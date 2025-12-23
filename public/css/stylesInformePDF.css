@@ -1,0 +1,201 @@
+@page { margin: 0; }
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* header {
+} */
+
+.header-wrapper {
+    width: 100%;
+    overflow:visible;
+}
+
+.amarillo {
+    background-color: #FAB955;
+    width:105mm;
+    height: 210mm;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+#icono {
+    width: 10rem;
+    height: 10rem;
+    position: absolute;
+    top: 30px;
+    right: 30px;
+}
+
+.linea {
+    background-color: #AAAAB4;
+    width:140mm;
+    height: 8mm;
+    position: absolute;
+    top: 50mm;
+    right: 0px;
+}
+
+.date {
+    color: #AAAAB4;
+    font-size: 3rem;
+    font-style: italic;
+    position: absolute;
+    top: 60mm;
+    right: 30px;
+}
+
+.titulo {
+    font-size: 4rem;
+    letter-spacing: 0.5rem;
+    color: #3C3C41;
+    font-weight: bold;
+    font-family: Verdana, Sans-Serif;
+    position: absolute;
+    top: 230mm;
+    left: 20mm;
+}
+
+#logo {
+    width: 70mm;
+    position: absolute;
+    top: 280mm;
+    right: 70mm;
+}
+
+.separator {
+    display:block;
+    width: 100%;
+    color: #fff;
+}
+
+.recuadros {
+    display: block;
+    width: 100%;
+    font-size: 0;
+    text-align: center;
+}
+
+.box {
+    width: 24%;
+    text-align: center;
+    padding: 10px 0px;
+    border-radius: 10px;
+    border: 2px solid #000;
+    display: inline-block;
+    font-size: 1rem;
+}
+
+.data-box {
+    font-size: 0.7rem;
+}
+
+.details {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+}
+
+
+.reason {
+    margin-bottom: 20px;
+}
+
+.reason-text {
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid #000;
+    width: 97%;
+    margin: 10px auto;
+    margin-left: 10px;
+}
+
+.options {
+    margin-left: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.option {
+    width: 23%;
+    text-align: center;
+    display: inline-block;
+}
+
+
+.check {
+    height: 20px;
+    width: 20px;
+    border-radius: 5px;
+    border: 2px solid #000;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.option-text {
+    margin-left: 0px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.observations {
+    width: 98%;
+    margin: 0px auto 20px 10px;
+}
+
+.obs-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.obs-box {
+    width: 98%;
+    min-height: 100px;
+    border: 1px solid #000;
+    border-radius: 3px;
+    padding: 10px 5px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.signatures {
+    margin: 40px auto 0px 10px;
+    width: 99%;
+    font-size: 0;
+}
+
+.signature {
+    padding-top: 10px;
+    width: 49%;
+    min-height: 180px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #000;
+    display: inline-block;
+    font-size: 1rem;
+}
+
+.signature-image {
+    width: 150px;
+}
+
+.signature-wrapper p {
+    font-size: 0.7rem;
+    line-height: 0;
+}

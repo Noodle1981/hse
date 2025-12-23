@@ -1,0 +1,187 @@
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    margin: auto;
+    background: white;
+    padding: 20px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* header {
+} */
+
+.header-wrapper {
+    width: 100%;
+    overflow:visible;
+}
+
+.logo-wrapper, .titulo-wrapper {
+    width: 50%;
+    display:inline-block;
+    vertical-align: middle;
+    margin-bottom: 10px;
+}
+
+.logo-wrapper {
+    width: 33%;
+    float: left;
+}
+
+.titulo-wrapper {
+    width: 90%;
+    float: left;
+}
+
+#logo {
+    width: 10rem; 
+    height: 10rem;
+}
+
+.titulo {
+    text-align: center;
+    padding-top: 4rem;
+    font-size: 40px;
+    width: 45%;
+    color: #F69239;
+    font-weight: bold;
+}
+
+.separator {
+    display:block;
+    width: 100%;
+    color: #fff;
+}
+
+.recuadros {
+    display: block;
+    width: 100%;
+    font-size: 0;
+    text-align: center;
+}
+
+.box {
+    width: 24%;
+    text-align: center;
+    padding: 10px 0px;
+    border-radius: 10px;
+    border: 2px solid #000;
+    display: inline-block;
+    font-size: 1rem;
+}
+
+.data-box {
+    font-size: 0.7rem;
+}
+
+.details {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+}
+
+.place, .date {
+    display: inline-block;
+    width: 65%;
+    padding: 0px 10px;
+}
+
+.date {
+    width: 25%;
+    text-align: right;
+}
+
+.reason {
+    margin-bottom: 20px;
+}
+
+.reason-text {
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+    border: 2px solid #000;
+    width: 97%;
+    margin: 10px auto;
+    margin-left: 10px;
+}
+
+.options {
+    margin-left: 10px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.option {
+    width: 23%;
+    text-align: center;
+    display: inline-block;
+}
+
+
+.check {
+    height: 20px;
+    width: 20px;
+    border-radius: 5px;
+    border: 2px solid #000;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.option-text {
+    margin-left: 0px;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.observations {
+    width: 98%;
+    margin: 0px auto 20px 10px;
+}
+
+.obs-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.obs-box {
+    width: 98%;
+    min-height: 100px;
+    border: 1px solid #000;
+    border-radius: 3px;
+    padding: 10px 5px;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.signatures {
+    margin: 40px auto 0px 10px;
+    width: 99%;
+    font-size: 0;
+}
+
+.signature {
+    padding-top: 10px;
+    width: 49%;
+    min-height: 180px;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid #000;
+    display: inline-block;
+    font-size: 1rem;
+}
+
+.signature-image {
+    width: 150px;
+}
+
+.signature-wrapper p {
+    font-size: 0.7rem;
+    line-height: 0;
+}

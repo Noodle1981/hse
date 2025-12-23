@@ -1,0 +1,612 @@
+CREATE TABLE IF NOT EXISTS "migrations"(
+  "id" integer primary key autoincrement not null,
+  "migration" varchar not null,
+  "batch" integer not null
+);
+CREATE TABLE IF NOT EXISTS "users"(
+  "id" integer primary key autoincrement not null,
+  "email" varchar not null,
+  "email_verified_at" datetime,
+  "password" varchar not null,
+  "remember_token" varchar,
+  "nombres" varchar not null,
+  "apellidos" varchar not null,
+  "genero" varchar not null,
+  "telefono" varchar,
+  "n_doc" varchar,
+  "rol" varchar not null,
+  "matricula" varchar not null,
+  "estado" tinyint(1) not null default '1',
+  "firma" varchar not null,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE UNIQUE INDEX "users_email_unique" on "users"("email");
+CREATE TABLE IF NOT EXISTS "password_reset_tokens"(
+  "email" varchar not null,
+  "token" varchar not null,
+  "created_at" datetime,
+  primary key("email")
+);
+CREATE TABLE IF NOT EXISTS "sessions"(
+  "id" varchar not null,
+  "user_id" integer,
+  "ip_address" varchar,
+  "user_agent" text,
+  "payload" text not null,
+  "last_activity" integer not null,
+  primary key("id")
+);
+CREATE INDEX "sessions_user_id_index" on "sessions"("user_id");
+CREATE INDEX "sessions_last_activity_index" on "sessions"("last_activity");
+CREATE TABLE IF NOT EXISTS "cache"(
+  "key" varchar not null,
+  "value" text not null,
+  "expiration" integer not null,
+  primary key("key")
+);
+CREATE TABLE IF NOT EXISTS "cache_locks"(
+  "key" varchar not null,
+  "owner" varchar not null,
+  "expiration" integer not null,
+  primary key("key")
+);
+CREATE TABLE IF NOT EXISTS "jobs"(
+  "id" integer primary key autoincrement not null,
+  "queue" varchar not null,
+  "payload" text not null,
+  "attempts" integer not null,
+  "reserved_at" integer,
+  "available_at" integer not null,
+  "created_at" integer not null
+);
+CREATE INDEX "jobs_queue_index" on "jobs"("queue");
+CREATE TABLE IF NOT EXISTS "job_batches"(
+  "id" varchar not null,
+  "name" varchar not null,
+  "total_jobs" integer not null,
+  "pending_jobs" integer not null,
+  "failed_jobs" integer not null,
+  "failed_job_ids" text not null,
+  "options" text,
+  "cancelled_at" integer,
+  "created_at" integer not null,
+  "finished_at" integer,
+  primary key("id")
+);
+CREATE TABLE IF NOT EXISTS "failed_jobs"(
+  "id" integer primary key autoincrement not null,
+  "uuid" varchar not null,
+  "connection" text not null,
+  "queue" text not null,
+  "payload" text not null,
+  "exception" text not null,
+  "failed_at" datetime not null default CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX "failed_jobs_uuid_unique" on "failed_jobs"("uuid");
+CREATE TABLE IF NOT EXISTS "personal_access_tokens"(
+  "id" integer primary key autoincrement not null,
+  "tokenable_type" varchar not null,
+  "tokenable_id" integer not null,
+  "name" varchar not null,
+  "token" varchar not null,
+  "abilities" text,
+  "last_used_at" datetime,
+  "expires_at" datetime,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE INDEX "personal_access_tokens_tokenable_type_tokenable_id_index" on "personal_access_tokens"(
+  "tokenable_type",
+  "tokenable_id"
+);
+CREATE UNIQUE INDEX "personal_access_tokens_token_unique" on "personal_access_tokens"(
+  "token"
+);
+CREATE TABLE IF NOT EXISTS "empresas"(
+  "id" integer primary key autoincrement not null,
+  "nombre" varchar not null,
+  "razon_social" varchar not null,
+  "cuit" varchar not null,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE TABLE IF NOT EXISTS "sedes"(
+  "id" integer primary key autoincrement not null,
+  "nombre_sede" varchar not null,
+  "tipo_sede" varchar,
+  "direccion" varchar,
+  "correo" varchar,
+  "telefono" varchar,
+  "localidad" varchar,
+  "empresa_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("empresa_id") references "empresas"("id")
+);
+CREATE TABLE IF NOT EXISTS "sede_users"(
+  "id" integer primary key autoincrement not null,
+  "sede_id" integer not null,
+  "user_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("sede_id") references "sedes"("id"),
+  foreign key("user_id") references "users"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_asigns"(
+  "id" integer primary key autoincrement not null,
+  "sede_id" integer not null,
+  "user_id" integer not null,
+  "tipo_checklist" varchar not null,
+  "checklist_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("sede_id") references "sedes"("id"),
+  foreign key("user_id") references "users"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_ots"(
+  "id" integer primary key autoincrement not null,
+  "descripcion" varchar,
+  "n1" integer,
+  "n2" integer,
+  "n3" integer,
+  "n4" integer,
+  "n5" integer,
+  "n6" integer,
+  "n7" integer,
+  "n8" integer,
+  "n9" integer,
+  "n10" integer,
+  "n11" integer,
+  "n12" integer,
+  "n13" integer,
+  "n14" integer,
+  "n15" integer,
+  "n16" integer,
+  "n17" integer,
+  "n18" integer,
+  "n19" integer,
+  "n20" integer,
+  "n21" integer,
+  "n22" integer,
+  "n23" integer,
+  "n24" integer,
+  "n25" integer,
+  "n26" integer,
+  "n27" integer,
+  "n28" integer,
+  "n29" integer,
+  "n30" integer,
+  "n31" integer,
+  "n32" integer,
+  "n33" integer,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "generador_constancias"(
+  "id" integer primary key autoincrement not null,
+  "sede_id" integer not null,
+  "user_id" integer not null,
+  "tipo_visita" varchar not null,
+  "observacion" varchar not null,
+  "firma_responsable" text,
+  "date_firma_responsable" date,
+  "firma_instructor" text,
+  "date_firma_instructor" date,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("sede_id") references "sedes"("id"),
+  foreign key("user_id") references "users"("id")
+);
+CREATE TABLE IF NOT EXISTS "informes"(
+  "id" integer primary key autoincrement not null,
+  "sede_id" integer not null,
+  "user_id" integer not null,
+  "titulo" varchar not null,
+  "descripcion" varchar not null,
+  "fecha" date not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("sede_id") references "sedes"("id"),
+  foreign key("user_id") references "users"("id")
+);
+CREATE TABLE IF NOT EXISTS "items"(
+  "id" integer primary key autoincrement not null,
+  "informe_id" integer not null,
+  "observacion" varchar not null,
+  "recomendacion" varchar not null,
+  "imagen1" text,
+  "imagen2" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("informe_id") references "informes"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_cars"(
+  "id" integer primary key autoincrement not null,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "n16" varchar,
+  "n17" varchar,
+  "n18" varchar,
+  "n19" varchar,
+  "n20" varchar,
+  "n21" varchar,
+  "n22" varchar,
+  "n23" varchar,
+  "n24" varchar,
+  "n25" varchar,
+  "n26" varchar,
+  "n27" varchar,
+  "n28" varchar,
+  "n29" varchar,
+  "n30" varchar,
+  "n31" varchar,
+  "n32" varchar,
+  "n33" varchar,
+  "n34" varchar,
+  "n35" varchar,
+  "n36" varchar,
+  "n37" varchar,
+  "n38" varchar,
+  "n39" varchar,
+  "n40" varchar,
+  "n41" varchar,
+  "n42" varchar,
+  "n43" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_sgas"(
+  "id" integer primary key autoincrement not null,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "n16" varchar,
+  "n17" varchar,
+  "n18" varchar,
+  "n19" varchar,
+  "n20" varchar,
+  "n21" varchar,
+  "n22" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_hes"(
+  "id" integer primary key autoincrement not null,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "n16" varchar,
+  "n17" varchar,
+  "n18" varchar,
+  "n19" varchar,
+  "n20" varchar,
+  "n21" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_vehs"(
+  "id" integer primary key autoincrement not null,
+  "marca" varchar,
+  "modelo" varchar,
+  "dominio" varchar,
+  "kilometraje" integer,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "n16" varchar,
+  "n17" varchar,
+  "n18" varchar,
+  "n19" varchar,
+  "n20" varchar,
+  "n21" varchar,
+  "n22" varchar,
+  "n23" varchar,
+  "n24" varchar,
+  "n25" varchar,
+  "n26" varchar,
+  "n27" varchar,
+  "n28" varchar,
+  "n29" varchar,
+  "n30" varchar,
+  "n31" varchar,
+  "n32" varchar,
+  "n33" varchar,
+  "n34" varchar,
+  "n35" varchar,
+  "n36" varchar,
+  "n37" varchar,
+  "n38" varchar,
+  "n39" varchar,
+  "n40" varchar,
+  "n41" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_ols"(
+  "id" integer primary key autoincrement not null,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "n16" varchar,
+  "n17" varchar,
+  "n18" varchar,
+  "n19" varchar,
+  "n20" varchar,
+  "n21" varchar,
+  "n22" varchar,
+  "n23" varchar,
+  "n24" varchar,
+  "n25" varchar,
+  "n26" varchar,
+  "n27" varchar,
+  "n28" varchar,
+  "n29" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_les"(
+  "id" integer primary key autoincrement not null,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "n16" varchar,
+  "n17" varchar,
+  "n18" varchar,
+  "n19" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_tes"(
+  "id" integer primary key autoincrement not null,
+  "ubicacion" varchar,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_e_s"(
+  "id" integer primary key autoincrement not null,
+  "lugar" varchar,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "checklist_aus"(
+  "id" integer primary key autoincrement not null,
+  "marca" varchar,
+  "modelo" varchar,
+  "n_serie" varchar,
+  "capacidad" integer,
+  "n1" varchar,
+  "n2" varchar,
+  "n3" varchar,
+  "n4" varchar,
+  "n5" varchar,
+  "n6" varchar,
+  "n7" varchar,
+  "n8" varchar,
+  "n9" varchar,
+  "n10" varchar,
+  "n11" varchar,
+  "n12" varchar,
+  "n13" varchar,
+  "n14" varchar,
+  "n15" varchar,
+  "n16" varchar,
+  "n17" varchar,
+  "n18" varchar,
+  "n19" varchar,
+  "n20" varchar,
+  "n21" varchar,
+  "n22" varchar,
+  "n23" varchar,
+  "n24" varchar,
+  "n25" varchar,
+  "n26" varchar,
+  "n27" varchar,
+  "n28" varchar,
+  "n29" varchar,
+  "n30" varchar,
+  "n31" varchar,
+  "n32" varchar,
+  "n33" varchar,
+  "checklist_asign_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("checklist_asign_id") references "checklist_asigns"("id")
+);
+CREATE TABLE IF NOT EXISTS "registros"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "tipo_registro" varchar not null,
+  "descripcion" varchar not null,
+  "nombre_usuario" varchar not null,
+  "link" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("user_id") references "users"("id")
+);
+CREATE TABLE IF NOT EXISTS "capacitacion_presencials"(
+  "id" integer primary key autoincrement not null,
+  "sede_id" integer not null,
+  "user_id" integer not null,
+  "tema" varchar not null,
+  "foto" varchar,
+  "estado" tinyint(1) not null default '0',
+  "email_responsable" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("sede_id") references "sedes"("id"),
+  foreign key("user_id") references "users"("id")
+);
+CREATE TABLE IF NOT EXISTS "capacitacion_virtuals"(
+  "id" integer primary key autoincrement not null,
+  "sede_id" integer not null,
+  "user_id" integer not null,
+  "tema" varchar not null,
+  "foto" varchar,
+  "link" varchar,
+  "lugar" varchar,
+  "instructor" varchar,
+  "duracion" integer,
+  "email_responsable" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("sede_id") references "sedes"("id"),
+  foreign key("user_id") references "users"("id")
+);
+CREATE TABLE IF NOT EXISTS "capacitacion_virual_asistentes"(
+  "id" integer primary key autoincrement not null,
+  "capacitacion_virtual_id" integer not null,
+  "nombre_apellido" varchar,
+  "dni" varchar,
+  "puesto" varchar,
+  "evaluacion" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("capacitacion_virtual_id") references "capacitacion_virtuals"("id")
+);
+
+INSERT INTO migrations VALUES(1,'0001_01_01_000000_create_users_table',1);
+INSERT INTO migrations VALUES(2,'0001_01_01_000001_create_cache_table',1);
+INSERT INTO migrations VALUES(3,'0001_01_01_000002_create_jobs_table',1);
+INSERT INTO migrations VALUES(4,'2025_04_01_025124_create_personal_access_tokens_table',1);
+INSERT INTO migrations VALUES(5,'2025_04_01_025936_create_empresas_table',1);
+INSERT INTO migrations VALUES(6,'2025_04_01_030132_create_sedes_table',1);
+INSERT INTO migrations VALUES(7,'2025_04_18_212231_create_sede_users_table',1);
+INSERT INTO migrations VALUES(8,'2025_04_19_213053_create_checklist_asigns_table',1);
+INSERT INTO migrations VALUES(9,'2025_04_19_213212_create_checklist_ots_table',1);
+INSERT INTO migrations VALUES(10,'2025_05_07_115932_create_generador_constancias_table',1);
+INSERT INTO migrations VALUES(11,'2025_05_28_135332_create_informes_table',1);
+INSERT INTO migrations VALUES(12,'2025_05_28_135346_create_items_table',1);
+INSERT INTO migrations VALUES(13,'2025_07_10_123526_create_checklist_cars_table',1);
+INSERT INTO migrations VALUES(14,'2025_07_10_123536_create_checklist_sgas_table',1);
+INSERT INTO migrations VALUES(15,'2025_07_10_123540_create_checklist_hes_table',1);
+INSERT INTO migrations VALUES(16,'2025_07_10_123647_create_checklist_vehs_table',1);
+INSERT INTO migrations VALUES(17,'2025_07_10_123705_create_checklist_ols_table',1);
+INSERT INTO migrations VALUES(18,'2025_07_10_123738_create_checklist_les_table',1);
+INSERT INTO migrations VALUES(19,'2025_07_10_123757_create_checklist_tes_table',1);
+INSERT INTO migrations VALUES(20,'2025_07_10_123816_create_checklist_e_s_table',1);
+INSERT INTO migrations VALUES(21,'2025_07_10_123835_create_checklist_aus_table',1);
+INSERT INTO migrations VALUES(22,'2025_09_08_135105_create_registros_table',1);
+INSERT INTO migrations VALUES(23,'2025_09_08_152014_create_capacitacion_presencials_table',1);
+INSERT INTO migrations VALUES(24,'2025_09_27_203131_create_capacitacion_viruals_table',1);
+INSERT INTO migrations VALUES(25,'2025_09_27_203749_create_capacitacion_virual_asistentes_table',1);
