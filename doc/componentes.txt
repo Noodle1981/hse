@@ -1,0 +1,150 @@
+1. Estructura de Base de Datos (Migraciones)
+Dile a la IA que genere estas 4 tablas para soportar la dinamicidad:
+
+PHP
+
+// 1. La plantilla del checklist
+Schema::create('checklists', function (Blueprint $table) {
+    $table->id();
+    $table->string('title'); // Ej: "Control de EPP"
+    $table->timestamps();
+});
+
+// 2. Las preguntas de esa plantilla
+Schema::create('questions', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('checklist_id')->constrained();
+    $table->string('label'); // Ej: "¿Usa casco?"
+    $table->string('type'); // text, select, checkbox, radio
+    $table->json('options')->nullable(); // Para los selects: ["Sí", "No", "N/A"]
+    $table->integer('order')->default(0);
+    $table->timestamps();
+});
+
+// 3. El registro de una ejecución (cuando alguien llena el checklist)
+Schema::create('inspections', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('checklist_id')->constrained();
+    $table->foreignId('user_id')->constrained(); // Quién lo llenó
+    $table->timestamp('completed_at');
+    $table->timestamps();
+});
+
+// 4. Las respuestas específicas
+Schema::create('answers', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('inspection_id')->constrained();
+    $table->foreignId('question_id')->constrained();
+    $table->text('value'); 
+    $table->timestamps();
+});
+2. El Componente Livewire (Lógica de "Llenado")
+Este es el componente que renderiza el formulario dinámicamente. Pídele a la IA que use un array asociativo para las respuestas:
+
+Componente: App\Livewire\ChecklistFiller.php
+
+PHP
+
+class ChecklistFiller extends Component
+{
+    public Checklist $checklist;
+    public $answers = []; // Se llena como ['question_id' => 'valor']
+
+    protected $rules = [
+        'answers.*' => 'required',
+    ];
+
+    public function mount(Checklist $checklist)
+    {
+        $this->checklist = $checklist->load('questions');
+        // Inicializar respuestas vacías
+        foreach ($this->checklist->questions as $q) {
+            $this->answers[$q->id] = '';
+        }
+    }
+
+    public function save()
+    {
+        $this->validate();
+
+        $inspection = Inspection::create([
+            'checklist_id' => $this->checklist->id,
+            'user_id' => auth()->id(),
+            'completed_at' => now(),
+        ]);
+
+        foreach ($this->answers as $questionId => $value) {
+            Answer::create([
+                'inspection_id' => $inspection->id,
+                'question_id' => $questionId,
+                'value' => is_array($value) ? json_encode($value) : $value,
+            ]);
+        }
+
+        session()->flash('message', 'Checklist guardado con éxito.');
+    }
+
+    public function render()
+    {
+        return view('livewire.checklist-filler');
+    }
+}
+3. La Vista Blade (Interfaz con Tailwind y Alpine)
+Aquí es donde ocurre la magia visual. Usamos un foreach para decidir qué input mostrar.
+
+Vista: livewire/checklist-filler.blade.php
+
+HTML
+
+<div class="p-6 bg-white rounded-lg shadow">
+    <h2 class="text-2xl font-bold mb-4">{{ $checklist->title }}</h2>
+
+    <form wire:submit.prevent="save" class="space-y-4">
+        @foreach($checklist->questions as $question)
+            <div class="border-b pb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ $question->label }}
+                </label>
+
+                @if($question->type == 'text')
+                    <input type="text" wire:model="answers.{{ $question->id }}" 
+                           class="w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500">
+                
+                @elseif($question->type == 'select')
+                    <select wire:model="answers.{{ $question->id }}" 
+                            class="w-full border-gray-300 rounded-md shadow-sm">
+                        <option value="">Seleccione...</option>
+                        @foreach($question->options as $option)
+                            <option value="{{ $option }}">{{ $option }}</option>
+                        @endforeach
+                    </select>
+
+                @elseif($question->type == 'radio')
+                    <div class="flex space-x-4">
+                        @foreach($question->options as $option)
+                            <label class="flex items-center">
+                                <input type="radio" value="{{ $option }}" wire:model="answers.{{ $question->id }}" class="mr-2">
+                                {{ $option }}
+                            </label>
+                        @endforeach
+                    </div>
+                @endif
+
+                @error('answers.'.$question->id) 
+                    <span class="text-red-500 text-xs">Este campo es obligatorio</span> 
+                @enderror
+            </div>
+        @endforeach
+
+        <button type="submit" 
+                class="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+            Guardar Inspección
+        </button>
+    </form>
+</div>
+¿Por qué esta estructura es mejor para tu proyecto?
+Cero errores al cambiar preguntas: Si mañana Equipo Preventivo decide que un checklist ya no tiene 5 preguntas sino 10, solo agregas filas en la tabla questions. No tocas ni una sola línea de código, ni migraciones de base de datos.
+
+Velocidad (Performance): Al usar Livewire, la validación ocurre en tiempo real sin recargar la página entera (como hacía Angular), pero con la simplicidad de estar dentro de Laravel.
+
+Mantenibilidad: Todo el código del checklist vive en un solo archivo de componente y una vista. Es mucho más fácil de leer que navegar por 5 archivos de Angular (ts, html, css, spec, module).

@@ -17,15 +17,15 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            $table->string('nombres');
-            $table->string('apellidos');
-            $table->string('genero');
+            $table->string('nombres')->nullable();
+            $table->string('apellidos')->nullable();
+            $table->string('genero')->nullable();
             $table->string('telefono')->nullable();
             $table->string('n_doc')->nullable();
-            $table->string('rol');
-            $table->string('matricula');
+            $table->string('rol')->nullable();
+            $table->string('matricula')->nullable();
             $table->boolean('estado')->default(true);
-            $table->string('firma');
+            $table->string('firma')->nullable();
             $table->timestamps();
         });
 

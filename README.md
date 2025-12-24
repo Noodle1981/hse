@@ -1,121 +1,330 @@
-# Equipo Preventivo - Sistema de Gestión Documental
+# 📋 EP-Back - Sistema de Checklists Dinámicos
 
-Aplicación de gestión documental para la consultora de higiene y seguridad **Equipo Preventivo**. Sistema integral que permite gestionar checklists de seguridad, constancias de visita, informes técnicos y capacitaciones en materia de higiene y seguridad laboral.
+> **Versión:** V1.2.0.0  
+> **Stack:** TALL (Tailwind, Alpine, Livewire, Laravel 12)  
+> **Estado:** ✅ Producción Ready
 
-## Características
+Sistema moderno de gestión de checklists dinámicos con dashboard de estadísticas, autenticación segura y API REST para integraciones externas.
 
-- **Checklists**: Múltiples tipos de listas de verificación para auditorías y controles de seguridad
-- **Constancias de Visita**: Generación automatizada de documentos de visita
-- **Informes**: Creación y gestión de informes técnicos
-- **Capacitaciones**: Registro y seguimiento de capacitaciones presenciales y virtuales
-- **Gestión de Registros**: Base de datos centralizada de empresas, sedes y usuarios
+---
 
-## Requisitos Previos
+## 🚀 Características Principales
 
-Antes de ejecutar la aplicación, asegúrate de contar con lo siguiente:
+- ✅ **Checklists 100% Dinámicos** - Crea plantillas desde la UI sin código
+- ✅ **8 Tipos de Pregunta** - text, textarea, radio, checkbox, select, number, date, signature
+- ✅ **Firma Digital** - Capture de firmas con signature_pad.js
+- ✅ **Dashboard Analytics** - KPIs, gráficos y estadísticas en tiempo real
+- ✅ **Sistema de Roles** - Administrador y Técnico con permisos granulares
+- ✅ **Autenticación Dual** - Web sessions + API tokens (Sanctum)
+- ✅ **PDF Automático** - Generación de reportes al completar inspecciones
+- ✅ **Responsive** - Sidebar colapsable y diseño mobile-first
 
-- **PHP 8.1 o superior**
-- **Composer** (gestor de dependencias de PHP)
-- **Node.js** y **npm** (para las dependencias frontend)
-- **SQLite** o **MySQL** (base de datos)
+---
 
-Se recomienda instalar **Herd**, que incluye PHP, Composer y otras herramientas necesarias:
+## 📊 Screenshots
 
-- [Descargar Herd para Windows](https://herd.laravel.com/windows)
-- [Descargar Herd para macOS](https://herd.laravel.com)
+### Dashboard
+![Dashboard](doc/screenshots/dashboard.png)
 
-## Pasos de Instalación
+### Login
+![Login](doc/screenshots/login.png)
 
-1. **Clonar el repositorio** dentro de la carpeta Herd:
+### Creador de Checklists
+![Builder](doc/screenshots/builder.png)
+
+---
+
+## 🛠️ Stack Tecnológico
+
+| Tecnología | Versión | Uso |
+|------------|---------|-----|
+| Laravel | 12.x | Framework backend |
+| Livewire | 3.7.3 | Componentes reactivos |
+| Tailwind CSS | 3.x | Estilos utility-first |
+| Alpine.js | 3.x | Interactividad JS |
+| SQLite | 3.x | Base de datos |
+| Sanctum | 4.x | API authentication |
+| signature_pad.js | latest | Firmas digitales |
+
+---
+
+## 📦 Instalación
+
+### Requisitos
+
+- PHP >= 8.2
+- Composer
+- Node.js >= 18
+- SQLite
+
+### Pasos
+
 ```bash
-cd C:\Users\{usuario}\Herd
-git clone https://github.com/carlostaglio/ep-back.git
+# 1. Clonar repositorio
+git clone https://github.com/tu-usuario/ep-back.git
 cd ep-back
-```
 
-2. **Instalar dependencias de PHP**:
-```bash
+# 2. Instalar dependencias PHP
 composer install
-```
 
-3. **Instalar dependencias de Node (frontend)**:
-```bash
+# 3. Instalar dependencias JS
 npm install
-```
 
-4. **Configurar archivo de entorno** - Copiar y renombrar:
-```bash
-copy .env.example .env
-```
+# 4. Copiar archivo de configuración
+cp .env.example .env
 
-5. **Configurar la base de datos y las credenciales de email** en el archivo `.env`:
-   - Para SQLite (recomendado para desarrollo):
-   ```
-   DB_CONNECTION=sqlite
-   ```
-   - Para MySQL, actualiza con tus credenciales:
-   ```
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=ep_base
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-   - Para el correo de gestión interna de la plataforma:
-   ```
-   MAIL_MAILER=log
-   MAIL_SCHEME=null
-   MAIL_HOST=127.0.0.1
-   MAIL_PORT=2525
-   MAIL_USERNAME=null
-   MAIL_PASSWORD=null
-   MAIL_FROM_ADDRESS="hello@example.com"
-   MAIL_FROM_NAME="${APP_NAME}"
-   ```
-   - Para el correo de contacto de la landing:
-   ```
-   MAIL2_MAILER=log
-   MAIL2_SCHEME=null
-   MAIL2_HOST=127.0.0.1
-   MAIL2_PORT=2525
-   MAIL2_USERNAME=null
-   MAIL2_PASSWORD=null
-   MAIL2_FROM_ADDRESS="hello@example.com"
-   MAIL2_FROM_NAME="${APP_NAME}"
-   ```
-
-6. **Generar clave de aplicación** y **ejecutar migraciones**:
-```bash
+# 5. Generar app key
 php artisan key:generate
-php artisan migrate
-```
 
-## Ejecución de la Aplicación
+# 6. Crear base de datos SQLite
+touch database/database.sqlite
 
-1. **Iniciar el servidor Laravel**:
-```bash
+# 7. Ejecutar migraciones y seeders
+php artisan migrate:fresh --seed
+php artisan db:seed --class=DemoChecklistsSeeder
+
+# 8. Iniciar servidor
 php artisan serve
 ```
 
-2. **En otra consola, compilar los assets frontend**:
-```bash
-npm run dev
+Accede a: **http://localhost:8000/login**
+
+---
+
+## 👤 Usuarios Demo
+
+### Administrador (Acceso completo)
+```
+Email: admin@ep.com
+Contraseña: password
 ```
 
-3. **Acceder a la aplicación**:
-- Aplicación: `http://127.0.0.1:8000/`
-- API: `http://127.0.0.1:8000/api/`
+### Técnicos (Sólo llenar checklists)
+```
+Email: tecnico1@ep.com
+Contraseña: password
+```
+(Disponibles: tecnico1 a tecnico5)
 
-Para compilar para producción:
-```bash
-npm run build
+---
+
+## 📂 Estructura del Proyecto
+
+```
+ep-back/
+├── app/
+│   ├── Livewire/
+│   │   ├── Auth/
+│   │   │   └── Login.php              # Login component
+│   │   └── Checklists/
+│   │       ├── Dashboard.php          # Estadísticas
+│   │       ├── ChecklistIndex.php     # Listado
+│   │       ├── ChecklistBuilder.php   # CRUD
+│   │       ├── ChecklistFiller.php    # Llenar + firma
+│   │       ├── InspectionHistory.php  # Historial
+│   │       └── InspectionShow.php     # Detalle
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Auth/UserController.php    # API usuarios
+│   │   │   └── InspectionPDFController.php # PDF generation
+│   │   └── Middleware/
+│   │       └── CheckRole.php          # Middleware roles
+│   └── Models/
+│       ├── DynamicChecklist.php
+│       ├── DynamicQuestion.php
+│       ├── DynamicInspection.php
+│       └── DynamicAnswer.php
+├── database/
+│   ├── migrations/                    # Migraciones
+│   └── seeders/
+│       └── DemoChecklistsSeeder.php   # Datos demo
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   ├── app.blade.php          # Layout principal
+│       │   └── guest.blade.php        # Layout login
+│       ├── livewire/                  # Vistas Livewire
+│       └── errors/                    # 404, 403
+├── routes/
+│   ├── web.php                        # Rutas web
+│   └── api.php                        # Rutas API
+└── doc/
+    ├── ARQUITECTURA.md                # Arquitectura del sistema
+    ├── ROADMAP.md                     # Fases del proyecto
+    └── CHECKLISTS_DINAMICOS.md        # Guía técnica
 ```
 
-## Recursos Útiles
+---
 
-- [Documentación de Laravel](https://laravel.com/docs)
-- [Documentación de Herd](https://herd.laravel.com)
-- [API REST Best Practices](https://restfulapi.net/)
+## 🔐 Seguridad
 
-**© 2025 Equipo Preventivo - Sistema de Gestión Documental**
+### Rutas Protegidas
+
+Todas las rutas de checklists requieren autenticación:
+
+```php
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', Dashboard::class);
+    Route::prefix('checklists')->group(...);
+});
+```
+
+### Permisos por Rol
+
+| Acción | Administrador | Técnico |
+|--------|---------------|---------|
+| Ver dashboard | ✅ | ✅ |
+| Ver checklists | ✅ | ✅ |
+| **Crear** checklist | ✅ | ❌ |
+| **Editar** checklist | ✅ | ❌ |
+| **Llenar** checklist | ✅ | ✅ |
+| Ver historial | ✅ | ✅ |
+
+---
+
+## 🔌 API REST
+
+### Autenticación
+
+```bash
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "admin@ep.com",
+  "password": "password"
+}
+
+# Respuesta
+{
+  "user": {...},
+  "token": "1|abc123..."
+}
+```
+
+### Uso
+
+```bash
+GET /api/listar_colaboradores_admin
+Authorization: Bearer {token}
+```
+
+Ver [ARQUITECTURA.md](doc/ARQUITECTURA.md) para endpoints completos.
+
+---
+
+## 📈 Dashboard
+
+El dashboard provee:
+
+- **KPIs:** Total plantillas, inspecciones, mes actual, promedio diario
+- **Gráfico 1:** Inspecciones por checklist (barras horizontales)
+- **Gráfico 2:** Actividad últimos 30 días (barras verticales)
+- **Tabla:** 10 inspecciones más recientes
+
+---
+
+## 🧪 Testing
+
+```bash
+# Ejecutar todos los tests
+php artisan test
+
+# Ejecutar tests específicos
+php artisan test --filter="DynamicChecklist"
+
+# Resultado esperado: 26 tests, 57 assertions ✅
+```
+
+---
+
+## 📝 Datos Demo
+
+El seeder crea:
+
+- **8 checklists** de diferentes categorías
+- **102 inspecciones** distribuidas en 90 días
+- **6 usuarios:** 1 Admin + 5 Técnicos
+
+```bash
+php artisan db:seed --class=DemoChecklistsSeeder
+```
+
+---
+
+## 🎨 Personalización
+
+### Colores
+
+Edita `tailwind.config.js`:
+
+```javascript
+colors: {
+  'ep-primary': '#F69239',      // Naranja EP
+  'ep-dark': '#1E1E2D',          // Sidebar
+}
+```
+
+### Logo
+
+Reemplaza el logo en `resources/views/layouts/app.blade.php`:
+
+```html
+<span class="text-white font-bold text-3xl">EP</span>
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [x] **Fase 1-7:** Sistema TALL completo ✅
+- [x] **Dashboard** con estadísticas ✅
+- [x] **Autenticación** y roles ✅
+- [ ] **Fase 8:** Theming white-label
+- [ ] **Fase 9:** Notificaciones por email
+- [ ] **Fase 10:** App móvil
+
+Ver [ROADMAP.md](doc/ROADMAP.md) para detalles.
+
+---
+
+## 📚 Documentación
+
+- [ARQUITECTURA.md](doc/ARQUITECTURA.md) - Arquitectura TALL + API
+- [ROADMAP.md](doc/ROADMAP.md) - Fases del proyecto
+- [CHECKLISTS_DINAMICOS.md](doc/CHECKLISTS_DINAMICOS.md) - Guía técnica
+
+---
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crea tu feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la branch (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Proyecto privado - EP Consultora © 2024
+
+---
+
+## 👨‍💻 Autor
+
+**EP Consultora**  
+Sistema desarrollado con ❤️ usando Laravel 12 + Livewire 3
+
+---
+
+## 📞 Soporte
+
+Para soporte técnico o consultas:
+- Email: soporte@ep.com
+- Web: https://equipopreventivo.com.ar
+
+---
+
+*Última actualización: 24 Diciembre 2024*

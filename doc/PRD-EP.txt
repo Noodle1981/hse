@@ -1,0 +1,2196 @@
+# Product Requirements Document (PRD)
+# Sistema Xamanen - Plataforma de Gestión de Auditorías Ambientales
+
+**Versión:** 2.0
+**Fecha:** Diciembre 2024
+**Autor:** Equipo de Producto Xamanen
+**Estado:** Draft para Aprobación
+
+---
+
+## 📋 Tabla de Contenidos
+
+1. [Resumen Ejecutivo](#-resumen-ejecutivo)
+2. [Objetivos del Producto](#-objetivos-del-producto)
+3. [Usuarios Objetivo](#-usuarios-objetivo)
+4. [Propuesta de Valor](#-propuesta-de-valor)
+5. [Alcance del Producto](#-alcance-del-producto)
+6. [Requisitos Funcionales](#-requisitos-funcionales)
+7. [Requisitos No Funcionales](#-requisitos-no-funcionales)
+8. [Especificaciones Técnicas](#-especificaciones-técnicas)
+9. [User Stories y Casos de Uso](#-user-stories-y-casos-de-uso)
+10. [Wireframes y Flujos](#-wireframes-y-flujos)
+11. [Métricas de Éxito](#-métricas-de-éxito)
+12. [Roadmap de Desarrollo](#-roadmap-de-desarrollo)
+13. [Dependencias y Riesgos](#-dependencias-y-riesgos)
+14. [Apéndices](#-apéndices)
+
+---
+
+## 🎯 Resumen Ejecutivo
+
+### ¿Qué es Xamanen?
+
+**Xamanen** es una plataforma SaaS especializada en **digitalizar y automatizar el proceso completo de auditorías de seguridad ambiental, gestión de residuos peligrosos y cumplimiento normativo** para empresas que requieren certificación en Buenas Prácticas Ambientales (BPA).
+
+### Problema que Resuelve
+
+**Proceso tradicional de auditoría:**
+- ⏱️ 7-10 días de entrega de informes
+- 💰 $300-500 USD por auditoría (mano de obra + impresiones)
+- 📄 Papeleo excesivo y propenso a errores
+- 🗄️ Archivos físicos difíciles de gestionar
+- ❌ 15-20% de errores humanos
+
+**Con Xamanen:**
+- ⚡ Entrega el mismo día
+- 💵 $50 USD por auditoría
+- 📱 100% digital con firmas electrónicas
+- ☁️ Trazabilidad completa en la nube
+- ✅ <2% de errores
+
+### Visión del Producto
+
+> "Ser la plataforma líder en Latinoamérica para la gestión integral de auditorías ambientales, transformando el cumplimiento normativo en un proceso simple, trazable y profesional que protege tanto al medio ambiente como a las personas."
+
+### Mercado Objetivo
+
+**TAM (Total Addressable Market):** $15.2B USD - Software de gestión ambiental global
+**SAM (Serviceable Available Market):** $380M USD - Auditorías ambientales LATAM
+**SOM (Serviceable Obtainable Market):** $3.8M USD - Alcanzable en 3 años
+
+---
+
+## 🎯 Objetivos del Producto
+
+### Objetivos de Negocio
+
+| Objetivo | Métrica | Meta Año 1 | Meta Año 3 |
+|----------|---------|------------|------------|
+| **Adquisición** | Empresas consultoras suscritas | 100 | 500 |
+| **Revenue** | MRR (Monthly Recurring Revenue) | $20K | $150K |
+| **Retención** | Churn mensual | <5% | <3% |
+| **NPS** | Net Promoter Score | >40 | >60 |
+| **Productividad** | Auditorías/mes/técnico | 25-30 | 40-50 |
+
+### Objetivos del Usuario
+
+**Para Empresas de Auditoría:**
+- Reducir 70% el tiempo de generación de informes
+- Eliminar 90% del papeleo
+- Aumentar 200% la productividad por técnico
+- Profesionalizar entrega de documentos
+
+**Para Empresas Auditadas:**
+- Acceso 24/7 a constancias y certificados
+- Reducir 50% el tiempo de preparación para inspecciones
+- Dashboard centralizado de cumplimiento
+- Recordatorios automáticos de vencimientos
+
+**Para Técnicos:**
+- Reducir 60% el tiempo en campo
+- Eliminar errores de transcripción manual
+- Acceso móvil para completar checklists
+- Generación automática de informes profesionales
+
+---
+
+## 👥 Usuarios Objetivo
+
+### Persona 1: Director de Empresa de Auditoría Ambiental
+
+**Nombre:** Carlos Mendoza
+**Edad:** 45 años
+**Cargo:** Director General
+**Empresa:** Consultora Ambiental con 15 técnicos
+**Ubicación:** Buenos Aires, Argentina
+
+**Perfil:**
+- Ingeniero Ambiental con 20 años de experiencia
+- Maneja 80-100 clientes activos
+- Factura $50K USD/mes
+- Busca escalar sin contratar más personal administrativo
+
+**Pain Points:**
+- "Perdemos 3-4 días por auditoría solo en papeleo"
+- "Los clientes se quejan de la demora en entregas"
+- "Gastamos $2000/mes en impresiones y envíos"
+- "Es difícil hacer seguimiento de todas las auditorías"
+
+**Jobs to be Done:**
+- Automatizar generación de informes
+- Tener visibilidad de todas las operaciones en un dashboard
+- Reducir costos administrativos
+- Mejorar imagen profesional ante clientes
+
+**Success Criteria:**
+- Reducir tiempo de entrega de informes de 7 días a mismo día
+- Aumentar capacidad de auditorías 150% sin contratar
+- Ahorro de $1500/mes en costos operativos
+
+---
+
+### Persona 2: Técnico de Seguridad e Higiene
+
+**Nombre:** María González
+**Edad:** 32 años
+**Cargo:** Técnica en Higiene y Seguridad
+**Empresa:** Consultora independiente
+**Ubicación:** Córdoba, Argentina
+
+**Perfil:**
+- Realiza 15-20 auditorías mensuales
+- Trabaja en campo 60% del tiempo
+- Necesita herramientas móviles
+- Valora rapidez y simplicidad
+
+**Pain Points:**
+- "Cargo formularios impresos y pierdo hojas"
+- "Cuando vuelvo a oficina, paso 4 horas transcribiendo a Word"
+- "A veces no recuerdo exactamente qué respondió el cliente"
+- "Los clientes piden el informe urgente y tardo días"
+
+**Jobs to be Done:**
+- Completar checklists digitalmente en campo
+- Capturar firmas digitales sin imprimir
+- Adjuntar fotos como evidencia
+- Generar informe profesional en minutos
+
+**Success Criteria:**
+- Completar auditoría completa en campo (sin volver a oficina)
+- Entregar informe al cliente antes de retirarse del sitio
+- Reducir 80% el tiempo administrativo
+
+---
+
+### Persona 3: Responsable de Medio Ambiente (Cliente)
+
+**Nombre:** Roberto Sánchez
+**Edad:** 38 años
+**Cargo:** Responsable de Medio Ambiente
+**Empresa:** Fábrica química con 200 empleados
+**Ubicación:** Rosario, Argentina
+
+**Perfil:**
+- Gestiona cumplimiento normativo de la planta
+- Coordina 8-10 auditorías anuales
+- Responde a inspecciones municipales/provinciales
+- Presupuesto de $15K USD/año en auditorías
+
+**Pain Points:**
+- "No tengo visibilidad de qué auditorías están vencidas"
+- "Cuando viene inspección, busco papeles por horas"
+- "Perdí constancias antiguas y tuve que re-auditar"
+- "No sé si estamos cumpliendo con todo lo requerido"
+
+**Jobs to be Done:**
+- Acceder rápidamente a todas las constancias
+- Recibir alertas de vencimientos
+- Dashboard de cumplimiento ambiental
+- Descargar certificados para inspecciones
+
+**Success Criteria:**
+- Encontrar cualquier documento en <30 segundos
+- Reducir 70% el tiempo de preparación para inspecciones
+- Zero multas por documentación faltante
+
+---
+
+## 💎 Propuesta de Valor
+
+### Value Proposition Canvas
+
+**Customer Pains (Dolores):**
+1. Proceso de auditoría lento (7-10 días)
+2. Alto costo operativo ($300-500 por auditoría)
+3. Errores de transcripción manual (15-20%)
+4. Pérdida de documentos físicos
+5. Falta de trazabilidad
+6. Dificultad para escalar operaciones
+7. Imagen poco profesional (documentos hechos a mano)
+
+**Customer Gains (Ganancias Deseadas):**
+1. Entrega inmediata de informes
+2. Reducción de costos operativos
+3. Cero errores en documentación
+4. Acceso 24/7 a documentos históricos
+5. Trazabilidad completa
+6. Escalar sin contratar más personal
+7. Imagen profesional y digital
+
+**Pain Relievers (Aliviadores de Dolor):**
+1. ✅ Generación automática de PDFs profesionales
+2. ✅ Checklists digitales guiados
+3. ✅ Validación automática de datos
+4. ✅ Backup en la nube
+5. ✅ Historial completo de auditorías
+6. ✅ Formularios dinámicos reutilizables
+7. ✅ Templates estandarizados
+
+**Gain Creators (Creadores de Ganancia):**
+1. ✅ Entrega mismo día con email automático
+2. ✅ Reducción de 87.5% en costos
+3. ✅ Dashboard analítico de métricas
+4. ✅ Acceso multi-dispositivo (web/móvil)
+5. ✅ API para integraciones
+6. ✅ Firmas digitales legalmente válidas
+7. ✅ Reportes ejecutivos personalizables
+
+**Products & Services:**
+- Plataforma web responsive
+- App móvil (futuro)
+- Checklists especializados (13 tipos)
+- Generación automática de PDFs
+- Sistema de firmas digitales
+- Dashboard analítico
+- Notificaciones por email
+- Almacenamiento en la nube
+- Soporte técnico
+
+---
+
+## 📦 Alcance del Producto
+
+### MVP (Minimum Viable Product) - Versión 1.0
+
+**Ya implementado:**
+
+#### ✅ Módulo de Autenticación
+- Login/Logout con email y contraseña
+- Recuperación de contraseña
+- Gestión de roles (Admin, Técnico, Colaborador, Cliente)
+- Sesiones con JWT
+
+#### ✅ Módulo de Gestión de Empresas
+- CRUD completo de empresas clientes
+- Gestión de múltiples sedes por empresa
+- Asignación de hasta 3 responsables por sede
+- Datos de contacto completos
+- Clasificación por tipo de residuos
+
+#### ✅ Módulo de Constancias de Visita
+- Creación de constancias digitales
+- Captura de firma digital
+- Generación automática de PDF profesional
+- Vista preliminar antes de guardar
+- Edición de constancias
+- Envío por email con selector de destinatarios
+- Listado y filtrado de constancias
+
+#### ✅ Módulo de Checklists
+- 13 formularios especializados:
+  - OT (Orden de Trabajo)
+  - CAR (Control de Acceso a Residuos)
+  - SGA (Sistema de Gestión Ambiental)
+  - HE (Higiene y Ergonomía)
+  - EPP (Equipos de Protección Personal)
+  - VEH (Seguridad de Vehículos)
+  - OL (Obligaciones Legales)
+  - EXT (Extintores)
+  - HM (Higiene y Manipulación)
+  - LE (Legislación Específica)
+  - TE (Técnico Especializado)
+  - CE (Certificaciones Especiales)
+  - AU (Auditoría General)
+- Captura de evidencias fotográficas
+- Observaciones por pregunta
+- Generación de PDF por checklist
+- Asignación a clientes
+
+#### ✅ Módulo de Informes Técnicos
+- Generación de informes basados en constancias
+- Integración de datos de checklists
+- Vista preliminar con datos integrados
+- Edición antes de finalizar
+- Exportación a PDF profesional
+- Envío por email con validaciones
+
+#### ✅ Módulo de Capacitaciones
+- Registro de capacitaciones presenciales/virtuales
+- Lista de participantes
+- Generación de certificados
+- Calendario de capacitaciones
+- Historial por empresa
+
+#### ✅ Módulo BPA (Buenas Prácticas Ambientales)
+- Clasificación de usuarios finales
+- Auditoría BPA-1 con sub-clasificaciones
+- Checklist específico por tipo
+- Verificación documental
+- Recomendaciones de capacitación
+
+#### ✅ Módulo CRM
+- Gestión de prospectos
+- Registro de emails y llamadas
+- Tareas de seguimiento
+- Historial de interacciones
+
+#### ✅ Dashboard
+- Actividades recientes
+- Filtros por período y usuario
+- Tabla de datos con paginación
+
+#### ✅ Sistema de Notificaciones
+- Envío de emails desde múltiples módulos
+- Selector flexible de destinatarios
+- Validaciones robustas
+- Manejo inteligente de errores
+- Feedback visual mejorado
+
+---
+
+### Versión 2.0 (Propuesta) - Mejoras Críticas
+
+#### 🔄 Refactorización de Arquitectura
+
+**Objetivo:** Resolver deuda técnica crítica identificada
+
+**Problemas a resolver:**
+1. ❌ Memory leaks en 91% de los componentes
+2. ❌ Código duplicado masivo (14 formularios casi idénticos)
+3. ❌ vista-preliminar-checklist.component.ts: 2,069 líneas
+4. ❌ CRUD incompleto (sin UPDATE/DELETE en checklists)
+5. ❌ Sin AuthGuard en rutas
+6. ❌ Token en localStorage (vulnerable a XSS)
+
+**Entregas:**
+
+1. **Sistema Dinámico de Checklists**
+   - UN componente dinámico para todos los tipos
+   - Configuración basada en JSON/DB
+   - Reducción de 10,000+ líneas de código duplicado
+   - CRUD completo (CREATE, READ, UPDATE, DELETE)
+
+2. **Seguridad Mejorada**
+   - AuthGuard en todas las rutas protegidas
+   - Tokens en HTTP-Only cookies
+   - HTTPS en todos los ambientes
+   - Refresh tokens implementados
+
+3. **Performance Optimizado**
+   - Lazy loading en todos los módulos
+   - OnPush change detection strategy
+   - Bundle size reducido de 2MB a <500KB
+   - Virtual scrolling en listas
+
+4. **Testing Implementado**
+   - Tests unitarios (>60% coverage)
+   - Tests de integración
+   - Tests E2E para flujos críticos
+
+---
+
+### Versión 3.0 (Futuro) - Funcionalidades de Alto Impacto
+
+#### 📊 Dashboard Analítico Avanzado
+
+**Features:**
+- Gráficos de cumplimiento por tipo de checklist
+- Tendencias mensuales de "No Cumple"
+- Ranking de sedes por seguridad
+- Alertas automáticas de items críticos
+- Exportación de reportes ejecutivos a Excel/PDF
+
+**Tecnología:**
+- Chart.js / ApexCharts para visualizaciones
+- Filtros dinámicos por fecha, sede, tipo
+- Benchmarking de industria
+
+---
+
+#### 🔔 Sistema de Alertas Inteligentes
+
+**Features:**
+- Alertas automáticas cuando item crítico no cumple
+- Notificaciones por email/SMS al responsable
+- Escalamiento automático si no hay respuesta en X días
+- Dashboard de items pendientes de corrección
+
+**Reglas de ejemplo:**
+```json
+{
+  "matafuegos-vencidos": {
+    "tipo": "checklist-incendio",
+    "pregunta": "¿Matafuegos con carga vigente?",
+    "respuesta": "no",
+    "severidad": "critica",
+    "accion": "email_inmediato",
+    "escalamiento": {
+      "tiempo": 24,
+      "destinatario": "responsable_hys"
+    }
+  }
+}
+```
+
+---
+
+#### 📅 Checklists Recurrentes Automáticos
+
+**Features:**
+- Programar checklists con frecuencia definida (mensual, trimestral, anual)
+- Notificaciones automáticas a técnicos cuando vence
+- Comparación automática con checklist anterior
+- Detección de deterioro progresivo
+
+**Modelo:**
+```typescript
+interface RecurringChecklist {
+  id: string;
+  tipo: string;
+  sede_id: string;
+  frecuencia: 'mensual' | 'trimestral' | 'semestral' | 'anual';
+  dia_ejecucion: number;
+  proximo_vencimiento: Date;
+  tecnico_asignado_id: string;
+  notificar_dias_antes: number;
+  activo: boolean;
+}
+```
+
+---
+
+#### 📱 App Móvil Nativa
+
+**Features:**
+- iOS + Android nativo
+- Modo offline completo
+- Captura de fotos optimizada
+- Geolocalización automática
+- Sincronización automática al recuperar conexión
+- Notificaciones push
+
+**Stack Tecnológico:**
+- React Native / Flutter
+- SQLite para storage offline
+- AWS Amplify para sync
+
+---
+
+#### 🤖 IA para Análisis de Imágenes
+
+**Features:**
+- Detección automática de anomalías en imágenes de equipos
+- Sugerencias de observaciones basadas en análisis
+- Validación automática de cumplimiento visual
+- Histórico de imágenes con comparación temporal
+
+**Tecnología:**
+- Google Vision AI / AWS Rekognition
+- TensorFlow.js para modelos en el frontend
+
+**Ejemplo de uso:**
+```typescript
+{
+  cumple: 'no',
+  confianza: 0.87,
+  observaciones_sugeridas: [
+    'Matafuego con carga vencida detectado',
+    'Señalización poco visible'
+  ],
+  anomalias_detectadas: [
+    'Etiqueta de vencimiento ilegible',
+    'Manómetro en zona roja'
+  ]
+}
+```
+
+---
+
+#### 🌐 API Pública para Integraciones
+
+**Endpoints:**
+```
+POST   /api/v1/checklist/create
+GET    /api/v1/checklist/{id}
+PUT    /api/v1/checklist/{id}
+DELETE /api/v1/checklist/{id}
+GET    /api/v1/checklist/metrics
+POST   /api/v1/checklist/{id}/complete
+GET    /api/v1/empresas
+POST   /api/v1/constancias
+```
+
+**Casos de uso:**
+- Integración con ERPs corporativos
+- Sincronización con sistemas de calidad (ISO)
+- Webhooks para eventos importantes
+- Developer portal para partners
+
+---
+
+## ⚙️ Requisitos Funcionales
+
+### RF-001: Autenticación y Autorización
+
+**Prioridad:** 🔴 Crítica
+**Épica:** Seguridad
+
+#### RF-001.1: Login de Usuario
+**Descripción:** El sistema debe permitir a los usuarios autenticarse con email y contraseña.
+
+**Criterios de Aceptación:**
+- ✅ El usuario ingresa email y contraseña válidos
+- ✅ El sistema valida las credenciales contra la base de datos
+- ✅ Si son válidas, genera un token JWT y redirige al dashboard
+- ✅ Si son inválidas, muestra mensaje de error descriptivo
+- ✅ El sistema bloquea cuenta tras 5 intentos fallidos consecutivos
+- ✅ El token expira después de 8 horas de inactividad
+
+**Validaciones:**
+- Email en formato válido (regex)
+- Contraseña mínimo 8 caracteres
+- Protección contra SQL injection
+- Rate limiting (10 intentos por IP por minuto)
+
+**Mockup:**
+```
+┌────────────────────────────┐
+│      XAMANEN LOGIN         │
+├────────────────────────────┤
+│ Email:                     │
+│ [____________________]     │
+│                            │
+│ Contraseña:                │
+│ [____________________]     │
+│                            │
+│ [ ] Recordarme             │
+│                            │
+│ [  INICIAR SESIÓN  ]       │
+│                            │
+│ ¿Olvidaste tu contraseña?  │
+└────────────────────────────┘
+```
+
+---
+
+#### RF-001.2: Recuperación de Contraseña
+**Descripción:** El sistema debe permitir a los usuarios recuperar su contraseña vía email.
+
+**Criterios de Aceptación:**
+- ✅ El usuario ingresa su email registrado
+- ✅ El sistema envía un email con link de recuperación
+- ✅ El link expira después de 1 hora
+- ✅ El usuario puede establecer nueva contraseña
+- ✅ El sistema invalida links anteriores al crear uno nuevo
+
+---
+
+#### RF-001.3: Gestión de Roles
+**Descripción:** El sistema debe soportar 4 roles con permisos diferenciados.
+
+**Roles y Permisos:**
+
+| Permiso | Admin | Técnico | Colaborador | Cliente |
+|---------|-------|---------|-------------|---------|
+| Ver empresas propias | ✅ | ✅ | ✅ | ✅ |
+| Crear empresas | ✅ | ❌ | ❌ | ❌ |
+| Editar empresas | ✅ | ❌ | ❌ | ❌ |
+| Eliminar empresas | ✅ | ❌ | ❌ | ❌ |
+| Ver constancias propias | ✅ | ✅ | ✅ | ✅ |
+| Crear constancias | ✅ | ✅ | ✅ | ❌ |
+| Editar constancias propias | ✅ | ✅ | ✅ | ❌ |
+| Ver checklists propios | ✅ | ✅ | ✅ | ✅ |
+| Crear checklists | ✅ | ✅ | ✅ | ❌ |
+| Ver informes propios | ✅ | ✅ | ✅ | ✅ |
+| Crear informes | ✅ | ✅ | ❌ | ❌ |
+| Gestionar usuarios | ✅ | ❌ | ❌ | ❌ |
+| Ver dashboard completo | ✅ | ✅ | ❌ | ❌ |
+| Acceder a configuración | ✅ | ❌ | ❌ | ❌ |
+
+---
+
+### RF-002: Gestión de Empresas y Sedes
+
+**Prioridad:** 🔴 Crítica
+**Épica:** Gestión de Clientes
+
+#### RF-002.1: Crear Empresa Cliente
+**Descripción:** El sistema debe permitir registrar nuevas empresas clientes con toda su información.
+
+**Datos requeridos:**
+- Razón Social (obligatorio)
+- CUIT (obligatorio, único, formato validado)
+- Teléfono (opcional)
+- Email (opcional, formato validado)
+- Dirección completa (opcional)
+
+**Criterios de Aceptación:**
+- ✅ El usuario con rol Admin accede a "Nueva Empresa"
+- ✅ El sistema muestra formulario con validaciones en tiempo real
+- ✅ El usuario completa los datos obligatorios
+- ✅ El sistema valida formato de CUIT (XX-XXXXXXXX-X)
+- ✅ El sistema verifica que CUIT no esté duplicado
+- ✅ Al guardar, crea el registro y muestra confirmación
+- ✅ Redirige a la vista de la empresa creada
+
+**Validaciones:**
+- CUIT único en el sistema
+- CUIT formato válido argentino
+- Email formato válido (si se proporciona)
+- Razón Social mínimo 3 caracteres
+
+---
+
+#### RF-002.2: Gestionar Sedes
+**Descripción:** El sistema debe permitir gestionar múltiples sedes por empresa.
+
+**Datos de Sede:**
+- Nombre de sede (obligatorio)
+- Dirección completa (obligatorio)
+- Teléfono (opcional)
+- Responsable 1, 2, 3 (nombre, email, teléfono, cargo)
+
+**Criterios de Aceptación:**
+- ✅ El usuario puede agregar N sedes a una empresa
+- ✅ Cada sede tiene hasta 3 responsables
+- ✅ Los emails de responsables se validan
+- ✅ Se puede editar/eliminar una sede
+- ✅ Al eliminar sede, se advierte si tiene auditorías asociadas
+
+**Regla de Negocio:**
+- No se puede eliminar una sede con auditorías activas (activo=true)
+- Se hace soft delete (marca activo=false)
+
+---
+
+### RF-003: Constancias de Visita Digitales
+
+**Prioridad:** 🔴 Crítica
+**Épica:** Documentación de Auditorías
+
+#### RF-003.1: Crear Constancia de Visita
+**Descripción:** El sistema debe permitir a técnicos generar constancias de visita con firma digital.
+
+**Datos de Constancia:**
+- Empresa (obligatorio, selector)
+- Sede (obligatorio, selector filtrado por empresa)
+- Fecha de visita (obligatorio, default: hoy)
+- Hora inicio (opcional)
+- Hora fin (opcional)
+- Actividades realizadas (obligatorio, textarea)
+- Firma digital del responsable (obligatorio)
+- Nombre del firmante (obligatorio)
+- Cargo del firmante (obligatorio)
+- Observaciones (opcional)
+
+**Flujo:**
+1. Técnico selecciona empresa
+2. Sistema carga sedes de esa empresa
+3. Técnico selecciona sede
+4. Sistema pre-carga datos de responsables
+5. Técnico completa actividades realizadas
+6. Técnico solicita firma al responsable de la empresa
+7. Responsable firma en canvas digital (tablet/móvil)
+8. Sistema genera PDF automáticamente
+9. Sistema muestra vista preliminar
+10. Técnico confirma y guarda
+11. Sistema envía email al cliente (opcional)
+
+**Criterios de Aceptación:**
+- ✅ El canvas de firma funciona con mouse y touch
+- ✅ El usuario puede limpiar la firma y volver a dibujar
+- ✅ La firma se captura como imagen base64
+- ✅ El PDF se genera con template profesional
+- ✅ El PDF incluye logo de la empresa auditora
+- ✅ El PDF incluye firma digital como imagen
+- ✅ El PDF se almacena en el servidor
+- ✅ Se puede descargar el PDF
+- ✅ Se puede enviar por email
+
+**Mockup del Canvas de Firma:**
+```
+┌─────────────────────────────────────┐
+│  Por favor firme en el recuadro:    │
+├─────────────────────────────────────┤
+│                                     │
+│                                     │
+│         [Espacio para firma]        │
+│                                     │
+│                                     │
+├─────────────────────────────────────┤
+│  [  Limpiar  ]    [  Aceptar  ]     │
+└─────────────────────────────────────┘
+```
+
+**Template PDF:**
+```
+╔═══════════════════════════════════════╗
+║   CONSTANCIA DE VISITA                ║
+║   [Logo Empresa Auditora]             ║
+╠═══════════════════════════════════════╣
+║ Empresa: ACME S.A.                    ║
+║ CUIT: 30-12345678-9                   ║
+║ Sede: Planta Central - Rosario       ║
+║ Dirección: Av. Belgrano 1234          ║
+╠═══════════════════════════════════════╣
+║ Fecha: 15/12/2024                     ║
+║ Hora: 09:00 - 12:00                   ║
+║ Técnico: María González               ║
+╠═══════════════════════════════════════╣
+║ ACTIVIDADES REALIZADAS:               ║
+║                                       ║
+║ - Inspección de matafuegos            ║
+║ - Verificación de señalética          ║
+║ - Revisión de botiquín                ║
+║                                       ║
+╠═══════════════════════════════════════╣
+║ FIRMA DEL RESPONSABLE:                ║
+║                                       ║
+║ [Imagen de firma digital]             ║
+║                                       ║
+║ Roberto Sánchez                       ║
+║ Responsable de Medio Ambiente         ║
+╚═══════════════════════════════════════╝
+```
+
+---
+
+#### RF-003.2: Editar Constancia
+**Descripción:** El sistema debe permitir editar constancias existentes.
+
+**Criterios de Aceptación:**
+- ✅ Solo el técnico creador o Admin puede editar
+- ✅ No se puede editar constancia de más de 7 días
+- ✅ Al editar, se guarda historial de cambios
+- ✅ Se re-genera el PDF automáticamente
+- ✅ Se marca la constancia como "Editada"
+
+---
+
+#### RF-003.3: Enviar Constancia por Email
+**Descripción:** El sistema debe permitir enviar la constancia por email al cliente.
+
+**Criterios de Aceptación:**
+- ✅ El usuario puede seleccionar destinatario de lista de responsables
+- ✅ El usuario puede ingresar email personalizado
+- ✅ El sistema valida formato de email
+- ✅ El usuario puede personalizar asunto y mensaje
+- ✅ El PDF se adjunta automáticamente
+- ✅ El sistema muestra confirmación de envío exitoso
+- ✅ Se registra el envío en el historial
+
+**Validaciones:**
+- Email formato válido
+- Asunto mínimo 3 caracteres
+- PDF generado (si no existe, lo genera)
+- Tamaño del PDF < 5MB
+
+---
+
+### RF-004: Sistema Dinámico de Checklists
+
+**Prioridad:** 🔴 Crítica
+**Épica:** Auditorías Especializadas
+
+#### RF-004.1: Seleccionar Tipo de Checklist
+**Descripción:** El sistema debe mostrar selector de tipos de checklist disponibles.
+
+**Tipos Disponibles:**
+1. OT - Orden de Trabajo
+2. CAR - Control de Acceso a Residuos
+3. SGA - Sistema de Gestión Ambiental
+4. HE - Higiene y Ergonomía
+5. EPP - Equipos de Protección Personal
+6. VEH - Seguridad de Vehículos
+7. OL - Obligaciones Legales
+8. EXT - Extintores y Equipos de Emergencia
+9. HM - Higiene y Manipulación
+10. LE - Legislación Específica
+11. TE - Técnico Especializado
+12. CE - Certificaciones Especiales
+13. AU - Auditoría General
+
+**Criterios de Aceptación:**
+- ✅ El usuario ve tarjetas visuales por cada tipo
+- ✅ Cada tarjeta muestra: icono, título, descripción breve
+- ✅ Al hacer click en una tarjeta, carga el formulario dinámico
+- ✅ El formulario se genera basado en configuración JSON/DB
+
+**Mockup:**
+```
+┌──────────────────────────────────────────┐
+│  Seleccione el Tipo de Checklist        │
+├──────────────────────────────────────────┤
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  │
+│  │  [🔥]   │  │  [⚡]   │  │  [👷]   │  │
+│  │Incendio │  │Eléctrico│  │  EPP    │  │
+│  └─────────┘  └─────────┘  └─────────┘  │
+│                                          │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐  │
+│  │  [🚗]   │  │  [📋]   │  │  [🏢]   │  │
+│  │Vehículos│  │   OT    │  │  SGA    │  │
+│  └─────────┘  └─────────┘  └─────────┘  │
+└──────────────────────────────────────────┘
+```
+
+---
+
+#### RF-004.2: Completar Checklist Dinámico
+**Descripción:** El sistema debe generar formulario dinámico basado en configuración.
+
+**Estructura de Item:**
+```typescript
+interface ChecklistItem {
+  orden: number;
+  pregunta: string;
+  tipo_respuesta: 'si_no_na' | 'texto' | 'numero' | 'fecha' | 'imagen';
+  es_obligatorio: boolean;
+  ayuda?: string;
+  cumple?: 'si' | 'no' | 'na' | '';
+  observaciones?: string;
+  imagen1?: File;
+  imagen2?: File;
+}
+```
+
+**Criterios de Aceptación:**
+- ✅ El formulario se genera dinámicamente según configuración
+- ✅ Cada pregunta muestra: número, texto, tipo de respuesta
+- ✅ Preguntas obligatorias están marcadas visualmente
+- ✅ Si hay ayuda, se muestra tooltip con icono ℹ️
+- ✅ Para tipo "si_no_na": botones Sí / No / N/A
+- ✅ Para tipo "texto": textarea
+- ✅ Para tipo "numero": input number
+- ✅ Para tipo "fecha": date picker
+- ✅ Para tipo "imagen": file upload con preview
+- ✅ Cada item tiene campo de observaciones (opcional)
+- ✅ Cada item permite 2 imágenes adjuntas
+- ✅ El usuario puede guardar progreso (draft)
+- ✅ El usuario puede completar en múltiples sesiones
+
+**Validaciones:**
+- Items obligatorios deben tener respuesta
+- Imágenes máximo 5MB cada una
+- Formatos de imagen: JPG, PNG, WEBP
+- Al menos 70% de items completados para generar PDF
+
+**Mockup de Item:**
+```
+┌─────────────────────────────────────────┐
+│ [1] ¿Matafuegos con carga vigente? *    │
+│     ℹ️ Verificar fecha en etiqueta      │
+├─────────────────────────────────────────┤
+│  [  Sí  ]  [  No  ]  [  N/A  ]          │
+├─────────────────────────────────────────┤
+│ Observaciones:                          │
+│ [_________________________________]     │
+│                                         │
+│ Imágenes:                               │
+│ [ 📷 Subir imagen 1 ]  [Vista previa]  │
+│ [ 📷 Subir imagen 2 ]  [Vista previa]  │
+└─────────────────────────────────────────┘
+```
+
+---
+
+#### RF-004.3: Guardar Checklist como Draft
+**Descripción:** El sistema debe permitir guardar progreso sin completar.
+
+**Criterios de Aceptación:**
+- ✅ El botón "Guardar Borrador" está siempre visible
+- ✅ Se guarda estado actual sin validaciones estrictas
+- ✅ El checklist queda marcado como "En Progreso"
+- ✅ Al volver a abrir, carga las respuestas guardadas
+- ✅ Muestra % de completitud
+
+---
+
+#### RF-004.4: Generar PDF de Checklist
+**Descripción:** El sistema debe generar PDF profesional del checklist completado.
+
+**Criterios de Aceptación:**
+- ✅ El PDF incluye header con logo y datos de la empresa
+- ✅ Lista todas las preguntas con sus respuestas
+- ✅ Marca visualmente "No Cumple" en rojo
+- ✅ Incluye observaciones de cada item
+- ✅ Incluye imágenes adjuntas (miniatura)
+- ✅ Incluye resumen de cumplimiento (% Sí, % No, % N/A)
+- ✅ Incluye firma del técnico
+- ✅ Incluye fecha y hora de generación
+- ✅ Footer con número de página
+
+---
+
+#### RF-004.5: CRUD Completo de Checklists
+**Descripción:** El sistema debe permitir operaciones completas sobre checklists.
+
+**Operaciones:**
+
+**CREATE:**
+- Ya implementado ✅
+
+**READ:**
+- Listar todos los checklists
+- Filtrar por empresa, sede, tipo, técnico, fecha
+- Ver detalle de un checklist
+- Descargar PDF
+
+**UPDATE:**
+- ⚠️ Actualmente NO implementado
+- El técnico puede editar checklist en estado "Draft"
+- El Admin puede editar cualquier checklist de menos de 30 días
+- Al editar, se re-genera el PDF
+
+**DELETE:**
+- ⚠️ Actualmente NO implementado
+- Soft delete (marca activo=false)
+- Solo Admin puede eliminar
+- No se puede eliminar si está asociado a un informe
+
+**Criterios de Aceptación UPDATE:**
+- ✅ El usuario accede a "Editar Checklist"
+- ✅ El sistema carga el formulario con datos existentes
+- ✅ El usuario modifica respuestas
+- ✅ El sistema valida cambios
+- ✅ Al guardar, actualiza registro en BD
+- ✅ Re-genera PDF automáticamente
+- ✅ Registra cambio en historial (audit log)
+
+**Criterios de Aceptación DELETE:**
+- ✅ El usuario hace click en "Eliminar"
+- ✅ El sistema muestra confirmación
+- ✅ El sistema verifica que no esté en informe
+- ✅ Marca activo=false (soft delete)
+- ✅ El checklist ya no aparece en listados activos
+- ✅ El Admin puede ver checklists eliminados en "Papelera"
+- ✅ El Admin puede restaurar checklist eliminado
+
+---
+
+### RF-005: Informes Técnicos
+
+**Prioridad:** 🟠 Alta
+**Épica:** Reportes Profesionales
+
+#### RF-005.1: Crear Informe Técnico
+**Descripción:** El sistema debe permitir generar informes técnicos integrando constancias y checklists.
+
+**Datos del Informe:**
+- Título del informe (obligatorio)
+- Empresa y Sede (obligatorio)
+- Fecha del informe (obligatorio)
+- Constancias asociadas (selección múltiple)
+- Checklists asociados (selección múltiple)
+- Introducción (obligatorio, editor de texto)
+- Hallazgos (obligatorio, editor de texto)
+- Recomendaciones (obligatorio, editor de texto)
+- Conclusiones (obligatorio, editor de texto)
+- Firma del técnico (automática)
+
+**Flujo:**
+1. Técnico inicia "Nuevo Informe"
+2. Selecciona empresa y sede
+3. Sistema muestra constancias y checklists disponibles de esa sede
+4. Técnico selecciona cuáles incluir
+5. Sistema pre-carga datos de constancias/checklists seleccionados
+6. Técnico redacta introducción, hallazgos, recomendaciones, conclusiones
+7. Sistema muestra vista preliminar del PDF
+8. Técnico ajusta si es necesario
+9. Técnico confirma y genera PDF final
+10. Sistema almacena informe
+11. Técnico puede enviar por email
+
+**Criterios de Aceptación:**
+- ✅ El usuario puede buscar constancias por fecha
+- ✅ El usuario puede filtrar checklists por tipo
+- ✅ El sistema integra datos automáticamente en el PDF
+- ✅ El PDF tiene estructura profesional
+- ✅ El PDF incluye resumen ejecutivo automático
+- ✅ El PDF incluye gráfico de cumplimiento
+- ✅ El editor de texto permite formato básico (negrita, lista, etc.)
+
+**Estructura del PDF:**
+```
+1. PORTADA
+   - Logo
+   - Título del informe
+   - Empresa y sede
+   - Fecha
+
+2. DATOS DE LA VISITA
+   - Constancias incluidas (fecha, técnico, actividades)
+
+3. RESUMEN EJECUTIVO
+   - % de cumplimiento general
+   - Items críticos no cumplidos
+   - Recomendaciones principales
+
+4. INTRODUCCIÓN
+   - Texto redactado por técnico
+
+5. HALLAZGOS
+   - Texto redactado por técnico
+   - Integración de datos de checklists
+
+6. RECOMENDACIONES
+   - Texto redactado por técnico
+   - Listado de acciones sugeridas
+
+7. CONCLUSIONES
+   - Texto redactado por técnico
+
+8. ANEXOS
+   - PDFs de checklists incluidos
+   - Evidencias fotográficas
+
+9. FIRMA
+   - Técnico responsable
+   - Fecha de emisión
+```
+
+---
+
+### RF-006: Capacitaciones
+
+**Prioridad:** 🟡 Media
+**Épica:** Gestión de Capacitaciones
+
+#### RF-006.1: Registrar Capacitación
+**Descripción:** El sistema debe permitir registrar capacitaciones presenciales y virtuales.
+
+**Datos de Capacitación:**
+- Empresa y Sede (obligatorio)
+- Tipo: Presencial / Virtual (obligatorio)
+- Fecha (obligatorio)
+- Hora inicio / Hora fin (opcional)
+- Tema (obligatorio)
+- Descripción (opcional)
+- Participantes (lista dinámica):
+  - Nombre completo
+  - Cargo
+  - Firma (solo presencial)
+
+**Criterios de Aceptación:**
+- ✅ El usuario puede agregar N participantes dinámicamente
+- ✅ El sistema genera certificado de asistencia por participante
+- ✅ El certificado incluye: nombre, cargo, tema, fecha, duración
+- ✅ Se puede descargar certificados en lote (ZIP)
+- ✅ El sistema registra capacitación en historial de la empresa
+
+---
+
+### RF-007: Módulo BPA (Buenas Prácticas Ambientales)
+
+**Prioridad:** 🟡 Media
+**Épica:** Cumplimiento Normativo
+
+#### RF-007.1: Clasificación de Usuario Final
+**Descripción:** El sistema debe clasificar empresas según normativa BPA.
+
+**Clasificaciones:**
+- Usuario Final Estándar
+- Usuario Final Especial
+- Distribuidor
+
+**Criterios de Aceptación:**
+- ✅ El sistema guía al técnico en la clasificación
+- ✅ Según clasificación, asigna checklist BPA-1 o BPA-2
+- ✅ El checklist BPA tiene preguntas específicas de normativa
+- ✅ El sistema genera recomendaciones de capacitación
+
+---
+
+### RF-008: CRM de Prospección
+
+**Prioridad:** 🟢 Baja
+**Épica:** Gestión Comercial
+
+#### RF-008.1: Gestionar Prospectos
+**Descripción:** El sistema debe permitir gestionar leads comerciales.
+
+**Datos del Prospecto:**
+- Razón Social
+- Email
+- Teléfono
+- Industria
+- Estado (nuevo, contactado, interesado, negociación, convertido, perdido)
+- Intereses
+- Notas
+
+**Criterios de Aceptación:**
+- ✅ El usuario puede crear prospecto
+- ✅ El usuario puede registrar interacciones (emails, llamadas, reuniones)
+- ✅ El usuario puede ver historial completo
+- ✅ El usuario puede convertir prospecto en cliente
+- ✅ El sistema muestra pipeline visual de ventas
+
+---
+
+### RF-009: Dashboard y Reportes
+
+**Prioridad:** 🟠 Alta
+**Épica:** Analytics
+
+#### RF-009.1: Dashboard Ejecutivo
+**Descripción:** El sistema debe mostrar métricas clave y actividades recientes.
+
+**Widgets:**
+- Total de auditorías del mes
+- Total de informes generados
+- Auditorías pendientes
+- Items no cumplidos críticos
+- Gráfico de auditorías por mes
+- Tabla de actividades recientes
+- Top 5 empresas más auditadas
+
+**Filtros:**
+- Por período (mes, trimestre, año)
+- Por técnico
+- Por empresa
+
+**Criterios de Aceptación:**
+- ✅ Los datos se actualizan en tiempo real
+- ✅ Los gráficos son interactivos
+- ✅ Se puede exportar dashboard a PDF
+- ✅ Se puede programar envío automático por email
+
+---
+
+### RF-010: Sistema de Notificaciones
+
+**Prioridad:** 🟠 Alta
+**Épica:** Comunicación
+
+#### RF-010.1: Notificaciones por Email
+**Descripción:** El sistema debe enviar notificaciones automáticas por eventos importantes.
+
+**Eventos que generan notificación:**
+- Nueva constancia creada → Email al cliente
+- Nuevo informe creado → Email al cliente
+- Checklist con items críticos no cumplidos → Email al responsable de HyS
+- Auditoría vencida → Email al técnico asignado
+- Nueva capacitación programada → Email a participantes
+
+**Criterios de Aceptación:**
+- ✅ Los emails tienen diseño profesional (HTML)
+- ✅ Incluyen logo de la empresa
+- ✅ Incluyen botón de acción (Ver constancia, Descargar PDF)
+- ✅ El usuario puede configurar qué notificaciones recibir
+- ✅ El sistema registra todos los envíos
+
+**Template de Email:**
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .header { background: #2563eb; color: white; padding: 20px; }
+    .content { padding: 20px; }
+    .button { background: #2563eb; color: white; padding: 10px 20px; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="[LOGO]" alt="Logo">
+    <h2>Nueva Constancia de Visita</h2>
+  </div>
+  <div class="content">
+    <p>Estimado Roberto Sánchez,</p>
+    <p>Se ha generado una nueva constancia de visita para su empresa ACME S.A.</p>
+    <p><strong>Fecha:</strong> 15/12/2024</p>
+    <p><strong>Técnico:</strong> María González</p>
+    <p><a href="[LINK]" class="button">Ver Constancia</a></p>
+    <p>Saludos cordiales,<br>Equipo Xamanen</p>
+  </div>
+</body>
+</html>
+```
+
+---
+
+## 🚀 Requisitos No Funcionales
+
+### RNF-001: Performance
+
+**RNF-001.1: Tiempo de Carga**
+- El sistema debe cargar la página inicial en menos de 2 segundos
+- Las páginas subsecuentes deben cargar en menos de 1 segundo
+- El bundle JavaScript inicial debe ser menor a 500KB
+
+**RNF-001.2: Generación de PDFs**
+- Un PDF de constancia debe generarse en menos de 3 segundos
+- Un PDF de checklist debe generarse en menos de 5 segundos
+- Un PDF de informe debe generarse en menos de 10 segundos
+
+**RNF-001.3: Operaciones de Base de Datos**
+- Las consultas de listado deben responder en menos de 500ms
+- Las operaciones de escritura deben completarse en menos de 1 segundo
+
+---
+
+### RNF-002: Seguridad
+
+**RNF-002.1: Autenticación**
+- Contraseñas deben hashearse con bcrypt (cost factor 12)
+- Los tokens JWT deben expirar después de 8 horas
+- Los refresh tokens deben expirar después de 30 días
+- Debe implementarse rate limiting (10 intentos de login por IP por minuto)
+
+**RNF-002.2: Autorización**
+- Todas las rutas deben estar protegidas con AuthGuard
+- Los permisos deben verificarse en backend, no solo en frontend
+- Los usuarios solo deben acceder a datos de sus empresas asignadas
+
+**RNF-002.3: Protección de Datos**
+- Todas las conexiones deben usar HTTPS
+- Los tokens deben almacenarse en HTTP-Only cookies
+- Los datos sensibles deben encriptarse en la base de datos
+- Debe implementarse CSRF protection
+
+**RNF-002.4: Auditoría**
+- Todas las operaciones críticas deben registrarse (audit log)
+- Los logs deben incluir: usuario, acción, timestamp, IP
+- Los logs deben conservarse por al menos 1 año
+
+---
+
+### RNF-003: Escalabilidad
+
+**RNF-003.1: Usuarios Concurrentes**
+- El sistema debe soportar 500 usuarios concurrentes sin degradación
+- El sistema debe poder escalar horizontalmente agregando servidores
+
+**RNF-003.2: Almacenamiento**
+- El sistema debe soportar almacenamiento de al menos 100,000 documentos
+- Los archivos PDF deben almacenarse en storage externo (S3/similar)
+- Debe implementarse política de retención de datos
+
+**RNF-003.3: Base de Datos**
+- La base de datos debe soportar al menos 1 millón de registros
+- Debe implementarse indexación en campos de búsqueda frecuente
+- Debe implementarse backup automático diario
+
+---
+
+### RNF-004: Usabilidad
+
+**RNF-004.1: Responsive Design**
+- El sistema debe funcionar en dispositivos móviles (tablets y smartphones)
+- El sistema debe adaptarse a resoluciones desde 320px hasta 4K
+- El diseño debe seguir principios de Material Design o similar
+
+**RNF-004.2: Accesibilidad**
+- El sistema debe cumplir con WCAG 2.1 nivel AA
+- Todos los elementos interactivos deben ser accesibles por teclado
+- Debe soportar lectores de pantalla
+
+**RNF-004.3: Experiencia de Usuario**
+- Las acciones deben tener feedback visual inmediato
+- Los errores deben mostrarse con mensajes descriptivos en español
+- El sistema debe tener ayuda contextual (tooltips)
+
+---
+
+### RNF-005: Disponibilidad
+
+**RNF-005.1: Uptime**
+- El sistema debe tener 99.5% de uptime (43.8 horas de downtime máximo al año)
+- Debe tener ventanas de mantenimiento programadas fuera de horario laboral
+
+**RNF-005.2: Recuperación ante Desastres**
+- Debe implementarse backup automático cada 24 horas
+- El tiempo de recuperación (RTO) debe ser menor a 4 horas
+- El punto de recuperación (RPO) debe ser menor a 24 horas
+
+---
+
+### RNF-006: Compatibilidad
+
+**RNF-006.1: Navegadores**
+- Debe soportar Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+- Debe degradar gracefully en navegadores no soportados
+
+**RNF-006.2: Dispositivos**
+- Debe funcionar en Android 8+
+- Debe funcionar en iOS 13+
+- Debe funcionar en Windows 10+, macOS 10.15+
+
+---
+
+### RNF-007: Mantenibilidad
+
+**RNF-007.1: Código**
+- El código debe seguir guías de estilo (ESLint, Prettier)
+- El código debe estar documentado con JSDoc
+- El código debe tener cobertura de tests >60%
+
+**RNF-007.2: Monitoreo**
+- Debe implementarse logging centralizado
+- Debe implementarse monitoreo de errores (Sentry o similar)
+- Debe implementarse monitoreo de performance (New Relic o similar)
+
+---
+
+## 🛠️ Especificaciones Técnicas
+
+### Stack Tecnológico (Opción A: Actual)
+
+**Frontend:**
+```json
+{
+  "framework": "Angular 19.2.1",
+  "language": "TypeScript 5.5.2",
+  "ui": "Bootstrap 5 + ng-bootstrap 18",
+  "charts": "Chart.js 4.5.0",
+  "maps": "Leaflet 1.9.4",
+  "pdf": "pdfmake 0.2.20",
+  "signatures": "signature_pad 5.0.7",
+  "state": "RxJS 7.8.0"
+}
+```
+
+**Backend:**
+```json
+{
+  "runtime": "Node.js 18+",
+  "framework": "Express 4.18+",
+  "database": "MongoDB 6.0+",
+  "auth": "JWT (jsonwebtoken)",
+  "api": "RESTful"
+}
+```
+
+---
+
+### Stack Tecnológico (Opción B: Propuesta)
+
+**Full-Stack:**
+```json
+{
+  "framework": "Laravel 11.x",
+  "language": "PHP 8.3+",
+  "frontend": "Blade + Livewire 3.x + Alpine.js",
+  "css": "Tailwind CSS 3.x",
+  "database": "MySQL 8.0+ / PostgreSQL 15+",
+  "auth": "Laravel Sanctum",
+  "cache": "Redis",
+  "queue": "Laravel Queue (Redis)",
+  "storage": "AWS S3 / Laravel Storage"
+}
+```
+
+---
+
+### Arquitectura del Sistema (Propuesta Laravel)
+
+```
+┌─────────────────────────────────────────────────┐
+│                   CLIENTE                        │
+│   (Navegador Web / App Móvil)                   │
+└─────────────────┬───────────────────────────────┘
+                  │
+                  │ HTTPS
+                  │
+┌─────────────────▼───────────────────────────────┐
+│              LOAD BALANCER                       │
+│            (Nginx / HAProxy)                     │
+└─────────────────┬───────────────────────────────┘
+                  │
+         ┌────────┴────────┐
+         │                 │
+┌────────▼──────┐  ┌──────▼────────┐
+│  APP SERVER 1 │  │  APP SERVER 2 │
+│   Laravel     │  │   Laravel     │
+│   Livewire    │  │   Livewire    │
+└───────┬───────┘  └───────┬───────┘
+        │                  │
+        └────────┬─────────┘
+                 │
+    ┌────────────┼────────────┐
+    │            │            │
+┌───▼────┐  ┌───▼────┐  ┌───▼────┐
+│  MySQL │  │ Redis  │  │   S3   │
+│  (RDS) │  │ (Cache)│  │(Storage)│
+└────────┘  └────────┘  └────────┘
+```
+
+---
+
+### Modelo de Datos (Entidades Principales)
+
+```mermaid
+erDiagram
+    USER ||--o{ EMPRESA : "gestiona"
+    EMPRESA ||--o{ SEDE : "tiene"
+    SEDE ||--o{ CONSTANCIA : "recibe"
+    SEDE ||--o{ CHECKLIST : "tiene"
+    SEDE ||--o{ INFORME : "recibe"
+    USER ||--o{ CONSTANCIA : "crea"
+    USER ||--o{ CHECKLIST : "realiza"
+    USER ||--o{ INFORME : "genera"
+    INFORME }o--o{ CONSTANCIA : "incluye"
+    INFORME }o--o{ CHECKLIST : "incluye"
+    CHECKLIST ||--o{ CHECKLIST_RESPUESTA : "contiene"
+    CHECKLIST_CONFIG ||--o{ CHECKLIST_ITEM : "define"
+
+    USER {
+        int id PK
+        string name
+        string email UK
+        string password
+        enum rol
+        boolean activo
+    }
+
+    EMPRESA {
+        int id PK
+        string razon_social
+        string cuit UK
+        string telefono
+        string email
+        string direccion
+        int user_id FK
+    }
+
+    SEDE {
+        int id PK
+        int empresa_id FK
+        string nombre
+        string direccion
+        string responsable1_nombre
+        string responsable1_email
+        string responsable2_nombre
+        string responsable3_nombre
+    }
+
+    CONSTANCIA {
+        int id PK
+        int empresa_id FK
+        int sede_id FK
+        int tecnico_id FK
+        date fecha
+        time hora_inicio
+        text actividades
+        text firma_responsable
+        string pdf_path
+    }
+
+    CHECKLIST {
+        int id PK
+        string tipo
+        int empresa_id FK
+        int sede_id FK
+        int tecnico_id FK
+        date fecha
+        text observaciones_generales
+        string pdf_path
+    }
+
+    CHECKLIST_CONFIG {
+        int id PK
+        string tipo UK
+        string titulo
+        text descripcion
+        string icono
+        string color
+    }
+
+    CHECKLIST_ITEM {
+        int id PK
+        int config_id FK
+        int orden
+        text pregunta
+        enum tipo_respuesta
+        boolean es_obligatorio
+        text ayuda
+    }
+
+    CHECKLIST_RESPUESTA {
+        int id PK
+        int checklist_id FK
+        int item_id FK
+        enum cumple
+        text observaciones
+        string imagen1_path
+        string imagen2_path
+    }
+
+    INFORME {
+        int id PK
+        int empresa_id FK
+        int sede_id FK
+        int tecnico_id FK
+        string titulo
+        text introduccion
+        text hallazgos
+        text recomendaciones
+        string pdf_path
+    }
+```
+
+---
+
+### API Endpoints (RESTful)
+
+#### Autenticación
+
+```
+POST   /api/auth/login
+POST   /api/auth/logout
+POST   /api/auth/refresh
+POST   /api/auth/forgot-password
+POST   /api/auth/reset-password
+GET    /api/auth/me
+```
+
+#### Empresas
+
+```
+GET    /api/empresas
+POST   /api/empresas
+GET    /api/empresas/{id}
+PUT    /api/empresas/{id}
+DELETE /api/empresas/{id}
+GET    /api/empresas/{id}/sedes
+GET    /api/empresas/{id}/constancias
+GET    /api/empresas/{id}/checklists
+GET    /api/empresas/{id}/informes
+```
+
+#### Sedes
+
+```
+GET    /api/sedes
+POST   /api/sedes
+GET    /api/sedes/{id}
+PUT    /api/sedes/{id}
+DELETE /api/sedes/{id}
+```
+
+#### Constancias
+
+```
+GET    /api/constancias
+POST   /api/constancias
+GET    /api/constancias/{id}
+PUT    /api/constancias/{id}
+DELETE /api/constancias/{id}
+GET    /api/constancias/{id}/pdf
+POST   /api/constancias/{id}/email
+```
+
+#### Checklists
+
+```
+GET    /api/checklists
+POST   /api/checklists
+GET    /api/checklists/{id}
+PUT    /api/checklists/{id}
+DELETE /api/checklists/{id}
+GET    /api/checklists/configs
+GET    /api/checklists/configs/{tipo}
+GET    /api/checklists/{id}/pdf
+POST   /api/checklists/{id}/email
+```
+
+#### Informes
+
+```
+GET    /api/informes
+POST   /api/informes
+GET    /api/informes/{id}
+PUT    /api/informes/{id}
+DELETE /api/informes/{id}
+GET    /api/informes/{id}/pdf
+POST   /api/informes/{id}/email
+```
+
+#### Dashboard
+
+```
+GET    /api/dashboard/stats
+GET    /api/dashboard/recent-activity
+GET    /api/dashboard/metrics?periodo=mes&tecnico_id=5
+```
+
+---
+
+## 📖 User Stories y Casos de Uso
+
+### US-001: Login como Técnico
+
+**Como** técnico de seguridad e higiene
+**Quiero** iniciar sesión en la plataforma
+**Para** acceder a mis auditorías asignadas
+
+**Criterios de Aceptación:**
+- Dado que soy un técnico registrado
+- Cuando ingreso mi email y contraseña correctos
+- Entonces accedo al dashboard de técnico
+- Y veo mis auditorías pendientes
+
+**Escenarios:**
+
+✅ **Escenario 1: Login Exitoso**
+```gherkin
+Given que ingreso email "maria@consultora.com"
+And ingreso contraseña "Pass1234!"
+When hago click en "Iniciar Sesión"
+Then veo el mensaje "Bienvenida María"
+And soy redirigida al dashboard
+And veo mis últimas 5 constancias
+```
+
+❌ **Escenario 2: Contraseña Incorrecta**
+```gherkin
+Given que ingreso email "maria@consultora.com"
+And ingreso contraseña incorrecta
+When hago click en "Iniciar Sesión"
+Then veo el mensaje "Email o contraseña incorrectos"
+And permanezco en la página de login
+And el campo de contraseña se limpia
+```
+
+---
+
+### US-002: Crear Constancia de Visita en Campo
+
+**Como** técnico en campo
+**Quiero** generar una constancia de visita desde mi tablet
+**Para** que el cliente firme digitalmente y reciba el documento al instante
+
+**Criterios de Aceptación:**
+- Dado que estoy en el sitio del cliente
+- Cuando completo los datos de la visita
+- Y capturo la firma digital del responsable
+- Entonces se genera un PDF profesional automáticamente
+- Y puedo enviarlo por email al cliente antes de retirarme
+
+**Flujo de Usuario:**
+
+```
+1. Técnico llega al sitio del cliente
+   └─> Abre Xamanen en su tablet
+
+2. Selecciona "Nueva Constancia"
+   └─> Selecciona empresa: "ACME S.A."
+   └─> Selecciona sede: "Planta Central - Rosario"
+   └─> Sistema pre-carga datos del responsable
+
+3. Completa datos de la visita
+   └─> Fecha: 15/12/2024 (autocompletada)
+   └─> Hora: 09:00 - 12:00
+   └─> Actividades: "Inspección de matafuegos..."
+
+4. Solicita firma al responsable
+   └─> Muestra tablet al responsable
+   └─> Responsable firma con el dedo
+   └─> Sistema captura firma como imagen
+
+5. Vista preliminar
+   └─> Técnico revisa PDF generado
+   └─> Confirma datos
+
+6. Envío
+   └─> Selecciona email del responsable
+   └─> Hace click en "Enviar"
+   └─> Cliente recibe email con PDF adjunto
+   └─> Técnico descarga copia en su tablet
+```
+
+**Mockup del Flujo:**
+
+```
+Paso 1: Selección de Empresa
+┌────────────────────────────┐
+│ Nueva Constancia           │
+├────────────────────────────┤
+│ Empresa: *                 │
+│ [ACME S.A.          ▼]     │
+│                            │
+│ Sede: *                    │
+│ [Planta Central     ▼]     │
+│                            │
+│ [ Continuar ]              │
+└────────────────────────────┘
+
+Paso 2: Datos de Visita
+┌────────────────────────────┐
+│ Datos de la Visita         │
+├────────────────────────────┤
+│ Fecha: *                   │
+│ [15/12/2024]               │
+│                            │
+│ Hora inicio: [09:00]       │
+│ Hora fin: [12:00]          │
+│                            │
+│ Actividades realizadas: *  │
+│ [____________________]     │
+│ [____________________]     │
+│ [____________________]     │
+│                            │
+│ [ Continuar ]              │
+└────────────────────────────┘
+
+Paso 3: Firma Digital
+┌────────────────────────────┐
+│ Firma del Responsable      │
+├────────────────────────────┤
+│ Por favor firme aquí:      │
+│                            │
+│ ┌────────────────────────┐ │
+│ │                        │ │
+│ │   [Espacio de firma]   │ │
+│ │                        │ │
+│ └────────────────────────┘ │
+│                            │
+│ Nombre: Roberto Sánchez    │
+│ Cargo: Resp. Medio Ambiente│
+│                            │
+│ [ Limpiar ] [ Confirmar ]  │
+└────────────────────────────┘
+
+Paso 4: Vista Preliminar
+┌────────────────────────────┐
+│ Vista Preliminar del PDF   │
+├────────────────────────────┤
+│ [Vista miniatura del PDF]  │
+│                            │
+│ CONSTANCIA DE VISITA       │
+│ Empresa: ACME S.A.         │
+│ Fecha: 15/12/2024          │
+│ ...                        │
+│                            │
+│ [ Editar ] [ Confirmar ]   │
+└────────────────────────────┘
+
+Paso 5: Envío
+┌────────────────────────────┐
+│ Enviar Constancia          │
+├────────────────────────────┤
+│ Destinatario:              │
+│ ● Roberto Sánchez          │
+│   rsanchez@acme.com        │
+│ ○ Juan Pérez               │
+│ ○ Otro email...            │
+│                            │
+│ Asunto:                    │
+│ [Constancia de Visita...]  │
+│                            │
+│ [ Enviar por Email ]       │
+│ [ Solo Descargar ]         │
+└────────────────────────────┘
+```
+
+---
+
+### US-003: Completar Checklist de Incendio
+
+**Como** técnico especializado
+**Quiero** completar un checklist de prevención de incendios
+**Para** documentar el cumplimiento de normas contra incendios
+
+**Criterios de Aceptación:**
+- Dado que necesito auditar equipos contra incendio
+- Cuando selecciono "Checklist de Incendio"
+- Entonces veo un formulario guiado con preguntas específicas
+- Y puedo responder Sí/No/N/A para cada item
+- Y puedo adjuntar fotos de matafuegos
+- Y puedo agregar observaciones por cada item
+- Entonces se genera un PDF con todos los hallazgos
+
+**Preguntas del Checklist de Incendio (ejemplo):**
+
+1. ¿Matafuegos con carga vigente y accesibles?
+2. ¿Señalización de salidas de emergencia visible?
+3. ¿Detectores de humo funcionales?
+4. ¿Alarmas contra incendio operativas?
+5. ¿Hidrantes con presión adecuada?
+6. ¿Mangueras en buen estado?
+7. ¿Rociadores automáticos funcionales?
+8. ¿Plan de evacuación actualizado?
+9. ¿Capacitación del personal en uso de extintores?
+10. ¿Registro de simulacros de evacuación?
+
+**Interacción:**
+
+```
+Item 1:
+┌─────────────────────────────────────────┐
+│ [1] ¿Matafuegos con carga vigente? *    │
+│     ℹ️ Verificar fecha en etiqueta      │
+├─────────────────────────────────────────┤
+│  [ Sí ]  [ No ]  [ N/A ]  ← Usuario elige "No"
+├─────────────────────────────────────────┤
+│ Observaciones:                          │
+│ [3 matafuegos vencidos en Sector A]    │ ← Usuario escribe
+│                                         │
+│ Imágenes:                               │
+│ [ 📷 Foto del matafuego vencido ]      │ ← Usuario adjunta foto
+└─────────────────────────────────────────┘
+
+Al terminar todos los items:
+┌─────────────────────────────────────────┐
+│ Resumen del Checklist                   │
+├─────────────────────────────────────────┤
+│ Total items: 10                         │
+│ ✅ Cumple: 7 (70%)                       │
+│ ❌ No cumple: 3 (30%)                    │
+│ ⚪ N/A: 0 (0%)                           │
+├─────────────────────────────────────────┤
+│ ⚠️ Items críticos no cumplidos:         │
+│ - Matafuegos con carga vigente          │
+│ - Hidrantes con presión adecuada        │
+│ - Rociadores automáticos funcionales    │
+├─────────────────────────────────────────┤
+│ [ Guardar Borrador ]  [ Generar PDF ]   │
+└─────────────────────────────────────────┘
+```
+
+---
+
+### US-004: Ver Dashboard de Cumplimiento (Cliente)
+
+**Como** responsable de medio ambiente de una empresa
+**Quiero** ver un dashboard con el estado de cumplimiento de mi planta
+**Para** saber qué auditorías están vencidas y qué items críticos debo atender
+
+**Criterios de Aceptación:**
+- Dado que soy usuario cliente
+- Cuando accedo al dashboard
+- Entonces veo todas las auditorías de mi empresa
+- Y veo alertas de vencimientos próximos
+- Y veo items críticos no cumplidos
+- Y puedo descargar cualquier documento histórico
+
+**Dashboard del Cliente:**
+
+```
+┌─────────────────────────────────────────────────────┐
+│ Dashboard - ACME S.A.                               │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│ ┌─────────────┐  ┌─────────────┐  ┌─────────────┐ │
+│ │ Auditorías  │  │  Vencidas   │  │  Items      │ │
+│ │   15        │  │     3       │  │ Críticos    │ │
+│ │  este mes   │  │             │  │     5       │ │
+│ └─────────────┘  └─────────────┘  └─────────────┘ │
+│                                                     │
+│ ⚠️ ALERTAS                                          │
+│ ┌─────────────────────────────────────────────────┐│
+│ │ • Checklist de Incendio vence en 5 días         ││
+│ │ • 3 matafuegos requieren recarga urgente        ││
+│ │ • Capacitación en EPP pendiente                 ││
+│ └─────────────────────────────────────────────────┘│
+│                                                     │
+│ ÚLTIMAS AUDITORÍAS                                  │
+│ ┌─────────────────────────────────────────────────┐│
+│ │ 15/12/2024 | Incendio      | ✅ Aprobado       ││
+│ │ 12/12/2024 | EPP           | ⚠️ Con observ.   ││
+│ │ 10/12/2024 | Vehículos     | ✅ Aprobado       ││
+│ └─────────────────────────────────────────────────┘│
+│                                                     │
+│ DOCUMENTOS DISPONIBLES                              │
+│ ┌─────────────────────────────────────────────────┐│
+│ │ 📄 Constancia Visita 15/12  [Descargar PDF]    ││
+│ │ 📄 Informe Técnico Dic 2024 [Descargar PDF]    ││
+│ │ 📄 Certificado Capacitación [Descargar PDF]    ││
+│ └─────────────────────────────────────────────────┘│
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📊 Métricas de Éxito
+
+### Métricas de Producto
+
+| Métrica | Objetivo | Forma de Medición |
+|---------|----------|-------------------|
+| **Adoption Rate** | 80% de técnicos usan la app semanalmente | Google Analytics - Weekly Active Users |
+| **Time to First Audit** | <24 horas desde signup | Tiempo entre registro y primera constancia creada |
+| **Audits per Technician** | 25-30 auditorías/mes/técnico | Promedio de constancias creadas por técnico |
+| **PDF Generation Time** | <5 segundos | Monitoreo de logs del servidor |
+| **Error Rate** | <0.1% | Sentry - Error tracking |
+| **Page Load Time** | <2 segundos | Lighthouse / Web Vitals |
+
+---
+
+### Métricas de Negocio
+
+| Métrica | Objetivo Año 1 | Objetivo Año 3 | Forma de Medición |
+|---------|----------------|----------------|-------------------|
+| **MRR** | $20K USD | $150K USD | Stripe / Facturación |
+| **Clientes Activos** | 100 empresas | 500 empresas | Base de datos |
+| **Churn Mensual** | <5% | <3% | Clientes que cancelan / Total |
+| **NPS** | >40 | >60 | Encuesta trimestral |
+| **CAC** | <$500 | <$300 | Costo marketing / Nuevos clientes |
+| **LTV:CAC** | >3:1 | >5:1 | Lifetime Value / CAC |
+
+---
+
+### Métricas de Usuario
+
+| Métrica | Objetivo | Forma de Medición |
+|---------|----------|-------------------|
+| **Tiempo de generación de informe** | <30 minutos (antes: 4-6 horas) | Encuesta + Analytics |
+| **Satisfacción del usuario** | >4.5/5 | Encuesta post-uso |
+| **Errores de transcripción** | <2% (antes: 15-20%) | Auditoría de calidad |
+| **Tiempo de búsqueda de documento** | <30 segundos | User testing |
+| **Tasa de uso de móvil** | >60% de sesiones | Google Analytics |
+
+---
+
+### KPIs de Calidad
+
+| KPI | Objetivo | Forma de Medición |
+|-----|----------|-------------------|
+| **Test Coverage** | >60% | Jest / Karma coverage reports |
+| **Bug Density** | <5 bugs por 1000 líneas | Jira / Bug tracking |
+| **Code Maintainability** | Grade A | SonarQube |
+| **Security Vulnerabilities** | 0 críticas, <5 medias | npm audit / Snyk |
+| **API Response Time** | p95 <200ms | New Relic / Datadog |
+
+---
+
+## 🗓️ Roadmap de Desarrollo
+
+### Q1 2025: Estabilización y Mejoras Críticas
+
+**Objetivos:**
+- Resolver bugs críticos identificados
+- Implementar sistema dinámico de checklists
+- Completar CRUD de checklists
+- Mejorar seguridad
+
+**Entregables:**
+- ✅ Eliminación de memory leaks (10+ componentes)
+- ✅ Sistema dinámico de checklists (reducción 10,000 líneas)
+- ✅ UPDATE y DELETE de checklists funcionando
+- ✅ AuthGuard en todas las rutas
+- ✅ Tokens en HTTP-Only cookies
+- ✅ Tests unitarios (>60% coverage)
+
+**Esfuerzo:** 320 horas (2 meses con 1 dev)
+
+---
+
+### Q2 2025: Performance y UX
+
+**Objetivos:**
+- Optimizar performance del frontend
+- Mejorar experiencia de usuario
+- Implementar PWA
+
+**Entregables:**
+- ✅ Lazy loading en todos los módulos
+- ✅ Bundle size reducido a <500KB
+- ✅ OnPush change detection
+- ✅ Rediseño de dashboard
+- ✅ Progressive Web App
+- ✅ Modo offline básico
+
+**Esfuerzo:** 280 horas (1.5 meses con 1 dev)
+
+---
+
+### Q3 2025: Analytics y Alertas
+
+**Objetivos:**
+- Dashboard analítico avanzado
+- Sistema de alertas inteligentes
+- Checklists recurrentes
+
+**Entregables:**
+- ✅ Dashboard con gráficos interactivos
+- ✅ Exportación a Excel/PDF
+- ✅ Alertas automáticas por email
+- ✅ Configuración de checklists recurrentes
+- ✅ Notificaciones de vencimientos
+
+**Esfuerzo:** 320 horas (2 meses con 1 dev)
+
+---
+
+### Q4 2025: Mobile First
+
+**Objetivos:**
+- App móvil nativa
+- Sincronización offline
+- Optimización para campo
+
+**Entregables:**
+- ✅ App iOS en App Store
+- ✅ App Android en Play Store
+- ✅ 90% de funcionalidades offline
+- ✅ Geolocalización automática
+- ✅ Notificaciones push
+
+**Esfuerzo:** 480 horas (3 meses con 2 devs mobile)
+
+---
+
+### Q1 2026: IA y API Pública
+
+**Objetivos:**
+- Análisis de imágenes con IA
+- API pública para integraciones
+- Marketplace de templates
+
+**Entregables:**
+- ✅ IA para análisis de imágenes de equipos
+- ✅ API pública RESTful documentada
+- ✅ SDK para developers
+- ✅ Marketplace con 100+ templates
+- ✅ 10 integraciones con ERPs
+
+**Esfuerzo:** 640 horas (4 meses con 2 devs)
+
+---
+
+## ⚠️ Dependencias y Riesgos
+
+### Dependencias Técnicas
+
+| Dependencia | Impacto | Mitigación |
+|-------------|---------|------------|
+| **Servicio de Email** | Si falla, no se envían constancias | Implementar cola de reintentos + backup SMTP |
+| **Almacenamiento S3** | Si falla, no se guardan PDFs | Implementar almacenamiento local de respaldo |
+| **MongoDB/MySQL** | Si falla, app no funciona | Implementar réplicas + backup automático |
+| **Librería signature_pad** | Si tiene bug, no funciona firma | Tener alternativa (canvas nativo) |
+| **pdfmake** | Si tiene bug, no se generan PDFs | Evaluar alternativa (Puppeteer, wkhtmltopdf) |
+
+---
+
+### Riesgos del Proyecto
+
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|-------------|---------|------------|
+| **Adopción lenta** | Media | Alto | Ofrecer plan gratuito + onboarding personalizado |
+| **Competidor lanza producto similar** | Media | Medio | Diferenciarse con normativa BPA Argentina |
+| **Cambios en normativa BPA** | Baja | Alto | Tener checklists configurables, no hardcodeados |
+| **Equipo pequeño sobrecargado** | Alta | Medio | Priorizar MVP, outsourcing para features secundarias |
+| **Problemas de performance a escala** | Media | Alto | Load testing desde Q2, arquitectura escalable |
+| **Vulnerabilidades de seguridad** | Media | Crítico | Auditoría de seguridad trimestral, bug bounty |
+
+---
+
+### Asunciones del Proyecto
+
+1. **Asunción:** Los técnicos tienen acceso a tablets/móviles en campo
+   **Validación:** Encuesta a 20 empresas de auditoría
+
+2. **Asunción:** Los clientes aceptan firmas digitales legalmente
+   **Validación:** Consulta con abogado especializado
+
+3. **Asunción:** La conexión a internet en campo es suficiente
+   **Validación:** Implementar modo offline para casos sin conexión
+
+4. **Asunción:** Las empresas están dispuestas a pagar $199-999/mes
+   **Validación:** Entrevistas de pricing con 50 prospectos
+
+5. **Asunción:** El mercado argentino tiene 500+ empresas auditoras
+   **Validación:** Investigación de mercado en cámaras empresariales
+
+---
+
+## 📎 Apéndices
+
+### Apéndice A: Glosario de Términos
+
+| Término | Definición |
+|---------|------------|
+| **BPA** | Buenas Prácticas Ambientales - Normativa argentina para gestión de residuos peligrosos |
+| **Constancia de Visita** | Documento que certifica que un técnico visitó una empresa en una fecha específica |
+| **Checklist** | Formulario estructurado con preguntas específicas para auditar un aspecto (incendio, EPP, etc.) |
+| **Informe Técnico** | Documento profesional que integra constancias, checklists y análisis del técnico |
+| **Sede** | Ubicación física de una empresa (ej: planta, sucursal, depósito) |
+| **HyS** | Higiene y Seguridad - Área de prevención de riesgos laborales |
+| **EPP** | Equipos de Protección Personal (cascos, guantes, gafas, etc.) |
+| **Soft Delete** | Eliminación lógica (marca activo=false) sin borrar físicamente el registro |
+
+---
+
+### Apéndice B: Checklist de Validación Pre-Launch
+
+**Funcional:**
+- [ ] Todos los módulos tienen CRUD completo
+- [ ] Todas las validaciones funcionan correctamente
+- [ ] Los PDFs se generan correctamente
+- [ ] Las firmas digitales se capturan
+- [ ] Los emails se envían correctamente
+- [ ] El dashboard muestra datos en tiempo real
+
+**Seguridad:**
+- [ ] AuthGuard implementado en todas las rutas
+- [ ] Tokens en HTTP-Only cookies
+- [ ] HTTPS en producción
+- [ ] CSRF protection activado
+- [ ] Rate limiting implementado
+- [ ] Auditoría de seguridad pasada
+
+**Performance:**
+- [ ] Bundle size <500KB
+- [ ] Page load <2 segundos
+- [ ] PDF generation <5 segundos
+- [ ] Lighthouse score >85
+
+**Testing:**
+- [ ] Tests unitarios >60% coverage
+- [ ] Tests E2E para flujos críticos
+- [ ] Load testing con 100 usuarios concurrentes
+- [ ] Cross-browser testing (Chrome, Firefox, Safari, Edge)
+- [ ] Mobile testing (iOS, Android)
+
+**Compliance:**
+- [ ] WCAG 2.1 AA cumplido
+- [ ] Política de privacidad publicada
+- [ ] Términos y condiciones publicados
+- [ ] GDPR compliance (si aplica)
+
+---
+
+### Apéndice C: Recursos y Referencias
+
+**Normativa:**
+- Ley 24.051 - Residuos Peligrosos (Argentina)
+- Decreto 831/93 - Reglamentario de la Ley 24.051
+- Resolución SRT 463/09 - Identificación de instalaciones (Argentina)
+- ISO 14001 - Sistemas de Gestión Ambiental
+- ISO 45001 - Sistemas de Gestión de Seguridad y Salud
+
+**Competencia:**
+- SafetyCulture (iAuditor)
+- EHS Insight
+- Intelex
+- Gensuite
+- Enablon
+
+**Tecnología:**
+- [Angular Documentation](https://angular.io/docs)
+- [Laravel Documentation](https://laravel.com/docs)
+- [Livewire Documentation](https://livewire.laravel.com/docs)
+- [pdfmake Playground](http://pdfmake.org/playground.html)
+- [signature_pad](https://github.com/szimek/signature_pad)
+
+---
+
+## ✅ Aprobaciones
+
+| Rol | Nombre | Firma | Fecha |
+|-----|--------|-------|-------|
+| Product Owner | ___________ | _______ | ___/___/___ |
+| Tech Lead | ___________ | _______ | ___/___/___ |
+| UX Designer | ___________ | _______ | ___/___/___ |
+| Stakeholder | ___________ | _______ | ___/___/___ |
+
+---
+
+**Historial de Versiones:**
+
+| Versión | Fecha | Autor | Cambios |
+|---------|-------|-------|---------|
+| 1.0 | Dic 2024 | Equipo Producto | Versión inicial basada en propuesta de valor |
+| 2.0 | Dic 2024 | Equipo Producto | Añadidos requisitos funcionales detallados, user stories y métricas |
+
+---
+
+**Documento creado:** Diciembre 2024
+**Última actualización:** Diciembre 2024
+**Próxima revisión:** Post-implementación Q1 2025
+
+---
+
+*Este PRD es un documento vivo que debe actualizarse conforme el producto evoluciona y se obtiene feedback de usuarios.*
