@@ -11,6 +11,9 @@ use App\Livewire\Checklists\ChecklistFiller;
 use App\Livewire\Checklists\InspectionHistory;
 use App\Livewire\Checklists\InspectionShow;
 use App\Livewire\Auth\Login;
+use App\Livewire\Categories\CategoryIndex;
+use App\Livewire\Categories\CategoryBuilder as CategoryBuilderComponent;
+use App\Livewire\Categories\SubcategoryManager;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +50,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}', InspectionShow::class)->name('inspections.show');
         Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('inspections.pdf');
         Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('inspections.pdf.preview');
+    });
+
+    // Rutas de Categorías (Solo Admin)
+    Route::middleware(['role:Administrador'])->prefix('categories')->group(function () {
+        Route::get('/', CategoryIndex::class)->name('categories.index');
+        Route::get('/create', CategoryBuilderComponent::class)->name('categories.create');
+        Route::get('/{id}/edit', CategoryBuilderComponent::class)->name('categories.edit');
+        Route::get('/{category}/subcategories', SubcategoryManager::class)->name('categories.subcategories');
     });
     
     // Logout

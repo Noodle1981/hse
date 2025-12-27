@@ -13,7 +13,10 @@ class DynamicChecklist extends Model
     protected $fillable = [
         'title',
         'description',
-        'category',
+        'category',        // Legacy field - mantener por compatibilidad
+        'category_id',     // Nueva relación
+        'subcategory_id',  // Nueva relación
+        'registry_code',   // Código normativo (ej: EP-REG-008)
         'is_active',
         'is_draft',
     ];
@@ -37,6 +40,30 @@ class DynamicChecklist extends Model
     public function inspections(): HasMany
     {
         return $this->hasMany(DynamicInspection::class);
+    }
+
+    /**
+     * Categoría del checklist
+     */
+    public function categoryRelation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    /**
+     * Subcategoría del checklist
+     */
+    public function subcategoryRelation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Subcategory::class, 'subcategory_id');
+    }
+
+    /**
+     * Secciones del checklist (para agrupar preguntas)
+     */
+    public function sections(): HasMany
+    {
+        return $this->hasMany(ChecklistSection::class)->orderBy('order');
     }
 
     /**

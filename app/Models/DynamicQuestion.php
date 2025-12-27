@@ -13,6 +13,7 @@ class DynamicQuestion extends Model
 
     protected $fillable = [
         'dynamic_checklist_id',
+        'section_id',      // Nueva relación con sección (nullable)
         'label',
         'type',
         'options',
@@ -54,6 +55,14 @@ class DynamicQuestion extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(DynamicAnswer::class);
+    }
+
+    /**
+     * La sección a la que pertenece esta pregunta (opcional)
+     */
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(ChecklistSection::class, 'section_id');
     }
 
     /**
