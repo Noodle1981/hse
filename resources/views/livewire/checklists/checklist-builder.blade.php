@@ -22,13 +22,37 @@
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
-                    <select wire:model="category"
+                    <select wire:model.live="categoryId"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
                         <option value="">Sin categoría</option>
-                        <option value="hys">Higiene y Seguridad</option>
-                        <option value="calidad">Calidad</option>
-                        <option value="seguimiento">Seguimiento</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        @endforeach
                     </select>
+                    @error('categoryId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+
+                @if($categoryId)
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Subcategoría</label>
+                        <select wire:model="subcategoryId"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
+                            <option value="">Sin subcategoría</option>
+                            @foreach($subcategories as $sub)
+                                <option value="{{ $sub->id }}">{{ $sub->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('subcategoryId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+                @endif
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Código de Registro</label>
+                    <input type="text" wire:model="registryCode"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary"
+                           placeholder="EP-REG-008, REG-001-0T...">
+                    <p class="text-xs text-gray-500 mt-1">Código normativo opcional (ej: EP-REG-008)</p>
+                    @error('registryCode') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -39,14 +63,52 @@
                           placeholder="Descripción opcional del checklist"></textarea>
             </div>
 
-            <div class="mt-4">
+            <div class="mt-4 flex items-center gap-6">
                 <label class="flex items-center space-x-3">
                     <input type="checkbox" wire:model="is_active" 
                            class="w-5 h-5 text-ep-primary rounded focus:ring-ep-primary">
                     <span class="text-sm text-gray-700">Checklist activo</span>
                 </label>
+
+                <label class="flex items-center space-x-3">
+                    <input type="checkbox" wire:model.live="useSections" 
+                           class="w-5 h-5 text-ep-primary rounded focus:ring-ep-primary">
+                    <span class="text-sm text-gray-700">Organizar en secciones</span>
+                </label>
             </div>
         </div>
+
+        <!-- Secciones (si está habilitado) -->
+        @if($useSections)
+            <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-xl font-semibold text-ep-dark mb-4">Secciones</h2>
+                
+                @if(count($sections) > 0)
+                    <div class="space-y-2 mb-4">
+                        @foreach($sections as $index => $section)
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border">
+                                <div class="flex-1">
+                                    <span class="font-medium">{{ $section['title'] }}</span>
+                                </div>
+                                <button type="button" wire:click="removeSection({{ $index }})"
+                                        class="text-red-500 hover:text-red-700 px-2">✕</button>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="flex gap-2">
+                    <input type="text" wire:model="newSectionTitle"
+                           wire:keydown.enter.prevent="addSection"
+                           class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary"
+                           placeholder="Nombre de la sección (ej: Ambiente de trabajo)">
+                    <button type="button" wire:click="addSection"
+                            class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark">
+                        + Agregar Sección
+                    </button>
+                </div>
+            </div>
+        @endif
 
         <!-- Preguntas -->
         <div class="bg-white rounded-lg shadow p-6">
@@ -140,10 +202,22 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-4">
-                    <label class="flex items-center space-x-2">
-                        <input type="checkbox" wire:model="newQuestion.is_required" class="w-4 h-4 text-ep-primary rounded">
-                        <span class="text-sm text-gray-700">Campo requerido</span>
-                    </label>
+                    <div class="flex items-center gap-4">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" wire:model="newQuestion.is_required" class="w-4 h-4 text-ep-primary rounded">
+                            <span class="text-sm text-gray-700">Campo requerido</span>
+                        </label>
+
+                        @if($useSections && count($sections) > 0)
+                            <select wire:model="newQuestion.section_id"
+                                    class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm">
+                                <option value="">Sin sección</option>
+                                @foreach($sections as $section)
+                                    <option value="{{ $section['id'] }}">{{ $section['title'] }}</option>
+                                @endforeach
+                            </select>
+                        @endif
+                    </div>
                     
                     <button type="button" wire:click="addQuestion"
                             class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark">
