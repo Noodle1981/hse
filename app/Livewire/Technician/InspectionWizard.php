@@ -24,6 +24,7 @@ class InspectionWizard extends Component
 
     public $sections = [];
     public $totalSteps = 0;
+    public $questionsBySection = []; // Cache de preguntas por sección
 
     public function mount(int $id, ?int $assignment = null)
     {
@@ -32,11 +33,19 @@ class InspectionWizard extends Component
         }])->findOrFail($id);
 
         if ($assignment) {
-            $this->assignment = ChecklistAssignment::findOrFail($assignment);
+            // Validar que la asignación pertenece al usuario autenticado
+            $this->assignment = ChecklistAssignment::where('id', $assignment)
+                ->where('user_id', auth()->id())
+                ->firstOrFail();
         }
 
         // Preparar secciones
         $this->sections = $this->checklist->sections->sortBy('order')->values()->toArray();
+        
+        // Cache de preguntas por sección para evitar queries en validateCurrentStep
+        foreach ($this->checklist->sections as $section) {
+            $this->questionsBySection[$section->id] = $section->questions;
+        }
         
         // Total steps: Intro (0) + Secciones (N) + Firmas (N+1)
         $this->totalSteps = count($this->sections) + 2;
@@ -81,7 +90,9 @@ class InspectionWizard extends Component
         // Solo validar si es un paso de sección
         if ($this->currentStep > 0 && $this->currentStep <= count($this->sections)) {
             $section = $this->sections[$this->currentStep - 1];
-            $questions = \App\Models\DynamicQuestion::where('section_id', $section['id'])->get();
+            
+            // Usar cache en lugar de query
+            $questions = $this->questionsBySection[$section['id']] ?? collect();
             
             $rules = [];
             foreach ($questions as $question) {
@@ -98,18 +109,28 @@ class InspectionWizard extends Component
 
     public function saveProgress()
     {
-        // Guardar respuestas intermedias
-        foreach ($this->answers as $questionId => $value) {
-            DynamicAnswer::updateOrCreate(
-                [
-                    'dynamic_inspection_id' => $this->inspection->id,
-                    'dynamic_question_id' => $questionId
-                ],
-                ['value' => is_array($value) ? json_encode($value) : $value]
-            );
-        }
+        try {
+            // Guardar respuestas intermedias
+            \DB::transaction(function () {
+                foreach ($this->answers as $questionId => $value) {
+                    DynamicAnswer::updateOrCreate(
+                        [
+                            'dynamic_inspection_id' => $this->inspection->id,
+                            'dynamic_question_id' => $questionId
+                        ],
+                        ['value' => is_array($value) ? json_encode($value) : $value]
+                    );
+                }
 
-        $this->inspection->update(['notes' => $this->notes]);
+                $this->inspection->update(['notes' => $this->notes]);
+            });
+        } catch (\Exception $e) {
+            \Log::error('Error guardando progreso de inspección', [
+                'inspection_id' => $this->inspection->id,
+                'error' => $e->getMessage()
+            ]);
+            session()->flash('error', 'Error al guardar el progreso. Por favor, intenta nuevamente.');
+        }
     }
 
     public function complete()

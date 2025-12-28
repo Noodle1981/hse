@@ -20,10 +20,8 @@ class InspectionPDFController extends Controller
             'answers.question'
         ])->findOrFail($id);
 
-        // Seguridad
-        if (auth()->user()->rol === 'Técnico' && $inspection->user_id !== auth()->id()) {
-            abort(403);
-        }
+        // Usar Policy para autorización
+        $this->authorize('view', $inspection);
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,
@@ -44,10 +42,8 @@ class InspectionPDFController extends Controller
             'answers.question'
         ])->findOrFail($id);
 
-        // Seguridad
-        if (auth()->user()->rol === 'Técnico' && $inspection->user_id !== auth()->id()) {
-            abort(403);
-        }
+        // Usar Policy para autorización
+        $this->authorize('view', $inspection);
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,

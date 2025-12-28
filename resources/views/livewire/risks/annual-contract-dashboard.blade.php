@@ -125,7 +125,7 @@
                                 
                                 @foreach($months as $name => $num)
                                     @php 
-                                        $data = $this->getComplianceData($plan, $name, $num);
+                                        $data = $complianceData[$plan->id][$name] ?? ['status' => 'none', 'count' => 0];
                                         $status = $data['status'];
                                         $cnt = $data['count'];
                                     @endphp

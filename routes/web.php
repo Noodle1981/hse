@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AngularController;
 use App\Http\Controllers\InspectionPDFController;
 use App\Livewire\Checklists\Dashboard;
+use App\Livewire\Admin\AdminDashboard;
+use App\Livewire\Technician\TechnicianDashboard;
 use App\Livewire\Checklists\ChecklistIndex;
 use App\Livewire\Checklists\ChecklistBuilder;
 use App\Livewire\Checklists\ChecklistFiller;
@@ -28,7 +30,22 @@ Route::get('/login', Login::class)->name('login');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', Dashboard::class)->name('dashboard');
+    // Dashboard con redirect condicional
+    Route::get('/dashboard', function () {
+        if (auth()->user()->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('technician.dashboard');
+    })->name('dashboard');
+    
+    // Dashboards específicos
+    Route::get('/admin/dashboard', AdminDashboard::class)
+        ->middleware(['role:Administrador'])
+        ->name('admin.dashboard');
+    
+    Route::get('/technician/dashboard', TechnicianDashboard::class)
+        ->middleware(['role:Técnico,Administrador'])
+        ->name('technician.dashboard');
     
     Route::prefix('checklists')->group(function () {
         // Solo Admin puede ver listado, crear/editar

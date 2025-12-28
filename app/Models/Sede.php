@@ -69,4 +69,29 @@ class Sede extends Model
     {
         return $this->hasMany(Informe::class);
     }
+
+    public function inspections()
+    {
+        return $this->hasMany(DynamicInspection::class);
+    }
+
+    public function trainings()
+    {
+        return $this->hasMany(Training::class);
+    }
+
+    public function employees()
+    {
+        return $this->hasMany(Employee::class);
+    }
+
+    public function riskMatrices()
+    {
+        return $this->hasMany(RiskMatrix::class);
+    }
+
+    public function annualPlans()
+    {
+        return $this->hasMany(AnnualPlan::class);
+    }
 }

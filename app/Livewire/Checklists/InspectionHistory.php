@@ -83,9 +83,15 @@ class InspectionHistory extends Component
 
         return view('livewire.checklists.inspection-history', [
             'inspections' => $inspections,
-            'empresas' => \App\Models\Empresa::orderBy('nombre')->get(),
-            'sedes' => $this->empresaFilter ? \App\Models\Sede::where('empresa_id', $this->empresaFilter)->orderBy('nombre_sede')->get() : collect(),
-            'checklists' => \App\Models\DynamicChecklist::orderBy('title')->get(),
+            'empresas' => \App\Models\Empresa::whereHas('sedes.inspections')
+                ->orderBy('nombre')->get(),
+            'sedes' => $this->empresaFilter 
+                ? \App\Models\Sede::where('empresa_id', $this->empresaFilter)
+                    ->whereHas('inspections')
+                    ->orderBy('nombre_sede')->get() 
+                : collect(),
+            'checklists' => \App\Models\DynamicChecklist::whereHas('inspections')
+                ->orderBy('title')->get(),
         ])->layout('components.layouts.app');
     }
 }

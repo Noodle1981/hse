@@ -99,5 +99,21 @@ class User extends Authenticatable
         }
         return $this->rol === $roles;
     }
+
+    /**
+     * Verifica si el usuario es Administrador
+     */
+    public function isAdmin(): bool
+    {
+        return in_array(strtolower($this->rol), ['administrador', 'admin']);
+    }
+
+    /**
+     * Verifica si el usuario es Técnico
+     */
+    public function isTechnician(): bool
+    {
+        return in_array(strtolower($this->rol), ['técnico', 'tecnico']);
+    }
     
 }

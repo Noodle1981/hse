@@ -55,16 +55,27 @@
             background-color: rgba(255, 255, 255, 0.05);
         }
         
-        /* Custom scrollbar */
+        /* Custom scrollbar - Mejorado para mejor visibilidad */
         .sidebar-scroll::-webkit-scrollbar {
-            width: 4px;
+            width: 8px;
         }
         .sidebar-scroll::-webkit-scrollbar-track {
-            background: transparent;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
         }
         .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
+            background: rgba(246, 146, 57, 0.4);
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(246, 146, 57, 0.7);
+        }
+        
+        /* Firefox scrollbar */
+        .sidebar-scroll {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(246, 146, 57, 0.4) rgba(255, 255, 255, 0.05);
         }
     </style>
     
@@ -193,8 +204,7 @@
                             <span x-show="sidebarOpen" class="menu-text">Matrices de Riesgo</span>
                         </a>
                     </li>
-
-                    <!-- Mapa de Calor (Admin y Tecnico) -->
+                    {{-- Mapa de Calor Global (Solo Admin) --}}`r`n                    @if(auth()->user()->rol === 'Administrador')
                     <li>
                         <a href="{{ route('risk-matrices.dashboard') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -204,9 +214,10 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v12a2 2 0 002 2z"/>
                                 </svg>
                             </span>
-                            <span x-show="sidebarOpen" class="menu-text">Mapa de Calor (P x I)</span>
+                            <span x-show="sidebarOpen" class="menu-text">Mapa de Calor Global</span>
                         </a>
                     </li>
+                    @endif
 
                     <li class="mt-6">
                         <span x-show="sidebarOpen" class="px-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Ejecución y Control Anual</span>
@@ -466,3 +477,4 @@
     @stack('scripts')
 </body>
 </html>
+

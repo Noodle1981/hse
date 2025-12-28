@@ -29,7 +29,20 @@ class TrainingIndex extends Component
 
     public function delete($id)
     {
+        // Validar que solo Admin puede eliminar
+        if (!auth()->user()->isAdmin()) {
+            session()->flash('error', 'No tienes permisos para eliminar capacitaciones.');
+            return;
+        }
+
         $training = Training::findOrFail($id);
+        
+        // Validar que no tenga asistencias registradas
+        if ($training->attendances()->count() > 0) {
+            session()->flash('error', 'No se puede eliminar una capacitación con asistencias registradas.');
+            return;
+        }
+        
         $training->delete();
         session()->flash('message', 'Capacitación eliminada correctamente.');
     }

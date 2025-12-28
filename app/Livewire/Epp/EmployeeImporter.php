@@ -48,64 +48,93 @@ class EmployeeImporter extends Component
     public function import()
     {
         $this->validate();
+        
+        // Validar tipo MIME
+        $mimeType = $this->file->getMimeType();
+        $allowedMimes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+            'application/vnd.ms-excel', // .xls
+            'text/csv', // .csv
+        ];
+        
+        if (!in_array($mimeType, $allowedMimes)) {
+            $this->message = 'Tipo de archivo no válido. Solo se permiten archivos Excel (.xlsx, .xls) o CSV.';
+            return;
+        }
+        
         $this->importing = true;
         $this->errorLog = [];
         $this->message = '';
 
-        $path = $this->file->getRealPath();
-        
-        if ($xlsx = SimpleXLSX::parse($path)) {
-            $rows = $xlsx->rows();
-            $header = array_shift($rows); // Quitar encabezados
+        try {
+            $path = $this->file->getRealPath();
             
-            // Mapeo de columnas por nombre
-            $colMap = array_flip(array_map('strtolower', $header));
-            
-            $count = 0;
-            $errors = 0;
+            if ($xlsx = SimpleXLSX::parse($path)) {
+                $rows = $xlsx->rows();
+                $header = array_shift($rows); // Quitar encabezados
+                
+                // Mapeo de columnas por nombre
+                $colMap = array_flip(array_map('strtolower', $header));
+                
+                $count = 0;
+                $errors = 0;
 
-            foreach ($rows as $index => $row) {
-                try {
-                    $nombre = $row[$colMap['nombre']] ?? null;
-                    $apellido = $row[$colMap['apellido']] ?? null;
-                    $dni = $row[$colMap['dni']] ?? null;
-                    $cuil = $row[$colMap['cuil']] ?? null;
-                    $puesto = $row[$colMap['puesto']] ?? null;
+                foreach ($rows as $index => $row) {
+                    try {
+                        $nombre = $row[$colMap['nombre']] ?? null;
+                        $apellido = $row[$colMap['apellido']] ?? null;
+                        $dni = $row[$colMap['dni']] ?? null;
+                        $cuil = $row[$colMap['cuil']] ?? null;
+                        $puesto = $row[$colMap['puesto']] ?? null;
 
-                    if (!$nombre || !$apellido || !$dni) {
-                        $this->errorLog[] = "Fila " . ($index + 2) . ": Datos obligatorios faltantes (Nombre, Apellido o DNI).";
+                        if (!$nombre || !$apellido || !$dni) {
+                            $this->errorLog[] = "Fila " . ($index + 2) . ": Datos obligatorios faltantes (Nombre, Apellido o DNI).";
+                            $errors++;
+                            continue;
+                        }
+
+                        // Validar CUIL si está presente
+                        if ($cuil && !(new \App\Rules\ValidCuil())->passes('cuil', $cuil)) {
+                            $this->errorLog[] = "Fila " . ($index + 2) . ": CUIL inválido ($cuil).";
+                            $errors++;
+                            continue;
+                        }
+
+                        Employee::updateOrCreate(
+                            ['dni' => $dni],
+                            [
+                                'empresa_id' => $this->empresa_id,
+                                'sede_id' => $this->sede_id,
+                                'name' => $nombre,
+                                'last_name' => $apellido,
+                                'cuil' => $cuil,
+                                'puesto' => $puesto,
+                                'is_active' => true,
+                            ]
+                        );
+                        $count++;
+                    } catch (\Exception $e) {
+                        $this->errorLog[] = "Fila " . ($index + 2) . ": " . $e->getMessage();
                         $errors++;
-                        continue;
                     }
-
-                    Employee::updateOrCreate(
-                        ['dni' => $dni],
-                        [
-                            'empresa_id' => $this->empresa_id,
-                            'sede_id' => $this->sede_id,
-                            'name' => $nombre,
-                            'last_name' => $apellido,
-                            'cuil' => $cuil,
-                            'puesto' => $puesto,
-                            'is_active' => true,
-                        ]
-                    );
-                    $count++;
-                } catch (\Exception $e) {
-                    $this->errorLog[] = "Fila " . ($index + 2) . ": " . $e->getMessage();
-                    $errors++;
                 }
-            }
 
-            $this->message = "Importación finalizada. Creados/Actualizados: $count. Errores: $errors.";
-            if ($errors == 0) {
-                $this->reset(['file', 'empresa_id', 'sede_id']);
+                $this->message = "Importación finalizada. Creados/Actualizados: $count. Errores: $errors.";
+                if ($errors == 0) {
+                    $this->reset(['file', 'empresa_id', 'sede_id']);
+                }
+            } else {
+                $this->message = "Error al procesar el archivo: " . SimpleXLSX::parseError();
             }
-        } else {
-            $this->message = "Error al procesar el archivo: " . SimpleXLSX::parseError();
+        } catch (\Exception $e) {
+            \Log::error('Error en importación de empleados', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->message = 'Error al procesar el archivo. Por favor, verifica el formato e intenta nuevamente.';
+        } finally {
+            $this->importing = false;
         }
-
-        $this->importing = false;
     }
 
     public function render()
