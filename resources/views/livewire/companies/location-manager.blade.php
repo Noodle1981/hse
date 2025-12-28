@@ -139,6 +139,7 @@
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dirección</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Localidad</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Técnicos</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
                 </tr>
             </thead>
@@ -189,6 +190,11 @@
                                 <span class="text-sm text-gray-600">{{ $sede->localidad ?: '-' }}</span>
                             @endif
                         </td>
+                        <td class="px-6 py-4">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                                {{ $sede->users_count }} técnico(s)
+                            </span>
+                        </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             @if($editingId === $sede->id)
                                 <div class="flex gap-2">
@@ -206,6 +212,11 @@
                             @else
                                 <div class="flex gap-2">
                                     <button 
+                                        wire:click="manageUsers({{ $sede->id }})" 
+                                        class="text-blue-600 hover:text-blue-900">
+                                        Técnicos
+                                    </button>
+                                    <button 
                                         wire:click="edit({{ $sede->id }})" 
                                         class="text-indigo-600 hover:text-indigo-900">
                                         Editar
@@ -222,7 +233,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                             No hay sedes creadas. Haz clic en "Nueva Sede" para agregar una.
                         </td>
                     </tr>
@@ -230,4 +241,55 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Modal de gestión de usuarios -->
+    @if($managingUsersForSede)
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-900">Asignar Técnicos</h3>
+                    <button wire:click="closeUserManagement" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="p-6 overflow-y-auto max-h-[60vh]">
+                    @if(count($availableUsers) > 0)
+                        <div class="space-y-2">
+                            @foreach($availableUsers as $user)
+                                <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        wire:click="toggleUser({{ $user->id }})"
+                                        {{ in_array($user->id, $assignedUsers) ? 'checked' : '' }}
+                                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
+                                    >
+                                    <div class="ml-3">
+                                        <div class="font-medium text-gray-900">
+                                            {{ $user->apellidos }}, {{ $user->nombres }}
+                                        </div>
+                                        <div class="text-sm text-gray-500">{{ $user->email }}</div>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-gray-500 text-center py-4">
+                            No hay técnicos disponibles. Crea usuarios con rol "Técnico" primero.
+                        </p>
+                    @endif
+                </div>
+
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
+                    <button 
+                        wire:click="closeUserManagement"
+                        class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

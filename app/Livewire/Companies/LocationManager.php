@@ -4,6 +4,7 @@ namespace App\Livewire\Companies;
 
 use App\Models\Empresa;
 use App\Models\Sede;
+use App\Models\User;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
 
@@ -28,15 +29,63 @@ class LocationManager extends Component
     public string $editTipoSede = '';
     public string $editLocalidad = '';
 
+    // Gestión de usuarios
+    public ?int $managingUsersForSede = null;
+    public $availableUsers = [];
+    public $assignedUsers = [];
+
     public function mount(Empresa $empresa)
     {
         $this->empresa = $empresa;
         $this->loadSedes();
+        $this->loadAvailableUsers();
     }
 
     public function loadSedes()
     {
-        $this->sedes = $this->empresa->sedes()->orderBy('nombre_sede')->get();
+        $this->sedes = $this->empresa->sedes()->withCount('users')->orderBy('nombre_sede')->get();
+    }
+
+    public function loadAvailableUsers()
+    {
+        // Cargar solo técnicos
+        $this->availableUsers = User::where('rol', 'Técnico')
+            ->orderBy('apellidos')
+            ->orderBy('nombres')
+            ->get();
+    }
+
+    public function manageUsers(int $sedeId)
+    {
+        $this->managingUsersForSede = $sedeId;
+        $sede = Sede::findOrFail($sedeId);
+        $this->assignedUsers = $sede->users()->pluck('users.id')->toArray();
+    }
+
+    public function toggleUser(int $userId)
+    {
+        if (!$this->managingUsersForSede) return;
+
+        $sede = Sede::findOrFail($this->managingUsersForSede);
+        
+        if (in_array($userId, $this->assignedUsers)) {
+            // Desasignar
+            $sede->users()->detach($userId);
+            $this->assignedUsers = array_diff($this->assignedUsers, [$userId]);
+        } else {
+            // Asignar
+            $sede->users()->attach($userId);
+            $this->assignedUsers[] = $userId;
+        }
+
+        $this->loadSedes();
+        session()->flash('message', 'Asignación actualizada');
+    }
+
+    public function closeUserManagement()
+    {
+        $this->managingUsersForSede = null;
+        $this->assignedUsers = [];
     }
 
     public function toggleForm()
