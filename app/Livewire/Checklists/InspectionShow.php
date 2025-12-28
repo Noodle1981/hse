@@ -11,11 +11,19 @@ class InspectionShow extends Component
 
     public function mount(int $id)
     {
-        $this->inspection = DynamicInspection::with([
+        $inspection = DynamicInspection::with([
             'checklist',
             'user',
+            'sede.empresa',
             'answers.question'
         ])->findOrFail($id);
+
+        // Seguridad: El técnico solo puede ver sus propias inspecciones
+        if (auth()->user()->rol === 'Técnico' && $inspection->user_id !== auth()->id()) {
+            abort(403, 'No tienes permiso para ver esta inspección');
+        }
+
+        $this->inspection = $inspection;
     }
 
     public function render()

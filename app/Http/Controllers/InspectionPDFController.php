@@ -14,46 +14,47 @@ class InspectionPDFController extends Controller
     public function download(int $id)
     {
         $inspection = DynamicInspection::with([
-            'checklist',
+            'checklist.sections',
             'user',
+            'sede.empresa',
             'answers.question'
         ])->findOrFail($id);
 
-        // Organizar respuestas por orden
-        $answers = $inspection->answers->sortBy(function ($answer) {
-            return $answer->question->order ?? 0;
-        });
+        // Seguridad
+        if (auth()->user()->rol === 'Técnico' && $inspection->user_id !== auth()->id()) {
+            abort(403);
+        }
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,
-            'answers' => $answers,
+            'answers' => $inspection->answers,
+            'sections' => $inspection->checklist->sections->sortBy('order'),
         ]);
 
-        $filename = 'inspeccion_' . $inspection->id . '_' . now()->format('Ymd') . '.pdf';
-
+        $filename = 'reporte_inspeccion_' . $inspection->id . '.pdf';
         return $pdf->download($filename);
     }
 
-    /**
-     * Muestra el PDF en el navegador (preview)
-     */
     public function preview(int $id)
     {
         $inspection = DynamicInspection::with([
-            'checklist',
+            'checklist.sections',
             'user',
+            'sede.empresa',
             'answers.question'
         ])->findOrFail($id);
 
-        $answers = $inspection->answers->sortBy(function ($answer) {
-            return $answer->question->order ?? 0;
-        });
+        // Seguridad
+        if (auth()->user()->rol === 'Técnico' && $inspection->user_id !== auth()->id()) {
+            abort(403);
+        }
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,
-            'answers' => $answers,
+            'answers' => $inspection->answers,
+            'sections' => $inspection->checklist->sections->sortBy('order'),
         ]);
 
-        return $pdf->stream('inspeccion_' . $inspection->id . '.pdf');
+        return $pdf->stream('reporte_inspeccion_' . $inspection->id . '.pdf');
     }
 }

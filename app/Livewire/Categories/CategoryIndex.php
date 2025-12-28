@@ -22,7 +22,8 @@ class CategoryIndex extends Component
             ->orderBy('order')
             ->paginate(10);
 
-        return view('livewire.categories.category-index', compact('categories'));
+        return view('livewire.categories.category-index', compact('categories'))
+            ->layout('components.layouts.app');
     }
 
     public function delete(Category $category)

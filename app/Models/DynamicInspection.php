@@ -14,9 +14,14 @@ class DynamicInspection extends Model
     protected $fillable = [
         'dynamic_checklist_id',
         'user_id',
+        'sede_id',
+        'checklist_assignment_id',
         'completed_at',
         'notes',
         'status',
+        'supervisor_name',
+        'supervisor_signature',
+        'technician_signature',
     ];
 
     protected $casts = [
@@ -35,6 +40,22 @@ class DynamicInspection extends Model
     public function checklist(): BelongsTo
     {
         return $this->belongsTo(DynamicChecklist::class, 'dynamic_checklist_id');
+    }
+
+    /**
+     * La sede donde se realiza la inspección
+     */
+    public function sede(): BelongsTo
+    {
+        return $this->belongsTo(Sede::class);
+    }
+
+    /**
+     * La asignación que originó esta inspección (si aplica)
+     */
+    public function assignment(): BelongsTo
+    {
+        return $this->belongsTo(ChecklistAssignment::class, 'checklist_assignment_id');
     }
 
     /**

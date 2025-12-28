@@ -94,10 +94,13 @@ class AssignmentManager extends Component
         if (!$this->showForm) {
             $this->resetForm();
         } else {
-            // Pre-seleccionar sede si hay una seleccionada
+            // Pre-seleccionar sede si hay una en los filtros
             if ($this->selectedSede) {
                 $this->formSedeId = $this->selectedSede;
                 $this->loadTecnicos();
+            } elseif ($this->selectedEmpresa) {
+                // Si solo hay empresa seleccionada, cargar sus sedes
+                $this->loadSedes();
             }
         }
     }

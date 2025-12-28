@@ -81,4 +81,12 @@ class DynamicChecklist extends Model
     {
         return $query->where('category', $category);
     }
+
+    /**
+     * Controles de riesgo que se verifican con este checklist
+     */
+    public function riskControls(): HasMany
+    {
+        return $this->hasMany(RiskControl::class, 'checklist_id');
+    }
 }

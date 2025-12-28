@@ -182,6 +182,7 @@ class LocationManager extends Component
 
     public function render()
     {
-        return view('livewire.companies.location-manager');
+        return view('livewire.companies.location-manager')
+            ->layout('components.layouts.app');
     }
 }

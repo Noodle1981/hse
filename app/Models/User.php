@@ -91,5 +91,13 @@ class User extends Authenticatable
     {
         return $this->hasMany(Registro::class);
     }
+
+    public function hasRole(string|array $roles): bool
+    {
+        if (is_array($roles)) {
+            return in_array($this->rol, $roles);
+        }
+        return $this->rol === $roles;
+    }
     
 }

@@ -31,24 +31,24 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', Dashboard::class)->name('dashboard');
     
     Route::prefix('checklists')->group(function () {
-        Route::get('/', ChecklistIndex::class)->name('checklists.index');
-        
-        // Solo Admin puede crear/editar
+        // Solo Admin puede ver listado, crear/editar
         Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/', ChecklistIndex::class)->name('checklists.index');
             Route::get('/create', ChecklistBuilder::class)->name('checklists.create');
             Route::get('/{id}/edit', ChecklistBuilder::class)->name('checklists.edit');
         });
         
-        // Admin y Técnico pueden llenar
+        // Admin y Técnico pueden llenar y ver sus tareas
         Route::middleware(['role:Administrador,Técnico'])->group(function () {
-            Route::get('/{id}/fill', ChecklistFiller::class)->name('checklists.fill');
+            Route::get('/my-assignments', \App\Livewire\Technician\MyAssignments::class)->name('tasks.index');
+            Route::get('/{id}/fill', \App\Livewire\Technician\InspectionWizard::class)->name('checklists.fill');
         });
     });
 
     Route::prefix('inspections')->group(function () {
         Route::get('/', InspectionHistory::class)->name('inspections.index');
         Route::get('/{id}', InspectionShow::class)->name('inspections.show');
-        Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('inspections.pdf');
+        Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('inspections.pdf.download');
         Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('inspections.pdf.preview');
     });
 
@@ -77,7 +77,62 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:Administrador'])->prefix('users')->group(function () {
         Route::get('/', \App\Livewire\Users\UserManager::class)->name('users.index');
     });
+
+    // Rutas de Capacitaciones
+    Route::prefix('trainings')->group(function () {
+        Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/', \App\Livewire\Trainings\TrainingIndex::class)->name('trainings.index');
+            Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('trainings.create');
+            Route::get('/{id}/edit', \App\Livewire\Trainings\TrainingBuilder::class)->name('trainings.edit');
+        });
+        
+        // Asistencia puede ser tomada por Admin o Técnico
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('trainings.attendance');
+        });
+    });
+
+    // Rutas de EPP y Empleados (Sprint 9)
+    Route::prefix('epp')->group(function () {
+        // Solo Admin
+        Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/catalog', \App\Livewire\Epp\EppCatalog::class)->name('epp.catalog');
+            Route::get('/import-employees', \App\Livewire\Epp\EmployeeImporter::class)->name('epp.employees.import');
+        });
+
+        // Solo Técnico (Entrega de Campo)
+        Route::middleware(['role:Técnico'])->group(function () {
+            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('epp.deliver');
+        });
+
+        // Admin y Técnico (Personal e Historial)
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('epp.employees.index');
+            Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('epp.history');
+            Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('epp.delivery.pdf');
+            Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('epp.delivery.pdf.preview');
+        });
+    });
+
+    // Rutas de Matriz de Riesgo (Sprint 10)
+    Route::prefix('risk-matrices')->group(function () {
+        // Solo Admin puede diseñar las matrices
+        Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/{matrixId}/editor', \App\Livewire\Risks\RiskMatrixEditor::class)->name('risk-matrices.editor');
+        });
+
+        // Admin y Técnico pueden ver listado, evaluar y ver dashboard
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('risk-matrices.index');
+            Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('risk-matrices.dashboard');
+            Route::get('/{matrixId}/evaluate', \App\Livewire\Risks\RiskEvaluator::class)->name('risk-matrices.evaluator');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('risk-matrices.pdf');
+            Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
+        });
+    });
     
+    Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
+
     // Logout
     Route::post('/logout', function () {
         Auth::logout();

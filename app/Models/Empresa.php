@@ -20,4 +20,9 @@ class Empresa extends Model
     {
         return $this->hasMany(Sede::class);
     }
+
+    public function assignments()
+    {
+        return $this->hasMany(ChecklistAssignment::class);
+    }
 }

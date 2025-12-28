@@ -3,242 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Inspección #{{ $inspection->id }}</title>
+    <title>Reporte de Inspección #{{ $inspection->id }}</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        @page {
+            margin: 1cm;
         }
         body {
-            font-family: 'DejaVu Sans', Arial, sans-serif;
-            font-size: 12px;
-            color: #333;
-            line-height: 1.4;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 10pt;
+            color: #2D3748;
+            line-height: 1.5;
         }
-        .header {
-            background-color: #1d2d35;
-            color: white;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-        .header .subtitle {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        .logo {
-            width: 60px;
-            height: 60px;
-            background-color: #FF8F12;
-            color: white;
-            font-weight: bold;
-            font-size: 24px;
-            text-align: center;
-            line-height: 60px;
-            border-radius: 8px;
-            float: left;
-            margin-right: 15px;
-        }
-        .info-box {
-            background-color: #f5f5f5;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-        }
-        .info-box table {
+        .header-table {
             width: 100%;
+            border-bottom: 2pt solid #1A365D;
+            padding-bottom: 10pt;
+            margin-bottom: 20pt;
         }
-        .info-box td {
-            padding: 5px 10px;
-        }
-        .info-box .label {
-            color: #666;
+        .logo-box {
+            width: 60pt;
+            height: 60pt;
+            background-color: #2B6CB0;
+            color: white;
             font-weight: bold;
-            width: 150px;
+            font-size: 24pt;
+            text-align: center;
+            line-height: 60pt;
+            border-radius: 4pt;
         }
-        .questions {
-            margin-top: 20px;
+        .report-title {
+            font-size: 18pt;
+            font-weight: bold;
+            color: #1A365D;
+            margin: 0;
+            padding: 0;
         }
-        .question {
-            border: 1px solid #ddd;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            overflow: hidden;
+        .report-metadata {
+            font-size: 9pt;
+            color: #718096;
         }
-        .question-header {
-            background-color: #f9f9f9;
-            padding: 10px 15px;
-            border-bottom: 1px solid #ddd;
+        .section-header {
+            background-color: #F7FAFC;
+            padding: 8pt 12pt;
+            border-left: 4pt solid #2B6CB0;
+            margin-top: 20pt;
+            margin-bottom: 10pt;
+        }
+        .section-title {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #2D3748;
+            text-transform: uppercase;
+            letter-spacing: 0.5pt;
+        }
+        .info-grid {
+            width: 100%;
+            margin-bottom: 15pt;
+        }
+        .info-label {
+            font-size: 8pt;
+            font-weight: bold;
+            color: #A0AEC0;
+            text-transform: uppercase;
+        }
+        .info-value {
+            font-size: 10pt;
+            color: #2D3748;
+            font-weight: 500;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table tr td {
+            padding: 8pt 5pt;
+            border-bottom: 0.5pt solid #E2E8F0;
+            vertical-align: top;
         }
         .question-label {
             font-weight: bold;
-            color: #1d2d35;
-        }
-        .question-type {
-            font-size: 10px;
-            color: #FF8F12;
-            margin-left: 10px;
-        }
-        .question-answer {
-            padding: 15px;
-            background-color: white;
+            width: 60%;
         }
         .answer-value {
-            color: #333;
+            width: 40%;
+            text-align: right;
+            font-weight: 500;
         }
-        .answer-empty {
-            color: #999;
-            font-style: italic;
-        }
-        .checkbox-item {
+        .checkbox-badge {
             display: inline-block;
-            background-color: #FF8F12;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            margin-right: 5px;
-            margin-bottom: 5px;
-            font-size: 11px;
+            background-color: #EBF8FF;
+            color: #2B6CB0;
+            padding: 2pt 6pt;
+            border-radius: 4pt;
+            font-size: 8pt;
+            margin-left: 4pt;
+            border: 0.5pt solid #BEE3F8;
         }
-        .notes-section {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #fff8e6;
-            border: 1px solid #FF8F12;
-            border-radius: 5px;
+        .notes-box {
+            background-color: #FEFCBF;
+            border: 1pt solid #ECC94B;
+            padding: 12pt;
+            margin-top: 20pt;
+            border-radius: 4pt;
         }
-        .notes-section h3 {
-            color: #FF8F12;
-            margin-bottom: 10px;
+        .notes-title {
+            font-size: 9pt;
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5pt;
+            text-transform: uppercase;
+        }
+        .signatures-table {
+            width: 100%;
+            margin-top: 50pt;
+        }
+        .signature-cell {
+            width: 50%;
+            text-align: center;
+            padding: 0 20pt;
+        }
+        .signature-line {
+            border-top: 1pt solid #CBD5E0;
+            margin-bottom: 5pt;
+        }
+        .signature-img {
+            max-height: 80pt;
+            margin-bottom: 5pt;
         }
         .footer {
-            margin-top: 30px;
-            padding-top: 15px;
-            border-top: 2px solid #1d2d35;
-            font-size: 10px;
-            color: #666;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 8pt;
+            color: #A0AEC0;
             text-align: center;
+            padding-top: 10pt;
+            border-top: 0.5pt solid #E2E8F0;
         }
         .status-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
+            font-size: 8pt;
             font-weight: bold;
+            padding: 2pt 6pt;
+            border-radius: 2pt;
+            display: inline-block;
         }
-        .status-completed {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-draft {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .required {
-            color: #dc3545;
-        }
+        .status-completed { background-color: #C6F6D5; color: #22543D; }
+        .status-draft { background-color: #FEEBC8; color: #744210; }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="logo">EP</div>
-        <h1>{{ $inspection->checklist->title }}</h1>
-        <div class="subtitle">
-            Inspección #{{ $inspection->id }} | 
-            {{ $inspection->completed_at?->format('d/m/Y H:i') ?? 'Sin completar' }}
-        </div>
-    </div>
-
-    <!-- Info Box -->
-    <div class="info-box">
-        <table>
-            <tr>
-                <td class="label">Inspector:</td>
-                <td>{{ $inspection->user->nombres ?? 'N/A' }} {{ $inspection->user->apellidos ?? '' }}</td>
-                <td class="label">Email:</td>
-                <td>{{ $inspection->user->email ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Checklist:</td>
-                <td>{{ $inspection->checklist->title }}</td>
-                <td class="label">Categoría:</td>
-                <td>{{ ucfirst($inspection->checklist->category ?? 'Sin categoría') }}</td>
-            </tr>
-            <tr>
-                <td class="label">Fecha de Inspección:</td>
-                <td>{{ $inspection->completed_at?->format('d/m/Y') ?? '-' }}</td>
-                <td class="label">Estado:</td>
-                <td>
-                    <span class="status-badge {{ $inspection->status === 'completed' ? 'status-completed' : 'status-draft' }}">
-                        {{ $inspection->status === 'completed' ? 'Completado' : 'Borrador' }}
-                    </span>
-                </td>
-            </tr>
-        </table>
-    </div>
-
-    <!-- Questions and Answers -->
-    <div class="questions">
-        <h2 style="margin-bottom: 15px; color: #1d2d35;">Respuestas</h2>
-        
-        @foreach($answers as $answer)
-            <div class="question">
-                <div class="question-header">
-                    <span class="question-label">
-                        {{ $answer->question->label }}
-                        @if($answer->question->is_required)
-                            <span class="required">*</span>
-                        @endif
-                    </span>
-                    <span class="question-type">[{{ ucfirst($answer->question->type) }}]</span>
+    <table class="header-table">
+        <tr>
+            <td style="width: 70pt;">
+                <div class="logo-box">EP</div>
+            </td>
+            <td>
+                <div class="report-title">{{ $inspection->checklist->title }}</div>
+                <div class="report-metadata">
+                    Reporte Digital de Inspección • Generado el {{ now()->format('d/m/Y H:i') }}
                 </div>
-                <div class="question-answer">
-                    @if($answer->question->type === 'checkbox')
-                        @php $values = json_decode($answer->value, true) ?? []; @endphp
-                        @if(is_array($values) && count($values) > 0)
-                            @foreach($values as $val)
-                                <span class="checkbox-item">✓ {{ $val }}</span>
-                            @endforeach
-                        @else
-                            <span class="answer-empty">Sin selección</span>
-                        @endif
-                    @elseif($answer->question->type === 'date' && $answer->value)
-                        <span class="answer-value">{{ \Carbon\Carbon::parse($answer->value)->format('d/m/Y') }}</span>
-                    @elseif($answer->question->type === 'signature')
-                        @if(str_starts_with($answer->value ?? '', 'data:image'))
-                            <img src="{{ $answer->value }}" alt="Firma" style="max-height: 60px; border: 1px solid #ddd; border-radius: 4px;">
-                        @else
-                            <span class="answer-value">{{ $answer->value ?: 'Sin firma' }}</span>
-                        @endif
-                    @else
-                        @if($answer->value)
-                            <span class="answer-value">{{ $answer->value }}</span>
-                        @else
-                            <span class="answer-empty">Sin respuesta</span>
-                        @endif
-                    @endif
+            </td>
+            <td style="text-align: right; vertical-align: bottom;">
+                <div class="status-badge {{ $inspection->status === 'completed' ? 'status-completed' : 'status-draft' }}">
+                    {{ $inspection->status === 'completed' ? 'COMPLETADO' : 'BORRADOR' }}
                 </div>
+                <div style="font-size: 9pt; color: #718096; margin-top: 4pt;">ID: #{{ $inspection->id }}</div>
+            </td>
+        </tr>
+    </table>
+
+    <table class="info-grid">
+        <tr>
+            <td style="width: 33%;">
+                <div class="info-label">Empresa / Cliente</div>
+                <div class="info-value">{{ $inspection->sede->empresa->nombre ?? 'N/A' }}</div>
+            </td>
+            <td style="width: 33%;">
+                <div class="info-label">Sede / Ubicación</div>
+                <div class="info-value">{{ $inspection->sede->nombre_sede ?? 'N/A' }}</div>
+            </td>
+            <td style="width: 33%;">
+                <div class="info-label">Fecha Inspección</div>
+                <div class="info-value">{{ $inspection->completed_at?->format('d/m/Y') ?? 'En proceso' }}</div>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding-top: 10pt;">
+                <div class="info-label">Inspector Asignado</div>
+                <div class="info-value">{{ $inspection->user->nombres ?? 'N/A' }} {{ $inspection->user->apellidos ?? '' }}</div>
+            </td>
+            <td style="padding-top: 10pt;">
+                <div class="info-label">Categoría</div>
+                <div class="info-value">{{ ucfirst($inspection->checklist->category ?? 'Sin especificar') }}</div>
+            </td>
+            <td style="padding-top: 10pt;">
+                <div class="info-label">Supervisor en Sitio</div>
+                <div class="info-value">{{ $inspection->supervisor_name ?: 'No informado' }}</div>
+            </td>
+        </tr>
+    </table>
+
+    @php
+        $groupedAnswers = $answers->groupBy(fn($a) => $a->question->section_id);
+    @endphp
+
+    @foreach($sections as $section)
+        @if($groupedAnswers->has($section->id))
+            <div class="section-header">
+                <div class="section-title">{{ $section->title }}</div>
             </div>
-        @endforeach
-    </div>
+            
+            <table class="data-table">
+                @foreach($groupedAnswers->get($section->id)->sortBy('question.id') as $answer)
+                    <tr>
+                        <td class="question-label">
+                            {{ $answer->question->label }}
+                        </td>
+                        <td class="answer-value">
+                            @if($answer->question->type === 'checkbox')
+                                @php $vals = json_decode($answer->value, true) ?? []; @endphp
+                                @foreach($vals as $v)
+                                    <span class="checkbox-badge">✓ {{ $v }}</span>
+                                @endforeach
+                            @else
+                                {{ $answer->value ?: '-' }}
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </table>
+        @endif
+    @endforeach
 
-    <!-- Notes Section -->
     @if($inspection->notes)
-        <div class="notes-section">
-            <h3>📝 Observaciones Generales</h3>
-            <p>{{ $inspection->notes }}</p>
+        <div class="notes-box">
+            <div class="notes-title">Observaciones y Hallazgos</div>
+            <div style="font-size: 9pt; color: #4A5568;">{{ $inspection->notes }}</div>
         </div>
     @endif
 
-    <!-- Footer -->
+    <table class="signatures-table">
+        <tr>
+            <td class="signature-cell">
+                @if($inspection->supervisor_signature)
+                    <img src="{{ $inspection->supervisor_signature }}" class="signature-img">
+                @else
+                    <div style="height: 60pt;"></div>
+                @endif
+                <div class="signature-line"></div>
+                <div class="info-label">Firma Supervisor</div>
+                <div class="info-value" style="font-size: 8pt;">{{ $inspection->supervisor_name ?: '................................' }}</div>
+            </td>
+            <td class="signature-cell">
+                @if($inspection->technician_signature)
+                    <img src="{{ $inspection->technician_signature }}" class="signature-img">
+                @else
+                    <div style="height: 60pt;"></div>
+                @endif
+                <div class="signature-line"></div>
+                <div class="info-label">Firma del Profesional</div>
+                <div class="info-value" style="font-size: 8pt;">{{ $inspection->user->nombres ?? '' }} {{ $inspection->user->apellidos ?? '' }}</div>
+            </td>
+        </tr>
+    </table>
+
     <div class="footer">
-        <p>EP - Sistema de Checklists Dinámicos V1.0.0.0</p>
-        <p>Generado el {{ now()->format('d/m/Y H:i') }} | Inspección ID: #{{ $inspection->id }}</p>
+        Este documento es un reporte oficial generado por el sistema EP Checklists.
+        Página 1 de 1
     </div>
 </body>
 </html>

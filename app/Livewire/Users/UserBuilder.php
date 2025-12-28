@@ -8,6 +8,7 @@ class UserBuilder extends Component
 {
     public function render()
     {
-        return view('livewire.users.user-builder');
+        return view('livewire.users.user-builder')
+            ->layout('components.layouts.app');
     }
 }

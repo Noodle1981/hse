@@ -22,7 +22,8 @@ class CompanyIndex extends Component
             ->orderBy('nombre')
             ->paginate(10);
 
-        return view('livewire.companies.company-index', compact('companies'));
+        return view('livewire.companies.company-index', compact('companies'))
+            ->layout('components.layouts.app');
     }
 
     public function delete(Empresa $empresa)

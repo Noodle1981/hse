@@ -77,6 +77,7 @@ class CategoryBuilder extends Component
 
     public function render()
     {
-        return view('livewire.categories.category-builder');
+        return view('livewire.categories.category-builder')
+            ->layout('components.layouts.app');
     }
 }

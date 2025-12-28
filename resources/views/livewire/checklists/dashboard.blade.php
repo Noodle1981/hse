@@ -5,8 +5,10 @@
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 uppercase">Plantillas</p>
-                    <h3 class="text-3xl font-bold text-gray-800">{{ $stats['total_checklists'] }}</h3>
+                    <p class="text-sm text-gray-500 uppercase">{{ auth()->user()->rol === 'Técnico' ? 'Tareas Pendientes' : 'Plantillas' }}</p>
+                    <h3 class="text-3xl font-bold text-gray-800">
+                        {{ auth()->user()->rol === 'Técnico' ? $stats['pending_tasks'] : $stats['total_checklists'] }}
+                    </h3>
                 </div>
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                     <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,7 +16,13 @@
                     </svg>
                 </div>
             </div>
-            <p class="text-xs text-gray-400 mt-2">{{ $stats['active_checklists'] }} activas</p>
+            <p class="text-xs text-gray-400 mt-2">
+                @if(auth()->user()->rol === 'Técnico')
+                    Checklists por completar
+                @else
+                    {{ $stats['active_checklists'] }} activas
+                @endif
+            </p>
         </div>
 
         <!-- Total Inspections -->

@@ -67,6 +67,7 @@ class CompanyBuilder extends Component
 
     public function render()
     {
-        return view('livewire.companies.company-builder');
+        return view('livewire.companies.company-builder')
+            ->layout('components.layouts.app');
     }
 }

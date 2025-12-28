@@ -133,6 +133,7 @@ class SubcategoryManager extends Component
 
     public function render()
     {
-        return view('livewire.categories.subcategory-manager');
+        return view('livewire.categories.subcategory-manager')
+            ->layout('components.layouts.app');
     }
 }
