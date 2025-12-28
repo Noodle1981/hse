@@ -67,6 +67,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/edit', \App\Livewire\Companies\CompanyBuilder::class)->name('companies.edit');
         Route::get('/{empresa}/locations', \App\Livewire\Companies\LocationManager::class)->name('companies.locations');
     });
+
+    // Rutas de Asignaciones (Solo Admin)
+    Route::middleware(['role:Administrador'])->prefix('assignments')->group(function () {
+        Route::get('/', \App\Livewire\Assignments\AssignmentManager::class)->name('assignments.index');
+    });
+
+    // Rutas de Usuarios (Solo Admin)
+    Route::middleware(['role:Administrador'])->prefix('users')->group(function () {
+        Route::get('/', \App\Livewire\Users\UserManager::class)->name('users.index');
+    });
     
     // Logout
     Route::post('/logout', function () {
