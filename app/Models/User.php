@@ -59,7 +59,7 @@ class User extends Authenticatable
 
     public function sedes(): BelongsToMany
     {
-        return $this->belongsToMany(Sede::class);
+        return $this->belongsToMany(Sede::class, 'sede_users');
     }
     
     public function generadorConstancias()
