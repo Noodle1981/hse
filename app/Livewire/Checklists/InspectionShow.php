@@ -27,6 +27,6 @@ class InspectionShow extends Component
 
         return view('livewire.checklists.inspection-show', [
             'answers' => $answers,
-        ])->layout('layouts.app');
+        ])->layout('components.layouts.app');
     }
 }

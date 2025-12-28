@@ -59,6 +59,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{id}/edit', CategoryBuilderComponent::class)->name('categories.edit');
         Route::get('/{category}/subcategories', SubcategoryManager::class)->name('categories.subcategories');
     });
+
+    // Rutas de Empresas (Solo Admin)
+    Route::middleware(['role:Administrador'])->prefix('companies')->group(function () {
+        Route::get('/', \App\Livewire\Companies\CompanyIndex::class)->name('companies.index');
+        Route::get('/create', \App\Livewire\Companies\CompanyBuilder::class)->name('companies.create');
+        Route::get('/{id}/edit', \App\Livewire\Companies\CompanyBuilder::class)->name('companies.edit');
+        Route::get('/{empresa}/locations', \App\Livewire\Companies\LocationManager::class)->name('companies.locations');
+    });
     
     // Logout
     Route::post('/logout', function () {

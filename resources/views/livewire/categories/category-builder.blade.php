@@ -1,4 +1,4 @@
-<div class="p-6">
+<div>
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-gray-800">
             {{ $category ? 'Editar Categoría' : 'Nueva Categoría' }}

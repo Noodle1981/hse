@@ -87,6 +87,6 @@ class ChecklistFiller extends Component
     public function render()
     {
         return view('livewire.checklists.checklist-filler')
-            ->layout('layouts.app');
+            ->layout('components.layouts.app');
     }
 }

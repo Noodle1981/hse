@@ -68,6 +68,6 @@ class ChecklistIndex extends Component
 
         return view('livewire.checklists.checklist-index', [
             'checklists' => $checklists,
-        ])->layout('layouts.app');
+        ])->layout('components.layouts.app');
     }
 }

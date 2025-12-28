@@ -44,6 +44,6 @@ class InspectionHistory extends Component
 
         return view('livewire.checklists.inspection-history', [
             'inspections' => $inspections,
-        ])->layout('layouts.app');
+        ])->layout('components.layouts.app');
     }
 }

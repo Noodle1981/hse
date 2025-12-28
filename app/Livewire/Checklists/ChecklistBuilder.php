@@ -165,6 +165,6 @@ class ChecklistBuilder extends Component
     public function render()
     {
         return view('livewire.checklists.checklist-builder')
-            ->layout('layouts.app');
+            ->layout('components.layouts.app');
     }
 }
