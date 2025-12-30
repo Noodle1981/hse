@@ -41,4 +41,10 @@ class Training extends Model
     public function attendances()
     {
         return $this->hasMany(\App\Models\TrainingAttendance::class);
-    }}
+    }
+
+    public function constancias()
+    {
+        return $this->morphToMany(GeneradorConstancia::class, 'actividad', 'constancia_actividades');
+    }
+}

@@ -37,4 +37,9 @@ class EppDelivery extends Model
                     ->withPivot('cantidad', 'tipo_entrega')
                     ->withTimestamps();
     }
+
+    public function constancias()
+    {
+        return $this->morphToMany(GeneradorConstancia::class, 'actividad', 'constancia_actividades');
+    }
 }

@@ -13,7 +13,8 @@ use App\Models\{
     EppItem,
     Risk,
     RiskEvaluation,
-    AnnualPlan
+    AnnualPlan,
+    GeneradorConstancia
 };
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -92,6 +93,12 @@ class AdminDashboard extends Component
                 'compliance_percentage' => $this->calculateAnnualCompliance(),
                 'overdue_activities' => AnnualPlan::where('status', 'overdue')->count(),
                 'activities_this_month' => AnnualPlan::whereMonth('created_at', now()->month)->count(),
+            ],
+            'visit_certificates' => [
+                'total' => GeneradorConstancia::count(),
+                'pending_signature' => GeneradorConstancia::whereNull('firma_responsable')->count(),
+                'completed_this_month' => GeneradorConstancia::whereNotNull('firma_responsable')
+                    ->whereMonth('date_firma_responsable', now()->month)->count(),
             ],
         ];
     }

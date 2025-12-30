@@ -33,4 +33,12 @@ class Risk extends Model
     {
         return $this->hasMany(RiskControl::class);
     }
+
+    /**
+     * Hallazgos asociados a este riesgo (OPCIONAL - Fase 2 Hallazgos)
+     */
+    public function hallazgos()
+    {
+        return $this->hasMany(Hallazgo::class);
+    }
 }

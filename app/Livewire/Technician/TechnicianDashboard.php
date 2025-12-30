@@ -8,7 +8,8 @@ use App\Models\{
     Training,
     TrainingAttendance,
     EppDelivery,
-    RiskEvaluation
+    RiskEvaluation,
+    GeneradorConstancia
 };
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -74,6 +75,13 @@ class TechnicianDashboard extends Component
                     ->whereNull('evaluation_date')->count(),
                 'this_month' => RiskEvaluation::where('user_id', $user->id)
                     ->whereMonth('evaluation_date', now()->month)->count(),
+            ],
+            'my_visit_certificates' => [
+                'this_month' => GeneradorConstancia::where('user_id', $user->id)
+                    ->whereMonth('created_at', now()->month)->count(),
+                'pending_signature' => GeneradorConstancia::where('user_id', $user->id)
+                    ->whereNull('firma_responsable')->count(),
+                'total' => GeneradorConstancia::where('user_id', $user->id)->count(),
             ],
         ];
     }

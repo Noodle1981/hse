@@ -45,6 +45,11 @@ class Sede extends Model
         return $this->hasMany(GeneradorConstancia::class);
     }
 
+    public function constancias()
+    {
+        return $this->hasMany(GeneradorConstancia::class);
+    }
+
     public function checklists()
     {
         return $this->hasMany(ChecklistsAsign::class);

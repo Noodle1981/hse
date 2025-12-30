@@ -100,4 +100,20 @@ class DynamicInspection extends Model
             'completed_at' => now(),
         ]);
     }
+
+    /**
+     * Constancias de visita asociadas
+     */
+    public function constancias()
+    {
+        return $this->morphToMany(GeneradorConstancia::class, 'actividad', 'constancia_actividades');
+    }
+
+    /**
+     * Hallazgos detectados durante esta inspección (OPCIONAL - Fase 2 Hallazgos)
+     */
+    public function hallazgos()
+    {
+        return $this->morphMany(Hallazgo::class, 'origen');
+    }
 }

@@ -31,4 +31,9 @@ class RiskEvaluation extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function constancias()
+    {
+        return $this->morphToMany(GeneradorConstancia::class, 'actividad', 'constancia_actividades');
+    }
 }

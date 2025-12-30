@@ -59,7 +59,7 @@
         <section>
             <div class="details">
                 <div class="place">Lugar: {{$data['sede']['nombre_sede']}}</div>
-                <div class="date">Fecha: {{$data['created_at']->format("d/m/Y H:i")}} hs </div>
+                <div class="date">Fecha de Visita: {{$data['fecha_visita']}}</div>
             </div>
             
             <div class="reason">
@@ -67,15 +67,15 @@
                 <div class="options">
                     <div class="option">
                         <div class="check">
-                            @if ($data['tipo_visita'] == 'visita-rutina')
+                            @if ($data['tipo_visita'] == 'Inspección de Seguridad')
                                 X
                             @endif
                         </div>
-                        <div class="option-text">Visita de rutina</div>
+                        <div class="option-text">Inspección</div>
                     </div>
                     <div class="option">
                         <div class="check">
-                            @if ($data['tipo_visita'] == 'capacitacion')
+                            @if ($data['tipo_visita'] == 'Capacitación')
                                 X
                             @endif
                         </div>
@@ -83,19 +83,19 @@
                     </div>
                     <div class="option">
                         <div class="check">
-                            @if ($data['tipo_visita'] == 'medio-ambiente')
+                            @if ($data['tipo_visita'] == 'Auditoría')
                                 X
                             @endif
                         </div>
-                        <div class="option-text">Medio Ambiente</div>
+                        <div class="option-text">Auditoría</div>
                     </div>
                     <div class="option">
                         <div class="check">
-                            @if ($data['tipo_visita'] == 'otros')
+                            @if (!in_array($data['tipo_visita'], ['Inspección de Seguridad', 'Capacitación', 'Auditoría']))
                                 X
                             @endif
                         </div>
-                        <div class="option-text otros">Otros</div>
+                        <div class="option-text otros">Otros: {{ $data['tipo_visita'] }}</div>
                     </div>
                 </div>
             </div>
@@ -105,10 +105,76 @@
                     {{$data['observacion']}}
                 </div>
             </div>
+
+            <!-- Actividades Realizadas -->
+            @if(isset($data['actividades']) && 
+                ($data['actividades']['inspections']->isNotEmpty() || 
+                 $data['actividades']['trainings']->isNotEmpty() || 
+                 $data['actividades']['riskEvaluations']->isNotEmpty() || 
+                 $data['actividades']['eppDeliveries']->isNotEmpty() ||
+                 $data['actividades']['hallazgos']->isNotEmpty()))
+                <div class="observations" style="margin-top: 10px;">
+                    <div class="obs-title">ACTIVIDADES REALIZADAS DURANTE LA VISITA</div>
+                    <div class="obs-box">
+                        @if($data['actividades']['inspections']->isNotEmpty())
+                            <strong>Inspecciones/Checklists:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                @foreach($data['actividades']['inspections'] as $inspection)
+                                    <li>{{ $inspection->checklist->title }} ({{ $inspection->completed_at->format('H:i') }})</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        @if($data['actividades']['trainings']->isNotEmpty())
+                            <strong>Capacitaciones:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                @foreach($data['actividades']['trainings'] as $training)
+                                    <li>{{ $training->title }} ({{ $training->date->format('H:i') }})</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        @if($data['actividades']['hallazgos']->isNotEmpty())
+                            <strong>Hallazgos Detectados:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                @foreach($data['actividades']['hallazgos'] as $hallazgo)
+                                    <li>{{ $hallazgo->titulo }} ({{ $hallazgo->criticidad }}, {{ $hallazgo->created_at->format('H:i') }})</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        @if($data['actividades']['riskEvaluations']->isNotEmpty())
+                            <strong>Evaluaciones de Riesgo:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                @foreach($data['actividades']['riskEvaluations'] as $evaluation)
+                                    <li>{{ $evaluation->risk->name }} ({{ $evaluation->evaluation_date->format('H:i') }})</li>
+                                @endforeach
+                            </ul>
+                        @endif
+
+                        @if($data['actividades']['eppDeliveries']->isNotEmpty())
+                            <strong>Entregas de EPP:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                @foreach($data['actividades']['eppDeliveries'] as $delivery)
+                                    <li>{{ $delivery->employee->name }} {{ $delivery->employee->last_name }} ({{ $delivery->delivery_date->format('H:i') }})</li>
+                                @endforeach
+                            </ul>
+                        @endif
+                    </div>
+                </div>
+            @endif
+
             <div class="signatures">
                 <div class="signature">Responsable
                     <div class="signature-wrapper">
-                        <img class="signature-image" id="signature" src="{{ $data['firma_responsable'] }}" onerror="signatureError(this)" alt="Firma responsable">
+                        @if($data['justificacion_firma'])
+                            <div style="font-style: italic; color: #666; margin: 20px 0; border: 1px dashed #ccc; padding: 10px;">
+                                <strong>Firma no disponible:</strong><br>
+                                {{ $data['justificacion_firma'] }}
+                            </div>
+                        @else
+                            <img class="signature-image" id="signature" src="{{ $data['firma_responsable'] }}" onerror="signatureError(this)" alt="Firma responsable">
+                        @endif
                         <p>{{ $data['aclaracion_responsable'] }}</p>
                     </div>
                 </div>

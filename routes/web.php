@@ -106,6 +106,8 @@ Route::middleware(['auth'])->group(function () {
         // Asistencia puede ser tomada por Admin o Técnico
         Route::middleware(['role:Administrador,Técnico'])->group(function () {
             Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('trainings.attendance');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('trainings.pdf.download');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('trainings.pdf.preview');
         });
     });
 
@@ -149,6 +151,51 @@ Route::middleware(['auth'])->group(function () {
     });
     
     Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
+
+    // Rutas de Hallazgos (Fase 3 - Módulo de Hallazgos)
+    Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
+        // Admin y Administrativos - Gestión completa
+        Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/', \App\Livewire\Hallazgos\HallazgoManager::class)->name('index');
+            Route::get('/{id}/editar', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('edit');
+        });
+        
+        // Admin, Administrativos y Técnicos - Crear, ver y PDF
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/crear', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('create');
+            Route::get('/{id}', \App\Livewire\Hallazgos\HallazgoDetail::class)->name('show');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
+        });
+    });
+
+    // Mis Hallazgos (Técnicos)
+    Route::get('/mis-hallazgos', \App\Livewire\Hallazgos\MisHallazgos::class)
+        ->middleware(['role:Técnico,Administrador'])
+        ->name('mis-hallazgos');
+
+    // Rutas de Incidentes (Fase 3 - Módulo de Hallazgos)
+    Route::prefix('incidentes')->name('incidentes.')->group(function () {
+        Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/', \App\Livewire\Incidentes\IncidenteManager::class)->name('index');
+        });
+    });
+
+    // Rutas de Constancias de Visitas
+    Route::prefix('visit-certificates')->group(function () {
+        // Solo Admin - Ver todas las constancias
+        Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/', \App\Livewire\Visits\VisitCertificateManager::class)->name('visit-certificates.index');
+        });
+        
+        // Admin y Técnico - Crear, historial y PDF
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/create', \App\Livewire\Visits\VisitCertificateWizard::class)->name('visit-certificates.create');
+            Route::get('/my-history', \App\Livewire\Visits\VisitCertificateHistory::class)->name('visit-certificates.history');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('visit-certificates.pdf.download');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('visit-certificates.pdf.preview');
+        });
+    });
 
     // Logout
     Route::post('/logout', function () {
