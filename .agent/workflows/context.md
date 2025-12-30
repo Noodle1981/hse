@@ -7,9 +7,9 @@ description: Contexto del proyecto EP-Back - Sistema de Checklists Dinámicos
 ## 🎯 Visión General
 
 **Nombre:** EP-Back (Equipo Preventivo - Backend)
-**Versión Actual:** V1.0.0.0
-**Tipo:** Sistema SaaS de gestión de checklists dinámicos
-**Stack:** Laravel 12 + Livewire 3 + Tailwind CSS + SQLite (dev) / MySQL|PostgreSQL (prod)
+**Versión Actual:** V2.0.0.0
+**Tipo:** Sistema SaaS integral de Higiene y Seguridad
+**Stack:** Laravel 11 + Livewire 3 + Tailwind CSS + SQLite (dev) / MySQL|PostgreSQL (prod)
 
 ### Propósito
 Sistema escalable de checklists que permite crear, gestionar y ejecutar formularios dinámicos para:
@@ -103,108 +103,26 @@ ep-back/
 
 ## ✅ Buenas Prácticas
 
-### 1. Código
+### Código
+- ✅ Usar Type Hints y Return Types
+- ✅ Form Requests para validación
+- ✅ Eager Loading para prevenir N+1
+- ❌ Evitar código sin tipado
 
-```php
-// ✅ HACER: Usar Type Hints y Return Types
-public function getActiveChecklists(): Collection
-{
-    return Checklist::where('is_active', true)->get();
-}
+### Componentes Livewire
+- ✅ Componentes pequeños y enfocados
+- ✅ Validación por propiedades
+- ❌ Evitar componentes >500 líneas
 
-// ❌ EVITAR: Funciones sin tipado
-public function getChecklists()
-{
-    return Checklist::all();
-}
-```
+### Base de Datos
+- ✅ Migraciones con índices y constraints
+- ✅ foreignId()->constrained()->cascadeOnDelete()
+- ✅ Índices en columnas frecuentemente consultadas
 
-```php
-// ✅ HACER: Usar Form Requests para validación
-class StoreChecklistRequest extends FormRequest
-{
-    public function rules(): array
-    {
-        return [
-            'title' => 'required|string|max:255',
-            'questions' => 'required|array|min:1',
-        ];
-    }
-}
-
-// ❌ EVITAR: Validación inline en controladores
-$request->validate(['title' => 'required']);
-```
-
-### 2. Componentes Livewire
-
-```php
-// ✅ HACER: Componentes pequeños y enfocados
-class QuestionEditor extends Component
-{
-    public Question $question;
-    
-    protected function rules(): array
-    {
-        return [
-            'question.label' => 'required|string|max:500',
-            'question.type' => 'required|in:text,select,checkbox,radio',
-        ];
-    }
-}
-
-// ❌ EVITAR: Componentes monolíticos de +500 líneas
-```
-
-### 3. Base de Datos
-
-```php
-// ✅ HACER: Usar Migraciones descriptivas
-public function up(): void
-{
-    Schema::create('questions', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('checklist_id')->constrained()->cascadeOnDelete();
-        $table->string('label', 500);
-        $table->string('type', 50); // text, select, checkbox, radio
-        $table->json('options')->nullable();
-        $table->integer('order')->default(0);
-        $table->boolean('is_required')->default(false);
-        $table->timestamps();
-        
-        $table->index(['checklist_id', 'order']);
-    });
-}
-
-// ❌ EVITAR: Migraciones sin índices ni constraints
-```
-
-### 4. Testing
-
-```php
-// ✅ HACER: Tests descriptivos con Arrange-Act-Assert
-public function test_user_can_complete_checklist(): void
-{
-    // Arrange
-    $user = User::factory()->create();
-    $checklist = Checklist::factory()
-        ->has(Question::factory()->count(3))
-        ->create();
-    
-    // Act
-    $response = $this->actingAs($user)
-        ->post("/inspections/{$checklist->id}", [
-            'answers' => [1 => 'Sí', 2 => 'No', 3 => 'N/A']
-        ]);
-    
-    // Assert
-    $response->assertRedirect();
-    $this->assertDatabaseHas('inspections', [
-        'user_id' => $user->id,
-        'checklist_id' => $checklist->id,
-    ]);
-}
-```
+### Testing
+- ✅ Patrón Arrange-Act-Assert
+- ✅ Factories para datos de prueba
+- ✅ Tests descriptivos (test_user_can_...)
 
 ---
 
@@ -237,41 +155,17 @@ public function test_user_can_complete_checklist(): void
 ## 🔄 Git Workflow
 
 ### Ramas
-```
-main            → Producción estable
-├── develop     → Desarrollo activo
-│   ├── feature/checklist-builder
-│   ├── feature/question-editor
-│   └── feature/inspection-history
-└── hotfix/     → Correcciones urgentes en producción
-```
+- `main` → Producción estable
+- `develop` → Desarrollo activo
+- `feature/*` → Nuevas funcionalidades
+- `hotfix/*` → Correcciones urgentes
 
-### Commits (Conventional Commits)
-```
-feat: add dynamic question types to checklist builder
-fix: resolve validation error on empty options array
-docs: update API documentation for inspections
-test: add unit tests for Answer model
-refactor: extract question rendering to separate component
-chore: update composer dependencies
-```
-
-### Pull Request Template
-```markdown
-## Descripción
-[Describir cambios realizados]
-
-## Tipo de cambio
-- [ ] Bug fix
-- [ ] Nueva feature
-- [ ] Breaking change
-- [ ] Documentación
-
-## Checklist
-- [ ] Tests pasan localmente
-- [ ] Código sigue las convenciones del proyecto
-- [ ] Documentación actualizada si aplica
-```
+### Commits (Conventional)
+- `feat:` Nueva funcionalidad
+- `fix:` Corrección de bug
+- `docs:` Documentación
+- `test:` Tests
+- `refactor:` Refactorización
 
 ---
 
@@ -279,42 +173,13 @@ chore: update composer dependencies
 
 ### Comandos
 ```bash
-# Ejecutar todos los tests
-php artisan test
-
-# Ejecutar tests específicos
-php artisan test --filter=ChecklistTest
-
-# Ejecutar con coverage
-php artisan test --coverage
-
-# Ejecutar tests de feature
-php artisan test tests/Feature
-
-# Ejecutar tests unitarios
-php artisan test tests/Unit
+php artisan test                    # Todos los tests
+php artisan test --filter=Name      # Tests específicos
+php artisan test --coverage         # Con coverage
 ```
 
-### Estructura de Tests
-```
-tests/
-├── Feature/
-│   └── Checklists/
-│       ├── ChecklistBuilderTest.php
-│       ├── ChecklistFillerTest.php
-│       └── InspectionTest.php
-└── Unit/
-    └── Models/
-        ├── ChecklistTest.php
-        ├── QuestionTest.php
-        └── AnswerTest.php
-```
-
-### Coverage Mínimo Esperado
-- Modelos: 80%
-- Componentes Livewire: 70%
-- Controladores: 60%
-- **Global: >60%**
+### Coverage Esperado
+- Modelos: 80% | Livewire: 70% | Controllers: 60% | **Global: >60%**
 
 ---
 
@@ -363,32 +228,33 @@ DB_CONNECTION=sqlite
 
 ---
 
-## 📚 Documentación de Referencia
+## 📚 Documentación Completa del Sistema
 
-### Interna
-- `/doc/PRD-EP.txt` - Product Requirements Document
-- `/doc/Cambio-tecnologia.txt` - Análisis de migración tecnológica
-- `/doc/ROADMAP.md` - Fases del proyecto (actualizado)
-- `/doc/CHECKLISTS_DINAMICOS.md` - **Documentación técnica del módulo**
-- `/doc/componentes.txt` - Especificación de componentes
+### 📖 Procedimientos (11)
+- `/doc/Lógica_del_diseño/ARQUITECTURA.md` - Arquitectura V2.0
+- `/doc/Procedimientos/TAREAS.MD` - Estado y roadmap
+- `/doc/Procedimientos/CHECKLISTS_DINAMICOS.md`
+- `/doc/Procedimientos/CAPACITACIONES.MD`
+- `/doc/Procedimientos/CONTANCIAS_DE_VISITAS.MD`
+- `/doc/Procedimientos/ENTREGA_EPP.MD`
+- `/doc/Procedimientos/EMPRESAS_SEDE_EMPLEADOS.MD`
+- `/doc/Procedimientos/HALLAZGOS.md`
+- `/doc/Procedimientos/MATRIZ_RIESGOS.md`
+- `/doc/Procedimientos/CONTRATO_ANUAL.MD`
+- `/doc/Procedimientos/ROLES Y SUS ALCANCES.MD`
 
-### Módulo de Checklists Dinámicos (V1.0.0.0)
-```
-URL: http://localhost:8000/checklists
+### 🎨 Lógica del Diseño (4)
+- `/doc/Lógica_del_diseño/COMPONENTES_LIVEWARE.MD` - 41 componentes
+- `/doc/Lógica_del_diseño/TABLAS.MD` - 46 tablas
+- `/doc/Lógica_del_diseño/ESCALABILIDAD.MD`
+- `/doc/Lógica_del_diseño/VISUAL.MD`
 
-Archivos principales:
-├── app/Models/DynamicChecklist.php
-├── app/Models/DynamicQuestion.php
-├── app/Livewire/Checklists/ChecklistBuilder.php
-├── app/Livewire/Checklists/ChecklistFiller.php
-└── resources/views/livewire/checklists/
-```
+### 📊 Estadísticas
+**15 documentos** | 500+ páginas | 41 componentes | 46 tablas | 30+ casos de uso
 
-### Externa
-- [Laravel 12 Docs](https://laravel.com/docs/12.x)
-- [Livewire 3 Docs](https://livewire.laravel.com/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs)
-- [Alpine.js](https://alpinejs.dev/start-here)
+### 🌐 Referencias
+- [Laravel 11](https://laravel.com/docs/11.x) | [Livewire 3](https://livewire.laravel.com/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs) | [Alpine.js](https://alpinejs.dev)
 
 ---
 
@@ -397,6 +263,7 @@ Archivos principales:
 ### Historial
 | Versión | Fecha | Descripción |
 |---------|-------|-------------|
+| V2.0.0.0 | Dic 2024 | Sistema completo - 14 módulos funcionales implementados |
 | V1.0.0.0 | Dic 2024 | Versión inicial - Sistema de checklists dinámicos |
 
 ### Versionado Semántico
@@ -410,5 +277,6 @@ MAJOR.MINOR.PATCH.BUILD
 
 ---
 
-*Documento actualizado: Diciembre 2024*
-*Próxima revisión: Post-implementación V1.0.0.0*
+*Documento actualizado: 30 Diciembre 2024*
+*Versión del Sistema: V2.0.0.0*
+*Documentación Completa: 15 Archivos Técnicos*
