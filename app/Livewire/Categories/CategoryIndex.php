@@ -26,14 +26,11 @@ class CategoryIndex extends Component
             ->layout('components.layouts.app');
     }
 
-    public function delete(Category $category)
+    public function toggleStatus(Category $category)
     {
-        if ($category->checklists()->count() > 0) {
-            session()->flash('error', 'No se puede eliminar una categoría con checklists asociados');
-            return;
-        }
-
-        $category->delete();
-        session()->flash('message', 'Categoría eliminada exitosamente');
+        $category->update(['is_active' => !$category->is_active]);
+        
+        $status = $category->is_active ? 'activada' : 'desactivada';
+        session()->flash('message', "Categoría {$status} exitosamente");
     }
 }

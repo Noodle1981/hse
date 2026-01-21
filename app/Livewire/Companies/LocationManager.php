@@ -29,6 +29,10 @@ class LocationManager extends Component
     public string $editTipoSede = '';
     public string $editLocalidad = '';
 
+    // Listas para autocompletado
+    public $existingTipos = [];
+    public $existingLocalidades = [];
+
     // Gestión de usuarios
     public ?int $managingUsersForSede = null;
     public $availableUsers = [];
@@ -44,6 +48,38 @@ class LocationManager extends Component
     public function loadSedes()
     {
         $this->sedes = $this->empresa->sedes()->withCount('users')->orderBy('nombre_sede')->get();
+        
+        // Cargar listas para autocompletado
+        $this->existingTipos = Sede::whereNotNull('tipo_sede')
+            ->where('tipo_sede', '!=', '')
+            ->distinct()
+            ->orderBy('tipo_sede')
+            ->pluck('tipo_sede')
+            ->toArray();
+            
+        $this->existingLocalidades = Sede::whereNotNull('localidad')
+            ->where('localidad', '!=', '')
+            ->distinct()
+            ->orderBy('localidad')
+            ->pluck('localidad')
+            ->toArray();
+    }
+
+    // Validación en tiempo real para nombre de sede
+    public function updatedNewNombreSede($value)
+    {
+        $this->validateOnly('newNombreSede', [
+            'newNombreSede' => [
+                'required', 
+                'string', 
+                'max:255',
+                Rule::unique('sedes', 'nombre_sede')->where(function ($query) {
+                    return $query->where('empresa_id', $this->empresa->id);
+                })
+            ],
+        ], [
+            'newNombreSede.unique' => 'Ya existe una sede con este nombre en esta empresa.'
+        ]);
     }
 
     public function loadAvailableUsers()
@@ -97,12 +133,21 @@ class LocationManager extends Component
     public function save()
     {
         $this->validate([
-            'newNombreSede' => 'required|string|max:255',
+            'newNombreSede' => [
+                'required', 
+                'string', 
+                'max:255',
+                Rule::unique('sedes', 'nombre_sede')->where(function ($query) {
+                    return $query->where('empresa_id', $this->empresa->id);
+                })
+            ],
             'newDireccion' => 'nullable|string|max:255',
             'newTipoSede' => 'nullable|string|max:100',
             'newLocalidad' => 'nullable|string|max:100',
             'newTelefono' => 'nullable|string|max:50',
             'newCorreo' => 'nullable|email|max:255',
+        ], [
+            'newNombreSede.unique' => 'Ya existe una sede con este nombre en esta empresa.'
         ]);
 
         Sede::create([

@@ -21,7 +21,7 @@ class InspectionPDFController extends Controller
         ])->findOrFail($id);
 
         // Usar Policy para autorización
-        $this->authorize('view', $inspection);
+        \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,
@@ -43,7 +43,7 @@ class InspectionPDFController extends Controller
         ])->findOrFail($id);
 
         // Usar Policy para autorización
-        $this->authorize('view', $inspection);
+        \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,

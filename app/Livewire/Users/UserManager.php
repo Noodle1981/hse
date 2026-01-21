@@ -27,6 +27,11 @@ class UserManager extends Component
     public string $telefono = '';
     public string $estado = 'activo';
 
+    // Modal de confirmación de eliminación
+    public bool $confirmingDeletion = false;
+    public ?int $userToDeleteId = null;
+    public string $userToDeleteName = '';
+
     public function updatedSearch()
     {
         $this->resetPage();
@@ -107,7 +112,7 @@ class UserManager extends Component
         $this->resetPage();
     }
 
-    public function delete(int $id)
+    public function confirmDelete(int $id, string $name)
     {
         // No permitir eliminar al usuario actual
         if ($id === auth()->id()) {
@@ -115,8 +120,26 @@ class UserManager extends Component
             return;
         }
 
-        User::findOrFail($id)->delete();
-        session()->flash('message', 'Usuario eliminado');
+        $this->userToDeleteId = $id;
+        $this->userToDeleteName = $name;
+        $this->confirmingDeletion = true;
+    }
+
+    public function cancelDelete()
+    {
+        $this->confirmingDeletion = false;
+        $this->userToDeleteId = null;
+        $this->userToDeleteName = '';
+    }
+
+    public function delete()
+    {
+        if (!$this->userToDeleteId) return;
+
+        User::findOrFail($this->userToDeleteId)->delete();
+        
+        $this->cancelDelete();
+        session()->flash('message', 'Usuario dado de baja exitosamente. (Datos históricos preservados)');
         $this->resetPage();
     }
 

@@ -94,4 +94,16 @@ class InspectionHistory extends Component
                 ->orderBy('title')->get(),
         ])->layout('components.layouts.app');
     }
+    public function delete($id)
+    {
+        $inspection = DynamicInspection::findOrFail($id);
+        
+        // Solo permitir borrar borradores o si es admin (adaptar según política)
+        if ($inspection->status !== 'draft' && !auth()->user()->isAdmin()) {
+            return;
+        }
+
+        $inspection->delete();
+        $this->dispatch('inspection-deleted'); // Opcional, para notificaciones
+    }
 }

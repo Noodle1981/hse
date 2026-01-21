@@ -82,17 +82,26 @@
                 <!-- Icono -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Icono (opcional)
+                        Icono (Seleccionar)
                     </label>
-                    <input 
-                        wire:model="icon" 
-                        type="text" 
-                        placeholder="shield-check"
-                        class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    >
-                    <p class="text-xs text-gray-500 mt-1">Nombre del icono (ej: shield-check, award, leaf)</p>
+                    <div class="grid grid-cols-4 sm:grid-cols-6 gap-2 border rounded-md p-2 max-h-48 overflow-y-auto">
+                        @foreach($this->icons as $key => $svg)
+                            <button type="button" 
+                                wire:click="$set('icon', '{{ $key }}')"
+                                class="flex flex-col items-center justify-center p-2 rounded border transition-all duration-200
+                                       {{ $icon === $key 
+                                          ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200 text-blue-600' 
+                                          : 'border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-700' }}"
+                                title="{{ $key }}">
+                                <svg class="w-6 h-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    {!! $svg !!}
+                                </svg>
+                                <span class="text-[10px] truncate w-full text-center">{{ $key }}</span>
+                            </button>
+                        @endforeach
+                    </div>
                     @error('icon') 
-                        <span class="text-red-500 text-sm">{{ $message }}</span> 
+                        <span class="text-red-500 text-sm mt-1 block">{{ $message }}</span> 
                     @enderror
                 </div>
 
@@ -133,7 +142,7 @@
                 <button 
                     type="submit" 
                     wire:loading.attr="disabled"
-                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                    class="px-4 py-2 bg-[#1E1E2D] text-white rounded-md hover:bg-[#2d2d3f] disabled:opacity-50 disabled:cursor-not-allowed">
                     <span wire:loading.remove>
                         {{ $category ? 'Actualizar' : 'Crear' }} Categoría
                     </span>

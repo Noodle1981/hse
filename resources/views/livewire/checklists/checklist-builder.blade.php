@@ -29,7 +29,11 @@
                             <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                         @endforeach
                     </select>
-                    @error('categoryId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </select>
+                    <a href="{{ route('categories.index') }}" class="text-xs text-ep-primary hover:text-ep-primary-dark mt-1 hover:underline inline-flex items-center">
+                        + Gestionar Categorías
+                    </a>
+                    @error('categoryId') <span class="text-red-500 text-sm block">{{ $message }}</span> @enderror
                 </div>
 
                 @if($categoryId)
@@ -239,4 +243,6 @@
             </button>
         </div>
     </form>
+
+
 </div>

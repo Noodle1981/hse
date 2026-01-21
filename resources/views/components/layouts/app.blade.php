@@ -301,20 +301,34 @@
                             <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3">Administración</span>
                         </li>
                         
-                        <!-- Categorías -->
+                        <!-- Usuarios -->
                         <li>
-                            <a href="{{ route('categories.index') }}" 
+                            <a href="{{ route('users.index') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('categories.*') ? 'menu-item-active text-white' : '' }}">
+                                      {{ request()->routeIs('users.*') ? 'menu-item-active text-white' : '' }}">
                                 <span class="menu-icon mr-3 flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                                     </svg>
                                 </span>
-                                <span x-show="sidebarOpen" class="menu-text">Categorías</span>
+                                <span x-show="sidebarOpen" class="menu-text">Usuarios</span>
                             </a>
                         </li>
-                        
+
+                        <!-- Técnicos -->
+                        <li>
+                            <a href="{{ route('technicians.index') }}" 
+                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                      {{ request()->routeIs('technicians.*') ? 'menu-item-active text-white' : '' }}">
+                                <span class="menu-icon mr-3 flex-shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </span>
+                                <span x-show="sidebarOpen" class="menu-text">Técnicos</span>
+                            </a>
+                        </li>
+
                         <!-- Empresas -->
                         <li>
                             <a href="{{ route('companies.index') }}" 
@@ -330,20 +344,6 @@
                         </li>
 
 
-
-                        <!-- Usuarios -->
-                        <li>
-                            <a href="{{ route('users.index') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('users.*') ? 'menu-item-active text-white' : '' }}">
-                                <span class="menu-icon mr-3 flex-shrink-0">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                                    </svg>
-                                </span>
-                                <span x-show="sidebarOpen" class="menu-text">Usuarios</span>
-                            </a>
-                        </li>
 
                         <!-- EPP y Personal (Solo Admin) -->
                         <li class="pt-4 pb-2" x-show="sidebarOpen">

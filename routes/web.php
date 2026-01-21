@@ -95,6 +95,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', \App\Livewire\Users\UserManager::class)->name('users.index');
     });
 
+    // Rutas de Técnicos (Solo Admin) - Nueva ruta para gestión
+    Route::middleware(['role:Administrador'])->prefix('tecnicos')->group(function () {
+        Route::get('/', \App\Livewire\Users\TechnicianManager::class)->name('technicians.index');
+    });
+
     // Rutas de Capacitaciones
     Route::prefix('trainings')->group(function () {
         Route::middleware(['role:Administrador'])->group(function () {

@@ -31,8 +31,19 @@
                     <option value="Técnico">Técnicos</option>
                 </select>
                 <button wire:click="toggleForm" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md whitespace-nowrap">
-                    {{ $showForm ? 'Cancelar' : '+ Nuevo Usuario' }}
+                        class="hover:bg-opacity-90 text-white px-4 py-2 rounded-md whitespace-nowrap transition-colors duration-200 flex items-center gap-2 shadow-sm"
+                        style="background-color: #292938;">
+                    @if($showForm)
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                        Cancelar
+                    @else
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Nuevo Usuario
+                    @endif
                 </button>
             </div>
         </div>
@@ -125,7 +136,8 @@
                         Cancelar
                     </button>
                     <button type="submit" wire:loading.attr="disabled"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+                            class="hover:bg-opacity-90 text-white px-4 py-2 rounded-md transition-colors duration-200 shadow-sm disabled:opacity-50"
+                            style="background-color: #292938;">
                         <span wire:loading.remove>{{ $editingId ? 'Actualizar' : 'Crear' }} Usuario</span>
                         <span wire:loading>Guardando...</span>
                     </button>
@@ -172,16 +184,21 @@
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <div class="flex gap-2">
+                            <div class="flex items-center gap-3">
                                 <button wire:click="edit({{ $user->id }})"
-                                        class="text-indigo-600 hover:text-indigo-900">
-                                    Editar
+                                        class="text-indigo-600 hover:text-indigo-900 transition-colors duration-150 p-1 hover:bg-indigo-50 rounded"
+                                        title="Editar">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                    </svg>
                                 </button>
                                 @if($user->id !== auth()->id())
-                                    <button wire:click="delete({{ $user->id }})"
-                                            wire:confirm="¿Estás seguro de eliminar este usuario?"
-                                            class="text-red-600 hover:text-red-900">
-                                        Eliminar
+                                    <button wire:click="confirmDelete({{ $user->id }}, '{{ $user->nombres }} {{ $user->apellidos }}')"
+                                            class="text-red-600 hover:text-red-900 transition-colors duration-150 p-1 hover:bg-red-50 rounded"
+                                            title="Eliminar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 000-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
                                     </button>
                                 @endif
                             </div>
@@ -203,4 +220,39 @@
             </div>
         @endif
     </div>
+
+    <!-- Modal de Confirmación de Baja (Soft Delete) -->
+    @if($confirmingDeletion)
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 overflow-hidden">
+                <div class="p-6">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-yellow-100 rounded-full mb-4">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-center text-gray-900 mb-2">
+                        ¿Dar de baja al usuario?
+                    </h3>
+                    <p class="text-sm text-gray-500 text-center mb-6">
+                        Estás a punto de dar de baja a <span class="font-bold text-gray-700">{{ $userToDeleteName }}</span>.
+                        <br><br>
+                        ⚠️ <span class="font-semibold">Nota Importante:</span> Este usuario NO se eliminará permanentemente de la base de datos para preservar el historial de inspecciones y reportes.
+                        <br>
+                        Sin embargo, perderá acceso inmediato al sistema.
+                    </p>
+                    <div class="flex justify-center gap-3">
+                        <button wire:click="cancelDelete" 
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium">
+                            Salir
+                        </button>
+                        <button wire:click="delete" 
+                                class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors font-bold shadow-sm">
+                            Revocar Acceso
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

@@ -19,6 +19,10 @@
             border-bottom: 2pt solid #1A365D;
             padding-bottom: 10pt;
             margin-bottom: 20pt;
+            page-break-before: always;
+        }
+        .header-table:first-of-type {
+            page-break-before: auto;
         }
         .logo-box {
             width: 60pt;
@@ -139,6 +143,36 @@
             text-align: center;
             padding-top: 10pt;
             border-top: 0.5pt solid #E2E8F0;
+        }
+
+        /* Estilos para previsualización en navegador */
+        @media screen {
+            body {
+                background-color: #f0f2f5;
+                padding: 30px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .header-table:first-of-type {
+                margin-top: 0;
+            }
+            .header-table {
+                margin-top: 50px;
+            }
+            body > * {
+                background: white;
+                width: 210mm;
+                padding: 40px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            .footer {
+                position: relative;
+                margin-top: 20px;
+                background: transparent;
+                box-shadow: none;
+                width: 100%;
+            }
         }
         .status-badge {
             font-size: 8pt;

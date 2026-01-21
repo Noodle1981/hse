@@ -15,6 +15,10 @@
             border-bottom: 2px solid #F69239;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            page-break-before: always;
+        }
+        .header:first-of-type {
+            page-break-before: auto;
         }
         .title {
             font-size: 20px;
@@ -113,6 +117,36 @@
             color: #aaa;
             border-top: 1px solid #eee;
             padding-top: 5px;
+        }
+
+        /* Estilos para previsualización en navegador */
+        @media screen {
+            body {
+                background-color: #f0f2f5;
+                padding: 30px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            .header:first-of-type {
+                margin-top: 0;
+            }
+            .header {
+                margin-top: 50px;
+            }
+            body > * {
+                background: white;
+                width: 210mm;
+                padding: 40px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            .footer {
+                position: relative;
+                margin-top: 20px;
+                background: transparent;
+                box-shadow: none;
+                width: 100%;
+            }
         }
     </style>
 </head>

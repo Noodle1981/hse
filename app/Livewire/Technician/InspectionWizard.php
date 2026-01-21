@@ -145,7 +145,7 @@ class InspectionWizard extends Component
         $this->saveProgress();
 
         $this->inspection->update([
-            'status' => 'completed',
+            'status' => $this->inspection->sede_id ? 'completed' : 'draft',
             'completed_at' => now(),
             'supervisor_name' => $this->supervisorName,
             'supervisor_signature' => $this->supervisorSignature,

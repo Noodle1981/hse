@@ -44,13 +44,13 @@ class SubcategoryManager extends Component
     public function save()
     {
         $this->validate([
-            'newCode' => [
+            'newCode' => 'required|string|max:50',
+            'newName' => [
                 'required',
                 'string',
-                'max:50',
-                Rule::unique('subcategories', 'code')
+                'max:255',
+                Rule::unique('subcategories', 'name')
             ],
-            'newName' => 'required|string|max:255',
             'newDescription' => 'nullable|string',
         ]);
 
@@ -80,13 +80,13 @@ class SubcategoryManager extends Component
     public function update()
     {
         $this->validate([
-            'editCode' => [
+            'editCode' => 'required|string|max:50',
+            'editName' => [
                 'required',
                 'string',
-                'max:50',
-                Rule::unique('subcategories', 'code')->ignore($this->editingId)
+                'max:255',
+                Rule::unique('subcategories', 'name')->ignore($this->editingId)
             ],
-            'editName' => 'required|string|max:255',
             'editDescription' => 'nullable|string',
         ]);
 
@@ -102,18 +102,14 @@ class SubcategoryManager extends Component
         session()->flash('message', 'Subcategoría actualizada exitosamente');
     }
 
-    public function delete(int $id)
+    public function toggleStatus(int $id)
     {
         $subcategory = Subcategory::findOrFail($id);
+        $subcategory->update(['is_active' => !$subcategory->is_active]);
         
-        if ($subcategory->checklists()->count() > 0) {
-            session()->flash('error', 'No se puede eliminar una subcategoría con checklists asociados');
-            return;
-        }
-
-        $subcategory->delete();
         $this->loadSubcategories();
-        session()->flash('message', 'Subcategoría eliminada exitosamente');
+        $status = $subcategory->is_active ? 'activada' : 'desactivada';
+        session()->flash('message', "Subcategoría {$status} exitosamente");
     }
 
     public function cancelEdit()
