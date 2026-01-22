@@ -11,15 +11,18 @@ class AttendanceTracker extends Component
 {
     public Training $training;
     public $attendees = [];
+    public $observations = '';
+    public $visitId = null; // Para saber si vino desde una visita
     public $newAttendee = [
         'employee_name' => '',
         'dni' => '',
         'signature' => '',
     ];
 
-    public function mount($id)
+    public function mount($id, $visit_id = null)
     {
         $this->training = Training::with(['empresa', 'sede'])->findOrFail($id);
+        $this->visitId = $visit_id;
         $this->loadAttendees();
     }
 
@@ -69,6 +72,28 @@ class AttendanceTracker extends Component
         $this->loadAttendees();
         $this->dispatch('attendance-added');
         session()->flash('message', 'Asistencia registrada correctamente.');
+    }
+
+    public function completeTraining()
+    {
+        // Actualizar observaciones y estado
+        $this->training->update([
+            'status' => 'completed',
+            'notes' => $this->observations,
+        ]);
+
+        session()->flash('message', 'Capacitación finalizada correctamente.');
+        
+        // Si vino desde una visita, regresar a ella
+        if ($this->visitId) {
+            return redirect()->route('tecnico.visits.in-progress', $this->visitId);
+        }
+        
+        // Sino, redirigir según rol
+        if (auth()->user()->hasRole('Administrador')) {
+            return redirect()->route('gestor.trainings.index');
+        }
+        return redirect()->route('tecnico.dashboard');
     }
 
     public function render()

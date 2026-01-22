@@ -19,6 +19,7 @@ class Training extends Model
         'duration',
         'trainer_name',
         'status',
+        'notes',
     ];
 
     protected $casts = [

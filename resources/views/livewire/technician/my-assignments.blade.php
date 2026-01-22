@@ -106,6 +106,57 @@
         </div>
         @endif
 
+        @if($eppRequests->isNotEmpty())
+        <div class="mb-8">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                Solicitudes de Entrega EPP
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($eppRequests as $request)
+                    <div class="bg-white rounded-xl shadow-sm border border-orange-200 overflow-hidden hover:shadow-md transition-shadow">
+                         <div class="p-5">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="text-lg font-bold text-gray-900 leading-tight">
+                                    {{ $request->employee->name }} {{ $request->employee->last_name }}
+                                </h3>
+                                <span class="bg-orange-100 text-orange-800 text-xs px-2 py-0.5 rounded-full font-medium">Pendiente</span>
+                            </div>
+                            
+                            <p class="text-sm text-gray-600 mb-3">
+                                {{ count($request->items) }} ítems solicitados por {{ $request->requester->nombres }}
+                            </p>
+
+                            <div class="space-y-1 mb-4">
+                                @foreach(array_slice($request->items, 0, 3, true) as $itemId => $itemData)
+                                    @php 
+                                        // selectedItems format: [item_id => ['cantidad' => X, 'tipo_entrega' => Y]]
+                                        $eppItem = \App\Models\EppItem::find($itemId); 
+                                        $cantidad = is_array($itemData) ? ($itemData['cantidad'] ?? 1) : 1;
+                                    @endphp
+                                    <div class="text-xs bg-gray-50 border px-2 py-1 rounded text-gray-600 flex justify-between">
+                                        <span>{{ $eppItem->nombre ?? 'Item #'.$itemId }}</span>
+                                        <span class="font-bold">x{{ $cantidad }}</span>
+                                    </div>
+                                @endforeach
+                                @if(count($request->items) > 3)
+                                    <span class="text-xs text-gray-400 italic">+{{ count($request->items) - 3 }} más...</span>
+                                @endif
+                            </div>
+
+                            <div class="flex items-center text-sm text-gray-500">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                {{ $request->sede->nombre_sede }}
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         @if($assignments->isNotEmpty())
         <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
             <svg class="w-5 h-5 mr-2 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">

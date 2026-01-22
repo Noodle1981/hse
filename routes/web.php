@@ -330,9 +330,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/import-employees', \App\Livewire\Epp\EmployeeImporter::class)->name('epp.employees.import');
         });
 
-        // Solo Técnico (Entrega de Campo)
-        Route::middleware(['role:Técnico'])->group(function () {
-            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('epp.deliver');
+        // Admin y Técnico (Entrega de Campo y Solicitudes)
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+             Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('epp.deliver');
         });
 
         // Admin y Técnico (Personal e Historial)
@@ -399,17 +399,22 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas de Visitas (Sistema Integrado)
     Route::prefix('visits')->name('visits.')->group(function () {
-        // Técnico - Mis Visitas (solo las propias)
-        Route::middleware(['role:Técnico'])->group(function () {
+        // Rutas accesibles por Técnicos y Administradores
+        Route::middleware(['role:Técnico,Administrador'])->group(function () {
+            // Index de visitas (Cada uno ve lo que le corresponde según lógica del componente)
             Route::get('/', \App\Livewire\Visits\VisitManager::class)->name('index');
+            
+            // Visita en progreso
             Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
+            
+            // PDF de constancia
+            Route::get('/{visit}/certificate/preview', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{visit}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
         });
         
-        // Gestor/Admin - Historial de TODAS las visitas
+        // Historial solo Admin (o Técnico también?) - Inicialmente Admin
         Route::middleware(['role:Administrador'])->group(function () {
             Route::get('/history', \App\Livewire\Visits\VisitHistory::class)->name('history');
-            // Admin también puede ver visitas en progreso de cualquier técnico
-            Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
         });
     });
 

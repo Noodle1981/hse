@@ -17,14 +17,63 @@ class VisitInProgress extends Component
     public $completedChecklists = [];
     public $checklists = [];
     public $trainings = [];
+    public $assignedTrainings = [];
     public $eppDeliveries = [];
     public $hallazgos = [];
     
+    // EPP Requests
+    public $assignedEppRequests = [];
+    public $selectedEppRequestId = null;
+
+    // ... (listeners)
+
+    // ... (mount)
+
+
+
+    public function executeEppRequest($requestId)
+    {
+        $this->selectedEppRequestId = $requestId;
+        $this->showEppModal = true;
+    }
+
+    public function openEppModal()
+    {
+        $this->selectedEppRequestId = null;
+        $this->showEppModal = true;
+    }
+
+    public function closeEppModal()
+    {
+        $this->showEppModal = false;
+        $this->selectedEppRequestId = null;
+    }
+
+    public function onEppDelivered()
+    {
+        // Si venía de una request, actualizar estado
+        if ($this->selectedEppRequestId) {
+            $eppRequest = \App\Models\EppDeliveryRequest::find($this->selectedEppRequestId);
+            if ($eppRequest) {
+                $eppRequest->update(['status' => 'completed']);
+            }
+        }
+
+        $this->closeEppModal();
+        $this->loadChecklists(); // Recargar todo
+        session()->flash('message', 'EPP entregado exitosamente.');
+    }
+
     // Estado de modales
     public $showAutoAssignModal = false;
     public $showFinalizeModal = false;
     public $showHallazgoModal = false;
     public $showIncidenteModal = false;
+    
+    // Finalización de visita
+    public $visitNotes = '';
+    public $responsibleName = '';
+    public $responsibleSignature = '';
     
     // Auto-asignación
     public $availableChecklists = [];
@@ -57,8 +106,8 @@ class VisitInProgress extends Component
     {
         $this->visit = $visit;
         
-        // Verificar que el usuario sea el dueño
-        if ($this->visit->user_id !== Auth::id()) {
+        // Verificar que el usuario sea el dueño o Admin
+        if ($this->visit->user_id !== Auth::id() && !Auth::user()->hasRole('Administrador')) {
             abort(403);
         }
         
@@ -76,8 +125,6 @@ class VisitInProgress extends Component
     public function loadChecklists()
     {
         // 1. Cargar asignaciones pendientes para esta sede/empresa
-        // This property is still used in openFillModal, so it needs to be kept or refactored.
-        // For now, keeping it as the diff doesn't explicitly remove its usage.
         $this->assignedChecklists = ChecklistAssignment::query()
             ->where('user_id', Auth::id())
             ->where('sede_id', $this->visit->sede_id)
@@ -86,24 +133,58 @@ class VisitInProgress extends Component
             ->get();
 
         // 2. Cargar checklists ya completados en ESTA visita
-        // This property is still used in openFillModal, so it needs to be kept or refactored.
-        // For now, keeping it as the diff doesn't explicitly remove its usage.
         $this->completedChecklists = $this->visit->checklistCompletions()
             ->with(['assignment.checklist'])
             ->get();
             
-        // The diff indicates a new 'checklists' property should hold completions.
-        // Assuming this replaces the need for 'completedChecklists' for display purposes.
-        $this->checklists = $this->visit->checklistCompletions()->with('assignment.checklist')->get();
-
         // 3. Cargar capacitaciones realizadas
-        $this->trainings = $this->visit->trainings()->latest()->get();
+        $this->trainings = $this->visit->trainings()->with('training')->latest()->get();
+
+        // 3.1 Cargar capacitaciones asignadas (pendientes) para esta sede y usuario
+        $this->assignedTrainings = \App\Models\Training::query()
+            ->where('user_id', Auth::id())
+            ->where('sede_id', $this->visit->sede_id)
+            ->where('status', 'scheduled') // Solo programadas
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // 3.2 Cargar Solicitudes de EPP (Pendientes)
+        $this->assignedEppRequests = \App\Models\EppDeliveryRequest::where('sede_id', $this->visit->sede_id)
+            ->where('status', 'pending')
+            ->with(['employee']) 
+            ->get();
 
         // 4. Cargar entregas de EPP realizadas
         $this->eppDeliveries = $this->visit->eppDeliveries()->with('employee')->latest()->get();
 
         // 5. Cargar hallazgos
         $this->hallazgos = $this->visit->hallazgos()->latest()->get();
+    }
+
+    public function executeTraining($trainingId)
+    {
+        $training = \App\Models\Training::find($trainingId);
+        
+        if (!$training) {
+            return;
+        }
+
+        // Crear registro de capacitación en la visita vinculado a la planificación
+        $visitTraining = $this->visit->trainings()->create([
+            'training_id' => $training->id, // Vinculamos al ID original
+            'is_adhoc' => false,
+            'title' => $training->title,
+            'description' => $training->description,
+            'duration_minutes' => $training->duration,
+            'attendees' => [], // Inicialmente vacío
+            'notes' => 'Ejecutado desde Visita #' . $this->visit->id
+        ]);
+
+        // Redirigir a toma de asistencia con visit_id
+        return redirect()->route('trainings.attendance', [
+            'id' => $training->id,
+            'visit_id' => $this->visit->id
+        ]);
     }
 
     public function openAutoAssignModal()
@@ -140,9 +221,6 @@ class VisitInProgress extends Component
         $this->showAutoAssignModal = false;
         $this->selectedChecklistIdToAssign = null;
         $this->loadChecklists(); // Recargar lista
-        
-        // Notificar éxito (opcional)
-        // session()->flash('message', 'Checklist auto-asignado correctamente.');
     }
 
     public function openFillModal($assignmentId)
@@ -191,24 +269,9 @@ class VisitInProgress extends Component
         if ($visitTraining->training_id) {
             return redirect()->route('trainings.attendance', $visitTraining->training_id);
         }
+        // Si es ad-hoc (sin ID de training padre), quizás necesitemos otra vista o no soportarlo aún
     }
 
-    public function openEppModal()
-    {
-        $this->showEppModal = true;
-    }
-
-    public function closeEppModal()
-    {
-        $this->showEppModal = false;
-    }
-
-    public function onEppDelivered()
-    {
-        $this->closeEppModal();
-        $this->loadChecklists(); // Recargar todo
-        session()->flash('message', 'EPP entregado exitosamente.');
-    }
 
     public function openHallazgoModal()
     {
@@ -242,6 +305,39 @@ class VisitInProgress extends Component
         $this->closeIncidenteModal();
         $this->loadChecklists();
         session()->flash('message', 'Incidente reportado exitosamente.');
+    }
+
+    public function finalizeVisit()
+    {
+        // Validar campos requeridos
+        $this->validate([
+            'visitNotes' => 'required|string|min:10',
+            'responsibleName' => 'required|string|min:3',
+            'responsibleSignature' => 'required|string',
+        ], [
+            'visitNotes.required' => 'Las observaciones son obligatorias',
+            'visitNotes.min' => 'Las observaciones deben tener al menos 10 caracteres',
+            'responsibleName.required' => 'El nombre del responsable es obligatorio',
+            'responsibleName.min' => 'El nombre debe tener al menos 3 caracteres',
+            'responsibleSignature.required' => 'La firma digital es obligatoria',
+        ]);
+
+        // Actualizar estado de la visita
+        $this->visit->update([
+            'status' => 'completed',
+            'end_time' => now(),
+            'notes' => $this->visitNotes,
+            'responsible_name' => $this->responsibleName,
+            'responsible_signature' => $this->responsibleSignature,
+        ]);
+
+        session()->flash('message', 'Visita finalizada correctamente. Puede descargar la constancia desde la lista de visitas.');
+        
+        // Redirigir a lista de visitas
+        if (auth()->user()->hasRole('Administrador')) {
+            return redirect()->route('gestor.visits.history');
+        }
+        return redirect()->route('tecnico.visits.index');
     }
 
     public function render()

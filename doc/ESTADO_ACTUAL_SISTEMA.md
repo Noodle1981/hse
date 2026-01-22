@@ -369,6 +369,85 @@ Las rutas sin prefijo (`/checklists`, `/inspections`, etc.) se mantienen tempora
 
 ---
 
+## 🎯 Funcionalidades Recientes (2026-01-22)
+
+### **Solicitudes de Entrega EPP (Admin → Técnico)**
+
+**Implementado**: 2026-01-22 16:00-16:40
+
+**Descripción**: Sistema de solicitudes de entrega de EPP donde el Administrador puede crear solicitudes que aparecen como tareas pendientes para los técnicos.
+
+**Flujo de trabajo**:
+1. **Admin crea solicitud** (`/epp/deliver`)
+   - Selecciona empresa, sede y empleado
+   - Selecciona ítems EPP del catálogo con cantidades
+   - El sistema guarda como `EppDeliveryRequest` con estado `pending`
+   - No requiere firma (es solo una solicitud)
+
+2. **Técnico ve solicitud** 
+   - Aparece en "Mis Tareas" (`/checklists/my-assignments`)
+   - Aparece en "Visita en Progreso" si la visita es de esa sede
+   - Muestra: empleado, cantidad de ítems, solicitante
+
+3. **Técnico ejecuta entrega**
+   - Click en "Entregar" abre el modal de EPP
+   - Formulario pre-cargado con empleado e ítems solicitados
+   - Técnico completa firma y observaciones
+   - Al guardar: crea `EppDelivery` real y marca request como `completed`
+
+**Componentes modificados**:
+- `app/Livewire/Epp/EppDeliveryWizard.php` - Detecta rol y crea Request o Delivery
+- `app/Livewire/Technician/MyAssignments.php` - Muestra requests pendientes
+- `app/Livewire/Visits/VisitInProgress.php` - Muestra requests de la sede
+- `app/Livewire/Visits/EppDelivery.php` - Acepta `requestId` para pre-cargar
+
+**Modelos nuevos**:
+- `app/Models/EppDeliveryRequest.php`
+- Tabla: `epp_delivery_requests`
+  - `empresa_id`, `sede_id`, `employee_id`
+  - `requested_by_user_id` (Admin que solicitó)
+  - `status` (pending/completed)
+  - `items` (JSON: `{item_id: {cantidad, tipo_entrega}}`)
+  - `notes`
+
+**Vistas actualizadas**:
+- `resources/views/livewire/technician/my-assignments.blade.php` - Sección "Solicitudes de Entrega EPP"
+- `resources/views/livewire/visits/visit-in-progress.blade.php` - Card "Entregas EPP" con solicitudes pendientes
+
+**Rutas modificadas**:
+- `/epp/deliver` ahora accesible por Admin y Técnico (antes solo Técnico)
+
+**Nota sobre Stock**: 
+- Actualmente NO hay gestión de stock de EPP
+- Los ítems EPP se definen en `epp_items` (catálogo)
+- Si un `item_id` no existe en `epp_items`, se mostrará como "Item #X"
+- **Recomendación futura**: Implementar módulo de inventario/stock para validar disponibilidad antes de crear solicitudes
+
+### **Capacitaciones Asignadas en Visitas**
+
+**Implementado**: 2026-01-22 15:50-16:00
+
+**Descripción**: Las capacitaciones programadas (`status='scheduled'`) ahora aparecen en la vista de visita en progreso.
+
+**Flujo**:
+1. Admin crea capacitación con estado "scheduled" asignada a técnico y sede
+2. Técnico ve la capacitación en "Mis Tareas"
+3. Al iniciar visita en esa sede, aparece en tarjeta "Capacitaciones" como "Planificadas para hoy"
+4. Click en "Realizar" crea `VisitTraining` vinculado y redirige a toma de asistencia
+
+**Componentes modificados**:
+- `app/Livewire/Visits/VisitInProgress.php` - Carga `assignedTrainings`
+- `resources/views/livewire/visits/visit-in-progress.blade.php` - Sección "Planificadas para hoy"
+
+### **Correcciones de Permisos**
+
+**Implementado**: 2026-01-22 16:05
+
+- **Visitas**: Admin puede ver visitas de cualquier técnico (bypass ownership check)
+- **Rutas consolidadas**: `/visits/in-progress/{visit}` accesible por Admin y Técnico
+
+---
+
 ## 📝 Archivos de Documentación
 
 - `ASIGNACIONES_RECURRENTES.md` - Especificación técnica de recurrencias (pendiente)

@@ -130,14 +130,58 @@
                             + Registrar
                         </button>
                     </div>
+
+                    <!-- Capacitaciones Planificadas / Asignadas -->
+                    @if(count($assignedTrainings) > 0)
+                        <div class="mb-4 space-y-2">
+                             <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Planificadas para hoy</h3>
+                             @foreach($assignedTrainings as $assigned)
+                                <div class="p-3 bg-blue-50 rounded border border-blue-200">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-sm font-bold text-gray-800">{{ $assigned->title }}</h3>
+                                            <p class="text-xs text-blue-600 mt-0.5">{{ $assigned->duration }} min • {{ $assigned->date->format('H:i') }} hs</p>
+                                        </div>
+                                        <button 
+                                            wire:click="executeTraining({{ $assigned->id }})"
+                                            class="btn-xs bg-blue-600 text-white rounded px-3 py-1 hover:bg-blue-700 transition-colors shadow-sm"
+                                        >
+                                            Realizar
+                                        </button>
+                                    </div>
+                                    @if($assigned->description)
+                                        <p class="text-xs text-gray-600 mt-1 line-clamp-1">{{ $assigned->description }}</p>
+                                    @endif
+                                </div>
+                             @endforeach
+                        </div>
+                    @endif
+                    
+                    <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Realizadas en esta visita</h3>
                     
                     @if(count($trainings) > 0)
                         <div class="space-y-3">
                             @foreach($trainings as $training)
                                 <div class="p-3 bg-gray-50 rounded border border-gray-100 transition-colors hover:border-blue-200">
                                     <div class="flex justify-between items-start">
-                                        <h3 class="text-sm font-medium text-gray-900">{{ $training->title }}</h3>
-                                        <span class="text-xs text-blue-600 font-semibold">{{ $training->duration_minutes }} min</span>
+                                        <div class="flex-1">
+                                            <h3 class="text-sm font-medium text-gray-900">{{ $training->title }}</h3>
+                                            @if($training->training)
+                                                <span class="text-xs {{ $training->training->status === 'completed' ? 'text-green-600' : 'text-blue-600' }} font-semibold">
+                                                    {{ $training->duration_minutes }} min
+                                                    @if($training->training->status === 'completed')
+                                                        • Completada
+                                                    @endif
+                                                </span>
+                                            @else
+                                                <span class="text-xs text-blue-600 font-semibold">{{ $training->duration_minutes }} min</span>
+                                            @endif
+                                        </div>
+                                        @if($training->training && $training->training->status === 'completed')
+                                            <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                                ✓ Completada
+                                            </span>
+                                        @endif
                                     </div>
                                     <p class="text-xs text-gray-500 mt-1 line-clamp-2">{{ $training->description }}</p>
                                     <div class="mt-2 flex items-center justify-between">
@@ -145,7 +189,7 @@
                                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                                             {{ $training->attendees_count }} asistentes
                                         </div>
-                                        @if($training->training_id)
+                                        @if($training->training_id && (!$training->training || $training->training->status !== 'completed'))
                                             <button wire:click="openAttendance({{ $training->id }})" class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors">
                                                 Tomar Asistencia
                                             </button>
@@ -172,13 +216,45 @@
                         </button>
                     </div>
 
+                    <!-- Solicitudes de Entrega Pendientes -->
+                    @php
+                        $pendingRequests = $assignedEppRequests->where('status', 'pending');
+                    @endphp
+                    @if($pendingRequests->count() > 0)
+                        <div class="mb-4 space-y-2">
+                             <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Solicitudes Pendientes</h3>
+                             @foreach($pendingRequests as $eppRequest)
+                                <div class="p-3 bg-orange-50 rounded border border-orange-200">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-sm font-bold text-gray-800">{{ $eppRequest->employee->name }} {{ $eppRequest->employee->last_name }}</h3>
+                                            <p class="text-xs text-orange-600 mt-0.5">{{ count($eppRequest->items) }} ítems solicitados</p>
+                                        </div>
+                                        <button 
+                                            wire:click="executeEppRequest({{ $eppRequest->id }})"
+                                            class="btn-xs bg-orange-600 text-white rounded px-3 py-1 hover:bg-orange-700 transition-colors shadow-sm"
+                                        >
+                                            Entregar
+                                        </button>
+                                    </div>
+                                </div>
+                             @endforeach
+                        </div>
+                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Entregas Realizadas</h3>
+                    @endif
+
                     @if(count($eppDeliveries) > 0)
                         <div class="space-y-3">
                             @foreach($eppDeliveries as $delivery)
                                 <div class="p-3 bg-gray-50 rounded border border-gray-100">
                                     <div class="flex justify-between items-start">
-                                        <h3 class="text-sm font-medium text-gray-900">{{ $delivery->employee->name }} {{ $delivery->employee->last_name }}</h3>
-                                        <span class="text-xs text-orange-600 font-semibold">{{ count($delivery->epp_items ?? []) }} ítems</span>
+                                        <div class="flex-1">
+                                            <h3 class="text-sm font-medium text-gray-900">{{ $delivery->employee->name }} {{ $delivery->employee->last_name }}</h3>
+                                            <span class="text-xs text-orange-600 font-semibold">{{ count($delivery->epp_items ?? []) }} ítems</span>
+                                        </div>
+                                        <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
+                                            ✓ Entregado
+                                        </span>
                                     </div>
                                     <div class="mt-2 text-xs text-gray-500">
                                         @foreach(array_slice($delivery->epp_items ?? [], 0, 2) as $item)
@@ -251,9 +327,128 @@
         </div>
     @endif
     
-    <!-- Modal Finalizar (Placeholder) -->
+    <!-- Modal Finalizar Visita -->
     @if($showFinalizeModal)
-        @livewire('visits.visit-finalizer', ['visit' => $visit], key('finalizer-'.$visit->id))
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full mx-4 p-6 max-h-[90vh] overflow-y-auto" 
+                 x-data="{ 
+                    canvas: null,
+                    ctx: null,
+                    isDrawing: false,
+                    lastX: 0,
+                    lastY: 0,
+                    init() {
+                        this.$nextTick(() => {
+                            this.canvas = this.$refs.signatureCanvas;
+                            this.ctx = this.canvas.getContext('2d');
+                            const rect = this.canvas.getBoundingClientRect();
+                            this.canvas.width = rect.width;
+                            this.canvas.height = rect.height;
+                            this.ctx.strokeStyle = '#059669';
+                            this.ctx.lineWidth = 2;
+                            this.ctx.lineCap = 'round';
+                            this.ctx.lineJoin = 'round';
+                        });
+                    },
+                    startDrawing(e) {
+                        this.isDrawing = true;
+                        const rect = this.canvas.getBoundingClientRect();
+                        this.lastX = e.clientX - rect.left;
+                        this.lastY = e.clientY - rect.top;
+                    },
+                    draw(e) {
+                        if (!this.isDrawing) return;
+                        const rect = this.canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(this.lastX, this.lastY);
+                        this.ctx.lineTo(x, y);
+                        this.ctx.stroke();
+                        this.lastX = x;
+                        this.lastY = y;
+                    },
+                    stopDrawing() {
+                        this.isDrawing = false;
+                    },
+                    clearSignature() {
+                        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    },
+                    submitForm() {
+                        const signatureData = this.canvas.toDataURL('image/png');
+                        @this.set('responsibleSignature', signatureData);
+                        @this.finalizeVisit();
+                    }
+                 }">
+                <div class="mb-6">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 text-center mb-2">Finalizar Visita</h3>
+                    <p class="text-sm text-gray-500 text-center">
+                        Complete los siguientes datos para generar la constancia de visita
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Observaciones -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Observaciones de la Visita *</label>
+                        <textarea wire:model="visitNotes" 
+                                  rows="4"
+                                  class="block w-full border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 text-sm"
+                                  placeholder="Describa las actividades realizadas, hallazgos importantes, estado general de la sede, etc."></textarea>
+                        @error('visitNotes') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Nombre del Responsable -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Nombre del Responsable de la Sede *</label>
+                        <input type="text" 
+                               wire:model="responsibleName" 
+                               class="block w-full border-gray-300 rounded-xl focus:ring-green-500 focus:border-green-500 text-sm"
+                               placeholder="Nombre completo de quien recibe la visita">
+                        @error('responsibleName') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Firma Digital -->
+                    <div wire:ignore>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Firma del Responsable *</label>
+                        <div class="relative bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden touch-none h-40">
+                            <canvas x-ref="signatureCanvas" 
+                                    @mousedown="startDrawing($event)"
+                                    @mousemove="draw($event)"
+                                    @mouseup="stopDrawing()"
+                                    @mouseleave="stopDrawing()"
+                                    class="w-full h-full cursor-crosshair"></canvas>
+                            <button type="button" @click="clearSignature()" 
+                                    class="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur shadow-sm rounded-lg text-gray-500 hover:text-red-500 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                        @error('responsibleSignature') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex gap-3 pt-4">
+                        <button wire:click="$set('showFinalizeModal', false)" 
+                                type="button"
+                                class="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                            Cancelar
+                        </button>
+                        <button @click="submitForm()" 
+                                type="button"
+                                class="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors shadow-lg shadow-green-600/20">
+                            Generar Constancia
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     @endif
     
     <!-- Modal Llenado Checklist -->
@@ -269,8 +464,9 @@
     <!-- Modal Entrega EPP -->
     @if($showEppModal)
         @livewire('visits.epp-delivery', [
-            'visit' => $visit
-        ], key('epp-form'))
+            'visit' => $visit,
+            'requestId' => $selectedEppRequestId
+        ], key('epp-form-'.($selectedEppRequestId ?? 'new')))
     @endif
 
     <!-- Modal Hallazgo Rápido -->

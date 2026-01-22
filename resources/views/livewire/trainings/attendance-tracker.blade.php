@@ -107,6 +107,28 @@
                 @endforelse
             </ul>
         </div>
+
+        <!-- Observaciones y Finalizar -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mt-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Observaciones de la Capacitación
+            </h3>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Notas y comentarios</label>
+                <textarea wire:model="observations" 
+                          rows="4"
+                          class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-4 transition-all"
+                          placeholder="Agregue observaciones sobre el desarrollo de la capacitación, temas tratados, materiales entregados, etc."></textarea>
+            </div>
+
+            <button wire:click="completeTraining" 
+                    class="w-full py-4 bg-green-600 text-white rounded-2xl shadow-xl shadow-green-600/20 hover:bg-green-700 transition-all font-bold text-lg flex items-center justify-center">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Finalizar Capacitación
+            </button>
+        </div>
     </div>
 
     <script>

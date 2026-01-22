@@ -77,9 +77,19 @@ class MyAssignments extends Component
             ->orderBy('date', 'asc')
             ->get(); // Generalmente son pocas, usamos get() en lugar de paginate para simplificar UI mixta
 
+        // EPP Delivery Requests (Solicitudes de Admin)
+        $eppRequests = \App\Models\EppDeliveryRequest::query()
+            ->where('status', 'pending')
+            ->when($this->selectedEmpresa, fn($q) => $q->where('empresa_id', $this->selectedEmpresa))
+            ->when($this->selectedSede, fn($q) => $q->where('sede_id', $this->selectedSede))
+            ->with(['empresa', 'sede', 'employee', 'requester'])
+            ->latest()
+            ->get();
+
         return view('livewire.technician.my-assignments', [
             'assignments' => $assignments,
             'trainings' => $trainings,
+            'eppRequests' => $eppRequests,
             'empresas' => $empresas,
             'sedes' => $sedes,
         ])->layout('components.layouts.app');

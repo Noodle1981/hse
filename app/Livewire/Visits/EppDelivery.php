@@ -35,10 +35,35 @@ class EppDelivery extends Component
         $this->visitService = $visitService;
     }
 
-    public function mount(VisitCertificate $visit)
+    public function mount(VisitCertificate $visit, $requestId = null)
     {
         $this->visit = $visit;
         $this->loadData();
+        
+        if ($requestId) {
+            $eppRequest = \App\Models\EppDeliveryRequest::find($requestId);
+            if ($eppRequest) {
+                // Pre-fill form
+                $this->employeeId = $eppRequest->employee_id;
+                $this->notes = $eppRequest->notes;
+                
+                // Convert request items to selectedItems format
+                // request items: {item_id: {cantidad, tipo_entrega}}
+                // selectedItems: [{item_id, name, qty, size, reason}]
+                foreach ($eppRequest->items as $itemId => $itemData) {
+                    $eppItem = EppItem::find($itemId);
+                    if ($eppItem) {
+                        $this->selectedItems[] = [
+                            'item_id' => $eppItem->id,
+                            'name' => $eppItem->nombre,
+                            'qty' => is_array($itemData) ? ($itemData['cantidad'] ?? 1) : 1,
+                            'size' => null,
+                            'reason' => 'Entrega',
+                        ];
+                    }
+                }
+            }
+        }
     }
 
     public function loadData()
