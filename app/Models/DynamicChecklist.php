@@ -45,6 +45,9 @@ class DynamicChecklist extends Model
     /**
      * Categoría del checklist
      */
+    /**
+     * Categoría del checklist
+     */
     public function categoryRelation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
@@ -77,7 +80,7 @@ class DynamicChecklist extends Model
     /**
      * Scope para filtrar por categoría
      */
-    public function scopeCategory($query, string $category)
+    public function scopeByCategory($query, string $category)
     {
         return $query->where('category', $category);
     }

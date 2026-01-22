@@ -28,6 +28,9 @@ class Hallazgo extends Model
         'origen_type',
         'origen_id',
         'risk_id',
+        'visit_certificate_id',
+        'checklist_completion_id',
+        'question_id',
     ];
 
     protected $casts = [
@@ -112,6 +115,30 @@ class Hallazgo extends Model
     public function incidentes(): HasMany
     {
         return $this->hasMany(Incidente::class);
+    }
+
+    /**
+     * Visita asociada (integración)
+     */
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(VisitCertificate::class, 'visit_certificate_id');
+    }
+
+    /**
+     * Checklist completion asociado
+     */
+    public function checklistCompletion(): BelongsTo
+    {
+        return $this->belongsTo(VisitChecklistCompletion::class, 'checklist_completion_id');
+    }
+
+    /**
+     * Pregunta específica del checklist
+     */
+    public function question(): BelongsTo
+    {
+        return $this->belongsTo(DynamicQuestion::class, 'question_id');
     }
 
     // ============================================

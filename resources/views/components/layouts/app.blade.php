@@ -112,35 +112,25 @@
                 <ul class="space-y-1 px-3">
                     <!-- Dashboard -->
                     <!-- Plantillas (Solo Admin) -->
-                    @if(auth()->user()->rol === 'Administrador')
-                    <li>
-                        <a href="{{ route('checklists.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('checklists.index') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Plantillas</span>
-                        </a>
-                    </li>
+
                     
-                    <!-- Nuevo Checklist -->
+                    <!-- Mis Visitas (Técnico y Admin) -->
+                    @if(auth()->user()->rol === 'Técnico' || auth()->user()->rol === 'Administrador')
                     <li>
-                        <a href="{{ route('checklists.create') }}" 
+                        <a href="{{ route('visits.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('checklists.create') ? 'menu-item-active text-white' : '' }}">
+                                  {{ request()->routeIs('visits.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </span>
-                            <span x-show="sidebarOpen" class="menu-text">Nuevo Checklist</span>
+                            <span x-show="sidebarOpen" class="menu-text">Mis Visitas</span>
                         </a>
                     </li>
                     @endif
-                    
+
                     <!-- Mis Tareas (Solo Técnico) -->
                     @if(auth()->user()->rol === 'Técnico')
                     <li>
@@ -168,7 +158,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                                 </svg>
                             </span>
-                            <span x-show="sidebarOpen" class="menu-text">Asignaciones</span>
+                            <span x-show="sidebarOpen" class="menu-text">Checklist</span>
                         </a>
                     </li>
                     @endif
@@ -191,53 +181,8 @@
 
                     @endif
 
-                    <!-- Matrices de Riesgo (Admin y Técnico) -->
-                    <li>
-                        <a href="{{ route('risk-matrices.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('risk-matrices.index') || request()->routeIs('risk-matrices.editor') || request()->routeIs('risk-matrices.evaluator') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Matrices de Riesgo</span>
-                        </a>
-                    </li>
-                    {{-- Mapa de Calor Global (Solo Admin) --}}`r`n                    @if(auth()->user()->rol === 'Administrador')
-                    <li>
-                        <a href="{{ route('risk-matrices.dashboard') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('risk-matrices.dashboard') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v12a2 2 0 002 2z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Mapa de Calor Global</span>
-                        </a>
-                    </li>
-                    @endif
 
-                    <li class="mt-6">
-                        <span x-show="sidebarOpen" class="px-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Ejecución y Control Anual</span>
-                    </li>
-
-                    <!-- Contrato Anual -->
-                    <li>
-                        <a href="{{ route('annual-contract.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('annual-contract.*') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text font-bold">Resumen Contrato Anual</span>
-                        </a>
-                    </li>
-
-                    <!-- Historial -->
+                    {{-- Historial --}}
                     <li>
                         <a href="{{ route('inspections.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -250,22 +195,8 @@
                             <span x-show="sidebarOpen" class="menu-text">Historial</span>
                         </a>
                     </li>
-                    
-                    <!-- Constancias de Visitas (Admin) -->
+
                     @if(auth()->user()->rol === 'Administrador')
-                    <li>
-                        <a href="{{ route('visit-certificates.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('visit-certificates.index') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Constancias de Visitas</span>
-                        </a>
-                    </li>
-                    
                     <!-- Hallazgos (Solo Admin) -->
                     <li>
                         <a href="{{ route('hallazgos.index') }}" 
@@ -291,6 +222,67 @@
                                 </svg>
                             </span>
                             <span x-show="sidebarOpen" class="menu-text">Incidentes</span>
+                        </a>
+                    </li>
+                    @endif
+
+                    <li>
+                        <a href="{{ route('epp.history') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('epp.history') ? 'menu-item-active text-white' : '' }}">
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen" class="menu-text">Gestión EPP</span>
+                        </a>
+                    </li>
+
+                    <li class="mt-6">
+                        <span x-show="sidebarOpen" class="px-3 text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Avanzadas</span>
+                    </li>
+
+                    <!-- Matrices de Riesgo (Admin y Técnico) -->
+                    <li>
+                        <a href="{{ route('risk-matrices.index') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('risk-matrices.index') || request()->routeIs('risk-matrices.editor') || request()->routeIs('risk-matrices.evaluator') ? 'menu-item-active text-white' : '' }}">
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"/>
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen" class="menu-text">Matrices de Riesgo</span>
+                        </a>
+                    </li>
+
+                    <!-- Contrato Anual -->
+                    <li>
+                        <a href="{{ route('annual-contract.index') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('annual-contract.*') ? 'menu-item-active text-white' : '' }}">
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/>
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen" class="menu-text">Contratos Anuales</span>
+                        </a>
+                    </li>
+
+                    {{-- Mapa de Calor Global (Solo Admin) --}}
+                    @if(auth()->user()->rol === 'Administrador')
+                    <li>
+                        <a href="{{ route('risk-matrices.dashboard') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('risk-matrices.dashboard') ? 'menu-item-active text-white' : '' }}">
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2-2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen" class="menu-text">Mapa de Calor Global</span>
                         </a>
                     </li>
                     @endif
@@ -343,24 +335,21 @@
                             </a>
                         </li>
 
-
-
-                        <!-- EPP y Personal (Solo Admin) -->
-                        <li class="pt-4 pb-2" x-show="sidebarOpen">
-                            <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3">EPP y Personal</span>
-                        </li>
+                        <!-- Personal -->
                         <li>
-                            <a href="{{ route('epp.catalog') }}" 
+                            <a href="{{ route('epp.employees.index') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('epp.catalog') ? 'menu-item-active text-white' : '' }}">
+                                      {{ request()->routeIs('epp.employees.index') ? 'menu-item-active text-white' : '' }}">
                                 <span class="menu-icon mr-3 flex-shrink-0">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                     </svg>
                                 </span>
-                                <span x-show="sidebarOpen" class="menu-text">Catálogo EPP</span>
+                                <span x-show="sidebarOpen" class="menu-text">Personal</span>
                             </a>
                         </li>
+
+                        <!-- Importar Personal -->
                         <li>
                             <a href="{{ route('epp.employees.import') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -373,12 +362,10 @@
                                 <span x-show="sidebarOpen" class="menu-text">Importar Personal</span>
                             </a>
                         </li>
+
+
                     @endif
-                    
-                    <!-- Entrega de EPP (Técnico y Admin) -->
-                    <li class="pt-4 pb-2" x-show="sidebarOpen">
-                        <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider px-3">Gestión de Campo</span>
-                    </li>
+
                     @if(auth()->user()->hasRole('Técnico') && !auth()->user()->hasRole('Administrador'))
                     <li>
                         <a href="{{ route('epp.deliver') }}" 
@@ -393,56 +380,11 @@
                         </a>
                     </li>
                     @endif
-                    <li>
-                        <a href="{{ route('epp.employees.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('epp.employees.index') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Personal</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('epp.history') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('epp.history') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Historial EPP</span>
-                        </a>
-                    </li>
+
+
                     
-                    <!-- Mis Hallazgos (Técnico y Admin) -->
-                    <li>
-                        <a href="{{ route('mis-hallazgos') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('mis-hallazgos') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Mis Hallazgos</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('visit-certificates.history') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('visit-certificates.*') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Constancias de Visitas</span>
-                        </a>
-                    </li>
+
+
 
                     <!-- Separador Reportes -->
                     <li class="pt-4 pb-2" x-show="sidebarOpen">

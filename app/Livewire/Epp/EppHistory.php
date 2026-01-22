@@ -3,6 +3,7 @@
 namespace App\Livewire\Epp;
 
 use App\Models\EppDelivery;
+use App\Models\VisitEppDelivery;
 use App\Models\Empresa;
 use App\Models\Sede;
 use Livewire\Component;
@@ -22,7 +23,8 @@ class EppHistory extends Component
 
     public function render()
     {
-        $deliveries = EppDelivery::query()
+        // Query legacy standalone deliveries
+        $legacyDeliveries = EppDelivery::query()
             ->with(['employee', 'items', 'user', 'employee.empresa', 'employee.sede'])
             ->when(auth()->user()->hasRole('Técnico') && !auth()->user()->hasRole('Administrador'), function ($q) {
                 $q->where('user_id', auth()->id());
@@ -40,7 +42,50 @@ class EppHistory extends Component
                 $q->whereHas('employee', fn($sq) => $sq->where('sede_id', $this->sedeFilter));
             })
             ->latest('delivery_date')
-            ->paginate(15);
+            ->get();
+
+        // Query visit-based deliveries
+        $visitDeliveries = VisitEppDelivery::query()
+            ->with(['employee', 'visit.user', 'employee.empresa', 'employee.sede', 'visit'])
+            ->when(auth()->user()->hasRole('Técnico') && !auth()->user()->hasRole('Administrador'), function ($q) {
+                $q->whereHas('visit', fn($v) => $v->where('user_id', auth()->id()));
+            })
+            ->when($this->search, function ($q) {
+                $q->whereHas('employee', function ($sq) {
+                    $sq->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->empresaFilter, function ($q) {
+                $q->whereHas('employee', fn($sq) => $sq->where('empresa_id', $this->empresaFilter));
+            })
+            ->when($this->sedeFilter, function ($q) {
+                $q->whereHas('employee', fn($sq) => $sq->where('sede_id', $this->sedeFilter));
+            })
+            ->latest('created_at')
+            ->get();
+
+        // Merge and paginate manually
+        $allDeliveries = $legacyDeliveries->concat($visitDeliveries)
+            ->sortByDesc(function($delivery) {
+                return $delivery instanceof VisitEppDelivery 
+                    ? $delivery->created_at 
+                    : $delivery->delivery_date;
+            })
+            ->values();
+
+        // Manual pagination
+        $currentPage = \Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $perPage = 15;
+        $currentPageItems = $allDeliveries->slice(($currentPage - 1) * $perPage, $perPage)->values();
+        
+        $deliveries = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $allDeliveries->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+        );
 
         $empresas = Empresa::orderBy('nombre')->get();
         $sedes = $this->empresaFilter 

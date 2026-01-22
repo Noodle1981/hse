@@ -1,6 +1,8 @@
 <div>
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-ep-dark">Historial de Inspecciones</h1>
+        <h1 class="text-3xl font-bold text-ep-dark">
+            Historial de Inspecciones <span class="text-lg font-normal text-gray-500 ml-2">(vista en revisión)</span>
+        </h1>
         <a href="{{ route('checklists.index') }}" 
            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
             ← Volver a Plantillas

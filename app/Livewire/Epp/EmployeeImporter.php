@@ -21,6 +21,14 @@ class EmployeeImporter extends Component
     public $message = '';
     public $errorLog = [];
 
+    // Campos para registro manual
+    public $manual_name;
+    public $manual_lastname;
+    public $manual_dni;
+    public $manual_cuil;
+    public $manual_puesto;
+    public $manualMessage = '';
+
     protected $rules = [
         'file' => 'required|mimes:xlsx,xls,csv|max:10240',
         'empresa_id' => 'required|exists:empresas,id',
@@ -134,6 +142,40 @@ class EmployeeImporter extends Component
             $this->message = 'Error al procesar el archivo. Por favor, verifica el formato e intenta nuevamente.';
         } finally {
             $this->importing = false;
+        }
+    }
+
+    public function createManual()
+    {
+        $this->validate([
+            'empresa_id' => 'required|exists:empresas,id',
+            'sede_id' => 'required|exists:sedes,id',
+            'manual_name' => 'required|string|max:255',
+            'manual_lastname' => 'required|string|max:255',
+            'manual_dni' => 'required|string|unique:employees,dni',
+            'manual_cuil' => ['nullable', new \App\Rules\ValidCuil()],
+            'manual_puesto' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            Employee::create([
+                'empresa_id' => $this->empresa_id,
+                'sede_id' => $this->sede_id,
+                'name' => $this->manual_name,
+                'last_name' => $this->manual_lastname,
+                'dni' => $this->manual_dni,
+                'cuil' => $this->manual_cuil,
+                'puesto' => $this->manual_puesto,
+                'is_active' => true,
+            ]);
+
+            $this->manualMessage = "Empleado registrado manualmente con éxito.";
+            
+            // Limpiar campos manuales
+            $this->reset(['manual_name', 'manual_lastname', 'manual_dni', 'manual_cuil', 'manual_puesto']);
+            
+        } catch (\Exception $e) {
+            $this->manualMessage = "Error al registrar: " . $e->getMessage();
         }
     }
 

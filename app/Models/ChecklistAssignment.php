@@ -43,6 +43,11 @@ class ChecklistAssignment extends Model
         return $this->belongsTo(Empresa::class);
     }
 
+    public function visitCompletion(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(VisitChecklistCompletion::class, 'checklist_assignment_id');
+    }
+
     // Scopes
     public function scopePending($query)
     {

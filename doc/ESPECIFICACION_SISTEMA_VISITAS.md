@@ -38,7 +38,7 @@ Implementar un sistema donde las **Visitas** actúan como contenedor universal d
 
 ### Modelo de Datos Unificado
 
-```sql
+``` SQLITE
 -- Tabla principal: Visitas
 visit_certificates
 ├── id

@@ -16,7 +16,7 @@ class HallazgoWizard extends Component
 
     public $hallazgoId = null;
     public $currentStep = 1;
-    public $totalSteps = 4;
+    public $totalSteps = 4; // Dynamic: 3 if from visit, 4 if standalone
 
     // Paso 1: Información Básica
     public $titulo = '';
@@ -39,6 +39,13 @@ class HallazgoWizard extends Component
 
     // Fotos (se manejan en el detalle después de crear)
     public $fotos = [];
+
+    // Visit context (optional)
+    public $visitId;
+
+    protected $queryString = [
+        'visitId' => ['except' => null, 'as' => 'visit_id'],
+    ];
 
     protected function rules()
     {
@@ -77,12 +84,25 @@ class HallazgoWizard extends Component
 
     public function mount($id = null)
     {
+        // Capture visit_id from query string
+        $this->visitId = request()->query('visit_id', $this->visitId);
+
         if ($id) {
             $this->hallazgoId = $id;
             $this->loadHallazgo();
         } else {
-            // Valores por defecto
+            // Default values
             $this->plazo_correccion = now()->addDays(15)->format('Y-m-d');
+            
+            // Pre-fill from visit context if available
+            if ($this->visitId) {
+                $visit = \App\Models\VisitCertificate::find($this->visitId);
+                if ($visit) {
+                    $this->sede_id = $visit->sede_id;
+                }
+                // Reduce steps: skip "Origen" step when from visit
+                $this->totalSteps = 3;
+            }
         }
     }
 
@@ -109,6 +129,11 @@ class HallazgoWizard extends Component
 
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
+            
+            // Skip step 3 (Origen) if from visit context
+            if ($this->visitId && $this->currentStep == 3) {
+                $this->currentStep = 4;
+            }
         }
     }
 
@@ -173,6 +198,11 @@ class HallazgoWizard extends Component
             $data['risk_id'] = $this->risk_id;
         }
 
+        // Visit association (if created from visit context)
+        if ($this->visitId) {
+            $data['visit_certificate_id'] = $this->visitId;
+        }
+
         if ($this->hallazgoId) {
             // Actualizar
             $hallazgo = Hallazgo::findOrFail($this->hallazgoId);
@@ -182,6 +212,11 @@ class HallazgoWizard extends Component
             // Crear
             $hallazgo = Hallazgo::create($data);
             session()->flash('message', 'Hallazgo creado correctamente.');
+        }
+
+        // Redirect back to visit if created from visit context
+        if ($this->visitId) {
+            return redirect()->route('visits.in-progress', $this->visitId);
         }
 
         return redirect()->route('hallazgos.show', $hallazgo);

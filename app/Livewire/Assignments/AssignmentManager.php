@@ -161,7 +161,7 @@ class AssignmentManager extends Component
 
     public function render()
     {
-        $query = ChecklistAssignment::with(['checklist', 'user', 'sede', 'empresa'])
+        $query = ChecklistAssignment::with(['checklist', 'user', 'sede', 'empresa', 'visitCompletion.visit'])
             ->orderBy('created_at', 'desc');
 
         // Aplicar filtros

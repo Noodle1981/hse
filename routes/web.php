@@ -104,12 +104,12 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('trainings')->group(function () {
         Route::middleware(['role:Administrador'])->group(function () {
             Route::get('/', \App\Livewire\Trainings\TrainingIndex::class)->name('trainings.index');
-            Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('trainings.create');
-            Route::get('/{id}/edit', \App\Livewire\Trainings\TrainingBuilder::class)->name('trainings.edit');
         });
         
-        // Asistencia puede ser tomada por Admin o Técnico
+        // Admin y Técnico pueden crear, editar y tomar asistencia
         Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('trainings.create');
+            Route::get('/{id}/edit', \App\Livewire\Trainings\TrainingBuilder::class)->name('trainings.edit');
             Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('trainings.attendance');
             Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('trainings.pdf.download');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('trainings.pdf.preview');
@@ -186,20 +186,16 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // Rutas de Constancias de Visitas
-    Route::prefix('visit-certificates')->group(function () {
-        // Solo Admin - Ver todas las constancias
-        Route::middleware(['role:Administrador'])->group(function () {
-            Route::get('/', \App\Livewire\Visits\VisitCertificateManager::class)->name('visit-certificates.index');
+    // Rutas de Visitas (Sistema Integrado)
+    Route::prefix('visits')->name('visits.')->group(function () {
+        // Admin y Técnico - Gestión de Visitas Activas e Historial
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/', \App\Livewire\Visits\VisitManager::class)->name('index');
+            Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
         });
         
-        // Admin y Técnico - Crear, historial y PDF
-        Route::middleware(['role:Administrador,Técnico'])->group(function () {
-            Route::get('/create', \App\Livewire\Visits\VisitCertificateWizard::class)->name('visit-certificates.create');
-            Route::get('/my-history', \App\Livewire\Visits\VisitCertificateHistory::class)->name('visit-certificates.history');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('visit-certificates.pdf.download');
-            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('visit-certificates.pdf.preview');
-        });
+        // Mantener rutas legacy de certificados SOLO si se necesita acceso histórico antiguo
+        // (Opcional: migrar funcionalidad a nuevo sistema)
     });
 
     // Logout

@@ -19,10 +19,15 @@
                         @endforeach
                     </ul>
                 @endif
+        @endif
+
+        @if ($manualMessage)
+            <div class="mb-6 p-4 rounded-xl text-sm font-medium {{ str_contains($manualMessage, 'Error') ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-green-50 text-green-700 border border-green-200' }}">
+                <div class="font-bold">{{ $manualMessage }}</div>
             </div>
         @endif
 
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden mb-8">
             <form wire:submit="import" class="p-8 space-y-8">
                 <!-- Empresa y Sede -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -39,7 +44,7 @@
 
                     <div class="space-y-2">
                         <label class="block text-sm font-bold text-gray-700">Sede Destino</label>
-                        <select wire:model="sede_id" {{ !$empresa_id ? 'disabled' : '' }} class="w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all {{ !$empresa_id ? 'opacity-50 cursor-not-allowed' : '' }}">
+                        <select wire:model.live="sede_id" {{ !$empresa_id ? 'disabled' : '' }} class="w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all {{ !$empresa_id ? 'opacity-50 cursor-not-allowed' : '' }}">
                             <option value="">Seleccione Sede...</option>
                             @foreach($sedes as $sede)
                                 <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
@@ -97,4 +102,62 @@
             </form>
         </div>
     </div>
-</div>
+
+    <!-- Sección de Registro Manual -->
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+            <div class="p-6 border-b border-gray-100 bg-gray-50">
+                <h2 class="text-lg font-bold text-gray-800">Registro Manual Individual</h2>
+                <p class="text-xs text-gray-500">¿Solo necesitas agregar uno? Hazlo aquí rápidamente.</p>
+            </div>
+            
+            <form wire:submit="createManual" class="p-8 space-y-6">
+                <!-- Usar selección de empresa/sede de arriba si está disponible, o inhabilitar si no -->
+                @if(!$empresa_id || !$sede_id)
+                    <div class="p-4 bg-blue-50 text-blue-700 rounded-xl text-sm mb-4">
+                        <span class="font-bold">Nota:</span> Por favor selecciona Empresa y Sede en la parte superior primero.
+                    </div>
+                @endif
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Nombre</label>
+                        <input type="text" wire:model="manual_name" class="w-full border-gray-200 rounded-xl focus:ring-ep-primary focus:border-ep-primary text-sm" placeholder="Juan">
+                        @error('manual_name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">Apellido</label>
+                        <input type="text" wire:model="manual_lastname" class="w-full border-gray-200 rounded-xl focus:ring-ep-primary focus:border-ep-primary text-sm" placeholder="Pérez">
+                        @error('manual_lastname') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">DNI (Único)</label>
+                        <input type="text" wire:model="manual_dni" class="w-full border-gray-200 rounded-xl focus:ring-ep-primary focus:border-ep-primary text-sm" placeholder="12345678">
+                        @error('manual_dni') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1">CUIL (Opcional)</label>
+                        <input type="text" wire:model="manual_cuil" class="w-full border-gray-200 rounded-xl focus:ring-ep-primary focus:border-ep-primary text-sm" placeholder="20-12345678-9">
+                        @error('manual_cuil') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Puesto / Cargo (Opcional)</label>
+                    <input type="text" wire:model="manual_puesto" class="w-full border-gray-200 rounded-xl focus:ring-ep-primary focus:border-ep-primary text-sm" placeholder="Operario de Mantenimiento">
+                    @error('manual_puesto') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" 
+                            {{ (!$empresa_id || !$sede_id) ? 'disabled' : '' }}
+                            class="w-full px-6 py-3 bg-gray-800 text-white font-bold rounded-xl shadow hover:bg-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                        Registrar Empleado
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>

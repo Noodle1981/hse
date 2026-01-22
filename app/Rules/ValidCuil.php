@@ -13,14 +13,17 @@ class ValidCuil implements Rule
      * @param  mixed  $value
      * @return bool
      */
+    private $error = 'El CUIL ingresado no es válido.';
+
     public function passes($attribute, $value)
     {
         if (empty($value)) {
-            return true; // CUIL es opcional
+            return true;
         }
 
         // Formato: XX-XXXXXXXX-X
         if (!preg_match('/^\d{2}-\d{8}-\d$/', $value)) {
+            $this->error = 'El formato debe ser XX-XXXXXXXX-X (con guiones).';
             return false;
         }
 
@@ -28,10 +31,11 @@ class ValidCuil implements Rule
         $cuil = str_replace('-', '', $value);
         
         if (strlen($cuil) !== 11) {
+            $this->error = 'El CUIL debe tener 11 dígitos.';
             return false;
         }
 
-        // Algoritmo de validación de CUIL/CUIT argentino
+        // Algoritmo de validación
         $multiplicadores = [5, 4, 3, 2, 7, 6, 5, 4, 3, 2];
         $suma = 0;
 
@@ -48,16 +52,16 @@ class ValidCuil implements Rule
             $digitoVerificador = 9;
         }
 
-        return (int)$cuil[10] === $digitoVerificador;
+        if ((int)$cuil[10] !== $digitoVerificador) {
+            $this->error = "Dígito verificador incorrecto. Se esperaba $digitoVerificador.";
+            return false;
+        }
+
+        return true;
     }
 
-    /**
-     * Get the validation error message.
-     *
-     * @return string
-     */
     public function message()
     {
-        return 'El CUIL ingresado no es válido. Formato esperado: XX-XXXXXXXX-X';
+        return $this->error;
     }
 }

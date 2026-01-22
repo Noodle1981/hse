@@ -1,10 +1,16 @@
 <div>
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-ep-dark">Plantillas de Checklists</h1>
-        <a href="{{ route('checklists.create') }}" 
-           class="px-6 py-3 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors font-semibold">
-            + Nuevo Checklist
-        </a>
+        <div class="flex gap-3">
+            <a href="{{ route('assignments.index') }}" 
+               class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold flex items-center">
+                ← Volver
+            </a>
+            <a href="{{ route('checklists.create') }}" 
+               class="px-6 py-3 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors font-semibold">
+                + Nuevo Checklist
+            </a>
+        </div>
     </div>
 
     <!-- Filtros -->
@@ -89,27 +95,33 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                <div class="flex justify-center gap-2 flex-wrap">
-                                    @if(!$checklist->is_draft)
-                                        <a href="{{ route('checklists.fill', $checklist) }}"
-                                           class="px-3 py-1 bg-ep-primary text-white rounded hover:bg-ep-primary-dark text-sm">
-                                            Llenar
+                                    <div class="flex justify-center gap-2 flex-wrap">
+                                        <!-- Test PDF Button -->
+                                        <a href="{{ route('inspections.index') }}" 
+                                           class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm flex items-center gap-1">
+                                            <span>📄</span> Probar PDF
                                         </a>
-                                    @endif
-                                    <a href="{{ route('checklists.edit', $checklist) }}"
-                                       class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm">
-                                        Editar
-                                    </a>
-                                    <button wire:click="duplicate({{ $checklist->id }})"
-                                            class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-                                        📋 Duplicar
-                                    </button>
-                                    <button wire:click="delete({{ $checklist->id }})"
-                                            wire:confirm="¿Estás seguro de eliminar este checklist?"
-                                            class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                                        Eliminar
-                                    </button>
-                                </div>
+
+                                        @if(!$checklist->is_draft)
+                                            <a href="{{ route('checklists.fill', $checklist) }}"
+                                               class="px-3 py-1 bg-ep-primary text-white rounded hover:bg-ep-primary-dark text-sm">
+                                                Llenar
+                                            </a>
+                                        @endif
+                                        <a href="{{ route('checklists.edit', $checklist) }}"
+                                           class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm">
+                                            Editar
+                                        </a>
+                                        <button wire:click="duplicate({{ $checklist->id }})"
+                                                class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
+                                            📋 Duplicar
+                                        </button>
+                                        <button wire:click="delete({{ $checklist->id }})"
+                                                wire:confirm="¿Estás seguro de eliminar este checklist?"
+                                                class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
+                                            Eliminar
+                                        </button>
+                                    </div>
                             </td>
                         </tr>
                     @endforeach

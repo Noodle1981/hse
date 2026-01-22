@@ -57,6 +57,8 @@ class ChecklistBuilder extends Component
         'description' => '',
     ];
 
+
+
     protected $rules = [
         'title' => 'required|string|max:255',
         'description' => 'nullable|string',
@@ -219,6 +221,8 @@ class ChecklistBuilder extends Component
             $this->subcategories = [];
         }
     }
+
+
 
     public function addSection()
     {

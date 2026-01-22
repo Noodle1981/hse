@@ -16,11 +16,13 @@ class TrainingIndex extends Component
     public $search = '';
     public $empresaFilter = '';
     public $sedeFilter = '';
+    public $viewMode = 'templates'; // 'templates' | 'executions'
 
     protected $queryString = [
         'search' => ['except' => ''],
         'empresaFilter' => ['as' => 'empresa', 'except' => ''],
         'sedeFilter' => ['as' => 'sede', 'except' => ''],
+        'viewMode' => ['except' => 'templates'],
     ];
 
     public function updatingSearch() { $this->resetPage(); }
@@ -49,14 +51,32 @@ class TrainingIndex extends Component
 
     public function render()
     {
-        $trainings = Training::query()
-            ->with(['empresa', 'sede'])
-            ->withCount('attendances')
-            ->when($this->search, fn($q) => $q->where('title', 'like', '%' . $this->search . '%'))
-            ->when($this->empresaFilter, fn($q) => $q->where('empresa_id', $this->empresaFilter))
-            ->when($this->sedeFilter, fn($q) => $q->where('sede_id', $this->sedeFilter))
-            ->latest()
-            ->paginate(10);
+        $trainings = collect();
+        
+        if ($this->viewMode === 'templates') {
+            $trainings = Training::query()
+                ->with(['empresa', 'sede'])
+                ->withCount('attendances')
+                ->when($this->search, fn($q) => $q->where('title', 'like', '%' . $this->search . '%'))
+                ->when($this->empresaFilter, fn($q) => $q->where('empresa_id', $this->empresaFilter))
+                ->when($this->sedeFilter, fn($q) => $q->where('sede_id', $this->sedeFilter))
+                ->latest()
+                ->paginate(10);
+        } else {
+            // Modo executions (VisitTraining)
+            $trainings = \App\Models\VisitTraining::query()
+                ->with(['visit.empresa', 'visit.sede', 'visit.user'])
+                ->when($this->search, fn($q) => $q->where('title', 'like', '%' . $this->search . '%'))
+                // Filtrar por empresa/sede a través de la visita
+                ->when($this->empresaFilter, function($q) {
+                    $q->whereHas('visit', fn($v) => $v->where('empresa_id', $this->empresaFilter));
+                })
+                ->when($this->sedeFilter, function($q) {
+                    $q->whereHas('visit', fn($v) => $v->where('sede_id', $this->sedeFilter));
+                })
+                ->latest()
+                ->paginate(10);
+        }
 
         $empresas = Empresa::orderBy('nombre')->get();
         $sedes = $this->empresaFilter 

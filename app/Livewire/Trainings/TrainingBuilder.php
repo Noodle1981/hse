@@ -14,13 +14,22 @@ class TrainingBuilder extends Component
     public $trainingId;
     public $title, $description, $type = 'presencial', $date, $duration, $trainer_name, $status = 'scheduled';
     public $empresa_id, $sede_id, $user_id;
+    public $visitId; // ID de visita (opcional)
+
+    protected $queryString = [
+        'visitId' => ['except' => null, 'as' => 'visit_id'],
+    ];
 
     public function mount($id = null)
     {
+        // Capturar visit_id desde request si no llega por property (aunque queryString lo maneja)
+        $this->visitId = request()->query('visit_id', $this->visitId);
+
         if ($id) {
             $training = Training::findOrFail($id);
             $this->trainingId = $training->id;
             $this->title = $training->title;
+            // ... resto de campos ...
             $this->description = $training->description;
             $this->type = $training->type;
             $this->date = $training->date->format('Y-m-d\TH:i');
@@ -30,6 +39,14 @@ class TrainingBuilder extends Component
             $this->empresa_id = $training->empresa_id;
             $this->sede_id = $training->sede_id;
             $this->user_id = $training->user_id;
+        } else if ($this->visitId) {
+            // Pre-llenar desde visita
+            $visit = \App\Models\VisitCertificate::find($this->visitId);
+            if ($visit) {
+                $this->empresa_id = $visit->empresa_id;
+                $this->sede_id = $visit->sede_id;
+                $this->date = now()->format('Y-m-d\TH:i'); // Default to now
+            }
         }
     }
 
@@ -54,11 +71,25 @@ class TrainingBuilder extends Component
         $data = $this->validate();
 
         if ($this->trainingId) {
-            Training::find($this->trainingId)->update($data);
+            $training = Training::find($this->trainingId);
+            $training->update($data);
             session()->flash('message', 'Capacitación actualizada correctamente.');
         } else {
-            Training::create($data);
+            $training = Training::create($data);
+            
+            // Si viene de una visita, linkear
+            if ($this->visitId) {
+                \App\Models\VisitTraining::create([
+                    'visit_certificate_id' => $this->visitId,
+                    'training_id' => $training->id,
+                    'is_adhoc' => false,
+                ]);
+            }
             session()->flash('message', 'Capacitación creada correctamente.');
+        }
+
+        if ($this->visitId) {
+            return redirect()->route('visits.in-progress', $this->visitId);
         }
 
         return redirect()->route('trainings.index');

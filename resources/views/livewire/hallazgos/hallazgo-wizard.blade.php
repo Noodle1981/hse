@@ -11,28 +11,40 @@
         {{-- Progress Steps --}}
         <div class="bg-white rounded-lg shadow p-6 mb-6">
             <div class="flex items-center justify-between">
+                @php
+                    $stepLabels = $visitId 
+                        ? ['Información', 'Clasificación', 'Riesgo'] 
+                        : ['Información', 'Clasificación', 'Origen', 'Riesgo'];
+                    $displayStep = 1;
+                @endphp
+                
                 @for($i = 1; $i <= $totalSteps; $i++)
-                    <div class="flex items-center {{ $i < $totalSteps ? 'flex-1' : '' }}">
+                    @php
+                        // Skip step 3 display when from visit
+                        if ($visitId && $i == 3) continue;
+                        $isActive = $currentStep >= $i;
+                        $isCurrent = $currentStep == $i;
+                    @endphp
+                    
+                    <div class="flex items-center {{ $displayStep < count($stepLabels) ? 'flex-1' : '' }}">
                         <div class="flex flex-col items-center">
                             <button wire:click="goToStep({{ $i }})"
                                     class="w-10 h-10 rounded-full flex items-center justify-center font-bold transition-colors
-                                    {{ $currentStep >= $i ? 'bg-ep-primary text-white' : 'bg-gray-200 text-gray-600' }}
-                                    {{ $currentStep == $i ? 'ring-4 ring-ep-primary ring-opacity-30' : '' }}">
-                                {{ $i }}
+                                    {{ $isActive ? 'bg-ep-primary text-white' : 'bg-gray-200 text-gray-600' }}
+                                    {{ $isCurrent ? 'ring-4 ring-ep-primary ring-opacity-30' : '' }}">
+                                {{ $displayStep }}
                             </button>
                             <span class="text-xs mt-2 text-center
-                                {{ $currentStep == $i ? 'text-ep-primary font-semibold' : 'text-gray-600' }}">
-                                @if($i == 1) Información
-                                @elseif($i == 2) Clasificación
-                                @elseif($i == 3) Origen
-                                @else Riesgo
-                                @endif
+                                {{ $isCurrent ? 'text-ep-primary font-semibold' : 'text-gray-600' }}">
+                                {{ $stepLabels[$displayStep - 1] }}
                             </span>
                         </div>
-                        @if($i < $totalSteps)
+                        @if($displayStep < count($stepLabels))
                             <div class="flex-1 h-1 mx-2 {{ $currentStep > $i ? 'bg-ep-primary' : 'bg-gray-200' }}"></div>
                         @endif
                     </div>
+                    
+                    @php $displayStep++; @endphp
                 @endfor
             </div>
         </div>
@@ -183,8 +195,8 @@
                     </div>
                 @endif
 
-                {{-- Paso 3: Origen (Opcional) --}}
-                @if($currentStep == 3)
+                {{-- Paso 3: Origen (Opcional) - Skip if from visit --}}
+                @if($currentStep == 3 && !$visitId)
                     <div class="space-y-4">
                         <h2 class="text-xl font-bold text-ep-dark mb-4">Origen del Hallazgo (Opcional)</h2>
                         <p class="text-gray-600 mb-4">Si este hallazgo fue detectado durante una inspección o visita, puede vincularlo aquí.</p>

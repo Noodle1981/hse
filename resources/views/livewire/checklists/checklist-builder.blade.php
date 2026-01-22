@@ -1,8 +1,12 @@
 <div>
-    <div class="mb-6">
+    <div class="mb-6 flex justify-between items-center">
         <h1 class="text-3xl font-bold text-ep-dark">
             {{ $checklist ? 'Editar Checklist' : 'Nuevo Checklist' }}
         </h1>
+        <a href="{{ route('categories.index') }}" 
+           class="bg-white text-ep-primary border border-gray-200 hover:bg-gray-50 hover:text-ep-primary-dark px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
+            Administrar Categorías
+        </a>
     </div>
 
     <form wire:submit="save" class="space-y-6">
@@ -21,7 +25,9 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-medium text-gray-700">Categoría</label>
+                    </div>
                     <select wire:model.live="categoryId"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
                         <option value="">Sin categoría</option>
@@ -29,16 +35,18 @@
                             <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                         @endforeach
                     </select>
-                    </select>
-                    <a href="{{ route('categories.index') }}" class="text-xs text-ep-primary hover:text-ep-primary-dark mt-1 hover:underline inline-flex items-center">
-                        + Gestionar Categorías
-                    </a>
                     @error('categoryId') <span class="text-red-500 text-sm block">{{ $message }}</span> @enderror
                 </div>
 
                 @if($categoryId)
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Subcategoría</label>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-sm font-medium text-gray-700">Subcategoría</label>
+                            <button type="button" wire:click="openSubcategoryModal"
+                                    class="text-xs bg-gray-100 hover:bg-gray-200 text-ep-dark border border-gray-200 px-2 py-1 rounded transition-colors">
+                                + Crear Subcategoría
+                            </button>
+                        </div>
                         <select wire:model="subcategoryId"
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
                             <option value="">Sin subcategoría</option>
@@ -46,10 +54,6 @@
                                 <option value="{{ $sub->id }}">{{ $sub->name }}</option>
                             @endforeach
                         </select>
-                        <button type="button" wire:click="openSubcategoryModal"
-                                class="text-xs text-ep-primary hover:text-ep-primary-dark mt-1 hover:underline inline-flex items-center">
-                            + crear subcategoría
-                        </button>
                         @error('subcategoryId') <span class="text-red-500 text-sm block">{{ $message }}</span> @enderror
                     </div>
                 @endif
@@ -359,5 +363,7 @@
             </div>
         </div>
     @endif
+
+
 
 </div>

@@ -21,6 +21,7 @@ class Incidente extends Model
         'personas_afectadas',
         'dias_perdidos',
         'medidas_tomadas',
+        'visit_certificate_id',
     ];
 
     protected $casts = [
@@ -70,6 +71,14 @@ class Incidente extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Visita asociada (integración)
+     */
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(VisitCertificate::class, 'visit_certificate_id');
     }
 
     // ============================================

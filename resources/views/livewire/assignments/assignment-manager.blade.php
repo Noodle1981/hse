@@ -1,7 +1,16 @@
 <div>
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Asignación de Checklists</h1>
-        <p class="text-gray-600 mt-1">Asigna checklists a técnicos en sedes específicas</p>
+    <div class="mb-6 flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Asignación de Checklists</h1>
+            <p class="text-gray-600 mt-1">Asigna checklists a técnicos en sedes específicas</p>
+        </div>
+        <a href="{{ route('checklists.index') }}" 
+           class="flex items-center gap-2 text-ep-primary hover:text-ep-primary-dark font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 hover:shadow-md">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            Gestor de Plantillas
+        </a>
     </div>
 
     @if (session()->has('message'))
@@ -223,6 +232,14 @@
                                     {{ $statusLabel }}
                                 @endif
                             </span>
+                            
+                            @if($assignment->visitCompletion && $assignment->visitCompletion->visit)
+                                <div class="mt-1">
+                                    <span class="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+                                        Visita: {{ $assignment->visitCompletion->visit->status_label }}
+                                    </span>
+                                </div>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <button wire:click="delete({{ $assignment->id }})"
