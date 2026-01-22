@@ -4,7 +4,7 @@
             <h1 class="text-3xl font-bold text-ep-dark">Mis Hallazgos</h1>
             <p class="text-gray-600 mt-2">Hallazgos detectados por ti</p>
         </div>
-        <a href="{{ route('hallazgos.create') }}" 
+        <a href="{{ route('tecnico.hallazgos.create') }}" 
            class="inline-flex items-center px-6 py-3 bg-ep-primary text-white font-bold rounded-xl shadow-lg shadow-ep-primary/30 hover:bg-ep-primary-dark transition-all">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             Nuevo Hallazgo
@@ -94,7 +94,7 @@
                         </div>
                     </div>
                     <div class="flex gap-2">
-                        <a href="{{ route('hallazgos.show', $hallazgo) }}"
+                        <a href="{{ route('tecnico.hallazgos.show', $hallazgo) }}"
                            class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark">
                             Ver Detalle
                         </a>

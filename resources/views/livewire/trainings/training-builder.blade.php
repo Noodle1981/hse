@@ -34,7 +34,7 @@
 
                     <div class="sm:col-span-3">
                         <label class="block text-sm font-bold text-gray-700 mb-2">Sede / Ubicación</label>
-                        <select wire:model="sede_id" 
+                        <select wire:model.live="sede_id" 
                                 class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all {{ !$empresa_id ? 'opacity-50 cursor-not-allowed' : '' }}"
                                 {{ !$empresa_id ? 'disabled' : '' }}>
                             <option value="">Seleccione una sede</option>

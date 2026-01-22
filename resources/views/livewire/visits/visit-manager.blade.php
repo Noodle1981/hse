@@ -9,12 +9,14 @@
         <div class="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
             <button 
                 wire:click="openStartVisitModal"
-                class="btn bg-ep-primary hover:bg-orange-600 text-white"
+                class="bg-ep-primary text-white rounded-xl px-5 py-2.5 font-bold shadow-lg shadow-ep-primary/30 hover:shadow-ep-primary/50 hover:bg-ep-primary-dark hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2 group"
             >
-                <svg class="w-4 h-4 fill-current opacity-50 shrink-0 mr-2" viewBox="0 0 16 16">
-                    <path d="M15 7H9V1c0-.6-.4-1-1-1S7 .4 7 1v6H1c-.6 0-1 .4-1 1s.4 1 1 1h6v6c0 .6.4 1 1 1s1-.4 1-1V9h6c.6 0 1-.4 1-1s-.4-1-1-1z" />
-                </svg>
-                Iniciar Nueva Visita
+                <div class="bg-white/20 rounded-full p-1 group-hover:bg-white/30 transition-colors">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </div>
+                <span>Iniciar Nueva Visita</span>
             </button>
         </div>
     </div>
@@ -26,42 +28,77 @@
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="table-auto w-full">
-                <thead class="text-xs font-semibold uppercase text-gray-500 bg-gray-50 border-b border-gray-200">
+                <thead class="bg-ep-dark text-white border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-3 whitespace-nowrap text-left">Fecha</th> // Fixed whitespace
-                        <th class="px-4 py-3 whitespace-nowrap text-left">Sede / Cliente</th>
-                        <th class="px-4 py-3 whitespace-nowrap text-left">Duración</th>
-                        <th class="px-4 py-3 whitespace-nowrap text-center">Estado</th>
-                        <th class="px-4 py-3 whitespace-nowrap text-right">Acciones</th>
+                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider pl-6">Fecha / Horario</th>
+                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Ubicación</th>
+                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Duración</th>
+                        <th class="px-4 py-4 whitespace-nowrap text-center text-xs font-bold uppercase tracking-wider">Estado</th>
+                        <th class="px-4 py-4 whitespace-nowrap text-right text-xs font-bold uppercase tracking-wider pr-6">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
                     @forelse ($pastVisits as $visit)
-                        <tr>
-                            <td class="px-4 py-3 text-gray-800">
-                                {{ $visit->visit_date->format('d/m/Y') }}
-                                <div class="text-xs text-gray-500">
-                                    {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 font-bold">
+                                        {{ $visit->visit_date->format('d') }}
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-bold text-gray-900">{{ $visit->visit_date->format('F, Y') }}</div>
+                                        <div class="text-xs text-gray-500">
+                                            {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
+                                        </div>
+                                    </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-gray-800">
-                                <span class="font-medium text-ep-dark">{{ $visit->sede->nombre_sede }}</span>
-                                <div class="text-xs text-gray-500">{{ $visit->empresa->nombre }}</div>
+                            <td class="px-4 py-4 whitespace-nowrap">
+                                <div class="flex flex-col">
+                                    <span class="text-sm font-semibold text-gray-900">{{ $visit->sede->nombre_sede }}</span>
+                                    <span class="text-xs text-gray-500">{{ $visit->empresa->nombre }}</span>
+                                </div>
                             </td>
-                            <td class="px-4 py-3 text-gray-500">
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
                                 @if($visit->end_time && $visit->start_time)
-                                    {{ $visit->start_time->diffInMinutes($visit->end_time) }} min
+                                    @php
+                                        $duration = $visit->start_time->diffInMinutes($visit->end_time);
+                                        $hours = floor($duration / 60);
+                                        $minutes = $duration % 60;
+                                    @endphp
+                                    <div class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        @if($hours > 0)
+                                            <span class="font-medium">{{ $hours }}:{{ str_pad($minutes, 2, '0', STR_PAD_LEFT) }} hrs</span>
+                                        @else
+                                            <span>{{ $minutes }} min</span>
+                                        @endif
+                                    </div>
                                 @else
-                                    -
+                                    <span class="text-gray-400">-</span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-center">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $visit->status_badge }}">
+                            <td class="px-4 py-4 whitespace-nowrap text-center">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $visit->status_badge }}">
                                     {{ $visit->status_label }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-right">
-                                <a href="#" class="btn-xs bg-white border-gray-200 hover:border-gray-300 text-gray-500">Ver Detalles</a>
+                            <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="text-gray-400 hover:text-ep-primary transition-colors p-1" title="Ver Detalles">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                    <button class="text-gray-400 hover:text-red-500 transition-colors p-1" title="Descargar PDF (Próximamente)">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 2H7a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @empty

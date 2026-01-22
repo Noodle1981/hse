@@ -103,7 +103,7 @@
                             </td>
                             <td class="px-4 py-3 text-right">
                                 @if($visit->status === 'in_progress')
-                                    <a href="{{ route('visits.in-progress', $visit) }}" 
+                                    <a href="{{ route('gestor.visits.in-progress', $visit) }}" 
                                        class="btn-xs bg-blue-500 hover:bg-blue-600 text-white">
                                         Ver en Vivo
                                     </a>

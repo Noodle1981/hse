@@ -73,7 +73,11 @@ class EppDeliveryWizard extends Component
         });
 
         session()->flash('message', 'Entrega de EPP registrada correctamente.');
-        return redirect()->route('epp.history');
+        
+        if (auth()->user()->hasRole('Administrador')) {
+            return redirect()->route('gestor.epp.history');
+        }
+        return redirect()->route('tecnico.epp.history');
     }
 
     public function render()

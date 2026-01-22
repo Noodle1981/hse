@@ -3,10 +3,12 @@
         <h1 class="text-3xl font-bold text-ep-dark">
             Historial de Inspecciones <span class="text-lg font-normal text-gray-500 ml-2">(vista en revisión)</span>
         </h1>
-        <a href="{{ route('checklists.index') }}" 
+        @if(auth()->user()->isAdmin())
+        <a href="{{ route('gestor.checklists.index') }}" 
            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
             ← Volver a Plantillas
         </a>
+        @endif
     </div>
 
     <!-- Filtros -->
@@ -144,7 +146,7 @@
                                 </td>
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex items-center justify-center space-x-3">
-                                        <a href="{{ route('inspections.show', $inspection) }}" 
+                                        <a href="{{ auth()->user()->isAdmin() ? route('gestor.inspections.show', $inspection) : route('tecnico.inspections.show', $inspection) }}" 
                                            title="Ver detalle"
                                            class="p-2 text-ep-primary bg-ep-primary/10 rounded-lg hover:bg-ep-primary hover:text-white transition-all">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +155,7 @@
                                             </svg>
                                         </a>
                                         @if($inspection->status === 'completed')
-                                            <a href="{{ route('inspections.pdf.download', $inspection) }}" 
+                                            <a href="{{ auth()->user()->isAdmin() ? route('gestor.inspections.pdf.download', $inspection) : route('tecnico.inspections.pdf.download', $inspection) }}" 
                                                title="Descargar PDF"
                                                class="p-2 text-red-600 bg-red-100 rounded-lg hover:bg-red-600 hover:text-white transition-all">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

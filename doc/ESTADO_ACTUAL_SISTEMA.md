@@ -1,6 +1,6 @@
 # Estado Actual del Sistema - XamaSafe v2.0.0
 
-**Fecha**: 2026-01-21  
+**Fecha**: 2026-01-22  
 **Versión**: 2.0.0  
 **Sistema**: XamaSafe - Sistema de Checklists Dinámicos
 
@@ -225,6 +225,29 @@
 - ✅ Hover: `hover:bg-opacity-90`
 - ✅ Consistencia en toda la aplicación
 
+### Arquitectura de Rutas (Nuevo 2026-01-22)
+- ✅ Implementación de prefijos `/gestor` y `/tecnico`
+- ✅ Separación clara de rutas por rol
+- ✅ Middleware automático de permisos por grupo
+- ✅ Sidebar dinámico basado en rol del usuario
+- ✅ URLs semánticas y descriptivas
+- ✅ Componentes actualizados con rutas role-based:
+  - `VisitManager.php` - Redirects por rol
+  - `VisitInProgress.php` - Redirects por rol
+  - `EppDeliveryWizard.php` - Redirects por rol
+  - `MisHallazgos.php` - Rutas técnico
+  - `HallazgoManager.php` - Rutas gestor
+  - `InspectionHistory.blade.php` - Links dinámicos
+  - `app.blade.php` - Sidebar completamente refactorizado
+  
+### Mejoras Específicas (Actualizado 2026-01-22 14:00)
+- ✅ **Sidebar Técnico Reorganizado**: Orden optimizado: Mis Tareas > Mis Visitas > Mis Hallazgos > Mis Incidentes.
+- ✅ **Modernización Visual "Mis Visitas"**: Tabla con encabezado oscuro, formato de duración inteligente (hrs/min), iconos de acción en lugar de botones de texto.
+- ✅ **Modernización "Visita en Progreso"**: Header full-width estilo banner, contenido centrado (`max-w-6xl`), botones de acción con diseño moderno e iconos, indicadores de estado mejorados.
+- ✅ **Restricciones de Rol en Vistas Gestor**: Eliminada la capacidad de crear incidentes y hallazgos desde las vistas de Gestor (`IncidenteManager`, `HallazgoManager`), enfocándolas solo en visualización y gestión.
+- ✅ **Vista "Mis Incidentes" para Técnico**: Nueva ruta `/tecnico/incidentes` que reutiliza la vista de gestión pero adaptada al contexto del técnico.
+- ✅ **Bandeja "Mis Tareas" Mejorada**: Inclusión de tareas completadas, ordenamiento por estado (Pendiente > En Progreso > Completado) y eliminación de botones de acción redundantes en las tarjetas.
+
 ---
 
 ## 📊 Estructura de Base de Datos
@@ -280,19 +303,69 @@
 
 ---
 
-## 🚀 Rutas Principales
+## 🚀 Arquitectura de Rutas (Actualizado 2026-01-22)
 
+### **Nueva Estructura Role-Based**
+
+El sistema ahora implementa una arquitectura de rutas separada por roles con prefijos `/gestor` y `/tecnico`, permitiendo:
+- URLs semánticas y claras por rol
+- Middleware automático de permisos
+- Sidebar personalizado por rol
+- Mejor escalabilidad y mantenibilidad
+
+### **Rutas Gestor (Administrador)**
 ```
-/dashboard              - Dashboard principal
-/users                  - Gestión de usuarios (Admin)
-/companies              - Gestión de empresas (Admin)
-/categories             - Gestión de categorías (Admin)
-/checklists             - Plantillas de checklists (Admin)
-/checklists/create      - Crear nuevo checklist (Admin)
-/checklists/{id}/edit   - Editar checklist (Admin)
-/assignments            - Asignaciones (Admin)
-/tasks                  - Mis tareas (Técnico)
+/gestor/dashboard                          - Dashboard administrativo
+/gestor/administracion                     - Hub de administración
+/gestor/users                              - Gestión de usuarios
+/gestor/tecnicos                           - Gestión de técnicos
+/gestor/companies                          - Gestión de empresas
+/gestor/companies/{id}/locations           - Gestión de sedes
+/gestor/assignments                        - Asignaciones de checklists
+/gestor/checklists                         - Plantillas de checklists
+/gestor/checklists/create                  - Crear checklist
+/gestor/checklists/{id}/edit               - Editar checklist
+/gestor/categories                         - Gestión de categorías
+/gestor/visits/history                     - Historial de todas las visitas
+/gestor/epp/catalog                        - Catálogo EPP
+/gestor/epp/history                        - Historial EPP
+/gestor/epp/employees                      - Gestión de empleados
+/gestor/hallazgos                          - Gestión de hallazgos
+/gestor/hallazgos/crear                    - Crear hallazgo
+/gestor/hallazgos/{id}/editar              - Editar hallazgo
+/gestor/incidentes                         - Gestión de incidentes
+/gestor/inspections                        - Historial de inspecciones
+/gestor/trainings                          - Gestión de capacitaciones
+/gestor/risk-matrices                      - Matrices de riesgo
+/gestor/advanced-executions.hub            - Hub de ejecuciones avanzadas
 ```
+
+### **Rutas Técnico**
+```
+/tecnico/dashboard                         - Dashboard del técnico
+/tecnico/visits                            - Mis visitas asignadas
+/tecnico/visits/in-progress/{id}           - Visita en progreso
+/tecnico/checklists/tasks.index            - Mis tareas asignadas
+/tecnico/checklists/{id}/fill              - Completar checklist
+/tecnico/hallazgos/index                   - Mis hallazgos
+/tecnico/hallazgos/crear                   - Crear hallazgo
+/tecnico/hallazgos/{id}                    - Ver detalle hallazgo
+/tecnico/epp/deliver                       - Entrega de EPP
+/tecnico/epp/history                       - Historial EPP
+/tecnico/inspections                       - Historial de inspecciones
+/tecnico/trainings/create                  - Crear capacitación
+/tecnico/trainings/{id}/attendance         - Tomar asistencia
+/tecnico/risk-matrices                     - Evaluar matrices de riesgo
+```
+
+### **Rutas Legacy (Compatibilidad Temporal)**
+Las rutas sin prefijo (`/checklists`, `/inspections`, etc.) se mantienen temporalmente para compatibilidad con código existente. Se recomienda migrar gradualmente a las nuevas rutas role-based.
+
+**Estrategia de migración**:
+1. Terminar desarrollo de funcionalidades pendientes
+2. Buscar y reemplazar referencias a rutas legacy
+3. Implementar redirects automáticos basados en rol
+4. Eliminar rutas legacy una vez completada la migración
 
 ---
 
@@ -334,5 +407,5 @@
 
 ---
 
-**Última actualización**: 2026-01-21  
+**Última actualización**: 2026-01-22  
 **Responsable**: Equipo de Desarrollo XamaSafe

@@ -30,15 +30,216 @@ Route::get('/login', Login::class)->name('login');
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
-    // Dashboard con redirect condicional
+    // Redirect condicional al dashboard correcto
     Route::get('/dashboard', function () {
         if (auth()->user()->isAdmin()) {
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('gestor.dashboard');
         }
-        return redirect()->route('technician.dashboard');
+        return redirect()->route('tecnico.dashboard');
     })->name('dashboard');
     
-    // Dashboards específicos
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas GESTOR (Prefijo: /gestor)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador'])->group(function() {
+        // Dashboard
+        Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+
+        // Visitas
+        Route::prefix('visits')->name('visits.')->group(function () {
+            Route::get('/history', \App\Livewire\Visits\VisitHistory::class)->name('history');
+            Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
+        });
+
+        // Administración
+        Route::get('/administracion', \App\Livewire\Admin\AdministrationHub::class)->name('administration.hub');
+        
+        Route::prefix('users')->group(function () {
+            Route::get('/', \App\Livewire\Users\UserManager::class)->name('users.index');
+        });
+        
+        Route::prefix('tecnicos')->group(function () {
+            Route::get('/', \App\Livewire\Users\TechnicianManager::class)->name('technicians.index');
+        });
+
+        Route::prefix('companies')->name('companies.')->group(function () {
+            Route::get('/', \App\Livewire\Companies\CompanyIndex::class)->name('index');
+            Route::get('/create', \App\Livewire\Companies\CompanyBuilder::class)->name('create');
+            Route::get('/{id}/edit', \App\Livewire\Companies\CompanyBuilder::class)->name('edit');
+            Route::get('/{empresa}/locations', \App\Livewire\Companies\LocationManager::class)->name('locations');
+        });
+
+        Route::prefix('assignments')->name('assignments.')->group(function () {
+            Route::get('/', \App\Livewire\Assignments\AssignmentManager::class)->name('index');
+        });
+        
+        /*
+        Route::prefix('projects')->name('projects.')->group(function () {
+            Route::get('/', \App\Livewire\Companies\ProjectManager::class)->name('index'); // Si existiera
+        });
+        */
+
+        // Gestión EPP
+         Route::prefix('epp')->name('epp.')->group(function () {
+            Route::get('/catalog', \App\Livewire\Epp\EppCatalog::class)->name('catalog');
+            Route::get('/import-employees', \App\Livewire\Epp\EmployeeImporter::class)->name('employees.import');
+            Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('employees.index');
+            Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
+            Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('delivery.pdf');
+            Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('delivery.pdf.preview');
+        });
+
+        // Hallazgos
+        Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
+            Route::get('/', \App\Livewire\Hallazgos\HallazgoManager::class)->name('index');
+            Route::get('/crear', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('create');
+            Route::get('/{id}/editar', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('edit');
+            Route::get('/{id}', \App\Livewire\Hallazgos\HallazgoDetail::class)->name('show');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
+        });
+
+        // Incidentes
+        Route::prefix('incidentes')->name('incidentes.')->group(function () {
+            Route::get('/', \App\Livewire\Incidentes\IncidenteManager::class)->name('index');
+             // Agregar rutas de detalle/PDF si existen
+        });
+
+        // Historial Inspecciones
+        Route::prefix('inspections')->name('inspections.')->group(function () {
+            Route::get('/', \App\Livewire\Checklists\InspectionHistory::class)->name('index');
+            Route::get('/{id}', \App\Livewire\Checklists\InspectionShow::class)->name('show');
+            Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('pdf.download');
+            Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('pdf.preview');
+            // Route::get('/{id}/delete', ...)->name('delete'); // Pendiente funcionalidad
+        });
+
+        // Checklists
+        Route::prefix('checklists')->name('checklists.')->group(function () {
+            Route::get('/', ChecklistIndex::class)->name('index');
+            Route::get('/create', ChecklistBuilder::class)->name('create');
+            Route::get('/{id}/edit', ChecklistBuilder::class)->name('edit');
+            Route::get('/{id}', ChecklistBuilder::class)->name('show'); // Añadida ruta show si es necesario
+        });
+
+            // Rutas de Categorías
+        Route::prefix('categories')->name('categories.')->group(function () {
+            Route::get('/', CategoryIndex::class)->name('index');
+            Route::get('/create', CategoryBuilderComponent::class)->name('create');
+            Route::get('/{id}/edit', CategoryBuilderComponent::class)->name('edit');
+            Route::get('/{category}/subcategories', SubcategoryManager::class)->name('subcategories');
+        });
+
+        // Capacitaciones
+        Route::prefix('trainings')->name('trainings.')->group(function () {
+            Route::get('/', \App\Livewire\Trainings\TrainingIndex::class)->name('index');
+            Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('create');
+            Route::get('/{id}/edit', \App\Livewire\Trainings\TrainingBuilder::class)->name('edit');
+            Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('attendance');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
+            // Delete route if needed
+        });
+
+        // Ejecuciones Avanzadas
+        Route::middleware(['role:Administrador'])->group(function () {
+             Route::get('/risk-matrices/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
+        });
+
+        Route::prefix('risk-matrices')->name('risk-matrices.')->group(function () {
+            Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index');
+            Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
+            Route::get('/{matrixId}/editor', \App\Livewire\Risks\RiskMatrixEditor::class)->name('editor');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
+            // Contrato Anual
+            Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
+        });
+        
+        // Contrato Anual PDF - fuera del grupo risk-matrices pero con nombre consistente?
+        Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
+
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas TÉCNICO (Prefijo: /tecnico)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico'])->group(function() {
+        // Dashboard
+        Route::get('/dashboard', TechnicianDashboard::class)->name('dashboard');
+
+        // Checklists (Asignaciones y Llenado)
+        Route::prefix('checklists')->name('checklists.')->group(function () {
+             Route::get('/my-assignments', \App\Livewire\Technician\MyAssignments::class)->name('tasks.index'); // Mis Tareas
+             Route::get('/{id}/fill', \App\Livewire\Technician\InspectionWizard::class)->name('fill');
+        });
+
+        // Visitas
+        Route::prefix('visits')->name('visits.')->group(function () {
+            Route::get('/', \App\Livewire\Visits\VisitManager::class)->name('index'); // Mis Visitas
+            Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
+        });
+
+        // Capacitaciones
+        Route::prefix('trainings')->name('trainings.')->group(function () {
+            Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('create');
+            Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('attendance');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
+        });
+
+        // Ejecuciones Avanzadas
+        Route::get('/risk-matrices/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
+
+        Route::prefix('risk-matrices')->name('risk-matrices.')->group(function () {
+            Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index'); // Evaluar
+            Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
+            Route::get('/{matrixId}/evaluate', \App\Livewire\Risks\RiskEvaluator::class)->name('evaluator');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
+            Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
+        });
+
+        // Gestión EPP
+        Route::prefix('epp')->name('epp.')->group(function () {
+            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('deliver');
+            Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
+            Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('employees.index'); // Solo lectura?
+            Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('delivery.pdf');
+            Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('delivery.pdf.preview');
+        });
+
+        // Mis Hallazgos
+        Route::get('/mis-hallazgos', \App\Livewire\Hallazgos\MisHallazgos::class)->name('hallazgos.index');
+        
+        // Hallazgos (Crear/Ver) - Nota: Crear principal es via Modal en visitas, pero mantenemos wizard si existe
+        Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
+             Route::get('/crear', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('create');
+             Route::get('/{id}', \App\Livewire\Hallazgos\HallazgoDetail::class)->name('show');
+             Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
+             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
+        });
+
+        // Historial Inspecciones
+        Route::prefix('inspections')->name('inspections.')->group(function () {
+            Route::get('/', \App\Livewire\Checklists\InspectionHistory::class)->name('index');
+            Route::get('/{id}', \App\Livewire\Checklists\InspectionShow::class)->name('show');
+            Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('pdf.download');
+            Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('pdf.preview');
+        });
+
+        // Mis Incidentes
+        Route::get('/incidentes', \App\Livewire\Incidentes\IncidenteManager::class)->name('incidentes.index');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas LEGACY (Mantener temporalmente para compatibilidad)
+    |--------------------------------------------------------------------------
+    */
+    
+    // Dashboards específicos (Legacy)
     Route::get('/admin/dashboard', AdminDashboard::class)
         ->middleware(['role:Administrador'])
         ->name('admin.dashboard');

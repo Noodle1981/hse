@@ -17,6 +17,7 @@ use App\Http\Controllers\SedeUserController;
 use App\Http\Controllers\ResponsableConstanciaController;
 use App\Http\Controllers\RegistroController;
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\CapacitacionPresencialController;
 
 use App\Http\Controllers\PDFController;
 

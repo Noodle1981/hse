@@ -50,7 +50,10 @@ class VisitFinalizer extends Component
         );
 
         // Redirigir al manager o mostrar éxito
-        return redirect()->route('visits.index');
+        if (auth()->user()->hasRole('Administrador')) {
+            return redirect()->route('gestor.visits.history');
+        }
+        return redirect()->route('tecnico.visits.index');
     }
 
     public function cancel()

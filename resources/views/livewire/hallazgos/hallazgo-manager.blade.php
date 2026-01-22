@@ -3,12 +3,6 @@
     <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-3xl font-bold text-ep-dark">Gestión de Hallazgos</h1>
-            @if(auth()->user()->isTechnician())
-                <a href="{{ route('hallazgos.create') }}" 
-                   class="px-6 py-3 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors font-semibold">
-                    + Nuevo Hallazgo
-                </a>
-            @endif
         </div>
 
         {{-- KPIs --}}
@@ -232,11 +226,11 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex justify-center gap-2 flex-wrap">
-                                        <a href="{{ route('hallazgos.show', $hallazgo) }}"
+                                        <a href="{{ route('gestor.hallazgos.show', $hallazgo) }}"
                                            class="px-3 py-1 bg-ep-primary text-white rounded hover:bg-ep-primary-dark text-sm">
                                             Ver
                                         </a>
-                                        <a href="{{ route('hallazgos.edit', $hallazgo) }}"
+                                        <a href="{{ route('gestor.hallazgos.edit', $hallazgo) }}"
                                            class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm">
                                             Editar
                                         </a>

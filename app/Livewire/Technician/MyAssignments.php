@@ -38,7 +38,7 @@ class MyAssignments extends Component
 
         $assignments = ChecklistAssignment::query()
             ->where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'in_progress'])
+            ->whereIn('status', ['pending', 'in_progress', 'completed'])
             ->with(['checklist', 'empresa', 'sede'])
             ->when($this->selectedEmpresa, fn($q) => $q->where('empresa_id', $this->selectedEmpresa))
             ->when($this->selectedSede, fn($q) => $q->where('sede_id', $this->selectedSede))
@@ -47,6 +47,12 @@ class MyAssignments extends Component
                   ->orWhereHas('empresa', fn($sq) => $sq->where('nombre', 'like', '%' . $this->search . '%'))
                   ->orWhereHas('sede', fn($sq) => $sq->where('nombre_sede', 'like', '%' . $this->search . '%'));
             })
+            ->orderByRaw("CASE 
+                WHEN status = 'pending' THEN 1 
+                WHEN status = 'in_progress' THEN 2 
+                WHEN status = 'completed' THEN 3 
+                ELSE 4 
+            END")
             ->orderBy('due_date', 'asc')
             ->paginate(12);
 
@@ -57,8 +63,23 @@ class MyAssignments extends Component
                   ->get()
             : collect();
 
+        // Trainings assignments
+        $trainings = \App\Models\Training::query()
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['scheduled', 'completed'])
+            ->when($this->selectedEmpresa, fn($q) => $q->where('empresa_id', $this->selectedEmpresa))
+            ->when($this->selectedSede, fn($q) => $q->where('sede_id', $this->selectedSede))
+            ->when($this->search, function($q) {
+                $q->where('title', 'like', '%' . $this->search . '%')
+                  ->orWhereHas('empresa', fn($sq) => $sq->where('nombre', 'like', '%' . $this->search . '%'))
+                  ->orWhereHas('sede', fn($sq) => $sq->where('nombre_sede', 'like', '%' . $this->search . '%'));
+            })
+            ->orderBy('date', 'asc')
+            ->get(); // Generalmente son pocas, usamos get() en lugar de paginate para simplificar UI mixta
+
         return view('livewire.technician.my-assignments', [
             'assignments' => $assignments,
+            'trainings' => $trainings,
             'empresas' => $empresas,
             'sedes' => $sedes,
         ])->layout('components.layouts.app');

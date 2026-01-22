@@ -64,7 +64,10 @@ class VisitInProgress extends Component
         
         // Verificar que esté en progreso
         if ($this->visit->status !== 'in_progress') {
-            return redirect()->route('visits.index');
+            if (Auth::user()->hasRole('Administrador')) {
+                return redirect()->route('gestor.visits.history');
+            }
+            return redirect()->route('tecnico.visits.index');
         }
         
         $this->loadChecklists();

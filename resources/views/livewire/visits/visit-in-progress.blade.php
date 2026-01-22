@@ -1,47 +1,56 @@
 <div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
     
     <!-- Header de Visita -->
-    <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-        <div class="sm:flex sm:justify-between sm:items-center">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
             <div>
-                <div class="flex items-center space-x-2">
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <div class="flex items-center space-x-2 mb-2">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                        <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 animate-pulse"></span>
                         En Progreso
                     </span>
-                    <span class="text-sm text-gray-500">{{ $visit->visit_date->format('d/m/Y') }}</span>
+                    <span class="text-sm font-medium text-gray-400">{{ $visit->visit_date->format('d \d\e F, Y') }}</span>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-800 mt-1">{{ $visit->sede->nombre_sede }}</h1>
-                <p class="text-gray-600">{{ $visit->empresa->nombre }}</p>
-            </div>
-            <div class="mt-4 sm:mt-0 flex flex-col sm:items-end">
-                <div class="text-sm text-gray-500">Iniciado a las {{ $visit->start_time->format('H:i') }}</div>
-                <div class="text-xs text-gray-400">Duración: {{ $visit->start_time->diffInMinutes(now()) }} min</div>
+                <h1 class="text-3xl font-bold text-gray-900 leading-tight">{{ $visit->sede->nombre_sede }}</h1>
+                <p class="text-lg text-gray-500 font-medium">{{ $visit->empresa->nombre }}</p>
                 
-                <div class="mt-2 flex space-x-2">
-                    <!-- Botón temporal para pausar (volver atrás) -->
-                    <a href="{{ route('visits.index') }}" class="btn-sm bg-white border-gray-200 hover:border-gray-300 text-gray-600">
-                        <svg class="w-4 h-4 fill-current mr-2" viewBox="0 0 16 16">
-                            <path d="M8 0C3.6 0 0 3.6 0 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 14c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6zM7 7V4h2v3h3v2H9v3H7V9H4V7h3z" />
-                        </svg>
-                        Pausar / Salir
-                    </a>
-                    
-                    <button 
-                        wire:click="$set('showFinalizeModal', true)"
-                        class="btn-sm bg-green-600 hover:bg-green-700 text-white"
-                    >
-                        <svg class="w-4 h-4 fill-current mr-2" viewBox="0 0 16 16">
-                            <path d="M12 0H4a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V2a2 2 0 00-2-2zM4 2h8v12H4V2z"/>
-                            <path d="M11 6L7.5 9.5 5 7 3.5 8.5 7.5 12.5 12.5 7.5z"/>
-                        </svg>
-                        Finalizar Visita
-                    </button>
+                <div class="flex items-center mt-3 text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Iniciado a las <span class="font-bold text-gray-700 ml-1">{{ $visit->start_time->format('H:i') }} hs</span>
                 </div>
+            </div>
+
+            <div class="flex items-center gap-3 mt-2 md:mt-0">
+                <!-- Botón Pausar/Salir -->
+                @if(auth()->user()->hasRole('Administrador'))
+                    <a href="{{ route('gestor.visits.history') }}" 
+                @else
+                    <a href="{{ route('tecnico.visits.index') }}" 
+                @endif
+                   class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl font-semibold text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-200">
+                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Salir / Pausar
+                </a>
+                
+                <button 
+                    wire:click="$set('showFinalizeModal', true)"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-xl font-bold text-sm text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 shadow-lg shadow-green-600/20 transition-all hover:-translate-y-0.5"
+                >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Finalizar Visita
+                </button>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         
         <!-- Columna Izquierda: Checklists -->
         <div class="space-y-6">
@@ -278,4 +287,5 @@
         ], key('incidente-form'))
     @endif
 
+    </div>
 </div>

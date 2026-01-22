@@ -61,6 +61,7 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Capacitación</th>
+                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Responsable</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Ubicación</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Fecha</th>
                             <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Asistentes</th>
@@ -77,6 +78,21 @@
                                     <div class="flex flex-col">
                                         <div class="text-sm font-bold text-gray-900">{{ $training->title }}</div>
                                         <div class="text-xs text-gray-500">{{ $training->trainer_name ?: 'Sin instructor' }}</div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="flex items-center">
+                                        @if($training->responsibleUser)
+                                            <div class="h-8 w-8 rounded-full bg-ep-primary/10 flex items-center justify-center text-ep-primary font-bold text-xs mr-3">
+                                                {{ substr($training->responsibleUser->name, 0, 1) }}{{ substr($training->responsibleUser->apellidos, 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <div class="font-medium text-gray-900">{{ $training->responsibleUser->name }} {{ $training->responsibleUser->apellidos }}</div>
+                                                <div class="text-xs text-gray-500">{{ $training->responsibleUser->email }}</div>
+                                            </div>
+                                        @else
+                                            <span class="text-gray-400 italic">Sin asignar</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

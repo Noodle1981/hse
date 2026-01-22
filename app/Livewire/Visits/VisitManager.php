@@ -33,7 +33,7 @@ class VisitManager extends Component
         // Redirigir si ya hay visita en progreso
         $activeVisit = $this->visitService->getActiveVisit(Auth::user());
         if ($activeVisit) {
-            return redirect()->route('visits.in-progress', $activeVisit);
+            return redirect()->route('tecnico.visits.in-progress', $activeVisit);
         }
     }
 
@@ -60,7 +60,7 @@ class VisitManager extends Component
         
         $visit = $this->visitService->startVisit(Auth::user(), $sede);
 
-        return redirect()->route('visits.in-progress', $visit);
+        return redirect()->route('tecnico.visits.in-progress', $visit);
     }
 
     public function render()
