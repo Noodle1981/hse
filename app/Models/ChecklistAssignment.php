@@ -59,6 +59,11 @@ class ChecklistAssignment extends Model
         return $query->where('status', 'completed');
     }
 
+    public function scopeReassigned($query)
+    {
+        return $query->where('status', 'reassigned');
+    }
+
     public function scopeOverdue($query)
     {
         return $query->where('due_date', '<', now())
@@ -93,6 +98,7 @@ class ChecklistAssignment extends Model
             'pending' => 'yellow',
             'in_progress' => 'blue',
             'completed' => 'green',
+            'reassigned' => 'orange',
             default => 'gray',
         };
     }

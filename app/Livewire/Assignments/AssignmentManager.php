@@ -176,6 +176,8 @@ class AssignmentManager extends Component
         if ($this->statusFilter !== 'all') {
             if ($this->statusFilter === 'overdue') {
                 $query->overdue();
+            } elseif ($this->statusFilter === 'reassigned') {
+                $query->where('status', 'reassigned');
             } else {
                 $query->where('status', $this->statusFilter);
             }

@@ -46,7 +46,11 @@
                                 <option value="{{ $sub->id }}">{{ $sub->name }}</option>
                             @endforeach
                         </select>
-                        @error('subcategoryId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <button type="button" wire:click="openSubcategoryModal"
+                                class="text-xs text-ep-primary hover:text-ep-primary-dark mt-1 hover:underline inline-flex items-center">
+                            + crear subcategoría
+                        </button>
+                        @error('subcategoryId') <span class="text-red-500 text-sm block">{{ $message }}</span> @enderror
                     </div>
                 @endif
 
@@ -146,16 +150,40 @@
                                     @endif
                                 </div>
                             </div>
-                            <button type="button" wire:click="removeQuestion({{ $index }})"
-                                    class="text-red-500 hover:text-red-700 px-2">✕</button>
+                            <div class="flex gap-2">
+                                <button type="button" wire:click="editQuestion({{ $index }})"
+                                        class="text-blue-500 hover:text-blue-700 px-2" title="Editar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                <button type="button" wire:click="removeQuestion({{ $index }})"
+                                        class="text-red-500 hover:text-red-700 px-2" title="Eliminar">✕</button>
+                            </div>
                         </div>
                     @endforeach
                 </div>
             @endif
 
-            <!-- Agregar nueva pregunta -->
-            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4" x-data="{ showOptions: ['select', 'radio', 'checkbox'].includes($wire.newQuestion.type) }">
-                <h3 class="font-medium text-gray-700 mb-3">Agregar Pregunta</h3>
+            <!-- Agregar/Editar pregunta -->
+            <div id="question-form" 
+                 class="border-2 border-dashed rounded-lg p-4 transition-all duration-300"
+                 :class="$wire.editingQuestionIndex !== null ? 'border-blue-400 bg-blue-50' : 'border-gray-300'"
+                 x-data="{ showOptions: ['select', 'radio', 'checkbox'].includes($wire.newQuestion.type) }"
+                 x-init="$watch('$wire.editingQuestionIndex', value => { 
+                     if (value !== null) { 
+                         setTimeout(() => {
+                             document.getElementById('question-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                         }, 100);
+                     }
+                 })">
+                <h3 class="font-medium text-gray-700 mb-3">
+                    @if($editingQuestionIndex !== null)
+                        Editar Pregunta
+                    @else
+                        Agregar Pregunta
+                    @endif
+                </h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="md:col-span-2">
@@ -223,10 +251,23 @@
                         @endif
                     </div>
                     
-                    <button type="button" wire:click="addQuestion"
-                            class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark">
-                        + Agregar Pregunta
-                    </button>
+                    <div class="flex gap-2">
+                        @if($editingQuestionIndex !== null)
+                            <button type="button" wire:click="cancelEdit"
+                                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                                Cancelar
+                            </button>
+                            <button type="button" wire:click="updateQuestion"
+                                    class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                                Actualizar Pregunta
+                            </button>
+                        @else
+                            <button type="button" wire:click="addQuestion"
+                                    class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark">
+                                + Agregar Pregunta
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -244,5 +285,79 @@
         </div>
     </form>
 
+    <!-- Modal para crear subcategoría -->
+    @if($showSubcategoryModal)
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" wire:click.self="closeSubcategoryModal">
+            <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-semibold text-ep-dark">Crear Nueva Subcategoría</h3>
+                    <button type="button" wire:click="closeSubcategoryModal" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <form wire:submit.prevent="saveSubcategory" class="space-y-4">
+                    <!-- Categoría -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                        <select wire:model="newSubcategory.category_id"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary
+                                       @error('newSubcategory.category_id') border-red-500 @enderror">
+                            <option value="">Seleccionar categoría</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('newSubcategory.category_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Código (Nueva Subcategoría) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Código *
+                            <span class="text-xs text-gray-500 font-normal">(ej: electricidad)</span>
+                        </label>
+                        <input type="text" wire:model="newSubcategory.code"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary
+                                      @error('newSubcategory.code') border-red-500 @enderror"
+                               placeholder="electricidad">
+                        @error('newSubcategory.code') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Nombre -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                        <input type="text" wire:model="newSubcategory.name"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary
+                                      @error('newSubcategory.name') border-red-500 @enderror"
+                               placeholder="Nombre de la subcategoría">
+                        @error('newSubcategory.name') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Descripción -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                        <textarea wire:model="newSubcategory.description" rows="3"
+                                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary"
+                                  placeholder="Descripción opcional"></textarea>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" wire:click="closeSubcategoryModal"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                                class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark">
+                            Crear Subcategoría
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 
 </div>

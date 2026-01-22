@@ -42,13 +42,14 @@
                     <option value="pending">Pendientes</option>
                     <option value="in_progress">En Progreso</option>
                     <option value="completed">Completados</option>
+                    <option value="reassigned">Reubicados</option>
                     <option value="overdue">Vencidos</option>
                 </select>
             </div>
 
             <div class="flex items-end">
                 <button wire:click="toggleForm" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">
+                        class="w-full bg-ep-dark hover:bg-opacity-90 text-white px-4 py-2 rounded-md">
                     {{ $showForm ? 'Cancelar' : '+ Nueva Asignación' }}
                 </button>
             </div>
@@ -155,7 +156,7 @@
                         Cancelar
                     </button>
                     <button type="submit" wire:loading.attr="disabled"
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50">
+                            class="px-4 py-2 bg-ep-dark text-white rounded-md hover:bg-opacity-90 disabled:opacity-50">
                         <span wire:loading.remove>Crear Asignación</span>
                         <span wire:loading>Guardando...</span>
                     </button>
@@ -211,6 +212,7 @@
                                     'pending' => 'Pendiente',
                                     'in_progress' => 'En Progreso',
                                     'completed' => 'Completado',
+                                    'reassigned' => 'Reubicado',
                                     default => ucfirst($assignment->status)
                                 };
                             @endphp

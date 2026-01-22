@@ -81,7 +81,7 @@
     
     @livewireStyles
 </head>
-<body class="bg-gray-100 min-h-screen" x-data="{ sidebarOpen: true, mobileMenuOpen: false }">
+<body class="bg-gray-100 min-h-screen" x-data="{ sidebarOpen: window.innerWidth >= 1024, mobileMenuOpen: false }">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <aside :class="sidebarOpen ? 'w-64' : 'w-20'" 
@@ -99,7 +99,7 @@
                         Checklists
                     </span>
                 </a>
-                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-gray-400 hover:text-white p-1">
+                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-ep-primary hover:text-ep-primary-dark p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                               :d="sidebarOpen ? 'M11 19l-7-7 7-7m8 14l-7-7 7-7' : 'M13 5l7 7-7 7M5 5l7 7-7 7'"/>
@@ -489,7 +489,7 @@
                 </form>
                 
                 <div x-show="sidebarOpen" class="text-xs text-gray-500 text-center mt-3">
-                    EP v2.0.0
+                    XamaSafe v2.0.0
                 </div>
             </div>
         </aside>
@@ -500,9 +500,9 @@
              class="fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
         
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col min-h-screen" :class="sidebarOpen ? 'lg:ml-0' : 'lg:ml-0'">
+        <div class="flex-1 flex flex-col h-screen overflow-hidden">
             <!-- Top Header -->
-            <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 lg:px-8 sticky top-0 z-20">
+            <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 lg:px-8 flex-shrink-0 z-20">
                 <!-- Mobile menu button -->
                 <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-600 hover:text-gray-900">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -529,17 +529,19 @@
                 </div>
             </header>
             
-            <!-- Main Content Area -->
-            <main class="flex-1 p-6">
-                {{ $slot }}
-            </main>
-            
-            <!-- Footer -->
-            <footer class="bg-white border-t border-gray-200 py-4 px-8">
-                <div class="text-center text-sm text-gray-500">
-                    EP - Sistema de Checklists Dinámicos © {{ date('Y') }}
+            <!-- Main Content Area with Scroll -->
+            <main class="flex-1 overflow-y-auto bg-gray-100">
+                <div class="p-6">
+                    {{ $slot }}
                 </div>
-            </footer>
+                
+                <!-- Footer -->
+                <footer class="bg-white border-t border-gray-200 py-4 px-8">
+                    <div class="text-center text-sm text-gray-500">
+                        EP - Sistema de Checklists Dinámicos © {{ date('Y') }}
+                    </div>
+                </footer>
+            </main>
         </div>
     </div>
 

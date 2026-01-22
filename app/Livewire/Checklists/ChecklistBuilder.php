@@ -42,10 +42,20 @@ class ChecklistBuilder extends Component
     ];
 
     public string $optionInput = '';
+    public ?int $editingQuestionIndex = null;
 
     // Datos para selectores
     public $categories = [];
     public $subcategories = [];
+
+    // Modal de subcategoría
+    public bool $showSubcategoryModal = false;
+    public array $newSubcategory = [
+        'category_id' => null,
+        'code' => '',
+        'name' => '',
+        'description' => '',
+    ];
 
     protected $rules = [
         'title' => 'required|string|max:255',
@@ -130,6 +140,39 @@ class ChecklistBuilder extends Component
         $this->resetNewQuestion();
     }
 
+    public function editQuestion(int $index)
+    {
+        $this->editingQuestionIndex = $index;
+        // Hacer una copia profunda del array
+        $question = $this->questions[$index];
+        $this->newQuestion = [
+            'label' => $question['label'] ?? '',
+            'type' => $question['type'] ?? 'text',
+            'options' => $question['options'] ?? [],
+            'is_required' => $question['is_required'] ?? false,
+            'help_text' => $question['help_text'] ?? '',
+            'section_id' => $question['section_id'] ?? null,
+        ];
+    }
+
+    public function updateQuestion()
+    {
+        if (trim($this->newQuestion['label']) === '') {
+            $this->addError('newQuestion.label', 'La pregunta es requerida.');
+            return;
+        }
+
+        $this->questions[$this->editingQuestionIndex] = $this->newQuestion;
+        $this->resetNewQuestion();
+        $this->editingQuestionIndex = null;
+    }
+
+    public function cancelEdit()
+    {
+        $this->resetNewQuestion();
+        $this->editingQuestionIndex = null;
+    }
+
     public function removeQuestion(int $index)
     {
         unset($this->questions[$index]);
@@ -204,6 +247,71 @@ class ChecklistBuilder extends Component
         
         unset($this->sections[$index]);
         $this->sections = array_values($this->sections);
+    }
+
+    public function openSubcategoryModal()
+    {
+        $this->showSubcategoryModal = true;
+        // Pre-seleccionar la categoría actual si existe
+        if ($this->categoryId) {
+            $this->newSubcategory['category_id'] = $this->categoryId;
+        }
+    }
+
+    public function closeSubcategoryModal()
+    {
+        $this->showSubcategoryModal = false;
+        $this->newSubcategory = [
+            'category_id' => null,
+            'code' => '',
+            'name' => '',
+            'description' => '',
+        ];
+        $this->resetErrorBag();
+    }
+
+    public function saveSubcategory()
+    {
+        $this->validate([
+            'newSubcategory.category_id' => 'required|exists:categories,id',
+            'newSubcategory.code' => 'required|string|max:50|unique:subcategories,code',
+            'newSubcategory.name' => 'required|string|max:255',
+            'newSubcategory.description' => 'nullable|string',
+        ], [
+            'newSubcategory.category_id.required' => 'Debe seleccionar una categoría.',
+            'newSubcategory.code.required' => 'El código es requerido.',
+            'newSubcategory.code.unique' => 'Ya existe una subcategoría con este código.',
+            'newSubcategory.name.required' => 'El nombre es requerido.',
+        ]);
+
+        // Obtener el último order de subcategorías de esta categoría
+        $lastOrder = Subcategory::where('category_id', $this->newSubcategory['category_id'])
+            ->max('order') ?? 0;
+
+        // Crear la subcategoría
+        $subcategory = Subcategory::create([
+            'category_id' => $this->newSubcategory['category_id'],
+            'code' => $this->newSubcategory['code'],
+            'name' => $this->newSubcategory['name'],
+            'description' => $this->newSubcategory['description'] ?: null,
+            'is_active' => true,
+            'order' => $lastOrder + 1,
+        ]);
+
+        // Actualizar la categoría seleccionada si es diferente
+        if ($this->categoryId != $this->newSubcategory['category_id']) {
+            $this->categoryId = $this->newSubcategory['category_id'];
+        }
+
+        // Recargar subcategorías
+        $this->loadSubcategories();
+
+        // Seleccionar automáticamente la nueva subcategoría
+        $this->subcategoryId = $subcategory->id;
+
+        // Cerrar modal y mostrar mensaje
+        $this->closeSubcategoryModal();
+        session()->flash('message', 'Subcategoría creada exitosamente.');
     }
 
     private function resetNewQuestion()
