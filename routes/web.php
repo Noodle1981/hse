@@ -90,6 +90,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', \App\Livewire\Assignments\AssignmentManager::class)->name('assignments.index');
     });
 
+    // Hub de Administración (Solo Admin)
+    Route::middleware(['role:Administrador'])->group(function () {
+        Route::get('/administracion', \App\Livewire\Admin\AdministrationHub::class)->name('administration.hub');
+    });
+
     // Rutas de Usuarios (Solo Admin)
     Route::middleware(['role:Administrador'])->prefix('users')->group(function () {
         Route::get('/', \App\Livewire\Users\UserManager::class)->name('users.index');
@@ -140,6 +145,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas de Matriz de Riesgo (Sprint 10)
     Route::prefix('risk-matrices')->group(function () {
+        // Hub de Ejecuciones Avanzadas (Admin y Técnico)
+        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+            Route::get('/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
+        });
+        
         // Solo Admin puede diseñar las matrices
         Route::middleware(['role:Administrador'])->group(function () {
             Route::get('/{matrixId}/editor', \App\Livewire\Risks\RiskMatrixEditor::class)->name('risk-matrices.editor');
@@ -188,14 +198,18 @@ Route::middleware(['auth'])->group(function () {
 
     // Rutas de Visitas (Sistema Integrado)
     Route::prefix('visits')->name('visits.')->group(function () {
-        // Admin y Técnico - Gestión de Visitas Activas e Historial
-        Route::middleware(['role:Administrador,Técnico'])->group(function () {
+        // Técnico - Mis Visitas (solo las propias)
+        Route::middleware(['role:Técnico'])->group(function () {
             Route::get('/', \App\Livewire\Visits\VisitManager::class)->name('index');
             Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
         });
         
-        // Mantener rutas legacy de certificados SOLO si se necesita acceso histórico antiguo
-        // (Opcional: migrar funcionalidad a nuevo sistema)
+        // Gestor/Admin - Historial de TODAS las visitas
+        Route::middleware(['role:Administrador'])->group(function () {
+            Route::get('/history', \App\Livewire\Visits\VisitHistory::class)->name('history');
+            // Admin también puede ver visitas en progreso de cualquier técnico
+            Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
+        });
     });
 
     // Logout

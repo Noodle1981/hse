@@ -24,6 +24,7 @@ class VisitInProgress extends Component
     public $showAutoAssignModal = false;
     public $showFinalizeModal = false;
     public $showHallazgoModal = false;
+    public $showIncidenteModal = false;
     
     // Auto-asignación
     public $availableChecklists = [];
@@ -48,6 +49,8 @@ class VisitInProgress extends Component
         'closeEppDelivery' => 'closeEppModal',
         'hallazgoCreated' => 'onHallazgoCreated',
         'closeHallazgoQuick' => 'closeHallazgoModal',
+        'incidenteCreated' => 'onIncidenteCreated',
+        'closeIncidenteQuick' => 'closeIncidenteModal',
     ];
 
     public function mount(VisitCertificate $visit)
@@ -219,6 +222,23 @@ class VisitInProgress extends Component
         $this->closeHallazgoModal();
         $this->loadChecklists();
         session()->flash('message', 'Hallazgo registrado exitosamente.');
+    }
+
+    public function openIncidenteModal()
+    {
+        $this->showIncidenteModal = true;
+    }
+
+    public function closeIncidenteModal()
+    {
+        $this->showIncidenteModal = false;
+    }
+
+    public function onIncidenteCreated()
+    {
+        $this->closeIncidenteModal();
+        $this->loadChecklists();
+        session()->flash('message', 'Incidente reportado exitosamente.');
     }
 
     public function render()

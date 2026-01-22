@@ -198,7 +198,7 @@
                     </svg>
                     Registrar Hallazgo
                 </button>
-                <button class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 font-medium hover:bg-red-100 transition-colors flex flex-col items-center justify-center">
+                <button wire:click="openIncidenteModal" class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 font-medium hover:bg-red-100 transition-colors flex flex-col items-center justify-center">
                     <svg class="w-8 h-8 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
@@ -269,6 +269,13 @@
         @livewire('visits.hallazgo-quick', [
             'visit' => $visit
         ], key('hallazgo-form'))
+    @endif
+
+    <!-- Modal Incidente Rápido -->
+    @if($showIncidenteModal)
+        @livewire('visits.incidente-quick', [
+            'visit' => $visit
+        ], key('incidente-form'))
     @endif
 
 </div>
