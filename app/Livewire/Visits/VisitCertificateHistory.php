@@ -7,6 +7,8 @@ use App\Models\Empresa;
 use App\Models\Sede;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ConstanciaFirmaResponsable;
 
 class VisitCertificateHistory extends Component
 {
@@ -23,6 +25,22 @@ class VisitCertificateHistory extends Component
     public function updatingStatusFilter() { $this->resetPage(); }
     public function updatingEmpresaFilter() { $this->sedeFilter = ''; $this->resetPage(); }
     public function updatingSedeFilter() { $this->resetPage(); }
+
+    public function resendEmail($id)
+    {
+        $certificate = GeneradorConstancia::find($id);
+        
+        if ($certificate && !$certificate->firma_responsable && $certificate->email_responsable) {
+            try {
+                Mail::to($certificate->email_responsable)->send(new ConstanciaFirmaResponsable($certificate));
+                session()->flash('success', 'Email reenviado correctamente a ' . $certificate->email_responsable);
+            } catch (\Exception $e) {
+                session()->flash('error', 'Error al reenviar email: ' . $e->getMessage());
+            }
+        } else {
+             session()->flash('error', 'No se puede reenviar el email (ya firmado o sin destinatario).');
+        }
+    }
 
     public function render()
     {

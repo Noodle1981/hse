@@ -53,15 +53,17 @@
         </div>
         <div class="info-row">
             <div class="info-label">Fecha de Visita:</div>
-            <div class="info-value">{{ $visit->start_time->format('d/m/Y H:i') }}</div>
+            <div class="info-value">{{ $visit->start_time ? $visit->start_time->format('d/m/Y H:i') : $visit->visit_date->format('d/m/Y') }}</div>
         </div>
         <div class="info-row">
             <div class="info-label">Duración:</div>
             <div class="info-value">
-                @if($visit->end_time)
+                @if($visit->start_time && $visit->end_time)
                     {{ $visit->start_time->diffForHumans($visit->end_time, true) }}
-                @else
+                @elseif($visit->start_time)
                     En progreso
+                @else
+                    N/A
                 @endif
             </div>
         </div>
@@ -73,9 +75,9 @@
         @if($visit->checklistCompletions->count() > 0)
             @foreach($visit->checklistCompletions as $completion)
                 <div class="item">
-                    <div class="item-title">{{ $completion->assignment->checklist->title }}</div>
+                    <div class="item-title">{{ $completion->assignment?->checklist?->title ?? 'Checklist eliminado o no asignado' }}</div>
                     <div class="item-detail">
-                        Categoría: {{ $completion->assignment->checklist->categoryRelation->name ?? 'N/A' }} | 
+                        Categoría: {{ $completion->assignment?->checklist?->categoryRelation?->name ?? 'N/A' }} | 
                         Completado: {{ $completion->created_at->format('d/m/Y H:i') }}
                     </div>
                 </div>
@@ -176,37 +178,56 @@
     </div>
 
     <!-- Observations -->
-    @if($visit->notes)
+    @if($visit->general_observations)
     <div class="section">
-        <div class="section-title">Observaciones</div>
-        <div style="padding: 10px; background: #f9f9f9;">
-            {{ $visit->notes }}
-        </div>
+        <div class="section-title">Observaciones Varias</div>
+        <div style="padding: 10px; background: #f9f9f9; white-space: pre-wrap; font-size: 10pt;">{{ $visit->general_observations }}</div>
     </div>
     @endif
 
     <!-- Signature Section -->
-    @if($visit->responsible_name || $visit->responsible_signature)
-    <div class="section" style="margin-top: 40px;">
+    <div class="section" style="margin-top: 40px; page-break-inside: avoid;">
         <div style="display: table; width: 100%;">
+            <!-- Firma Responsable -->
             <div style="display: table-cell; width: 50%; text-align: center; vertical-align: bottom;">
                 @if($visit->responsible_signature)
                     <img src="{{ $visit->responsible_signature }}" alt="Firma" style="max-height: 80px; max-width: 200px; margin-bottom: 10px;">
+                    @if($visit->date_firma_responsable)
+                        <div style="font-size: 8pt; color: #666; margin-bottom: 5px;">
+                            Firmado digitalmente: {{ \Carbon\Carbon::parse($visit->date_firma_responsable)->format('d/m/Y H:i') }}
+                        </div>
+                    @endif
+                @elseif($visit->signature_skip_reason)
+                    <div style="height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 1px dashed #ccc; padding: 10px;">
+                        <div>
+                            <strong style="color: #FF6B35;">Firma Pendiente / No Disponible</strong><br>
+                            <span style="font-size: 8pt; color: #666;">Motivo: {{ $visit->signature_skip_reason }}</span>
+                        </div>
+                    </div>
+                @else
+                    <div style="height: 80px;"></div>
                 @endif
+                
                 <div style="border-top: 2px solid #333; padding-top: 5px; margin: 0 20px;">
                     <strong>{{ $visit->responsible_name ?? 'Responsable de Sede' }}</strong><br>
                     <span style="font-size: 9pt; color: #666;">Responsable de Sede</span>
+                    @if($visit->email_responsable)
+                        <br><span style="font-size: 8pt; color: #999;">{{ $visit->email_responsable }}</span>
+                    @endif
                 </div>
             </div>
+
+            <!-- Firma Técnico -->
             <div style="display: table-cell; width: 50%; text-align: center; vertical-align: bottom;">
-                <div style="border-top: 2px solid #333; padding-top: 5px; margin: 0 20px; margin-top: 60px;">
+                <!-- Espacio para firma técnico si fuera necesario -->
+                <div style="height: 80px;"></div>
+                <div style="border-top: 2px solid #333; padding-top: 5px; margin: 0 20px;">
                     <strong>{{ $visit->user->nombres }} {{ $visit->user->apellidos }}</strong><br>
                     <span style="font-size: 9pt; color: #666;">Técnico XamaSafe</span>
                 </div>
             </div>
         </div>
     </div>
-    @endif
 
     <!-- Footer -->
     <div class="footer">

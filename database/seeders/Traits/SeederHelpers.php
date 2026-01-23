@@ -492,4 +492,106 @@ trait SeederHelpers
 
         echo "   📋 7 asignaciones creadas (2 vencidas, 5 pendientes)\n";
     }
+    /**
+     * Crear tareas con fecha de vencimiento específica (Ej: 31 Enero)
+     */
+    protected function createDeadlineTasks($tecnico, $sede, array $checklists, $date): void
+    {
+        // 1. Asignaciones de Checklists (3 tareas)
+        $tasksCount = 3;
+        for ($i = 0; $i < $tasksCount; $i++) {
+            if (empty($checklists)) break;
+            
+            $checklist = $checklists[$i % count($checklists)];
+            
+            \App\Models\ChecklistAssignment::create([
+                'dynamic_checklist_id' => $checklist->id,
+                'user_id' => $tecnico->id,
+                'sede_id' => $sede->id,
+                'empresa_id' => $sede->empresa_id,
+                'due_date' => $date,
+                'status' => 'pending',
+                'notes' => 'Tarea prioritaria con vencimiento: ' . $date->format('d/m/Y'),
+            ]);
+        }
+    }
+
+    /**
+     * Crear capacitaciones programadas para una fecha
+     */
+    protected function createScheduledTrainings($tecnico, $sede, $date): void
+    {
+        $topics = [
+            'Seguridad Operativa Avanzada',
+            'Protocolos de Emergencia 2026',
+            'Actualización Normativa ISO 45001'
+        ];
+
+        foreach ($topics as $topic) {
+            Training::create([
+                'empresa_id' => $sede->empresa_id,
+                'sede_id' => $sede->id,
+                'title' => $topic,
+                'description' => 'Capacitación obligatoria de vencimiento mensual',
+                'type' => 'presencial',
+                'date' => $date->setTime(rand(9, 14), 0),
+                'duration' => 120,
+                'trainer_name' => 'Instructor Certificado',
+                'status' => 'scheduled',
+                // Asignar al técnico como asistente si el modelo lo permite o si hay tabla pivote
+            ]);
+            
+            // Nota: Si TrainingAttendance requiere un empleado, aquí asumimos que el técnico asiste como "empleado" o usuario.
+            // Si el sistema usa TrainingAttendance para usuarios, agregarlo aquí.
+            // Revisando TrainingAttendance: tiene 'user_id' nullable.
+            
+            /*
+            TrainingAttendance::create([
+                'training_id' => ...
+                'user_id' => $tecnico->id
+            ]);
+            */
+        }
+    }
+
+    /**
+     * Crear solicitudes de EPP pendientes
+     */
+    /**
+     * Crear solicitudes de EPP pendientes
+     */
+    protected function createPendingEppRequests($tecnico, $sede, $date): void
+    {
+        // Solicitudes de EPP (Si existe el modelo EppDeliveryRequest o similar)
+        if (!class_exists(\App\Models\EppDeliveryRequest::class)) return;
+
+        // Necesitamos empleados para asignar la solicitud
+        $employees = \App\Models\Employee::where('sede_id', $sede->id)->inRandomOrder()->take(3)->get();
+        if ($employees->isEmpty()) return;
+        
+        // Crear 3 solicitudes (o tantas como empleados encontremos hasta 3)
+        foreach ($employees as $employee) {
+            // Items aleatorios para esta solicitud
+            $items = EppItem::inRandomOrder()->take(rand(1, 3))->get();
+            if ($items->isEmpty()) continue;
+
+            $itemsJson = $items->map(function($item) {
+                return [
+                    'item_id' => $item->id,
+                    'cantidad' => rand(1, 2),
+                    'tipo' => $item->tipo
+                ];
+            })->toArray();
+
+            \App\Models\EppDeliveryRequest::create([
+                 'empresa_id' => $sede->empresa_id,
+                 'sede_id' => $sede->id,
+                 'employee_id' => $employee->id,
+                 'requested_by_user_id' => $tecnico->id,
+                 'status' => 'pending',
+                 'items' => $itemsJson,
+                 'notes' => 'Solicitud urgente. Vencimiento requerido: ' . $date->format('d/m/Y'),
+             ]);
+        }
+    }
 }

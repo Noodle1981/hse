@@ -10,6 +10,8 @@ use App\Models\RiskEvaluation;
 use App\Models\EppDelivery;
 use Livewire\Component;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ConstanciaFirmaResponsable;
 
 class VisitCertificateWizard extends Component
 {
@@ -39,6 +41,27 @@ class VisitCertificateWizard extends Component
     public $justificacion_firma = '';
 
     public ?GeneradorConstancia $certificate = null;
+
+    public function updatedFirmaNoDisponible($value)
+    {
+        if ($value && empty($this->email_responsable) && !empty($this->sede_id)) {
+            $sede = Sede::find($this->sede_id);
+            if ($sede) {
+                $this->email_responsable = $sede->responsable_1_email 
+                    ?? $sede->responsable_2_email 
+                    ?? $sede->responsable_3_email 
+                    ?? $sede->correo 
+                    ?? '';
+                
+                if (empty($this->aclaracion_responsable)) {
+                    $this->aclaracion_responsable = $sede->responsable_1_nombre
+                        ?? $sede->responsable_2_nombre
+                        ?? $sede->responsable_3_nombre
+                        ?? '';
+                }
+            }
+        }
+    }
 
     public function mount()
     {
@@ -114,7 +137,9 @@ class VisitCertificateWizard extends Component
             'observacion' => $this->observacion,
             'firma_instructor' => $this->firma_instructor,
             'date_firma_instructor' => now(),
+            'status' => 'completed', // Wizard always creates completed certificates
             'justificacion_firma' => $this->firma_no_disponible ? $this->justificacion_firma : null,
+            'signature_skip_reason' => $this->firma_no_disponible ? $this->justificacion_firma : null, // Support both models if migrating
             'email_responsable' => $this->email_responsable,
             'aclaracion_responsable' => $this->aclaracion_responsable,
             'token_responsable' => $token,
@@ -138,8 +163,17 @@ class VisitCertificateWizard extends Component
             $this->certificate->hallazgosActividades()->attach($this->selectedHallazgos);
         }
 
-        // TODO: Enviar email al responsable con el link para firmar
-        // Mail::to($this->email_responsable)->send(new ConstanciaFirmaResponsable($this->certificate));
+        // Enviar email al responsable si la firma no está disponible y hay email
+        if ($this->firma_no_disponible && $this->email_responsable) {
+            try {
+                Mail::to($this->email_responsable)->send(new ConstanciaFirmaResponsable($this->certificate));
+            } catch (\Exception $e) {
+                // Log error but continue
+                \Illuminate\Support\Facades\Log::error('Error enviando email de firma: ' . $e->getMessage());
+                session()->flash('warning', 'Constancia creada pero hubo un error enviando el email: ' . $e->getMessage());
+                return redirect()->route('visit-certificates.history');
+            }
+        }
 
         session()->flash('message', '¡Constancia de visita creada exitosamente!');
         

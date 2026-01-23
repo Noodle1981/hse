@@ -27,7 +27,13 @@ class TransportSeeder extends Seeder
         $this->createAnnualContract($this->sede, $checklists, 'Transporte');
         
         // Crear asignaciones para Roberto (Transporte)
-        $this->createDemoAssignments($checklists, $this->tecnicos[0], $this->sede);
+        // Tareas con vencimiento 31 Enero 2026
+        $deadline = \Carbon\Carbon::create(2026, 1, 31, 12, 0, 0);
+        if (!empty($this->tecnicos)) {
+            $this->createDeadlineTasks($this->tecnicos[0], $this->sede, $checklists, $deadline);
+            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline);
+            $this->createPendingEppRequests($this->tecnicos[0], $this->sede, $deadline);
+        }
 
         echo "✅ Transporte completado\n";
     }

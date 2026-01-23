@@ -6,6 +6,9 @@ use App\Models\ChecklistAssignment;
 use App\Models\VisitCertificate;
 use App\Models\DynamicChecklist;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use App\Mail\ConstanciaFirmaResponsable;
 use Livewire\Component;
 
 class VisitInProgress extends Component
@@ -24,6 +27,30 @@ class VisitInProgress extends Component
     // EPP Requests
     public $assignedEppRequests = [];
     public $selectedEppRequestId = null;
+
+    public function updatedSignatureUnavailable($value)
+    {
+        if ($value && empty($this->responsibleEmail)) {
+            // Intentar pre-llenar con el email del responsable de la sede
+            $sede = $this->visit->sede;
+            if ($sede) {
+                // Priorizar responsable 1, luego 2, luego 3
+                $this->responsibleEmail = $sede->responsable_1_email 
+                    ?? $sede->responsable_2_email 
+                    ?? $sede->responsable_3_email 
+                    ?? $sede->correo 
+                    ?? '';
+                
+                // También intentar pre-llenar el nombre si está vacío
+                if (empty($this->responsibleName)) {
+                    $this->responsibleName = $sede->responsable_1_nombre
+                        ?? $sede->responsable_2_nombre
+                        ?? $sede->responsable_3_nombre
+                        ?? '';
+                }
+            }
+        }
+    }
 
     // ... (listeners)
 
@@ -74,6 +101,11 @@ class VisitInProgress extends Component
     public $visitNotes = '';
     public $responsibleName = '';
     public $responsibleSignature = '';
+    
+    // Firma Remota
+    public $signatureUnavailable = false;
+    public $signatureUnavailableReason = '';
+    public $responsibleEmail = '';
     
     // Auto-asignación
     public $availableChecklists = [];
@@ -310,28 +342,66 @@ class VisitInProgress extends Component
     public function finalizeVisit()
     {
         // Validar campos requeridos
-        $this->validate([
+        $rules = [
             'visitNotes' => 'required|string|min:10',
             'responsibleName' => 'required|string|min:3',
-            'responsibleSignature' => 'required|string',
-        ], [
+        ];
+
+        if ($this->signatureUnavailable) {
+            $rules['signatureUnavailableReason'] = 'required|string|min:5';
+            $rules['responsibleEmail'] = 'nullable|email';
+        } else {
+            $rules['responsibleSignature'] = 'required|string';
+        }
+
+        $this->validate($rules, [
             'visitNotes.required' => 'Las observaciones son obligatorias',
             'visitNotes.min' => 'Las observaciones deben tener al menos 10 caracteres',
             'responsibleName.required' => 'El nombre del responsable es obligatorio',
             'responsibleName.min' => 'El nombre debe tener al menos 3 caracteres',
             'responsibleSignature.required' => 'La firma digital es obligatoria',
+            'signatureUnavailableReason.required' => 'Debe indicar el motivo por el cual no se pudo obtener la firma',
+            'responsibleEmail.email' => 'El formato del email no es válido',
         ]);
+
+        // Datos básicos
+        $data = [
+            'end_time' => now(),
+            'general_observations' => $this->visitNotes,
+            'responsible_name' => $this->responsibleName,
+        ];
+
+        if ($this->signatureUnavailable) {
+            $data['status'] = 'completed'; // Usamos completed ya que pending_signature no existe en el enum de la DB
+            $data['signature_skip_reason'] = $this->signatureUnavailableReason;
+            $data['email_responsable'] = $this->responsibleEmail;
+
+            // Generar token y código si hay email
+            if ($this->responsibleEmail) {
+                $data['token_responsable'] = Str::random(60);
+                $data['code'] = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            }
+        } else {
+            $data['status'] = 'completed';
+            $data['signature'] = $this->responsibleSignature;
+            $data['date_firma_responsable'] = now();
+        }
 
         // Actualizar estado de la visita
-        $this->visit->update([
-            'status' => 'completed',
-            'end_time' => now(),
-            'notes' => $this->visitNotes,
-            'responsible_name' => $this->responsibleName,
-            'responsible_signature' => $this->responsibleSignature,
-        ]);
+        $this->visit->update($data);
 
-        session()->flash('message', 'Visita finalizada correctamente. Puede descargar la constancia desde la lista de visitas.');
+        // Enviar email si aplica
+        if ($this->signatureUnavailable && $this->responsibleEmail) {
+            try {
+                // Usamos el mismo Mailable, pero asegurandonos que acepte VisitCertificate
+                // VisitCertificate debe tener las props esperadas por la vista del mail.
+                Mail::to($this->responsibleEmail)->send(new ConstanciaFirmaResponsable($this->visit));
+            } catch (\Exception $e) {
+                session()->flash('warning', 'Visita finalizada pero error enviando email: ' . $e->getMessage());
+            }
+        }
+
+        session()->flash('message', 'Visita finalizada correctamente.');
         
         // Redirigir a lista de visitas
         if (auth()->user()->hasRole('Administrador')) {

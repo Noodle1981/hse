@@ -91,6 +91,10 @@
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                         En Progreso
                                     </span>
+                                @elseif($visit->status === 'completed' && !$visit->responsible_signature && $visit->signature_skip_reason)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        Pendiente Firma
+                                    </span>
                                 @elseif($visit->status === 'completed')
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         Completada
@@ -111,6 +115,14 @@
                                     <a href="#" class="btn-xs bg-white border-gray-200 hover:border-gray-300 text-gray-500">
                                         Ver Detalles
                                     </a>
+                                    
+                                    @if($visit->status === 'completed' && !$visit->responsible_signature && $visit->signature_skip_reason && $visit->email_responsable)
+                                        <button wire:click="resendEmail({{ $visit->id }})" 
+                                                wire:loading.attr="disabled"
+                                                class="ml-2 btn-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200">
+                                            Reenviar Email
+                                        </button>
+                                    @endif
                                 @endif
                             </td>
                         </tr>

@@ -78,14 +78,14 @@ database/seeders/
 
 **Responsabilidades:**
 - Crear administrador global
-- Crear 7 técnicos (4 casos de uso)
+- Crear 1 técnico (4 casos de uso)
 - Instanciar y ejecutar seeders de casos de uso
 - Mostrar resumen de datos creados
 
 **Métodos principales:**
 - `run()`: Método principal de ejecución
-- `createAdmin()`: Crea usuario administrador
-- `createTechnicians()`: Crea 7 técnicos
+- `createAdmin()`: Crea usuario administrador 
+- `createTechnicians()`: Crea 1 técnico
 - `showSummary()`: Muestra resumen de datos
 
 ### SeederHelpers.php (Trait)

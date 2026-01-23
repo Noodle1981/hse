@@ -19,12 +19,19 @@ class VisitCertificate extends Model
         'status', // draft, in_progress, completed, signed
         'general_observations',
         'signature',
+        'signature_skip_reason',
+        'email_responsable',
+        'token_responsable',
+        'code',
+        'responsible_name',
+        'date_firma_responsable',
     ];
 
     protected $casts = [
         'visit_date' => 'date',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'date_firma_responsable' => 'datetime',
     ];
 
     // Relaciones principales
@@ -90,5 +97,15 @@ class VisitCertificate extends Model
             'signed' => 'Firmada',
             default => $this->status,
         };
+    }
+
+    public function getNotesAttribute()
+    {
+        return $this->general_observations;
+    }
+
+    public function getResponsibleSignatureAttribute()
+    {
+        return $this->signature;
     }
 }

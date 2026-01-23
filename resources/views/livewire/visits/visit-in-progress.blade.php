@@ -337,17 +337,21 @@
                     isDrawing: false,
                     lastX: 0,
                     lastY: 0,
+                    signatureUnavailable: @entangle('signatureUnavailable'),
                     init() {
                         this.$nextTick(() => {
-                            this.canvas = this.$refs.signatureCanvas;
-                            this.ctx = this.canvas.getContext('2d');
-                            const rect = this.canvas.getBoundingClientRect();
-                            this.canvas.width = rect.width;
-                            this.canvas.height = rect.height;
-                            this.ctx.strokeStyle = '#059669';
-                            this.ctx.lineWidth = 2;
-                            this.ctx.lineCap = 'round';
-                            this.ctx.lineJoin = 'round';
+                            // Ensure canvas exists before init
+                            if (this.$refs.signatureCanvas) {
+                                this.canvas = this.$refs.signatureCanvas;
+                                this.ctx = this.canvas.getContext('2d');
+                                const rect = this.canvas.getBoundingClientRect();
+                                this.canvas.width = rect.width;
+                                this.canvas.height = rect.height;
+                                this.ctx.strokeStyle = '#059669';
+                                this.ctx.lineWidth = 2;
+                                this.ctx.lineCap = 'round';
+                                this.ctx.lineJoin = 'round';
+                            }
                         });
                     },
                     startDrawing(e) {
@@ -375,8 +379,10 @@
                         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                     },
                     submitForm() {
-                        const signatureData = this.canvas.toDataURL('image/png');
-                        @this.set('responsibleSignature', signatureData);
+                        if (!this.signatureUnavailable && this.canvas) {
+                            const signatureData = this.canvas.toDataURL('image/png');
+                            @this.set('responsibleSignature', signatureData);
+                        }
                         @this.finalizeVisit();
                     }
                  }">
@@ -414,23 +420,57 @@
                     </div>
 
                     <!-- Firma Digital -->
-                    <div wire:ignore>
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Firma del Responsable *</label>
-                        <div class="relative bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden touch-none h-40">
-                            <canvas x-ref="signatureCanvas" 
-                                    @mousedown="startDrawing($event)"
-                                    @mousemove="draw($event)"
-                                    @mouseup="stopDrawing()"
-                                    @mouseleave="stopDrawing()"
-                                    class="w-full h-full cursor-crosshair"></canvas>
-                            <button type="button" @click="clearSignature()" 
-                                    class="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur shadow-sm rounded-lg text-gray-500 hover:text-red-500 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                </svg>
-                            </button>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-sm font-bold text-gray-700">Firma del Responsable *</label>
+                            
+                            <label class="flex items-center space-x-2 cursor-pointer text-sm">
+                                <input type="checkbox" wire:model.live="signatureUnavailable" class="rounded border-gray-300 text-green-600 focus:ring-green-500">
+                                <span class="text-gray-600">No disponible</span>
+                            </label>
                         </div>
-                        @error('responsibleSignature') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        
+                        <div x-show="!signatureUnavailable" style="display: none;">
+                            <div wire:ignore>
+                                <div class="relative bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden touch-none h-40">
+                                    <canvas x-ref="signatureCanvas" 
+                                            @mousedown="startDrawing($event)"
+                                            @mousemove="draw($event)"
+                                            @mouseup="stopDrawing()"
+                                            @mouseleave="stopDrawing()"
+                                            class="w-full h-full cursor-crosshair"></canvas>
+                                    <button type="button" @click="clearSignature()" 
+                                            class="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur shadow-sm rounded-lg text-gray-500 hover:text-red-500 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">Firme dentro del recuadro usando mouse o pantalla táctil.</p>
+                            </div>
+                            <!-- Error solo visible si es required -->
+                            @error('responsibleSignature') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div x-show="signatureUnavailable" style="display: none;" class="space-y-4 bg-yellow-50 p-4 rounded-xl border border-yellow-100">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Motivo de la falta de firma *</label>
+                                <textarea wire:model="signatureUnavailableReason" 
+                                          rows="2"
+                                          class="block w-full border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                                          placeholder="Explique por qué no se pudo obtener la firma..."></textarea>
+                                @error('signatureUnavailableReason') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-1">Email del Responsable (Opcional)</label>
+                                <input type="email" wire:model="responsibleEmail" 
+                                       class="block w-full border-gray-300 rounded-lg text-sm focus:ring-green-500 focus:border-green-500"
+                                       placeholder="cliente@ejemplo.com">
+                                <p class="text-xs text-gray-500 mt-1">Si ingresa un email, se enviará un enlace para firmar digitalmente.</p>
+                                @error('responsibleEmail') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Botones -->

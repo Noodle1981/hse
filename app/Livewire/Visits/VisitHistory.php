@@ -5,6 +5,8 @@ namespace App\Livewire\Visits;
 use App\Models\VisitCertificate;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ConstanciaFirmaResponsable;
 
 class VisitHistory extends Component
 {
@@ -14,6 +16,20 @@ class VisitHistory extends Component
     public $filterStatus = '';
     public $filterTechnician = '';
     public $filterSede = '';
+
+    public function resendEmail($id)
+    {
+        $visit = VisitCertificate::find($id);
+
+        if ($visit && !$visit->responsible_signature && $visit->signature_skip_reason && $visit->email_responsable) {
+            try {
+                Mail::to($visit->email_responsable)->send(new ConstanciaFirmaResponsable($visit));
+                session()->flash('message', 'Email enviado correctamente a ' . $visit->email_responsable);
+            } catch (\Exception $e) {
+                session()->flash('error', 'Error enviando email: ' . $e->getMessage());
+            }
+        }
+    }
 
     public function render()
     {

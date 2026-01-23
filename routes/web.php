@@ -23,6 +23,7 @@ use App\Livewire\Categories\SubcategoryManager;
 |--------------------------------------------------------------------------
 */
 Route::get('/login', Login::class)->name('login');
+Route::get('/constancia/firmar/{token}', \App\Livewire\Public\PublicSignature::class)->name('constancia.firmar');
 
 /*
 |--------------------------------------------------------------------------
