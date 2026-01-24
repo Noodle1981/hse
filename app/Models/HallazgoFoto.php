@@ -72,11 +72,11 @@ class HallazgoFoto extends Model
     // ============================================
 
     /**
-     * Obtener la URL completa de la foto
+     * Obtener la URL completa de la foto (Accessor)
      */
-    public function getUrl(): string
+    public function getUrlAttribute(): string
     {
-        return Storage::url($this->ruta_archivo);
+        return Storage::disk('public')->url($this->ruta_archivo);
     }
 
     /**

@@ -1,12 +1,12 @@
 ---
-description: Contexto del proyecto EP-Back - Sistema de Checklists Dinámicos
+description: Contexto del proyecto XamaSafe
 ---
 
-# 📖 Contexto del Proyecto EP-Back
+# 📖 Contexto del XamaSafe
 
 ## 🎯 Visión General
 
-**Nombre:** EP-Back (Equipo Preventivo - Backend)
+**Nombre:** XamaSafe
 **Versión Actual:** V2.0.0.0
 **Tipo:** Sistema SaaS integral de Higiene y Seguridad
 **Stack:** Laravel 11 + Livewire 3 + Tailwind CSS + SQLite (dev) / MySQL|PostgreSQL (prod)

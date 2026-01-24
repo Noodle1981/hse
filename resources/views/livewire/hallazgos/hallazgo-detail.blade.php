@@ -9,8 +9,8 @@
                         ← Volver
                     </a>
                 </div>
-                <h1 class="text-3xl font-bold text-ep-dark">{{ $hallazgo->titulo }}</h1>
-                <p class="text-gray-600 mt-2">Creado el {{ $hallazgo->created_at->format('d/m/Y H:i') }} por {{ $hallazgo->user->nombres }}</p>
+                <h1 class="text-3xl font-bold text-ep-dark">Hallazgo #{{ $hallazgo->visit_counter }} • {{ $hallazgo->titulo }}</h1>
+                <p class="text-gray-600 mt-2">ID Global #{{ $hallazgo->id }} • Creado el {{ $hallazgo->created_at->format('d/m/Y H:i') }} por {{ $hallazgo->user->nombres }}</p>
             </div>
             <div class="flex gap-2">
                 <a href="{{ route('hallazgos.pdf', $hallazgo) }}" 
@@ -227,22 +227,26 @@
 
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
                     @forelse($hallazgo->fotos as $foto)
-                        <div class="relative group">
-                            <img src="{{ asset('storage/' . $foto->ruta_archivo) }}" 
+                        <div class="relative group border rounded-lg overflow-hidden bg-gray-100">
+                            <img src="{{ $foto->url }}" 
                                  alt="{{ $foto->descripcion }}"
-                                 class="w-full h-48 object-cover rounded-lg">
+                                 class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
                             <div class="absolute top-2 left-2">
-                                <span class="px-2 py-1 bg-black bg-opacity-70 text-white text-xs rounded">
+                                <span class="px-2 py-1 bg-black bg-opacity-70 text-white text-[10px] uppercase font-bold rounded">
                                     {{ ucfirst($foto->tipo) }}
                                 </span>
                             </div>
                             <button wire:click="eliminarFoto({{ $foto->id }})"
                                     wire:confirm="¿Eliminar esta foto?"
-                                    class="absolute top-2 right-2 bg-red-600 text-white p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity">
-                                🗑️
+                                    class="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
                             </button>
                             @if($foto->descripcion)
-                                <p class="text-sm text-gray-600 mt-1">{{ $foto->descripcion }}</p>
+                                <div class="absolute bottom-0 left-0 right-0 p-2 bg-black bg-opacity-50 text-white text-xs">
+                                    {{ $foto->descripcion }}
+                                </div>
                             @endif
                         </div>
                     @empty

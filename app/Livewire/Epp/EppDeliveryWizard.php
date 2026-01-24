@@ -67,13 +67,13 @@ class EppDeliveryWizard extends Component
             'selectedEmployeeId' => 'required',
             'selectedItems' => 'required|array|min:1',
             // La firma solo es requerida si NO es admin (si es técnico entregando)
-            'signature' => auth()->user()->hasRole('Administrador') ? 'nullable' : 'required',
+            'signature' => auth()->user()->isAdmin() ? 'nullable' : 'required',
         ], [
             'selectedItems.required' => 'Debe seleccionar al menos un elemento.',
             'signature.required' => 'La firma es obligatoria.',
         ]);
 
-        if (auth()->user()->hasRole('Administrador')) {
+        if (auth()->user()->isAdmin()) {
             // ADMIN: Crea una SOLICITUD
             \App\Models\EppDeliveryRequest::create([
                 'empresa_id' => $this->empresa_id,

@@ -1,283 +1,95 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Reporte de Hallazgo #{{ $hallazgo->id }}</title>
+<x-pdf.layout :title="'Reporte de Hallazgo/Incidente'" :code="'FIND-'.$finding->id" :status="$finding->status">
+    
     <style>
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 12px;
-            color: #333;
-            line-height: 1.5;
-        }
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #F69239;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            page-break-before: always;
-        }
-        .header:first-of-type {
-            page-break-before: auto;
-        }
-        .title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #1E1E2D;
-            margin: 0;
-        }
-        .section-title {
-            background-color: #f3f4f6;
-            padding: 8px;
-            font-weight: bold;
-            border-left: 4px solid #F69239;
-            margin-top: 20px;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            font-size: 10px;
-        }
-        .info-grid {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .info-grid td {
-            padding: 5px;
-            vertical-align: top;
-            border-bottom: 1px solid #eee;
-        }
-        .label {
-            font-weight: bold;
-            width: 30%;
-            color: #666;
-        }
-        .badge {
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-            color: white;
-            display: inline-block;
-        }
-        .criticidad-critico { background-color: #ef4444; }
-        .criticidad-alto { background-color: #f97316; }
-        .criticidad-medio { background-color: #eab308; }
-        .criticidad-bajo { background-color: #22c55e; }
+        .context-table { width: 100%; border-collapse: collapse; }
+        .context-table td { vertical-align: top; padding: 10px 5px; }
         
-        .estado-cerrado { background-color: #22c55e; }
-        .estado-verificado { background-color: #3b82f6; }
-        .estado-resuelto { background-color: #06b6d4; }
-        .estado-en_proceso { background-color: #eab308; }
-        .estado-pendiente { background-color: #ef4444; }
-
-        .timeline {
-            margin-left: 20px;
-            border-left: 1px solid #ddd;
-            padding-left: 15px;
-        }
-        .timeline-item {
-            margin-bottom: 15px;
-            position: relative;
-        }
-        .timeline-date {
-            font-size: 10px;
-            color: #888;
-        }
-        .timeline-user {
-            font-weight: bold;
+        /* Etiquetas pequeñas y grises */
+        .label-sm { 
+            font-size: 8pt; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            font-weight: bold; 
+            display: block;
+            margin-bottom: 2px;
         }
         
-        .photo-gallery {
-            width: 100%;
-            margin-top: 10px;
-        }
-        .photo-item {
-            display: inline-block;
-            width: 30%;
-            margin-right: 2%;
-            margin-bottom: 10px;
-            vertical-align: top;
-        }
-        .photo-img {
-            width: 100%;
-            height: auto;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-        }
-        .photo-caption {
-            font-size: 9px;
-            text-align: center;
-            margin-top: 5px;
-            color: #666;
-        }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            text-align: center;
-            font-size: 10px;
-            color: #aaa;
-            border-top: 1px solid #eee;
-            padding-top: 5px;
+        /* Valores en negro y legibles */
+        .value-md { 
+            font-size: 10.5pt; 
+            color: #1e293b; 
+            font-weight: 500;
         }
 
-        /* Estilos para previsualización en navegador */
-        @media screen {
-            body {
-                background-color: #f0f2f5;
-                padding: 30px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .header:first-of-type {
-                margin-top: 0;
-            }
-            .header {
-                margin-top: 50px;
-            }
-            body > * {
-                background: white;
-                width: 210mm;
-                padding: 40px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            }
-            .footer {
-                position: relative;
-                margin-top: 20px;
-                background: transparent;
-                box-shadow: none;
-                width: 100%;
-            }
+        /* Indicador de ID */
+        .id-badge {
+            background-color: #f1f5f9;
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #e2e8f0;
+            display: inline-block;
         }
+
+        .separator { height: 15px; }
     </style>
-</head>
-<body>
-    <div class="header">
-        <h1 class="title">REPORTE DE HALLAZGO</h1>
-        <p>EP - Sitema de Gestión de Seguridad y Salud en el Trabajo</p>
+
+    {{-- Datos de Contexto (Ficha Técnica) --}}
+    <x-pdf.card title="Información General del Reporte">
+        <table class="context-table">
+            <tr>
+                {{-- Columna 1: Ubicación --}}
+                <td style="width: 35%; border-right: 1px solid #f1f5f9;">
+                    <span class="label-sm">Ubicación / Sede</span>
+                    <span class="value-md">{{ $finding->sede->nombre_sede ?? 'N/A' }}</span>
+                    
+                    <div style="margin-top: 10px;">
+                        <span class="label-sm">Empresa Cliente</span>
+                        <span class="value-md">{{ $finding->sede->empresa->nombre ?? 'N/A' }}</span>
+                    </div>
+                </td>
+
+                {{-- Columna 2: Reportante --}}
+                <td style="width: 35%; padding-left: 15px; border-right: 1px solid #f1f5f9;">
+                    <span class="label-sm">Reportado por</span>
+                    <span class="value-md">{{ $finding->user->nombres ?? '' }} {{ $finding->user->apellidos ?? 'N/A' }}</span>
+                    
+                    <div style="margin-top: 10px;">
+                        <span class="label-sm">Fecha de Registro</span>
+                        <span class="value-md">{{ $finding->created_at->format('d/m/Y H:i') }}</span>
+                    </div>
+                </td>
+
+                {{-- Columna 3: Referencias --}}
+                <td style="width: 30%; padding-left: 15px; text-align: right;">
+                    <span class="label-sm">Identificador</span>
+                    <div class="id-badge">
+                        <span style="font-size: 11pt; font-weight: bold; color: #1e40af;">
+                            #{{ $finding->visit_counter }}
+                        </span>
+                        <span style="font-size: 8pt; color: #64748b;">(ID: {{ $finding->id }})</span>
+                    </div>
+                    
+                    <div style="margin-top: 10px;">
+                        <span class="label-sm">Estado Actual</span>
+                        {{-- Esto asume que tienes badges configurados en tu CSS --}}
+                        <span style="text-transform: uppercase; font-size: 8pt; font-weight: bold; color: {{ $finding->status == 'open' ? '#dc2626' : '#16a34a' }}">
+                            ● {{ $finding->status_label ?? $finding->status }}
+                        </span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </x-pdf.card>
+
+    <div class="separator"></div>
+
+    {{-- Detalle del Hallazgo (Descripción, Riesgo, Acciones) --}}
+    {{-- 
+        Sugerencia: Si puedes editar x-pdf.finding-detail, 
+        asegúrate de que use width: 100% y padding consistente.
+    --}}
+    <div style="width: 100%;">
+        <x-pdf.finding-detail :finding="$finding" />
     </div>
 
-    <table class="info-grid">
-        <tr>
-            <td class="label">ID de Hallazgo:</td>
-            <td>#{{ $hallazgo->id }}</td>
-            <td class="label">Fecha Detección:</td>
-            <td>{{ $hallazgo->fecha_deteccion?->format('d/m/Y H:i') }}</td>
-        </tr>
-        <tr>
-            <td class="label">Título:</td>
-            <td colspan="3"><strong>{{ $hallazgo->titulo }}</strong></td>
-        </tr>
-        <tr>
-            <td class="label">Estado:</td>
-            <td>
-                <span class="badge estado-{{ $hallazgo->estado }}">
-                    {{ strtoupper(str_replace('_', ' ', $hallazgo->estado)) }}
-                </span>
-            </td>
-            <td class="label">Criticidad:</td>
-            <td>
-                <span class="badge criticidad-{{ $hallazgo->criticidad }}">
-                    {{ strtoupper($hallazgo->criticidad) }}
-                </span>
-            </td>
-        </tr>
-        <tr>
-            <td class="label">Sede:</td>
-            <td>{{ $hallazgo->sede->nombre_sede }}</td>
-            <td class="label">Empresa:</td>
-            <td>{{ $hallazgo->sede->empresa->nombre_empresa }}</td>
-        </tr>
-        <tr>
-            <td class="label">Técnico Responsable:</td>
-            <td>{{ $hallazgo->user->nombres }}</td>
-            <td class="label">Plazo Corrección:</td>
-            <td>{{ $hallazgo->plazo_correccion?->format('d/m/Y') ?? 'N/A' }}</td>
-        </tr>
-        @if($hallazgo->ubicacion_especifica)
-        <tr>
-            <td class="label">Ubicación Específica:</td>
-            <td colspan="3">{{ $hallazgo->ubicacion_especifica }}</td>
-        </tr>
-        @endif
-    </table>
-
-    <div class="section-title">Descripción del Hallazgo</div>
-    <div style="padding: 5px;">
-        {{ $hallazgo->descripcion }}
-    </div>
-
-    @if($hallazgo->responsable_correccion)
-    <div class="section-title">Responsable de Corrección</div>
-    <div style="padding: 5px;">
-        {{ $hallazgo->responsable_correccion }}
-    </div>
-    @endif
-
-    @if($hallazgo->risk)
-    <div class="section-title">Vínculo con Riesgo</div>
-    <table class="info-grid">
-        <tr>
-            <td class="label">Riesgo:</td>
-            <td>{{ $hallazgo->risk->hazard }}</td>
-        </tr>
-        <tr>
-            <td class="label">Matriz:</td>
-            <td>{{ $hallazgo->risk->matrix->name }}</td>
-        </tr>
-    </table>
-    @endif
-
-    @if($seguimientos->count() > 0)
-    <div class="section-title">Historial de Seguimientos</div>
-    <div class="timeline">
-        @foreach($seguimientos as $seg)
-        <div class="timeline-item">
-            <div class="timeline-date">{{ $seg->fecha_seguimiento->format('d/m/Y H:i') }}</div>
-            <div class="timeline-user">{{ $seg->user->nombres }}</div>
-            <div style="font-size: 11px; margin-top: 3px;">
-                @if($seg->estado_anterior != $seg->estado_nuevo)
-                <span style="color: #666;">Cambio de estado: </span>
-                <strong>{{ strtoupper($seg->estado_anterior) }} &rarr; {{ strtoupper($seg->estado_nuevo) }}</strong><br>
-                @endif
-                {{ $seg->comentario }}
-            </div>
-        </div>
-        @endforeach
-    </div>
-    @endif
-
-    @if($fotos->count() > 0)
-    <div class="section-title">Evidencia Fotográfica</div>
-    <div class="photo-gallery">
-        @foreach($fotos as $foto)
-        <div class="photo-item">
-            {{-- Usamos path local para dompdf --}}
-            @php
-                $path = storage_path('app/public/' . $foto->ruta_archivo);
-                $type = pathinfo($path, PATHINFO_EXTENSION);
-                if (file_exists($path)) {
-                    $data = file_get_contents($path);
-                    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
-                } else {
-                    $base64 = ''; // O una imagen por defecto
-                }
-            @endphp
-            @if($base64)
-                <img src="{{ $base64 }}" class="photo-img">
-            @else
-                <div style="height: 100px; background: #eee; text-align: center; line-height: 100px;">Foto no encontrada</div>
-            @endif
-            <div class="photo-caption">
-                <strong>{{ strtoupper($foto->tipo) }}</strong><br>
-                {{ $foto->descripcion }}
-            </div>
-        </div>
-        @endforeach
-    </div>
-    @endif
-
-    <div class="footer">
-        Reporte generado automáticamente por Sistema EP el {{ date('d/m/Y H:i') }} - Página 1
-    </div>
-</body>
-</html>
+</x-pdf.layout>

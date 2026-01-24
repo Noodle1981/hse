@@ -3,17 +3,22 @@
 namespace App\Livewire\Visits;
 
 use App\Models\Hallazgo;
+use App\Models\HallazgoFoto;
 use App\Models\VisitCertificate;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class HallazgoQuick extends Component
 {
+    use WithFileUploads;
+
     public $visit;
     public $titulo = '';
     public $descripcion = '';
     public $ubicacion_especifica = '';
     public $criticidad = 'medio';
     public $plazo_correccion;
+    public $photos = [];
 
     protected $rules = [
         'titulo' => 'required|string|max:255',
@@ -21,6 +26,7 @@ class HallazgoQuick extends Component
         'ubicacion_especifica' => 'nullable|string|max:255',
         'criticidad' => 'required|in:bajo,medio,alto,critico',
         'plazo_correccion' => 'required|date|after:today',
+        'photos.*' => 'image|max:5120', // Máximo 5MB por foto
     ];
 
     protected $messages = [
@@ -52,6 +58,18 @@ class HallazgoQuick extends Component
             'plazo_correccion' => $this->plazo_correccion,
             'fecha_deteccion' => now(),
         ]);
+
+        // Guardar fotos
+        foreach ($this->photos as $photo) {
+            $path = $photo->store('hallazgos/fotos', 'public');
+            
+            HallazgoFoto::create([
+                'hallazgo_id' => $hallazgo->id,
+                'tipo' => HallazgoFoto::TIPO_ANTES,
+                'ruta_archivo' => $path,
+                'descripcion' => 'Evidencia detectada durante la visita - ' . now()->format('d/m/Y')
+            ]);
+        }
 
         $this->dispatch('hallazgoCreated');
         $this->dispatch('closeHallazgoQuick');

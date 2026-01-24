@@ -1,309 +1,194 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Reporte de Inspección #{{ $inspection->id }}</title>
-    <style>
-        @page {
-            margin: 1cm;
-        }
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 10pt;
-            color: #2D3748;
-            line-height: 1.5;
-        }
-        .header-table {
-            width: 100%;
-            border-bottom: 2pt solid #1A365D;
-            padding-bottom: 10pt;
-            margin-bottom: 20pt;
-            page-break-before: always;
-        }
-        .header-table:first-of-type {
-            page-break-before: auto;
-        }
-        .logo-box {
-            width: 60pt;
-            height: 60pt;
-            background-color: #2B6CB0;
-            color: white;
-            font-weight: bold;
-            font-size: 24pt;
-            text-align: center;
-            line-height: 60pt;
-            border-radius: 4pt;
-        }
-        .report-title {
-            font-size: 18pt;
-            font-weight: bold;
-            color: #1A365D;
-            margin: 0;
-            padding: 0;
-        }
-        .report-metadata {
-            font-size: 9pt;
-            color: #718096;
-        }
-        .section-header {
-            background-color: #F7FAFC;
-            padding: 8pt 12pt;
-            border-left: 4pt solid #2B6CB0;
-            margin-top: 20pt;
-            margin-bottom: 10pt;
-        }
-        .section-title {
-            font-size: 11pt;
-            font-weight: bold;
-            color: #2D3748;
-            text-transform: uppercase;
-            letter-spacing: 0.5pt;
-        }
-        .info-grid {
-            width: 100%;
-            margin-bottom: 15pt;
-        }
-        .info-label {
-            font-size: 8pt;
-            font-weight: bold;
-            color: #A0AEC0;
-            text-transform: uppercase;
-        }
-        .info-value {
-            font-size: 10pt;
-            color: #2D3748;
-            font-weight: 500;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-table tr td {
-            padding: 8pt 5pt;
-            border-bottom: 0.5pt solid #E2E8F0;
-            vertical-align: top;
-        }
-        .question-label {
-            font-weight: bold;
-            width: 60%;
-        }
-        .answer-value {
-            width: 40%;
-            text-align: right;
-            font-weight: 500;
-        }
-        .checkbox-badge {
-            display: inline-block;
-            background-color: #EBF8FF;
-            color: #2B6CB0;
-            padding: 2pt 6pt;
-            border-radius: 4pt;
-            font-size: 8pt;
-            margin-left: 4pt;
-            border: 0.5pt solid #BEE3F8;
-        }
-        .notes-box {
-            background-color: #FEFCBF;
-            border: 1pt solid #ECC94B;
-            padding: 12pt;
-            margin-top: 20pt;
-            border-radius: 4pt;
-        }
-        .notes-title {
-            font-size: 9pt;
-            font-weight: bold;
-            color: #856404;
-            margin-bottom: 5pt;
-            text-transform: uppercase;
-        }
-        .signatures-table {
-            width: 100%;
-            margin-top: 50pt;
-        }
-        .signature-cell {
-            width: 50%;
-            text-align: center;
-            padding: 0 20pt;
-        }
-        .signature-line {
-            border-top: 1pt solid #CBD5E0;
-            margin-bottom: 5pt;
-        }
-        .signature-img {
-            max-height: 80pt;
-            margin-bottom: 5pt;
-        }
-        .footer {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            font-size: 8pt;
-            color: #A0AEC0;
-            text-align: center;
-            padding-top: 10pt;
-            border-top: 0.5pt solid #E2E8F0;
-        }
+<x-pdf.layout :title="$inspection->checklist->title ?? 'Reporte de Inspección'" :code="'INSP-' . str_pad($inspection->id, 6, '0', STR_PAD_LEFT)" :status="$inspection->status">
 
-        /* Estilos para previsualización en navegador */
-        @media screen {
-            body {
-                background-color: #f0f2f5;
-                padding: 30px;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            .header-table:first-of-type {
-                margin-top: 0;
-            }
-            .header-table {
-                margin-top: 50px;
-            }
-            body > * {
-                background: white;
-                width: 210mm;
-                padding: 40px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            }
-            .footer {
-                position: relative;
-                margin-top: 20px;
-                background: transparent;
-                box-shadow: none;
-                width: 100%;
-            }
-        }
-        .status-badge {
-            font-size: 8pt;
-            font-weight: bold;
-            padding: 2pt 6pt;
-            border-radius: 2pt;
-            display: inline-block;
-        }
-        .status-completed { background-color: #C6F6D5; color: #22543D; }
-        .status-draft { background-color: #FEEBC8; color: #744210; }
-    </style>
-</head>
-<body>
-    <table class="header-table">
-        <tr>
-            <td style="width: 70pt;">
-                <div class="logo-box">EP</div>
-            </td>
-            <td>
-                <div class="report-title">{{ $inspection->checklist->title }}</div>
-                <div class="report-metadata">
-                    Reporte Digital de Inspección • Generado el {{ now()->format('d/m/Y H:i') }}
-                </div>
-            </td>
-            <td style="text-align: right; vertical-align: bottom;">
-                <div class="status-badge {{ $inspection->status === 'completed' ? 'status-completed' : 'status-draft' }}">
-                    {{ $inspection->status === 'completed' ? 'COMPLETADO' : 'BORRADOR' }}
-                </div>
-                <div style="font-size: 9pt; color: #718096; margin-top: 4pt;">ID: #{{ $inspection->id }}</div>
-            </td>
-        </tr>
-    </table>
+    {{-- 1. Cabecera (Grid de 3 columnas simulado con Tabla) --}}
+    <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        <table class="no-border">
+            <tr>
+                {{-- Col 1: Info General --}}
+                <td style="width: 33%; vertical-align: top;">
+                    <div style="font-size: 8pt; font-weight: bold; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Información General
+                    </div>
+                    <div style="line-height: 1.6;">
+                        <div>
+                            <span style="font-weight: bold; color: #4b5563;">ID Reporte:</span> 
+                            #{{ $inspection->id }}
+                        </div>
+                        <div>
+                            <span style="font-weight: bold; color: #4b5563;">Fecha:</span> 
+                            {{ $inspection->completed_at ? \Carbon\Carbon::parse($inspection->completed_at)->format('d/m/Y H:i') : 'En proceso' }}
+                        </div>
+                        <div style="margin-top: 4px;">
+                            <span class="badge {{ $inspection->status === 'completed' ? 'badge-success' : 'badge-warning' }}">
+                                {{ $inspection->status === 'completed' ? 'COMPLETADO' : 'BORRADOR' }}
+                            </span>
+                        </div>
+                    </div>
+                </td>
 
-    <table class="info-grid">
-        <tr>
-            <td style="width: 33%;">
-                <div class="info-label">Empresa / Cliente</div>
-                <div class="info-value">{{ $inspection->sede->empresa->nombre ?? 'N/A' }}</div>
-            </td>
-            <td style="width: 33%;">
-                <div class="info-label">Sede / Ubicación</div>
-                <div class="info-value">{{ $inspection->sede->nombre_sede ?? 'N/A' }}</div>
-            </td>
-            <td style="width: 33%;">
-                <div class="info-label">Fecha Inspección</div>
-                <div class="info-value">{{ $inspection->completed_at?->format('d/m/Y') ?? 'En proceso' }}</div>
-            </td>
-        </tr>
-        <tr>
-            <td style="padding-top: 10pt;">
-                <div class="info-label">Inspector Asignado</div>
-                <div class="info-value">{{ $inspection->user->nombres ?? 'N/A' }} {{ $inspection->user->apellidos ?? '' }}</div>
-            </td>
-            <td style="padding-top: 10pt;">
-                <div class="info-label">Categoría</div>
-                <div class="info-value">{{ ucfirst($inspection->checklist->category ?? 'Sin especificar') }}</div>
-            </td>
-            <td style="padding-top: 10pt;">
-                <div class="info-label">Supervisor en Sitio</div>
-                <div class="info-value">{{ $inspection->supervisor_name ?: 'No informado' }}</div>
-            </td>
-        </tr>
-    </table>
+                {{-- Col 2: Ubicación --}}
+                <td style="width: 33%; vertical-align: top; border-left: 1px solid #f3f4f6; padding-left: 15px;">
+                    <div style="font-size: 8pt; font-weight: bold; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Ubicación
+                    </div>
+                    <div style="line-height: 1.4;">
+                        <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a;">
+                            {{ $inspection->sede->empresa->nombre ?? 'N/A' }}
+                        </div>
+                        <div style="font-weight: 500; color: #4b5563;">
+                            {{ $inspection->sede->nombre_sede ?? 'Sede no especificada' }}
+                        </div>
+                        <div style="font-size: 8pt; color: #9ca3af; margin-top: 2px;">
+                            {{ $inspection->sede->direccion ?? '' }}
+                        </div>
+                    </div>
+                </td>
 
+                {{-- Col 3: Responsable --}}
+                <td style="width: 33%; vertical-align: top; border-left: 1px solid #f3f4f6; padding-left: 15px;">
+                    <div style="font-size: 8pt; font-weight: bold; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Responsable
+                    </div>
+                    <div style="line-height: 1.4;">
+                        <div style="font-weight: bold; color: #1f2937;">
+                            {{ $inspection->user->nombres ?? 'Desconocido' }} {{ $inspection->user->apellidos ?? '' }}
+                        </div>
+                        <div style="font-size: 9pt; color: #6b7280;">
+                            {{ $inspection->user->rol ?? 'Técnico' }}
+                        </div>
+                        <div style="font-size: 8pt; color: #9ca3af; margin-top: 2px;">
+                            {{ $inspection->user->email ?? '' }}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    {{-- 2. Secciones y Preguntas --}}
     @php
-        $groupedAnswers = $answers->groupBy(fn($a) => $a->question->section_id);
+        $groupedAnswers = $inspection->answers->sortBy(fn($a) => $a->question->order ?? 0)->groupBy(fn($a) => $a->question->section_id);
+        $sections = $inspection->checklist->sections->keyBy('id');
     @endphp
 
-    @foreach($sections as $section)
-        @if($groupedAnswers->has($section->id))
-            <div class="section-header">
-                <div class="section-title">{{ $section->title }}</div>
-            </div>
-            
-            <table class="data-table">
-                @foreach($groupedAnswers->get($section->id)->sortBy('question.id') as $answer)
-                    <tr>
-                        <td class="question-label">
-                            {{ $answer->question->label }}
-                        </td>
-                        <td class="answer-value">
-                            @if($answer->question->type === 'checkbox')
-                                @php $vals = json_decode($answer->value, true) ?? []; @endphp
-                                @foreach($vals as $v)
-                                    <span class="checkbox-badge">✓ {{ $v }}</span>
-                                @endforeach
-                            @else
-                                {{ $answer->value ?: '-' }}
-                            @endif
-                        </td>
-                    </tr>
-                @endforeach
-            </table>
-        @endif
-    @endforeach
+    <div style="margin-top: 20px;">
+        @foreach($groupedAnswers as $sectionId => $sectionAnswers)
+            <div style="margin-bottom: 25px; page-break-inside: avoid;">
+                {{-- Título de Sección --}}
+                <h3 style="font-size: 12pt; font-weight: bold; color: #111827; border-left: 4px solid #1e3a8a; padding-left: 10px; margin-bottom: 15px;">
+                    {{ $sections[$sectionId]->title ?? 'Preguntas Generales' }}
+                </h3>
 
+                {{-- Tabla de Preguntas --}}
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+                    @foreach($sectionAnswers as $answer)
+                        <tr>
+                            <td style="border-bottom: 1px solid #f3f4f6; padding: 10px 5px; width: 60%; vertical-align: top;">
+                                <div style="font-size: 9pt; font-weight: bold; color: #374151;">
+                                    {{ $answer->question->label }}
+                                </div>
+                                @if($answer->question->help_text)
+                                    <div style="font-size: 8pt; color: #9ca3af; font-style: italic; margin-top: 3px;">
+                                        {{ $answer->question->help_text }}
+                                    </div>
+                                @endif
+                                {{-- Observaciones por pregunta --}}
+                                @if($answer->observation)
+                                    <div style="margin-top: 5px; font-size: 8pt; padding: 3px 6px; background-color: #fff7ed; border-left: 2px solid #ea580c; color: #9a3412;">
+                                        <strong>Obs:</strong> {{ $answer->observation }}
+                                    </div>
+                                @endif
+                            </td>
+                            <td style="border-bottom: 1px solid #f3f4f6; padding: 10px 5px; width: 40%; vertical-align: top; text-align: right;">
+                                @if($answer->question->type === 'checkbox')
+                                    @php $values = json_decode($answer->value, true) ?? []; @endphp
+                                    <div style="text-align: right;">
+                                        @forelse($values as $val)
+                                            <span style="display: inline-block; background-color: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 8pt; margin-left: 4px; font-weight: bold;">
+                                                ✓ {{ $val }}
+                                            </span>
+                                        @empty
+                                            <span style="font-style: italic; color: #d1d5db;">-</span>
+                                        @endforelse
+                                    </div>
+                                @elseif($answer->question->type === 'photo')
+                                    <div style="text-align: right;">
+                                        <span style="font-size: 8pt; color: #6b7280;">(Ver Anexo Fotos)</span>
+                                    </div>
+                                @else
+                                    <div style="font-weight: 500; color: {{ empty($answer->value) ? '#d1d5db' : '#111827' }};">
+                                        {{ $answer->value ?: '-' }}
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
+        @endforeach
+    </div>
+
+    {{-- 3. Observaciones Generales --}}
     @if($inspection->notes)
-        <div class="notes-box">
-            <div class="notes-title">Observaciones y Hallazgos</div>
-            <div style="font-size: 9pt; color: #4A5568;">{{ $inspection->notes }}</div>
+        <div style="background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 15px; margin-top: 20px; page-break-inside: avoid;">
+            <div style="font-size: 9pt; font-weight: bold; color: #1e40af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                Observaciones y Hallazgos
+            </div>
+            <p style="font-size: 9pt; color: #1e3a8a; line-height: 1.5; margin: 0;">
+                {{ $inspection->notes }}
+            </p>
         </div>
     @endif
 
-    <table class="signatures-table">
-        <tr>
-            <td class="signature-cell">
-                @if($inspection->supervisor_signature)
-                    <img src="{{ $inspection->supervisor_signature }}" class="signature-img">
-                @else
-                    <div style="height: 60pt;"></div>
-                @endif
-                <div class="signature-line"></div>
-                <div class="info-label">Firma Supervisor</div>
-                <div class="info-value" style="font-size: 8pt;">{{ $inspection->supervisor_name ?: '................................' }}</div>
-            </td>
-            <td class="signature-cell">
-                @if($inspection->technician_signature)
-                    <img src="{{ $inspection->technician_signature }}" class="signature-img">
-                @else
-                    <div style="height: 60pt;"></div>
-                @endif
-                <div class="signature-line"></div>
-                <div class="info-label">Firma del Profesional</div>
-                <div class="info-value" style="font-size: 8pt;">{{ $inspection->user->nombres ?? '' }} {{ $inspection->user->apellidos ?? '' }}</div>
-            </td>
-        </tr>
-    </table>
+    {{-- 4. Firmas --}}
+    <div style="margin-top: 40px; page-break-inside: avoid;">
+        <table class="no-border">
+            <tr>
+                {{-- Firma Supervisor --}}
+                <td style="width: 50%; padding: 0 20px; text-align: center;">
+                    <div style="border-bottom: 2px solid #d1d5db; height: 80px; margin-bottom: 10px; display: flex; align-items: flex-end; justify-content: center;">
+                         @if($inspection->supervisor_signature)
+                            <img src="{{ $inspection->supervisor_signature }}" style="max-height: 75px; margin: 0 auto;">
+                        @else
+                            <span style="color: #e5e7eb; font-size: 9pt; font-style: italic; line-height: 80px;">(Firma vacía)</span>
+                        @endif
+                    </div>
+                    <div style="font-weight: bold; color: #111827; font-size: 10pt;">
+                        {{ $inspection->supervisor_name ?: 'Supervisor no especificado' }}
+                    </div>
+                    <div style="font-size: 8pt; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; font-weight: 600;">
+                        Conformidad Supervisor
+                    </div>
+                </td>
 
-    <div class="footer">
-        Este documento es un reporte oficial generado por el sistema EP Checklists.
-        Página 1 de 1
+                {{-- Firma Técnico --}}
+                <td style="width: 50%; padding: 0 20px; text-align: center;">
+                    <div style="border-bottom: 2px solid #d1d5db; height: 80px; margin-bottom: 10px; display: flex; align-items: flex-end; justify-content: center;">
+                         @if($inspection->technician_signature)
+                            <img src="{{ $inspection->technician_signature }}" style="max-height: 75px; margin: 0 auto;">
+                        @else
+                            {{-- Intentar usar firma del usuario si no está guardada explícitamente en technical_signature --}}
+                            @if($inspection->user->firma)
+                                <img src="{{ $inspection->user->firma }}" style="max-height: 75px; margin: 0 auto;">
+                            @else
+                                <span style="color: #e5e7eb; font-size: 9pt; font-style: italic; line-height: 80px;">(Firma vacía)</span>
+                            @endif
+                        @endif
+                    </div>
+                    <div style="font-weight: bold; color: #111827; font-size: 10pt;">
+                        {{ $inspection->user->nombres ?? '' }} {{ $inspection->user->apellidos ?? '' }}
+                    </div>
+                    <div style="font-size: 8pt; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; font-weight: 600;">
+                        Firma del Profesional
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
-</body>
-</html>
+
+    {{-- 5. Footer de Generación (adicional al global) --}}
+    <div style="text-align: center; color: #9ca3af; font-size: 8pt; margin-top: 30px; border-top: 1px solid #f3f4f6; padding-top: 10px;">
+        GENERADO AUTOMÁTICAMENTE POR EP CHECKLISTS • {{ now()->format('d/m/Y H:i:s') }}
+    </div>
+
+</x-pdf.layout>

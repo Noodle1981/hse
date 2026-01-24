@@ -105,6 +105,8 @@
                                         </div>
                                     @elseif($question->type === 'textarea')
                                         <textarea wire:model.live="answers.{{ $question->id }}" rows="3" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary sm:text-sm" placeholder="Escriba aquí..."></textarea>
+                                    @elseif($question->type === 'number')
+                                        <input type="number" step="any" wire:model.live="answers.{{ $question->id }}" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary sm:text-sm" placeholder="0.00">
                                     @elseif($question->type === 'date')
                                         <input type="date" wire:model.live="answers.{{ $question->id }}" class="block w-full rounded-lg border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary sm:text-sm">
                                     @else

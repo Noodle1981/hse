@@ -16,11 +16,12 @@
             width: 100%;
             margin-bottom: 15px;
             padding-bottom: 5px;
-            border-bottom: 2px solid #4f46e5;
+            border-bottom: 2px solid #1e40af;
         }
         .header table { width: 100%; }
-        .logo { font-size: 18px; font-weight: bold; color: #4f46e5; }
-        .title { font-size: 14px; font-weight: bold; text-align: right; }
+        .logo { width: 25%; }
+        .logo img { max-height: 40px; }
+        .title { font-size: 14px; font-weight: bold; text-align: right; color: #111; text-transform: uppercase; }
         
         .info-table {
             width: 100%;
@@ -37,11 +38,11 @@
             border-collapse: collapse;
         }
         .main-table th {
-            background-color: #4f46e5;
+            background-color: #1e40af;
             color: white;
             padding: 5px 2px;
             font-size: 8px;
-            border: 1px solid #3730a3;
+            border: 1px solid #1e3a8a;
             text-transform: uppercase;
         }
         .main-table td {
@@ -52,7 +53,7 @@
         .category-row {
             background-color: #f3f4f6;
             font-weight: bold;
-            color: #4f46e5;
+            color: #1e40af;
             text-transform: uppercase;
             font-size: 7px;
         }
@@ -99,7 +100,9 @@
     <div class="header">
         <table>
             <tr>
-                <td class="logo">EPP SAAS</td>
+                <td class="logo">
+                    <img src="{{ public_path('images/logo.png') }}" alt="Logo">
+                </td>
                 <td class="title">PROGRAMA ANUAL DE ACTIVIDADES - {{ $year }}</td>
             </tr>
         </table>
@@ -183,7 +186,7 @@
     </div>
 
     <div class="footer">
-        Este documento es un reporte generado automáticamente por el Sistema de Gestión EPP - Plataforma Integral de Seguridad y Salud Ocupacional.
+        SOFTWARE DE GESTIÓN XAMASAFE • PROGRAMA ANUAL DE HIGIENE Y SEGURIDAD • GENERADO AUTOMÁTICAMENTE
     </div>
 </body>
 </html>

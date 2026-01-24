@@ -97,6 +97,45 @@
                         @error('plazo_correccion') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
+                    <!-- Evidencia Fotográfica -->
+                    <div class="bg-gray-50 p-4 rounded-xl border-2 border-dashed border-gray-200">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            📸 Evidencia Fotográfica (Opcional)
+                        </label>
+                        
+                        <div class="flex items-center justify-center w-full">
+                            <label class="flex flex-col w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-8 h-8 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                    <p class="text-sm text-gray-500"><span class="font-bold">Haga clic</span> o arrastre sus fotos</p>
+                                    <p class="text-xs text-gray-400">PNG, JPG o JPEG (Soporta múltiples)</p>
+                                </div>
+                                <input type="file" wire:model="photos" class="hidden" multiple accept="image/*" />
+                            </label>
+                        </div>
+                        
+                        @error('photos.*') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+
+                        @if($photos)
+                            <div class="grid grid-cols-4 gap-2 mt-4">
+                                @foreach($photos as $index => $photo)
+                                    <div class="relative group aspect-square rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+                                        <img src="{{ $photo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                        <button type="button" 
+                                                wire:click="$set('photos.{{$index}}', null)" 
+                                                class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                        </button>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                        
+                        <div wire:loading wire:target="photos" class="mt-2 text-xs text-indigo-500 font-bold animate-pulse">
+                            Subiendo fotos...
+                        </div>
+                    </div>
+
                     <!-- Botones -->
                     <div class="flex justify-end gap-3 pt-4 border-t">
                         <button type="button" wire:click="$dispatch('closeHallazgoQuick')"

@@ -16,11 +16,11 @@ class VisitCertificatePDFController extends Controller
             'checklistCompletions.assignment.checklist',
             'trainings.training',
             'eppDeliveries.employee',
-            'hallazgos',
-            'incidentes'
+            'hallazgos.fotos',
+            'incidentes.fotos'
         ])->findOrFail($id);
 
-        $pdf = Pdf::loadView('pdfs.visit-certificate', compact('visit'));
+        $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit'));
         
         return $pdf->stream('constancia-visita-' . $visit->id . '.pdf');
     }
@@ -34,11 +34,11 @@ class VisitCertificatePDFController extends Controller
             'checklistCompletions.assignment.checklist',
             'trainings.training',
             'eppDeliveries.employee',
-            'hallazgos',
-            'incidentes'
+            'hallazgos.fotos',
+            'incidentes.fotos'
         ])->findOrFail($id);
 
-        $pdf = Pdf::loadView('pdfs.visit-certificate', compact('visit'));
+        $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit'));
         
         return $pdf->download('constancia-visita-' . $visit->id . '.pdf');
     }

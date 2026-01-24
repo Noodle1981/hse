@@ -21,6 +21,9 @@ class Incidente extends Model
         'personas_afectadas',
         'dias_perdidos',
         'medidas_tomadas',
+        'titulo',
+        'ubicacion_especifica',
+        'estado',
         'visit_certificate_id',
     ];
 
@@ -54,7 +57,7 @@ class Incidente extends Model
      */
     public function hallazgo(): BelongsTo
     {
-        return $this->belongsTo(Hallazgo::class)->nullable();
+        return $this->belongsTo(Hallazgo::class);
     }
 
     /**
@@ -80,6 +83,15 @@ class Incidente extends Model
     {
         return $this->belongsTo(VisitCertificate::class, 'visit_certificate_id');
     }
+
+    /**
+     * Fotos del incidente
+     */
+    public function fotos()
+    {
+        return $this->hasMany(IncidenteFoto::class);
+    }
+
 
     // ============================================
     // SCOPES

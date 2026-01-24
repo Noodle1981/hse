@@ -26,7 +26,7 @@ class EppHistory extends Component
         // Query legacy standalone deliveries
         $legacyDeliveries = EppDelivery::query()
             ->with(['employee', 'items', 'user', 'employee.empresa', 'employee.sede'])
-            ->when(auth()->user()->hasRole('Técnico') && !auth()->user()->hasRole('Administrador'), function ($q) {
+            ->when(!auth()->user()->isAdmin(), function ($q) {
                 $q->where('user_id', auth()->id());
             })
             ->when($this->search, function ($q) {
@@ -47,7 +47,7 @@ class EppHistory extends Component
         // Query visit-based deliveries
         $visitDeliveries = VisitEppDelivery::query()
             ->with(['employee', 'visit.user', 'employee.empresa', 'employee.sede', 'visit'])
-            ->when(auth()->user()->hasRole('Técnico') && !auth()->user()->hasRole('Administrador'), function ($q) {
+            ->when(!auth()->user()->isAdmin(), function ($q) {
                 $q->whereHas('visit', fn($v) => $v->where('user_id', auth()->id()));
             })
             ->when($this->search, function ($q) {

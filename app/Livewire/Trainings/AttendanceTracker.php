@@ -84,13 +84,14 @@ class AttendanceTracker extends Component
 
         session()->flash('message', 'Capacitación finalizada correctamente.');
         
-        // Si vino desde una visita, regresar a ella
+        // Si vino desde una visita, regresar a ella respetando el rol del usuario
         if ($this->visitId) {
-            return redirect()->route('tecnico.visits.in-progress', $this->visitId);
+            $routeName = auth()->user()->hasRole('Administrador') ? 'gestor.visits.in-progress' : 'tecnico.visits.in-progress';
+            return redirect()->route($routeName, $this->visitId);
         }
         
         // Sino, redirigir según rol
-        if (auth()->user()->hasRole('Administrador')) {
+        if (auth()->user()->isAdmin()) {
             return redirect()->route('gestor.trainings.index');
         }
         return redirect()->route('tecnico.dashboard');

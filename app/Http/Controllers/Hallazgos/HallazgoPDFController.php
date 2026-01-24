@@ -24,7 +24,7 @@ class HallazgoPDFController extends Controller
         ])->findOrFail($id);
 
         $pdf = Pdf::loadView('pdf.hallazgo-report', [
-            'hallazgo' => $hallazgo,
+            'finding' => $hallazgo,
             'seguimientos' => $hallazgo->seguimientos->sortByDesc('fecha_seguimiento'),
             'fotos' => $hallazgo->fotos,
         ]);
@@ -49,7 +49,7 @@ class HallazgoPDFController extends Controller
         ])->findOrFail($id);
 
         $pdf = Pdf::loadView('pdf.hallazgo-report', [
-            'hallazgo' => $hallazgo,
+            'finding' => $hallazgo,
             'seguimientos' => $hallazgo->seguimientos->sortByDesc('fecha_seguimiento'),
             'fotos' => $hallazgo->fotos,
         ]);

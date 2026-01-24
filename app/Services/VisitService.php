@@ -53,7 +53,6 @@ class VisitService
             // 2. Actualizar estado de la asignación
             $assignment->update([
                 'status' => 'completed',
-                'completed_at' => now(), // Aseguramos que el modelo tenga este campo o usamos updated_at
             ]);
 
             return $completion;

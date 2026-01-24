@@ -15,7 +15,7 @@
         }
         .header {
             width: 100%;
-            border-bottom: 2px solid #4f46e5;
+            border-bottom: 2px solid #1e40af;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
@@ -23,15 +23,17 @@
             width: 100%;
         }
         .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #4f46e5;
+            width: 30%;
+        }
+        .logo img {
+            max-height: 45px;
         }
         .report-title {
             text-align: right;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             color: #111;
+            text-transform: uppercase;
         }
         .info-grid {
             width: 100%;
@@ -59,7 +61,7 @@
             margin-top: 20px;
         }
         table.main-table th {
-            background-color: #4f46e5;
+            background-color: #1e40af;
             color: white;
             padding: 8px;
             text-align: left;
@@ -86,7 +88,7 @@
         }
         .footer {
             position: fixed;
-            bottom: 0;
+            bottom: 0px;
             width: 100%;
             text-align: center;
             font-size: 8px;
@@ -100,7 +102,9 @@
     <div class="header">
         <table>
             <tr>
-                <td class="logo">EPP SAAS</td>
+                <td class="logo">
+                    <img src="{{ public_path('images/logo.png') }}" alt="Logo">
+                </td>
                 <td class="report-title">MATRIZ DE IDENTIFICACIÓN DE PELIGROS Y EVALUACIÓN DE RIESGOS</td>
             </tr>
         </table>
@@ -179,14 +183,14 @@
                             <span style="color: #9ca3af; font-style: italic;">Sin evaluar</span>
                         @endif
                     </td>
-                    <td align="center">{{ $eval ? $eval->evaluation_date->format('d/m/Y') : '-' }}</td>
+                    <td align="center">{{ $eval ? ($eval->evaluation_date instanceof \Carbon\Carbon ? $eval->evaluation_date->format('d/m/Y') : $eval->evaluation_date) : '-' }}</td>
                 </tr>
             @endforeach
         </tbody>
     </table>
 
     <div class="footer">
-        Software de Gestión EPP - Sistema de Seguridad y Salud Ocupacional - Generado automáticamente
+        SOFTWARE DE GESTIÓN XAMASAFE • GENERADO AUTOMÁTICAMENTE
     </div>
 </body>
 </html>

@@ -49,7 +49,8 @@ class VisitTraining extends Model
 
     public function getDurationMinutesAttribute($value)
     {
-        return $this->training ? $this->training->duration : $value;
+        $duration = $this->training ? $this->training->duration : $value;
+        return $duration ?: 0;
     }
 
     public function getAttendeesCountAttribute()

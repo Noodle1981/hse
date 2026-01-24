@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Risks;
 use App\Http\Controllers\Controller;
 use App\Models\AnnualPlan;
 use App\Models\Sede;
-use App\Models\Inspection;
+use App\Models\DynamicInspection;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -53,10 +53,11 @@ class AnnualContractReportController extends Controller
 
         $count = 0;
         if ($plan->category === 'Inspección' && $plan->checklist_id) {
-            $count = Inspection::where('dynamic_checklist_id', $plan->checklist_id)
+            $count = DynamicInspection::where('dynamic_checklist_id', $plan->checklist_id)
                 ->where('sede_id', $sedeId)
-                ->whereMonth('created_at', $monthNumber)
-                ->whereYear('created_at', $year)
+                ->where('status', 'completed')
+                ->whereMonth('completed_at', $monthNumber)
+                ->whereYear('completed_at', $year)
                 ->count();
         }
         

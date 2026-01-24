@@ -105,7 +105,8 @@ Route::middleware(['auth'])->group(function () {
         // Incidentes
         Route::prefix('incidentes')->name('incidentes.')->group(function () {
             Route::get('/', \App\Livewire\Incidentes\IncidenteManager::class)->name('index');
-             // Agregar rutas de detalle/PDF si existen
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('pdf.preview');
         });
 
         // Historial Inspecciones
@@ -153,6 +154,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index');
             Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
             Route::get('/{matrixId}/editor', \App\Livewire\Risks\RiskMatrixEditor::class)->name('editor');
+            Route::get('/dashboard/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'dashboardExport'])->name('dashboard.pdf');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
             // Contrato Anual
             Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
@@ -198,6 +200,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index'); // Evaluar
             Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
             Route::get('/{matrixId}/evaluate', \App\Livewire\Risks\RiskEvaluator::class)->name('evaluator');
+            Route::get('/dashboard/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'dashboardExport'])->name('dashboard.pdf');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
             Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
         });
@@ -232,6 +235,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Mis Incidentes
         Route::get('/incidentes', \App\Livewire\Incidentes\IncidenteManager::class)->name('incidentes.index');
+        Route::get('/incidentes/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('incidentes.pdf');
+        Route::get('/incidentes/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('incidentes.pdf.preview');
     });
 
     /*
@@ -361,6 +366,7 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware(['role:Administrador,Técnico'])->group(function () {
             Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('risk-matrices.index');
             Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('risk-matrices.dashboard');
+            Route::get('/dashboard/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'dashboardExport'])->name('risk-matrices.dashboard.pdf');
             Route::get('/{matrixId}/evaluate', \App\Livewire\Risks\RiskEvaluator::class)->name('risk-matrices.evaluator');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('risk-matrices.pdf');
             Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');

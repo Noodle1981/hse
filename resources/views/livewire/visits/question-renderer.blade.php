@@ -18,6 +18,14 @@
                        class="shadow-sm focus:ring-ep-primary focus:border-ep-primary block w-full sm:text-sm border-gray-300 rounded-md">
                 @break
 
+            @case('number')
+                <input type="number" 
+                       step="any"
+                       wire:model="responses.{{ $question->id }}"
+                       class="shadow-sm focus:ring-ep-primary focus:border-ep-primary block w-full sm:text-sm border-gray-300 rounded-md"
+                       placeholder="0.00">
+                @break
+
             @case('textarea')
                 <textarea wire:model="responses.{{ $question->id }}"
                           rows="3"

@@ -23,6 +23,7 @@ class VisitInProgress extends Component
     public $assignedTrainings = [];
     public $eppDeliveries = [];
     public $hallazgos = [];
+    public $incidentes = [];
     
     // EPP Requests
     public $assignedEppRequests = [];
@@ -191,6 +192,9 @@ class VisitInProgress extends Component
 
         // 5. Cargar hallazgos
         $this->hallazgos = $this->visit->hallazgos()->latest()->get();
+
+        // 6. Cargar incidentes
+        $this->incidentes = \App\Models\Incidente::where('visit_certificate_id', $this->visit->id)->latest()->get();
     }
 
     public function executeTraining($trainingId)
@@ -201,16 +205,18 @@ class VisitInProgress extends Component
             return;
         }
 
-        // Crear registro de capacitación en la visita vinculado a la planificación
-        $visitTraining = $this->visit->trainings()->create([
-            'training_id' => $training->id, // Vinculamos al ID original
-            'is_adhoc' => false,
-            'title' => $training->title,
-            'description' => $training->description,
-            'duration_minutes' => $training->duration,
-            'attendees' => [], // Inicialmente vacío
-            'notes' => 'Ejecutado desde Visita #' . $this->visit->id
-        ]);
+        // Evitar duplicados: Si ya existe una entrada de esta capacitación para esta visita,
+        // simplemente la recuperamos o actualizamos en lugar de crear una nueva.
+        $visitTraining = $this->visit->trainings()->updateOrCreate(
+            ['training_id' => $training->id], // Criterio de búsqueda
+            [
+                'is_adhoc' => false,
+                'title' => $training->title,
+                'description' => $training->description,
+                'duration_minutes' => $training->duration,
+                'notes' => 'Ejecutado desde Visita #' . $this->visit->id
+            ]
+        );
 
         // Redirigir a toma de asistencia con visit_id
         return redirect()->route('trainings.attendance', [
@@ -337,6 +343,15 @@ class VisitInProgress extends Component
         $this->closeIncidenteModal();
         $this->loadChecklists();
         session()->flash('message', 'Incidente reportado exitosamente.');
+    }
+
+    public function removeTraining($id)
+    {
+        $training = $this->visit->trainings()->findOrFail($id);
+        $training->delete();
+        
+        $this->loadChecklists();
+        session()->flash('message', 'Registro de capacitación eliminado.');
     }
 
     public function finalizeVisit()

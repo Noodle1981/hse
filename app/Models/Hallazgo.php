@@ -110,6 +110,14 @@ class Hallazgo extends Model
     }
 
     /**
+     * Alias para compatibilidad con componentes que esperan 'photos'
+     */
+    public function getPhotosAttribute()
+    {
+        return $this->fotos;
+    }
+
+    /**
      * Incidentes relacionados con este hallazgo
      */
     public function incidentes(): HasMany
@@ -139,6 +147,20 @@ class Hallazgo extends Model
     public function question(): BelongsTo
     {
         return $this->belongsTo(DynamicQuestion::class, 'question_id');
+    }
+
+    /**
+     * Obtener el número correlativo del hallazgo dentro de su visita
+     */
+    public function getVisitCounterAttribute(): int
+    {
+        if (!$this->visit_certificate_id) {
+            return 1;
+        }
+
+        return self::where('visit_certificate_id', $this->visit_certificate_id)
+            ->where('id', '<=', $this->id)
+            ->count();
     }
 
     // ============================================

@@ -1,239 +1,112 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constancia de Visita #{{ $visit->id }}</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; font-size: 11pt; line-height: 1.4; color: #333; }
-        .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1E1E2D; padding-bottom: 15px; }
-        .header h1 { font-size: 24pt; color: #1E1E2D; margin-bottom: 5px; }
-        .header .subtitle { font-size: 10pt; color: #666; }
-        .info-grid { display: table; width: 100%; margin-bottom: 20px; }
-        .info-row { display: table-row; }
-        .info-label { display: table-cell; font-weight: bold; width: 30%; padding: 5px; background: #f5f5f5; }
-        .info-value { display: table-cell; padding: 5px; border-bottom: 1px solid #ddd; }
-        .section { margin-bottom: 25px; page-break-inside: avoid; }
-        .section-title { font-size: 14pt; font-weight: bold; color: #1E1E2D; margin-bottom: 10px; border-bottom: 2px solid #FF6B35; padding-bottom: 5px; }
-        .item { margin-bottom: 10px; padding: 8px; background: #f9f9f9; border-left: 3px solid #FF6B35; }
-        .item-title { font-weight: bold; color: #1E1E2D; }
-        .item-detail { font-size: 9pt; color: #666; margin-top: 3px; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 8pt; font-weight: bold; }
-        .badge-success { background: #d4edda; color: #155724; }
-        .badge-warning { background: #fff3cd; color: #856404; }
-        .badge-danger { background: #f8d7da; color: #721c24; }
-        .footer { margin-top: 40px; padding-top: 15px; border-top: 2px solid #ddd; text-align: center; font-size: 9pt; color: #666; }
-        .empty-section { font-style: italic; color: #999; padding: 10px; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th { background: #1E1E2D; color: white; padding: 8px; text-align: left; font-size: 9pt; }
-        td { padding: 6px; border-bottom: 1px solid #ddd; font-size: 9pt; }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <div class="header">
-        <h1>CONSTANCIA DE VISITA</h1>
-        <div class="subtitle">Documento ID: {{ str_pad($visit->id, 6, '0', STR_PAD_LEFT) }}</div>
-    </div>
+<x-pdf.layout title="Constancia de Visita" :code="'VIS-' . str_pad($visit->id, 6, '0', STR_PAD_LEFT)" :status="$visit->status">
+    
+    {{-- 1. Resumen Ejecutivo de la Visita --}}
+    <x-pdf.card title="Resumen de Visita Técnica">
+        <table class="no-border">
+            <tr>
+                <td style="width: 50%;">
+                    <strong>Empresa:</strong> {{ $visit->empresa->nombre ?? 'N/A' }}<br>
+                    <strong>Sede:</strong> {{ $visit->sede->nombre_sede ?? 'N/A' }}<br>
+                    <strong>Dirección:</strong> {{ $visit->sede->direccion ?? 'N/A' }}
+                </td>
+                <td style="width: 50%; text-align: right;">
+                    <strong>Técnico Responsable:</strong> {{ $visit->responsible_name ?? ($visit->user->nombres ?? '') . ' ' . ($visit->user->apellidos ?? '') }}<br>
+                    <strong>Inicio:</strong> {{ $visit->start_time ? \Carbon\Carbon::parse($visit->start_time)->format('d/m/Y H:i') : '-' }}<br>
+                    <strong>Fin:</strong> {{ $visit->end_time ? \Carbon\Carbon::parse($visit->end_time)->format('d/m/Y H:i') : '-' }}
+                </td>
+            </tr>
+        </table>
+        
+        <div class="mt-4 mb-2">
+            <strong>Observaciones Generales:</strong>
+            <p class="bg-gray" style="padding: 10px; border-radius: 4px; margin-top: 5px;">
+                {{ $visit->general_observations ?? 'Sin observaciones registradas.' }}
+            </p>
+        </div>
 
-    <!-- Visit Information -->
-    <div class="info-grid">
-        <div class="info-row">
-            <div class="info-label">Empresa:</div>
-            <div class="info-value">{{ $visit->empresa->nombre }}</div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">Sede:</div>
-            <div class="info-value">{{ $visit->sede->nombre_sede }}</div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">Técnico:</div>
-            <div class="info-value">{{ $visit->user->nombres }} {{ $visit->user->apellidos }}</div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">Fecha de Visita:</div>
-            <div class="info-value">{{ $visit->start_time ? $visit->start_time->format('d/m/Y H:i') : $visit->visit_date->format('d/m/Y') }}</div>
-        </div>
-        <div class="info-row">
-            <div class="info-label">Duración:</div>
-            <div class="info-value">
-                @if($visit->start_time && $visit->end_time)
-                    {{ $visit->start_time->diffForHumans($visit->end_time, true) }}
-                @elseif($visit->start_time)
-                    En progreso
-                @else
-                    N/A
-                @endif
-            </div>
-        </div>
-    </div>
-
-    <!-- Checklists Completed -->
-    <div class="section">
-        <div class="section-title">1. Checklists Completados</div>
-        @if($visit->checklistCompletions->count() > 0)
-            @foreach($visit->checklistCompletions as $completion)
-                <div class="item">
-                    <div class="item-title">{{ $completion->assignment?->checklist?->title ?? 'Checklist eliminado o no asignado' }}</div>
-                    <div class="item-detail">
-                        Categoría: {{ $completion->assignment?->checklist?->categoryRelation?->name ?? 'N/A' }} | 
-                        Completado: {{ $completion->created_at->format('d/m/Y H:i') }}
-                    </div>
-                </div>
-            @endforeach
-        @else
-            <div class="empty-section">No se completaron checklists durante esta visita</div>
-        @endif
-    </div>
-
-    <!-- Trainings -->
-    <div class="section">
-        <div class="section-title">2. Capacitaciones Realizadas</div>
-        @if($visit->trainings->count() > 0)
-            @foreach($visit->trainings as $training)
-                <div class="item">
-                    <div class="item-title">
-                        {{ $training->title }}
-                        @if($training->training && $training->training->status === 'completed')
-                            <span class="badge badge-success">Completada</span>
-                        @else
-                            <span class="badge badge-warning">Programada</span>
-                        @endif
-                    </div>
-                    <div class="item-detail">
-                        Duración: {{ $training->duration_minutes }} min | 
-                        Asistentes: {{ $training->attendees_count }}
-                    </div>
-                </div>
-            @endforeach
-        @else
-            <div class="empty-section">No se realizaron capacitaciones durante esta visita</div>
-        @endif
-    </div>
-
-    <!-- EPP Deliveries -->
-    <div class="section">
-        <div class="section-title">3. Entregas de EPP</div>
-        @if($visit->eppDeliveries->count() > 0)
-            <table>
-                <thead>
+        {{-- Geolocalización (Si existe) --}}
+        @if($visit->latitude && $visit->longitude)
+            <div class="mt-4" style="border-top: 1px solid #e2e8f0; padding-top: 10px;">
+                <table class="no-border">
                     <tr>
-                        <th>Empleado</th>
-                        <th>Ítems Entregados</th>
-                        <th>Fecha</th>
+                        <td style="width: 60%;">
+                            <strong>Ubicación GPS:</strong><br>
+                            Lat: {{ $visit->latitude }} / Long: {{ $visit->longitude }}
+                        </td>
+                        <td style="width: 40%; text-align: right;">
+                            {{-- Placeholder para mapa estático --}}
+                            <div style="background: #eee; height: 60px; width: 100px; display: inline-block; text-align: center; line-height: 60px; font-size: 8pt; color: #999;">
+                                Mapa GPS
+                            </div>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach($visit->eppDeliveries as $delivery)
-                        <tr>
-                            <td>{{ $delivery->employee->name }} {{ $delivery->employee->last_name }}</td>
-                            <td>{{ count($delivery->epp_items ?? []) }} ítems</td>
-                            <td>{{ $delivery->created_at->format('d/m/Y H:i') }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @else
-            <div class="empty-section">No se realizaron entregas de EPP durante esta visita</div>
+                </table>
+            </div>
         @endif
-    </div>
+    </x-pdf.card>
 
-    <!-- Findings -->
-    <div class="section">
-        <div class="section-title">4. Hallazgos Reportados</div>
-        @if($visit->hallazgos->count() > 0)
-            @foreach($visit->hallazgos as $hallazgo)
-                <div class="item">
-                    <div class="item-title">
-                        {{ $hallazgo->titulo }}
-                        <span class="badge badge-{{ $hallazgo->severidad === 'alta' ? 'danger' : ($hallazgo->severidad === 'media' ? 'warning' : 'success') }}">
-                            {{ ucfirst($hallazgo->severidad) }}
-                        </span>
-                    </div>
-                    <div class="item-detail">{{ $hallazgo->descripcion }}</div>
-                </div>
-            @endforeach
-        @else
-            <div class="empty-section">No se reportaron hallazgos durante esta visita</div>
-        @endif
-    </div>
+    <div class="page-break"></div>
 
-    <!-- Incidents -->
-    <div class="section">
-        <div class="section-title">5. Incidentes Reportados</div>
-        @if($visit->incidentes->count() > 0)
-            @foreach($visit->incidentes as $incidente)
-                <div class="item">
-                    <div class="item-title">
-                        {{ $incidente->titulo }}
-                        <span class="badge badge-danger">{{ ucfirst($incidente->gravedad) }}</span>
-                    </div>
-                    <div class="item-detail">{{ $incidente->descripcion }}</div>
-                </div>
-            @endforeach
-        @else
-            <div class="empty-section">No se reportaron incidentes durante esta visita</div>
-        @endif
-    </div>
-
-    <!-- Observations -->
-    @if($visit->general_observations)
-    <div class="section">
-        <div class="section-title">Observaciones Varias</div>
-        <div style="padding: 10px; background: #f9f9f9; white-space: pre-wrap; font-size: 10pt;">{{ $visit->general_observations }}</div>
-    </div>
+    {{-- 2. Anexos: Checklists Completados --}}
+    @if(isset($visit->checklistCompletions) && $visit->checklistCompletions->count() > 0)
+        <h3 class="text-primary" style="border-bottom: 2px solid #1e3a8a; margin-bottom: 15px;">Anexo I: Checklists e Inspecciones</h3>
+        @foreach($visit->checklistCompletions as $completion)
+            <x-pdf.checklist-detail :checklist="$completion->assignment->checklist ?? $completion->checklist" :completion="$completion" />
+            <div style="margin-bottom: 20px;"></div>
+        @endforeach
+        <div class="page-break"></div>
     @endif
 
-    <!-- Signature Section -->
-    <div class="section" style="margin-top: 40px; page-break-inside: avoid;">
-        <div style="display: table; width: 100%;">
-            <!-- Firma Responsable -->
-            <div style="display: table-cell; width: 50%; text-align: center; vertical-align: bottom;">
-                @if($visit->responsible_signature)
-                    <img src="{{ $visit->responsible_signature }}" alt="Firma" style="max-height: 80px; max-width: 200px; margin-bottom: 10px;">
-                    @if($visit->date_firma_responsable)
-                        <div style="font-size: 8pt; color: #666; margin-bottom: 5px;">
-                            Firmado digitalmente: {{ \Carbon\Carbon::parse($visit->date_firma_responsable)->format('d/m/Y H:i') }}
-                        </div>
-                    @endif
-                @elseif($visit->signature_skip_reason)
-                    <div style="height: 60px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; border: 1px dashed #ccc; padding: 10px;">
-                        <div>
-                            <strong style="color: #FF6B35;">Firma Pendiente / No Disponible</strong><br>
-                            <span style="font-size: 8pt; color: #666;">Motivo: {{ $visit->signature_skip_reason }}</span>
-                        </div>
+    {{-- 3. Anexos: Capacitaciones --}}
+    @if(isset($visit->trainings) && $visit->trainings->count() > 0)
+        <h3 class="text-primary" style="border-bottom: 2px solid #1e3a8a; margin-bottom: 15px;">Anexo II: Capacitaciones</h3>
+        @foreach($visit->trainings as $training)
+            <x-pdf.training-record :training="$training" />
+            <div style="margin-bottom: 20px;"></div>
+        @endforeach
+        <div class="page-break"></div>
+    @endif
+
+    {{-- 4. Anexos: Entregas EPP --}}
+    @if(isset($visit->eppDeliveries) && $visit->eppDeliveries->count() > 0)
+        <h3 class="text-primary" style="border-bottom: 2px solid #1e3a8a; margin-bottom: 15px;">Anexo III: Entregas de EPP</h3>
+        @foreach($visit->eppDeliveries as $delivery)
+            <x-pdf.epp-delivery :delivery="$delivery" />
+            <div style="margin-bottom: 20px;"></div>
+        @endforeach
+        <div class="page-break"></div>
+    @endif
+
+    {{-- 5. Cierre y Firmas --}}
+    <x-pdf.card title="Conformidad del Servicio">
+        <table class="no-border" style="margin-top: 30px;">
+            <tr>
+                <td style="width: 50%; text-align: center; padding: 10px;">
+                    <div style="border-bottom: 1px solid #333; height: 60px; margin-bottom: 5px;">
+                         {{-- Firma Técnico --}}
+                         @if($visit->responsible_signature)
+                            <img src="{{ $visit->responsible_signature }}" style="max-height: 60px;">
+                         @endif
                     </div>
-                @else
-                    <div style="height: 80px;"></div>
-                @endif
-                
-                <div style="border-top: 2px solid #333; padding-top: 5px; margin: 0 20px;">
-                    <strong>{{ $visit->responsible_name ?? 'Responsable de Sede' }}</strong><br>
-                    <span style="font-size: 9pt; color: #666;">Responsable de Sede</span>
-                    @if($visit->email_responsable)
-                        <br><span style="font-size: 8pt; color: #999;">{{ $visit->email_responsable }}</span>
+                    <strong>{{ $visit->user->nombres ?? '' }} {{ $visit->user->apellidos ?? '' }}</strong><br>
+                    <span class="text-secondary text-xs">Técnico Prevencionista</span>
+                </td>
+                <td style="width: 50%; text-align: center; padding: 10px;">
+                    @if($visit->status == 'signed' || $visit->client_signature)
+                        <div style="border-bottom: 1px solid #333; height: 60px; margin-bottom: 5px;">
+                            <img src="{{ $visit->client_signature }}" style="max-height: 60px;">
+                        </div>
+                        <strong>Cliente / Responsable Sede</strong>
+                    @else
+                        <div style="border-bottom: 1px solid #333; height: 60px; margin-bottom: 5px; color: #999; line-height: 60px;">
+                            {{ $visit->signature_skip_reason ?? 'Firma Pendiente' }}
+                        </div>
+                        <strong>Firma Pendiente o No Disponible</strong><br>
+                        <span class="text-secondary text-xs">Motivo: {{ $visit->signature_skip_reason }}</span>
                     @endif
-                </div>
-            </div>
+                </td>
+            </tr>
+        </table>
+    </x-pdf.card>
 
-            <!-- Firma Técnico -->
-            <div style="display: table-cell; width: 50%; text-align: center; vertical-align: bottom;">
-                <!-- Espacio para firma técnico si fuera necesario -->
-                <div style="height: 80px;"></div>
-                <div style="border-top: 2px solid #333; padding-top: 5px; margin: 0 20px;">
-                    <strong>{{ $visit->user->nombres }} {{ $visit->user->apellidos }}</strong><br>
-                    <span style="font-size: 9pt; color: #666;">Técnico XamaSafe</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <p><strong>Documento generado automáticamente</strong></p>
-        <p>Fecha de generación: {{ now()->format('d/m/Y H:i:s') }}</p>
-        <p>Sistema XamaSafe v2.0.0</p>
-    </div>
-</body>
-</html>
+</x-pdf.layout>

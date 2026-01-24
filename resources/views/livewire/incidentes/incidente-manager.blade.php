@@ -103,11 +103,22 @@
                             <td class="px-4 py-3 text-center">{{ $incidente->personas_afectadas }}</td>
                             <td class="px-4 py-3 text-center">{{ $incidente->dias_perdidos ?? '-' }}</td>
                             <td class="px-4 py-3 text-center">
-                                <button wire:click="delete({{ $incidente->id }})"
-                                        wire:confirm="¿Eliminar este incidente?"
-                                        class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                                    Eliminar
-                                </button>
+                                <div class="flex items-center justify-center space-x-2">
+                                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.incidentes.pdf.preview', $incidente) : route('tecnico.incidentes.pdf.preview', $incidente) }}" 
+                                       target="_blank"
+                                       class="p-1 px-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 text-xs font-bold"
+                                       title="Ver Reporte">
+                                        PDF
+                                    </a>
+                                    <button wire:click="delete({{ $incidente->id }})"
+                                            wire:confirm="¿Eliminar este incidente?"
+                                            class="p-1 text-red-600 hover:text-red-800"
+                                            title="Eliminar">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

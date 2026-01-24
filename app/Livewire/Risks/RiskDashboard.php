@@ -46,6 +46,13 @@ class RiskDashboard extends Component
                 $join->on('risk_evaluations.id', '=', 'latest_evals.last_id');
             });
 
+        $user = auth()->user();
+        if ($user->rol === 'Técnico') {
+            $query->whereHas('risk.matrix', function($q) use ($user) {
+                $q->whereIn('sede_id', $user->sedes()->pluck('sedes.id'));
+            });
+        }
+
         if ($this->matrixId) {
             $query->whereHas('risk', function($q) {
                 $q->where('risk_matrix_id', $this->matrixId);
