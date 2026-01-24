@@ -275,6 +275,25 @@
 
                     <li>
                         @if(auth()->user()->rol === 'Administrador')
+                            <a href="{{ route('gestor.master-reports.index') }}" 
+                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                      {{ request()->routeIs('gestor.master-reports.*') ? 'menu-item-active text-white' : '' }}">
+                        @else
+                            <a href="{{ route('tecnico.master-reports.index') }}" 
+                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                      {{ request()->routeIs('tecnico.master-reports.*') ? 'menu-item-active text-white' : '' }}">
+                        @endif
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 00-4-4H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen" class="menu-text">Informe Maestro</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        @if(auth()->user()->rol === 'Administrador')
                             <a href="{{ route('gestor.epp.history') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                       {{ request()->routeIs('gestor.epp.history') ? 'menu-item-active text-white' : '' }}">

@@ -163,6 +163,15 @@ Route::middleware(['auth'])->group(function () {
         // Contrato Anual PDF - fuera del grupo risk-matrices pero con nombre consistente?
         Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
 
+        // Informe Maestro (Informe de la Muerte)
+        Route::prefix('master-reports')->name('master-reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\MasterReportController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\MasterReportController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\MasterReportController::class, 'store'])->name('store');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\MasterReportController::class, 'preview'])->name('pdf');
+        });
+
+
     });
 
     /*
@@ -237,6 +246,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/incidentes', \App\Livewire\Incidentes\IncidenteManager::class)->name('incidentes.index');
         Route::get('/incidentes/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('incidentes.pdf');
         Route::get('/incidentes/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('incidentes.pdf.preview');
+
+        // Informe Maestro (Redacción)
+        Route::prefix('master-reports')->name('master-reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\MasterReportController::class, 'index'])->name('index');
+            Route::get('/{id}/edit', [\App\Http\Controllers\MasterReportController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\MasterReportController::class, 'update'])->name('update');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\MasterReportController::class, 'preview'])->name('pdf');
+        });
+
     });
 
     /*

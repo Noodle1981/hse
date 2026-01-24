@@ -99,4 +99,8 @@ class Sede extends Model
     {
         return $this->hasMany(AnnualPlan::class);
     }
+    public function visitCertificates()
+    {
+        return $this->hasMany(VisitCertificate::class);
+    }
 }
