@@ -11,10 +11,26 @@ class Empresa extends Model
     use HasFactory;
 
     protected $fillable = [
+        'consultora_id',
         'nombre',
         'razon_social',
-        'cuit'
+        'cuit',
+        'logo_path',
+        'primary_color',
+        'branding_config',
     ];
+
+    protected $casts = [
+        'branding_config' => 'array',
+    ];
+
+    /**
+     * Consultora a la que pertenece esta empresa
+     */
+    public function consultora()
+    {
+        return $this->belongsTo(Consultora::class, 'consultora_id');
+    }
 
     public function sedes()
     {

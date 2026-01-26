@@ -10,12 +10,16 @@ class SafetyTraceabilitySeeder extends Seeder
 {
     use SeederHelpers;
 
-    private $tecnicos = [];
+    private $tecnico;
+    private $gestor;
     private $sede;
 
-    public function run(): void
+    public function run($gestor = null, $tecnico = null): void
     {
-        echo "🛡️  Creando Caso de Uso Maestro: Trazabilidad Total 2025...\n";
+        $this->gestor = $gestor ?? User::where('rol', 'Administrador')->first();
+        $this->tecnico = $tecnico ?? User::where('rol', 'Técnico')->first();
+
+        echo "🛡️  Creando Caso de Uso Maestro: Trazabilidad Total 2026...\n";
 
         $this->createCompanyAndSede();
         
@@ -29,26 +33,25 @@ class SafetyTraceabilitySeeder extends Seeder
         $employees = $this->seedEmployees();
         $this->seedTrainings($employees, $checklists);
 
-        // 4. Generar 10 Visitas a lo largo de 2025 (Cronología)
-        $this->seedTimeline2025($checklists, $employees);
+        // 4. Generar 10 Visitas a lo largo de 2026 (Cronología)
+        $this->seedTimeline2026($checklists, $employees);
 
-        // 5. Plan Anual 2025
-        $this->createAnnualContract($this->sede, $checklists, 'Seguridad Proactiva');
+        // 5. Plan Anual 2026
+        $this->createAnnualContract($this->sede, $checklists, 'Seguridad Proactiva 2026');
 
-        echo "✅ Caso Maestro 2025 completado. Sistema de trazabilidad alimentado.\n";
+        echo "✅ Caso Maestro 2026 completado. Sistema de trazabilidad alimentado.\n";
     }
 
-    private function seedTimeline2025(array $checklists, array $employees): void
+    private function seedTimeline2026(array $checklists, array $employees): void
     {
-        $tecnico = is_array($this->tecnicos) ? $this->tecnicos[0] : $this->tecnicos->first();
         $riesgos = Risk::all();
         $riskAltura = $riesgos->where('hazard', 'like', '%Altura%')->first();
         $riskAuto = $riesgos->where('hazard', 'like', '%Atropello%')->first();
 
-        // 10 Visitas Programadas (Incluimos hoy para disparar alertas en tiempo real)
+        // 10 Visitas Programadas en 2026 (Cronología real)
         $dates = [
-            '2025-01-15', '2025-02-10', '2025-03-05', '2025-04-20',
-            '2025-05-12', '2025-06-18', '2025-10-05',
+            '2026-01-15', '2026-02-10', '2026-03-05', '2026-04-20',
+            '2026-05-12', '2026-06-18', '2026-10-05',
             now()->subDays(20)->format('Y-m-d'),
             now()->subDays(10)->format('Y-m-d'),
             now()->format('Y-m-d') 
@@ -62,11 +65,11 @@ class SafetyTraceabilitySeeder extends Seeder
             if ($index == 2) $targetFail = $riskAltura; // Histórico
             if ($index == 9) $targetFail = $riskAuto;   // ALERTA ACTUAL: Hoy falló el autoelevador
 
-            $visit = $this->createCompleteVisit($this->sede, $tecnico, $date, $checklists, $employees, $targetFail);
+            $visit = $this->createCompleteVisit($this->sede, $this->tecnico, $date, $checklists, $employees, $targetFail);
 
             // Si es la visita de hoy, forzamos un hallazgo
             if ($index == 9) {
-                echo "   🚨 DISPARADOR ACTIVO: Fallo de control detectado HOY (" . $date->format('d/m/Y') . ")\n";
+                echo "   🚨 DISPARADOR ACTIVO SEEDER: Fallo de control detectado HOY (" . $date->format('d/m/Y') . ")\n";
             }
 
             // Si hubo un hallazgo crítico en la visita 3, generar un incidente 2 días después
@@ -74,7 +77,7 @@ class SafetyTraceabilitySeeder extends Seeder
                 $hallazgo = $visit->hallazgos()->first();
                 if ($hallazgo) {
                     $this->createIncidente($hallazgo, $date->copy()->addDays(2));
-                    echo "   ⚠️ Incidente generado derivado de fallo en control (Marzo 2025)\n";
+                    echo "   ⚠️ Incidente generado derivado de fallo en control (Marzo 2026)\n";
                 }
             }
         }
@@ -82,11 +85,6 @@ class SafetyTraceabilitySeeder extends Seeder
 
     private function createCompanyAndSede(): void
     {
-        $this->tecnicos = User::where('rol', 'Técnico')->get();
-        if ($this->tecnicos->isEmpty()) {
-            $this->tecnicos = [User::first()]; // Fallback
-        }
-
         $empresa = Empresa::create([
             'nombre' => 'TechIndustry Global',
             'razon_social' => 'TechIndustry Global S.R.L.',
@@ -103,14 +101,14 @@ class SafetyTraceabilitySeeder extends Seeder
             'correo' => 'seguridad@techindustry.com',
         ]);
 
-        $this->sede->users()->attach($this->tecnicos->pluck('id'));
+        $this->sede->users()->attach([$this->gestor->id, $this->tecnico->id]);
     }
 
     private function seedRiskMatrix(): int
     {
         $this->createRiskMatrix(
             $this->sede,
-            $this->tecnicos[0],
+            $this->tecnico,
             'Matriz IPERC - Operaciones Logísticas',
             'Control de riesgos en altura y movimiento de cargas',
             'Logística',
@@ -247,7 +245,7 @@ class SafetyTraceabilitySeeder extends Seeder
 
     private function seedTrainings(array $employees, array $checklists): void
     {
-        $this->createTrainings($this->sede, $this->tecnicos->toArray(), [
+        $this->createTrainings($this->sede, [$this->tecnico], [
             ['Cero Accidentes: Trabajo en Altura', 'Normativa y uso correcto de EPP de altura', -10],
             ['Manejo Seguro de Autoelevadores', 'Seguridad en el movimiento de cargas', -5],
             ['Primeros Auxilios Avanzados', 'RCP y atención de traumas', 15],

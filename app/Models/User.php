@@ -21,6 +21,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'consultora_id',
         'nombres',
         'apellidos',
         'email',
@@ -34,6 +35,14 @@ class User extends Authenticatable
         'firma',
         'titulo'
     ];
+
+    /**
+     * Consultora a la que pertenece este usuario (Admin/Técnico)
+     */
+    public function consultora()
+    {
+        return $this->belongsTo(Consultora::class, 'consultora_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -102,11 +111,19 @@ class User extends Authenticatable
     }
 
     /**
+     * Verifica si el usuario es Super Administrador (Global)
+     */
+    public function isSuperAdmin(): bool
+    {
+        return strtolower($this->rol) === 'super_admin';
+    }
+
+    /**
      * Verifica si el usuario es Administrador
      */
     public function isAdmin(): bool
     {
-        return in_array(strtolower($this->rol), ['administrador', 'admin']);
+        return in_array(strtolower($this->rol), ['administrador', 'admin', 'super_admin']);
     }
 
     /**

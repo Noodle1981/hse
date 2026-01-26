@@ -13,49 +13,122 @@ class MasterDemoSeeder extends Seeder
     {
         $this->command->info('');
         $this->command->info('🚀 ========================================');
-        $this->command->info('🚀 Iniciando MasterDemoSeeder (Demo Trazabilidad)');
+        $this->command->info('🚀 Iniciando MasterDemoSeeder v2.0 (Multi-Tenancy)');
         $this->command->info('🚀 ========================================');
         $this->command->info('');
 
-        // Crear admin
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@ep.com'],
+        // 0. Sembrar Categorías
+        $this->call(CategorySeeder::class);
+
+        // 1. Crear Consultora Maestra
+        $consultora = \App\Models\Consultora::firstOrCreate(
+            ['cuit' => '30-11111111-9'],
+            [
+                'nombre' => 'XamaSafe Consulting Group',
+                'max_tecnicos' => 20
+            ]
+        );
+
+        // 2. Crear Super Admin
+        User::firstOrCreate(
+            ['email' => 'admin@xamasafe.com'],
             [
                 'nombres' => 'Carlos',
-                'apellidos' => 'Administrador',
+                'apellidos' => 'Administrator',
+                'password' => Hash::make('password'),
+                'rol' => 'super_admin',
+                'estado' => 'activo',
+                'consultora_id' => null,
+            ]
+        );
+
+        // 3. Crear Usuarios Empresa 1
+        $gestor1 = User::firstOrCreate(
+            ['email' => 'gestor1@empresa1.com'],
+            [
+                'nombres' => 'Juan',
+                'apellidos' => 'Gestor Uno',
                 'password' => Hash::make('password'),
                 'rol' => 'Administrador',
                 'estado' => 'activo',
-                'firma' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                'consultora_id' => $consultora->id,
             ]
         );
 
-        $this->command->info('✅ Admin: admin@ep.com / password');
-
-        // Crear Técnico Único
-        $tecnico = User::firstOrCreate(
-            ['email' => 'operario@ep.com'],
+        $tecnico1 = User::firstOrCreate(
+            ['email' => 'tecnico1@empresa1.com'],
             [
                 'nombres' => 'Roberto',
-                'apellidos' => 'Operario',
+                'apellidos' => 'Tecnico Uno',
                 'password' => Hash::make('password'),
                 'rol' => 'Técnico',
                 'estado' => 'activo',
-                'matricula' => 'MAT-DEMO-001',
-                'firma' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                'consultora_id' => $consultora->id,
+                'matricula' => 'MAT-E1-001'
             ]
         );
 
-        $this->command->info('✅ Técnico Demo: operario@ep.com / password');
-        $this->command->info('');
-        
-        // Ejecutar Caso de Uso Único de Trazabilidad y Seguridad
-        $safetySeeder = new \Database\Seeders\UseCases\SafetyTraceabilitySeeder();
-        $safetySeeder->run();
-        $this->command->info('');
+        // 4. Crear Usuarios Empresa 2
+        $gestor2 = User::firstOrCreate(
+            ['email' => 'gestor2@empresa2.com'],
+            [
+                'nombres' => 'Maria',
+                'apellidos' => 'Gestor Dos',
+                'password' => Hash::make('password'),
+                'rol' => 'Administrador',
+                'estado' => 'activo',
+                'consultora_id' => $consultora->id,
+            ]
+        );
 
-        // Resumen final
+        $tecnico2 = User::firstOrCreate(
+            ['email' => 'tecnico2@empresa2.com'],
+            [
+                'nombres' => 'Luis',
+                'apellidos' => 'Tecnico Dos',
+                'password' => Hash::make('password'),
+                'rol' => 'Técnico',
+                'estado' => 'activo',
+                'consultora_id' => $consultora->id,
+                'matricula' => 'MAT-E2-001'
+            ]
+        );
+
+        $this->command->info('✅ Usuarios creados según tareas.md');
+        
+        // 5. Ejecutar Caso de Uso 1 (Seguridad Industrial 2026)
+        $this->command->info('🕒 Generando Caso de Uso 1: Seguridad Industrial 2026...');
+        $safetySeeder = new \Database\Seeders\UseCases\SafetyTraceabilitySeeder();
+        $safetySeeder->run($gestor1, $tecnico1); // Pasar usuarios para vinculación
+        
+        // 6. Ejecutar Caso de Uso 2 (Nuevo Cliente)
+        $this->command->info('🏗️ Generando Caso de Uso 2: Nuevo Cliente...');
+        // Aquí podríamos llamar a otro seeder o crear lógica ad-hoc
+        $this->createNewUseCase($gestor2, $tecnico2);
+
         $this->showSummary();
+    }
+
+    private function createNewUseCase($gestor, $tecnico)
+    {
+        // Lógica para Empresa 2
+        $empresa = \App\Models\Empresa::create([
+            'nombre' => 'Aceros del Sur S.A.',
+            'razon_social' => 'Aceros del Sur Sociedad Anónima',
+            'cuit' => '30-99999999-1',
+            'primary_color' => '#1e40af', // Azul Aceros
+        ]);
+
+        $sede = $empresa->sedes()->create([
+            'nombre_sede' => 'Planta Industrial Quilmes',
+            'direccion' => 'Av. Mitre 1234',
+            'localidad' => 'Quilmes',
+            'tipo_sede' => 'Industrial'
+        ]);
+
+        $sede->users()->attach([$gestor->id, $tecnico->id]);
+        
+        $this->command->info('✅ Empresa 2 y Sede creadas');
     }
 
     private function showSummary(): void
@@ -64,15 +137,5 @@ class MasterDemoSeeder extends Seeder
         $this->command->info('🎉 ========================================');
         $this->command->info('🎉 MasterDemoSeeder COMPLETADO');
         $this->command->info('🎉 ========================================');
-        $this->command->info('');
-        $this->command->info('📊 Resumen de datos creados:');
-        $this->command->info('   - Caso de Uso Maestro: Trazabilidad y Seguridad Industrial');
-        $this->command->info('   - Checklists vinculados a Matriz IPERC con Lógica Fallo');
-        $this->command->info('   - Inspecciones con Evaluación Automática Pasa/No Pasa');
-        $this->command->info('');
-        $this->command->info('🔐 Credenciales de Acceso:');
-        $this->command->info('   Admin: admin@ep.com / password');
-        $this->command->info('   Técnico: operario@ep.com / password');
-        $this->command->info('');
     }
 }

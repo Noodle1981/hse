@@ -17,9 +17,16 @@ class CheckRole
             return redirect('/login');
         }
 
-        $userRole = $request->user()->rol;
+        $userRole = strtolower($request->user()->rol);
+        $allowedRoles = array_map('strtolower', $roles);
 
-        if (!in_array($userRole, $roles)) {
+        \Log::info('CheckRole Debug:', [
+            'user' => $request->user()->email,
+            'user_role' => $userRole,
+            'allowed_roles' => $allowedRoles
+        ]);
+
+        if (!in_array($userRole, $allowedRoles)) {
             abort(403, 'No tienes permiso para acceder a esta página.');
         }
 

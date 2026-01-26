@@ -1,27 +1,37 @@
 ---
-description: Checklist 
+description: Checklist
 ---
 
-cuando necesito modificar el contenido dentro de un checklist no lo puedo hacer, digamos me permite editar la pregunta, y la opciones, pero si yo quisiera editar el contenido de las opciones. me refiero a la vista de http://127.0.0.1:8000/checklists/12/edit
+Diseñar la capa de admin, bajo la ruta de admin, en la cual mantendrá el diseño de siempre, tanto sidebar como el resto
 
-Ejemplo 
-Pregunta ¿Documentación completa? (EDITABLE)
-Opciones (una) (ETIDABLE)
-Si, No (NO EDITABLE, IMPLEMENTAR QUE SE PUEDA EDITAR)
-Obligatorio (NO EDITABLE, IMPLEMENTAR QUE SE PUEDA EDITAR)
+Se debe diseñar
 
+un link y una vista para generar los usuarios que son las consultoras, de cada consultoras tendrá que completar datos propios de una consultora, tambien consultar cantidad de técnicos, para preveer una cantidad de usuarios disponibles, 
 
-Ahora trabajando con mis colegas nos dimos cuenta de algo, si el técnico completa los checklist, pero nada dice si se cumplio o no, solo que se completo, o que esta pendiente
+diseñar una vista dentro de la empresa que usa la plataforma, personalizacion o customización de la vista propia, osea que si quiere poner su logos, darle un color porpio, lo puede hacer, probablemente haya que trabajar un poco. pero tenlo preparado
 
-tenemos varios problemas, si dice que la temperatura registrada (c°), el tecnico pone lo que registra, ¿Como sabe el checklist, que la temperatura registrada es peligrosa?, como sabe cual es el límite de la calidad de oxígeno en una cueva de mineria, o cual es el limite de la presion de una cubierta de cambion, o como que valores son aceptables, como un minino y un maximo, o mejor dicho un rango.
+luego en la misma vista una lupa o algo que nose lleva a un dashboard interno tipo tabla, que muestre cuantas empresas estan haciendo sus inspecciones técnicas, nombres y ubicaciones de las mismas, checklist, capacitaciones, epp, constancias, matriz de riesgos, hallazgos, incidencias tiene por cada una, es para manejo de historial, demanda, todo lo que una empresa desarrolladora de software necesita.
 
-y la opcion de Si (True) No (False), si no tiene casco, se escoje No y se dispararia el checklis que no pasó
-
-Pero si la pregunta es si el casco esta roto, la opción si es la que dispararía, 
+tambien lo mismo para ver cuanto técnicos hay.
 
 
+tambien un dashboar general con filtos, para analizar en detalles.
 
-Además eso se va a conectar la matriz de riesgo, cuantos checklist fallaros, se completaron, y cuantas capacitaciones se hicieron para esa matriz de riesgo.
+
+reemplazar los nuevos seeder
+
+Credenciales de Acceso:
+   Admin: admin@xamasafe.com / password
+   Gestor: gestor1@empresa1.com / password
+   Gestor: gestor2@empresa2.com / password
+
+   Tecnico: tecnico2@empresa1.com / password
+   Tecnico: tecnico2@empresa1.com / password
 
 
-¿Podemos charlar si has comprendido?
+actualizar el seeder de IPERC - Operaciones Logísticas para gestor1 y tecnico1, con fechas de este año, arma plan anual para este 2026, recudir la cantidad de checklist que no pasaron.
+
+
+Crear un seeder de empresa nueva para gestor2 y tecnico2, con otro caso de uso por favor
+
+

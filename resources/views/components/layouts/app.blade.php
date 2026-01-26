@@ -7,13 +7,24 @@
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    @php
+        $user = auth()->user();
+        $empresa = null;
+        if ($user) {
+            $sede = $user->sedes()->first();
+            $empresa = $sede ? $sede->empresa : null;
+        }
+        $primaryColor = $empresa->primary_color ?? '#F69239';
+        $logoPath = $empresa->logo_path ?? null;
+    @endphp
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        'ep-primary': '#F69239',
-                        'ep-primary-dark': '#E07D1E',
+                        'ep-primary': '{{ $primaryColor }}',
+                        'ep-primary-dark': '{{ $primaryColor }}', // Simplificado
                         'ep-dark': '#1E1E2D',
                         'ep-dark-light': '#2D2D3F',
                         'ep-sidebar': '#1E1E2D',
@@ -92,11 +103,15 @@
             <!-- Brand/Logo -->
             <div class="h-16 flex items-center justify-between px-4 border-b border-gray-700">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-ep-primary rounded-lg flex items-center justify-center font-bold text-white text-lg flex-shrink-0">
-                        EP
-                    </div>
+                    @if($logoPath)
+                        <img src="{{ asset('storage/' . $logoPath) }}" class="h-10 w-auto">
+                    @else
+                        <div class="w-10 h-10 bg-ep-primary rounded-lg flex items-center justify-center font-bold text-white text-lg flex-shrink-0">
+                            EP
+                        </div>
+                    @endif
                     <span x-show="sidebarOpen" class="brand-text text-white font-semibold text-lg transition-opacity">
-                        XamaSafe
+                        {{ $empresa->nombre ?? 'XamaSafe' }}
                     </span>
                 </a>
                 <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-ep-primary hover:text-ep-primary-dark p-1">
@@ -119,9 +134,9 @@
                     <!-- Mis Tareas (Solo Técnico) -->
                     @if(auth()->user()->rol === 'Técnico')
                     <li>
-                        <a href="{{ route('tasks.index') }}" 
+                        <a href="{{ route('tecnico.checklists.tasks.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('tasks.*') ? 'menu-item-active text-white' : '' }}">
+                                  {{ request()->routeIs('tecnico.checklists.tasks.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
@@ -413,7 +428,7 @@
                 </form>
                 
                 <div x-show="sidebarOpen" class="text-xs text-gray-500 text-center mt-3">
-                    XamaSafe v2.0.0
+                    XamaSafe v1.0.0
                 </div>
             </div>
         </aside>
@@ -436,7 +451,7 @@
                 
                 <!-- Page Title -->
                 <h1 class="text-xl font-semibold text-gray-800">
-                    {{ $title ?? 'EP - Sistema XamaSafe' }}
+                    {{ $title ?? 'XamaSafe' }}
                 </h1>
                 
                 <!-- Right side -->
@@ -462,7 +477,7 @@
                 <!-- Footer -->
                 <footer class="bg-white border-t border-gray-200 py-4 px-8">
                     <div class="text-center text-sm text-gray-500">
-                        EP - Sistema XamaSafe © {{ date('Y') }}
+                        XamaSafe © {{ date('Y') }}
                     </div>
                 </footer>
             </main>
