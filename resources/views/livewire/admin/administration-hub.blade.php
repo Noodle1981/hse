@@ -9,7 +9,7 @@
         <!-- Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Usuarios Card -->
-            <a href="{{ route('users.index') }}" 
+            <a href="{{ route('gestor.users.index') }}" 
                class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon -->
@@ -40,7 +40,7 @@
             </a>
 
             <!-- Técnicos Card -->
-            <a href="{{ route('technicians.index') }}" 
+            <a href="{{ route('gestor.technicians.index') }}" 
                class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon -->
@@ -71,7 +71,7 @@
             </a>
 
             <!-- Empresas Card -->
-            <a href="{{ route('companies.index') }}" 
+            <a href="{{ route('gestor.companies.index') }}" 
                class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon -->
@@ -102,7 +102,7 @@
             </a>
 
             <!-- Empleados Card -->
-            <a href="{{ route('epp.employees.index') }}" 
+            <a href="{{ route('gestor.epp.employees.index') }}" 
                class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon -->

@@ -1,3 +1,7 @@
+@php
+    $prefix = auth()->user()->rol === 'Administrador' ? 'gestor.' : 'tecnico.';
+    $backRoute = route($prefix . 'risk-matrices.index');
+@endphp
 <div class="py-6">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {{-- Header --}}
@@ -7,7 +11,7 @@
             </div>
             
             <div class="flex items-center space-x-4 mb-4">
-                <a href="{{ route('risk-matrices.index') }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                <a href="{{ $backRoute }}" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7 7-7"/></svg>
                 </a>
                 <div>
@@ -125,7 +129,7 @@
         {{-- Finish Button / Summary --}}
         <div class="mt-12 text-center pb-20">
             <p class="text-sm text-gray-500 mb-6">Asegúrese de haber evaluado todos los peligros antes de retirarse del área.</p>
-            <a href="{{ route('risk-matrices.index') }}" class="inline-flex items-center px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+            <a href="{{ $backRoute }}" class="inline-flex items-center px-8 py-4 bg-white border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                 Finalizar Recorrido
             </a>

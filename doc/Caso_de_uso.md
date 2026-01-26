@@ -27,7 +27,7 @@
 
 ### 1.1 Crear Empresa [x]
 
-**Login**: `admin@ep.com` / `password`
+**Login**: `gestor@ep.com` / `password`
 
 **Navegación**: Menú → Empresas → Nueva Empresa
 

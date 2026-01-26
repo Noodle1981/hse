@@ -85,7 +85,7 @@
                             </td>
                             <td class="px-6 py-4 text-right text-sm font-medium space-x-2">
                                 @if(auth()->user()->rol === 'Administrador')
-                                    <a href="{{ route('risk-matrices.editor', $matrix->id) }}" class="text-indigo-600 hover:text-indigo-900" title="Diseñar Riesgos">
+                                    <a href="{{ route('gestor.risk-matrices.editor', $matrix->id) }}" class="text-indigo-600 hover:text-indigo-900" title="Diseñar Riesgos">
                                         <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                     </a>
                                     <button wire:click="duplicate({{ $matrix->id }})" class="text-green-600 hover:text-green-900" title="Duplicar Matriz">
@@ -95,12 +95,15 @@
                                         <svg class="h-5 w-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 @else
-                                    <a href="{{ route('risk-matrices.evaluator', $matrix->id) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all">
+                                    <a href="{{ route('tecnico.risk-matrices.evaluator', $matrix->id) }}" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-bold rounded-md text-white bg-indigo-600 hover:bg-indigo-700 shadow-sm transition-all">
                                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         Evaluar Riesgos
                                     </a>
                                 @endif
-                                <a href="{{ route('risk-matrices.pdf', $matrix->id) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-bold rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-all" title="Ver PDF">
+                                @php
+                                    $prefix = auth()->user()->rol === 'Administrador' ? 'gestor.' : 'tecnico.';
+                                @endphp
+                                <a href="{{ route($prefix . 'risk-matrices.pdf', $matrix->id) }}" target="_blank" class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-bold rounded-md text-gray-700 bg-white hover:bg-gray-50 shadow-sm transition-all" title="Ver PDF">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 </a>
                             </td>

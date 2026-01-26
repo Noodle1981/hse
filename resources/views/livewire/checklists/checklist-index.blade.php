@@ -2,11 +2,11 @@
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-ep-dark">Plantillas de Checklists</h1>
         <div class="flex gap-3">
-            <a href="{{ route('assignments.index') }}" 
+            <a href="{{ route('gestor.assignments.index') }}" 
                class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold flex items-center">
                 ← Volver
             </a>
-            <a href="{{ route('checklists.create') }}" 
+            <a href="{{ route('gestor.checklists.create') }}" 
                class="px-6 py-3 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors font-semibold">
                 + Nuevo Checklist
             </a>
@@ -97,18 +97,20 @@
                             <td class="px-6 py-4">
                                     <div class="flex justify-center gap-2 flex-wrap">
                                         <!-- Test PDF Button -->
-                                        <a href="{{ route('inspections.index') }}" 
+                                        <a href="{{ route('gestor.inspections.index') }}" 
                                            class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm flex items-center gap-1">
                                             <span>📄</span> Probar PDF
                                         </a>
 
                                         @if(!$checklist->is_draft)
-                                            <a href="{{ route('checklists.fill', $checklist) }}"
-                                               class="px-3 py-1 bg-ep-primary text-white rounded hover:bg-ep-primary-dark text-sm">
-                                                Llenar
-                                            </a>
+                                            <!-- Note: Filling usually happens for technicians, but if admins want to test, we need a route -->
+                                            <!-- There is no gestor.checklists.fill route in the provided web.php dump -->
+                                            <!-- Keeping as is might break if route doesn't exist, but removing might be safer or pointing to technician route if shared? -->
+                                            <!-- Actually, technician route is tecnico.checklists.fill -->
+                                            <!-- Let's comment it out or point to edit if fill is not for gestor -->
+                                            {{-- <a href="{{ route('checklists.fill', $checklist) }}" class="...">Llenar</a> --}} 
                                         @endif
-                                        <a href="{{ route('checklists.edit', $checklist) }}"
+                                        <a href="{{ route('gestor.checklists.edit', $checklist) }}"
                                            class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm">
                                             Editar
                                         </a>

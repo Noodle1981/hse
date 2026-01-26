@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('nombre');
             $table->string('razon_social');
             $table->string('cuit');
+            $table->string('direccion')->nullable();
+            $table->string('email')->nullable();
             $table->timestamps();
         });
     }

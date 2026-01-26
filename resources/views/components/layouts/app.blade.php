@@ -111,7 +111,7 @@
                         </div>
                     @endif
                     <span x-show="sidebarOpen" class="brand-text text-white font-semibold text-lg transition-opacity">
-                        {{ $empresa->nombre ?? 'XamaSafe' }}
+                        XamaSafe
                     </span>
                 </a>
                 <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-ep-primary hover:text-ep-primary-dark p-1">
@@ -328,7 +328,7 @@
 
 
 
-                    <!-- Ejecuciones Avanzadas (Admin y Técnico) -->
+                    <!-- (Oculto por solicitud)
                     <li>
                         @if(auth()->user()->rol === 'Administrador')
                             <a href="{{ route('gestor.advanced-executions.hub') }}" 
@@ -347,6 +347,7 @@
                             <span x-show="sidebarOpen" class="menu-text">Ejecuciones Avanzadas</span>
                         </a>
                     </li>
+                    -->
                     
                     @if(auth()->user()->rol === 'Administrador')
                     <!-- Administración Hub (Solo Admin) -->

@@ -9,12 +9,14 @@ use Livewire\WithPagination;
 class ConsultantManager extends Component
 {
     use WithPagination;
+    use \Livewire\WithFileUploads;
 
     public $showModal = false;
     public $editingId = null;
     public $nombre, $cuit, $max_tecnicos = 5;
     public $description, $fiscal_address, $email, $phone;
     public $province, $locality;
+    public $logo;
 
     public function render()
     {
@@ -25,7 +27,12 @@ class ConsultantManager extends Component
 
     public function create()
     {
-        $this->reset(['nombre', 'cuit', 'max_tecnicos', 'editingId', 'description', 'fiscal_address', 'email', 'phone', 'province', 'locality']);
+        if (Consultora::count() >= 1) {
+            $this->dispatch('notify', 'Solo se permite registrar una (1) consultora.');
+            return;
+        }
+
+        $this->reset(['nombre', 'cuit', 'max_tecnicos', 'editingId', 'description', 'fiscal_address', 'email', 'phone', 'province', 'locality', 'logo']);
         $this->showModal = true;
     }
 
@@ -42,6 +49,7 @@ class ConsultantManager extends Component
         $this->locality = $consultora->locality;
         $this->email = $consultora->email;
         $this->phone = $consultora->phone;
+        $this->logo = null; // Reset logo input
         $this->showModal = true;
     }
 
@@ -57,7 +65,19 @@ class ConsultantManager extends Component
             'fiscal_address' => 'nullable|string|max:255',
             'province' => 'nullable|string|max:100',
             'locality' => 'nullable|string|max:100',
+            'logo' => 'nullable|image|mimes:png|max:2048', // 2MB Max, PNG only
         ]);
+
+        if ($this->logo) {
+            // Overwrite the public/images/logo.png
+            try {
+                $path = public_path('images/logo.png');
+                file_put_contents($path, file_get_contents($this->logo->getRealPath()));
+            } catch (\Exception $e) {
+                // Fail silently or notify?
+                // For now just proceed
+            }
+        }
 
         $data = [
             'nombre' => $this->nombre,

@@ -10,12 +10,12 @@
                 </p>
             </div>
             <div class="flex gap-3">
-                <a href="{{ route('epp.catalog') }}" 
+                <a href="{{ route('gestor.epp.catalog') }}" 
                    class="inline-flex items-center px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 hover:text-ep-primary transition-all">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                     Catálogo EPP
                 </a>
-                <a href="{{ route('epp.deliver') }}" 
+                <a href="{{ route('gestor.epp.deliver') }}" 
                    class="inline-flex items-center px-6 py-3 bg-ep-primary text-white font-bold rounded-xl shadow-lg shadow-ep-primary/30 hover:bg-ep-primary-dark transition-all">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Nueva Entrega
@@ -110,11 +110,11 @@
                                             Entrega en Visita
                                         </span>
                                     @else
-                                        <a href="{{ route('epp.delivery.pdf.preview', $delivery->id) }}" target="_blank" class="inline-flex items-center px-4 py-2 border border-ep-primary text-ep-primary font-bold rounded-lg hover:bg-ep-primary hover:text-white transition-colors text-xs mr-2">
+                                        <a href="{{ route('gestor.epp.delivery.pdf.preview', $delivery->id) }}" target="_blank" class="inline-flex items-center px-4 py-2 border border-ep-primary text-ep-primary font-bold rounded-lg hover:bg-ep-primary hover:text-white transition-colors text-xs mr-2">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             Ver
                                         </a>
-                                        <a href="{{ route('epp.delivery.pdf', $delivery->id) }}" class="inline-flex items-center px-4 py-2 bg-ep-primary text-white font-bold rounded-lg hover:bg-ep-primary-dark transition-colors text-xs shadow-sm shadow-ep-primary/20">
+                                        <a href="{{ route('gestor.epp.delivery.pdf', $delivery->id) }}" class="inline-flex items-center px-4 py-2 bg-ep-primary text-white font-bold rounded-lg hover:bg-ep-primary-dark transition-colors text-xs shadow-sm shadow-ep-primary/20">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                             PDF
                                         </a>

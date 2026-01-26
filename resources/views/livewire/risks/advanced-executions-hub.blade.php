@@ -1,4 +1,7 @@
 <div class="py-6">
+    @php
+        $prefix = auth()->user()->isAdmin() ? 'gestor.' : 'tecnico.';
+    @endphp
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
@@ -9,7 +12,7 @@
         <!-- Cards Grid -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Matrices de Riesgo Card -->
-            <a href="{{ route('risk-matrices.index') }}" 
+            <a href="{{ route($prefix . 'risk-matrices.index') }}" 
                class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon -->
@@ -40,7 +43,7 @@
             </a>
 
             <!-- Contratos Anuales Card -->
-            <a href="{{ route('annual-contract.index') }}" 
+            <a href="{{ route($prefix . 'risk-matrices.annual-contract.index') }}" 
                class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon -->
@@ -71,7 +74,7 @@
             </a>
 
             <!-- Mapa de Calor Global Card -->
-            <a href="{{ route('risk-matrices.dashboard') }}" 
+            <a href="{{ route($prefix . 'risk-matrices.dashboard') }}" 
                class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
                 <div class="flex flex-col items-center text-center">
                     <!-- Icon -->

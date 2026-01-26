@@ -1,9 +1,16 @@
 <div class="py-6">
+    @php
+        $prefix = auth()->user()->isAdmin() ? 'gestor.' : 'tecnico.';
+        // Technicians don't have a trainings index (only create), so we redirect them to dashboard or similar if they cancel?
+        // Actually, looking at routes, technicians don't have 'tecnico.trainings.index'.
+        // So validation: If admin, go to index. If technician, go to dashboard or previous page.
+        $backRoute = auth()->user()->isAdmin() ? route('gestor.trainings.index') : route('tecnico.dashboard');
+    @endphp
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
-            <a href="{{ route('trainings.index') }}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-ep-primary transition-colors">
+            <a href="{{ $backRoute }}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-ep-primary transition-colors">
                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                Volver al listado
+                Volver
             </a>
             <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ $trainingId ? 'Editar' : 'Nueva' }} Capacitación</h1>
         </div>
@@ -126,7 +133,7 @@
 
             <!-- Botones de Acción -->
             <div class="flex items-center justify-end gap-4">
-                <a href="{{ route('trainings.index') }}" 
+                <a href="{{ $backRoute }}" 
                    class="px-6 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">
                     Cancelar
                 </a>

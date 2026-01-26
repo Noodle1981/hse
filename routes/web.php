@@ -98,6 +98,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
             Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('delivery.pdf');
             Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('delivery.pdf.preview');
+            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('deliver');
         });
 
         // Hallazgos
@@ -276,6 +277,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function() {
         Route::get('/dashboard', \App\Livewire\Admin\EcosystemDashboard::class)->name('dashboard');
         Route::get('/consultants', \App\Livewire\Admin\ConsultantManager::class)->name('consultants');
+        Route::get('/consultants/{consultant}/users', \App\Livewire\Admin\ConsultantUsers::class)->name('consultants.users');
     });
 
     /*
@@ -285,7 +287,8 @@ Route::middleware(['auth'])->group(function () {
     */
     
     // Logout
-    Route::post('/logout', function () {
+    // Logout
+    Route::match(['get', 'post'], '/logout', function () {
         Auth::logout();
         session()->invalidate();
         session()->regenerateToken();

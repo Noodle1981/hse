@@ -15,6 +15,8 @@ class Empresa extends Model
         'nombre',
         'razon_social',
         'cuit',
+        'direccion',
+        'email',
         'logo_path',
         'primary_color',
         'branding_config',

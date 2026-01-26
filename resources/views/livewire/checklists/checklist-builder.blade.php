@@ -3,7 +3,7 @@
         <h1 class="text-3xl font-bold text-ep-dark">
             {{ $checklist ? 'Editar Checklist' : 'Nuevo Checklist' }}
         </h1>
-        <a href="{{ route('categories.index') }}" 
+        <a href="{{ route('gestor.categories.index') }}" 
            class="bg-white text-ep-primary border border-gray-200 hover:bg-gray-50 hover:text-ep-primary-dark px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm">
             Administrar Categorías
         </a>
@@ -297,13 +297,10 @@
                         @endif
 
                         <div class="flex flex-col">
-                            <label class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Vincular a Riesgo (IPERC)</label>
-                            <select wire:model="newQuestion.risk_id"
-                                    class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white max-w-[200px]">
-                                <option value="">No vinculado</option>
-                                @foreach($availableRisks as $r)
-                                    <option value="{{ $r->id }}">[{{ $r->matrix->title }}] {{ $r->hazard }}</option>
-                                @endforeach
+                            <label class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Vincular a Riesgo (IPERC) (Próximamente)</label>
+                            <select disabled
+                                    class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-400 max-w-[200px] cursor-not-allowed">
+                                <option value="">No disponible</option>
                             </select>
                         </div>
                     </div>
@@ -331,7 +328,7 @@
 
         <!-- Botones -->
         <div class="flex justify-end gap-4">
-            <a href="{{ route('checklists.index') }}"
+            <a href="{{ route('gestor.checklists.index') }}"
                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                 Cancelar
             </a>

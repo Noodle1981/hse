@@ -95,6 +95,11 @@ class UserManager extends Component
             'estado' => $this->estado,
         ];
 
+        // Assign to current user's consultancy if not set (Tenancy)
+        if (!auth()->user()->isSuperAdmin()) {
+            $data['consultora_id'] = auth()->user()->consultora_id;
+        }
+
         if ($this->password) {
             $data['password'] = Hash::make($this->password);
         }
@@ -158,7 +163,13 @@ class UserManager extends Component
 
     public function render()
     {
+        $currentUser = auth()->user();
         $query = User::query();
+
+        // 1. Tenancy: Filter by consultancy if not Super Admin
+        if (!$currentUser->isSuperAdmin()) {
+            $query->where('consultora_id', $currentUser->consultora_id);
+        }
 
         if ($this->search) {
             $query->where(function($q) {

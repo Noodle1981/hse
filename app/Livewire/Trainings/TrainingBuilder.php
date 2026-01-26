@@ -104,7 +104,12 @@ class TrainingBuilder extends Component
             return redirect()->route('visits.in-progress', $this->visitId);
         }
 
-        return redirect()->route('trainings.index');
+        if (auth()->user()->isAdmin()) {
+            return redirect()->route('gestor.trainings.index');
+        }
+
+        // Si es técnico, redirigir al dashboard o a la toma de asistencia si acaba de crearla
+        return redirect()->route('tecnico.dashboard');
     }
 
     public function render()
