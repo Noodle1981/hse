@@ -92,4 +92,12 @@ class DynamicChecklist extends Model
     {
         return $this->hasMany(RiskControl::class, 'checklist_id');
     }
+
+    /**
+     * Capacitaciones asociadas a este checklist
+     */
+    public function trainings(): HasMany
+    {
+        return $this->hasMany(Training::class, 'dynamic_checklist_id');
+    }
 }

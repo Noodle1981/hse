@@ -117,12 +117,14 @@ trait SeederHelpers
     /**
      * Crear capacitaciones
      */
-    protected function createTrainings($sede, array $tecnicos, array $trainingsData, array $employees = []): void
+    protected function createTrainings($sede, array $tecnicos, array $trainingsData, array $employees = [], array $checklists = []): void
     {
         foreach ($trainingsData as $data) {
             $daysOffset = $data[2]; // Negativo = pasado, Positivo = futuro
             $date = now()->addDays($daysOffset);
             
+            $checklistId = !empty($checklists) ? $checklists[array_rand($checklists)]->id : null;
+
             $training = Training::create([
                 'empresa_id' => $sede->empresa_id,
                 'sede_id' => $sede->id,
@@ -133,6 +135,7 @@ trait SeederHelpers
                 'duration' => rand(2, 8) * 60, // Convert hours to minutes
                 'trainer_name' => 'Instructor Externo',
                 'status' => $daysOffset < 0 ? 'completed' : 'scheduled',
+                'dynamic_checklist_id' => $checklistId,
             ]);
 
             // Si es pasada, agregar asistentes (usar empleados si existen)
@@ -519,7 +522,7 @@ trait SeederHelpers
     /**
      * Crear capacitaciones programadas para una fecha
      */
-    protected function createScheduledTrainings($tecnico, $sede, $date): void
+    protected function createScheduledTrainings($tecnico, $sede, $date, array $checklists = []): void
     {
         $topics = [
             'Seguridad Operativa Avanzada',
@@ -528,35 +531,23 @@ trait SeederHelpers
         ];
 
         foreach ($topics as $topic) {
+            $checklistId = !empty($checklists) ? $checklists[array_rand($checklists)]->id : null;
+
             Training::create([
                 'empresa_id' => $sede->empresa_id,
                 'sede_id' => $sede->id,
                 'title' => $topic,
                 'description' => 'Capacitación obligatoria de vencimiento mensual',
                 'type' => 'presencial',
-                'date' => $date->setTime(rand(9, 14), 0),
+                'date' => $date->copy()->setTime(rand(9, 14), 0),
                 'duration' => 120,
                 'trainer_name' => 'Instructor Certificado',
                 'status' => 'scheduled',
-                // Asignar al técnico como asistente si el modelo lo permite o si hay tabla pivote
+                'dynamic_checklist_id' => $checklistId,
             ]);
-            
-            // Nota: Si TrainingAttendance requiere un empleado, aquí asumimos que el técnico asiste como "empleado" o usuario.
-            // Si el sistema usa TrainingAttendance para usuarios, agregarlo aquí.
-            // Revisando TrainingAttendance: tiene 'user_id' nullable.
-            
-            /*
-            TrainingAttendance::create([
-                'training_id' => ...
-                'user_id' => $tecnico->id
-            ]);
-            */
         }
     }
 
-    /**
-     * Crear solicitudes de EPP pendientes
-     */
     /**
      * Crear solicitudes de EPP pendientes
      */

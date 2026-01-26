@@ -13,7 +13,20 @@
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                 <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-6">
-                        <label class="block text-sm font-bold text-gray-700 mb-2">Título de la Capacitación</label>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Checklist Asociado <span class="text-ep-primary">*</span></label>
+                        <select wire:model.live="dynamic_checklist_id" 
+                                class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all">
+                            <option value="">Seleccione el checklist que se tratará en la capacitación</option>
+                            @foreach($checklists as $checklist)
+                                <option value="{{ $checklist->id }}">{{ $checklist->title }}</option>
+                            @endforeach
+                        </select>
+                        <p class="text-[10px] text-gray-400 mt-1 italic">Vincule un checklist para dar trazabilidad a los contenidos de la capacitación.</p>
+                        @error('dynamic_checklist_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <div class="sm:col-span-6">
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Título de la Capacitación <span class="text-ep-primary">*</span></label>
                         <input type="text" wire:model="title" 
                                class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all"
                                placeholder="Ej: Seguridad en Alturas, Prevención de Incendios...">

@@ -21,7 +21,7 @@ class TransportSeeder extends Seeder
         $checklists = $this->createChecklists();
         $this->createInspections($checklists, $this->tecnicos, $this->sede, 5); // Solo 5 inspecciones
         $employees = $this->seedEmployees();
-        $this->seedTrainings($employees);
+        $this->seedTrainings($employees, $checklists);
         $this->seedEpp($employees);
         $this->seedRiskMatrix();
         $this->createAnnualContract($this->sede, $checklists, 'Transporte');
@@ -31,7 +31,7 @@ class TransportSeeder extends Seeder
         $deadline = \Carbon\Carbon::create(2026, 1, 31, 12, 0, 0);
         if (!empty($this->tecnicos)) {
             $this->createDeadlineTasks($this->tecnicos[0], $this->sede, $checklists, $deadline);
-            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline);
+            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline, $checklists);
             $this->createPendingEppRequests($this->tecnicos[0], $this->sede, $deadline);
         }
 
@@ -118,7 +118,7 @@ class TransportSeeder extends Seeder
         ];
     }
 
-    private function seedTrainings(array $employees): void
+    private function seedTrainings(array $employees, array $checklists): void
     {
         $this->createTrainings($this->sede, $this->tecnicos, [
             ['Manejo Defensivo', 'Técnicas de conducción segura', 5],
@@ -127,7 +127,7 @@ class TransportSeeder extends Seeder
             ['Mantenimiento Preventivo', 'Cuidado básico de vehículos', 20],
             ['Normativa de Transporte', 'Legislación vigente', 25],
             ['Gestión de Residuos', 'Manejo de desechos en ruta', 30],
-        ], $employees);
+        ], $employees, $checklists);
     }
 
     private function seedEmployees(): array

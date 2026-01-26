@@ -21,7 +21,7 @@ class ConstructionSeeder extends Seeder
         $checklists = $this->createChecklists();
         $this->createInspections($checklists, $this->tecnicos, $this->sede, 10);
         $employees = $this->seedEmployees(); // Crear empleados PRIMERO
-        $this->seedTrainings($employees); // Pasar empleados a capacitaciones
+        $this->seedTrainings($employees, $checklists); // Pasar empleados y checklists a capacitaciones
         $this->seedEpp($employees); // Pasar empleados a EPP
         $this->seedRiskMatrix();
         $this->createAnnualContract($this->sede, $checklists, 'Construcción');
@@ -30,7 +30,7 @@ class ConstructionSeeder extends Seeder
         $deadline = \Carbon\Carbon::create(2026, 1, 31, 12, 0, 0);
         if (!empty($this->tecnicos)) {
             $this->createDeadlineTasks($this->tecnicos[0], $this->sede, $checklists, $deadline);
-            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline);
+            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline, $checklists);
             $this->createPendingEppRequests($this->tecnicos[0], $this->sede, $deadline);
         }
 
@@ -124,7 +124,7 @@ class ConstructionSeeder extends Seeder
         ];
     }
 
-    private function seedTrainings(array $employees): void
+    private function seedTrainings(array $employees, array $checklists): void
     {
         $this->createTrainings($this->sede, $this->tecnicos, [
             ['Trabajo en Altura', 'Capacitación sobre prevención de caídas', -15],
@@ -133,7 +133,7 @@ class ConstructionSeeder extends Seeder
             ['Primeros Auxilios en Obra', 'Atención de emergencias', 15],
             ['Manejo de Herramientas Eléctricas', 'Seguridad en uso de herramientas', 30],
             ['Prevención de Riesgos', 'Identificación de peligros', 45],
-        ], $employees);
+        ], $employees, $checklists);
     }
 
     private function seedEmployees(): array

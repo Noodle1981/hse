@@ -13,7 +13,7 @@ class TrainingBuilder extends Component
 {
     public $trainingId;
     public $title, $description, $type = 'presencial', $date, $duration, $trainer_name, $status = 'scheduled';
-    public $empresa_id, $sede_id, $user_id;
+    public $empresa_id, $sede_id, $user_id, $dynamic_checklist_id;
     public $visitId; // ID de visita (opcional)
 
     protected $queryString = [
@@ -39,6 +39,7 @@ class TrainingBuilder extends Component
             $this->empresa_id = $training->empresa_id;
             $this->sede_id = $training->sede_id;
             $this->user_id = $training->user_id;
+            $this->dynamic_checklist_id = $training->dynamic_checklist_id;
         } else if ($this->visitId) {
             // Pre-llenar desde visita
             $visit = \App\Models\VisitCertificate::find($this->visitId);
@@ -50,9 +51,20 @@ class TrainingBuilder extends Component
         }
     }
 
+    public function updatedDynamicChecklistId($value)
+    {
+        if ($value && empty($this->title)) {
+            $checklist = \App\Models\DynamicChecklist::find($value);
+            if ($checklist) {
+                $this->title = $checklist->title;
+            }
+        }
+    }
+
     public function rules()
     {
         return [
+            'dynamic_checklist_id' => 'required|exists:dynamic_checklists,id',
             'title' => 'required|string|max:255',
             'empresa_id' => 'required|exists:empresas,id',
             'sede_id' => 'required|exists:sedes,id',
@@ -106,10 +118,13 @@ class TrainingBuilder extends Component
             ? Sede::find($this->sede_id)->users()->orderBy('apellidos')->get()
             : collect();
 
+        $checklists = \App\Models\DynamicChecklist::active()->orderBy('title')->get();
+
         return view('livewire.trainings.training-builder', [
             'empresas' => $empresas,
             'sedes' => $sedes,
             'tecnicos' => $tecnicos,
+            'checklists' => $checklists,
         ])->layout('components.layouts.app');
     }
 }

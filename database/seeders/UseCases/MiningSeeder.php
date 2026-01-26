@@ -21,7 +21,7 @@ class MiningSeeder extends Seeder
         $checklists = $this->createChecklists();
         $this->createInspections($checklists, $this->tecnicos, $this->sede, 10);
         $employees = $this->seedEmployees();
-        $this->seedTrainings($employees);
+        $this->seedTrainings($employees, $checklists);
         $this->seedEpp($employees);
         $this->seedRiskMatrix();
         $this->createAnnualContract($this->sede, $checklists, 'Minería');
@@ -30,7 +30,7 @@ class MiningSeeder extends Seeder
         $deadline = \Carbon\Carbon::create(2026, 1, 31, 12, 0, 0);
         if (!empty($this->tecnicos)) {
             $this->createDeadlineTasks($this->tecnicos[0], $this->sede, $checklists, $deadline);
-            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline);
+            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline, $checklists);
             $this->createPendingEppRequests($this->tecnicos[0], $this->sede, $deadline);
         }
 
@@ -121,7 +121,7 @@ class MiningSeeder extends Seeder
         ];
     }
 
-    private function seedTrainings(array $employees): void
+    private function seedTrainings(array $employees, array $checklists): void
     {
         $this->createTrainings($this->sede, $this->tecnicos, [
             ['Operación de Maquinaria Pesada', 'Manejo seguro de palas y camiones', -25],
@@ -130,7 +130,7 @@ class MiningSeeder extends Seeder
             ['Primeros Auxilios Mineros', 'Atención de emergencias', 5],
             ['Ventilación en Minería', 'Control de atmósferas peligrosas', 20],
             ['Prevención de Derrumbes', 'Fortificación y sostenimiento', 35],
-        ], $employees);
+        ], $employees, $checklists);
     }
 
     private function seedEmployees(): array

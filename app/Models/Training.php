@@ -20,12 +20,18 @@ class Training extends Model
         'trainer_name',
         'status',
         'notes',
+        'dynamic_checklist_id',
     ];
 
     protected $casts = [
         'date' => 'datetime',
         'is_template' => 'boolean',
     ];
+
+    public function dynamicChecklist()
+    {
+        return $this->belongsTo(\App\Models\DynamicChecklist::class, 'dynamic_checklist_id');
+    }
 
     public function responsibleUser()
     {

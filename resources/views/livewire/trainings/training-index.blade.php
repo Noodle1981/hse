@@ -1,5 +1,5 @@
 <div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <!-- Header & Actions -->
         <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
             <div>
@@ -60,13 +60,13 @@
                 <table class="min-w-full divide-y divide-gray-100">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Capacitación</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Responsable</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Ubicación</th>
-                            <th scope="col" class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Fecha</th>
-                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Asistentes</th>
-                            <th scope="col" class="px-6 py-4 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Estado</th>
-                            <th scope="col" class="relative px-6 py-4">
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Capacitación</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Responsable</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Ubicación</th>
+                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Fecha</th>
+                            <th scope="col" class="px-3 py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Asistentes</th>
+                            <th scope="col" class="px-3 py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Estado</th>
+                            <th scope="col" class="relative px-3 py-3">
                                 <span class="sr-only">Acciones</span>
                             </th>
                         </tr>
@@ -74,13 +74,13 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse($trainings as $training)
                             <tr class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-3 py-3 whitespace-nowrap">
                                     <div class="flex flex-col">
                                         <div class="text-sm font-bold text-gray-900">{{ $training->title }}</div>
                                         <div class="text-xs text-gray-500">{{ $training->trainer_name ?: 'Sin instructor' }}</div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
                                     <div class="flex items-center">
                                         @if($training->responsibleUser)
                                             <div class="h-8 w-8 rounded-full bg-ep-primary/10 flex items-center justify-center text-ep-primary font-bold text-xs mr-3">
@@ -95,24 +95,24 @@
                                         @endif
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
                                     <div class="flex flex-col">
                                         <div class="font-medium text-gray-700">{{ $training->empresa->nombre ?? 'N/A' }}</div>
                                         <div class="text-xs">{{ $training->sede->nombre_sede ?? 'N/A' }}</div>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
                                     <div class="flex items-center">
                                         <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                                         {{ $training->date->format('d/m/Y H:i') }}
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                <td class="px-3 py-3 whitespace-nowrap text-center text-sm">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
                                         {{ $training->attendances_count }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <td class="px-3 py-3 whitespace-nowrap text-center">
                                     @php
                                         $statusClasses = [
                                             'scheduled' => 'bg-yellow-100 text-yellow-800',
@@ -129,11 +129,13 @@
                                         {{ $statusLabels[$training->status] ?? $training->status }}
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <td class="px-3 py-3 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex justify-end gap-2">
-                                        <a href="{{ route('trainings.attendance', $training) }}" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Tomar Asistencia">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
-                                        </a>
+                                        @if(auth()->user()->isTechnician())
+                                            <a href="{{ route('trainings.attendance', $training) }}" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Tomar Asistencia">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                                            </a>
+                                        @endif
                                         <a href="{{ route('trainings.pdf.preview', $training) }}" target="_blank" class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Ver PDF">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </a>

@@ -21,7 +21,7 @@ class WinerySeeder extends Seeder
         $checklists = $this->createChecklists();
         $this->createInspections($checklists, $this->tecnicos, $this->sede, 10);
         $employees = $this->seedEmployees();
-        $this->seedTrainings($employees);
+        $this->seedTrainings($employees, $checklists);
         $this->seedEpp($employees);
         $this->seedRiskMatrix();
         $this->createAnnualContract($this->sede, $checklists, 'Bodega');
@@ -30,7 +30,7 @@ class WinerySeeder extends Seeder
         $deadline = \Carbon\Carbon::create(2026, 1, 31, 12, 0, 0);
         if (!empty($this->tecnicos)) {
             $this->createDeadlineTasks($this->tecnicos[0], $this->sede, $checklists, $deadline);
-            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline);
+            $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline, $checklists);
             $this->createPendingEppRequests($this->tecnicos[0], $this->sede, $deadline);
         }
 
@@ -120,7 +120,7 @@ class WinerySeeder extends Seeder
         ];
     }
 
-    private function seedTrainings(array $employees): void
+    private function seedTrainings(array $employees, array $checklists): void
     {
         $this->createTrainings($this->sede, $this->tecnicos, [
             ['Manejo de Productos Químicos', 'Uso seguro de sanitizantes', -20],
@@ -129,7 +129,7 @@ class WinerySeeder extends Seeder
             ['Cata y Calidad', 'Evaluación sensorial', 10],
             ['Mantenimiento de Barricas', 'Cuidado de barricas de roble', 25],
             ['Prevención de Incendios', 'Uso de extintores', 40],
-        ], $employees);
+        ], $employees, $checklists);
     }
 
     private function seedEmployees(): array

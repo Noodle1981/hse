@@ -284,7 +284,7 @@
                         <textarea wire:model="observaciones_hallazgos_incidentes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="Comentarios sobre los desvíos y eventos detectados..."></textarea>
                     </div>
                 </div>
-
+               
                 {{-- SECCIÓN 6: RESUMEN EJECUTIVO (Debajo de TODO) --}}
                 <div class="bg-ep-dark p-8 rounded-lg shadow-2xl border-t-8 border-ep-primary">
                     <div class="flex items-center mb-6 pb-2 border-b border-gray-700">
