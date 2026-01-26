@@ -36,9 +36,13 @@ class ChecklistBuilder extends Component
         'label' => '',
         'type' => 'text',
         'options' => [],
+        'min_value' => null,
+        'max_value' => null,
+        'failure_values' => [],
         'is_required' => false,
         'help_text' => '',
         'section_id' => null,
+        'risk_id' => null,
     ];
 
     public string $optionInput = '';
@@ -78,6 +82,7 @@ class ChecklistBuilder extends Component
     public function mount(?int $id = null)
     {
         $this->loadCategories();
+        $this->loadRisks();
         
         if ($id) {
             $this->checklist = DynamicChecklist::with(['questions', 'sections'])->findOrFail($id);
@@ -105,11 +110,16 @@ class ChecklistBuilder extends Component
                     'label' => $q->label,
                     'type' => $q->type,
                     'options' => $q->options ?? [],
+                    'min_value' => $q->min_value,
+                    'max_value' => $q->max_value,
+                    'failure_values' => $q->failure_values ?? [],
                     'is_required' => $q->is_required,
                     'help_text' => $q->help_text ?? '',
                     'section_id' => $q->section_id,
+                    'risk_id' => $q->risk_id,
                 ];
             })->toArray();
+            
             
             if ($this->categoryId) {
                 $this->loadSubcategories();
@@ -127,8 +137,30 @@ class ChecklistBuilder extends Component
 
     public function removeOption(int $index)
     {
+        $option = $this->newQuestion['options'][$index];
+        
+        // Remove from failure_values if it exists
+        if (in_array($option, $this->newQuestion['failure_values'])) {
+            $this->newQuestion['failure_values'] = array_values(array_filter(
+                $this->newQuestion['failure_values'],
+                fn($v) => $v !== $option
+            ));
+        }
+
         unset($this->newQuestion['options'][$index]);
         $this->newQuestion['options'] = array_values($this->newQuestion['options']);
+    }
+
+    public function toggleFailureValue(string $option)
+    {
+        if (in_array($option, $this->newQuestion['failure_values'])) {
+            $this->newQuestion['failure_values'] = array_values(array_filter(
+                $this->newQuestion['failure_values'],
+                fn($v) => $v !== $option
+            ));
+        } else {
+            $this->newQuestion['failure_values'][] = $option;
+        }
     }
 
     public function addQuestion()
@@ -151,9 +183,13 @@ class ChecklistBuilder extends Component
             'label' => $question['label'] ?? '',
             'type' => $question['type'] ?? 'text',
             'options' => $question['options'] ?? [],
+            'min_value' => $question['min_value'] ?? null,
+            'max_value' => $question['max_value'] ?? null,
+            'failure_values' => $question['failure_values'] ?? [],
             'is_required' => $question['is_required'] ?? false,
             'help_text' => $question['help_text'] ?? '',
             'section_id' => $question['section_id'] ?? null,
+            'risk_id' => $question['risk_id'] ?? null,
         ];
     }
 
@@ -221,6 +257,15 @@ class ChecklistBuilder extends Component
             $this->subcategories = [];
         }
     }
+
+    public function loadRisks()
+    {
+        // For simplicity, we load all risks. 
+        // In a real scenario, we might filter by company/sede if the checklist belongs to one.
+        $this->availableRisks = \App\Models\Risk::with('matrix')->get();
+    }
+
+    public $availableRisks = [];
 
 
 
@@ -324,9 +369,13 @@ class ChecklistBuilder extends Component
             'label' => '',
             'type' => 'text',
             'options' => [],
+            'min_value' => null,
+            'max_value' => null,
+            'failure_values' => [],
             'is_required' => false,
             'help_text' => '',
             'section_id' => null,
+            'risk_id' => null,
         ];
         $this->optionInput = '';
     }
@@ -391,10 +440,14 @@ class ChecklistBuilder extends Component
                 'label' => $q['label'],
                 'type' => $q['type'],
                 'options' => !empty($q['options']) ? $q['options'] : null,
+                'min_value' => $q['min_value'] !== '' ? $q['min_value'] : null,
+                'max_value' => $q['max_value'] !== '' ? $q['max_value'] : null,
+                'failure_values' => !empty($q['failure_values']) ? $q['failure_values'] : null,
                 'order' => $order,
                 'is_required' => $q['is_required'] ?? false,
                 'help_text' => $q['help_text'] ?? null,
                 'section_id' => $sectionId,
+                'risk_id' => $q['risk_id'] ?? null,
             ]);
         }
 
@@ -407,6 +460,7 @@ class ChecklistBuilder extends Component
         return view('livewire.checklists.checklist-builder', [
             'categories' => $this->categories,
             'subcategories' => $this->subcategories,
+            'availableRisks' => $this->availableRisks,
         ])->layout('components.layouts.app');
     }
 }

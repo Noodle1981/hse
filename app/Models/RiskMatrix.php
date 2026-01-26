@@ -36,4 +36,12 @@ class RiskMatrix extends Model
     {
         return $this->hasMany(Risk::class)->orderBy('order');
     }
+
+    /**
+     * Obtener el total de fallos de todos los riesgos de esta matriz (últimos 30 días)
+     */
+    public function getTotalFailuresCount(): int
+    {
+        return $this->risks->sum(fn($risk) => $risk->getRecentFailuresCount());
+    }
 }

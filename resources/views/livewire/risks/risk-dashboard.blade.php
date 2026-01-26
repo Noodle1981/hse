@@ -54,6 +54,10 @@
                 <div class="text-[10px] font-bold text-green-400 uppercase tracking-widest mb-1">Bajos</div>
                 <div class="text-3xl font-black text-green-600">{{ $kpis['low'] }}</div>
             </div>
+            <div class="{{ $kpis['alert_triggers'] > 0 ? 'bg-red-600' : 'bg-white' }} p-6 rounded-xl shadow-sm border {{ $kpis['alert_triggers'] > 0 ? 'border-red-700' : 'border-gray-100 shadow-lg' }} transition-all">
+                <div class="text-[10px] font-bold {{ $kpis['alert_triggers'] > 0 ? 'text-white/70' : 'text-gray-400' }} uppercase tracking-widest mb-1">Disparadores Activos</div>
+                <div class="text-3xl font-black {{ $kpis['alert_triggers'] > 0 ? 'text-white' : 'text-gray-900' }}">{{ $kpis['alert_triggers'] }}</div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">

@@ -13,7 +13,7 @@ class MasterDemoSeeder extends Seeder
     {
         $this->command->info('');
         $this->command->info('🚀 ========================================');
-        $this->command->info('🚀 Iniciando MasterDemoSeeder (Modo Single-Tech)');
+        $this->command->info('🚀 Iniciando MasterDemoSeeder (Demo Trazabilidad)');
         $this->command->info('🚀 ========================================');
         $this->command->info('');
 
@@ -31,7 +31,6 @@ class MasterDemoSeeder extends Seeder
         );
 
         $this->command->info('✅ Admin: admin@ep.com / password');
-        $this->command->info('');
 
         // Crear Técnico Único
         $tecnico = User::firstOrCreate(
@@ -40,7 +39,7 @@ class MasterDemoSeeder extends Seeder
                 'nombres' => 'Roberto',
                 'apellidos' => 'Operario',
                 'password' => Hash::make('password'),
-                'rol' => 'Técnico', // O 'Operario' según el sistema
+                'rol' => 'Técnico',
                 'estado' => 'activo',
                 'matricula' => 'MAT-DEMO-001',
                 'firma' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
@@ -50,31 +49,9 @@ class MasterDemoSeeder extends Seeder
         $this->command->info('✅ Técnico Demo: operario@ep.com / password');
         $this->command->info('');
         
-        // Array de un solo técnico para pasar a los seeders
-        $tecnicos = [$tecnico];
-
-        // Caso 1: Construcción
-        $constructionSeeder = new ConstructionSeeder();
-        $constructionSeeder->setTechnicians($tecnicos);
-        $constructionSeeder->run();
-        $this->command->info('');
-
-        // Caso 2: Bodega
-        $winerySeeder = new WinerySeeder();
-        $winerySeeder->setTechnicians($tecnicos);
-        $winerySeeder->run();
-        $this->command->info('');
-
-        // Caso 3: Minería
-        $miningSeeder = new MiningSeeder();
-        $miningSeeder->setTechnicians($tecnicos);
-        $miningSeeder->run();
-        $this->command->info('');
-
-        // Caso 4: Transporte
-        $transportSeeder = new \Database\Seeders\UseCases\TransportSeeder();
-        $transportSeeder->setTechnicians($tecnicos);
-        $transportSeeder->run();
+        // Ejecutar Caso de Uso Único de Trazabilidad y Seguridad
+        $safetySeeder = new \Database\Seeders\UseCases\SafetyTraceabilitySeeder();
+        $safetySeeder->run();
         $this->command->info('');
 
         // Resumen final
@@ -89,11 +66,11 @@ class MasterDemoSeeder extends Seeder
         $this->command->info('🎉 ========================================');
         $this->command->info('');
         $this->command->info('📊 Resumen de datos creados:');
-        $this->command->info('   - 1 Técnico manejando 4 Casos de Uso');
-        $this->command->info('   - Tareas con vencimiento 31 de Enero generadas');
-        $this->command->info('   - Matrices de Riesgo y Planes Anuales completos');
+        $this->command->info('   - Caso de Uso Maestro: Trazabilidad y Seguridad Industrial');
+        $this->command->info('   - Checklists vinculados a Matriz IPERC con Lógica Fallo');
+        $this->command->info('   - Inspecciones con Evaluación Automática Pasa/No Pasa');
         $this->command->info('');
-        $this->command->info('🔐 Credenciales:');
+        $this->command->info('🔐 Credenciales de Acceso:');
         $this->command->info('   Admin: admin@ep.com / password');
         $this->command->info('   Técnico: operario@ep.com / password');
         $this->command->info('');

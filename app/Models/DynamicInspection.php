@@ -19,6 +19,7 @@ class DynamicInspection extends Model
         'completed_at',
         'notes',
         'status',
+        'result',
         'supervisor_name',
         'supervisor_signature',
         'technician_signature',
@@ -33,6 +34,12 @@ class DynamicInspection extends Model
      */
     public const STATUS_DRAFT = 'draft';
     public const STATUS_COMPLETED = 'completed';
+
+    /**
+     * Resultados posibles de una inspección
+     */
+    public const RESULT_PASS = 'Pass';
+    public const RESULT_FAIL = 'Fail';
 
     /**
      * El checklist que se está ejecutando
@@ -98,7 +105,24 @@ class DynamicInspection extends Model
         $this->update([
             'status' => self::STATUS_COMPLETED,
             'completed_at' => now(),
+            'result' => $this->evaluateResult(),
         ]);
+    }
+
+    /**
+     * Evaluar el resultado de la inspección basado en las respuestas y la lógica de las preguntas
+     */
+    public function evaluateResult(): string
+    {
+        $this->load(['answers.question']);
+        
+        foreach ($this->answers as $answer) {
+            if ($answer->isFailure()) {
+                return self::RESULT_FAIL;
+            }
+        }
+
+        return self::RESULT_PASS;
     }
 
     /**

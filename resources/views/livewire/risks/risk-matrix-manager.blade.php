@@ -45,6 +45,7 @@
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Detalles Matriz</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sede / Empresa</th>
                         <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Estado</th>
+                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Monitoreo</th>
                         <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
@@ -67,6 +68,20 @@
                                     {{ $matrix->status === 'active' ? 'bg-green-100 text-green-800' : ($matrix->status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800') }}">
                                     {{ ucfirst($matrix->status) }}
                                 </span>
+                            </td>
+                            <td class="px-6 py-4">
+                                @php $matrixFailures = $matrix->getTotalFailuresCount(); @endphp
+                                @if($matrixFailures > 0)
+                                    <div class="flex items-center text-red-600 font-bold text-xs" title="Total de fallos en checklists vinculados">
+                                        <svg class="h-4 w-4 mr-1 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                        {{ $matrixFailures }} ALERTAS
+                                    </div>
+                                @else
+                                    <div class="text-green-600 font-semibold text-xs flex items-center">
+                                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                        Operativo
+                                    </div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 text-right text-sm font-medium space-x-2">
                                 @if(auth()->user()->rol === 'Administrador')

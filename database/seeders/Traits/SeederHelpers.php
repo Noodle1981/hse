@@ -8,7 +8,9 @@ use App\Models\{
     Training, TrainingAttendance,
     Employee, EppItem, EppDelivery,
     RiskMatrix, Risk, RiskControl, RiskEvaluation,
-    AnnualPlan, Category
+    AnnualPlan, Category,
+    VisitCertificate, VisitTraining, VisitChecklistCompletion,
+    Hallazgo, Incidente
 };
 
 trait SeederHelpers
@@ -43,7 +45,11 @@ trait SeederHelpers
                     'label' => $label,
                     'type' => $config['type'],
                     'options' => $config['options'] ?? null,
-                    'is_required' => in_array($config['type'], ['radio', 'select', 'text']),
+                    'min_value' => $config['min_value'] ?? null,
+                    'max_value' => $config['max_value'] ?? null,
+                    'failure_values' => $config['failure_values'] ?? null,
+                    'risk_id' => $config['risk_id'] ?? null,
+                    'is_required' => in_array($config['type'], ['radio', 'select', 'text', 'number']),
                     'order' => $questionOrder++,
                 ]);
             }
@@ -74,7 +80,11 @@ trait SeederHelpers
                 'label' => $label,
                 'type' => $config['type'],
                 'options' => $config['options'] ?? null,
-                'is_required' => in_array($config['type'], ['radio', 'select', 'text']),
+                'min_value' => $config['min_value'] ?? null,
+                'max_value' => $config['max_value'] ?? null,
+                'failure_values' => $config['failure_values'] ?? null,
+                'risk_id' => $config['risk_id'] ?? null,
+                'is_required' => in_array($config['type'], ['radio', 'select', 'text', 'number']),
                 'order' => $questionOrder++,
             ]);
         }
@@ -110,6 +120,11 @@ trait SeederHelpers
                         'value' => $value,
                     ]);
                 }
+
+                // Evaluar y guardar resultado final (preservando fecha histórica)
+                $inspection->update([
+                    'result' => $inspection->evaluateResult(),
+                ]);
             }
         }
     }
@@ -349,11 +364,26 @@ trait SeederHelpers
      */
     private function generateAnswerValue($question)
     {
+        // 10% de probabilidad de generar un fallo si hay lógica de falla definida
+        $shouldFail = rand(1, 10) === 1;
+
+        if ($shouldFail) {
+            if (!empty($question->failure_values)) {
+                return is_array($question->failure_values) ? $question->failure_values[array_rand($question->failure_values)] : $question->failure_values;
+            }
+            if ($question->type === 'number') {
+                if ($question->min_value !== null) return (float)$question->min_value - 5.0;
+                if ($question->max_value !== null) return (float)$question->max_value + 5.0;
+            }
+        }
+
         return match($question->type) {
             'text' => $this->generateTextValue($question->label),
             'textarea' => rand(0, 1) ? 'Sin observaciones' : 'Requiere seguimiento',
             'date' => now()->subDays(rand(1, 30))->format('Y-m-d'),
-            'number' => rand(10, 100),
+            'number' => $question->min_value !== null && $question->max_value !== null 
+                        ? rand((int)$question->min_value, (int)$question->max_value) 
+                        : rand(10, 100),
             'radio' => $question->options ? $question->options[array_rand($question->options)] : 'Sí',
             'select' => $question->options ? $question->options[array_rand($question->options)] : 'Bueno',
             'checkbox' => $question->options ? json_encode(array_slice($question->options, 0, rand(1, count($question->options)))) : '[]',
@@ -584,5 +614,143 @@ trait SeederHelpers
                  'notes' => 'Solicitud urgente. Vencimiento requerido: ' . $date->format('d/m/Y'),
              ]);
         }
+    }
+
+    /**
+     * Crear una visita completa con integraciones
+     */
+    protected function createCompleteVisit($sede, $tecnico, $date, array $checklists, array $employees, ?Risk $riskToFail = null): VisitCertificate
+    {
+        $visit = VisitCertificate::create([
+            'user_id' => $tecnico->id,
+            'sede_id' => $sede->id,
+            'empresa_id' => $sede->empresa_id,
+            'visit_date' => $date,
+            'start_time' => $date->copy()->setTime(9, 0),
+            'end_time' => $date->copy()->setTime(17, 0),
+            'status' => 'signed',
+            'code' => 'VIS-' . $date->format('Ymd') . '-' . rand(100, 999),
+            'responsible_name' => 'Juan Responsable',
+            'general_observations' => 'Visita de control programada 2025.',
+            'signature' => $this->getDefaultSignature(),
+        ]);
+
+        // 1. Vincular Checklists (Completados)
+        foreach ($checklists as $checklist) {
+            // Crear una asignación previa para que todo cierre
+            $assignment = \App\Models\ChecklistAssignment::create([
+                'dynamic_checklist_id' => $checklist->id,
+                'user_id' => $tecnico->id,
+                'sede_id' => $sede->id,
+                'empresa_id' => $sede->empresa_id,
+                'due_date' => $date,
+                'status' => 'completed',
+            ]);
+
+            $inspection = DynamicInspection::create([
+                'dynamic_checklist_id' => $checklist->id,
+                'checklist_assignment_id' => $assignment->id,
+                'user_id' => $tecnico->id,
+                'sede_id' => $sede->id,
+                'completed_at' => $date->copy()->setTime(11, 0),
+                'status' => 'completed',
+            ]);
+
+            // Crear la constancia en la visita
+            $completion = VisitChecklistCompletion::create([
+                'visit_certificate_id' => $visit->id,
+                'checklist_assignment_id' => $assignment->id,
+                'is_self_assigned' => true,
+                'completed_at' => $date->copy()->setTime(11, 0),
+                'responses' => [], // Se llenará con DynamicAnswer
+            ]);
+
+            // Generar respuestas (algunas pueden fallar si el riesgo es coincidente)
+            $responsesForJson = [];
+            foreach ($checklist->questions as $question) {
+                $isTargetRisk = ($riskToFail && $question->risk_id == $riskToFail->id);
+                $value = $isTargetRisk ? $this->generateFailureValue($question) : $this->generateAnswerValue($question);
+
+                DynamicAnswer::create([
+                    'dynamic_inspection_id' => $inspection->id,
+                    'dynamic_question_id' => $question->id,
+                    'value' => $value,
+                ]);
+
+                $responsesForJson[$question->id] = $value;
+
+                // Si falló, crear un Hallazgo vinculado
+                $tempAnswer = new DynamicAnswer(['dynamic_question_id' => $question->id, 'value' => $value]);
+                if ($tempAnswer->isFailure()) {
+                    $this->createHallazgo($visit, $tecnico, $question, $riskToFail);
+                }
+            }
+            
+            // Actualizar el JSON de respuestas en la constancia
+            $completion->update(['responses' => $responsesForJson]);
+            
+            // Evaluar y guardar resultado final de la inspección (preservando fecha histórica)
+            $inspection->update([
+                'result' => $inspection->evaluateResult(),
+            ]);
+        }
+
+        // 2. Vincular Capacitación
+        VisitTraining::create([
+            'visit_certificate_id' => $visit->id,
+            'training_id' => Training::where('empresa_id', $sede->empresa_id)->inRandomOrder()->first()?->id,
+            'is_adhoc' => false,
+        ]);
+
+        return $visit;
+    }
+
+    /**
+     * Crear un Hallazgo vinculado a un fallo
+     */
+    protected function createHallazgo($visit, $tecnico, $question, ?Risk $risk = null): Hallazgo
+    {
+        return Hallazgo::create([
+            'sede_id' => $visit->sede_id,
+            'user_id' => $tecnico->id,
+            'titulo' => 'Desviación detectada: ' . $question->label,
+            'descripcion' => 'Se detectó un incumplimiento crítico durante la inspección del control operativo.',
+            'criticidad' => 'alto',
+            'estado' => 'pendiente',
+            'fecha_deteccion' => $visit->visit_date,
+            'risk_id' => $risk ? $risk->id : $question->risk_id,
+            'visit_certificate_id' => $visit->id,
+            'question_id' => $question->id,
+        ]);
+    }
+
+    /**
+     * Crear un Incidente vinculado a un hallazgo/riesgo
+     */
+    protected function createIncidente($hallazgo, $date): Incidente
+    {
+        return Incidente::create([
+            'hallazgo_id' => $hallazgo->id,
+            'sede_id' => $hallazgo->sede_id,
+            'user_id' => $hallazgo->user_id,
+            'tipo' => 'incidente',
+            'gravedad' => 'moderado',
+            'fecha_ocurrencia' => $date,
+            'titulo' => 'Evento adverso relacionado con ' . $hallazgo->titulo,
+            'descripcion' => 'Incidente derivado de un fallo en el control preventivo detectado previamente.',
+            'estado' => 'investigacion',
+            'visit_certificate_id' => $hallazgo->visit_certificate_id,
+        ]);
+    }
+
+    private function generateFailureValue($question)
+    {
+        if (!empty($question->failure_values)) {
+            return is_array($question->failure_values) ? $question->failure_values[array_rand($question->failure_values)] : $question->failure_values;
+        }
+        if ($question->type === 'number') {
+            return ($question->min_value !== null) ? (float)$question->min_value - 10 : (float)$question->max_value + 10;
+        }
+        return 'Fallo';
     }
 }

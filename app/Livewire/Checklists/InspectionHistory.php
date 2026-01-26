@@ -12,13 +12,14 @@ class InspectionHistory extends Component
 
     public string $search = '';
     public string $statusFilter = '';
+    public string $resultFilter = '';
     public ?int $checklistFilter = null;
     public ?int $empresaFilter = null;
     public ?int $sedeFilter = null;
     public $fromDate;
     public $toDate;
 
-    protected $queryString = ['search', 'statusFilter', 'checklistFilter', 'empresaFilter', 'sedeFilter', 'fromDate', 'toDate'];
+    protected $queryString = ['search', 'statusFilter', 'resultFilter', 'checklistFilter', 'empresaFilter', 'sedeFilter', 'fromDate', 'toDate'];
 
     public function updatingSearch()
     {
@@ -60,6 +61,9 @@ class InspectionHistory extends Component
             })
             ->when($this->statusFilter, function ($query) {
                 $query->where('status', $this->statusFilter);
+            })
+            ->when($this->resultFilter, function ($query) {
+                $query->where('result', $this->resultFilter);
             })
             ->when($this->checklistFilter, function ($query) {
                 $query->where('dynamic_checklist_id', $this->checklistFilter);

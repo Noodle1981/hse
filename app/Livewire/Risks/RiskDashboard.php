@@ -17,7 +17,8 @@ class RiskDashboard extends Component
         'critical' => 0,
         'high' => 0,
         'medium' => 0,
-        'low' => 0
+        'low' => 0,
+        'alert_triggers' => 0
     ];
 
     public function mount($matrixId = null)
@@ -73,6 +74,15 @@ class RiskDashboard extends Component
             elseif ($eval->level === 'Medio') $this->kpis['medium']++;
             else $this->kpis['low']++;
         }
+
+        // 4. Calcular disparadores de alerta activos
+        $this->kpis['alert_triggers'] = Risk::query()
+            ->when($this->matrixId, fn($q) => $q->where('risk_matrix_id', $this->matrixId))
+            ->when($user->rol === 'Técnico', function($q) use ($user) {
+                $q->whereHas('matrix', fn($qm) => $qm->whereIn('sede_id', $user->sedes()->pluck('sedes.id')));
+            })
+            ->get()
+            ->sum(fn($risk) => $risk->getRecentFailuresCount());
     }
 
     private function resetKpis()
@@ -82,7 +92,8 @@ class RiskDashboard extends Component
             'critical' => 0,
             'high' => 0,
             'medium' => 0,
-            'low' => 0
+            'low' => 0,
+            'alert_triggers' => 0
         ];
     }
 

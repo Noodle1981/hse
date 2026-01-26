@@ -40,6 +40,17 @@
                 </select>
             </div>
 
+            <!-- Resultado -->
+            <div>
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Resultado</label>
+                <select wire:model.live="resultFilter" 
+                        class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-ep-primary">
+                    <option value="">Todos los resultados</option>
+                    <option value="Pass">Pasa</option>
+                    <option value="Fail">No Pasa</option>
+                </select>
+            </div>
+
             <!-- Checklist -->
             <div>
                 <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Checklist</label>
@@ -112,6 +123,7 @@
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Ubicación</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Inspector</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+                            <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Resultado</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
                             <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
                         </tr>
@@ -135,6 +147,16 @@
                                         {{ $inspection->status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
                                         {{ $inspection->status === 'completed' ? 'Completado' : 'Borrador' }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    @if($inspection->result)
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wide uppercase
+                                            {{ $inspection->result === 'Pass' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ $inspection->result === 'Pass' ? 'Pasa' : 'No Pasa' }}
+                                        </span>
+                                    @else
+                                        <span class="text-xs text-gray-400">-</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($inspection->completed_at)

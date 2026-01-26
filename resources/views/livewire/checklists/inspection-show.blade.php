@@ -49,6 +49,14 @@
                                     {{ $inspection->status === 'completed' ? 'Completado' : 'Borrador' }}
                                 </span>
                             </p>
+                            @if($inspection->result)
+                                <p class="text-sm">
+                                    <span class="font-semibold text-gray-600">Resultado:</span>
+                                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-bold tracking-tight uppercase {{ $inspection->result === 'Pass' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $inspection->result === 'Pass' ? 'Pasa' : 'No Pasa' }}
+                                    </span>
+                                </p>
+                            @endif
                         </div>
                     </div>
                     <div>

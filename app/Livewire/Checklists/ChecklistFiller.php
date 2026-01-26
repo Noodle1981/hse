@@ -62,13 +62,13 @@ class ChecklistFiller extends Component
             $userId = $firstUser?->id;
         }
 
-        // Crear inspección
+        // Crear inspección (primero como borrador para poder guardar respuestas y luego evaluar)
         $inspection = DynamicInspection::create([
             'dynamic_checklist_id' => $this->checklist->id,
             'user_id' => $userId,
-            'completed_at' => now(),
+            'completed_at' => null,
             'notes' => $this->notes ?: null,
-            'status' => 'completed',
+            'status' => DynamicInspection::STATUS_DRAFT,
         ]);
 
         // Guardar respuestas
@@ -79,6 +79,9 @@ class ChecklistFiller extends Component
                 'value' => is_array($value) ? json_encode($value) : $value,
             ]);
         }
+
+        // Ahora marcar como completada (esto disparará la evaluación de resultados)
+        $inspection->markAsCompleted();
 
         session()->flash('message', '¡Checklist completado con éxito!');
         return redirect()->route('checklists.index');

@@ -58,6 +58,63 @@
                         </div>
                     </div>
 
+                    {{-- Dynamic Monitoring (Failure Traceability) --}}
+                    @php $failures = $risk->getRecentFailures(); @endphp
+                    <div class="px-5 py-2 {{ $failures->count() > 0 ? 'bg-red-50' : 'bg-green-50/30' }} border-b border-gray-100">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="flex h-2 w-2 relative">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full {{ $failures->count() > 0 ? 'bg-red-400' : 'bg-green-400' }} opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 {{ $failures->count() > 0 ? 'bg-red-500' : 'bg-green-500' }}"></span>
+                                </span>
+                                <span class="text-[11px] font-bold uppercase tracking-wider {{ $failures->count() > 0 ? 'text-red-700' : 'text-green-700' }}">
+                                    @if($failures->count() > 0)
+                                        Alerta: {{ $failures->count() }} Disparadores de Falla detectados
+                                    @else
+                                        Controles Operativos: Sin Fallos
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="text-[10px] text-gray-500 italic">Evidencia basada en inspecciones (30d)</div>
+                                @if($failures->count() > 0)
+                                    <span class="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded-full animate-pulse uppercase">Riesgo Crítico</span>
+                                @endif
+                                <button wire:click="openHistory({{ $risk->id }})" class="p-1 px-2 text-indigo-600 hover:bg-indigo-50 border border-indigo-200 rounded-md transition-all flex items-center gap-1 group" title="Ver Historial de Fallos">
+                                    <svg class="w-3 h-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    <span class="text-[10px] font-bold uppercase">Historial</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Detalle Rápido de Disparadores (30d) --}}
+                        @if($failures->count() > 0)
+                            <div class="mt-3 space-y-2 pb-2">
+                                <h5 class="text-[10px] font-bold text-red-800 uppercase tracking-tighter mb-1 border-b border-red-100 pb-1 flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    Fallas Recientes Detectadas
+                                </h5>
+                                <div class="grid grid-cols-1 gap-1">
+                                    @foreach($failures->take(3) as $failure)
+                                        <div class="flex items-start justify-between bg-white/60 p-2 rounded border border-red-100">
+                                            <div class="flex-1">
+                                                <div class="text-[11px] font-bold text-gray-800 leading-tight">{{ $failure->question->label }}</div>
+                                                <div class="text-[10px] text-red-600 font-medium italic">Respuesta: "{{ $failure->value }}"</div>
+                                            </div>
+                                            <div class="text-right flex flex-col items-end">
+                                                <div class="text-[9px] font-bold text-gray-400 uppercase tracking-tighter">{{ $failure->inspection->checklist->title ?? 'Checklist' }}</div>
+                                                <div class="text-[9px] text-gray-500">{{ $failure->inspection->completed_at->format('d/m/Y') }}</div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                    @if($failures->count() > 3)
+                                        <div class="text-[9px] text-center text-red-400 font-bold italic mt-1">... y {{ $failures->count() - 3 }} fallos más en los últimos 30 días</div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
                     {{-- Controls Section --}}
                     <div class="p-5">
                         <div class="flex justify-between items-center mb-4">
@@ -91,6 +148,24 @@
                                 <div class="col-span-2 text-xs text-gray-400 italic py-2">No hay medidas de control definidas para este riesgo.</div>
                             @endforelse
                         </div>
+
+                        {{-- Related Trainings --}}
+                        @php $trainings = $risk->relatedTrainings(); @endphp
+                        @if($trainings->count() > 0)
+                            <div class="mt-4 pt-4 border-t border-gray-50">
+                                <h5 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 flex items-center">
+                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                    Capacitaciones de Prevención vinculadas
+                                </h5>
+                                <div class="flex flex-wrap gap-2">
+                                    @foreach($trainings as $t)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                            {{ $t->title }}
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @empty
@@ -192,6 +267,99 @@
                                 <button type="button" wire:click="$set('showControlModal', false)" class="inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Cancelar</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- History Modal --}}
+        @if($showHistoryModal)
+            <div class="fixed inset-0 z-50 overflow-y-auto">
+                <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                    <div class="fixed inset-0 transition-opacity" aria-hidden="true" wire:click="closeHistory"><div class="absolute inset-0 bg-gray-500 opacity-75"></div></div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl sm:w-full">
+                        <div class="p-0">
+                            {{-- Header --}}
+                            <div class="bg-gray-900 px-6 py-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-indigo-500/20 rounded-lg">
+                                        <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-white font-bold leading-tight">Auditoría Histórica de Fallos</h3>
+                                        <p class="text-indigo-300 text-[10px] font-bold uppercase tracking-widest tracking-tighter">{{ $historyRisk->hazard ?? '' }}</p>
+                                    </div>
+                                </div>
+                                <button wire:click="closeHistory" class="text-gray-400 hover:text-white transition-colors">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
+
+                            {{-- Body --}}
+                            <div class="max-h-[60vh] overflow-y-auto p-6 bg-gray-50/50">
+                                @if(count($historyFailures) > 0)
+                                    <div class="space-y-4">
+                                        @foreach($historyFailures as $fail)
+                                            <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                                                <div class="px-5 py-3 bg-white flex items-center justify-between border-b border-gray-50">
+                                                    <div class="flex items-center space-x-3">
+                                                        <span class="flex h-2 w-2 rounded-full bg-red-500"></span>
+                                                        <span class="text-xs font-black text-gray-900 uppercase">{{ $fail->inspection->completed_at->format('d M Y - H:i') }} hs</span>
+                                                    </div>
+                                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[9px] font-bold rounded uppercase">
+                                                        {{ $fail->inspection->sede->nombre_sede ?? 'Sede' }}
+                                                    </span>
+                                                </div>
+                                                <div class="p-5">
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div>
+                                                            <div class="text-[10px] font-bold text-gray-400 uppercase mb-1 tracking-widest">Pregunta Evaluada</div>
+                                                            <div class="text-sm font-medium text-gray-800 leading-snug">{{ $fail->question->label }}</div>
+                                                        </div>
+                                                        <div class="bg-red-50 p-3 rounded-lg border border-red-100/50">
+                                                            <div class="text-[10px] font-bold text-red-400 uppercase mb-1 tracking-widest">Respuesta Detectada (Falla)</div>
+                                                            <div class="text-sm font-black text-red-700 italic">"{{ $fail->value }}"</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-4 pt-4 border-t border-gray-50 flex items-center justify-between">
+                                                        <div class="flex items-center space-x-4">
+                                                            <div class="text-[10px]">
+                                                                <span class="text-gray-400 font-bold uppercase tracking-tighter">Checklist:</span>
+                                                                <span class="text-indigo-600 font-bold">{{ $fail->inspection->checklist->title ?? 'N/A' }}</span>
+                                                            </div>
+                                                            <div class="text-[10px]">
+                                                                <span class="text-gray-400 font-bold uppercase tracking-tighter">Técnico:</span>
+                                                                <span class="text-gray-600 font-bold">{{ $fail->inspection->user->name ?? 'N/A' }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <a href="{{ route('gestor.inspections.show', $fail->dynamic_inspection_id) }}" target="_blank" class="text-[10px] font-bold text-indigo-600 hover:text-indigo-800 flex items-center bg-indigo-50 px-3 py-1.5 rounded-full transition-all">
+                                                            Ver detalles de inspección
+                                                            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="text-center py-12">
+                                        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        </div>
+                                        <h3 class="text-sm font-bold text-gray-900">Sin antecedentes de fallos</h3>
+                                        <p class="text-xs text-gray-500 mt-1">Este control preventivo no ha registrado desviaciones históricamente.</p>
+                                    </div>
+                                @endif
+                            </div>
+
+                            {{-- Footer --}}
+                            <div class="bg-gray-50 px-6 py-4 border-t flex justify-end">
+                                <button wire:click="closeHistory" class="px-5 py-2 bg-gray-900 text-white text-xs font-bold uppercase tracking-widest rounded-lg hover:bg-gray-800 transition-colors">
+                                    Cerrar Auditoría
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -213,25 +213,64 @@
                     </div>
                 </div>
 
+                <!-- Lógica de Rangos (para números) -->
+                <div x-show="$wire.newQuestion.type === 'number'" x-cloak class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Lógica de Aprobación (Opcional)</h4>
+                    <p class="text-xs text-gray-500 mb-3">Defina el rango de valores aceptables. Si el valor ingresado está fuera de este rango, la inspección se marcará como "No Pasa".</p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Mínimo Aceptable</label>
+                            <input type="number" step="0.01" wire:model="newQuestion.min_value"
+                                   class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+                                   placeholder="Ej: 0.00">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Máximo Aceptable</label>
+                            <input type="number" step="0.01" wire:model="newQuestion.max_value"
+                                   class="w-full px-3 py-1.5 border border-gray-300 rounded-lg text-sm"
+                                   placeholder="Ej: 100.00">
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Opciones para select/radio/checkbox -->
                 <div x-show="showOptions" x-cloak class="mt-4 p-4 bg-gray-100 rounded-lg">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Opciones</label>
-                    <div class="flex gap-2 mb-2">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-medium text-gray-700">Opciones y Disparadores de Falla</label>
+                        <span class="text-xs text-gray-500">Marque las opciones que causen que la inspección <b>No Pase</b>.</span>
+                    </div>
+                    <div class="flex gap-2 mb-4">
                         <input type="text" wire:model="optionInput"
                                class="flex-1 px-3 py-2 border border-gray-300 rounded-lg"
-                               placeholder="Nueva opción" wire:keydown.enter.prevent="addOption">
+                               placeholder="Nueva opción (Ej: Mal estado, No cumple...)" wire:keydown.enter.prevent="addOption">
                         <button type="button" wire:click="addOption"
                                 class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
                             Agregar
                         </button>
                     </div>
                     @if(!empty($newQuestion['options']))
-                        <div class="flex flex-wrap gap-2">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             @foreach($newQuestion['options'] as $i => $opt)
-                                <span class="inline-flex items-center px-3 py-1 bg-white border rounded-full text-sm">
-                                    {{ $opt }}
-                                    <button type="button" wire:click="removeOption({{ $i }})" class="ml-2 text-red-500">×</button>
-                                </span>
+                                <div class="flex items-center justify-between p-2 bg-white border rounded-lg {{ in_array($opt, $newQuestion['failure_values']) ? 'border-red-300 bg-red-50' : '' }}">
+                                    <div class="flex items-center gap-3">
+                                        <button type="button" wire:click="toggleFailureValue('{{ $opt }}')" 
+                                                class="flex items-center gap-2 text-sm {{ in_array($opt, $newQuestion['failure_values']) ? 'text-red-600 font-bold' : 'text-gray-600' }}">
+                                            <div class="w-4 h-4 rounded border {{ in_array($opt, $newQuestion['failure_values']) ? 'bg-red-500 border-red-500' : 'bg-white border-gray-300' }} flex items-center justify-center">
+                                                @if(in_array($opt, $newQuestion['failure_values']))
+                                                    <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path>
+                                                    </svg>
+                                                @endif
+                                            </div>
+                                            {{ $opt }}
+                                        </button>
+                                    </div>
+                                    <button type="button" wire:click="removeOption({{ $i }})" class="text-gray-400 hover:text-red-500 px-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
                             @endforeach
                         </div>
                     @endif
@@ -245,14 +284,28 @@
                         </label>
 
                         @if($useSections && count($sections) > 0)
-                            <select wire:model="newQuestion.section_id"
-                                    class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm">
-                                <option value="">Sin sección</option>
-                                @foreach($sections as $section)
-                                    <option value="{{ $section['id'] }}">{{ $section['title'] }}</option>
+                            <div class="flex flex-col">
+                                <label class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Sección</label>
+                                <select wire:model="newQuestion.section_id"
+                                        class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white">
+                                    <option value="">Sin sección</option>
+                                    @foreach($sections as $section)
+                                        <option value="{{ $section['id'] }}">{{ $section['title'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
+                        <div class="flex flex-col">
+                            <label class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Vincular a Riesgo (IPERC)</label>
+                            <select wire:model="newQuestion.risk_id"
+                                    class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm bg-white max-w-[200px]">
+                                <option value="">No vinculado</option>
+                                @foreach($availableRisks as $r)
+                                    <option value="{{ $r->id }}">[{{ $r->matrix->title }}] {{ $r->hazard }}</option>
                                 @endforeach
                             </select>
-                        @endif
+                        </div>
                     </div>
                     
                     <div class="flex gap-2">

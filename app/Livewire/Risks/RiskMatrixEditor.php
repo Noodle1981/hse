@@ -23,6 +23,11 @@ class RiskMatrixEditor extends Component
     public $currentRiskId = null;
     public $editingControlId = null;
     public $measure, $controlType = 'Administrativo', $checklist_id;
+    
+    // History Modal
+    public $showHistoryModal = false;
+    public $historyFailures = [];
+    public $historyRisk = null;
 
     public function mount($matrixId)
     {
@@ -135,6 +140,20 @@ class RiskMatrixEditor extends Component
     {
         RiskControl::find($id)->delete();
         $this->loadMatrix();
+    }
+
+    public function openHistory($riskId)
+    {
+        $this->historyRisk = Risk::findOrFail($riskId);
+        $this->historyFailures = $this->historyRisk->getAllHistoricalFailures();
+        $this->showHistoryModal = true;
+    }
+
+    public function closeHistory()
+    {
+        $this->showHistoryModal = false;
+        $this->historyRisk = null;
+        $this->historyFailures = [];
     }
 
     private function resetRiskForm()
