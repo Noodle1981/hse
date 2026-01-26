@@ -17,6 +17,12 @@ class Consultora extends Model
         'cuit',
         'max_tecnicos',
         'config',
+        'description',
+        'fiscal_address',
+        'province',
+        'locality',
+        'email',
+        'phone',
     ];
 
     protected $casts = [

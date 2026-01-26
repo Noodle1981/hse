@@ -13,7 +13,7 @@ class MasterDemoSeeder extends Seeder
     {
         $this->command->info('');
         $this->command->info('🚀 ========================================');
-        $this->command->info('🚀 Iniciando MasterDemoSeeder v2.0 (Multi-Tenancy)');
+        $this->command->info('🚀 Iniciando MasterDemoSeeder v3.0 (Manual Testing Mode)');
         $this->command->info('🚀 ========================================');
         $this->command->info('');
 
@@ -42,60 +42,50 @@ class MasterDemoSeeder extends Seeder
             ]
         );
 
-        // 3. Crear Usuarios Empresa 1
-        $gestor1 = User::firstOrCreate(
-            ['email' => 'gestor1@empresa1.com'],
+        // 3. Crear Gestor Minera del Sol
+        $gestorMinera = User::firstOrCreate(
+            ['email' => 'gestor_minera@xamasafe.com'],
             [
                 'nombres' => 'Juan',
-                'apellidos' => 'Gestor Uno',
+                'apellidos' => 'Gestor Minas',
                 'password' => Hash::make('password'),
                 'rol' => 'Administrador',
                 'estado' => 'activo',
                 'consultora_id' => $consultora->id,
             ]
         );
-
-        $tecnico1 = User::firstOrCreate(
-            ['email' => 'tecnico1@empresa1.com'],
-            [
-                'nombres' => 'Roberto',
-                'apellidos' => 'Tecnico Uno',
-                'password' => Hash::make('password'),
-                'rol' => 'Técnico',
-                'estado' => 'activo',
-                'consultora_id' => $consultora->id,
-                'matricula' => 'MAT-E1-001'
-            ]
-        );
-
-        // 4. Crear Usuarios Empresa 2
-        $gestor2 = User::firstOrCreate(
-            ['email' => 'gestor2@empresa2.com'],
-            [
-                'nombres' => 'Maria',
-                'apellidos' => 'Gestor Dos',
-                'password' => Hash::make('password'),
-                'rol' => 'Administrador',
-                'estado' => 'activo',
-                'consultora_id' => $consultora->id,
-            ]
-        );
-
-        $tecnico2 = User::firstOrCreate(
-            ['email' => 'tecnico2@empresa2.com'],
-            [
-                'nombres' => 'Luis',
-                'apellidos' => 'Tecnico Dos',
-                'password' => Hash::make('password'),
-                'rol' => 'Técnico',
-                'estado' => 'activo',
-                'consultora_id' => $consultora->id,
-                'matricula' => 'MAT-E2-001'
-            ]
-        );
-
-        $this->command->info('✅ Usuarios creados según tareas.md');
         
+        // Crear Empresa Inicial (Vacía) para que el gestor tenga contexto
+        $empresa = \App\Models\Empresa::firstOrCreate(
+            ['cuit' => '30-55555555-5'],
+            [
+                'nombre' => 'Minera del Sol S.A.',
+                'razon_social' => 'Minera del Sol Sociedad Anónima',
+                'primary_color' => '#8B4513'
+            ]
+        );
+
+        $sede = \App\Models\Sede::firstOrCreate(
+             ['empresa_id' => $empresa->id, 'nombre_sede' => 'Mina San José'],
+             [
+                 'tipo_sede' => 'Yacimiento',
+                 'direccion' => 'Ruta 40 km 3000',
+                 'localidad' => 'San Juan', 
+                 'correo' => 'seguridad@minera.com'
+             ]
+        );
+        
+        // Vincular gestor a la sede
+        $sede->users()->syncWithoutDetaching([$gestorMinera->id]);
+
+        $this->command->info('✅ Usuarios base creados: Admin y Gestor Minera');
+        
+        // ***************************************************************
+        // NOTA: Se ha deshabilitado la generación automática de casos de uso
+        // para permitir la prueba manual de CRUDs según caso_de_uso.md
+        // ***************************************************************
+
+        /*
         // 5. Ejecutar Caso de Uso 1 (Seguridad Industrial 2026)
         $this->command->info('🕒 Generando Caso de Uso 1: Seguridad Industrial 2026...');
         $safetySeeder = new \Database\Seeders\UseCases\SafetyTraceabilitySeeder();
@@ -105,37 +95,18 @@ class MasterDemoSeeder extends Seeder
         $this->command->info('🏗️ Generando Caso de Uso 2: Nuevo Cliente...');
         // Aquí podríamos llamar a otro seeder o crear lógica ad-hoc
         $this->createNewUseCase($gestor2, $tecnico2);
+        */
 
         $this->showSummary();
-    }
-
-    private function createNewUseCase($gestor, $tecnico)
-    {
-        // Lógica para Empresa 2
-        $empresa = \App\Models\Empresa::create([
-            'nombre' => 'Aceros del Sur S.A.',
-            'razon_social' => 'Aceros del Sur Sociedad Anónima',
-            'cuit' => '30-99999999-1',
-            'primary_color' => '#1e40af', // Azul Aceros
-        ]);
-
-        $sede = $empresa->sedes()->create([
-            'nombre_sede' => 'Planta Industrial Quilmes',
-            'direccion' => 'Av. Mitre 1234',
-            'localidad' => 'Quilmes',
-            'tipo_sede' => 'Industrial'
-        ]);
-
-        $sede->users()->attach([$gestor->id, $tecnico->id]);
-        
-        $this->command->info('✅ Empresa 2 y Sede creadas');
     }
 
     private function showSummary(): void
     {
         $this->command->info('');
         $this->command->info('🎉 ========================================');
-        $this->command->info('🎉 MasterDemoSeeder COMPLETADO');
+        $this->command->info('🎉 MasterDemoSeeder COMPLETADO (Modo Manual)');
+        $this->command->info('🎉 Ahora puedes ingresar con gestor_minera@xamasafe.com');
+        $this->command->info('🎉 y seguir la guía en caso_de_uso.md');
         $this->command->info('🎉 ========================================');
     }
 }

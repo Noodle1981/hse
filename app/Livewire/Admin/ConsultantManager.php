@@ -13,6 +13,8 @@ class ConsultantManager extends Component
     public $showModal = false;
     public $editingId = null;
     public $nombre, $cuit, $max_tecnicos = 5;
+    public $description, $fiscal_address, $email, $phone;
+    public $province, $locality;
 
     public function render()
     {
@@ -23,7 +25,7 @@ class ConsultantManager extends Component
 
     public function create()
     {
-        $this->reset(['nombre', 'cuit', 'max_tecnicos', 'editingId']);
+        $this->reset(['nombre', 'cuit', 'max_tecnicos', 'editingId', 'description', 'fiscal_address', 'email', 'phone', 'province', 'locality']);
         $this->showModal = true;
     }
 
@@ -34,6 +36,12 @@ class ConsultantManager extends Component
         $this->nombre = $consultora->nombre;
         $this->cuit = $consultora->cuit;
         $this->max_tecnicos = $consultora->max_tecnicos;
+        $this->description = $consultora->description;
+        $this->fiscal_address = $consultora->fiscal_address;
+        $this->province = $consultora->province;
+        $this->locality = $consultora->locality;
+        $this->email = $consultora->email;
+        $this->phone = $consultora->phone;
         $this->showModal = true;
     }
 
@@ -43,20 +51,30 @@ class ConsultantManager extends Component
             'nombre' => 'required|string|max:255',
             'cuit' => 'required|string|max:20|unique:consultoras,cuit,' . $this->editingId,
             'max_tecnicos' => 'required|integer|min:1',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+            'fiscal_address' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:100',
+            'locality' => 'nullable|string|max:100',
         ]);
 
+        $data = [
+            'nombre' => $this->nombre,
+            'cuit' => $this->cuit,
+            'max_tecnicos' => $this->max_tecnicos,
+            'description' => $this->description,
+            'fiscal_address' => $this->fiscal_address,
+            'province' => $this->province,
+            'locality' => $this->locality,
+            'email' => $this->email,
+            'phone' => $this->phone,
+        ];
+
         if ($this->editingId) {
-            Consultora::find($this->editingId)->update([
-                'nombre' => $this->nombre,
-                'cuit' => $this->cuit,
-                'max_tecnicos' => $this->max_tecnicos,
-            ]);
+            Consultora::find($this->editingId)->update($data);
         } else {
-            Consultora::create([
-                'nombre' => $this->nombre,
-                'cuit' => $this->cuit,
-                'max_tecnicos' => $this->max_tecnicos,
-            ]);
+            Consultora::create($data);
         }
 
         $this->showModal = false;

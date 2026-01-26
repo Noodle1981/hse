@@ -3,9 +3,9 @@
         <!-- Logo -->
         <div class="text-center mb-8">
             <div class="w-20 h-20 bg-ep-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <span class="text-white font-bold text-3xl">EP</span>
+                <span class="text-white font-bold text-1xl">XamaSafe</span>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Sistema de Checklists</h1>
+            <h1 class="text-3xl font-bold text-white mb-2">Plataforma de Higiene y Seguridad</h1>
             <p class="text-gray-400">Ingrese sus credenciales para continuar</p>
         </div>
 
@@ -65,17 +65,16 @@
 
             <!-- Demo Credentials -->
             <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p class="text-xs text-gray-500 text-center mb-2 font-semibold">Credenciales de prueba:</p>
+                <p class="text-xs text-gray-500 text-center mb-2 font-semibold">Problemas de ingreso</p>
                 <p class="text-xs text-gray-600 text-center">
-                    <span class="font-mono">inspector@ep.com</span> / 
-                    <span class="font-mono">password</span>
+                    <span class="font-mono">soporte@xamasafe.com.ar</span>
                 </p>
             </div>
         </div>
 
         <!-- Footer -->
         <p class="text-center text-gray-400 text-sm mt-6">
-            EP - Sistema de Checklists Dinámicos V1.2.0.0
+            XamaSafe - Sistema de Checklists Dinámicos V1.2.0.0
         </p>
     </div>
 </div>

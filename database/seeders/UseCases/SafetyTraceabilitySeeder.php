@@ -19,236 +19,328 @@ class SafetyTraceabilitySeeder extends Seeder
         $this->gestor = $gestor ?? User::where('rol', 'Administrador')->first();
         $this->tecnico = $tecnico ?? User::where('rol', 'Técnico')->first();
 
-        echo "🛡️  Creando Caso de Uso Maestro: Trazabilidad Total 2026...\n";
+        echo "🛡️  Refinando Caso de Uso Maestro: Trazabilidad Total 2026...\n";
 
         $this->createCompanyAndSede();
         
         // 1. Crear Matriz IPERC
         $this->seedRiskMatrix();
         
-        // 2. Crear Checklists Trazables
-        $checklists = $this->createTraceableChecklists();
+        // 2. Crear 10 Tareas de Checklist (5 Completadas, 5 Pendientes)
+        // Necesitamos definiciones de Checklists (Plantillas)
+        $checklistDefinitions = $this->createTraceableChecklists();
         
-        // 3. Empleados y Capacitaciones
+        // 3. Empleados
         $employees = $this->seedEmployees();
-        $this->seedTrainings($employees, $checklists);
 
-        // 4. Generar 10 Visitas a lo largo de 2026 (Cronología)
-        $this->seedTimeline2026($checklists, $employees);
+        // 4. Checklists Reales (Asignaciones)
+        $assignments = $this->createCustomChecklistAssignments($checklistDefinitions);
+        
+        // 5. Capacitaciones (Vinculadas a los completados)
+        $this->seedCustomTrainings($employees);
 
-        // 5. Plan Anual 2026
-        $this->createAnnualContract($this->sede, $checklists, 'Seguridad Proactiva 2026');
+        // 6. Entregas EPP (2 Entregadas, 3 Pendientes)
+        $this->seedCustomEpp($employees);
 
-        echo "✅ Caso Maestro 2026 completado. Sistema de trazabilidad alimentado.\n";
+        // 7. Generar constancias de visitas (5 Visitas)
+        $this->seedCustomVisits($assignments['completed'], $assignments['failed']);
+
+        // 8. Plan Anual 2026
+        // Usamos solo las definiciones para el contrato
+        $this->createAnnualContract($this->sede, $checklistDefinitions, 'Seguridad Proactiva 2026');
+
+        echo "✅ Caso Maestro Refinado Completado.\n";
     }
 
-    private function seedTimeline2026(array $checklists, array $employees): void
+    private function createCustomChecklistAssignments(array $definitions): array
     {
-        $riesgos = Risk::all();
-        $riskAltura = $riesgos->where('hazard', 'like', '%Altura%')->first();
-        $riskAuto = $riesgos->where('hazard', 'like', '%Atropello%')->first();
+        $completed = [];
+        $pending = [];
+        $failed = null;
 
-        // 10 Visitas Programadas en 2026 (Cronología real)
-        $dates = [
-            '2026-01-15', '2026-02-10', '2026-03-05', '2026-04-20',
-            '2026-05-12', '2026-06-18', '2026-10-05',
-            now()->subDays(20)->format('Y-m-d'),
-            now()->subDays(10)->format('Y-m-d'),
-            now()->format('Y-m-d') 
+        // Generar 10 Asignaciones: 5 Completas (1 fallida), 5 Pendientes
+        for ($i = 0; $i < 10; $i++) {
+            $def = $definitions[$i % count($definitions)]; // Ciclar entre las definiciones
+            $status = $i < 5 ? 'completed' : 'pending';
+            
+            // Crear asignación
+            $assignment = \App\Models\ChecklistAssignment::create([
+                'dynamic_checklist_id' => $def->id,
+                'user_id' => $this->tecnico->id,
+                'sede_id' => $this->sede->id,
+                'empresa_id' => $this->sede->empresa_id,
+                'status' => $status,
+                'due_date' => $status === 'completed' ? now()->subDays(rand(1, 30)) : now()->addDays(rand(1, 15)),
+                // 'completed_at' no existe en Assignment, SOLO en Inspection
+            ]);
+            $completedDate = $status === 'completed' ? now()->subDays(rand(1, 30)) : null;
+
+            if ($status === 'completed') {
+                // Completar la inspección
+                $inspection = \App\Models\DynamicInspection::create([
+                    'dynamic_checklist_id' => $def->id,
+                    'user_id' => $this->tecnico->id,
+                    'sede_id' => $this->sede->id,
+                    'checklist_assignment_id' => $assignment->id,
+                    'completed_at' => $completedDate,
+                    // 'data' y 'score' no existen en la tabla base
+                    'status' => 'completed', // STATUS_COMPLETED
+                    'result' => 'Pass'
+                ]);
+
+                // Hacer que la 3ra completada falle (índice 2)
+                if ($i === 2) {
+                    $inspection->update(['result' => 'Fail']);
+                    $failed = $inspection;
+                }
+                
+                $completed[] = $inspection;
+            } else {
+                $pending[] = $assignment;
+            }
+        }
+
+        return ['completed' => $completed, 'pending' => $pending, 'failed' => $failed];
+    }
+
+    private function seedCustomEpp(array $employees): void
+    {
+        // Crear Items EPP
+        $casco = \App\Models\EppItem::create([
+            'name' => 'Casco de Seguridad',
+            'code' => 'EPP-001',
+            'stock' => 50,
+            'is_active' => true,
+            'consultora_id' => null
+        ]);
+
+        // 2 Entregadas
+        for ($i = 0; $i < 2; $i++) {
+            \App\Models\EppDelivery::create([
+                'epp_item_id' => $casco->id,
+                'employee_id' => $employees[$i]->id,
+                'user_id' => $this->tecnico->id, // Quien entrega
+                'sede_id' => $this->sede->id,
+                'quantity' => 1,
+                'delivery_date' => now()->subDays(rand(1, 10)),
+                'status' => 'delivered', // Entregado
+                'signature_path' => 'dummy_signature.png'
+            ]);
+        }
+
+        // 3 Pendientes (Solicitudes)
+        for ($i = 2; $i < 5; $i++) {
+             // Usar empleado si existe, sino ciclar
+             $emp = $employees[$i % count($employees)];
+             \App\Models\EppDelivery::create([
+                'epp_item_id' => $casco->id,
+                'employee_id' => $emp->id,
+                'user_id' => $this->tecnico->id,
+                'sede_id' => $this->sede->id,
+                'quantity' => 1,
+                'delivery_date' => null,
+                'status' => 'pending', // Pendiente
+            ]);
+        }
+    }
+
+    private function seedCustomTrainings(array $employees): void
+    {
+        // Crear capacitaciones relacionadas a los checklists (Altura y Autoelevadores)
+        $topics = [
+            'Seguridad en Altura y Uso de Arnés', 
+            'Operación Segura de Montacargas'
         ];
 
-        foreach ($dates as $index => $dateStr) {
-            $date = \Carbon\Carbon::parse($dateStr);
-            
-            // Simular un fallo crítico en la visita 3 y en la ÚLTIMA (Hoy)
-            $targetFail = null;
-            if ($index == 2) $targetFail = $riskAltura; // Histórico
-            if ($index == 9) $targetFail = $riskAuto;   // ALERTA ACTUAL: Hoy falló el autoelevador
+        foreach ($topics as $index => $topic) {
+            $isCompleted = $index === 0; // La primera completada, la segunda pendiente/futura
 
-            $visit = $this->createCompleteVisit($this->sede, $this->tecnico, $date, $checklists, $employees, $targetFail);
+            $training = \App\Models\Training::create([
+                'title' => $topic,
+                'description' => 'Capacitación técnica obligatoria',
+                'user_id' => $this->tecnico->id, // Instructor
+                'sede_id' => $this->sede->id,
+                'date' => $isCompleted ? now()->subDays(15) : now()->addDays(10),
+                'duration_minutes' => 60,
+                'status' => $isCompleted ? 'completed' : 'scheduled'
+            ]);
 
-            // Si es la visita de hoy, forzamos un hallazgo
-            if ($index == 9) {
-                echo "   🚨 DISPARADOR ACTIVO SEEDER: Fallo de control detectado HOY (" . $date->format('d/m/Y') . ")\n";
-            }
-
-            // Si hubo un hallazgo crítico en la visita 3, generar un incidente 2 días después
-            if ($index == 2) {
-                $hallazgo = $visit->hallazgos()->first();
-                if ($hallazgo) {
-                    $this->createIncidente($hallazgo, $date->copy()->addDays(2));
-                    echo "   ⚠️ Incidente generado derivado de fallo en control (Marzo 2026)\n";
+            if ($isCompleted) {
+                // Asistencia
+                foreach ($employees as $emp) {
+                    \App\Models\TrainingAttendance::create([
+                        'training_id' => $training->id,
+                        'employee_id' => $emp->id,
+                        'attended' => true,
+                        'signature_path' => 'dummy.png'
+                    ]);
                 }
             }
         }
     }
 
+    private function seedCustomVisits(array $completedInspections, $failedInspection): void
+    {
+        // 5 Constancias de Visita
+        for ($i = 0; $i < 5; $i++) {
+            $date = now()->subDays((5 - $i) * 3); // Espaciadas
+            
+            $constancia = \App\Models\GeneradorConstancia::create([
+                'user_id' => $this->tecnico->id,
+                'sede_id' => $this->sede->id,
+                'fecha' => $date,
+                'hora_ingreso' => '09:00',
+                'hora_egreso' => '13:00',
+                'observaciones' => 'Visita de rutina nro ' . ($i + 1),
+                'firma_tecnico' => 'signed',
+                // Las constancias suelen firmarse por el responsable
+                'firma_responsable' => $i < 3 ? 'signed_resp' : null, // 3 firmadas, 2 pendientes
+                'date_firma_responsable' => $i < 3 ? $date : null
+            ]);
+
+            // Asociar inspecciones a la constancia (Agrupar)
+            // Distribuir las 5 inspecciones completadas entre las visitas
+            if (isset($completedInspections[$i])) {
+                 // Nota: En la estructura actual, no hay tabla pivote directa constancia_inspeccion en el modelo básico
+                 // a menos que uses `attach` si existe relación. 
+                 // Asumiré que quieres que existan en el tiempo de la visita.
+                 // Si hay relación directa, la usamos:
+                 // $constancia->inspections()->attach($completedInspections[$i]->id);
+            }
+        }
+        
+        // El checklist NO completado (fallido) ya está en $failedInspection (es una inspección rejected)
+        if ($failedInspection) {
+             echo "   ❌ Checklist Fallido ID: " . $failedInspection->id . "\n";
+        }
+    }
+
+    // --- Helpers originales necesarios ---
     private function createCompanyAndSede(): void
     {
-        $empresa = Empresa::create([
-            'nombre' => 'TechIndustry Global',
-            'razon_social' => 'TechIndustry Global S.R.L.',
-            'cuit' => '30-77889900-1',
-        ]);
+        $empresa = Empresa::firstOrCreate(
+            ['cuit' => '30-77889900-1'],
+            [
+                'nombre' => 'TechIndustry Global',
+                'razon_social' => 'TechIndustry Global S.R.L.',
+            ]
+        );
 
-        $this->sede = Sede::create([
-            'empresa_id' => $empresa->id,
-            'nombre_sede' => 'Planta Logística Central',
-            'tipo_sede' => 'Centro de Distribución',
-            'direccion' => 'Av. Industrial 500',
-            'localidad' => 'Pilar, Buenos Aires',
-            'telefono' => '0230-4455667',
-            'correo' => 'seguridad@techindustry.com',
-        ]);
+        $this->sede = Sede::firstOrCreate(
+            ['empresa_id' => $empresa->id, 'nombre_sede' => 'Planta Logística Central'],
+            [
+                'tipo_sede' => 'Centro de Distribución',
+                'direccion' => 'Av. Industrial 500',
+                'localidad' => 'Pilar, Buenos Aires',
+                'telefono' => '0230-4455667',
+                'correo' => 'seguridad@techindustry.com',
+            ]
+        );
 
-        $this->sede->users()->attach([$this->gestor->id, $this->tecnico->id]);
+        $this->sede->users()->syncWithoutDetaching([$this->gestor->id, $this->tecnico->id]);
     }
 
     private function seedRiskMatrix(): int
     {
-        $this->createRiskMatrix(
-            $this->sede,
-            $this->tecnico,
-            'Matriz IPERC - Operaciones Logísticas',
-            'Control de riesgos en altura y movimiento de cargas',
-            'Logística',
-            'Almacenamiento y Despacho',
-            [
+        // Crear matriz básica si no existe
+        $matrix = \App\Models\RiskMatrix::create([
+             'user_id' => $this->tecnico->id,
+             'sede_id' => $this->sede->id,
+             'empresa_id' => $this->sede->empresa_id,
+             'title' => 'Matriz IPERC - Operaciones Logísticas',
+             'description' => 'Control de riesgos en altura y movimiento de cargas',
+             'area' => 'Logística',
+             'process' => 'Almacenamiento y Despacho',
+             'status' => 'active'
+        ]);
+
+        $riesgosData = [
                 [
                     'hazard' => 'Caída de personas a distinto nivel',
                     'type' => 'Físico',
-                    'consequence' => 'Fracturas, traumatismos craneales, muerte',
-                    'controls' => [
-                        ['Arnés de seguridad y línea de vida', 'EPP'],
-                        ['Barandas y plataformas de trabajo', 'Ingeniería'],
-                        ['Permiso de trabajo en altura', 'Administrativo'],
-                    ],
-                    'probability' => 3,
-                    'severity' => 5,
+                    'probability' => 3, 'severity' => 5, // Crítico
                 ],
                 [
                     'hazard' => 'Atropello por autoelevadores',
                     'type' => 'Mecánico',
-                    'consequence' => 'Contusiones, aplastamiento, muerte',
-                    'controls' => [
-                        ['Segregación de peatones y máquinas', 'Ingeniería'],
-                        ['Alarma sonora y lumínica de reversa', 'Ingeniería'],
-                        ['Capacitación en manejo defensivo', 'Administrativo'],
-                    ],
-                    'probability' => 4,
-                    'severity' => 5,
+                    'probability' => 4, 'severity' => 5, // Muy Crítico
                 ],
                 [
                     'hazard' => 'Caída de objetos desde altura',
                     'type' => 'Mecánico',
-                    'consequence' => 'Golpes, lesiones físicas',
-                    'controls' => [
-                        ['Mallas de seguridad en racks', 'Ingeniería'],
-                        ['Uso obligatorio de casco', 'EPP'],
-                    ],
-                    'probability' => 3,
-                    'severity' => 4,
+                    'probability' => 3, 'severity' => 4,
                 ]
-            ]
-        );
+            ];
+            
+        foreach ($riesgosData as $r) {
+            $risk = \App\Models\Risk::create([
+                'risk_matrix_id' => $matrix->id,
+                'hazard' => $r['hazard'],
+                'type' => $r['type'],
+                // 'consequence' => ... (Podríamos agregarlo si está en el array, si no dejar null)
+            ]);
 
-        return \App\Models\RiskMatrix::latest()->first()->id;
+            // Crear evaluación inicial
+            \App\Models\RiskEvaluation::create([
+                'risk_id' => $risk->id,
+                'user_id' => $this->tecnico->id,
+                'probability' => $r['probability'],
+                'severity' => $r['severity'],
+                'score' => $r['probability'] * $r['severity'],
+                'level' => 'Alto', // Simplificado
+                'color' => '#EF4444', // Rojo
+                'evaluation_date' => now()
+            ]);
+        }
+
+        return $matrix->id;
     }
 
     private function createTraceableChecklists(): array
     {
         $hys = Category::where('code', 'hys')->first();
         
-        // Obtener riesgos para vincular
-        $riskAltura = Risk::where('hazard', 'like', '%Altura%')->first();
-        $riskAuto = Risk::where('hazard', 'like', '%Atropello%')->first();
+        $c1 = \App\Models\DynamicChecklist::create([
+            'title' => 'Pre-Operacional de Autoelevadores',
+            'description' => 'Control diario',
+            // 'user_id' => $this->gestor->id, // No existe en fillable
+            'is_active' => true,
+            'category_id' => $hys?->id
+        ]);
+        
+        $c2 = \App\Models\DynamicChecklist::create([
+            'title' => 'Inspección de Equipos de Altura',
+            'description' => 'Verificación mensual',
+            // 'user_id' => $this->gestor->id,
+            'is_active' => true,
+            'category_id' => $hys?->id
+        ]);
 
-        return [
-            $this->createChecklistWithSections(
-                'Pre-Operacional de Autoelevadores',
-                'Control diario de seguridad para montacargas',
-                $hys,
-                [
-                    'Estado Mecánico' => [
-                        '¿Frenos de servicio operativos?' => [
-                            'type' => 'radio', 
-                            'options' => ['Sí', 'No'],
-                            'failure_values' => ['No'],
-                            'risk_id' => $riskAuto?->id
-                        ],
-                        '¿Alarma de retroceso funciona?' => [
-                            'type' => 'radio', 
-                            'options' => ['Sí', 'No'],
-                            'failure_values' => ['No'],
-                            'risk_id' => $riskAuto?->id
-                        ],
-                        'Presión de neumáticos (PSI)' => [
-                            'type' => 'number',
-                            'min_value' => 80,
-                            'max_value' => 110,
-                            'risk_id' => $riskAuto?->id
-                        ],
-                    ],
-                    'Cabina y Visibilidad' => [
-                        '¿Espejos retrovisores limpios?' => ['type' => 'radio', 'options' => ['Sí', 'No']],
-                        '¿Luces de giro y stop?' => [
-                            'type' => 'radio', 
-                            'options' => ['Sí', 'No'],
-                            'failure_values' => ['No'],
-                            'risk_id' => $riskAuto?->id
-                        ]
-                    ]
-                ]
-            ),
-
-            $this->createChecklistWithSections(
-                'Inspección de Equipos de Altura',
-                'Verificación de arneses y líneas de vida',
-                $hys,
-                [
-                    'Estado del Arnés' => [
-                        '¿Costuras en buen estado?' => [
-                            'type' => 'radio', 
-                            'options' => ['Sí', 'No'],
-                            'failure_values' => ['No'],
-                            'risk_id' => $riskAltura?->id
-                        ],
-                        '¿Presencia de quemaduras o químicos?' => [
-                            'type' => 'radio', 
-                            'options' => ['No', 'Sí'],
-                            'failure_values' => ['Sí'],
-                            'risk_id' => $riskAltura?->id
-                        ],
-                    ],
-                    'Puntos de Anclaje' => [
-                        '¿Punto de anclaje certificado?' => [
-                            'type' => 'radio', 
-                            'options' => ['Sí', 'No'],
-                            'failure_values' => ['No'],
-                            'risk_id' => $riskAltura?->id
-                        ]
-                    ]
-                ]
-            )
-        ];
+        return [$c1, $c2];
     }
 
     private function seedEmployees(): array
     {
-        return $this->createEmployees($this->sede, [
+        $data = [
             ['Alberto', 'Fernandez', '20123456', '20-20123456-9', 'Operador Logístico'],
             ['Marta', 'Gomez', '25678901', '27-25678901-0', 'Supervisor de Almacén'],
             ['Jorge', 'Rios', '30234567', '20-30234567-1', 'Operador de Autoelevador'],
             ['Silvia', 'Luna', '35345678', '27-35345678-2', 'Operario'],
-        ]);
-    }
-
-    private function seedTrainings(array $employees, array $checklists): void
-    {
-        $this->createTrainings($this->sede, [$this->tecnico], [
-            ['Cero Accidentes: Trabajo en Altura', 'Normativa y uso correcto de EPP de altura', -10],
-            ['Manejo Seguro de Autoelevadores', 'Seguridad en el movimiento de cargas', -5],
-            ['Primeros Auxilios Avanzados', 'RCP y atención de traumas', 15],
-        ], $employees, $checklists);
+        ];
+        
+        $employees = [];
+        foreach($data as $d) {
+            $employees[] = \App\Models\Employee::create([
+                'empresa_id' => $this->sede->empresa_id, // Requerido por Employee
+                'sede_id' => $this->sede->id,
+                'name' => $d[0],      // first_name -> name
+                'last_name' => $d[1],
+                'dni' => $d[2],
+                'cuil' => $d[3],
+                'puesto' => $d[4],    // position -> puesto
+                'is_active' => true
+            ]);
+        }
+        return $employees;
     }
 }
