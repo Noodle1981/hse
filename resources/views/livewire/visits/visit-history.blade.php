@@ -111,18 +111,33 @@
                                        class="btn-xs bg-blue-500 hover:bg-blue-600 text-white">
                                         Ver en Vivo
                                     </a>
-                                @else
-                                    <a href="#" class="btn-xs bg-white border-gray-200 hover:border-gray-300 text-gray-500">
-                                        Ver Detalles
+                                @endif
+
+                                @if($visit->status === 'completed' || $visit->status === 'signed')
+                                    <a href="{{ route('gestor.visits.certificate.preview', $visit->id) }}" 
+                                       target="_blank"
+                                       class="btn-xs bg-white border-gray-200 hover:text-blue-600 transition-colors p-1" 
+                                       title="Ver Constancia PDF">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
                                     </a>
-                                    
-                                    @if($visit->status === 'completed' && !$visit->responsible_signature && $visit->signature_skip_reason && $visit->email_responsable)
-                                        <button wire:click="resendEmail({{ $visit->id }})" 
-                                                wire:loading.attr="disabled"
-                                                class="ml-2 btn-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200">
-                                            Reenviar Email
-                                        </button>
-                                    @endif
+                                    <a href="{{ route('gestor.visits.certificate.download', $visit->id) }}" 
+                                       class="ml-1 btn-xs bg-white border-gray-200 hover:text-green-600 transition-colors p-1" 
+                                       title="Descargar Constancia PDF">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </a>
+                                @endif
+                                
+                                @if($visit->status === 'completed' && !$visit->responsible_signature && $visit->signature_skip_reason && $visit->email_responsable)
+                                    <button wire:click="resendEmail({{ $visit->id }})" 
+                                            wire:loading.attr="disabled"
+                                            class="ml-2 btn-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200">
+                                        Reenviar Email
+                                    </button>
                                 @endif
                             </td>
                         </tr>

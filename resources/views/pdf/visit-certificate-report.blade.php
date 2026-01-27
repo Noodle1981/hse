@@ -189,24 +189,29 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($completion->responses ?? [] as $resp)
-                            @if(is_array($resp))
-                                <tr class="{{ $loop->even ? 'row-alt' : '' }}">
-                                    <td>{{ $resp['question_label'] ?? 'Pregunta' }}</td>
-                                    <td style="text-align: center;">
-                                        @php $val = strtolower((string)($resp['value'] ?? '')); @endphp
-                                        <span class="pill {{ $val == 'si' ? 'pill-success' : ($val == 'no' ? 'pill-danger' : 'pill-info') }}">
-                                            {{ strtoupper($val) ?: '-' }}
-                                        </span>
-                                    </td>
-                                    <td style="font-size: 8px; color: #64748b;">{{ $resp['observation'] ?? '-' }}</td>
-                                </tr>
-                            @else
-                                <tr class="{{ $loop->even ? 'row-alt' : '' }}">
-                                    <td colspan="2">{{ (string)$resp }}</td>
-                                    <td style="text-align: center;"><span class="pill pill-info">REGISTRADO</span></td>
-                                </tr>
-                            @endif
+                        @foreach($completion->formatted_responses as $resp)
+                            @php 
+                                $val = strtolower((string)($resp['value'] ?? '')); 
+                                $isFailure = in_array($val, ['no', 'no cumple']);
+                                $isSuccess = in_array($val, ['si', 'cumple', 'pasa']);
+                            @endphp
+                            <tr class="{{ $loop->even ? 'row-alt' : '' }}">
+                                <td style="padding: 10px; border-bottom: 1px solid #edf2f7; {{ $isFailure ? 'color: #b91c1c; font-weight: bold; background-color: #fef2f2;' : '' }}">
+                                    <div style="font-size: 10px; margin-bottom: 2px; color: #1e293b;">
+                                        {{ $resp['question_label'] ?? 'Punto de Control' }}
+                                    </div>
+                                    @if(!empty($resp['observation']))
+                                        <div style="font-size: 8px; color: #64748b; font-style: italic; margin-top: 4px; padding-left: 5px; border-left: 2px solid #e2e8f0;">
+                                            Nota: {{ $resp['observation'] }}
+                                        </div>
+                                    @endif
+                                </td>
+                                <td style="width: 80px; text-align: center; vertical-align: middle; border-bottom: 1px solid #edf2f7; {{ $isFailure ? 'background-color: #fef2f2;' : '' }}">
+                                    <span class="pill {{ $isSuccess ? 'pill-success' : ($isFailure ? 'pill-danger' : 'pill-info') }}" style="display: inline-block; min-width: 60px;">
+                                        {{ strtoupper($val) ?: 'PENDIENTE' }}
+                                    </span>
+                                </td>
+                            </tr>
                         @endforeach
                     </tbody>
                 </table>

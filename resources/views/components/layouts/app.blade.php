@@ -238,16 +238,16 @@
                     @endif
 
 
-                    {{-- Inspecciones --}}
+                {{-- Inspecciones --}}
                     <li>
                         @if(auth()->user()->rol === 'Administrador')
-                            <a href="{{ route('gestor.inspections.index') }}" 
+                            <a href="{{ route('gestor.assignments.index') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('gestor.inspections.*') ? 'menu-item-active text-white' : '' }}">
+                                      {{ request()->routeIs('gestor.assignments.*') || request()->routeIs('gestor.inspections.*') ? 'menu-item-active text-white' : '' }}">
                         @else
-                            <a href="{{ route('tecnico.inspections.index') }}" 
+                            <a href="{{ route('tecnico.checklists.tasks.index') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('tecnico.inspections.*') ? 'menu-item-active text-white' : '' }}">
+                                      {{ request()->routeIs('tecnico.checklists.tasks.*') || request()->routeIs('tecnico.inspections.*') ? 'menu-item-active text-white' : '' }}">
                         @endif
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,22 +308,29 @@
                     </li>
 
                     <li>
-                        @if(auth()->user()->rol === 'Administrador')
+                        @if(auth()->user()->isAdmin())
                             <a href="{{ route('gestor.epp.history') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                       {{ request()->routeIs('gestor.epp.history') ? 'menu-item-active text-white' : '' }}">
+                               <span class="menu-icon mr-3 flex-shrink-0">
+                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 00-9 9h18a9 9 0 00-9-9zM3 12v1h18v-1M12 3v3m5 1l-1 2m-7-2l1 2"/>
+                                   </svg>
+                               </span>
+                               <span x-show="sidebarOpen" class="menu-text">Gestión EPP</span>
+                            </a>
                         @else
-                            <a href="{{ route('tecnico.epp.history') }}" 
+                            <a href="{{ route('tecnico.epp.deliver') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('tecnico.epp.history') ? 'menu-item-active text-white' : '' }}">
+                                      {{ request()->routeIs('tecnico.epp.deliver') ? 'menu-item-active text-white' : '' }}">
+                               <span class="menu-icon mr-3 flex-shrink-0">
+                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 00-9 9h18a9 9 0 00-9-9zM3 12v1h18v-1M12 3v3m5 1l-1 2m-7-2l1 2"/>
+                                   </svg>
+                               </span>
+                               <span x-show="sidebarOpen" class="menu-text">Entrega de EPP</span>
+                            </a>
                         @endif
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Gestión EPP</span>
-                        </a>
                     </li>
 
 
@@ -367,20 +374,7 @@
 
                     @endif
 
-                    @if(auth()->user()->hasRole('Técnico') && !auth()->user()->hasRole('Administrador'))
-                    <li>
-                        <a href="{{ route('tecnico.epp.deliver') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('tecnico.epp.deliver') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen" class="menu-text">Entrega de EPP</span>
-                        </a>
-                    </li>
-                    @endif
+
 
 
                     

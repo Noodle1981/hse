@@ -60,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('visits')->name('visits.')->group(function () {
             Route::get('/history', \App\Livewire\Visits\VisitHistory::class)->name('history');
             Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
+            Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
+            Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 
         // Administración
@@ -196,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Checklists (Asignaciones y Llenado)
         Route::prefix('checklists')->name('checklists.')->group(function () {
-             Route::get('/my-assignments', \App\Livewire\Technician\MyAssignments::class)->name('tasks.index'); // Mis Tareas
+             Route::get('/my-assignments', \App\Livewire\Technician\MyAssignments::class)->name('tasks.index'); // Mis Tareas / Inspecciones
              Route::get('/{id}/fill', \App\Livewire\Technician\InspectionWizard::class)->name('fill');
         });
 
@@ -204,6 +208,10 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('visits')->name('visits.')->group(function () {
             Route::get('/', \App\Livewire\Visits\VisitManager::class)->name('index'); // Mis Visitas
             Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
+            Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
+            Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 
         // Capacitaciones
@@ -211,6 +219,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('create');
             Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('attendance');
             Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
         });
 
         // Ejecuciones Avanzadas

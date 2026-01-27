@@ -214,12 +214,13 @@ class VisitInProgress extends Component
                 'title' => $training->title,
                 'description' => $training->description,
                 'duration_minutes' => $training->duration,
-                'notes' => 'Ejecutado desde Visita #' . $this->visit->id
+                'notes' => null // Dejar nulo para que use las notas del Training al finalizarse
             ]
         );
 
         // Redirigir a toma de asistencia con visit_id
-        return redirect()->route('trainings.attendance', [
+        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+        return redirect()->route($prefix . '.trainings.attendance', [
             'id' => $training->id,
             'visit_id' => $this->visit->id
         ]);
@@ -298,14 +299,16 @@ class VisitInProgress extends Component
     public function openTrainingModal()
     {
         // Redirigir al generador avanzado de capacitaciones (Admin Format)
-        return redirect()->route('trainings.create', ['visit_id' => $this->visit->id]);
+        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+        return redirect()->route($prefix . '.trainings.create', ['visit_id' => $this->visit->id]);
     }
 
     public function openAttendance(\App\Models\VisitTraining $visitTraining)
     {
         // Si es una capacitación vinculada (template), ir al tracker
         if ($visitTraining->training_id) {
-            return redirect()->route('trainings.attendance', $visitTraining->training_id);
+            $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+            return redirect()->route($prefix . '.trainings.attendance', $visitTraining->training_id);
         }
         // Si es ad-hoc (sin ID de training padre), quizás necesitemos otra vista o no soportarlo aún
     }

@@ -19,6 +19,7 @@ class EppDelivery extends Component
 
     // Form
     public $employeeId;
+    public $requestId; // Nuevo: rastrear si viene de una solicitud
     public $selectedItems = []; // [{item_id, name, qty, size, reason}]
     public $notes;
 
@@ -40,6 +41,7 @@ class EppDelivery extends Component
         $this->visit = $visit;
         $this->loadData();
         
+        $this->requestId = $requestId;
         if ($requestId) {
             $eppRequest = \App\Models\EppDeliveryRequest::find($requestId);
             if ($eppRequest) {
@@ -123,7 +125,8 @@ class EppDelivery extends Component
             $this->employeeId,
             $this->selectedItems,
             null, // signature
-            $this->notes
+            $this->notes,
+            $this->requestId ? true : false // Omitir decremento si ya se hizo en la solicitud
         );
 
         $this->dispatch('eppDelivered');

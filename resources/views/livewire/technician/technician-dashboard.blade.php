@@ -143,7 +143,7 @@
                                     {{ $task->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800' }}">
                                     {{ $task->status === 'pending' ? 'Pendiente' : 'En Progreso' }}
                                 </span>
-                                <a href="{{ route('checklists.fill', ['id' => $task->dynamic_checklist_id, 'assignment' => $task->id]) }}" 
+                                <a href="{{ route('tecnico.checklists.fill', ['id' => $task->dynamic_checklist_id, 'assignment' => $task->id]) }}" 
                                    class="text-blue-600 hover:text-blue-800 font-medium text-sm">
                                     Ejecutar →
                                 </a>

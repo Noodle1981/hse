@@ -146,11 +146,27 @@
                         <button wire:click="$set('step', 1)" class="px-8 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-all">
                             Atrás
                         </button>
-                        <button wire:click="$set('step', 3)" 
-                                {{ empty($selectedItems) ? 'disabled' : '' }}
-                                class="px-10 py-3 bg-ep-primary text-white rounded-xl font-bold shadow-lg shadow-ep-primary/30 hover:bg-ep-primary-dark transition-all disabled:opacity-50">
-                            Continuar a Firma
-                        </button>
+                        
+                        @if(auth()->user()->isAdmin())
+                            <div class="space-y-4 w-full">
+                                <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100 text-[11px] text-emerald-800 leading-relaxed font-medium">
+                                    <span class="font-bold">Nota Legal:</span> Se deja constancia de que el personal seleccionado será el responsable directo de la recepción y uso de los equipos solicitados.
+                                </div>
+                                <button wire:click="save" 
+                                        {{ empty($selectedItems) ? 'disabled' : '' }}
+                                        class="w-full px-10 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center justify-center">
+                                    <span wire:loading.remove>Realizar envío</span>
+                                    <span wire:loading class="animate-pulse">Enviando...</span>
+                                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                </button>
+                            </div>
+                        @else
+                            <button wire:click="$set('step', 3)" 
+                                    {{ empty($selectedItems) ? 'disabled' : '' }}
+                                    class="px-10 py-3 bg-ep-primary text-white rounded-xl font-bold shadow-lg shadow-ep-primary/30 hover:bg-ep-primary-dark transition-all disabled:opacity-50">
+                                Continuar a Firma
+                            </button>
+                        @endif
                     </div>
                 </div>
             @endif

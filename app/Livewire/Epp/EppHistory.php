@@ -65,12 +65,38 @@ class EppHistory extends Component
             ->latest('created_at')
             ->get();
 
+        // Query pending/completed requests
+        $eppRequests = \App\Models\EppDeliveryRequest::query()
+            ->with(['employee', 'requester', 'employee.empresa', 'employee.sede'])
+            ->when(!auth()->user()->isAdmin(), function ($q) {
+                $q->where('status', 'pending'); // Technicians only see pending if we want? Actually, history should show all related.
+                // For history, maybe just those involving the user
+                $q->where(function($sq) {
+                    $sq->where('requested_by_user_id', auth()->id());
+                });
+            })
+            ->when($this->search, function ($q) {
+                $q->whereHas('employee', function ($sq) {
+                    $sq->where('name', 'like', '%' . $this->search . '%')
+                      ->orWhere('last_name', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->empresaFilter, function ($q) {
+                $q->whereHas('employee', fn($sq) => $sq->where('empresa_id', $this->empresaFilter));
+            })
+            ->when($this->sedeFilter, function ($q) {
+                $q->whereHas('employee', fn($sq) => $sq->where('sede_id', $this->sedeFilter));
+            })
+            ->latest('created_at')
+            ->get();
+
         // Merge and paginate manually
-        $allDeliveries = $legacyDeliveries->concat($visitDeliveries)
+        $allDeliveries = $legacyDeliveries->concat($visitDeliveries)->concat($eppRequests)
             ->sortByDesc(function($delivery) {
-                return $delivery instanceof VisitEppDelivery 
-                    ? $delivery->created_at 
-                    : $delivery->delivery_date;
+                if ($delivery instanceof VisitEppDelivery || $delivery instanceof \App\Models\EppDeliveryRequest) {
+                    return $delivery->created_at;
+                }
+                return $delivery->delivery_date;
             })
             ->values();
 

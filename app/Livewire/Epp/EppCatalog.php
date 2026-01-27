@@ -10,12 +10,64 @@ class EppCatalog extends Component
 {
     use WithPagination;
 
+    // Catálogo de elementos EPP predefinidos
+    const EPP_CATALOG_OPTIONS = [
+        'Cabeza' => [
+            'Casco de seguridad',
+            'Casco con barbiquejo',
+            'Gorro desechable',
+        ],
+        'Auditiva' => [
+            'Tapones auditivos',
+            'Orejeras',
+            'Tapones con cordón',
+        ],
+        'Ocular' => [
+            'Gafas de seguridad',
+            'Antiparras',
+            'Careta facial',
+            'Gafas para soldar',
+        ],
+        'Respiratoria' => [
+            'Barbijo descartable',
+            'Respirador N95',
+            'Máscara con filtro',
+            'Respirador media cara',
+        ],
+        'Manos' => [
+            'Guantes de látex',
+            'Guantes de nitrilo',
+            'Guantes de cuero',
+            'Guantes anticorte',
+            'Guantes dieléctricos',
+        ],
+        'Calzado' => [
+            'Botas de seguridad',
+            'Zapatos con puntera',
+            'Botas dieléctricas',
+            'Calzado antideslizante',
+        ],
+        'Cuerpo' => [
+            'Chaleco reflectivo',
+            'Mameluco',
+            'Delantal',
+            'Arnés de seguridad',
+            'Faja lumbar',
+        ],
+        'Caídas' => [
+            'Arnés anticaída',
+            'Línea de vida',
+            'Cabo de amarre',
+            'Mosquetón',
+        ],
+    ];
+
     public $search = '';
     public $showForm = false;
     public $itemId = null;
 
     // Campos del formulario
-    public $nombre, $descripcion, $tipo, $vida_util_meses, $codigo_norma;
+    public $nombre, $descripcion, $tipo, $vida_util_meses, $codigo_norma, $stock_actual;
 
     protected $rules = [
         'nombre' => 'required|string|max:255',
@@ -23,7 +75,13 @@ class EppCatalog extends Component
         'tipo' => 'required|string',
         'vida_util_meses' => 'nullable|integer|min:1',
         'codigo_norma' => 'nullable|string|max:100',
+        'stock_actual' => 'required|integer|min:0',
     ];
+
+    public function getEppCatalogOptions()
+    {
+        return self::EPP_CATALOG_OPTIONS;
+    }
 
     public function updatingSearch()
     {
@@ -45,6 +103,7 @@ class EppCatalog extends Component
         $this->tipo = $item->tipo;
         $this->vida_util_meses = $item->vida_util_meses;
         $this->codigo_norma = $item->codigo_norma;
+        $this->stock_actual = $item->stock_actual;
         $this->showForm = true;
     }
 
@@ -78,6 +137,7 @@ class EppCatalog extends Component
         $this->tipo = '';
         $this->vida_util_meses = null;
         $this->codigo_norma = '';
+        $this->stock_actual = 0;
     }
 
     public function render()

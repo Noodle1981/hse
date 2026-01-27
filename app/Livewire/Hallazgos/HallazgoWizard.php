@@ -215,11 +215,12 @@ class HallazgoWizard extends Component
         }
 
         // Redirect back to visit if created from visit context
+        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
         if ($this->visitId) {
-            return redirect()->route('visits.in-progress', $this->visitId);
+            return redirect()->route($prefix . '.visits.in-progress', $this->visitId);
         }
 
-        return redirect()->route('hallazgos.show', $hallazgo);
+        return redirect()->route($prefix . '.hallazgos.show', $hallazgo);
     }
 
     public function render()

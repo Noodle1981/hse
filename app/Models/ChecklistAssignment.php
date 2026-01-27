@@ -119,4 +119,16 @@ class ChecklistAssignment extends Model
             default => $this->frequency,
         };
     }
+
+    public function canBeEdited(): bool
+    {
+        // Solo se puede editar si está pendiente y no tiene una inspección iniciada
+        return $this->status === 'pending' && !$this->visitCompletion;
+    }
+
+    public function canBeDeleted(): bool
+    {
+        // No se puede eliminar si ya está completado
+        return $this->status !== 'completed';
+    }
 }

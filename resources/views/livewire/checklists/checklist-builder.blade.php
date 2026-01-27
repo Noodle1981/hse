@@ -67,14 +67,6 @@
 
                     @error('registryCode') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Vincular a Riesgo (IPERC) (Próximamente)</label>
-                    <select disabled
-                            class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-400 cursor-not-allowed">
-                        <option value="">No disponible</option>
-                    </select>
-                </div>
             </div>
 
             <div class="mt-4">
@@ -133,8 +125,20 @@
 
         <!-- Preguntas -->
         <div class="bg-white rounded-lg shadow p-6">
-            <h2 class="text-xl font-semibold text-ep-dark mb-4">Preguntas</h2>
-            @error('questions') <div class="text-red-500 text-sm mb-4">{{ $message }}</div> @enderror
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-xl font-semibold text-ep-dark">Preguntas</h2>
+                    @error('questions') <div class="text-red-500 text-sm mt-1">{{ $message }}</div> @enderror
+                </div>
+                <div class="w-64">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vincular a Riesgo (IPERC) (Próximamente)</label>
+                    <select disabled
+                            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-400 cursor-not-allowed">
+                        <option value="">No disponible</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">Disparador cuando las preguntas no pasan</p>
+                </div>
+            </div>
             
             <!-- Lista de preguntas agregadas -->
             @if(count($questions) > 0)

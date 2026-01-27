@@ -133,5 +133,12 @@ class User extends Authenticatable
     {
         return in_array(strtolower($this->rol), ['técnico', 'tecnico']);
     }
-    
+
+    /**
+     * Accesor para nombre completo
+     */
+    public function getFullNameAttribute(): string
+    {
+        return trim("{$this->nombres} {$this->apellidos}");
+    }
 }

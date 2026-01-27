@@ -46,7 +46,7 @@
                                         {{ $visit->visit_date->format('d') }}
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-bold text-gray-900">{{ $visit->visit_date->format('F, Y') }}</div>
+                                        <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->translatedFormat('F, Y')) }}</div>
                                         <div class="text-xs text-gray-500">
                                             {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
                                         </div>
@@ -87,9 +87,9 @@
                             </td>
                             <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
-                                    @if($visit->status === 'completed')
+                                    @if($visit->status === 'completed' || $visit->status === 'signed')
                                         <!-- Ver PDF -->
-                                        <a href="{{ route('visits.certificate.preview', $visit->id) }}" 
+                                        <a href="{{ route('tecnico.visits.certificate.preview', $visit->id) }}" 
                                            target="_blank"
                                            class="text-gray-400 hover:text-blue-600 transition-colors p-1" 
                                            title="Ver Constancia PDF">
@@ -99,7 +99,7 @@
                                             </svg>
                                         </a>
                                         <!-- Descargar PDF -->
-                                        <a href="{{ route('visits.certificate.download', $visit->id) }}" 
+                                        <a href="{{ route('tecnico.visits.certificate.download', $visit->id) }}" 
                                            class="text-gray-400 hover:text-green-600 transition-colors p-1" 
                                            title="Descargar Constancia PDF">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

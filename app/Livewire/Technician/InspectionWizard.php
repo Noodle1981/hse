@@ -157,7 +157,7 @@ class InspectionWizard extends Component
         }
 
         session()->flash('message', '¡Inspección completada exitosamente!');
-        return redirect()->route('inspections.show', $this->inspection->id);
+        return redirect()->route('tecnico.inspections.show', $this->inspection->id);
     }
 
     public function render()

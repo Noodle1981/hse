@@ -44,4 +44,9 @@ class Empresa extends Model
     {
         return $this->hasMany(ChecklistAssignment::class);
     }
+
+    public function checklistAssignments()
+    {
+        return $this->hasMany(ChecklistAssignment::class);
+    }
 }

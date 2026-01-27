@@ -42,4 +42,32 @@ class VisitCertificatePDFController extends Controller
         
         return $pdf->download('constancia-visita-' . $visit->id . '.pdf');
     }
+
+    public function checklistPreview($id)
+    {
+        $completion = \App\Models\VisitChecklistCompletion::with([
+            'visit.empresa',
+            'visit.sede',
+            'visit.user',
+            'assignment.checklist.sections'
+        ])->findOrFail($id);
+
+        $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion'));
+        
+        return $pdf->stream('inspeccion-' . $completion->id . '.pdf');
+    }
+
+    public function checklistDownload($id)
+    {
+        $completion = \App\Models\VisitChecklistCompletion::with([
+            'visit.empresa',
+            'visit.sede',
+            'visit.user',
+            'assignment.checklist.sections'
+        ])->findOrFail($id);
+
+        $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion'));
+        
+        return $pdf->download('inspeccion-' . $completion->id . '.pdf');
+    }
 }

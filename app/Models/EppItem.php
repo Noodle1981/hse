@@ -15,6 +15,7 @@ class EppItem extends Model
         'tipo',
         'vida_util_meses',
         'codigo_norma',
+        'stock_actual',
         'is_active',
     ];
 

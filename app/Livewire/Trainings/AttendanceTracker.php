@@ -19,10 +19,10 @@ class AttendanceTracker extends Component
         'signature' => '',
     ];
 
-    public function mount($id, $visit_id = null)
+    public function mount($id)
     {
         $this->training = Training::with(['empresa', 'sede'])->findOrFail($id);
-        $this->visitId = $visit_id;
+        $this->visitId = request()->query('visit_id');
         $this->loadAttendees();
     }
 

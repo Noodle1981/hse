@@ -69,6 +69,11 @@ class Sede extends Model
         return $this->hasMany(ChecklistAssignment::class);
     }
 
+    public function checklistAssignments()
+    {
+        return $this->hasMany(ChecklistAssignment::class);
+    }
+
     public function capacitacionesPresenciales()
     {
         return $this->hasMany(CapacitacionPresencial::class);

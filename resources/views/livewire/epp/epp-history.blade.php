@@ -23,6 +23,23 @@
             </div>
         </div>
 
+        <!-- Aviso de Responsabilidad -->
+        <div class="mb-8 bg-blue-50 border-l-4 border-blue-400 p-4 rounded-r-xl shadow-sm">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-blue-800 font-medium">
+                        <span class="font-bold">Aviso Importante:</span> 
+                        Se deja constancia de que el personal registrado en cada acta es el único responsable de la recepción, custodia y correcto uso de los equipos de protección personal entregados, conforme a las políticas de seguridad y normativa vigente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <!-- Filtros -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -78,9 +95,11 @@
                             <!-- Info Entrega -->
                             <div class="flex flex-wrap gap-8 items-center lg:justify-end flex-1">
                                 <div class="text-center md:text-left">
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Fecha de Entrega</div>
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                        {{ $delivery instanceof \App\Models\EppDeliveryRequest ? 'Fecha Solicitud' : 'Fecha de Entrega' }}
+                                    </div>
                                     <div class="text-sm font-bold text-gray-700">
-                                        @if($delivery instanceof \App\Models\VisitEppDelivery)
+                                        @if($delivery instanceof \App\Models\VisitEppDelivery || $delivery instanceof \App\Models\EppDeliveryRequest)
                                             {{ $delivery->created_at->format('d/m/Y H:i') }}
                                         @else
                                             {{ $delivery->delivery_date->format('d/m/Y H:i') }}
@@ -88,10 +107,14 @@
                                     </div>
                                 </div>
                                 <div class="text-center md:text-left">
-                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Entregado por</div>
+                                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                                        {{ $delivery instanceof \App\Models\EppDeliveryRequest ? 'Solicitado por' : 'Entregado por' }}
+                                    </div>
                                     <div class="text-sm font-bold text-gray-700">
                                         @if($delivery instanceof \App\Models\VisitEppDelivery)
                                             {{ $delivery->visit->user->nombres ?? 'Sistema' }}
+                                        @elseif($delivery instanceof \App\Models\EppDeliveryRequest)
+                                            {{ $delivery->requester->nombres ?? 'Sistema' }}
                                         @else
                                             {{ $delivery->user->nombres ?? 'Sistema' }}
                                         @endif
@@ -109,6 +132,18 @@
                                             <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                                             Entrega en Visita
                                         </span>
+                                    @elseif($delivery instanceof \App\Models\EppDeliveryRequest)
+                                        @if($delivery->status == 'pending')
+                                            <span class="inline-flex items-center px-3 py-1.5 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold ring-1 ring-amber-200">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Pendiente de Entrega
+                                            </span>
+                                        @else
+                                            <span class="inline-flex items-center px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold ring-1 ring-emerald-200">
+                                                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                Solicitud Completada
+                                            </span>
+                                        @endif
                                     @else
                                         <a href="{{ route('gestor.epp.delivery.pdf.preview', $delivery->id) }}" target="_blank" class="inline-flex items-center px-4 py-2 border border-ep-primary text-ep-primary font-bold rounded-lg hover:bg-ep-primary hover:text-white transition-colors text-xs mr-2">
                                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -135,6 +170,20 @@
                                             @if(isset($item['size']))
                                                 <span class="ml-2 text-[10px] text-gray-400 px-1.5 py-0.5 rounded-lg border border-gray-200 uppercase">{{ $item['size'] }}</span>
                                             @endif
+                                        </div>
+                                    @endforeach
+                                @elseif($delivery instanceof \App\Models\EppDeliveryRequest)
+                                    @foreach($delivery->items as $itemId => $data)
+                                        @php $itemModel = \App\Models\EppItem::find($itemId); @endphp
+                                        <div class="flex items-center bg-gray-100 px-3 py-1.5 rounded-xl border border-gray-200">
+                                            <span class="w-5 h-5 bg-amber-500 text-white rounded-full flex items-center justify-center text-[10px] font-bold mr-2">{{ $data['cantidad'] ?? 1 }}</span>
+                                            <span class="text-xs font-bold text-gray-700">{{ $itemModel->nombre ?? 'Efecto Desconocido' }}</span>
+                                            <span class="ml-2 text-[10px] text-gray-400 px-1.5 py-0.5 rounded-lg border border-gray-200 uppercase">
+                                                @if(($data['tipo_entrega'] ?? '') == 'inicial') Entrega Inicial
+                                                @elseif(($data['tipo_entrega'] ?? '') == 'reposicion_rotura') Rotura
+                                                @else Vencimiento
+                                                @endif
+                                            </span>
                                         </div>
                                     @endforeach
                                 @else

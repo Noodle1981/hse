@@ -4,24 +4,52 @@
             <h1 class="text-3xl font-bold text-gray-800">Asignación de Checklists</h1>
             <p class="text-gray-600 mt-1">Asigna checklists a técnicos en sedes específicas</p>
         </div>
-        <a href="{{ route('gestor.checklists.index') }}" 
-           class="flex items-center gap-2 text-ep-primary hover:text-ep-primary-dark font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 hover:shadow-md">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-            </svg>
-            Gestor de Plantillas
-        </a>
+        <div class="flex gap-3">
+            <a href="{{ route('gestor.inspections.index') }}" 
+               class="flex items-center gap-2 text-gray-600 hover:text-gray-800 font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Volver
+            </a>
+            <button wire:click="toggleForm" 
+                    class="flex items-center gap-2 {{ $showForm ? 'bg-gray-500 hover:bg-gray-600' : 'bg-ep-dark hover:bg-opacity-90' }} text-white px-4 py-2 rounded-lg shadow-sm transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    @if($showForm)
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    @else
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    @endif
+                </svg>
+                {{ $showForm ? 'Cancelar' : 'Nueva Asignación' }}
+            </button>
+            <a href="{{ route('gestor.checklists.index') }}" 
+               class="flex items-center gap-2 text-ep-primary hover:text-ep-primary-dark font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 hover:shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                </svg>
+                Gestor de Plantillas
+            </a>
+        </div>
     </div>
 
     @if (session()->has('message'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 shadow-sm flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             {{ session('message') }}
         </div>
     @endif
 
-    <!-- Filtros y Acciones -->
+    @if (session()->has('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 shadow-sm flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Filtros -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Empresa</label>
                 <select wire:model.live="selectedEmpresa" class="w-full rounded-md border-gray-300 shadow-sm">
@@ -32,66 +60,42 @@
                 </select>
             </div>
 
-            @if($selectedEmpresa)
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Sede</label>
-                    <select wire:model.live="selectedSede" class="w-full rounded-md border-gray-300 shadow-sm">
-                        <option value="">Todas las sedes</option>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Sede</label>
+                <select wire:model.live="selectedSede" class="w-full rounded-md border-gray-300 shadow-sm" {{ !$selectedEmpresa ? 'disabled' : '' }}>
+                    <option value="">{{ $selectedEmpresa ? 'Todas las sedes' : 'Primero selecciona una empresa' }}</option>
+                    @if($selectedEmpresa)
                         @foreach($sedes as $sede)
                             <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
                         @endforeach
-                    </select>
-                </div>
-            @endif
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                <select wire:model.live="statusFilter" class="w-full rounded-md border-gray-300 shadow-sm">
-                    <option value="all">Todos</option>
-                    <option value="pending">Pendientes</option>
-                    <option value="in_progress">En Progreso</option>
-                    <option value="completed">Completados</option>
-                    <option value="reassigned">Reubicados</option>
-                    <option value="overdue">Vencidos</option>
+                    @endif
                 </select>
-            </div>
-
-            <div class="flex items-end">
-                <button wire:click="toggleForm" 
-                        class="w-full bg-ep-dark hover:bg-opacity-90 text-white px-4 py-2 rounded-md">
-                    {{ $showForm ? 'Cancelar' : '+ Nueva Asignación' }}
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Formulario de Nueva Asignación -->
+    <!-- Formulario de Nueva/Editar Asignación -->
     @if($showForm)
         <div class="bg-white rounded-lg shadow-lg p-6 mb-6 border-2 border-ep-primary">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h3 class="text-xl font-bold text-gray-800">Nueva Asignación de Checklist</h3>
-                    <p class="text-sm text-gray-600 mt-1">Completa los siguientes campos para asignar un checklist a un técnico</p>
-                </div>
-                <button type="button" wire:click="toggleForm" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-800">
+                    {{ $editingId ? 'Editar Asignación de Checklist' : 'Nueva Asignación de Checklist' }}
+                </h3>
+                <p class="text-sm text-gray-600 mt-1">
+                    {{ $editingId ? 'Modifica el técnico, fecha o notas de la asignación' : 'Completa los campos para asignar un checklist a un técnico' }}
+                </p>
             </div>
 
             <form wire:submit.prevent="save">
-                <!-- Paso 1: Selección de Empresa y Sede -->
-                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 class="font-semibold text-blue-900 mb-3 flex items-center">
-                        <span class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">1</span>
-                        Selecciona la Empresa y Sede
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Empresa <span class="text-red-500">*</span>
-                            </label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Empresa -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Empresa <span class="text-red-500">*</span>
+                        </label>
+                        @if($editingId)
+                            <input type="text" value="{{ $empresas->find($formEmpresaId)?->nombre }}" disabled class="w-full rounded-md border-gray-300 bg-gray-100 shadow-sm">
+                        @else
                             <select wire:model.live="formEmpresaId" class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary">
                                 <option value="">Seleccionar empresa...</option>
                                 @foreach($empresas as $empresa)
@@ -99,12 +103,17 @@
                                 @endforeach
                             </select>
                             @error('formEmpresaId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
+                        @endif
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Sede <span class="text-red-500">*</span>
-                            </label>
+                    <!-- Sede -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Sede <span class="text-red-500">*</span>
+                        </label>
+                        @if($editingId)
+                            <input type="text" value="{{ $empresas->find($formEmpresaId)?->sedes->find($formSedeId)?->nombre_sede }}" disabled class="w-full rounded-md border-gray-300 bg-gray-100 shadow-sm">
+                        @else
                             <select wire:model.live="formSedeId" 
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary"
                                     {{ !$formEmpresaId ? 'disabled' : '' }}>
@@ -116,22 +125,14 @@
                                 @endif
                             </select>
                             @error('formSedeId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
+                        @endif
                     </div>
-                </div>
 
-                <!-- Paso 2: Selección de Checklist y Técnico -->
-                <div class="mb-6 p-4 {{ $formSedeId ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200' }} rounded-lg border">
-                    <h4 class="font-semibold {{ $formSedeId ? 'text-green-900' : 'text-gray-500' }} mb-3 flex items-center">
-                        <span class="{{ $formSedeId ? 'bg-green-600' : 'bg-gray-400' }} text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">2</span>
-                        Selecciona el Checklist y Técnico
-                    </h4>
-                    
-                    <!-- Filtros de Categoría y Subcategoría -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 pb-4 border-b border-gray-200">
+                    <!-- Categoría -->
+                    @if(!$editingId)
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Categoría (Filtro opcional)
+                                Categoría <span class="text-gray-400 text-xs">(Filtro opcional)</span>
                             </label>
                             <select wire:model.live="formCategoryId" 
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary"
@@ -145,9 +146,10 @@
                             </select>
                         </div>
 
+                        <!-- Subcategoría -->
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Subcategoría (Filtro opcional)
+                                Subcategoría <span class="text-gray-400 text-xs">(Filtro opcional)</span>
                             </label>
                             <select wire:model.live="formSubcategoryId" 
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary"
@@ -160,21 +162,26 @@
                                 @endif
                             </select>
                         </div>
-                    </div>
+                    @endif
 
-                    <!-- Selección de Checklist y Técnico -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Checklist <span class="text-red-500">*</span>
-                            </label>
+                    <!-- Checklist -->
+                    <div {{ $editingId ? 'class=md:col-span-2' : '' }}>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Checklist <span class="text-red-500">*</span>
+                        </label>
+                        @if($editingId)
+                            @php
+                                $checklist = \App\Models\DynamicChecklist::find($formChecklistId);
+                            @endphp
+                            <input type="text" value="{{ $checklist?->title }}{{ $checklist?->registry_code ? ' (' . $checklist->registry_code . ')' : '' }}" disabled class="w-full rounded-md border-gray-300 bg-gray-100 shadow-sm">
+                        @else
                             <select wire:model="formChecklistId" 
                                     class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary"
                                     {{ !$formSedeId ? 'disabled' : '' }}>
                                 <option value="">{{ $formSedeId ? 'Seleccionar checklist...' : 'Primero selecciona una sede' }}</option>
                                 @if($formSedeId)
                                     @if(empty($checklists))
-                                        <option value="" disabled>No hay checklists disponibles con los filtros seleccionados</option>
+                                        <option value="" disabled>No hay checklists disponibles</option>
                                     @else
                                         @foreach($checklists as $checklist)
                                             <option value="{{ $checklist->id }}">
@@ -191,72 +198,44 @@
                             @if($formSedeId && !empty($checklists))
                                 <p class="text-xs text-gray-500 mt-1">{{ count($checklists) }} checklist(s) disponible(s)</p>
                             @endif
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Técnico <span class="text-red-500">*</span>
-                            </label>
-                            <select wire:model="formUserId" 
-                                    class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary"
-                                    {{ !$formSedeId ? 'disabled' : '' }}>
-                                <option value="">{{ $formSedeId ? 'Seleccionar técnico...' : 'Primero selecciona una sede' }}</option>
-                                @if($formSedeId)
-                                    @foreach($tecnicos as $tecnico)
-                                        <option value="{{ $tecnico->id }}">
-                                            {{ $tecnico->apellidos }}, {{ $tecnico->nombres }}
-                                        </option>
-                                    @endforeach
-                                @endif
-                            </select>
-                            @error('formUserId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Paso 3: Configuración de Frecuencia y Fecha -->
-                <div class="mb-6 p-4 {{ $formChecklistId && $formUserId ? 'bg-purple-50 border-purple-200' : 'bg-gray-50 border-gray-200' }} rounded-lg border">
-                    <h4 class="font-semibold {{ $formChecklistId && $formUserId ? 'text-purple-900' : 'text-gray-500' }} mb-3 flex items-center">
-                        <span class="{{ $formChecklistId && $formUserId ? 'bg-purple-600' : 'bg-gray-400' }} text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-2">3</span>
-                        Configura la Frecuencia y Fecha
-                    </h4>
-                    
-                    @if(!$formChecklistId || !$formUserId)
-                        <div class="text-sm text-gray-500 italic mb-4">
-                            Completa el Paso 2 para configurar la frecuencia y fecha
-                        </div>
-                    @endif
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Frecuencia <span class="text-red-500">*</span>
-                            </label>
-                            <select wire:model="formFrequency" 
-                                    class="w-full rounded-md border-gray-300 shadow-sm bg-gray-100 cursor-not-allowed"
-                                    disabled>
-                                <option value="once">Única vez</option>
-                            </select>
-                            <p class="text-xs text-blue-600 mt-1 flex items-start gap-1">
-                                <svg class="w-3 h-3 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                                </svg>
-                                <span>Próximamente: frecuencias recurrentes vinculadas a matriz de riesgos</span>
-                            </p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Fecha de Vencimiento
-                            </label>
-                            <input type="date" wire:model="formDueDate" 
-                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary">
-                            @error('formDueDate') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        </div>
+                        @endif
                     </div>
 
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Notas Adicionales</label>
+                    <!-- Técnico -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Técnico <span class="text-red-500">*</span>
+                        </label>
+                        <select wire:model="formUserId" 
+                                class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary"
+                                {{ !$formSedeId ? 'disabled' : '' }}>
+                            <option value="">{{ $formSedeId ? 'Seleccionar técnico...' : 'Primero selecciona una sede' }}</option>
+                            @if($formSedeId)
+                                @foreach($tecnicos as $tecnico)
+                                    <option value="{{ $tecnico->id }}">
+                                        {{ $tecnico->apellidos }}, {{ $tecnico->nombres }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        @error('formUserId') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Fecha de Vencimiento -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Fecha de Vencimiento <span class="text-gray-400 text-xs">(Opcional)</span>
+                        </label>
+                        <input type="date" wire:model="formDueDate" 
+                               class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary">
+                        @error('formDueDate') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Notas -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            Notas Adicionales <span class="text-gray-400 text-xs">(Opcional)</span>
+                        </label>
                         <textarea wire:model="formNotes" rows="2" 
                                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-ep-primary focus:ring-ep-primary"
                                   placeholder="Agrega cualquier nota o instrucción especial..."></textarea>
@@ -265,7 +244,7 @@
                 </div>
 
                 <!-- Botones de Acción -->
-                <div class="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <div class="flex justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
                     <button type="button" wire:click="toggleForm"
                             class="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors">
                         Cancelar
@@ -276,7 +255,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span wire:loading.remove>Crear Asignación</span>
+                        <span wire:loading.remove>{{ $editingId ? 'Guardar Cambios' : 'Crear Asignación' }}</span>
                         <span wire:loading>Guardando...</span>
                     </button>
                 </div>
@@ -352,11 +331,35 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <button wire:click="delete({{ $assignment->id }})"
-                                    wire:confirm="¿Estás seguro de eliminar esta asignación?"
-                                    class="text-red-600 hover:text-red-900">
-                                Eliminar
-                            </button>
+                            <div class="flex items-center gap-3">
+                                @if($assignment->canBeEdited())
+                                    <button wire:click="edit({{ $assignment->id }})"
+                                            class="text-blue-600 hover:text-blue-900 font-medium p-1"
+                                            title="Editar asignación">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </button>
+                                @endif
+
+                                @if($assignment->status === 'completed' && $assignment->visitCompletion)
+                                    <a href="{{ route('gestor.visits.checklist.preview', $assignment->visitCompletion->id) }}" 
+                                       target="_blank"
+                                       class="text-ep-primary hover:text-ep-primary-dark p-1" 
+                                       title="Ver Checklist PDF">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </a>
+                                @endif
+
+                                @if($assignment->canBeDeleted())
+                                    <button wire:click="delete({{ $assignment->id }})"
+                                            wire:confirm="¿Estás seguro de eliminar esta asignación?"
+                                            class="text-red-600 hover:text-red-900 font-medium p-1"
+                                            title="Eliminar asignación">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                 @empty

@@ -89,15 +89,32 @@ class VisitService
         int $employeeId,
         array $items, // [{item, qty, size}]
         ?string $signature = null,
-        ?string $notes = null
+        ?string $notes = null,
+        bool $skipStockDecrement = false
     ): VisitEppDelivery {
-        return VisitEppDelivery::create([
-            'visit_certificate_id' => $visit->id,
-            'employee_id' => $employeeId,
-            'epp_items' => $items,
-            'employee_signature' => $signature,
-            'notes' => $notes,
-        ]);
+        return DB::transaction(function () use ($visit, $employeeId, $items, $signature, $notes, $skipStockDecrement) {
+            $delivery = VisitEppDelivery::create([
+                'visit_certificate_id' => $visit->id,
+                'employee_id' => $employeeId,
+                'epp_items' => $items,
+                'employee_signature' => $signature,
+                'notes' => $notes,
+            ]);
+
+            // Descontar stock para cada item entregado (si no se pide omitirlo)
+            if (!$skipStockDecrement) {
+                foreach ($items as $itemData) {
+                    if (isset($itemData['item_id'])) {
+                        $item = \App\Models\EppItem::find($itemData['item_id']);
+                        if ($item) {
+                            $item->decrement('stock_actual', $itemData['qty'] ?? 1);
+                        }
+                    }
+                }
+            }
+
+            return $delivery;
+        });
     }
 
     /**

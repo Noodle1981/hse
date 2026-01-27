@@ -14,6 +14,7 @@ class ChecklistFiller extends Component
     
     public $assignmentId; // Para montado indirecto si fuera necesario
     public $responses = [];
+    public $observations = [];
     public $showModal = false;
 
     // Cache de preguntas para renderizado
@@ -76,11 +77,22 @@ class ChecklistFiller extends Component
             $this->validate($rules, $messages);
         }
 
+        // Formatear respuestas para incluir metadata (label y observación)
+        $formattedResponses = [];
+        foreach ($checklist->questions as $question) {
+            $formattedResponses[] = [
+                'question_id' => $question->id,
+                'question_label' => $question->label,
+                'value' => $this->responses[$question->id],
+                'observation' => $this->observations[$question->id] ?? null
+            ];
+        }
+
         // Guardar usando el servicio
         $this->visitService->completeChecklist(
             $this->visit,
             $this->assignment,
-            $this->responses,
+            $formattedResponses,
             false // isSelfAssigned (podría pasar param si fuera relevante)
         );
 

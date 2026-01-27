@@ -74,16 +74,27 @@ class EppDeliveryWizard extends Component
         ]);
 
         if (auth()->user()->isAdmin()) {
-            // ADMIN: Crea una SOLICITUD
-            \App\Models\EppDeliveryRequest::create([
-                'empresa_id' => $this->empresa_id,
-                'sede_id' => $this->sede_id,
-                'employee_id' => $this->selectedEmployeeId,
-                'requested_by_user_id' => auth()->id(),
-                'status' => 'pending',
-                'items' => $this->selectedItems,
-                'notes' => $this->observaciones,
-            ]);
+            DB::transaction(function () {
+                // ADMIN: Crea una SOLICITUD
+                \App\Models\EppDeliveryRequest::create([
+                    'empresa_id' => $this->empresa_id,
+                    'sede_id' => $this->sede_id,
+                    'employee_id' => $this->selectedEmployeeId,
+                    'requested_by_user_id' => auth()->id(),
+                    'status' => 'pending',
+                    'items' => $this->selectedItems,
+                    'notes' => $this->observaciones,
+                ]);
+
+                // Descontar stock al crear la solicitud (Efecto "Egreso")
+                foreach ($this->selectedItems as $id => $data) {
+                    $item = EppItem::find($id);
+                    if ($item) {
+                        $qty = (int) ($data['cantidad'] ?? 1);
+                        $item->decrement('stock_actual', $qty);
+                    }
+                }
+            });
 
             session()->flash('message', 'Solicitud de entrega registrada. El técnico la verá en sus tareas.');
             return redirect()->route('gestor.epp.history');
@@ -100,10 +111,20 @@ class EppDeliveryWizard extends Component
                 ]);
 
                 foreach ($this->selectedItems as $id => $data) {
+                    $qty = (int) ($data['cantidad'] ?? 1);
                     $delivery->items()->attach($id, [
-                        'cantidad' => $data['cantidad'],
+                        'cantidad' => $qty,
                         'tipo_entrega' => $data['tipo_entrega'],
                     ]);
+                    
+                    // Solo descontar stock si NO viene de una solicitud previa 
+                    // (porque la solicitud ya descontó el stock al ser creada por el Gestor)
+                    if (!request()->query('request_id')) {
+                        $item = EppItem::find($id);
+                        if ($item) {
+                            $item->decrement('stock_actual', $qty);
+                        }
+                    }
                 }
             });
 

@@ -5,11 +5,18 @@
                 <h1 class="text-3xl font-bold text-gray-900">Catálogo de EPP</h1>
                 <p class="mt-1 text-sm text-gray-500 text-balance">Gestione los elementos de protección personal disponibles para entrega.</p>
             </div>
-            <button wire:click="create" 
-                    class="inline-flex items-center px-6 py-3 bg-ep-primary text-white font-bold rounded-xl shadow-lg shadow-ep-primary/30 hover:bg-ep-primary-dark transition-all">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                Nuevo EPP
-            </button>
+            <div class="flex gap-3">
+                <a href="{{ route('gestor.epp.history') }}" 
+                   class="inline-flex items-center px-6 py-3 bg-white text-gray-700 font-bold rounded-xl border border-gray-200 hover:bg-gray-50 hover:text-ep-primary transition-all">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Historial de Entregas
+                </a>
+                <button wire:click="create" 
+                        class="inline-flex items-center px-6 py-3 bg-ep-primary text-white font-bold rounded-xl shadow-lg shadow-ep-primary/30 hover:bg-ep-primary-dark transition-all">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Nuevo EPP
+                </button>
+            </div>
         </div>
 
         @if (session()->has('message'))
@@ -38,6 +45,7 @@
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Elemento</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vda. Útil</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Normatividad</th>
                         <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -62,6 +70,14 @@
                                     {{ $item->tipo }}
                                 </span>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @php
+                                    $stockClass = $item->stock_actual <= 10 ? 'bg-red-50 text-red-700 border-red-200' : ($item->stock_actual <= 50 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-green-50 text-green-700 border-green-200');
+                                @endphp
+                                <span class="px-2.5 py-1 rounded-full text-xs font-bold border {{ $stockClass }}">
+                                    {{ $item->stock_actual }} unidades
+                                </span>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
                                 {{ $item->vida_util_meses ? $item->vida_util_meses . ' meses' : 'N/A' }}
                             </td>
@@ -81,7 +97,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="7" class="px-6 py-12 text-center">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0l-8 8-8-8"/></svg>
                                     <p class="text-gray-500 font-medium">No se encontraron elementos en el catálogo.</p>
@@ -108,35 +124,60 @@
                         <div class="bg-white px-8 pt-8 pb-4">
                             <h3 class="text-xl font-bold text-gray-900 mb-6">{{ $itemId ? 'Editar' : 'Nuevo' }} Elemento de Protección</h3>
                             <div class="space-y-5">
+                                <!-- Tipo / Categoría (PRIMERO) -->
+                                <div>
+                                    <label class="block text-sm font-bold text-gray-700 mb-2">Tipo / Categoría</label>
+                                    <select wire:model.live="tipo" class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all">
+                                        <option value="">Seleccione...</option>
+                                        <option value="Cabeza">Cabeza</option>
+                                        <option value="Auditiva">Auditiva</option>
+                                        <option value="Ocular">Ocular</option>
+                                        <option value="Respiratoria">Respiratoria</option>
+                                        <option value="Manos">Manos</option>
+                                        <option value="Calzado">Calzado</option>
+                                        <option value="Cuerpo">Cuerpo</option>
+                                        <option value="Caídas">Caídas</option>
+                                    </select>
+                                    @error('tipo') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                </div>
+
+                                <!-- Nombre del Elemento (SEGUNDO) -->
                                 <div>
                                     <label class="block text-sm font-bold text-gray-700 mb-2">Nombre del Elemento</label>
-                                    <input type="text" wire:model="nombre" 
-                                           class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all">
+                                    @if($tipo)
+                                        <select wire:model="nombre" class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all">
+                                            <option value="">Seleccione un elemento...</option>
+                                            @php
+                                                $catalogOptions = \App\Livewire\Epp\EppCatalog::EPP_CATALOG_OPTIONS;
+                                            @endphp
+                                            @if(isset($catalogOptions[$tipo]))
+                                                @foreach($catalogOptions[$tipo] as $option)
+                                                    <option value="{{ $option }}">{{ $option }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    @else
+                                        <input type="text" disabled 
+                                               class="block w-full border-gray-200 rounded-xl bg-gray-100 text-gray-400 text-sm p-3 cursor-not-allowed"
+                                               placeholder="Primero seleccione una categoría">
+                                    @endif
                                     @error('nombre') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">Tipo / Categoría</label>
-                                        <select wire:model="tipo" class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all">
-                                            <option value="">Seleccione...</option>
-                                            <option value="Cabeza">Cabeza</option>
-                                            <option value="Auditiva">Auditiva</option>
-                                            <option value="Ocular">Ocular</option>
-                                            <option value="Respiratoria">Respiratoria</option>
-                                            <option value="Manos">Manos</option>
-                                            <option value="Calzado">Calzado</option>
-                                            <option value="Cuerpo">Cuerpo</option>
-                                            <option value="Caídas">Caídas</option>
-                                        </select>
-                                        @error('tipo') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
-                                    </div>
                                     <div>
                                         <label class="block text-sm font-bold text-gray-700 mb-2">Vida Útil (Meses)</label>
                                         <input type="number" wire:model="vida_util_meses" 
                                                class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all" 
                                                placeholder="Opcional">
                                         @error('vida_util_meses') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Stock Actual</label>
+                                        <input type="number" wire:model="stock_actual" 
+                                               class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all" 
+                                               placeholder="Cantidad en inventario" min="0">
+                                        @error('stock_actual') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
 

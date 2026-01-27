@@ -17,10 +17,10 @@ class AssignmentManager extends Component
     // Filtros
     public ?int $selectedEmpresa = null;
     public ?int $selectedSede = null;
-    public string $statusFilter = 'all';
 
     // Formulario de nueva asignación
     public bool $showForm = false;
+    public ?int $editingId = null;
     public ?int $formEmpresaId = null;
     public ?int $formCategoryId = null;
     public ?int $formSubcategoryId = null;
@@ -65,11 +65,6 @@ class AssignmentManager extends Component
     public function updatedSelectedSede()
     {
         $this->loadTecnicos();
-        $this->resetPage();
-    }
-
-    public function updatedStatusFilter()
-    {
         $this->resetPage();
     }
 
@@ -173,8 +168,74 @@ class AssignmentManager extends Component
         }
     }
 
+    public function edit(int $id)
+    {
+        $assignment = ChecklistAssignment::with(['checklist', 'sede.empresa'])->findOrFail($id);
+        
+        // Verificar que se puede editar
+        if (!$assignment->canBeEdited()) {
+            session()->flash('error', 'Esta asignación no puede ser editada.');
+            return;
+        }
+
+        $this->editingId = $assignment->id;
+        $this->formEmpresaId = $assignment->empresa_id;
+        $this->formSedeId = $assignment->sede_id;
+        $this->formChecklistId = $assignment->dynamic_checklist_id;
+        $this->formUserId = $assignment->user_id;
+        $this->formDueDate = $assignment->due_date?->format('Y-m-d');
+        $this->formNotes = $assignment->notes ?? '';
+        $this->formFrequency = $assignment->frequency;
+        
+        // Cargar técnicos de la sede
+        $sede = Sede::find($this->formSedeId);
+        $this->tecnicos = $sede->users()->orderBy('apellidos')->get();
+        
+        $this->showForm = true;
+    }
+
+    public function update()
+    {
+        $this->validate([
+            'formUserId' => 'required|exists:users,id',
+            'formDueDate' => 'nullable|date|after:today',
+            'formNotes' => 'nullable|string|max:500',
+        ]);
+
+        $assignment = ChecklistAssignment::findOrFail($this->editingId);
+        
+        // Verificar que se puede editar
+        if (!$assignment->canBeEdited()) {
+            session()->flash('error', 'Esta asignación no puede ser editada.');
+            return;
+        }
+
+        // Verificar que el usuario esté asignado a la sede
+        $sede = Sede::findOrFail($assignment->sede_id);
+        if (!$sede->users()->where('user_id', $this->formUserId)->exists()) {
+            $this->addError('formUserId', 'El técnico seleccionado no está asignado a esta sede.');
+            return;
+        }
+
+        $assignment->update([
+            'user_id' => $this->formUserId,
+            'due_date' => $this->formDueDate,
+            'notes' => $this->formNotes ?: null,
+        ]);
+
+        session()->flash('message', 'Asignación actualizada exitosamente');
+        $this->resetForm();
+        $this->showForm = false;
+        $this->resetPage();
+    }
+
     public function save()
     {
+        if ($this->editingId) {
+            $this->update();
+            return;
+        }
+
         $this->validate();
 
         // Obtener empresa_id de la sede
@@ -205,13 +266,21 @@ class AssignmentManager extends Component
 
     public function delete(int $id)
     {
-        ChecklistAssignment::findOrFail($id)->delete();
+        $assignment = ChecklistAssignment::findOrFail($id);
+        
+        if (!$assignment->canBeDeleted()) {
+            session()->flash('error', 'No se puede eliminar una asignación completada.');
+            return;
+        }
+
+        $assignment->delete();
         session()->flash('message', 'Asignación eliminada');
         $this->resetPage();
     }
 
     private function resetForm()
     {
+        $this->editingId = null;
         $this->formEmpresaId = null;
         $this->formCategoryId = null;
         $this->formSubcategoryId = null;
@@ -238,16 +307,6 @@ class AssignmentManager extends Component
 
         if ($this->selectedSede) {
             $query->where('sede_id', $this->selectedSede);
-        }
-
-        if ($this->statusFilter !== 'all') {
-            if ($this->statusFilter === 'overdue') {
-                $query->overdue();
-            } elseif ($this->statusFilter === 'reassigned') {
-                $query->where('status', 'reassigned');
-            } else {
-                $query->where('status', $this->statusFilter);
-            }
         }
 
         $assignments = $query->paginate(15);

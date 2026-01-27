@@ -53,6 +53,11 @@ class VisitTraining extends Model
         return $duration ?: 0;
     }
 
+    public function getNotesAttribute($value)
+    {
+        return $value ?: ($this->training ? $this->training->notes : null);
+    }
+
     public function getAttendeesCountAttribute()
     {
         if ($this->training) {

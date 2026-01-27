@@ -128,4 +128,17 @@
             <span class="text-red-500 text-xs mt-1">{{ $message }}</span> 
         @enderror
     </div>
+
+    {{-- Observación opcional --}}
+    <div class="mt-3 pt-3 border-t border-gray-100">
+        <label for="obs-{{ $question->id }}" class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+            Observaciones / Comentarios
+        </label>
+        <textarea 
+            id="obs-{{ $question->id }}"
+            wire:model="observations.{{ $question->id }}"
+            rows="1"
+            class="block w-full text-xs border-gray-200 rounded-md focus:ring-ep-primary focus:border-ep-primary bg-gray-50/50"
+            placeholder="Aclaración opcional sobre este punto..."></textarea>
+    </div>
 </div>
