@@ -72,7 +72,7 @@ class CategoryBuilder extends Component
         }
 
         session()->flash('message', $message);
-        return $this->redirect(route('categories.index'), navigate: true);
+        return $this->redirect(route('gestor.categories.index'), navigate: true);
     }
 
 

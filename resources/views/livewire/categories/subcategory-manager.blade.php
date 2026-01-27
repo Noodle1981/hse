@@ -5,7 +5,7 @@
                 <h2 class="text-2xl font-bold text-gray-800">Subcategorías de {{ $category->name }}</h2>
                 <p class="text-gray-600 mt-1">Código: <span class="font-mono">{{ $category->code }}</span></p>
             </div>
-            <a href="{{ route('categories.index') }}" class="text-blue-600 hover:text-blue-800">
+            <a href="{{ route('gestor.categories.index') }}" class="text-blue-600 hover:text-blue-800">
                 ← Volver a categorías
             </a>
         </div>

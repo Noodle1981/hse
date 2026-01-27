@@ -13,6 +13,12 @@
         </div>
     </div>
 
+    @if (session()->has('message'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('message') }}
+        </div>
+    @endif
+
     <!-- Filtros -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
         <div class="flex flex-wrap gap-4">
@@ -26,9 +32,17 @@
                 <select wire:model.live="categoryFilter" 
                         class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
                     <option value="">Todas las categorías</option>
-                    <option value="hys">Higiene y Seguridad</option>
-                    <option value="calidad">Calidad</option>
-                    <option value="seguimiento">Seguimiento</option>
+                    @foreach($categories as $cat)
+                        <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <select wire:model.live="statusFilter" 
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
+                    <option value="all">Todos los estados</option>
+                    <option value="active">Activos</option>
+                    <option value="inactive">Inactivos</option>
                 </select>
             </div>
         </div>
@@ -50,6 +64,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left">Título</th>
                         <th class="px-6 py-3 text-left">Categoría</th>
+                        <th class="px-6 py-3 text-left">Subcategoría</th>
                         <th class="px-6 py-3 text-center">Preguntas</th>
                         <th class="px-6 py-3 text-center">Estado</th>
                         <th class="px-6 py-3 text-center">Acciones</th>
@@ -63,15 +78,23 @@
                                 @if($checklist->description)
                                     <div class="text-sm text-gray-500 truncate max-w-xs">{{ $checklist->description }}</div>
                                 @endif
+                                @if($checklist->registry_code)
+                                    <div class="text-xs text-gray-400 mt-1">Código: {{ $checklist->registry_code }}</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4">
-                                @if($checklist->category)
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium
-                                        @if($checklist->category === 'hys') bg-red-100 text-red-800
-                                        @elseif($checklist->category === 'calidad') bg-blue-100 text-blue-800
-                                        @else bg-green-100 text-green-800 @endif">
-                                        {{ ucfirst($checklist->category) }}
+                                @if($checklist->categoryRelation)
+                                    <span class="px-3 py-1 rounded-full text-xs font-medium" 
+                                          style="background-color: {{ $checklist->categoryRelation->color }}20; color: {{ $checklist->categoryRelation->color }}">
+                                        {{ $checklist->categoryRelation->name }}
                                     </span>
+                                @else
+                                    <span class="text-gray-400">-</span>
+                                @endif
+                            </td>
+                            <td class="px-6 py-4">
+                                @if($checklist->subcategoryRelation)
+                                    <span class="text-sm text-gray-700">{{ $checklist->subcategoryRelation->name }}</span>
                                 @else
                                     <span class="text-gray-400">-</span>
                                 @endif
@@ -90,40 +113,29 @@
                                     <button wire:click="toggleActive({{ $checklist->id }})"
                                             class="px-3 py-1 rounded-full text-xs font-medium transition-colors
                                                 {{ $checklist->is_active ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-gray-100 text-gray-600 hover:bg-gray-200' }}">
-                                        {{ $checklist->is_active ? '✅ Activo' : 'Inactivo' }}
+                                        {{ $checklist->is_active ? '✅ Activo' : '❌ Inactivo' }}
                                     </button>
                                 @endif
                             </td>
                             <td class="px-6 py-4">
-                                    <div class="flex justify-center gap-2 flex-wrap">
-                                        <!-- Test PDF Button -->
-                                        <a href="{{ route('gestor.inspections.index') }}" 
-                                           class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm flex items-center gap-1">
-                                            <span>📄</span> Probar PDF
-                                        </a>
-
-                                        @if(!$checklist->is_draft)
-                                            <!-- Note: Filling usually happens for technicians, but if admins want to test, we need a route -->
-                                            <!-- There is no gestor.checklists.fill route in the provided web.php dump -->
-                                            <!-- Keeping as is might break if route doesn't exist, but removing might be safer or pointing to technician route if shared? -->
-                                            <!-- Actually, technician route is tecnico.checklists.fill -->
-                                            <!-- Let's comment it out or point to edit if fill is not for gestor -->
-                                            {{-- <a href="{{ route('checklists.fill', $checklist) }}" class="...">Llenar</a> --}} 
-                                        @endif
-                                        <a href="{{ route('gestor.checklists.edit', $checklist) }}"
-                                           class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm">
-                                            Editar
-                                        </a>
-                                        <button wire:click="duplicate({{ $checklist->id }})"
-                                                class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">
-                                            📋 Duplicar
-                                        </button>
-                                        <button wire:click="delete({{ $checklist->id }})"
-                                                wire:confirm="¿Estás seguro de eliminar este checklist?"
-                                                class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                                            Eliminar
-                                        </button>
-                                    </div>
+                                <div class="flex justify-center gap-2 flex-wrap">
+                                    <a href="{{ route('gestor.checklists.edit', $checklist) }}"
+                                       class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                                       title="Editar">
+                                        ✏️ Editar
+                                    </a>
+                                    <button wire:click="duplicate({{ $checklist->id }})"
+                                            class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
+                                            title="Duplicar">
+                                        📋 Duplicar
+                                    </button>
+                                    <button wire:click="toggleActive({{ $checklist->id }})"
+                                            wire:confirm="¿Estás seguro de {{ $checklist->is_active ? 'desactivar' : 'activar' }} este checklist?"
+                                            class="px-3 py-1 {{ $checklist->is_active ? 'bg-orange-600 hover:bg-orange-700' : 'bg-green-600 hover:bg-green-700' }} text-white rounded text-sm"
+                                            title="{{ $checklist->is_active ? 'Desactivar' : 'Activar' }}">
+                                        {{ $checklist->is_active ? '🔒 Desactivar' : '✅ Activar' }}
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

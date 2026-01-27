@@ -64,7 +64,16 @@
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary"
                            placeholder="EP-REG-008, REG-001-0T...">
                     <p class="text-xs text-gray-500 mt-1">Código normativo opcional (ej: EP-REG-008)</p>
+
                     @error('registryCode') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Vincular a Riesgo (IPERC) (Próximamente)</label>
+                    <select disabled
+                            class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-400 cursor-not-allowed">
+                        <option value="">No disponible</option>
+                    </select>
                 </div>
             </div>
 
@@ -296,13 +305,7 @@
                             </div>
                         @endif
 
-                        <div class="flex flex-col">
-                            <label class="text-[10px] text-gray-400 uppercase font-bold mb-0.5">Vincular a Riesgo (IPERC) (Próximamente)</label>
-                            <select disabled
-                                    class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-400 max-w-[200px] cursor-not-allowed">
-                                <option value="">No disponible</option>
-                            </select>
-                        </div>
+
                     </div>
                     
                     <div class="flex gap-2">

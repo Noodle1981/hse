@@ -21,6 +21,9 @@ class AssignmentManager extends Component
 
     // Formulario de nueva asignación
     public bool $showForm = false;
+    public ?int $formEmpresaId = null;
+    public ?int $formCategoryId = null;
+    public ?int $formSubcategoryId = null;
     public ?int $formChecklistId = null;
     public ?int $formUserId = null;
     public ?int $formSedeId = null;
@@ -30,11 +33,14 @@ class AssignmentManager extends Component
 
     // Datos para selectores
     public $empresas;
+    public $categories = [];
+    public $subcategories = [];
     public $sedes = [];
     public $tecnicos = [];
-    public $checklists;
+    public $checklists = [];
 
     protected $rules = [
+        'formEmpresaId' => 'required|exists:empresas,id',
         'formChecklistId' => 'required|exists:dynamic_checklists,id',
         'formUserId' => 'required|exists:users,id',
         'formSedeId' => 'required|exists:sedes,id',
@@ -46,7 +52,7 @@ class AssignmentManager extends Component
     public function mount()
     {
         $this->empresas = Empresa::orderBy('nombre')->get();
-        $this->checklists = DynamicChecklist::where('is_active', true)->orderBy('title')->get();
+        $this->categories = \App\Models\Category::where('is_active', true)->orderBy('order')->get();
     }
 
     public function updatedSelectedEmpresa()
@@ -94,6 +100,9 @@ class AssignmentManager extends Component
         if (!$this->showForm) {
             $this->resetForm();
         } else {
+            // Cargar checklists inicialmente (todos los activos)
+            $this->loadChecklists();
+            
             // Pre-seleccionar sede si hay una en los filtros
             if ($this->selectedSede) {
                 $this->formSedeId = $this->selectedSede;
@@ -105,10 +114,63 @@ class AssignmentManager extends Component
         }
     }
 
+    public function updatedFormEmpresaId()
+    {
+        $this->formSedeId = null;
+        $this->formUserId = null;
+        $this->tecnicos = [];
+    }
+
+    public function updatedFormCategoryId()
+    {
+        $this->formSubcategoryId = null;
+        $this->formChecklistId = null;
+        $this->loadSubcategories();
+        $this->loadChecklists();
+    }
+
+    public function updatedFormSubcategoryId()
+    {
+        $this->formChecklistId = null;
+        $this->loadChecklists();
+    }
+
+    public function loadSubcategories()
+    {
+        if ($this->formCategoryId) {
+            $this->subcategories = \App\Models\Subcategory::where('category_id', $this->formCategoryId)
+                ->where('is_active', true)
+                ->orderBy('order')
+                ->get();
+        } else {
+            $this->subcategories = [];
+        }
+    }
+
+    public function loadChecklists()
+    {
+        $query = DynamicChecklist::where('is_active', true);
+        
+        if ($this->formCategoryId) {
+            $query->where('category_id', $this->formCategoryId);
+        }
+        
+        if ($this->formSubcategoryId) {
+            $query->where('subcategory_id', $this->formSubcategoryId);
+        }
+        
+        $this->checklists = $query->orderBy('title')->get();
+    }
+
     public function updatedFormSedeId()
     {
         $this->formUserId = null;
-        $this->loadTecnicos();
+        if ($this->formSedeId) {
+            $sede = Sede::find($this->formSedeId);
+            $this->tecnicos = $sede->users()->orderBy('apellidos')->get();
+        } else {
+            $this->tecnicos = [];
+        }
     }
 
     public function save()
@@ -150,12 +212,17 @@ class AssignmentManager extends Component
 
     private function resetForm()
     {
+        $this->formEmpresaId = null;
+        $this->formCategoryId = null;
+        $this->formSubcategoryId = null;
         $this->formChecklistId = null;
         $this->formUserId = null;
         $this->formSedeId = null;
         $this->formFrequency = 'once';
         $this->formDueDate = null;
         $this->formNotes = '';
+        $this->subcategories = [];
+        $this->checklists = [];
         $this->tecnicos = [];
     }
 

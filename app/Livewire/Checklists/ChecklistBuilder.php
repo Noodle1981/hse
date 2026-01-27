@@ -63,16 +63,37 @@ class ChecklistBuilder extends Component
 
 
 
-    protected $rules = [
-        'title' => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'categoryId' => 'nullable|exists:categories,id',
-        'subcategoryId' => 'nullable|exists:subcategories,id',
-        'registryCode' => 'nullable|string|max:50',
-        'questions' => 'required|array|min:1',
-        'questions.*.label' => 'required|string|max:500',
-        'questions.*.type' => 'required|in:text,textarea,select,radio,checkbox,number,date,signature',
-    ];
+    protected function rules()
+    {
+        return [
+            'title' => [
+                'required',
+                'string',
+                'max:255',
+                function ($attribute, $value, $fail) {
+                    $query = DynamicChecklist::where('title', $value)
+                        ->where('category_id', $this->categoryId)
+                        ->where('subcategory_id', $this->subcategoryId);
+                    
+                    // Si estamos editando, excluir el checklist actual
+                    if ($this->checklist) {
+                        $query->where('id', '!=', $this->checklist->id);
+                    }
+                    
+                    if ($query->exists()) {
+                        $fail('Ya existe un checklist con este título, categoría y subcategoría.');
+                    }
+                },
+            ],
+            'description' => 'nullable|string',
+            'categoryId' => 'nullable|exists:categories,id',
+            'subcategoryId' => 'nullable|exists:subcategories,id',
+            'registryCode' => 'nullable|string|max:50',
+            'questions' => 'required|array|min:1',
+            'questions.*.label' => 'required|string|max:500',
+            'questions.*.type' => 'required|in:text,textarea,select,radio,checkbox,number,date,signature',
+        ];
+    }
 
     protected $messages = [
         'questions.required' => 'Debe agregar al menos una pregunta.',
@@ -452,7 +473,7 @@ class ChecklistBuilder extends Component
         }
 
         session()->flash('message', $this->checklist ? 'Checklist actualizado.' : 'Checklist creado.');
-        return redirect()->route('checklists.index');
+        return redirect()->route('gestor.checklists.index');
     }
 
     public function render()
