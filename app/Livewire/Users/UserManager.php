@@ -56,9 +56,19 @@ class UserManager extends Component
         }
     }
 
+    private function ensureTenancy(User $user)
+    {
+        $currentUser = auth()->user();
+        if (!$currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
+            abort(403, 'Acceso no autorizado a este usuario.');
+        }
+    }
+
     public function edit(int $id)
     {
         $user = User::findOrFail($id);
+        $this->ensureTenancy($user);
+        
         $this->editingId = $id;
         $this->nombres = $user->nombres;
         $this->apellidos = $user->apellidos;
@@ -91,6 +101,11 @@ class UserManager extends Component
 
         $this->validate($rules);
 
+        if ($this->editingId) {
+            $user = User::findOrFail($this->editingId);
+            $this->ensureTenancy($user);
+        }
+
         $data = [
             'nombres' => $this->nombres,
             'apellidos' => $this->apellidos,
@@ -111,7 +126,7 @@ class UserManager extends Component
         }
 
         if ($this->editingId) {
-            User::findOrFail($this->editingId)->update($data);
+            $user->update($data); // Use the retrieved user instance
             session()->flash('message', 'Usuario actualizado exitosamente');
         } else {
             User::create($data);
@@ -131,6 +146,9 @@ class UserManager extends Component
             return;
         }
 
+        $user = User::findOrFail($id);
+        $this->ensureTenancy($user);
+
         $this->userToDeleteId = $id;
         $this->userToDeleteName = $name;
         $this->confirmingDeletion = true;
@@ -148,6 +166,8 @@ class UserManager extends Component
         if (!$this->userToDeleteId) return;
         
         $user = User::findOrFail($this->userToDeleteId);
+        $this->ensureTenancy($user);
+        
         $user->update(['estado' => 'inactivo']); // Set status to inactive before soft delete
         $user->delete();
         
@@ -207,6 +227,8 @@ class UserManager extends Component
     public function restore(int $id)
     {
         $user = User::withTrashed()->findOrFail($id);
+        $this->ensureTenancy($user);
+        
         $user->restore();
         $user->update(['estado' => 'activo']); // Automatically set back to active
         
