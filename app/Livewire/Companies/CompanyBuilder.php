@@ -15,14 +15,29 @@ class CompanyBuilder extends Component
 
     protected function rules(): array
     {
+        $consultoraId = auth()->user()->consultora_id;
+
         return [
-            'nombre' => 'required|string|max:255',
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('empresas', 'nombre')
+                    ->where(function ($query) use ($consultoraId) {
+                        return $query->where('consultora_id', $consultoraId);
+                    })
+                    ->ignore($this->empresa->id ?? null)
+            ],
             'razonSocial' => 'required|string|max:255',
             'cuit' => [
                 'required',
                 'string',
                 'max:13',
-                Rule::unique('empresas', 'cuit')->ignore($this->empresa->id ?? null)
+                Rule::unique('empresas', 'cuit')
+                    ->where(function ($query) use ($consultoraId) {
+                        return $query->where('consultora_id', $consultoraId);
+                    })
+                    ->ignore($this->empresa->id ?? null)
             ],
         ];
     }
@@ -52,6 +67,11 @@ class CompanyBuilder extends Component
             'razon_social' => $this->razonSocial,
             'cuit' => $this->cuit,
         ];
+        
+        // Tenancy: Assign consultora_id if not Super Admin
+        if (auth()->check() && !auth()->user()->isSuperAdmin()) {
+            $data['consultora_id'] = auth()->user()->consultora_id;
+        }
 
         if ($this->empresa) {
             $this->empresa->update($data);
@@ -62,7 +82,7 @@ class CompanyBuilder extends Component
         }
 
         session()->flash('message', $message);
-        return $this->redirect(route('companies.index'), navigate: true);
+        return $this->redirect(route('gestor.companies.index'), navigate: true);
     }
 
     public function render()

@@ -18,6 +18,9 @@ class LocationManager extends Component
     public string $newDireccion = '';
     public string $newTipoSede = '';
     public string $newLocalidad = '';
+    public ?int $newProvinciaId = null;
+    public $newLatitud = '';
+    public $newLongitud = '';
     public string $newTelefono = '';
     public string $newCorreo = '';
     public bool $showForm = false;
@@ -28,41 +31,114 @@ class LocationManager extends Component
     public string $editDireccion = '';
     public string $editTipoSede = '';
     public string $editLocalidad = '';
+    public ?int $editProvinciaId = null;
+    public $editLatitud = '';
+    public $editLongitud = '';
 
     // Listas para autocompletado
     public $existingTipos = [];
     public $existingLocalidades = [];
+    public $existingProvincias = [];
 
     // Gestión de usuarios
     public ?int $managingUsersForSede = null;
     public $availableUsers = [];
     public $assignedUsers = [];
 
+    // Soft Deletes
+    public bool $showDeleted = false;
+    public bool $confirmingDeletion = false;
+    public ?int $sedeToDeleteId = null;
+    public string $sedeToDeleteName = '';
+
     public function mount(Empresa $empresa)
     {
         $this->empresa = $empresa;
         $this->loadSedes();
         $this->loadAvailableUsers();
+        $this->existingProvincias = \App\Models\Provincia::orderBy('nombre')->get();
+    }
+
+    public function updatedShowDeleted()
+    {
+        $this->loadSedes();
     }
 
     public function loadSedes()
     {
-        $this->sedes = $this->empresa->sedes()->withCount('users')->orderBy('nombre_sede')->get();
+        $query = $this->empresa->sedes()->with(['provincia', 'users'])->withCount('users');
+
+        if ($this->showDeleted) {
+            $query->onlyTrashed();
+        }
+
+        $this->sedes = $query->orderBy('nombre_sede')->get();
         
-        // Cargar listas para autocompletado
-        $this->existingTipos = Sede::whereNotNull('tipo_sede')
+        // Cargar listas para autocompletado (solo de activas para mantener limpieza)
+        $this->existingTipos = Sede::where('empresa_id', $this->empresa->id)
+            ->whereNotNull('tipo_sede')
             ->where('tipo_sede', '!=', '')
             ->distinct()
             ->orderBy('tipo_sede')
             ->pluck('tipo_sede')
             ->toArray();
             
-        $this->existingLocalidades = Sede::whereNotNull('localidad')
+        $this->existingLocalidades = Sede::where('empresa_id', $this->empresa->id)
+            ->whereNotNull('localidad')
             ->where('localidad', '!=', '')
             ->distinct()
             ->orderBy('localidad')
             ->pluck('localidad')
             ->toArray();
+    }
+
+    // ... (rest of methods until delete) ...
+
+    public function confirmDelete($id, $name)
+    {
+        $this->sedeToDeleteId = $id;
+        $this->sedeToDeleteName = $name;
+        $this->confirmingDeletion = true;
+    }
+
+    public function cancelDelete()
+    {
+        $this->confirmingDeletion = false;
+        $this->sedeToDeleteId = null;
+        $this->sedeToDeleteName = '';
+    }
+
+    public function delete()
+    {
+        if (!$this->sedeToDeleteId) return;
+
+        $sede = Sede::findOrFail($this->sedeToDeleteId);
+        $sede->delete();
+        
+        $this->loadSedes();
+        $this->cancelDelete();
+        session()->flash('message', 'Sede dada de baja exitosamente');
+    }
+
+    public function restore($id)
+    {
+        $sede = Sede::withTrashed()->findOrFail($id);
+        $sede->restore();
+        
+        $this->loadSedes();
+        session()->flash('message', 'Sede restaurada exitosamente');
+    }
+
+    public function cancelEdit()
+    {
+        $this->editingId = null;
+        $this->editNombreSede = '';
+        $this->editDireccion = '';
+        $this->editTipoSede = '';
+        $this->editLocalidad = '';
+        $this->editProvinciaId = null;
+        $this->editLatitud = '';
+        $this->editLongitud = '';
     }
 
     // Validación en tiempo real para nombre de sede
@@ -144,6 +220,9 @@ class LocationManager extends Component
             'newDireccion' => 'nullable|string|max:255',
             'newTipoSede' => 'nullable|string|max:100',
             'newLocalidad' => 'nullable|string|max:100',
+            'newProvinciaId' => 'nullable|exists:provincias,id',
+            'newLatitud' => 'nullable|numeric|between:-90,90',
+            'newLongitud' => 'nullable|numeric|between:-180,180',
             'newTelefono' => 'nullable|string|max:50',
             'newCorreo' => 'nullable|email|max:255',
         ], [
@@ -156,6 +235,9 @@ class LocationManager extends Component
             'direccion' => $this->newDireccion ?: null,
             'tipo_sede' => $this->newTipoSede ?: null,
             'localidad' => $this->newLocalidad ?: null,
+            'provincia_id' => $this->newProvinciaId,
+            'latitud' => $this->newLatitud ?: null,
+            'longitud' => $this->newLongitud ?: null,
             'telefono' => $this->newTelefono ?: null,
             'correo' => $this->newCorreo ?: null,
         ]);
@@ -174,6 +256,9 @@ class LocationManager extends Component
         $this->editDireccion = $sede->direccion ?? '';
         $this->editTipoSede = $sede->tipo_sede ?? '';
         $this->editLocalidad = $sede->localidad ?? '';
+        $this->editProvinciaId = $sede->provincia_id;
+        $this->editLatitud = $sede->latitud;
+        $this->editLongitud = $sede->longitud;
     }
 
     public function update()
@@ -183,6 +268,9 @@ class LocationManager extends Component
             'editDireccion' => 'nullable|string|max:255',
             'editTipoSede' => 'nullable|string|max:100',
             'editLocalidad' => 'nullable|string|max:100',
+            'editProvinciaId' => 'nullable|exists:provincias,id',
+            'editLatitud' => 'nullable|numeric|between:-90,90',
+            'editLongitud' => 'nullable|numeric|between:-180,180',
         ]);
 
         $sede = Sede::findOrFail($this->editingId);
@@ -191,6 +279,9 @@ class LocationManager extends Component
             'direccion' => $this->editDireccion ?: null,
             'tipo_sede' => $this->editTipoSede ?: null,
             'localidad' => $this->editLocalidad ?: null,
+            'provincia_id' => $this->editProvinciaId,
+            'latitud' => $this->editLatitud ?: null,
+            'longitud' => $this->editLongitud ?: null,
         ]);
 
         $this->loadSedes();
@@ -198,22 +289,9 @@ class LocationManager extends Component
         session()->flash('message', 'Sede actualizada exitosamente');
     }
 
-    public function delete(int $id)
-    {
-        $sede = Sede::findOrFail($id);
-        $sede->delete();
-        $this->loadSedes();
-        session()->flash('message', 'Sede eliminada exitosamente');
-    }
 
-    public function cancelEdit()
-    {
-        $this->editingId = null;
-        $this->editNombreSede = '';
-        $this->editDireccion = '';
-        $this->editTipoSede = '';
-        $this->editLocalidad = '';
-    }
+
+
 
     private function resetForm()
     {
@@ -221,6 +299,9 @@ class LocationManager extends Component
         $this->newDireccion = '';
         $this->newTipoSede = '';
         $this->newLocalidad = '';
+        $this->newProvinciaId = null;
+        $this->newLatitud = '';
+        $this->newLongitud = '';
         $this->newTelefono = '';
         $this->newCorreo = '';
     }

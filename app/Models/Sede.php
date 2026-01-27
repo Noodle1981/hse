@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sede extends Model
 {
     /** @use HasFactory<\Database\Factories\SedeFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'nombre_sede',
@@ -18,6 +19,9 @@ class Sede extends Model
         'telefono',
         'tipo_sede',
         'localidad',
+        'provincia_id',
+        'latitud',
+        'longitud',
         'responsable_1_nombre',
         'responsable_1_cargo',
         'responsable_1_email',
@@ -33,6 +37,11 @@ class Sede extends Model
     public function empresa()
     {
         return $this->belongsTo(Empresa::class);
+    }
+
+    public function provincia()
+    {
+        return $this->belongsTo(Provincia::class);
     }
 
     public function users(): BelongsToMany

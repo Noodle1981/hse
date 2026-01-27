@@ -59,7 +59,7 @@
             </div>
 
             <div class="mt-6 flex justify-end gap-3">
-                <a href="{{ route('companies.index') }}" 
+                <a href="{{ route('gestor.companies.index') }}" 
                    class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                     Cancelar
                 </a>

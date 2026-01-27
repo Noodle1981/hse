@@ -14,6 +14,12 @@ class UserManager extends Component
 
     public string $search = '';
     public string $roleFilter = 'all';
+    public bool $showDeleted = false; // Toggle para ver eliminados
+
+    public function updatedShowDeleted()
+    {
+        $this->resetPage();
+    }
     
     // Formulario
     public bool $showForm = false;
@@ -72,8 +78,8 @@ class UserManager extends Component
             'apellidos' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($this->editingId)],
             'rol' => 'required|in:Administrador,Técnico',
-            'matricula' => 'nullable|string|max:50',
-            'telefono' => 'nullable|string|max:50',
+            'matricula' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($this->editingId)],
+            'telefono' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($this->editingId)],
             'estado' => 'required|in:activo,inactivo',
         ];
 
@@ -140,8 +146,10 @@ class UserManager extends Component
     public function delete()
     {
         if (!$this->userToDeleteId) return;
-
-        User::findOrFail($this->userToDeleteId)->delete();
+        
+        $user = User::findOrFail($this->userToDeleteId);
+        $user->update(['estado' => 'inactivo']); // Set status to inactive before soft delete
+        $user->delete();
         
         $this->cancelDelete();
         session()->flash('message', 'Usuario dado de baja exitosamente. (Datos históricos preservados)');
@@ -171,6 +179,11 @@ class UserManager extends Component
             $query->where('consultora_id', $currentUser->consultora_id);
         }
 
+        // 2. Toggled Trash View
+        if ($this->showDeleted) {
+            $query->onlyTrashed();
+        }
+
         if ($this->search) {
             $query->where(function($q) {
                 $q->where('nombres', 'like', "%{$this->search}%")
@@ -189,5 +202,15 @@ class UserManager extends Component
         return view('livewire.users.user-manager', [
             'users' => $users,
         ])->layout('components.layouts.app');
+    }
+
+    public function restore(int $id)
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+        $user->update(['estado' => 'activo']); // Automatically set back to active
+        
+        session()->flash('message', 'Usuario restaurado exitosamente.');
+        $this->resetPage();
     }
 }

@@ -25,6 +25,14 @@
                        class="w-full rounded-md border-gray-300 shadow-sm">
             </div>
             <div class="flex gap-2">
+                <div class="flex items-center mr-4">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
+                        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
+                        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Ver Eliminados</span>
+                    </label>
+                </div>
+
                 <select wire:model.live="roleFilter" class="flex-1 rounded-md border-gray-300 shadow-sm">
                     <option value="all">Todos los roles</option>
                     <option value="Administrador">Administradores</option>
@@ -163,8 +171,9 @@
                 @forelse($users as $user)
                     <tr>
                         <td class="px-6 py-4">
-                            <div class="font-medium text-gray-900">
+                            <div class="font-medium text-gray-900 {{ $user->trashed() ? 'line-through text-red-500' : '' }}">
                                 {{ $user->apellidos }}, {{ $user->nombres }}
+                                @if($user->trashed()) <span class="text-xs text-red-500 ml-1">(Baja)</span> @endif
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">
@@ -179,27 +188,37 @@
                             {{ $user->matricula ?: '-' }}
                         </td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 {{ $user->estado === 'activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }} rounded-full text-xs font-medium">
-                                {{ ucfirst($user->estado) }}
+                            <span class="px-2 py-1 {{ ($user->estado === 'activo' && !$user->trashed()) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }} rounded-full text-xs font-medium">
+                                {{ $user->trashed() ? 'Inactivo' : ucfirst($user->estado) }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                             <div class="flex items-center gap-3">
-                                <button wire:click="edit({{ $user->id }})"
-                                        class="text-indigo-600 hover:text-indigo-900 transition-colors duration-150 p-1 hover:bg-indigo-50 rounded"
-                                        title="Editar">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                    </svg>
-                                </button>
-                                @if($user->id !== auth()->id())
-                                    <button wire:click="confirmDelete({{ $user->id }}, '{{ $user->nombres }} {{ $user->apellidos }}')"
-                                            class="text-red-600 hover:text-red-900 transition-colors duration-150 p-1 hover:bg-red-50 rounded"
-                                            title="Eliminar">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 000-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                @if($user->trashed())
+                                    <button wire:click="restore({{ $user->id }})"
+                                            class="text-green-600 hover:text-green-900 transition-colors duration-150 p-1 hover:bg-green-50 rounded"
+                                            title="Restaurar Usuario">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                                         </svg>
                                     </button>
+                                @else
+                                    <button wire:click="edit({{ $user->id }})"
+                                            class="text-indigo-600 hover:text-indigo-900 transition-colors duration-150 p-1 hover:bg-indigo-50 rounded"
+                                            title="Editar">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                        </svg>
+                                    </button>
+                                    @if($user->id !== auth()->id())
+                                        <button wire:click="confirmDelete({{ $user->id }}, '{{ $user->nombres }} {{ $user->apellidos }}')"
+                                                class="text-red-600 hover:text-red-900 transition-colors duration-150 p-1 hover:bg-red-50 rounded"
+                                                title="Eliminar">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 000-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    @endif
                                 @endif
                             </div>
                         </td>

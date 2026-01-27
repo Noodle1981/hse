@@ -57,7 +57,7 @@
                     
                     <!-- Description -->
                     <p class="text-sm text-gray-600 mb-4">
-                        Gestión de técnicos y asignación de permisos
+                        Gestión de técnico y asignación de trabajo de campo
                     </p>
                     
                     <!-- Action Indicator -->

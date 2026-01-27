@@ -7,6 +7,7 @@ use App\Models\Empresa;
 use App\Models\Sede;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Validation\Rule;
 
 class EmployeeManager extends Component
 {
@@ -23,19 +24,39 @@ class EmployeeManager extends Component
     // Campos del formulario
     public $name, $last_name, $dni, $cuil, $puesto, $empresa_id, $sede_id;
 
-    protected $rules = [
-        'name' => 'required|string|max:255',
-        'last_name' => 'required|string|max:255',
-        'dni' => 'nullable|string|max:20',
-        'cuil' => 'nullable|string|max:20',
-        'puesto' => 'nullable|string|max:255',
-        'empresa_id' => 'required|exists:empresas,id',
-        'sede_id' => 'required|exists:sedes,id',
-    ];
+    // Soft Deletes
+    public bool $showDeleted = false;
+    public bool $confirmingDeletion = false;
+    public ?int $employeeToDeleteId = null;
+    public string $employeeToDeleteName = '';
+
+    protected function rules()
+    {
+        return [
+            'name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'dni' => [
+                'nullable', 
+                'string', 
+                'max:20', 
+                Rule::unique('employees', 'dni')->ignore($this->employeeId)
+            ],
+            'cuil' => [
+                'nullable', 
+                'string', 
+                'max:20', 
+                Rule::unique('employees', 'cuil')->ignore($this->employeeId)
+            ],
+            'puesto' => 'nullable|string|max:255',
+            'empresa_id' => 'required|exists:empresas,id',
+            'sede_id' => 'required|exists:sedes,id',
+        ];
+    }
 
     public function updatingSearch() { $this->resetPage(); }
     public function updatingEmpresaFilter() { $this->sedeFilter = ''; $this->resetPage(); }
     public function updatingSedeFilter() { $this->resetPage(); }
+    public function updatedShowDeleted() { $this->resetPage(); }
 
     public function create()
     {
@@ -57,9 +78,46 @@ class EmployeeManager extends Component
         $this->showForm = true;
     }
 
+    public function confirmDelete($id, $name)
+    {
+        $this->employeeToDeleteId = $id;
+        $this->employeeToDeleteName = $name;
+        $this->confirmingDeletion = true;
+    }
+
+    public function cancelDelete()
+    {
+        $this->confirmingDeletion = false;
+        $this->employeeToDeleteId = null;
+        $this->employeeToDeleteName = '';
+    }
+
+    public function delete()
+    {
+        if (!$this->employeeToDeleteId) return;
+
+        $employee = Employee::findOrFail($this->employeeToDeleteId);
+        $employee->delete();
+        
+        $this->cancelDelete();
+        session()->flash('message', 'Empleado dado de baja exitosamente.');
+    }
+
+    public function restore($id)
+    {
+        $employee = Employee::withTrashed()->findOrFail($id);
+        $employee->restore();
+        
+        session()->flash('message', 'Empleado restaurado exitosamente.');
+    }
+
     public function save()
     {
         $data = $this->validate();
+
+        // Convertir vacíos a null para evitar error de constraint unique
+        $data['dni'] = $data['dni'] ?: null;
+        $data['cuil'] = $data['cuil'] ?: null;
 
         if ($this->employeeId) {
             Employee::find($this->employeeId)->update($data);
@@ -87,9 +145,14 @@ class EmployeeManager extends Component
 
     public function render()
     {
-        $employees = Employee::query()
-            ->with(['empresa', 'sede'])
-            ->when($this->search, function($q) {
+        $query = Employee::query()
+            ->with(['empresa', 'sede']);
+
+        if ($this->showDeleted) {
+            $query->onlyTrashed();
+        }
+
+        $employees = $query->when($this->search, function($q) {
                 $q->where(function($sq) {
                     $sq->where('name', 'like', '%' . $this->search . '%')
                       ->orWhere('last_name', 'like', '%' . $this->search . '%')

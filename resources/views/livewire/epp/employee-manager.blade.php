@@ -21,7 +21,7 @@
 
         <!-- Filtros y Búsqueda -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                         <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -48,6 +48,13 @@
                     @endforeach
                 </select>
             </div>
+            <div class="flex justify-end">
+                 <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
+                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-ep-primary"></div>
+                    <span class="ms-3 text-sm font-medium text-gray-900">Ver Eliminados</span>
+                </label>
+            </div>
         </div>
 
         <!-- Tabla de Empleados -->
@@ -70,7 +77,10 @@
                                     <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold mr-3">
                                         {{ substr($emp->name, 0, 1) }}{{ substr($emp->last_name, 0, 1) }}
                                     </div>
-                                    <div class="text-sm font-bold text-gray-900">{{ $emp->full_name }}</div>
+                                    <div class="text-sm font-bold {{ $emp->trashed() ? 'text-red-500 line-through' : 'text-gray-900' }}">
+                                        {{ $emp->full_name }}
+                                        @if($emp->trashed()) <span class="text-xs ml-1 no-underline font-normal">(Baja)</span> @endif
+                                    </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
@@ -86,9 +96,18 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end gap-3">
-                                    <button wire:click="edit({{ $emp->id }})" class="text-ep-primary hover:text-ep-primary-dark transition-colors">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                                    </button>
+                                    @if($emp->trashed())
+                                        <button wire:click="restore({{ $emp->id }})" class="text-green-600 hover:text-green-800 transition-colors" title="Restaurar">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        </button>
+                                    @else
+                                        <button wire:click="edit({{ $emp->id }})" class="text-ep-primary hover:text-ep-primary-dark transition-colors" title="Editar">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                        </button>
+                                        <button wire:click="confirmDelete({{ $emp->id }}, '{{ $emp->full_name }}')" class="text-red-500 hover:text-red-700 transition-colors" title="Eliminar">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
