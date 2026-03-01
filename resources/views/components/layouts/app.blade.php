@@ -132,7 +132,7 @@
 
                     <!-- Visitas (diferente para cada rol) -->
                     <!-- Mis Tareas (Solo Técnico) -->
-                    @if(in_array(strtolower(auth()->user()->rol), ['técnico', 'tecnico', 'operario']))
+                    @if(auth()->user()->isTechnician())
                     <li>
                         <a href="{{ route('tecnico.checklists.tasks.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -186,7 +186,7 @@
                         </a>
                     </li>
                     @endif
-                    @if(auth()->user()->rol === 'Administrador')
+                    @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.visits.history') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -204,7 +204,7 @@
 
 
                     <!-- Plantillas de Checklist (Solo Admin) -->
-                    @if(auth()->user()->rol === 'Administrador')
+                    @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.checklists.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -219,18 +219,12 @@
                     </li>
                     @endif
 
-                    <!-- Capacitaciones -->
+                    <!-- Capacitaciones - Solo Gestores -->
+                    @if(auth()->user()->isAdmin())
                     <li>
-                        @if(auth()->user()->rol === 'Administrador')
                         <a href="{{ route('gestor.trainings.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.trainings.*') ? 'menu-item-active text-white' : '' }}">
-                        @else
-                        <!-- Asumimos que el Técnico usa la misma lista o una propia si existe en el router -->
-                        <a href="{{ route('tecnico.trainings.index') ?? '#' }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('tecnico.trainings.*') ? 'menu-item-active text-white' : '' }}">
-                        @endif
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
@@ -240,19 +234,15 @@
                             <span x-show="sidebarOpen" class="menu-text">Capacitaciones</span>
                         </a>
                     </li>
+                    @endif
 
 
-                {{-- Inspecciones --}}
+                {{-- Inspecciones (Asignaciones) - Solo Gestor --}}
+                    @if(auth()->user()->isAdmin())
                     <li>
-                        @if(auth()->user()->rol === 'Administrador')
-                            <a href="{{ route('gestor.assignments.index') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('gestor.assignments.*') || request()->routeIs('gestor.inspections.*') ? 'menu-item-active text-white' : '' }}">
-                        @else
-                            <a href="{{ route('tecnico.checklists.tasks.index') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('tecnico.checklists.tasks.*') || request()->routeIs('tecnico.inspections.*') ? 'menu-item-active text-white' : '' }}">
-                        @endif
+                        <a href="{{ route('gestor.assignments.index') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('gestor.assignments.*') || request()->routeIs('gestor.inspections.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
@@ -261,8 +251,9 @@
                             <span x-show="sidebarOpen" class="menu-text">Inspecciones</span>
                         </a>
                     </li>
+                    @endif
 
-                    @if(auth()->user()->rol === 'Administrador')
+                    @if(auth()->user()->isAdmin())
                     <!-- Hallazgos (Solo Admin) -->
                     <li>
                         <a href="{{ route('gestor.hallazgos.index') }}" 
@@ -293,7 +284,7 @@
                     @endif
 
                     <li>
-                        @if(auth()->user()->rol === 'Administrador')
+                        @if(auth()->user()->isAdmin())
                             <a href="{{ route('gestor.master-reports.index') }}" 
                                class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                       {{ request()->routeIs('gestor.master-reports.*') ? 'menu-item-active text-white' : '' }}">
@@ -354,7 +345,7 @@
 
 
 
-                    @if(auth()->user()->rol === 'Administrador')
+                    @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.advanced-executions.hub') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -368,7 +359,7 @@
                         </a>
                     </li>
                     @endif
-                    @if(auth()->user()->rol === 'Técnico')
+                    @if(auth()->user()->isTechnician())
                     <li>
                         <a href="{{ route('tecnico.annual-contract.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -384,7 +375,7 @@
                     @endif
 
                     
-                    @if(auth()->user()->rol === 'Administrador')
+                    @if(auth()->user()->isAdmin())
                     <!-- Administración Hub (Solo Admin) -->
                     <li>
                         <a href="{{ route('gestor.administration.hub') }}" 
