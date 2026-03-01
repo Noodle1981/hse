@@ -1,5 +1,5 @@
 # PRD — EPP SaaS + EPP Exchange (Nexo)
-**Versión:** 0.2 — MVP + Contrato de Integración  
+**Versión:** 0.3 — MVP Completado (Fases 1-3)  
 **Fecha:** 2026-03-01  
 **Autor:** Producto XamaSafe  
 
@@ -430,23 +430,23 @@ EPP_EXCHANGE_API_KEY=xxxxx
 
 ## 7. Roadmap de Implementación
 
-### Fase 1 — Base de datos extendida *(Siguiente sprint)*
+### ✅ Fase 1 — Base de datos extendida *(Completada)*
 
-- [ ] Migración: campos faltantes en `epp_delivery_items` (lote, fechas, estado, motivo_baja)
-- [ ] Migración: campos faltantes en `epp_items` (vida_util_fabricante_anios, requiere_control_critico, unidad_medida)
-- [ ] Crear modelo `EppReplacementAlert` con sus relaciones
+- [x] Migración: campos faltantes en `epp_delivery_items` (lote, fechas, estado, motivo_baja)
+- [x] Migración: campos faltantes en `epp_items` (vida_util_fabricante_anios, requiere_control_critico, unidad_medida)
+- [x] Crear modelo `EppReplacementAlert` con sus relaciones
 
-### Fase 2 — Motor de Triggers *(Sprint 2)*
+### ✅ Fase 2 — Motor de Triggers *(Completada)*
 
-- [ ] Job/Command diario: evalúa vencimientos y genera alertas
-- [ ] Vinculación de checklist ítem → epp_item (campo en DynamicQuestion o en la respuesta)
-- [ ] Disparador desde registro de incidente crítico
+- [x] Job `EvaluarVencimientosEppJob` diario: evalúa vencimientos y genera alertas
+- [ ] Vinculación de checklist ítem → epp_item (campo en DynamicQuestion o en la respuesta) ← *Pendiente Fase 2b*
+- [ ] Disparador desde registro de incidente crítico ← *Pendiente Fase 2b*
 
-### Fase 3 — Integración Mock Exchange *(Sprint 3)*
+### ✅ Fase 3 — Integración Mock Exchange + UI *(Completada)*
 
-- [ ] Crear `storage/app/mock_exchange/` con los JSON definidos en este PRD
-- [ ] Implementar `MockEppExchangeService` con interfaz `EppExchangeContract`
-- [ ] UI en panel de empresa: vista "Alertas de EPP + Cotizaciones disponibles"
+- [x] Crear `storage/app/mock_exchange/` con los JSON definidos en este PRD
+- [x] Implementar `MockEppExchangeService` con interfaz `EppExchangeContract`
+- [x] UI en panel de gestor: vista `/gestor/epp/alerts` — Alertas con cotizaciones del Exchange
 
 ### Fase 4 — Integración API Real *(Post-lanzamiento Exchange)*
 
