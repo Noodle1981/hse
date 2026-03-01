@@ -42,7 +42,6 @@ class ChecklistBuilder extends Component
         'is_required' => false,
         'help_text' => '',
         'section_id' => null,
-        'risk_id' => null,
     ];
 
     public string $optionInput = '';
@@ -103,7 +102,6 @@ class ChecklistBuilder extends Component
     public function mount(?int $id = null)
     {
         $this->loadCategories();
-        $this->loadRisks();
         
         if ($id) {
             $this->checklist = DynamicChecklist::with(['questions', 'sections'])->findOrFail($id);
@@ -137,7 +135,6 @@ class ChecklistBuilder extends Component
                     'is_required' => $q->is_required,
                     'help_text' => $q->help_text ?? '',
                     'section_id' => $q->section_id,
-                    'risk_id' => $q->risk_id,
                 ];
             })->toArray();
             
@@ -210,7 +207,6 @@ class ChecklistBuilder extends Component
             'is_required' => $question['is_required'] ?? false,
             'help_text' => $question['help_text'] ?? '',
             'section_id' => $question['section_id'] ?? null,
-            'risk_id' => $question['risk_id'] ?? null,
         ];
     }
 
@@ -279,14 +275,6 @@ class ChecklistBuilder extends Component
         }
     }
 
-    public function loadRisks()
-    {
-        // For simplicity, we load all risks. 
-        // In a real scenario, we might filter by company/sede if the checklist belongs to one.
-        $this->availableRisks = \App\Models\Risk::with('matrix')->get();
-    }
-
-    public $availableRisks = [];
 
 
 
@@ -396,7 +384,6 @@ class ChecklistBuilder extends Component
             'is_required' => false,
             'help_text' => '',
             'section_id' => null,
-            'risk_id' => null,
         ];
         $this->optionInput = '';
     }
@@ -468,7 +455,6 @@ class ChecklistBuilder extends Component
                 'is_required' => $q['is_required'] ?? false,
                 'help_text' => $q['help_text'] ?? null,
                 'section_id' => $sectionId,
-                'risk_id' => $q['risk_id'] ?? null,
             ]);
         }
 
@@ -481,7 +467,6 @@ class ChecklistBuilder extends Component
         return view('livewire.checklists.checklist-builder', [
             'categories' => $this->categories,
             'subcategories' => $this->subcategories,
-            'availableRisks' => $this->availableRisks,
         ])->layout('components.layouts.app');
     }
 }

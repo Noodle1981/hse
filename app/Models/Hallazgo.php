@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Risk;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +26,6 @@ class Hallazgo extends Model
         'fecha_resolucion',
         'origen_type',
         'origen_id',
-        'risk_id',
         'visit_certificate_id',
         'checklist_completion_id',
         'question_id',
@@ -83,14 +81,6 @@ class Hallazgo extends Model
     public function origen(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    /**
-     * Riesgo asociado en la matriz de riesgos (opcional)
-     */
-    public function risk(): BelongsTo
-    {
-        return $this->belongsTo(Risk::class);
     }
 
     /**

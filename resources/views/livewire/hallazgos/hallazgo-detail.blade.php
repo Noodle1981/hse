@@ -289,24 +289,6 @@
             <div class="bg-white rounded-lg shadow p-6">
                 <h3 class="font-bold text-ep-dark mb-4">Información Adicional</h3>
                 <div class="space-y-3 text-sm">
-                    <div>
-                        <span class="text-gray-600">Seguimientos:</span>
-                        <span class="font-semibold">{{ $hallazgo->seguimientos->count() }}</span>
-                    </div>
-                    <div>
-                        <span class="text-gray-600">Fotos:</span>
-                        <span class="font-semibold">{{ $hallazgo->fotos->count() }}</span>
-                    </div>
-                    <div>
-                        <span class="text-gray-600">Incidentes:</span>
-                        <span class="font-semibold">{{ $hallazgo->incidentes->count() }}</span>
-                    </div>
-                    @if($hallazgo->risk)
-                        <div class="pt-3 border-t">
-                            <span class="text-gray-600">Riesgo Vinculado:</span>
-                            <p class="font-semibold mt-1">{{ $hallazgo->risk->hazard }}</p>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>

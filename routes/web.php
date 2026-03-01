@@ -158,23 +158,12 @@ Route::middleware(['auth'])->group(function () {
             // Delete route if needed
         });
 
-        // Ejecuciones Avanzadas
+        // Ejecuciones Avanzadas (solo Contrato Anual)
         Route::middleware(['role:Administrador'])->group(function () {
-             Route::get('/risk-matrices/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
-        });
-
-        Route::prefix('risk-matrices')->name('risk-matrices.')->group(function () {
-            Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index');
-            Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
-            Route::get('/{matrixId}/editor', \App\Livewire\Risks\RiskMatrixEditor::class)->name('editor');
-            Route::get('/dashboard/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'dashboardExport'])->name('dashboard.pdf');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
-            // Contrato Anual
+            Route::get('/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
             Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
+            Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
         });
-        
-        // Contrato Anual PDF - fuera del grupo risk-matrices pero con nombre consistente?
-        Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
 
         // Informe Maestro (Informe de la Muerte)
         Route::prefix('master-reports')->name('master-reports.')->group(function () {
@@ -222,17 +211,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
         });
 
-        // Ejecuciones Avanzadas
-        Route::get('/risk-matrices/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
-
-        Route::prefix('risk-matrices')->name('risk-matrices.')->group(function () {
-            Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index'); // Evaluar
-            Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
-            Route::get('/{matrixId}/evaluate', \App\Livewire\Risks\RiskEvaluator::class)->name('evaluator');
-            Route::get('/dashboard/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'dashboardExport'])->name('dashboard.pdf');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
-            Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
-        });
+        // Ejecuciones Avanzadas (solo Contrato Anual)
+        Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
+        Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
 
         // Gestión EPP
         Route::prefix('epp')->name('epp.')->group(function () {

@@ -2,36 +2,6 @@
 description: Checklist
 ---
 
-Diseñar la capa de admin, bajo la ruta de admin, en la cual mantendrá el diseño de siempre, tanto sidebar como el resto
+Para la version minima, debemos trabajar en una nueva versión que tiene que ver con quitar http://127.0.0.1:8000/gestor/risk-matrices/dashboard-riesgos y http://127.0.0.1:8000/gestor/risk-matrices
 
-Se debe diseñar
-
-un link y una vista para generar los usuarios que son las consultoras, de cada consultoras tendrá que completar datos propios de una consultora, tambien consultar cantidad de técnicos, para preveer una cantidad de usuarios disponibles, 
-
-diseñar una vista dentro de la empresa que usa la plataforma, personalizacion o customización de la vista propia, osea que si quiere poner su logos, darle un color porpio, lo puede hacer, probablemente haya que trabajar un poco. pero tenlo preparado
-
-luego en la misma vista una lupa o algo que nose lleva a un dashboard interno tipo tabla, que muestre cuantas empresas estan haciendo sus inspecciones técnicas, nombres y ubicaciones de las mismas, checklist, capacitaciones, epp, constancias, matriz de riesgos, hallazgos, incidencias tiene por cada una, es para manejo de historial, demanda, todo lo que una empresa desarrolladora de software necesita.
-
-tambien lo mismo para ver cuanto técnicos hay.
-
-
-tambien un dashboar general con filtos, para analizar en detalles.
-
-
-reemplazar los nuevos seeder
-
-Credenciales de Acceso:
-   Admin: admin@xamasafe.com / password
-   Gestor: gestor1@empresa1.com / password
-   Gestor: gestor2@empresa2.com / password
-
-   Tecnico: tecnico2@empresa1.com / password
-   Tecnico: tecnico2@empresa1.com / password
-
-
-actualizar el seeder de IPERC - Operaciones Logísticas para gestor1 y tecnico1, con fechas de este año, arma plan anual para este 2026, recudir la cantidad de checklist que no pasaron.
-
-
-Crear un seeder de empresa nueva para gestor2 y tecnico2, con otro caso de uso por favor
-
-
+El motivo que viendo la competencias y las necesidades de las consultoras y técnicos, y la actualidad del mundo de SaaS, ya nadie quiere pagar por estos servicios, al menos aca en san juan argentina. Entonces nos enfocaremos a quitar estos elementos antes mencionados, debido a la complejidad, y en Ejecuciones avanzadas solo dejar Contrato Anual, ya que le permitirá hacer seguimientos de cumplimentación. La idea es que sea un sofwtare gratuito, adaptable, pero con la ventaja de conectarse a otra plataforma que tendrá una tienda de epp, que ese es nuestro modelo de negocio. para esta version necesito quitar esas dos elementos, matrices de riesgo y mapa global, quitar sus relaciones para que no se rompan. pero por supuesto que iremos revisando, uno por uno, cuando lo quites a lo que solicito. Haz un plan para implementar esos nuevos requerimientos, tiene que ser un plan metódico para que no pierda estabilidad, escalabilidad y trazabilidad.

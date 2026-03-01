@@ -6,7 +6,6 @@ use App\Models\GeneradorConstancia;
 use App\Models\Sede;
 use App\Models\DynamicInspection;
 use App\Models\Training;
-use App\Models\RiskEvaluation;
 use App\Models\EppDelivery;
 use Livewire\Component;
 use Illuminate\Support\Str;
@@ -29,7 +28,6 @@ class VisitCertificateWizard extends Component
     // Step 3: Actividades (NUEVO)
     public $selectedInspections = [];
     public $selectedTrainings = [];
-    public $selectedRiskEvaluations = [];
     public $selectedEppDeliveries = [];
     public $selectedHallazgos = [];
 
@@ -153,9 +151,6 @@ class VisitCertificateWizard extends Component
         if (!empty($this->selectedTrainings)) {
             $this->certificate->trainings()->attach($this->selectedTrainings);
         }
-        if (!empty($this->selectedRiskEvaluations)) {
-            $this->certificate->riskEvaluations()->attach($this->selectedRiskEvaluations);
-        }
         if (!empty($this->selectedEppDeliveries)) {
             $this->certificate->eppDeliveries()->attach($this->selectedEppDeliveries);
         }
@@ -204,14 +199,6 @@ class VisitCertificateWizard extends Component
             
             'trainings' => Training::where('sede_id', $this->sede_id)
                 ->whereBetween('date', [$startDate, $endDate])
-                ->get(),
-            
-            'riskEvaluations' => RiskEvaluation::where('user_id', auth()->id())
-                ->whereHas('risk.matrix', function($q) {
-                    $q->where('sede_id', $this->sede_id);
-                })
-                ->whereBetween('evaluation_date', [$startDate, $endDate])
-                ->with('risk:id,name')
                 ->get(),
             
             'eppDeliveries' => EppDelivery::where('user_id', auth()->id())

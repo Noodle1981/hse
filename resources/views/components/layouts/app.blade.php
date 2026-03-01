@@ -335,26 +335,35 @@
 
 
 
-                    <!-- (Oculto por solicitud)
+                    @if(auth()->user()->rol === 'Administrador')
                     <li>
-                        @if(auth()->user()->rol === 'Administrador')
-                            <a href="{{ route('gestor.advanced-executions.hub') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('gestor.advanced-executions.hub') || request()->routeIs('gestor.risk-matrices.*') || request()->routeIs('gestor.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
-                        @else
-                            <a href="{{ route('tecnico.advanced-executions.hub') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('tecnico.advanced-executions.hub') || request()->routeIs('tecnico.risk-matrices.*') || request()->routeIs('tecnico.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
-                        @endif
+                        <a href="{{ route('gestor.advanced-executions.hub') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('gestor.advanced-executions.hub') || request()->routeIs('gestor.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                                 </svg>
                             </span>
-                            <span x-show="sidebarOpen" class="menu-text">Ejecuciones Avanzadas</span>
+                            <span x-show="sidebarOpen" class="menu-text">Contrato Anual</span>
                         </a>
                     </li>
-                    -->
+                    @endif
+                    @if(auth()->user()->rol === 'Técnico')
+                    <li>
+                        <a href="{{ route('tecnico.annual-contract.index') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('tecnico.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen" class="menu-text">Contrato Anual</span>
+                        </a>
+                    </li>
+                    @endif
+
                     
                     @if(auth()->user()->rol === 'Administrador')
                     <!-- Administración Hub (Solo Admin) -->

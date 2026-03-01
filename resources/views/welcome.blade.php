@@ -53,8 +53,8 @@
                 <a href="#" class="hover:text-brand-500 transition-colors">Precios</a>
             </div>
             <div class="flex items-center gap-4">
-                <a href="#" class="text-sm font-semibold hover:text-brand-500">Log in</a>
-                <a href="#" class="bg-brand-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-brand-600 transition-all shadow-lg shadow-brand-900/10">
+                <a href="{{ route('login') }}" class="text-sm font-semibold hover:text-brand-500">Log in</a>
+                <a href="{{ route('login') }}" class="bg-brand-900 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-brand-600 transition-all shadow-lg shadow-brand-900/10">
                     Acceso Clientes
                 </a>
             </div>
@@ -75,10 +75,10 @@
                     Digitaliza el cumplimiento normativo y gestiona riesgos en tiempo real con una interfaz diseñada para el campo, no solo para la oficina.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2">
+                    <a href="{{ route('login') }}" class="bg-brand-500 hover:bg-brand-600 text-white px-8 py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2">
                         Empezar ahora
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                    </button>
+                    </a>
                     <button class="glass text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/10 transition-all">
                         Ver Demo
                     </button>

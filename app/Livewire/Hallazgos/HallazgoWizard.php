@@ -4,7 +4,6 @@ namespace App\Livewire\Hallazgos;
 
 use App\Models\Hallazgo;
 use App\Models\Sede;
-use App\Models\Risk;
 use App\Models\DynamicInspection;
 use App\Models\GeneradorConstancia;
 use Livewire\Component;
@@ -34,9 +33,6 @@ class HallazgoWizard extends Component
     public $origen_type = '';
     public $origen_id = '';
 
-    // Paso 4: Riesgo (opcional)
-    public $risk_id = '';
-
     // Fotos (se manejan en el detalle después de crear)
     public $fotos = [];
 
@@ -64,10 +60,6 @@ class HallazgoWizard extends Component
 
         if ($this->currentStep >= 3 && $this->origen_type) {
             $rules['origen_id'] = 'required|integer';
-        }
-
-        if ($this->currentStep >= 4 && $this->risk_id) {
-            $rules['risk_id'] = 'exists:risks,id';
         }
 
         return $rules;
@@ -120,7 +112,6 @@ class HallazgoWizard extends Component
         $this->responsable_correccion = $hallazgo->responsable_correccion;
         $this->origen_type = $hallazgo->origen_type;
         $this->origen_id = $hallazgo->origen_id;
-        $this->risk_id = $hallazgo->risk_id;
     }
 
     public function nextStep()
@@ -193,11 +184,6 @@ class HallazgoWizard extends Component
             $data['origen_id'] = $this->origen_id;
         }
 
-        // Riesgo (opcional)
-        if ($this->risk_id) {
-            $data['risk_id'] = $this->risk_id;
-        }
-
         // Visit association (if created from visit context)
         if ($this->visitId) {
             $data['visit_certificate_id'] = $this->visitId;
@@ -232,25 +218,8 @@ class HallazgoWizard extends Component
             ? $user->sedes()->orderBy('nombre_sede')->get()
             : Sede::orderBy('nombre_sede')->get();
 
-        $risks = Risk::with('matrix')->orderBy('hazard')->get();
-        
-        // Inspecciones recientes para vincular
-        $inspecciones = DynamicInspection::with('checklist')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->take(20)
-            ->get();
-
-        // Constancias recientes para vincular
-        $constancias = GeneradorConstancia::with('sede')
-            ->where('user_id', auth()->id())
-            ->latest()
-            ->take(20)
-            ->get();
-
         return view('livewire.hallazgos.hallazgo-wizard', [
             'sedes' => $sedes,
-            'risks' => $risks,
             'inspecciones' => $inspecciones,
             'constancias' => $constancias,
         ])->layout('components.layouts.app');
