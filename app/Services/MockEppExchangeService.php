@@ -16,6 +16,28 @@ class MockEppExchangeService implements EppExchangeContract
         $this->loadMockData();
     }
 
+    /**
+     * MOCK WEBHOOK: Simula la confirmación de una orden comprada en EPP Exchange.
+     * Retorna el payload final que mandaría la plataforma B, incluyendo el ID
+     * de la orden de compra y trazabilidad base (lote ficticio).
+     */
+    public function simulateOrderConfirmation(\App\Models\EppReplacementAlert $alert): array
+    {
+        // Generar IDs aleatorios para dar realismo a la simulación
+        $fakeOrderId = 'EX-' . now()->year . '-' . str_pad(rand(1000, 9999), 5, '0', STR_PAD_LEFT);
+        $proveedor = collect($this->getProviders())->random();
+
+        return [
+            'exchange_order_id'            => $fakeOrderId,
+            'lote'                         => 'LOT-SIM-' . strtoupper(substr(md5($fakeOrderId), 0, 8)),
+            'fecha_fabricacion'            => now()->subMonths(rand(1,6))->toDateString(),
+            'fecha_vencimiento_fabricante' => now()->addYears(rand(2,5))->toDateString(),
+            'proveedor'                    => $proveedor,
+            'cantidad'                     => $alert->cantidad_requerida,
+            'timestamp'                    => now()->toIso8601String(),
+        ];
+    }
+
     protected function loadMockData()
     {
         $productsFile = storage_path('app/mock_exchange/products.json');

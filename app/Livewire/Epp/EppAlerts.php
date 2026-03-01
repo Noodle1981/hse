@@ -22,15 +22,32 @@ class EppAlerts extends Component
     }
 
     /**
-     * Marca la alerta como "comprada", simulando que el usuario generó la orden de compra.
+     * Marca la alerta como "comprada" simulando el webhook de respuesta de EPP Exchange.
+     * Al recibir la confirmación de la otra plataforma, se actualiza el stock y se guarda el order ID.
      */
     public function markAsOrdered($alertId)
     {
-        $alert = EppReplacementAlert::find($alertId);
-        if ($alert) {
-            $alert->update(['status' => EppReplacementAlert::STATUS_COMPRADA]);
-            session()->flash('message', "Pedido de reposición generado para {$alert->eppItem->nombre}.");
-            Log::info("EppAlerts: Alerta {$alertId} marcada como COMPRADA por el usuario.");
+        $alert = EppReplacementAlert::with(['eppItem', 'empresa'])->find($alertId);
+        
+        if ($alert && $alert->status !== EppReplacementAlert::STATUS_COMPRADA) {
+            
+            // 1. Simular la llamada a EPP Exchange y obtener respuesta (Mock)
+            $exchangeService = app(\App\Services\MockEppExchangeService::class);
+            $confirmacion = $exchangeService->simulateOrderConfirmation($alert);
+            
+            // 2. Cierre de ciclo: Actualizar Alerta con el ID de Orden de Exchange
+            $alert->update([
+                'status' => EppReplacementAlert::STATUS_COMPRADA,
+                'exchange_order_id' => $confirmacion['exchange_order_id'],
+            ]);
+
+            // 3. Incremento del stock físico en el inventario
+            if ($alert->eppItem) {
+                $alert->eppItem->increment('stock_actual', $alert->cantidad_requerida);
+            }
+
+            session()->flash('message', "Pedido confirmado. Se recibieron {$alert->cantidad_requerida} unid. (Ref: {$confirmacion['exchange_order_id']})");
+            Log::info("EppAlerts: Webhook Simulado - Alerta {$alertId} cerrada exitosamente con stock actualizado.");
         }
     }
 

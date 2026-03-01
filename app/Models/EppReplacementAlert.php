@@ -38,6 +38,7 @@ class EppReplacementAlert extends Model
         'motivo',
         'status',
         'exchange_response',
+        'exchange_order_id',
     ];
 
     protected $casts = [

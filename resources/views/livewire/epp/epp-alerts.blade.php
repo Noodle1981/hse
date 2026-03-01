@@ -114,9 +114,23 @@
                                     @endif
                                 </div>
                             @else
-                                <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase {{ $alert->status === 'comprada' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">
-                                    {{ $alert->status }}
-                                </span>
+                                @if($alert->status === 'comprada')
+                                    <div class="flex flex-col items-end">
+                                        <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase bg-emerald-100 text-emerald-700 flex items-center gap-1 shadow-sm">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            COMPRA CONFIRMADA
+                                        </span>
+                                        @if($alert->exchange_order_id)
+                                            <span class="text-[10px] text-gray-500 mt-1 mr-1 font-mono bg-gray-100 px-2 py-0.5 rounded border border-gray-200" title="Exchange Order ID">
+                                                Ref: {{ $alert->exchange_order_id }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                @else
+                                    <span class="px-4 py-1.5 rounded-full text-xs font-bold uppercase bg-gray-100 text-gray-600">
+                                        {{ $alert->status }}
+                                    </span>
+                                @endif
                             @endif
                         </div>
                     </div>
