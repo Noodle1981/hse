@@ -76,6 +76,6 @@ class EppAlerts extends Component
         ];
 
         return view('livewire.epp.epp-alerts', compact('alerts', 'counts'))
-            ->layout('layouts.app');
+            ->layout('components.layouts.app');
     }
 }
