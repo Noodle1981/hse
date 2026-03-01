@@ -1,5 +1,5 @@
 # PRD — EPP SaaS + EPP Exchange (Nexo)
-**Versión:** 0.3 — MVP Completado (Fases 1-3)  
+**Versión:** 0.4 — Trazabilidad Legal (Res. 18/2025)  
 **Fecha:** 2026-03-01  
 **Autor:** Producto XamaSafe  
 
@@ -140,6 +140,61 @@ Antes de que un Trigger genere una Solicitud a la Tienda (EPP Exchange), el sist
    - **Escenario A (Stock Suficiente):** Si (`stock_actual` - necesidad) >= `stock_seguridad`: El sistema simplemente descuenta el stock local y genera el comprobante de entrega, notificando al pañolero interno. No contacta a la Tienda.
    - **Escenario B (Quiebre de Stock inminente):** Si hay stock para cubrir la necesidad pero el depósito quedaría por debajo del `stock_seguridad`, el sistema envía el EPP pero **también dispara** un Trigger de reposición a EPP Exchange para alertar al comprador que "El stock llegó a nivel crítico".
    - **Escenario C (Sin Stock):** No hay stock para cubrir la necesidad. El sistema bloquea el uso (informando la falta de EPP) y **dispara inmediatamente** el pedido a EPP Exchange.
+
+---
+
+## 3.5 Marco Legal de Trazabilidad — Resolución 18/2025
+
+> **Vigencia:** 1° de octubre de 2025. Reemplaza el antiguo "Sello S" de IRAM.
+
+### Qué exige la norma
+
+Todo EPP que ingresa al mercado argentino **a partir del 1/10/2025** debe incluir un **código QR visible e indeleble** en el producto o su envase primario, colocado antes de la comercialización. El QR debe dar acceso inmediato a:
+
+| Dato | Descripción |
+|------|-------------|
+| **Declaración Jurada de Conformidad** | Del fabricante o importador |
+| **Ficha técnica completa** | Norma aplicada, tipo de riesgo cubierto |
+| **Certificación vigente** | Qué certifica, emitida por qué organismo |
+| **Número de lote** | Identificación del lote de fabricación |
+| **Fechas de fabricación y vencimiento** | Para proyección de vida útil |
+
+> **Importante:** Los productos fabricados **antes** de la norma aún pueden circular sin QR hasta agotar stock. La plataforma debe soportar ambos modos: registro por QR (norma nueva) y carga manual de sello S (norma vieja).
+
+### Dos dimensiones de QR en el Nexo
+
+La plataforma maneja **dos tipos de QR complementarios**:
+
+```
+QR del fabricante (Res. 18/2025)              QR de XamaSafe (por acto de entrega)
+─────────────────────────────────             ──────────────────────────────────────
+• Identifica el PRODUCTO                       • Identifica la ASIGNACIÓN al trabajador
+• Contiene lote, norma, certificación          • Contiene delivery_item_id único (UUID)
+• Lo coloca el fabricante/importador           • Lo genera la plataforma al hacer entrega
+• Alimenta la ficha del EPP Exchange           • Se imprime en la constancia SRT 299/11
+• Permanece en el producto siempre             • El técnico lo escanea en visitas futuras
+```
+
+### Cómo aprovecha el Nexo este QR
+
+```
+EPP en campo (casco, arnés, etc.)
+    └── QR Res. 18/2025 (del fabricante)  ← Ya viene en el producto
+         └── Técnico escanea con app XamaSafe
+              └── Sistema valida:
+                   ├── ¿Producto original? (cotejando DB Exchange / fabricante)
+                   ├── ¿Estado del lote? (¿alguna unidad del lote fue dada de baja?)
+                   ├── ¿Vida útil vigente? (fecha fabricación + vida_util_fabricante_anios)
+                   └── ¿Está asignado a este trabajador? (cross con epp_delivery_items)
+```
+
+### Marcas relevantes ya alineadas
+
+| Marca | Tecnología | Relevancia para el Nexo |
+|-------|-----------|------------------------|
+| **Libus** | QR en documentación y brochures | Permite descargar certificaciones |
+| **MSA Safety** | MSA id Tag (tag digital por dispositivo) | Asignación digital por trabajador, sincronizable con nuestra API |
+| **3M** | Sensor Uvicator (cambio de color UV) | Indicador físico de degradación; nuestro sistema puede capturarlo como dato |
 
 ---
 
@@ -397,12 +452,15 @@ EPP_EXCHANGE_API_KEY=xxxxx
 
 ```
 1. Técnico hace visita y marca ítem crítico "No Conforme" en checklist
+   [OPCIÓN A] → Escanea QR del EPP con la app (Res. 18/2025) ← **Néxo legal**
+   [OPCIÓN B] → Marca manualmente el epp_item vinculado al checklist (Sello S legacy)
        ↓
-2. Sistema detecta que el ítem del checklist tiene epp_item_id vinculado
+2. Sistema detecta el epp_item_id vinculado al ítem de checklist
+   └── Verifica lote: ¿otras unidades del mismo lote también están en campo? ← Alerta masiva de lote
        ↓
 3. Módulo de Inventario evalúa:
    ¿Hay `stock_actual` para cubrir la baja sin perforar el `stock_seguridad`?
-   ├── SÍ → Se repone del pañol / depósito local internamente. Fin.
+   ├── SÍ → Se repone del pañol / depósito local. Fin.
    └── NO → Pasa al paso 4...
        ↓
 4. Se crea EppReplacementAlert {
@@ -413,17 +471,19 @@ EPP_EXCHANGE_API_KEY=xxxxx
    [MVP] → Devuelve datos del products.json + providers.json filtrados
    [PROD] → Llama a POST /api/v1/replacement-requests en EPP Exchange
        ↓
-6. La empresa ve en su panel: 
+6. La empresa ve en su panel:
    "Se necesitan comprar 50 cascos (30 para reposición inmediata + 20 para stock de seguridad) — 3 proveedores disponibles"
-   con precios referenciales y scorecard de cada proveedor
+   con precios referenciales, scorecard y enlace a certificación Res. 18/2025 de cada proveedor
        ↓
 7. Empresa aprueba la cotización → (MVP: simula confirmación)
                                     (PROD: genera orden en EPP Exchange)
        ↓
 8. EPP Exchange envía webhook a EPP SaaS con datos de la compra
+   └── Incluye: exchange_order_id, lote, fecha_fabricacion, fecha_vencimiento_fabricante
        ↓
-9. Al recibir la mercadería, el Módulo de Inventario sube el `stock_actual` y 
-   se crean nuevos epp_delivery_items para los operarios.
+9. Al recibir la mercancía, el Gestor registra la entrega:
+   └── Se generan nuevos epp_delivery_items con `lote`, `exchange_order_id`, y `codigo_qr_trazabilidad`
+   └── El tecnico puede ahora entregar y el PDF de constancia incluye el QR ← Cierra ciclo legal
 ```
 
 ---
@@ -442,6 +502,17 @@ EPP_EXCHANGE_API_KEY=xxxxx
 - [ ] Vinculación de checklist ítem → epp_item (campo en DynamicQuestion o en la respuesta) ← *Pendiente Fase 2b*
 - [ ] Disparador desde registro de incidente crítico ← *Pendiente Fase 2b*
 
+### Fase 2b — Trazabilidad Legal QR (Res. 18/2025) ← **Siguiente sprint**
+
+> Ancla legal de la plataforma. Sin esto, la trazabilidad es incompleta.
+
+- [ ] Campo `codigo_qr_trazabilidad` en `epp_delivery_items` (UUID único auto-generado al entregar)
+- [ ] QR incluido en el PDF de constancia de entrega SRT 299/11
+- [ ] Vista pública `/qr/{token}` para escaneo en campo: muestra estado del ítem, norma, vencimiento
+- [ ] Modo de escaneo en wizard de visita: técnico escanea QR del EPP y el sistema vincula automáticamente el `epp_delivery_item`
+- [ ] Soporte para carga manual de datos (Sello S legacy): productos pre-norma sin QR físico
+- [ ] Alerta de lote cruzado: si un ítem del lote X falla, alertar sobre todas las unidades del lote X en campo
+
 ### ✅ Fase 3 — Integración Mock Exchange + UI *(Completada)*
 
 - [x] Crear `storage/app/mock_exchange/` con los JSON definidos en este PRD
@@ -459,9 +530,11 @@ EPP_EXCHANGE_API_KEY=xxxxx
 ## 8. Reglas de Negocio Clave
 
 | Regla | Descripción |
-|---|---|
+|---|—-|
 | **El técnico aprueba, no vende** | Ninguna cotización llega a la empresa sin validación del técnico de H&S. |
 | **Un item bajado nunca se reactiva** | Una vez `motivo_baja` registrado, el `epp_delivery_item` es inmutable. Solo se crea uno nuevo. |
-| **El proveedor sin Sello S se muestra marcado** | El sistema indica visualmente si el proveedor no tiene sello de conformidad IRAM, pero no lo oculta. |
+| **QR es obligatorio (post Oct-2025)** | Todo EPP entregado desde la plataforma debe generar `codigo_qr_trazabilidad`. Para productos pre-norma con Sello S: carga manual habilitada. |
+| **Alerta de lote cruzado** | Si un operario reporta falla en lote X, el sistema alerta sobre TODAS las unidades del lote X activas en campo, no solo la del afectado. |
+| **El proveedor sin QR vigente se marca** | El sistema indica si el proveedor en EPP Exchange comercializa bajo norma nueva (QR) o sello S legacy, pero no lo oculta. |
 | **La reposición cierra el ciclo** | Un ítem dado de baja con `exchange_order_id` se considera trazado. Sin ese campo, la auditoría queda incompleta. |
-| **Res. 18/2025 (QR)** | Todo ítem entregado desde Fase 2 genera un `codigo_qr_trazabilidad` único que puede escanearse en futuras visitas para validación instantánea. |
+| **Lectura bidireccional del QR** | El QR del fabricante (Res. 18/2025) alimenta la ficha del producto en la plataforma. El QR de XamaSafe (por entrega) acredita la asignación al trabajador. Son dos dimensiones complementarias. |
