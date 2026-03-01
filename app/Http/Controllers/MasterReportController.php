@@ -51,38 +51,12 @@ class MasterReportController extends Controller
             ->whereIn('status', ['completed', 'signed'])
             ->get();
 
-        $riskMatrix = $report->sede->riskMatrices()->with('risks.latestEvaluation')->latest()->first();
-
         return [
-            'visits' => $visits,
-            'checklists' => $visits->flatMap->checklistCompletions,
-            'trainings' => $visits->flatMap->trainings,
             'hallazgos' => $visits->flatMap->hallazgos,
             'incidentes' => $visits->flatMap->incidentes,
-            'risk_matrix' => $riskMatrix,
-            'heatmap' => $this->calculateHeatmap($riskMatrix),
             'annual_plan' => $report->sede->annualPlans()->where('year', $startDate->year)->get(),
         ];
     }
 
-    private function calculateHeatmap($matrix)
-    {
-        $heatmap = [];
-        for ($s = 5; $s >= 1; $s--) {
-            for ($p = 1; $p <= 5; $p++) {
-                $heatmap[$s][$p] = 0;
-            }
-        }
 
-        if (!$matrix) return $heatmap;
-
-        foreach ($matrix->risks as $risk) {
-            $lastEval = $risk->latestEvaluation;
-            if ($lastEval) {
-                $heatmap[$lastEval->severity][$lastEval->probability]++;
-            }
-        }
-
-        return $heatmap;
-    }
 }

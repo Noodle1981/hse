@@ -8,7 +8,6 @@ use App\Models\{
     Training,
     TrainingAttendance,
     EppDelivery,
-    RiskEvaluation,
     GeneradorConstancia
 };
 use Illuminate\Support\Facades\DB;
@@ -69,12 +68,6 @@ class TechnicianDashboard extends Component
                 'this_month' => EppDelivery::where('user_id', $user->id)
                     ->whereMonth('delivery_date', now()->month)->count(),
                 'total' => EppDelivery::where('user_id', $user->id)->count(),
-            ],
-            'my_risk_evaluations' => [
-                'pending' => RiskEvaluation::where('user_id', $user->id)
-                    ->whereNull('evaluation_date')->count(),
-                'this_month' => RiskEvaluation::where('user_id', $user->id)
-                    ->whereMonth('evaluation_date', now()->month)->count(),
             ],
             'my_visit_certificates' => [
                 'this_month' => GeneradorConstancia::where('user_id', $user->id)
@@ -166,8 +159,6 @@ class TechnicianDashboard extends Component
         return [
             'overdue_tasks' => ChecklistAssignment::where('user_id', $user->id)
                 ->overdue()->count(),
-            'pending_evaluations' => RiskEvaluation::where('user_id', $user->id)
-                ->whereNull('evaluation_date')->count(),
             'tasks_due_soon' => ChecklistAssignment::where('user_id', $user->id)
                 ->where('status', 'pending')
                 ->whereBetween('due_date', [now(), now()->addDays(3)])

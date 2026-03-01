@@ -11,8 +11,6 @@ use App\Models\{
     EppDelivery,
     Employee,
     EppItem,
-    Risk,
-    RiskEvaluation,
     AnnualPlan,
     GeneradorConstancia
 };
@@ -79,15 +77,6 @@ class AdminDashboard extends Component
                 'deliveries_this_month' => EppDelivery::whereMonth('delivery_date', now()->month)->count(),
                 'active_employees' => Employee::where('is_active', true)->count(),
                 'catalog_items' => EppItem::where('is_active', true)->count(),
-            ],
-            'risks' => [
-                'critical_risks' => Risk::whereHas('latestEvaluation', function($q) {
-                    $q->where('level', 'Crítico');
-                })->count(),
-                'high_risks' => Risk::whereHas('latestEvaluation', function($q) {
-                    $q->where('level', 'Alto');
-                })->count(),
-                'pending_evaluations' => Risk::whereDoesntHave('evaluations')->count(),
             ],
             'annual' => [
                 'compliance_percentage' => $this->calculateAnnualCompliance(),
@@ -247,10 +236,6 @@ class AdminDashboard extends Component
     {
         return [
             'overdue_assignments' => ChecklistAssignment::overdue()->count(),
-            'critical_risks_unevaluated' => Risk::whereDoesntHave('evaluations')
-                ->whereHas('matrix', function($q) {
-                    $q->where('status', 'active');
-                })->count(),
             'overdue_annual_activities' => AnnualPlan::where('status', 'overdue')->count(),
         ];
     }
