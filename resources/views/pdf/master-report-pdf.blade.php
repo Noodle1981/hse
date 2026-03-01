@@ -278,81 +278,7 @@
         </div>
 
         <div class="section">
-            <div class="section-header"><h3>4. Análisis de Riesgos (ISO 31000)</h3></div>
-            @if($data['risk_matrix'])
-                <div style="margin-bottom: 15px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #F69239;">
-                    <span style="font-size: 11px; font-weight: bold; color: #1e1e2d;">{{ $data['risk_matrix']->title }}</span><br>
-                    <span style="font-size: 8px; color: #64748b;">ÁREA: {{ $data['risk_matrix']->area }} | PROCESO: {{ $data['risk_matrix']->process }}</span>
-                </div>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 35%">Peligro / Riesgo</th>
-                            <th style="width: 20%">Tipo</th>
-                            <th>Consecuencia / Daño</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($data['risk_matrix']->risks->take(12) as $risk)
-                            <tr>
-                                <td><strong>{{ $risk->hazard }}</strong></td>
-                                <td>{{ $risk->type }}</td>
-                                <td style="color: #565674; font-style: italic;">{{ $risk->consequence }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="3" style="text-align: center;">No hay riesgos definidos.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @endif
-
-            @if($report->observaciones_matriz)
-                <div class="obs-container">
-                    <div class="observation-label">Evolución del Riesgo:</div>
-                    <div class="observation-box">{{ $report->observaciones_matriz }}</div>
-                </div>
-            @endif
-
-            <div class="no-break" style="text-align: center; margin-top: 20px;">
-                <div class="observation-label" style="margin-bottom: 10px;">Mapa de Calor de la Sede</div>
-                <table style="width: auto; margin: 0 auto; border-collapse: separate; border-spacing: 2px; border: none;">
-                    @foreach($data['heatmap'] as $s => $probabilities)
-                        <tr>
-                            <td style="border:none; font-size: 8px; vertical-align: middle; padding-right: 5px;">S{{ $s }}</td>
-                            @foreach($probabilities as $p => $count)
-                                @php
-                                    $score = $s * $p;
-                                    $bgColor = $score >= 17 ? '#f64e60' : ($score >= 10 ? '#ffa800' : ($score >= 5 ? '#ffcd13' : '#1bc5bd'));
-                                    $opacity = $count == 0 ? '0.2' : '1';
-                                @endphp
-                                <td style="width: 50px; height: 50px; background-color: {{ $bgColor }}; color: white; text-align: center; vertical-align: middle; font-size: 16px; font-weight: bold; border-radius: 4px; opacity: {{ $opacity }}; border: none;">
-                                    {{ $count ?: '' }}
-                                </td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                    <tr>
-                        <td style="border: none;"></td>
-                        @for($i=1; $i<=5; $i++)
-                            <td style="border: none; text-align: center; font-size: 8px; color: #b5b5c3; padding-top: 5px;">P{{ $i }}</td>
-                        @endfor
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="page-break"></div>
-
-    {{-- 4. HALLAZGOS E INCIDENTES --}}
-    <div class="content-wrapper">
-        <div class="header">
-            <span class="header-meta">Seguridad Operativa</span>
-            <span class="header-title">5. Hallazgos e Incidentes</span>
-        </div>
-
-        <div class="section">
+            <div class="section-header"><h3>4. Análisis Operativo: Hallazgos e Incidentes</h3></div>
             <table>
                 <thead>
                     <tr>
@@ -403,10 +329,10 @@
             @endif
         </div>
 
-        {{-- SECCIÓN 6: CONCLUSIÓN --}}
+        {{-- SECCIÓN 5: CONCLUSIÓN --}}
         <div class="section" style="margin-top: 50px;">
             <div style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; border-top: 10px solid #F69239; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <h3 style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; color: #F69239; letter-spacing: 1px;">6. Resumen Ejecutivo Final</h3>
+                <h3 style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; color: #F69239; letter-spacing: 1px;">5. Resumen Ejecutivo Final</h3>
                 <div style="font-size: 12px; line-height: 1.8; color: #e2e8f0;">
                     {{ $report->resumen_ejecutivo ?: 'No se registró una conclusión final detallada para este periodo.' }}
                 </div>

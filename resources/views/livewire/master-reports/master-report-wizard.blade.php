@@ -156,91 +156,12 @@
                     </div>
                 </div>
 
-                {{-- SECCIÓN 4: MATRIZ DE RIESGO Y COMENTARIOS --}}
+                {{-- SECCIÓN 4 AHORA SON LOS HALLAZGOS E INCIDENTES --}}
+
+                {{-- SECCIÓN 4: HALLAZGOS e INCIDENTES (debajo de Matriz) --}}
                 <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
                     <div class="flex items-center mb-4 pb-2 border-b border-orange-100">
                         <div class="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold mr-3 text-sm">4</div>
-                        <h4 class="text-lg font-bold text-gray-800 uppercase tracking-tight">Matriz de Riesgo e Información de la Matriz</h4>
-                    </div>
-                    
-                    @if($monthlyData['risk_matrix'])
-                        <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
-                            <div class="flex items-center justify-between mb-4 border-b pb-2">
-                                <div>
-                                    <div class="text-xs font-bold text-gray-500 uppercase">Matriz de Riesgo Activa</div>
-                                    <div class="text-lg font-bold text-ep-primary">{{ $monthlyData['risk_matrix']->title }}</div>
-                                    <div class="text-sm text-gray-600">{{ $monthlyData['risk_matrix']->description }}</div>
-                                </div>
-                                <div class="bg-white p-2 rounded border shadow-sm">
-                                    <span class="text-xs font-bold uppercase text-gray-400 block border-b mb-1">Área / Proceso</span>
-                                    <span class="text-sm font-bold text-gray-700">{{ $monthlyData['risk_matrix']->area }} / {{ $monthlyData['risk_matrix']->process }}</span>
-                                </div>
-                            </div>
-
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full text-[10px] bg-white border rounded">
-                                    <thead class="bg-gray-100 font-bold uppercase">
-                                        <tr>
-                                            <th class="px-3 py-2 text-left border">Peligro / Riesgo</th>
-                                            <th class="px-3 py-2 text-left border">Tipo</th>
-                                            <th class="px-3 py-2 text-left border">Consecuencia / Daño</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($monthlyData['risk_matrix']->risks as $risk)
-                                            <tr>
-                                                <td class="px-3 py-2 border font-medium text-gray-800">{{ $risk->hazard }}</td>
-                                                <td class="px-3 py-2 border">{{ $risk->type }}</td>
-                                                <td class="px-3 py-2 border text-gray-600 italic">{{ $risk->consequence }}</td>
-                                            </tr>
-                                        @empty
-                                            <tr><td colspan="3" class="px-3 py-4 text-center text-gray-400">No hay riesgos definidos en esta matriz</td></tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    @endif
-
-                    <div class="mb-8">
-                        <label class="block text-sm font-bold text-gray-800 mb-2 uppercase italic">Evolución del Riesgo y Observaciones Técnicas</label>
-                        <textarea wire:model="observaciones_matriz" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="Comentarios sobre la evolución de riesgos..."></textarea>
-                    </div>
-
-                    {{-- MAPA DE CALOR REAL --}}
-                    <div class="mt-8">
-                        <div class="flex">
-                            <div class="flex items-center [writing-mode:vertical-lr] rotate-180 mr-4">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Impacto</span>
-                            </div>
-                            <div class="flex-1 max-w-[500px]">
-                                <div class="grid grid-cols-5 gap-1">
-                                    @foreach($monthlyData['heatmap'] as $s => $probabilities)
-                                        @foreach($probabilities as $p => $count)
-                                            @php
-                                                $score = $s * $p;
-                                                $bgColor = $score >= 17 ? 'bg-red-500' : ($score >= 10 ? 'bg-orange-500' : ($score >= 5 ? 'bg-yellow-500' : 'bg-green-500'));
-                                            @endphp
-                                            <div class="aspect-square flex items-center justify-center rounded-sm text-white font-bold text-lg {{ $bgColor }} {{ $count == 0 ? 'opacity-20' : '' }}">
-                                                {{ $count ?: '' }}
-                                            </div>
-                                        @endforeach
-                                    @endforeach
-                                </div>
-                                <div class="grid grid-cols-5 gap-1 mt-2 text-center">
-                                    @for($i=1; $i<=5; $i++)
-                                        <div class="text-[8px] font-bold text-gray-400 uppercase">P{{ $i }}</div>
-                                    @endfor
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- SECCIÓN 5: HALLAZGOS e INCIDENTES (debajo de Matriz) --}}
-                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100">
-                    <div class="flex items-center mb-4 pb-2 border-b border-orange-100">
-                        <div class="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold mr-3 text-sm">5</div>
                         <h4 class="text-lg font-bold text-gray-800 uppercase tracking-tight">Análisis de Hallazgos e Incidentes</h4>
                     </div>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -285,10 +206,10 @@
                     </div>
                 </div>
                
-                {{-- SECCIÓN 6: RESUMEN EJECUTIVO (Debajo de TODO) --}}
+                {{-- SECCIÓN 5: RESUMEN EJECUTIVO (Debajo de TODO) --}}
                 <div class="bg-ep-dark p-8 rounded-lg shadow-2xl border-t-8 border-ep-primary">
                     <div class="flex items-center mb-6 pb-2 border-b border-gray-700">
-                        <div class="w-10 h-10 bg-ep-primary rounded-full flex items-center justify-center text-white font-black mr-4 text-xl">6</div>
+                        <div class="w-10 h-10 bg-ep-primary rounded-full flex items-center justify-center text-white font-black mr-4 text-xl">5</div>
                         <h4 class="text-xl font-black text-white uppercase tracking-widest">Observación General (Resumen Ejecutivo Final)</h4>
                     </div>
                     <textarea wire:model="resumen_ejecutivo" rows="8" class="w-full rounded-md bg-gray-800 border-gray-600 text-white placeholder-gray-500 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-lg p-6" placeholder="Redacte aquí el resumen técnico final de la gestión del mes..."></textarea>

@@ -206,6 +206,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Capacitaciones
         Route::prefix('trainings')->name('trainings.')->group(function () {
+            Route::get('/', \App\Livewire\Trainings\TrainingIndex::class)->name('index');
             Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('create');
             Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('attendance');
             Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
