@@ -51,7 +51,7 @@ class EppAlerts extends Component
     {
         // Traemos las alertas base (con sus relaciones)
         $query = EppReplacementAlert::with(['eppItem', 'empresa', 'sede'])
-            ->orderByRaw("FIELD(urgencia, 'alta', 'media', 'baja')")
+            ->orderByRaw("CASE urgencia WHEN 'alta' THEN 1 WHEN 'media' THEN 2 WHEN 'baja' THEN 3 ELSE 4 END")
             ->latest();
 
         // Aplicamos el filtro de status o mostramos las pendientes+cotizadas por defecto
