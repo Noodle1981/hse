@@ -60,6 +60,8 @@ class EppDeliveryWizard extends Component
                 'lote'                         => '',
                 'fecha_fabricacion'            => '',
                 'fecha_vencimiento_fabricante' => '',
+                'tiene_qr_res18'               => false,
+                'qr_fabricante_url'            => '',
             ];
         }
     }
@@ -121,6 +123,8 @@ class EppDeliveryWizard extends Component
                         'lote'                         => !empty($data['lote']) ? $data['lote'] : null,
                         'fecha_fabricacion'            => !empty($data['fecha_fabricacion']) ? $data['fecha_fabricacion'] : null,
                         'fecha_vencimiento_fabricante' => !empty($data['fecha_vencimiento_fabricante']) ? $data['fecha_vencimiento_fabricante'] : null,
+                        'tiene_qr_res18'               => filter_var($data['tiene_qr_res18'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                        'qr_fabricante_url'            => !empty($data['qr_fabricante_url']) ? $data['qr_fabricante_url'] : null,
                         'estado'                       => \App\Models\EppDeliveryItem::ESTADO_ACTIVO,
                     ]);
                     

@@ -152,6 +152,26 @@
                                                         <input type="date" wire:model="selectedItems.{{ $item->id }}.fecha_vencimiento_fabricante" class="w-full bg-white border border-gray-100 rounded-lg px-2 py-1.5 focus:ring-ep-primary text-center" style="font-size: 10px;">
                                                     </div>
                                                 </div>
+
+                                                <!-- Soporte Res. 18/2025 (QR vs Sello S) -->
+                                                <div class="mt-2 p-2 bg-slate-50 flex flex-col gap-2 rounded-xl border border-slate-100">
+                                                    <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-gray-700">
+                                                        <input type="checkbox" wire:model.live="selectedItems.{{ $item->id }}.tiene_qr_res18" class="rounded text-ep-primary focus:ring-ep-primary w-4 h-4">
+                                                        ¿Equipo certificado bajo Res. 18/2025 (Tiene QR de Fábrica)?
+                                                    </label>
+                                                    
+                                                    @if(!empty($selectedItems[$item->id]['tiene_qr_res18']))
+                                                        <div class="animate-fade-in-up mt-1">
+                                                            <label class="block text-[9px] font-bold text-gray-500 uppercase mb-1">Escanear/Pegar URL del QR del fabricante (Opcional)</label>
+                                                            <input type="url" wire:model="selectedItems.{{ $item->id }}.qr_fabricante_url" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-1.5 focus:ring-ep-primary text-[10px]" placeholder="Ej: https://fabricante.com/qr/1234">
+                                                        </div>
+                                                    @else
+                                                        <div class="text-[10px] text-orange-700 font-semibold bg-orange-100/50 p-1.5 rounded-lg flex items-center gap-1 border border-orange-200">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                            Se registrará como producto pre-norma (Sello S).
+                                                        </div>
+                                                    @endif
+                                                </div>
                                             </div>
                                         @endif
                                     </div>
