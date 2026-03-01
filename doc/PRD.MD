@@ -64,12 +64,12 @@ Plataforma B (EPP Exchange)
 | `vida_util_meses` | ✅ Existe | Vida útil por uso, en meses |
 | `codigo_norma` | ✅ Existe | Ej: IRAM 3620 |
 | `descripcion` | ✅ Existe | |
-| `vida_util_fabricante_anios` | ❌ **Falta** | Vencimiento desde fabricación (Ej: arnés 10 años sin usar) |
+| `vida_util_fabricante_anios` | ✅ Implementado (Fase 1) | Vencimiento desde fabricación (Ej: arnés 10 años sin usar) |
 | `stock_actual` | ✅ Existe | Stock en almacén interno de la empresa/consultora |
-| `stock_seguridad` | ❌ **Falta** | Punto de pedido: si el stock baja de esto, sugiere comprar |
-| `exchange_product_id` | ❌ **Falta** | ID del producto en EPP Exchange (FK externa, nullable) |
-| `unidad_medida` | ❌ **Falta** | Par, Unidad, Caja |
-| `requiere_control_critico` | ❌ **Falta** | Bool: si este EPP activa baja obligatoria ante impacto/caída |
+| `stock_seguridad` | ✅ Implementado (Fase 1) | Punto de pedido: si el stock baja de esto, sugiere comprar |
+| `exchange_product_id` | ❌ Pendiente (Fase 4) | ID del producto en EPP Exchange (FK externa, nullable) |
+| `unidad_medida` | ✅ Implementado (Fase 1) | Par, Unidad, Caja |
+| `requiere_control_critico` | ✅ Implementado (Fase 1) | Bool: si este EPP activa baja obligatoria ante impacto/caída |
 
 #### Tabla `epp_delivery_items` (EPP entregado por acto)
 
@@ -79,26 +79,26 @@ Plataforma B (EPP Exchange)
 | `epp_item_id` | ✅ Existe | |
 | `cantidad` | ✅ Existe | |
 | `tipo_entrega` | ✅ Existe | inicial/reposicion_rotura/reposicion_fecha |
-| `lote` | ❌ **Falta** | Número de lote del fabricante |
-| `fecha_fabricacion` | ❌ **Falta** | Base para calcular vida útil de fábrica |
-| `fecha_vencimiento_fabricante` | ❌ **Falta** | Fecha dura de vencimiento (Res. 18/2025) |
-| `codigo_qr_trazabilidad` | ❌ **Falta** | Código único para escaneo en visitas (Res. 18/2025) |
-| `estado` | ❌ **Falta** | enum: activo / dado_de_baja / vencido / reemplazado |
-| `motivo_baja` | ❌ **Falta** | nullable: impacto / vencimiento / deterioro / otro |
-| `fecha_baja` | ❌ **Falta** | nullable |
-| `exchange_order_id` | ❌ **Falta** | nullable: ID del pedido en EPP Exchange que repuso este ítem |
+| `lote` | ✅ Implementado (Fase 1) | Número de lote del fabricante |
+| `fecha_fabricacion` | ✅ Implementado (Fase 1) | Base para calcular vida útil de fábrica |
+| `fecha_vencimiento_fabricante` | ✅ Implementado (Fase 1) | Fecha dura de vencimiento (Res. 18/2025) |
+| `codigo_qr_trazabilidad` | ✅ Implementado (Fase 2b) | UUID único por entrega, se imprime en PDF y permite escaneo en campo |
+| `tiene_qr_res18` | ✅ Implementado (Fase 2b) | Bool: si el producto viene con QR de fábrica según Res. 18/2025 |
+| `qr_fabricante_url` | ✅ Implementado (Fase 2b) | URL del QR del fabricante (opcional, para productos post-norma) |
+| `estado` | ✅ Implementado (Fase 1) | enum: activo / dado_de_baja / vencido / reemplazado |
+| `motivo_baja` | ✅ Implementado (Fase 1) | nullable: impacto / vencimiento / deterioro / otro |
+| `fecha_baja` | ✅ Implementado (Fase 1) | nullable |
+| `exchange_order_id` | ❌ Pendiente (Fase 3b) | nullable: ID del pedido en EPP Exchange que repuso este ítem |
 
-### 2.3 Nuevos campos requeridos — Migración propuesta
+### 2.3 Estado actual de los campos — Pendientes
 
-Los campos faltantes se agregarán mediante migraciones en dos fases:
+La mayoría de los campos están implementados. Queda pendiente:
 
-**Fase 1 — MVP (necesarios para los triggers del Nexo y Control de Inventario):**
-- `epp_items`: `vida_util_fabricante_anios`, `requiere_control_critico`, `unidad_medida`, `stock_seguridad`
-- `epp_delivery_items`: `lote`, `fecha_fabricacion`, `fecha_vencimiento_fabricante`, `estado`, `motivo_baja`, `fecha_baja`
+**Fase 3b — Cierre del ciclo de reposición (Webhook simulado):**
+- `epp_delivery_items`: `exchange_order_id` → se setea cuando la compra en Exchange es confirmada
 
-**Fase 2 — Integración Exchange:**
-- `epp_items`: `exchange_product_id`
-- `epp_delivery_items`: `codigo_qr_trazabilidad`, `exchange_order_id`
+**Fase 4 — Integración API Real (post-lanzamiento EPP Exchange):**
+- `epp_items`: `exchange_product_id` → FK al catálogo real de la Plataforma B
 
 ---
 
