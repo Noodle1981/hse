@@ -68,14 +68,19 @@ class EppCatalog extends Component
 
     // Campos del formulario
     public $nombre, $descripcion, $tipo, $vida_util_meses, $codigo_norma, $stock_actual;
+    public $vida_util_fabricante_anios, $unidad_medida = 'Unidad', $stock_seguridad = 0, $requiere_control_critico = false;
 
     protected $rules = [
         'nombre' => 'required|string|max:255',
         'descripcion' => 'nullable|string',
         'tipo' => 'required|string',
         'vida_util_meses' => 'nullable|integer|min:1',
+        'vida_util_fabricante_anios' => 'nullable|integer|min:1',
+        'unidad_medida' => 'required|string',
         'codigo_norma' => 'nullable|string|max:100',
         'stock_actual' => 'required|integer|min:0',
+        'stock_seguridad' => 'required|integer|min:0',
+        'requiere_control_critico' => 'boolean',
     ];
 
     public function getEppCatalogOptions()
@@ -102,8 +107,12 @@ class EppCatalog extends Component
         $this->descripcion = $item->descripcion;
         $this->tipo = $item->tipo;
         $this->vida_util_meses = $item->vida_util_meses;
+        $this->vida_util_fabricante_anios = $item->vida_util_fabricante_anios;
+        $this->unidad_medida = $item->unidad_medida;
         $this->codigo_norma = $item->codigo_norma;
         $this->stock_actual = $item->stock_actual;
+        $this->stock_seguridad = $item->stock_seguridad;
+        $this->requiere_control_critico = $item->requiere_control_critico;
         $this->showForm = true;
     }
 
@@ -136,8 +145,12 @@ class EppCatalog extends Component
         $this->descripcion = '';
         $this->tipo = '';
         $this->vida_util_meses = null;
+        $this->vida_util_fabricante_anios = null;
+        $this->unidad_medida = 'Unidad';
         $this->codigo_norma = '';
         $this->stock_actual = 0;
+        $this->stock_seguridad = 0;
+        $this->requiere_control_critico = false;
     }
 
     public function render()

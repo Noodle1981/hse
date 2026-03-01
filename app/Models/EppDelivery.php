@@ -34,7 +34,12 @@ class EppDelivery extends Model
     public function items()
     {
         return $this->belongsToMany(EppItem::class, 'epp_delivery_items')
-                    ->withPivot('cantidad', 'tipo_entrega')
+                    ->using(EppDeliveryItem::class)
+                    ->withPivot(
+                        'cantidad', 'tipo_entrega',
+                        'lote', 'fecha_fabricacion', 'fecha_vencimiento_fabricante',
+                        'estado', 'motivo_baja', 'fecha_baja'
+                    )
                     ->withTimestamps();
     }
 

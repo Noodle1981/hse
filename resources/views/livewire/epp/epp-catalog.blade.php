@@ -46,8 +46,10 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Elemento</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Stock</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider" title="Stock de Seguridad (Punto de pedido)">P. Pedido</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vda. Útil</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Normatividad</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-gray-500 uppercase tracking-wider" title="Control Crítico Activo">Control</th>
                         <th class="px-6 py-4 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
@@ -72,17 +74,43 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php
-                                    $stockClass = $item->stock_actual <= 10 ? 'bg-red-50 text-red-700 border-red-200' : ($item->stock_actual <= 50 ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-green-50 text-green-700 border-green-200');
+                                    $isCriticalStock = $item->stock_actual < $item->stock_seguridad;
+                                    $stockClass = $isCriticalStock ? 'bg-red-50 text-red-700 border-red-200' : 'bg-green-50 text-green-700 border-green-200';
                                 @endphp
-                                <span class="px-2.5 py-1 rounded-full text-xs font-bold border {{ $stockClass }}">
-                                    {{ $item->stock_actual }} unidades
-                                </span>
+                                <div class="flex items-center space-x-2">
+                                    <span class="px-2.5 py-1 rounded-full text-xs font-bold border {{ $stockClass }}">
+                                        {{ $item->stock_actual }} {{ Str::lower($item->unidad_medida) }}s
+                                    </span>
+                                    @if($isCriticalStock)
+                                        <span class="flex h-3 w-3 relative" title="Stock por debajo del punto de pedido ({{ $item->stock_seguridad }})">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
-                                {{ $item->vida_util_meses ? $item->vida_util_meses . ' meses' : 'N/A' }}
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium">
+                                {{ $item->stock_seguridad }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex flex-col">
+                                    <span class="text-sm text-gray-600 font-medium">{{ $item->vida_util_meses ? $item->vida_util_meses . ' meses' : '-' }}</span>
+                                    @if($item->vida_util_fabricante_anios)
+                                        <span class="text-xs text-gray-400">Fábrica: {{ $item->vida_util_fabricante_anios }} años</span>
+                                    @endif
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $item->codigo_norma ?: '-' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                @if($item->requiere_control_critico)
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-50 text-red-600" title="Requiere baja por impacto/caída">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    </span>
+                                @else
+                                    <span class="text-gray-300">-</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex justify-end gap-3">
@@ -166,12 +194,22 @@
 
                                 <div class="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label class="block text-sm font-bold text-gray-700 mb-2">Vida Útil (Meses)</label>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Vida Útil Uso (Meses)</label>
                                         <input type="number" wire:model="vida_util_meses" 
                                                class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all" 
                                                placeholder="Opcional">
                                         @error('vida_util_meses') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                                     </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Vida Útil Fábrica (Años)</label>
+                                        <input type="number" wire:model="vida_util_fabricante_anios" 
+                                               class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all" 
+                                               placeholder="Opcional (Ej: 3, 5, 10)">
+                                        @error('vida_util_fabricante_anios') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-sm font-bold text-gray-700 mb-2">Stock Actual</label>
                                         <input type="number" wire:model="stock_actual" 
@@ -179,14 +217,45 @@
                                                placeholder="Cantidad en inventario" min="0">
                                         @error('stock_actual') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                                     </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Stock Seguridad (Alerta)</label>
+                                        <input type="number" wire:model="stock_seguridad" 
+                                               class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all" 
+                                               placeholder="Punto de pedido" min="0">
+                                        @error('stock_seguridad') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Normativa / Código</label>
+                                        <input type="text" wire:model="codigo_norma" 
+                                               class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all"
+                                               placeholder="Ej: IRAM 3610">
+                                        @error('codigo_norma') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700 mb-2">Unidad Medida</label>
+                                        <select wire:model="unidad_medida" class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all">
+                                            <option value="Unidad">Unidad</option>
+                                            <option value="Par">Par</option>
+                                            <option value="Caja">Caja</option>
+                                        </select>
+                                        @error('unidad_medida') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    </div>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-bold text-gray-700 mb-2">Normativa / Código</label>
-                                    <input type="text" wire:model="codigo_norma" 
-                                           class="block w-full border-gray-200 rounded-xl bg-gray-50 focus:bg-white focus:ring-ep-primary focus:border-ep-primary text-sm p-3 transition-all"
-                                           placeholder="Ej: IRAM 3610">
-                                    @error('codigo_norma') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                                    <label class="flex items-start space-x-3 p-4 border border-gray-200 rounded-xl bg-gray-50 cursor-pointer hover:bg-white transition-all">
+                                        <div class="flex items-center h-5">
+                                            <input type="checkbox" wire:model="requiere_control_critico" 
+                                                   class="w-5 h-5 text-ep-primary border-gray-300 rounded focus:ring-ep-primary">
+                                        </div>
+                                        <div class="flex flex-col">
+                                            <span class="text-sm font-bold text-gray-900">Requiere Control Crítico</span>
+                                            <span class="text-xs text-gray-500 mt-1">Si está activo, indica que ante una caída o impacto este EPP debe darse de baja obligatoriamente y reponerse (ej: Arnés, Casco Clase B).</span>
+                                        </div>
+                                    </label>
                                 </div>
 
                                 <div>

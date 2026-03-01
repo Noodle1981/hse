@@ -55,8 +55,11 @@ class EppDeliveryWizard extends Component
             unset($this->selectedItems[$id]);
         } else {
             $this->selectedItems[$id] = [
-                'tipo_entrega' => 'inicial',
-                'cantidad' => 1
+                'tipo_entrega'                 => 'inicial',
+                'cantidad'                     => 1,
+                'lote'                         => '',
+                'fecha_fabricacion'            => '',
+                'fecha_vencimiento_fabricante' => '',
             ];
         }
     }
@@ -113,8 +116,12 @@ class EppDeliveryWizard extends Component
                 foreach ($this->selectedItems as $id => $data) {
                     $qty = (int) ($data['cantidad'] ?? 1);
                     $delivery->items()->attach($id, [
-                        'cantidad' => $qty,
-                        'tipo_entrega' => $data['tipo_entrega'],
+                        'cantidad'                     => $qty,
+                        'tipo_entrega'                 => $data['tipo_entrega'],
+                        'lote'                         => !empty($data['lote']) ? $data['lote'] : null,
+                        'fecha_fabricacion'            => !empty($data['fecha_fabricacion']) ? $data['fecha_fabricacion'] : null,
+                        'fecha_vencimiento_fabricante' => !empty($data['fecha_vencimiento_fabricante']) ? $data['fecha_vencimiento_fabricante'] : null,
+                        'estado'                       => \App\Models\EppDeliveryItem::ESTADO_ACTIVO,
                     ]);
                     
                     // Solo descontar stock si NO viene de una solicitud previa 

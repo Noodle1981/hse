@@ -121,18 +121,36 @@
                                         </div>
 
                                         @if(isset($selectedItems[$item->id]))
-                                            <div class="mt-4 pt-4 border-t border-ep-primary/20 grid grid-cols-2 gap-3" @click.stop>
-                                                <div>
-                                                    <label class="block text-[10px] font-bold text-ep-primary uppercase mb-1">Cant.</label>
-                                                    <input type="number" wire:model="selectedItems.{{ $item->id }}.cantidad" class="w-full bg-white border-0 rounded-lg text-xs p-2 focus:ring-ep-primary">
+                                            <div class="mt-4 pt-4 border-t border-ep-primary/20 flex flex-col gap-3" @click.stop>
+                                                <div class="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label class="block text-[10px] font-bold text-ep-primary uppercase mb-1">Cant.</label>
+                                                        <input type="number" wire:model="selectedItems.{{ $item->id }}.cantidad" class="w-full bg-white border-0 rounded-lg text-xs p-2 focus:ring-ep-primary" min="1">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[10px] font-bold text-ep-primary uppercase mb-1">Motivo</label>
+                                                        <select wire:model="selectedItems.{{ $item->id }}.tipo_entrega" class="w-full bg-white border-0 rounded-lg text-xs p-2 focus:ring-ep-primary">
+                                                            <option value="inicial">Inicial</option>
+                                                            <option value="reposicion_rotura">Rotura / Extravío</option>
+                                                            <option value="reposicion_fecha">Vencimiento</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <label class="block text-[10px] font-bold text-ep-primary uppercase mb-1">Motivo</label>
-                                                    <select wire:model="selectedItems.{{ $item->id }}.tipo_entrega" class="w-full bg-white border-0 rounded-lg text-xs p-2 focus:ring-ep-primary">
-                                                        <option value="inicial">Inicial</option>
-                                                        <option value="reposicion_rotura">Rotura</option>
-                                                        <option value="reposicion_fecha">Vencimiento</option>
-                                                    </select>
+                                                
+                                                <!-- Campos de Trazabilidad -->
+                                                <div class="grid grid-cols-3 gap-2 p-2 bg-white/50 rounded-xl border border-white">
+                                                    <div>
+                                                        <label class="block text-[9px] font-bold text-gray-500 uppercase mb-1 text-center" title="Lote del fabricante">Lote (Opc)</label>
+                                                        <input type="text" wire:model="selectedItems.{{ $item->id }}.lote" class="w-full bg-white border border-gray-100 rounded-lg px-2 py-1.5 focus:ring-ep-primary placeholder:text-gray-300 text-center" placeholder="L-123" style="font-size: 10px;">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[9px] font-bold text-gray-500 uppercase mb-1 text-center" title="Fecha de fabricación">Fabr. (Opc)</label>
+                                                        <input type="date" wire:model="selectedItems.{{ $item->id }}.fecha_fabricacion" class="w-full bg-white border border-gray-100 rounded-lg px-2 py-1.5 focus:ring-ep-primary text-center" style="font-size: 10px;">
+                                                    </div>
+                                                    <div>
+                                                        <label class="block text-[9px] font-bold text-gray-500 uppercase mb-1 text-center" title="Vencimiento de fábrica">Venc. (Opc)</label>
+                                                        <input type="date" wire:model="selectedItems.{{ $item->id }}.fecha_vencimiento_fabricante" class="w-full bg-white border border-gray-100 rounded-lg px-2 py-1.5 focus:ring-ep-primary text-center" style="font-size: 10px;">
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endif
