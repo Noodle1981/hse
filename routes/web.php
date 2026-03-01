@@ -97,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
         // Gestión EPP
          Route::prefix('epp')->name('epp.')->group(function () {
             Route::get('/catalog', \App\Livewire\Epp\EppCatalog::class)->name('catalog');
+            Route::get('/alerts', \App\Livewire\Epp\EppAlerts::class)->name('alerts'); // <- NUEVO
             Route::get('/import-employees', \App\Livewire\Epp\EmployeeImporter::class)->name('employees.import');
             Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('employees.index');
             Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
