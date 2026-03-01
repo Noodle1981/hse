@@ -1,0 +1,91 @@
+<?php
+
+namespace App\Services;
+
+use App\Contracts\EppExchangeContract;
+use App\Models\EppReplacementAlert;
+use Illuminate\Support\Facades\Log;
+
+class MockEppExchangeService implements EppExchangeContract
+{
+    protected array $products;
+    protected array $providers;
+
+    public function __construct()
+    {
+        $this->loadMockData();
+    }
+
+    protected function loadMockData()
+    {
+        $productsFile = storage_path('app/mock_exchange/products.json');
+        $providersFile = storage_path('app/mock_exchange/providers.json');
+
+        $this->products = file_exists($productsFile) ? json_decode(file_get_contents($productsFile), true)['products'] ?? [] : [];
+        $this->providers = file_exists($providersFile) ? json_decode(file_get_contents($providersFile), true)['providers'] ?? [] : [];
+    }
+
+    public function getProductsByTipo(?string $tipo): array
+    {
+        if (!$tipo) {
+            return $this->products;
+        }
+
+        // El tipo en EPP Exchange puede no ser exactamente igual al de nuestra BD
+        // Hacemos una búsqueda simple por "contains"
+        return array_values(array_filter($this->products, function ($product) use ($tipo) {
+            return stripos($product['tipo'], $tipo) !== false 
+                || stripos($product['nombre'], $tipo) !== false;
+        }));
+    }
+
+    public function getProviders(?string $productId = null): array
+    {
+        if (!$productId) {
+            return $this->providers;
+        }
+
+        $product = collect($this->products)->firstWhere('exchange_product_id', $productId);
+        
+        if (!$product || !isset($product['proveedores_disponibles'])) {
+            return [];
+        }
+
+        $providerIds = $product['proveedores_disponibles'];
+        return array_values(array_filter($this->providers, fn($p) => in_array($p['id'], $providerIds)));
+    }
+
+    public function submitAlert(EppReplacementAlert $alert): array
+    {
+        Log::info("MockEppExchangeService: Enviando alerta de tipo {$alert->trigger_type} para item {$alert->epp_item_id}");
+
+        // 1. Encontrar productos compatibles en el catálogo de Exchange
+        $eppType = $alert->eppItem->tipo ?? '';
+        $compatibleProducts = collect($this->getProductsByTipo($eppType))
+            ->take(3) // Sugerir max 3 productos
+            ->values()
+            ->all();
+
+        // 2. Extraer IDs de proveedores únicos de esos productos
+        $providerIds = collect($compatibleProducts)
+            ->pluck('proveedores_disponibles')
+            ->flatten()
+            ->unique();
+
+        // 3. Traer la info de esos proveedores
+        $suggestedProviders = collect($this->providers)
+            ->whereIn('id', $providerIds)
+            ->values()
+            ->all();
+
+        // 4. Simular la respuesta de cotización sugerida
+        return [
+            'status' => 'success',
+            'exchange_quote_id' => 'MOCK-QUOTE-' . date('Ymd-His') . '-' . rand(1000, 9999),
+            'timestamp' => now()->toIso8601String(),
+            'message' => 'Alerta recibida. Aquí hay proveedores que venden elementos de tipo ' . $eppType,
+            'suggested_products' => $compatibleProducts,
+            'suggested_providers' => $suggestedProviders,
+        ];
+    }
+}
