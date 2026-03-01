@@ -84,23 +84,7 @@
                 </div>
             </div>
 
-            {{-- Mis Evaluaciones de Riesgo --}}
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Evaluaciones (Mes)</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $kpis['my_risk_evaluations']['this_month'] }}</p>
-                    </div>
-                    <div class="bg-red-100 rounded-full p-3">
-                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 text-sm">
-                    <span class="text-red-600">{{ $kpis['my_risk_evaluations']['pending'] }} pendientes</span>
-                </div>
-            </div>
+
         </div>
 
         {{-- Charts Grid --}}
@@ -157,7 +141,7 @@
         </div>
 
         {{-- Mis Alertas --}}
-        @if($myAlerts['overdue_tasks'] > 0 || $myAlerts['pending_evaluations'] > 0 || $myAlerts['tasks_due_soon'] > 0)
+        @if($myAlerts['overdue_tasks'] > 0 || $myAlerts['tasks_due_soon'] > 0)
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
                 <div class="flex">
                     <div class="flex-shrink-0">
@@ -174,9 +158,6 @@
                                 @endif
                                 @if($myAlerts['tasks_due_soon'] > 0)
                                     <li>{{ $myAlerts['tasks_due_soon'] }} tareas vencen en 3 días</li>
-                                @endif
-                                @if($myAlerts['pending_evaluations'] > 0)
-                                    <li>{{ $myAlerts['pending_evaluations'] }} evaluaciones de riesgo pendientes</li>
                                 @endif
                             </ul>
                         </div>

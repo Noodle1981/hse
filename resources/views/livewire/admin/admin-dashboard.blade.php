@@ -84,24 +84,6 @@
                 </div>
             </div>
 
-            {{-- Riesgos --}}
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-red-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Riesgos Críticos</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $kpis['risks']['critical_risks'] }}</p>
-                    </div>
-                    <div class="bg-red-100 rounded-full p-3">
-                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 flex gap-4 text-sm">
-                    <span class="text-yellow-600">{{ $kpis['risks']['high_risks'] }} altos</span>
-                    <span class="text-gray-600">{{ $kpis['risks']['pending_evaluations'] }} pendientes</span>
-                </div>
-            </div>
 
             {{-- Contrato Anual --}}
             <div class="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
@@ -206,7 +188,7 @@
         </div>
 
         {{-- Alertas --}}
-        @if($alerts['overdue_assignments'] > 0 || $alerts['critical_risks_unevaluated'] > 0 || $alerts['overdue_annual_activities'] > 0)
+        @if($alerts['overdue_assignments'] > 0 || $alerts['overdue_annual_activities'] > 0)
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
                 <div class="flex">
                     <div class="flex-shrink-0">
@@ -220,9 +202,6 @@
                             <ul class="list-disc list-inside space-y-1">
                                 @if($alerts['overdue_assignments'] > 0)
                                     <li>{{ $alerts['overdue_assignments'] }} asignaciones vencidas</li>
-                                @endif
-                                @if($alerts['critical_risks_unevaluated'] > 0)
-                                    <li>{{ $alerts['critical_risks_unevaluated'] }} riesgos críticos sin evaluar</li>
                                 @endif
                                 @if($alerts['overdue_annual_activities'] > 0)
                                     <li>{{ $alerts['overdue_annual_activities'] }} actividades del contrato vencidas</li>
