@@ -16,9 +16,15 @@ class CheckRole
         if (!$request->user()) {
             return redirect('/login');
         }
-
         $userRole = strtolower($request->user()->rol);
-        $allowedRoles = array_map('strtolower', $roles);
+        
+        // Si Laravel pasa "Técnico,tecnico" como un solo parámetro por la versión/config, o si hay espacios
+        $parsedRoles = [];
+        foreach ($roles as $roleGroup) {
+            $parsedRoles = array_merge($parsedRoles, explode(',', $roleGroup));
+        }
+        
+        $allowedRoles = array_map('strtolower', array_map('trim', $parsedRoles));
 
         \Log::info('CheckRole Debug:', [
             'user' => $request->user()->email,
