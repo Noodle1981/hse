@@ -19,6 +19,7 @@
         "phpoffice/phpspreadsheet": "^1.30",
         "shuchkin/simplexlsx": "^1.1",
         "shuchkin/simplexlsxgen": "^1.5",
+        "simplesoftwareio/simple-qrcode": "*",
         "spatie/laravel-pdf": "^1.5"
     },
     "require-dev": {

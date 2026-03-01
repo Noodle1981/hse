@@ -21,16 +21,18 @@ class EppDeliveryItem extends Pivot
         // Campos de trazabilidad
         'lote',
         'fecha_fabricacion',
-        'fecha_vencimiento_fabricante',
-        'estado',
         'motivo_baja',
         'fecha_baja',
+        'codigo_qr_trazabilidad',
+        'tiene_qr_res18',
+        'qr_fabricante_url',
     ];
 
     protected $casts = [
         'fecha_fabricacion'            => 'date',
         'fecha_vencimiento_fabricante' => 'date',
         'fecha_baja'                   => 'datetime',
+        'tiene_qr_res18'               => 'boolean',
     ];
 
     // ============================================
@@ -41,6 +43,15 @@ class EppDeliveryItem extends Pivot
     const ESTADO_DADO_DE_BAJA = 'dado_de_baja';
     const ESTADO_VENCIDO      = 'vencido';
     const ESTADO_REEMPLAZADO  = 'reemplazado';
+
+    protected static function booted()
+    {
+        static::creating(function ($item) {
+            if (empty($item->codigo_qr_trazabilidad)) {
+                $item->codigo_qr_trazabilidad = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
 
     // ============================================
     // RELACIONES

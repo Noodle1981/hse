@@ -21,7 +21,8 @@
                 <th>Elemento (EPP)</th>
                 <th>Tipo</th>
                 <th class="text-center">Cant.</th>
-                <th>Motivo/Estado</th>
+                <th>Estado/Motivo</th>
+                <th class="text-center">Trazabilidad (QR)</th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +31,24 @@
                     <td>{{ $item->nombre }}</td>
                     <td>{{ $item->tipo }}</td>
                     <td class="text-center">{{ $item->pivot->cantidad ?? 1 }}</td>
-                    <td>{{ $delivery->observaciones ?? 'Entrega de rutina' }}</td>
+                    <td>{{ $delivery->observaciones ?? 'Entrega inicial' }}</td>
+                    <td class="text-center" style="vertical-align: middle;">
+                        @if($item->pivot->codigo_qr_trazabilidad)
+                            @php
+                                // Soporte para DOMPDF inyectando SVG en codificación base64
+                                $qrBase64 = base64_encode(\SimpleSoftwareIO\QrCode\Facades\QrCode::format('svg')
+                                    ->size(50)
+                                    ->margin(0)
+                                    ->generate(route('epp.qr.scan', $item->pivot->codigo_qr_trazabilidad)));
+                            @endphp
+                            <img src="data:image/svg+xml;base64,{!! $qrBase64 !!}" style="display:inline-block; width:50px; height:50px;" alt="QR Trazabilidad">
+                            <div style="font-size: 7px; color: #555; margin-top:2px;">UID: {{ substr($item->pivot->codigo_qr_trazabilidad, 0, 8) }}</div>
+                        @elseif($item->pivot->tiene_qr_res18 === false)
+                            <div style="font-size: 9px; font-weight:bold; color:#777; padding: 10px 0;">[SELLO S]<br><span style="font-weight:normal">Pre-norma</span></div>
+                        @else
+                            <span style="font-size: 10px; color: #999;">N/D</span>
+                        @endif
+                    </td>
                 </tr>
             @endforeach
         </tbody>
