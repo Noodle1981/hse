@@ -132,7 +132,7 @@
 
                     <!-- Visitas (diferente para cada rol) -->
                     <!-- Mis Tareas (Solo Técnico) -->
-                    @if(auth()->user()->rol === 'Técnico')
+                    @if(in_array(strtolower(auth()->user()->rol), ['técnico', 'tecnico', 'operario']))
                     <li>
                         <a href="{{ route('tecnico.checklists.tasks.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -219,12 +219,18 @@
                     </li>
                     @endif
 
-                    <!-- Capacitaciones (Solo Admin) -->
-                    @if(auth()->user()->rol === 'Administrador')
+                    <!-- Capacitaciones -->
                     <li>
+                        @if(auth()->user()->rol === 'Administrador')
                         <a href="{{ route('gestor.trainings.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.trainings.*') ? 'menu-item-active text-white' : '' }}">
+                        @else
+                        <!-- Asumimos que el Técnico usa la misma lista o una propia si existe en el router -->
+                        <a href="{{ route('tecnico.trainings.index') ?? '#' }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('tecnico.trainings.*') ? 'menu-item-active text-white' : '' }}">
+                        @endif
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/>
@@ -234,8 +240,6 @@
                             <span x-show="sidebarOpen" class="menu-text">Capacitaciones</span>
                         </a>
                     </li>
-
-                    @endif
 
 
                 {{-- Inspecciones --}}
