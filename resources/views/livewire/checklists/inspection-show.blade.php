@@ -1,3 +1,10 @@
+@php
+    $prefix = auth()->user()?->isAdmin() ? 'gestor' : 'tecnico';
+    $indexRoute   = $prefix . '.inspections.index';
+    $pdfPreview   = $prefix . '.inspections.pdf.preview';
+    $pdfDownload  = $prefix . '.inspections.pdf.download';
+@endphp
+
 <div class="py-6 min-h-screen bg-gray-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Breadcrumbs & Actions -->
@@ -6,7 +13,7 @@
                 <nav class="flex mb-2" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
-                            <a href="{{ route('inspections.index') }}" class="text-sm font-medium text-gray-500 hover:text-ep-primary">Historial</a>
+                            <a href="{{ route($indexRoute) }}" class="text-sm font-medium text-gray-500 hover:text-ep-primary">Historial</a>
                         </li>
                         <li>
                             <div class="flex items-center">
@@ -20,12 +27,12 @@
             </div>
             
             <div class="mt-4 md:mt-0 flex gap-3">
-                <a href="{{ route('inspections.pdf.preview', $inspection) }}" target="_blank"
+                <a href="{{ route($pdfPreview, $inspection) }}" target="_blank"
                    class="inline-flex items-center px-4 py-2 border border-blue-300 shadow-sm text-sm font-medium rounded-md text-blue-700 bg-white hover:bg-blue-50 transition-colors">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                     Vista Previa PDF
                 </a>
-                <a href="{{ route('inspections.pdf.download', $inspection) }}"
+                <a href="{{ route($pdfDownload, $inspection) }}"
                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-md shadow-sm text-white bg-ep-primary hover:bg-ep-primary-dark transition-all">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     Descargar Reporte

@@ -1,5 +1,18 @@
 <div class="py-6 min-h-screen bg-gray-50">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {{-- Banner contextual cuando viene de una visita --}}
+        @if($visitId)
+            <div class="mb-4 flex items-center gap-3 bg-teal-50 border border-teal-200 text-teal-800 px-4 py-3 rounded-xl shadow-sm">
+                <svg class="w-5 h-5 flex-shrink-0 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="text-sm font-medium">
+                    Estás completando este checklist dentro de una <strong>visita activa</strong>.
+                    Al finalizar, regresarás automáticamente a la constancia de visita.
+                </span>
+            </div>
+        @endif
         
         <!-- Progress Bar -->
         <div class="mb-8">

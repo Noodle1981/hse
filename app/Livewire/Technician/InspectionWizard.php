@@ -6,6 +6,8 @@ use App\Models\ChecklistAssignment;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
 use App\Models\DynamicAnswer;
+use App\Models\VisitCertificate;
+use App\Services\VisitService;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,6 +16,7 @@ class InspectionWizard extends Component
     public DynamicChecklist $checklist;
     public ?ChecklistAssignment $assignment = null;
     public ?DynamicInspection $inspection = null;
+    public ?int $visitId = null;
 
     public int $currentStep = 0;
     public array $answers = [];
@@ -26,17 +29,25 @@ class InspectionWizard extends Component
     public $totalSteps = 0;
     public $questionsBySection = []; // Cache de preguntas por sección
 
-    public function mount(int $id, ?int $assignment = null)
+    public function mount(int $id, mixed $assignment = null)
     {
         $this->checklist = DynamicChecklist::with(['sections.questions', 'questions' => function($q) {
             $q->whereNull('section_id');
         }])->findOrFail($id);
 
-        if ($assignment) {
+        if ($assignment instanceof ChecklistAssignment) {
+            abort_if($assignment->user_id !== auth()->id(), 403);
+            $this->assignment = $assignment;
+        } elseif ($assignment) {
             // Validar que la asignación pertenece al usuario autenticado
             $this->assignment = ChecklistAssignment::where('id', $assignment)
                 ->where('user_id', auth()->id())
                 ->firstOrFail();
+        }
+
+        // Leer visit_id desde la sesión (puesto al redirigir desde la visita)
+        if (session()->has('wizard_visit_id')) {
+            $this->visitId = session()->pull('wizard_visit_id');
         }
 
         // Preparar secciones
@@ -50,19 +61,38 @@ class InspectionWizard extends Component
         // Total steps: Intro (0) + Secciones (N) + Firmas (N+1)
         $this->totalSteps = count($this->sections) + 2;
 
-        // Inicializar respuestas
+        // Inicializar respuestas con valores por defecto
         foreach ($this->checklist->questions as $question) {
             $this->answers[$question->id] = $question->type === 'checkbox' ? [] : '';
         }
 
-        // Crear borrador inicial de inspección
-        $this->inspection = DynamicInspection::create([
-            'dynamic_checklist_id' => $this->checklist->id,
-            'user_id' => Auth::id(),
-            'sede_id' => $this->assignment ? $this->assignment->sede_id : null,
-            'checklist_assignment_id' => $this->assignment ? $this->assignment->id : null,
-            'status' => 'draft',
-        ]);
+        // Intentar reutilizar un borrador existente si hay asignación
+        $existingDraft = null;
+        if ($this->assignment) {
+            $existingDraft = DynamicInspection::where('checklist_assignment_id', $this->assignment->id)
+                ->where('status', 'draft')
+                ->latest('id')
+                ->first();
+        }
+
+        if ($existingDraft) {
+            // Retomar el borrador existente y cargar respuestas previas
+            $this->inspection = $existingDraft;
+            $existingDraft->load('answers');
+            foreach ($existingDraft->answers as $answer) {
+                $qId = $answer->dynamic_question_id;
+                $this->answers[$qId] = json_decode($answer->value, true) ?? $answer->value;
+            }
+        } else {
+            // Crear nuevo borrador
+            $this->inspection = DynamicInspection::create([
+                'dynamic_checklist_id' => $this->checklist->id,
+                'user_id' => Auth::id(),
+                'sede_id' => $this->assignment ? $this->assignment->sede_id : null,
+                'checklist_assignment_id' => $this->assignment ? $this->assignment->id : null,
+                'status' => 'draft',
+            ]);
+        }
 
         if ($this->assignment) {
             $this->assignment->update(['status' => 'in_progress']);
@@ -145,7 +175,7 @@ class InspectionWizard extends Component
         $this->saveProgress();
 
         $this->inspection->update([
-            'status' => $this->inspection->sede_id ? 'completed' : 'draft',
+            'status' => 'completed',
             'completed_at' => now(),
             'supervisor_name' => $this->supervisorName,
             'supervisor_signature' => $this->supervisorSignature,
@@ -153,10 +183,51 @@ class InspectionWizard extends Component
         ]);
 
         if ($this->assignment) {
-            $this->assignment->update(['status' => 'completed']);
+            // Si estamos en el contexto de una visita, registrar la completación via VisitService
+            if ($this->visitId) {
+                $visit = VisitCertificate::find($this->visitId);
+                if ($visit) {
+                    // Recopilar TODAS las preguntas: las de secciones + las sin sección
+                    $allQuestions = collect();
+                    foreach ($this->checklist->sections as $section) {
+                        $allQuestions = $allQuestions->merge($section->questions);
+                    }
+                    $allQuestions = $allQuestions->merge($this->checklist->questions);
+
+                    $formattedResponses = [];
+                    foreach ($allQuestions as $question) {
+                        $formattedResponses[] = [
+                            'question_id'    => $question->id,
+                            'question_label' => $question->label,
+                            'value'          => $this->answers[$question->id] ?? '',
+                            'observation'    => null,
+                        ];
+                    }
+
+                    try {
+                        app(VisitService::class)->completeChecklist(
+                            $visit,
+                            $this->assignment,
+                            $formattedResponses
+                        );
+                    } catch (\Exception $e) {
+                        \Log::error('VisitService::completeChecklist falló', ['error' => $e->getMessage()]);
+                        $this->assignment->update(['status' => 'completed']);
+                    }
+                }
+            } else {
+                $this->assignment->update(['status' => 'completed']);
+            }
         }
 
         session()->flash('message', '¡Inspección completada exitosamente!');
+
+        if ($this->visitId) {
+            $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+            return redirect()->route($prefix . '.visits.in-progress', $this->visitId)
+                ->with('message', '¡Checklist completado! Puedes continuar con la visita.');
+        }
+
         return redirect()->route('tecnico.inspections.show', $this->inspection->id);
     }
 

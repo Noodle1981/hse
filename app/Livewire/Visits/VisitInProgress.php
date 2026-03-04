@@ -161,7 +161,7 @@ class VisitInProgress extends Component
         $this->assignedChecklists = ChecklistAssignment::query()
             ->where('user_id', Auth::id())
             ->where('sede_id', $this->visit->sede_id)
-            ->where('status', 'pending') // Solo pendientes
+            ->whereIn('status', ['pending', 'in_progress']) // Pendientes o en progreso
             ->with(['checklist.categoryRelation', 'checklist.subcategoryRelation'])
             ->get();
 
@@ -264,11 +264,22 @@ class VisitInProgress extends Component
 
     public function openFillModal($assignmentId)
     {
-        $this->selectedAssignmentToFill = ChecklistAssignment::find($assignmentId);
-        
-        if ($this->selectedAssignmentToFill && $this->selectedAssignmentToFill->user_id === Auth::id()) {
-            $this->showFillModal = true;
+        $assignment = ChecklistAssignment::find($assignmentId);
+
+        if (!$assignment || $assignment->user_id !== Auth::id()) {
+            return;
         }
+
+        // Guardar visit_id en sesión para que el wizard pueda leerlo en mount()
+        session()->put('wizard_visit_id', $this->visit->id);
+
+        // Redirigir al wizard de inspección con contexto de visita
+        // assignment ahora es un parámetro de ruta, no query string
+        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+        return redirect()->route($prefix . '.checklists.fill', [
+            'id'         => $assignment->dynamic_checklist_id,
+            'assignment' => $assignment->id,
+        ]);
     }
 
     public function closeFillModal()

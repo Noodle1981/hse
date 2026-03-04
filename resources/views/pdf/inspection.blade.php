@@ -76,7 +76,7 @@
             <div style="margin-bottom: 25px; page-break-inside: avoid;">
                 {{-- Título de Sección --}}
                 <h3 style="font-size: 12pt; font-weight: bold; color: #111827; border-left: 4px solid #1e3a8a; padding-left: 10px; margin-bottom: 15px;">
-                    {{ $sections[$sectionId]->title ?? 'Preguntas Generales' }}
+                    {{ $sectionId && isset($sections[$sectionId]) ? $sections[$sectionId]->title : 'Preguntas Generales' }}
                 </h3>
 
                 {{-- Tabla de Preguntas --}}

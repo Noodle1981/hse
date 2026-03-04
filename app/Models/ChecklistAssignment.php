@@ -45,7 +45,12 @@ class ChecklistAssignment extends Model
 
     public function visitCompletion(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(VisitChecklistCompletion::class, 'checklist_assignment_id');
+        return $this->hasOne(VisitChecklistCompletion::class, 'checklist_assignment_id')->latest('id');
+    }
+
+    public function inspection(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(DynamicInspection::class, 'checklist_assignment_id')->latest('id');
     }
 
     // Scopes

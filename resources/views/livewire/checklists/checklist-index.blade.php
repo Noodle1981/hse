@@ -124,6 +124,11 @@
                                        title="Editar">
                                         ✏️ Editar
                                     </a>
+                                    <a href="{{ route('gestor.checklists.emulator', $checklist) }}"
+                                       class="px-3 py-1 bg-teal-600 text-white rounded hover:bg-teal-700 text-sm"
+                                       title="Emular">
+                                        📱 Emular
+                                    </a>
                                     <button wire:click="duplicate({{ $checklist->id }})"
                                             class="px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm"
                                             title="Duplicar">

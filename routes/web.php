@@ -137,6 +137,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', ChecklistIndex::class)->name('index');
             Route::get('/create', ChecklistBuilder::class)->name('create');
             Route::get('/{id}/edit', ChecklistBuilder::class)->name('edit');
+            Route::get('/{checklist}/emular', \App\Livewire\Checklists\ChecklistEmulator::class)->name('emulator');
+            Route::get('/{id}/fill/{assignment?}', \App\Livewire\Technician\InspectionWizard::class)->name('fill');
             Route::get('/{id}', ChecklistBuilder::class)->name('show'); // Añadida ruta show si es necesario
         });
 
@@ -191,7 +193,7 @@ Route::middleware(['auth'])->group(function () {
         // Checklists (Asignaciones y Llenado)
         Route::prefix('checklists')->name('checklists.')->group(function () {
              Route::get('/my-assignments', \App\Livewire\Technician\MyAssignments::class)->name('tasks.index'); // Mis Tareas / Inspecciones
-             Route::get('/{id}/fill', \App\Livewire\Technician\InspectionWizard::class)->name('fill');
+             Route::get('/{id}/fill/{assignment?}', \App\Livewire\Technician\InspectionWizard::class)->name('fill');
         });
 
         // Visitas

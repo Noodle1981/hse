@@ -1,0 +1,616 @@
+[
+    {
+        "title": "OBSERVACIÓN DE TAREA",
+        "description": "Formulario dinámico para la inspección de seguridad en tareas operativas. Evalúa el ambiente de trabajo, la actitud del personal y el estado de herramientas y EPP en tiempo real para prevenir incidentes laborales",
+        "registry_code": "EP – REG 001",
+        "is_active": true,
+        "category_id": 1,
+        "subcategory_id": 1,
+        "sections": [
+            {
+                "title": "AMBIENTE DE TRABAJO",
+                "description": "",
+                "order": 0,
+                "questions": [
+                    {
+                        "label": "1. Se observan elementos tirados en los lugares de circulación",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 0,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Se observan botellas, papeles, etc. tirados en el lugar de trabajo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 1,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Se observan machas de químicos en el suelo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 2,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Se observa peligros potenciales en el área de trabajo como huecos, barandas flojas o pisos levantados que pudiesen ocasionar accidentes.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 3,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Las herramientas manuales utilizadas se encuentran en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 4,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Los equipos de oxicorte se encuentran en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 5,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "7. Las herramientas eléctricas cuentan con sus protecciones y en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 6,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "8. Se ha delimitado la zona de trabajo de ser necesario",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 7,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "ACTITUD HACIA LA SEGURIDAD",
+                "description": "",
+                "order": 1,
+                "questions": [
+                    {
+                        "label": "1. Se ha confeccionado el ATS o ERNT antes de comenzar la tarea",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 8,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. El personal que desarrolla la tarea se encuentra en el ATS o ERNT",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 9,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Las medidas registradas en el ATS o ERNT son aplicadas en el área de trabajo.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 10,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Existe una coordinación en las tareas que se efectúan",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 11,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Se ha delimitado la zona de trabajo de ser necesario",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 12,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Se realiza una buena manipulación de las cargas manuales",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 13,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "7. Se observa una actitud proactiva hacia la seguridad durante el desarrollo de la tarea.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 14,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "8. El personal cuenta con los EPP necesarios para la tarea",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 15,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "9. Los EPP se encuentran en buen estado",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 16,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR TAREAS SUPERPUESTAS:",
+                "description": "",
+                "order": 2,
+                "questions": [
+                    {
+                        "label": "1. Hay comunicación entre los distintos frentes de trabajo.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 17,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR MOVIMIENTO DE EQUIPOS:",
+                "description": "",
+                "order": 3,
+                "questions": [
+                    {
+                        "label": "1. Se respeta la velocidad de circulación",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 18,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Las maniobras son pausadas y coordinadas",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 19,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Se respeta la distancias de proximidad entre los trabajadores y el equipo en movimiento",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 20,
+                        "is_required": false,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. El equipo realiza las tareas según lo establecido por el fabricante (peso que carga el equipo, ángulo máximo de trabajo, etc.)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 21,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Los accesorios o complementos del equipo se encuentran en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 22,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Los accesorios\/complementos del equipo se utilizan según lo establecido por el fabricante",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 23,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR CARGA SUSPENDIDA",
+                "description": "",
+                "order": 4,
+                "questions": [
+                    {
+                        "label": "1. Se encuentra delimitada la zona de trabajo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 24,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. El operario que manipula la carga se encuentra habilitado para tal fin",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 25,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Existe personal debajo o próximo a la carga.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 26,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Existe buena comunicación entre el operario de la carga y el banderillero (de ser necesario)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 27,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Los implementos o accesorios se encuentran en buen estado y son adecuados para la carga que se manipula.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 28,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. El equipo que manipula la carga se encuentra en buen estado",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 29,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR TAREAS ESPECIALES (TRABAJOS EN CALIENTE, EXCAVACIONES, ESPACIOS CONFINADOS, ETC.)",
+                "description": "",
+                "order": 5,
+                "questions": [
+                    {
+                        "label": "1. Se encuentra delimitada la zona de trabajo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 30,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Se aplican las medidas de control necesarias",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 31,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Se cuenta con los elementos de seguridad especiales para tal fin",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 32,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            }
+        ],
+        "questions": []
+    }
+]

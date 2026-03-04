@@ -79,12 +79,18 @@
                                     <p class="text-xs text-gray-500 mt-1">
                                         {{ $assignment->checklist->categoryRelation?->name }} / {{ $assignment->checklist->subcategoryRelation?->name }}
                                     </p>
+                                    @if($assignment->status === 'in_progress')
+                                        <span class="inline-flex items-center text-xs text-blue-600 font-medium mt-1">
+                                            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1 animate-pulse"></span>
+                                            En progreso
+                                        </span>
+                                    @endif
                                 </div>
                                 <button 
                                     wire:click="openFillModal({{ $assignment->id }})"
-                                    class="btn-xs bg-ep-primary text-white rounded-full hover:bg-orange-600 transition-colors z-10 relative"
+                                    class="btn-xs {{ $assignment->status === 'in_progress' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-ep-primary hover:bg-orange-600' }} text-white rounded-full transition-colors z-10 relative"
                                 >
-                                    Completar
+                                    {{ $assignment->status === 'in_progress' ? 'Continuar' : 'Completar' }}
                                 </button>
                             </div>
                         </div>
@@ -511,14 +517,6 @@
         </div>
     @endif
     
-    <!-- Modal Llenado Checklist -->
-    @if($showFillModal && $selectedAssignmentToFill)
-        @livewire('visits.checklist-filler', [
-            'visit' => $visit, 
-            'assignment' => $selectedAssignmentToFill
-        ], key('filler-'.$selectedAssignmentToFill->id))
-    @endif
-
 
 
     <!-- Modal Entrega EPP -->
