@@ -188,13 +188,19 @@
                  class="border-2 border-dashed rounded-lg p-4 transition-all duration-300"
                  :class="$wire.editingQuestionIndex !== null ? 'border-blue-400 bg-blue-50' : 'border-gray-300'"
                  x-data="{ showOptions: ['select', 'radio', 'checkbox'].includes($wire.newQuestion.type) }"
-                 x-init="$watch('$wire.editingQuestionIndex', value => { 
-                     if (value !== null) { 
-                         setTimeout(() => {
-                             document.getElementById('question-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                         }, 100);
-                     }
-                 })">
+                 x-init="
+                     $watch('$wire.newQuestion.type', value => {
+                         showOptions = ['select', 'radio', 'checkbox'].includes(value);
+                     });
+                     $watch('$wire.editingQuestionIndex', value => { 
+                         if (value !== null) { 
+                             showOptions = ['select', 'radio', 'checkbox'].includes($wire.newQuestion.type);
+                             setTimeout(() => {
+                                 document.getElementById('question-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                             }, 100);
+                         }
+                     });
+                 ">
                 <h3 class="font-medium text-gray-700 mb-3">
                     @if($editingQuestionIndex !== null)
                         Editar Pregunta
@@ -222,7 +228,6 @@
                             <option value="checkbox">Opciones (múltiples)</option>
                             <option value="number">Número</option>
                             <option value="date">Fecha</option>
-                            <option value="signature">Firma</option>
                         </select>
                     </div>
                 </div>

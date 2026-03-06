@@ -90,7 +90,7 @@ class ChecklistBuilder extends Component
             'registryCode' => 'nullable|string|max:50',
             'questions' => 'required|array|min:1',
             'questions.*.label' => 'required|string|max:500',
-            'questions.*.type' => 'required|in:text,textarea,select,radio,checkbox,number,date,signature',
+            'questions.*.type' => 'required|in:text,textarea,select,radio,checkbox,number,date',
         ];
     }
 
