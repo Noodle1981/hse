@@ -1,13 +1,13 @@
 <div>
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-ep-dark">Plantillas de Checklists</h1>
-        <div class="flex gap-3">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-ep-dark">Plantillas de Checklists</h1>
+        <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 w-full md:w-auto">
             <a href="{{ route('gestor.assignments.index') }}" 
-               class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold flex items-center">
+               class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold flex justify-center items-center w-full sm:w-auto">
                 ← Volver
             </a>
             <a href="{{ route('gestor.checklists.create') }}" 
-               class="px-6 py-3 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors font-semibold">
+               class="px-6 py-3 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors font-semibold flex justify-center items-center w-full sm:w-auto">
                 + Nuevo Checklist
             </a>
         </div>
@@ -49,7 +49,7 @@
     </div>
 
     <!-- Tabla de Checklists -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
         @if($checklists->isEmpty())
             <div class="p-12 text-center text-gray-500">
                 <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -18,13 +18,13 @@
 
     <!-- Filtros y Acciones -->
     <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="md:col-span-2">
+        <div class="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+            <div class="w-full md:w-1/3">
                 <input type="text" wire:model.live="search" 
                        placeholder="Buscar por nombre, email o matrícula..."
                        class="w-full rounded-md border-gray-300 shadow-sm">
             </div>
-            <div class="flex gap-2">
+            <div class="flex flex-col sm:flex-row flex-wrap gap-3 w-full md:w-auto items-start sm:items-center justify-end">
                 <div class="flex items-center mr-4">
                     <label class="inline-flex items-center cursor-pointer">
                         <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
@@ -33,13 +33,13 @@
                     </label>
                 </div>
 
-                <select wire:model.live="roleFilter" class="flex-1 rounded-md border-gray-300 shadow-sm">
+                <select wire:model.live="roleFilter" class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm">
                     <option value="all">Todos los roles</option>
                     <option value="Administrador">Administradores</option>
                     <option value="Técnico">Técnicos</option>
                 </select>
                 <button wire:click="toggleForm" 
-                        class="hover:bg-opacity-90 text-white px-4 py-2 rounded-md whitespace-nowrap transition-colors duration-200 flex items-center gap-2 shadow-sm"
+                        class="w-full sm:w-auto justify-center hover:bg-opacity-90 text-white px-4 py-2 rounded-md whitespace-nowrap transition-colors duration-200 flex items-center gap-2 shadow-sm"
                         style="background-color: #292938;">
                     @if($showForm)
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -155,7 +155,7 @@
     @endif
 
     <!-- Tabla de Usuarios -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>

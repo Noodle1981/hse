@@ -1,19 +1,19 @@
 <div>
-    <div class="mb-6 flex justify-between items-center">
+    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800">Asignación de Checklists</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Asignación de Checklists</h1>
             <p class="text-gray-600 mt-1">Asigna checklists a técnicos en sedes específicas</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 w-full md:w-auto">
             <a href="{{ route('gestor.inspections.index') }}" 
-               class="flex items-center gap-2 text-gray-600 hover:text-gray-800 font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md">
+               class="flex justify-center items-center gap-2 text-gray-600 hover:text-gray-800 font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md w-full sm:w-auto">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
                 Volver
             </a>
             <button wire:click="toggleForm" 
-                    class="flex items-center gap-2 {{ $showForm ? 'bg-gray-500 hover:bg-gray-600' : 'bg-ep-dark hover:bg-opacity-90' }} text-white px-4 py-2 rounded-lg shadow-sm transition-colors">
+                    class="flex justify-center items-center gap-2 {{ $showForm ? 'bg-gray-500 hover:bg-gray-600' : 'bg-ep-dark hover:bg-opacity-90' }} text-white px-4 py-2 rounded-lg shadow-sm transition-colors w-full sm:w-auto">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     @if($showForm)
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -24,7 +24,7 @@
                 {{ $showForm ? 'Cancelar' : 'Nueva Asignación' }}
             </button>
             <a href="{{ route('gestor.checklists.index') }}" 
-               class="flex items-center gap-2 text-ep-primary hover:text-ep-primary-dark font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 hover:shadow-md">
+               class="flex justify-center items-center gap-2 text-ep-primary hover:text-ep-primary-dark font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 hover:shadow-md w-full sm:w-auto">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                 </svg>
@@ -264,7 +264,7 @@
     @endif
 
     <!-- Tabla de Asignaciones -->
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>

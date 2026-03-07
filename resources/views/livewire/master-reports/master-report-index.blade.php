@@ -1,8 +1,8 @@
 <div>
-    <div class="flex justify-between items-center mb-6">
-        <div class="flex space-x-4">
-            <input wire:model.live="search" type="text" placeholder="Buscar por sede o título..." class="rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
-            <select wire:model.live="status" class="rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <input wire:model.live="search" type="text" placeholder="Buscar por sede o título..." class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
+            <select wire:model.live="status" class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
                 <option value="">Todos los estados</option>
                 <option value="solicitado">Solicitados</option>
                 <option value="en_redaccion">En Redacción</option>
@@ -10,9 +10,11 @@
             </select>
         </div>
         @if(auth()->user()->isAdmin())
-            <a href="{{ route('gestor.master-reports.create') }}" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 active:bg-orange-900 focus:outline-none focus:border-orange-900 focus:ring ring-orange-300 disabled:opacity-25 transition ease-in-out duration-150">
-                Solicitar Informe
-            </a>
+            <div class="w-full md:w-auto flex">
+                <a href="{{ route('gestor.master-reports.create') }}" class="w-full justify-center inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 active:bg-orange-900 focus:outline-none focus:border-orange-900 focus:ring ring-orange-300 disabled:opacity-25 transition ease-in-out duration-150">
+                    Solicitar Informe
+                </a>
+            </div>
         @endif
     </div>
 

@@ -1,15 +1,15 @@
 <div>
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Empresas</h2>
-        <div class="flex gap-4 items-center">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Empresas</h2>
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full md:w-auto">
             <label class="inline-flex items-center cursor-pointer">
                 <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
                 <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
-                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Ver Eliminados</span>
+                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300 whitespace-nowrap">Ver Eliminados</span>
             </label>
 
             <a href="{{ route('gestor.companies.create') }}" 
-            class="hover:bg-opacity-90 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2 shadow-sm"
+            class="w-full sm:w-auto justify-center hover:bg-opacity-90 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2 shadow-sm"
             style="background-color: #292938;">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
@@ -31,7 +31,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-lg shadow">
+    <div class="bg-white rounded-lg shadow overflow-x-auto">
         <div class="p-4 border-b">
             <input 
                 wire:model.live="search" 
