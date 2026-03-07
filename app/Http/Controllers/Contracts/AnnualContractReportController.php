@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Risks;
+namespace App\Http\Controllers\Contracts;
 
 use App\Http\Controllers\Controller;
 use App\Models\AnnualPlan;

@@ -61,10 +61,6 @@ class VisitCertificate extends Model
         return $this->hasMany(VisitTraining::class);
     }
 
-    public function eppDeliveries()
-    {
-        return $this->hasMany(VisitEppDelivery::class);
-    }
 
     public function hallazgos()
     {

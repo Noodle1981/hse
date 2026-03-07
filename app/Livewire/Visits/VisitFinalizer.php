@@ -15,7 +15,6 @@ class VisitFinalizer extends Component
     // Resumen para visualización
     public $checklistsCount = 0;
     public $trainingsCount = 0;
-    public $eppCount = 0;
 
     protected $visitService;
 
@@ -31,7 +30,6 @@ class VisitFinalizer extends Component
         // Cargar resumen
         $this->checklistsCount = $visit->checklistCompletions()->count();
         $this->trainingsCount = $visit->trainings()->count();
-        $this->eppCount = $visit->eppDeliveries()->count();
     }
 
     protected $rules = [

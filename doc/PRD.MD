@@ -1,540 +1,372 @@
-# PRD — EPP SaaS + EPP Exchange (Nexo)
-**Versión:** 0.4 — Trazabilidad Legal (Res. 18/2025)  
-**Fecha:** 2026-03-01  
-**Autor:** Producto XamaSafe  
+# PRD — XamaSafe: Plataforma de Gestión de Seguridad Laboral
+**Versión:** 1.0 — MVP Mínima Viable (Post Ultra-Minimización)
+**Fecha:** 2026-03-07
+**Autor:** Producto XamaSafe
 
 ---
 
 ## 1. Visión General
 
-### 1.1 Descripción del Ecosistema
+### 1.1 ¿Qué es XamaSafe?
 
-Este documento define dos plataformas interdependientes que forman un ecosistema completo:
+XamaSafe es una plataforma SaaS B2B de **gestión integral de Higiene y Seguridad Laboral** para consultoras y técnicos habilitados. Permite digitalizar el ciclo completo de la gestión de campo: visitas, checklists, capacitaciones, hallazgos, incidentes e informes.
 
-| Plataforma | Nombre de trabajo | Rol |
-|---|---|---|
-| **Plataforma A** | EPP SaaS (este repositorio) | Gestión de seguridad laboral: checklists, visitas, capacitaciones, entrega de EPP, hallazgos |
-| **Plataforma B** | EPP Exchange | Marketplace de conexión entre empresas que necesitan EPP y proveedores certificados. **Sin stock propio.** |
+### 1.2 Estado Actual — v1.0 MVP
 
-### 1.2 El "Nexo"
+El módulo EPP fue eliminado en esta versión para reducir la deuda técnica y enfocar el producto en su núcleo de valor. Toda la lógica de entrega, gestión de stock EPP y trazabilidad QR de EPP está documentada como **Ecosistema Futuro (Tienda EPP)** en la Sección 6 de este documento.
 
-La Plataforma A es el **generador de demanda calificada**. Cuando el técnico de H&S detecta en campo que un EPP está fuera de norma, el sistema convierte ese diagnóstico técnico en una **señal de compra legalmente validada** que alimenta la Plataforma B.
-
-La intención de compra no viene de marketing, viene de cumplimiento legal. Eso cambia radicalmente la conversión.
+### 1.3 Arquitectura del Ecosistema Completo (Visión Futura)
 
 ```
-Plataforma A (EPP SaaS)
+XamaSafe (este repositorio)          Tienda EPP (plataforma separada)
+────────────────────────────         ────────────────────────────────
+• Gestión de visitas                 • Catálogo de EPP certificado
+• Checklists dinámicos               • Proveedores verificados
+• Capacitaciones                     • Órdenes de compra
+• Hallazgos e incidentes             • Trazabilidad de lotes
+• Informes Maestros                  • Cumplimiento Res. 18/2025
+        │                                       │
+        └──────────── API / Webhook ────────────┘
+                  (Conexión futura planeada)
+```
+
+---
+
+## 2. Funcionalidades del MVP v1.0 (Estado Actual)
+
+### 2.1 Módulo de Administración (Gestor/Admin)
+
+| Funcionalidad | Estado | Descripción |
+|---|---|---|
+| Gestión de Empresas | ✅ Activo | CRUD de empresas clientes con CUI, CUIT, datos |
+| Gestión de Sedes | ✅ Activo | Sedes por empresa con responsables y datos de ubicación |
+| Gestión de Usuarios | ✅ Activo | Admins y técnicos por consultora |
+| Gestión de Técnicos | ✅ Activo | Perfil técnico con especialidades y firma |
+| Branding por Consultora | ✅ Activo | Logo y colores para PDFs personalizados |
+| Contrato Anual | ✅ Activo | Dashboard de planificación anual de servicios |
+| Informe Maestro | ✅ Activo | Informe mensual de gestión con PDF profesional |
+| Bitácora del Sistema | ✅ Activo | Historial de cambios con filtros avanzados |
+
+### 2.2 Módulo de Visitas Técnicas (Core del Producto)
+
+| Funcionalidad | Estado | Descripción |
+|---|---|---|
+| Gestión de Visitas | ✅ Activo | Creación y asignación de visitas a técnicos |
+| Visita en Progreso | ✅ Activo | Interfaz de campo para el técnico durante la visita |
+| Auto-asignación de Checklists | ✅ Activo | El técnico puede asignarse checklists en el momento |
+| Capacitaciones en Visita | ✅ Activo | Registro de capacitaciones dictadas durante la visita |
+| Hallazgos en Visita | ✅ Activo | Registro de hallazgos vinculados a la visita |
+| Incidentes en Visita | ✅ Activo | Registro de incidentes vinculados a la visita |
+| Constancia de Visita PDF | ✅ Activo | PDF con firma digital del responsable del cliente |
+| Firma Remota | ✅ Activo | Envío de link por email si el responsable no está presente |
+| Historial de Visitas | ✅ Activo | Filtros por estado, sede, técnico y fecha |
+
+### 2.3 Módulo de Checklists
+
+| Funcionalidad | Estado | Descripción |
+|---|---|---|
+| Constructor de Checklists | ✅ Activo | Creación dinámica de checklists con múltiples tipos de respuesta |
+| Asignación a Técnicos | ✅ Activo | Asignación por sede y usuario |
+| Llenado en Campo | ✅ Activo | Wizard de inspección paso a paso |
+| Historial de Inspecciones | ✅ Activo | Listado con filtros y PDF |
+| Exportar Checklist a JSON | ✅ Activo | Backup de plantillas de checklists |
+| Importar desde Seeder | ✅ Activo | Restauración de plantillas desde JSON |
+
+### 2.4 Módulo de Capacitaciones
+
+| Funcionalidad | Estado | Descripción |
+|---|---|---|
+| Creación de Capacitaciones | ✅ Activo | Con detalle de tema, duración, sede |
+| Asistencia de Personal | ✅ Activo | Toma de asistencia con firma |
+| PDF de Capacitación | ✅ Activo | Constancia de capacitación con branding |
+| Vinculación a Visitas | ✅ Activo | Las capacitaciones quedan ancladas a la visita del día |
+
+### 2.5 Módulo de Hallazgos
+
+| Funcionalidad | Estado | Descripción |
+|---|---|---|
+| Registro de Hallazgos | ✅ Activo | Solo desde dentro de una visita técnica |
+| Seguimiento de Estado | ✅ Activo | Pendiente → En Proceso → Resuelto → Verificado → Cerrado |
+| Criticidad | ✅ Activo | Bajo / Medio / Alto / Crítico |
+| Fotos adjuntas | ✅ Activo | Evidencia fotográfica del hallazgo |
+| Vista Mis Hallazgos | ✅ Activo | Historial del técnico con KPIs personales |
+| PDF de Hallazgo | ✅ Activo | Reporte individual del hallazgo |
+
+### 2.6 Módulo de Informe Maestro
+
+| Funcionalidad | Estado | Descripción |
+|---|---|---|
+| Solicitud de Informe (Gestor) | ✅ Activo | El gestor asigna un informe mensual a un técnico |
+| Redacción (Técnico) | ✅ Activo | El técnico redacta con datos mensuales pre-cargados |
+| PDF Profesional | ✅ Activo | Portada, resumen, visitas, checklists, capacitaciones, hallazgos e incidentes |
+| Integración con datos de Visita | ✅ Activo | Agrega automáticamente todo lo realizado en el mes para esa sede |
+
+---
+
+## 3. Arquitectura Técnica
+
+### 3.1 Stack
+
+| Capa | Tecnología |
+|---|---|
+| Backend | Laravel 11 (PHP 8.3) |
+| Frontend Reactivo | Livewire 4 + Alpine.js |
+| CSS | Tailwind CSS |
+| Base de Datos | MySQL |
+| PDFs | Spatie Laravel PDF (Chromium headless) |
+| Autenticación | Laravel Sanctum |
+| QR | SimpleSoftware QrCode |
+
+### 3.2 Roles del Sistema
+
+| Rol | Descripción |
+|---|---|
+| `super_admin` | Acceso total al sistema XamaSafe |
+| `Administrador` | Gestor de consultora: gestiona técnicos, empresas, informes |
+| `Técnico` / `tecnico` | Realiza visitas, completa checklists, genera hallazgos |
+
+### 3.3 Flujo Central de una Visita
+
+```
+Gestor crea visita y la asigna a un técnico
+    ↓
+Técnico ingresa a la visita (panel "En Progreso")
+    ↓
+Dentro de la visita puede:
+    ├── Completar checklists asignados (o auto-asignarse uno nuevo)
+    ├── Registrar capacitaciones dictadas en sede
+    ├── Levantar hallazgos con criticidad y fotos
+    └── Reportar incidentes
+    ↓
+Técnico finaliza visita
+    ├── Ingresa observaciones generales
+    ├── Nombre del responsable del cliente
+    └── Firma digital en canvas (o envío remoto por email)
+    ↓
+Sistema genera Constancia de Visita en PDF
+    └── Con datos de la empresa, técnico, firma y actividades del día
+```
+
+---
+
+## 4. Reglas de Negocio Clave
+
+| Regla | Descripción |
+|---|---|
+| **Hallazgos solo desde Visitas** | Un técnico no puede crear un hallazgo en forma aislada. Siempre debe estar dentro de una Visita en Progreso. Esto garantiza trazabilidad sellada. |
+| **Informe Maestro con datos reales** | El wizard de redacción del informe pre-carga las visitas, checklists y capacitaciones del mes para esa sede. El técnico solo agrega el análisis profesional. |
+| **Un técnico ve solo sus asignaciones** | Las visitas, los checklists pendientes y los informes se filtran automáticamente por `user_id`. |
+| **Branding por consultora** | Cada consultora puede definir logo y colores que se aplican a todos los PDFs generados. |
+| **Firma remota** | Si el responsable del cliente no está disponible al momento del cierre, el sistema envía un enlace por email para firma diferida. El informe queda en estado "pendiente de firma" hasta que se complete. |
+
+---
+
+## 5. Módulos Eliminados en v1.0 (Deuda Técnica Pagada)
+
+Los siguientes módulos fueron removidos completamente para reducir la complejidad y enfocar el producto:
+
+| Módulo | Estado | Razón |
+|---|---|---|
+| **Entrega de EPP** | ❌ Eliminado | Delegado a la futura Tienda EPP |
+| **Gestión de Empleados** | ❌ Eliminado | Dependía del módulo EPP |
+| **Catálogo de EPP** | ❌ Eliminado | Delegado a la futura Tienda EPP |
+| **Alertas de Vencimiento EPP** | ❌ Eliminado | El job diario fue removido |
+| **QR de Trazabilidad EPP** | ❌ Eliminado | Form parte del roadmap de la Tienda EPP |
+| **Módulo de Riesgos (heatmap)** | ❌ Eliminado | Sin demanda en MVP |
+| **Módulo Angular/Landing** | ❌ Eliminado | Código muerto |
+| **Hub de Ejecuciones Avanzadas** | ❌ Eliminado | Pantalla intermedia innecesaria |
+
+---
+
+## 6. Ecosistema Futuro — Tienda EPP (Plataforma Separada)
+
+### 6.1 Concepto
+
+La Tienda EPP es una plataforma independiente que actuará como marketplace de EPP certificado. XamaSafe, como generador de demanda calificada desde el campo, se conectará con ella vía API cuando el técnico detecte EPP vencido o fuera de norma.
+
+La intención de compra no vendrá de marketing, sino de **cumplimiento legal** diagnosticado por un profesional de H&S. Eso cambia radicalmente la tasa de conversión.
+
+### 6.2 Modelo de Integración
+
+```
+XamaSafe (Plataforma A)
     │
-    │  Emite evento: { epp_item, cantidad, urgencia, empresa, sede, motivo }
+    │  Técnico detecta EPP vencido en visita
+    │  Sistema emite evento: { epp_item, cantidad, urgencia, empresa, sede, motivo }
     │
     ▼
-[ API de Integración / Webhook ]
+[ Webhook / API ]
     │
     ▼
-Plataforma B (EPP Exchange)
-    │
-    ├── Proveedores certificados reciben la solicitud de cotización
-    ├── Empresa recibe comparativa de precios aprobados por el técnico
+Tienda EPP (Plataforma B)
+    ├── Proveedores certificados reciben solicitud de cotización
+    ├── Empresa recibe comparativa validada por el técnico
     └── La compra registrada en B cierra el ciclo de trazabilidad en A
 ```
 
----
+### 6.3 Beneficios del Consultor al Conectarse
 
-## 2. Plataforma A — EPP SaaS (MVP Actual)
+Cuando un consultor conecte su cuenta XamaSafe a la Tienda EPP:
 
-### 2.1 Funcionalidades del MVP
+- **Descuentos por volumen** en proveedores verificados
+- **Comisión por referidos**: cada compra generada desde un reporte de XamaSafe genera un % de comisión para la consultora
+- **Historial de compras trazado**: las órdenes de la tienda cierran el ciclo de auditoría legal en XamaSafe
+- **Catálogo pre-filtrado**: la tienda solo muestra productos compatibles con la norma detectada en el hallazgo
 
-- ✅ Gestión de sedes y empresas
-- ✅ Checklists dinámicos con respuestas y hallazgos
-- ✅ Visitas con constancias PDF firmadas digitalmente
-- ✅ Capacitaciones y asistencias
-- ✅ Entrega de EPP digitalizada (Res. SRT 299/11)
-- ✅ Historial de EPP por empleado
-- ✅ Hallazgos con seguimiento y fotos
-- ✅ Contrato anual
-
-### 2.2 Módulo de EPP — Estado actual de la base de datos
-
-#### Tabla `epp_items` (Catálogo de EPP)
-
-| Campo actual | Estado | Nota |
-|---|---|---|
-| `nombre` | ✅ Existe | |
-| `tipo` | ✅ Existe | Cabeza, Ocular, Auditiva, etc. |
-| `vida_util_meses` | ✅ Existe | Vida útil por uso, en meses |
-| `codigo_norma` | ✅ Existe | Ej: IRAM 3620 |
-| `descripcion` | ✅ Existe | |
-| `vida_util_fabricante_anios` | ✅ Implementado (Fase 1) | Vencimiento desde fabricación (Ej: arnés 10 años sin usar) |
-| `stock_actual` | ✅ Existe | Stock en almacén interno de la empresa/consultora |
-| `stock_seguridad` | ✅ Implementado (Fase 1) | Punto de pedido: si el stock baja de esto, sugiere comprar |
-| `exchange_product_id` | ❌ Pendiente (Fase 4) | ID del producto en EPP Exchange (FK externa, nullable) |
-| `unidad_medida` | ✅ Implementado (Fase 1) | Par, Unidad, Caja |
-| `requiere_control_critico` | ✅ Implementado (Fase 1) | Bool: si este EPP activa baja obligatoria ante impacto/caída |
-
-#### Tabla `epp_delivery_items` (EPP entregado por acto)
-
-| Campo actual | Estado | Nota |
-|---|---|---|
-| `epp_delivery_id` | ✅ Existe | |
-| `epp_item_id` | ✅ Existe | |
-| `cantidad` | ✅ Existe | |
-| `tipo_entrega` | ✅ Existe | inicial/reposicion_rotura/reposicion_fecha |
-| `lote` | ✅ Implementado (Fase 1) | Número de lote del fabricante |
-| `fecha_fabricacion` | ✅ Implementado (Fase 1) | Base para calcular vida útil de fábrica |
-| `fecha_vencimiento_fabricante` | ✅ Implementado (Fase 1) | Fecha dura de vencimiento (Res. 18/2025) |
-| `codigo_qr_trazabilidad` | ✅ Implementado (Fase 2b) | UUID único por entrega, se imprime en PDF y permite escaneo en campo |
-| `tiene_qr_res18` | ✅ Implementado (Fase 2b) | Bool: si el producto viene con QR de fábrica según Res. 18/2025 |
-| `qr_fabricante_url` | ✅ Implementado (Fase 2b) | URL del QR del fabricante (opcional, para productos post-norma) |
-| `estado` | ✅ Implementado (Fase 1) | enum: activo / dado_de_baja / vencido / reemplazado |
-| `motivo_baja` | ✅ Implementado (Fase 1) | nullable: impacto / vencimiento / deterioro / otro |
-| `fecha_baja` | ✅ Implementado (Fase 1) | nullable |
-| `exchange_order_id` | ❌ Pendiente (Fase 3b) | nullable: ID del pedido en EPP Exchange que repuso este ítem |
-
-### 2.3 Estado actual de los campos — Pendientes
-
-La mayoría de los campos están implementados. Queda pendiente:
-
-**Fase 3b — Cierre del ciclo de reposición (Webhook simulado):**
-- `epp_delivery_items`: `exchange_order_id` → se setea cuando la compra en Exchange es confirmada
-
-**Fase 4 — Integración API Real (post-lanzamiento EPP Exchange):**
-- `epp_items`: `exchange_product_id` → FK al catálogo real de la Plataforma B
-
----
-
-## 3. Lógica de Triggers — Cuándo el Sistema Notifica
-
-El sistema generará una **Alerta de Reemplazo** ante cualquiera de estos tres criterios:
-
-### Trigger 1 — Diagnóstico del Técnico (más prioritario)
-
-**Origen:** Checklist con ítem de tipo crítico marcado "No Conforme".  
-**Condición:** El ítem del checklist tiene vinculado un `epp_item_id`.  
-**Acción:** El `epp_delivery_item` correspondiente al empleado pasa a `estado = 'dado_de_baja'`.
-
-### Trigger 2 — Vencimiento de Vida Útil
-
-El sistema evalúa diariamente dos fechas:
-
-```
-vencimiento_por_uso = delivery_date + (epp_items.vida_util_meses * 30 días)
-vencimiento_de_fabrica = epp_delivery_items.fecha_fabricacion + (epp_items.vida_util_fabricante_anios * 365 días)
-fecha_vencimiento = MIN(vencimiento_por_uso, vencimiento_de_fabrica, epp_delivery_items.fecha_vencimiento_fabricante)
-```
-
-**Alerta anticipada:** 30 días antes de la fecha de vencimiento más próxima.
-
-### Trigger 3 — Evento Crítico (Incidente)
-
-**Origen:** Registro de incidente donde se documenta uso de EPP durante el evento.  
-**Condición:** `epp_items.requiere_control_critico = true` (ej: arnés, casco clase B).  
-**Acción:** Baja automática del lote + Verificación de stock.
-
-### Paso Intermedio: Validación de Inventario Local (Stock)
-
-Antes de que un Trigger genere una Solicitud a la Tienda (EPP Exchange), el sistema EPP SaaS DEBE evaluar el inventario interno:
-
-1. **La necesidad:** El sistema calcula la cantidad de EPP a reponer (ej: 20 cascos dados de baja).
-2. **Evaluación de Depósito:** Revisa `epp_items.stock_actual` vs. `epp_items.stock_seguridad`.
-3. **Decisión:**
-   - **Escenario A (Stock Suficiente):** Si (`stock_actual` - necesidad) >= `stock_seguridad`: El sistema simplemente descuenta el stock local y genera el comprobante de entrega, notificando al pañolero interno. No contacta a la Tienda.
-   - **Escenario B (Quiebre de Stock inminente):** Si hay stock para cubrir la necesidad pero el depósito quedaría por debajo del `stock_seguridad`, el sistema envía el EPP pero **también dispara** un Trigger de reposición a EPP Exchange para alertar al comprador que "El stock llegó a nivel crítico".
-   - **Escenario C (Sin Stock):** No hay stock para cubrir la necesidad. El sistema bloquea el uso (informando la falta de EPP) y **dispara inmediatamente** el pedido a EPP Exchange.
-
----
-
-## 3.5 Marco Legal de Trazabilidad — Resolución 18/2025
-
-> **Vigencia:** 1° de octubre de 2025. Reemplaza el antiguo "Sello S" de IRAM.
-
-### Qué exige la norma
-
-Todo EPP que ingresa al mercado argentino **a partir del 1/10/2025** debe incluir un **código QR visible e indeleble** en el producto o su envase primario, colocado antes de la comercialización. El QR debe dar acceso inmediato a:
-
-| Dato | Descripción |
-|------|-------------|
-| **Declaración Jurada de Conformidad** | Del fabricante o importador |
-| **Ficha técnica completa** | Norma aplicada, tipo de riesgo cubierto |
-| **Certificación vigente** | Qué certifica, emitida por qué organismo |
-| **Número de lote** | Identificación del lote de fabricación |
-| **Fechas de fabricación y vencimiento** | Para proyección de vida útil |
-
-> **Importante:** Los productos fabricados **antes** de la norma aún pueden circular sin QR hasta agotar stock. La plataforma debe soportar ambos modos: registro por QR (norma nueva) y carga manual de sello S (norma vieja).
-
-### Dos dimensiones de QR en el Nexo
-
-La plataforma maneja **dos tipos de QR complementarios**:
-
-```
-QR del fabricante (Res. 18/2025)              QR de XamaSafe (por acto de entrega)
-─────────────────────────────────             ──────────────────────────────────────
-• Identifica el PRODUCTO                       • Identifica la ASIGNACIÓN al trabajador
-• Contiene lote, norma, certificación          • Contiene delivery_item_id único (UUID)
-• Lo coloca el fabricante/importador           • Lo genera la plataforma al hacer entrega
-• Alimenta la ficha del EPP Exchange           • Se imprime en la constancia SRT 299/11
-• Permanece en el producto siempre             • El técnico lo escanea en visitas futuras
-```
-
-### Cómo aprovecha el Nexo este QR
-
-```
-EPP en campo (casco, arnés, etc.)
-    └── QR Res. 18/2025 (del fabricante)  ← Ya viene en el producto
-         └── Técnico escanea con app XamaSafe
-              └── Sistema valida:
-                   ├── ¿Producto original? (cotejando DB Exchange / fabricante)
-                   ├── ¿Estado del lote? (¿alguna unidad del lote fue dada de baja?)
-                   ├── ¿Vida útil vigente? (fecha fabricación + vida_util_fabricante_anios)
-                   └── ¿Está asignado a este trabajador? (cross con epp_delivery_items)
-```
-
-### Marcas relevantes ya alineadas
-
-| Marca | Tecnología | Relevancia para el Nexo |
-|-------|-----------|------------------------|
-| **Libus** | QR en documentación y brochures | Permite descargar certificaciones |
-| **MSA Safety** | MSA id Tag (tag digital por dispositivo) | Asignación digital por trabajador, sincronizable con nuestra API |
-| **3M** | Sensor Uvicator (cambio de color UV) | Indicador físico de degradación; nuestro sistema puede capturarlo como dato |
-
----
-
-## 4. Plataforma B — EPP Exchange (Contrato que debe cumplir)
-
-### 4.1 Modelo de negocio
-
-- EPP Exchange es un **marketplace broker**: conecta empresas con proveedores certificados.
-- **No maneja stock propio.**
-- Monetiza por comisión sobre transacciones cerradas o por suscripción a proveedores.
-
-### 4.2 Contrato de datos que EPP Exchange DEBE proveer a EPP SaaS
-
-Para que el ciclo de trazabilidad cierre en la Plataforma A, cuando una compra se realiza en EPP Exchange, esta DEBE enviar (vía webhook o API response) los siguientes datos:
+### 6.4 Datos que XamaSafe enviará a la Tienda EPP
 
 ```json
 {
-  "exchange_order_id": "EX-2026-00441",
-  "empresa_id_externo": "XS-EMP-12",
-  "epp_items": [
-    {
-      "exchange_product_id": "PROD-CASCO-CLASS-B-001",
-      "nombre": "Casco Clase B IRAM 3620",
-      "tipo": "Cabeza",
-      "codigo_norma": "IRAM 3620",
-      "vida_util_meses": 36,
-      "vida_util_fabricante_anios": 5,
-      "requiere_control_critico": false,
-      "unidad_medida": "Unidad",
-      "cantidad_entregada": 20,
-      "lote": "LOT-2025-11-MSA",
-      "fecha_fabricacion": "2025-11-01",
-      "fecha_vencimiento_fabricante": "2030-11-01",
-      "proveedor": {
-        "id": "PROV-001",
-        "nombre": "Proveedora Segura S.A.",
-        "sello_conformidad": true,
-        "certificaciones": ["IRAM 3620", "ANSI Z89.1"]
-      }
-    }
-  ],
-  "fecha_orden": "2026-03-01T15:00:00Z"
-}
-```
-
-### 4.3 Lo que EPP SaaS ENVIARÁ a EPP Exchange al generar la alerta
-
-```json
-{
-  "source": "eppsaas",
+  "source": "xamasafe",
   "trigger_type": "vencimiento_vida_util | diagnostico_tecnico | evento_critico",
-  "empresa": {
-    "id": 12,
-    "nombre": "Industrias XYZ S.A.",
-    "cuit": "30-12345678-9"
-  },
-  "sede": {
-    "id": 5,
-    "nombre": "Planta Norte",
-    "provincia": "Córdoba"
-  },
+  "empresa": { "id": 12, "nombre": "Industrias XYZ S.A.", "cuit": "30-12345678-9" },
+  "sede": { "id": 5, "nombre": "Planta Norte", "provincia": "Córdoba" },
   "epp_requerido": {
-    "epp_item_id": 3,
     "nombre": "Casco Clase B",
     "tipo": "Cabeza",
     "codigo_norma": "IRAM 3620",
     "cantidad_estimada": 20,
     "urgencia": "alta",
-    "motivo": "Vencimiento de fibras UV — detectado por técnico en visita #88"
+    "motivo": "Vencimiento detectado por técnico en visita #88"
   },
-  "tecnico_responsable": {
-    "nombre": "Omar Olivera",
-    "matricula": "HyS-1234"
-  },
-  "timestamp": "2026-03-01T13:00:00-03:00"
+  "tecnico_responsable": { "nombre": "Omar Olivera", "matricula": "HyS-1234" },
+  "timestamp": "2026-03-07T10:00:00-03:00"
 }
 ```
+
+### 6.5 Roadmap de Integración con Tienda EPP
+
+| Fase | Descripción | Estado |
+|---|---|---|
+| **Fase A** | Re-incorporar módulo de Empleados y Catálogo EPP (base de datos) | ⏳ Futuro |
+| **Fase B** | Re-incorporar entrega de EPP vinculada a visitas + PDF constancia SRT 299/11 | ⏳ Futuro |
+| **Fase C** | Detección de EPP vencido desde checklists + stock interno | ⏳ Futuro |
+| **Fase D** | Conexión vía API con Tienda EPP + mock para pruebas | ⏳ Futuro |
+| **Fase E** | Módulo de comisiones y beneficios para consultoras conectadas | ⏳ Futuro |
 
 ---
 
-## 5. Mock de EPP Exchange para el MVP
+## 7. Implementaciones Futuras — Tecnología
 
-Durante el desarrollo del MVP, EPP Exchange no existirá. El sistema leerá un archivo JSON local que simula las respuestas de la API de la tienda. Esto permite desarrollar y probar la UI completa sin depender de la Plataforma B.
+### 7.1 Certificación Blockchain de Constancias (Add-on Premium)
 
-### 5.1 Ubicación del mock
+#### ¿Por qué blockchain?
 
-```
-storage/app/mock_exchange/
-  ├── products.json       ← Catálogo de productos disponibles en la tienda
-  ├── providers.json      ← Proveedores certificados  
-  └── quotes.json         ← Respuestas de cotización simuladas
-```
+La constancia de visita PDF actual es un documento editable. Con blockchain, el hash del documento queda anclado en una red descentralizada, haciendo que cualquier alteración posterior sea **indefendible en una auditoría legal o judicial**.
 
-### 5.2 `products.json` — Catálogo simulado de EPP Exchange
+#### Propuesta Técnica
 
-```json
-{
-  "products": [
-    {
-      "exchange_product_id": "PROD-CASCO-CLASS-B-001",
-      "nombre": "Casco Seguridad Clase B - Hard Hat",
-      "marca": "MSA Safety",
-      "tipo": "Cabeza",
-      "codigo_norma": "IRAM 3620",
-      "vida_util_meses": 36,
-      "vida_util_fabricante_anios": 5,
-      "requiere_control_critico": false,
-      "unidad_medida": "Unidad",
-      "precio_referencia_ars": 12500,
-      "imagen_url": "https://placehold.co/200x200?text=Casco",
-      "certificaciones_vigentes": ["IRAM 3620", "ANSI Z89.1-2014"],
-      "sello_conformidad_iram": true,
-      "proveedores_disponibles": ["PROV-001", "PROV-003"]
-    },
-    {
-      "exchange_product_id": "PROD-ARNES-001",
-      "nombre": "Arnés Anticaída Cuerpo Completo",
-      "marca": "Petzl",
-      "tipo": "Anticaída",
-      "codigo_norma": "IRAM 3625",
-      "vida_util_meses": 60,
-      "vida_util_fabricante_anios": 10,
-      "requiere_control_critico": true,
-      "unidad_medida": "Unidad",
-      "precio_referencia_ars": 87000,
-      "imagen_url": "https://placehold.co/200x200?text=Arnes",
-      "certificaciones_vigentes": ["IRAM 3625", "EN 361:2002"],
-      "sello_conformidad_iram": true,
-      "proveedores_disponibles": ["PROV-002"]
-    },
-    {
-      "exchange_product_id": "PROD-CALZADO-001",
-      "nombre": "Bota de Seguridad Punta de Acero",
-      "marca": "Seguropie",
-      "tipo": "Pies",
-      "codigo_norma": "IRAM 3609",
-      "vida_util_meses": 12,
-      "vida_util_fabricante_anios": 3,
-      "requiere_control_critico": false,
-      "unidad_medida": "Par",
-      "precio_referencia_ars": 35000,
-      "imagen_url": "https://placehold.co/200x200?text=Bota",
-      "certificaciones_vigentes": ["IRAM 3609"],
-      "sello_conformidad_iram": true,
-      "proveedores_disponibles": ["PROV-001", "PROV-002", "PROV-003"]
-    },
-    {
-      "exchange_product_id": "PROD-GUANTE-NITRILO-001",
-      "nombre": "Guante de Nitrilo Resistencia Química",
-      "marca": "KleenGuard",
-      "tipo": "Manos",
-      "codigo_norma": "IRAM 3608",
-      "vida_util_meses": 6,
-      "vida_util_fabricante_anios": 2,
-      "requiere_control_critico": false,
-      "unidad_medida": "Par",
-      "precio_referencia_ars": 4200,
-      "imagen_url": "https://placehold.co/200x200?text=Guante",
-      "certificaciones_vigentes": ["IRAM 3608", "EN 374"],
-      "sello_conformidad_iram": false,
-      "proveedores_disponibles": ["PROV-001"]
-    }
-  ]
-}
-```
+Al momento de **finalizar la visita y generar la constancia**, el sistema:
 
-### 5.3 `providers.json` — Proveedores simulados
+1. Calcula el hash **SHA-256** del PDF generado
+2. Envía ese hash a la red **Polygon** (bajo costo, ~$0.01 USD por transacción)
+3. Recibe el `tx_hash` de la transacción confirmada
+4. Lo guarda en `visit_certificates.blockchain_tx_hash`
+5. Imprime en el PDF un **QR de verificación** que apunta al explorador de bloques con el TxID
 
-```json
-{
-  "providers": [
-    {
-      "id": "PROV-001",
-      "nombre": "Proveedora Segura S.A.",
-      "cuit": "30-70123456-8",
-      "provincia": "Buenos Aires",
-      "contacto_email": "ventas@provegs.com.ar",
-      "sello_conformidad": true,
-      "scorecard": {
-        "calidad_tecnica": 90,
-        "confiabilidad_entrega": 85,
-        "costo_beneficio": 80,
-        "total": 86
-      },
-      "certificaciones": ["IRAM 3620", "IRAM 3609", "IRAM 3608"],
-      "tiempo_entrega_dias": 3
-    },
-    {
-      "id": "PROV-002",
-      "nombre": "Equipo y Seguridad Andina",
-      "cuit": "30-88765432-1",
-      "provincia": "Córdoba",
-      "contacto_email": "comercial@esandina.com",
-      "sello_conformidad": true,
-      "scorecard": {
-        "calidad_tecnica": 95,
-        "confiabilidad_entrega": 78,
-        "costo_beneficio": 70,
-        "total": 82
-      },
-      "certificaciones": ["IRAM 3625", "IRAM 3609", "EN 361:2002"],
-      "tiempo_entrega_dias": 5
-    },
-    {
-      "id": "PROV-003",
-      "nombre": "Distribuidora EPP Norte",
-      "cuit": "30-55443322-7",
-      "provincia": "Tucumán",
-      "contacto_email": "info@eppnorte.com.ar",
-      "sello_conformidad": false,
-      "scorecard": {
-        "calidad_tecnica": 70,
-        "confiabilidad_entrega": 90,
-        "costo_beneficio": 92,
-        "total": 84
-      },
-      "certificaciones": ["IRAM 3620"],
-      "tiempo_entrega_dias": 2
-    }
-  ]
-}
-```
+#### Modelo de Negocio (Opcional por Consultora)
 
-### 5.4 Clase de servicio para consumir el mock (y futura API real)
+El consultor elige activar esta opción desde su panel. Modalidades posibles:
 
-La integración se implementará mediante un **Service** de Laravel que abstrae la fuente de datos. En MVP leerá el JSON; en producción apuntará a la API real de EPP Exchange sin cambiar el código que lo consume:
+| Modelo | Descripción |
+|---|---|
+| **Créditos prepagos** | Compra X créditos dentro de la plataforma; cada certificado anclado descuenta 1 crédito |
+| **Plan Premium** | Suscripción mensual con blockchain ilimitado incluido |
+| **Pay-per-use** | XamaSafe cobra por constancia anclada (ej: $0.50 USD por PDF) |
+
+#### Cambios Técnicos Requeridos
 
 ```php
-// app/Services/EppExchangeService.php
+// En app/Livewire/Visits/VisitInProgress.php → finalizeVisit()
 
-interface EppExchangeContract {
-    public function getProducts(): Collection;
-    public function getProviders(): Collection;
-    public function submitReplacementRequest(array $data): array;
+$pdfHash = hash('sha256', $pdfContent);
+
+if ($consultora->blockchain_enabled) {
+    $txHash = PolygonAnchorService::anchor($pdfHash);
+    $visit->update(['blockchain_tx_hash' => $txHash]);
 }
-
-// MVP: Lee desde JSON mock
-class MockEppExchangeService implements EppExchangeContract { ... }
-
-// Producción: Llama a la API real
-class ApiEppExchangeService implements EppExchangeContract { ... }
 ```
 
-La selección entre uno u otro se hace mediante una variable de entorno:
-```env
-EPP_EXCHANGE_MODE=mock        # usa JSON local
-EPP_EXCHANGE_MODE=api         # llama a la API real
-EPP_EXCHANGE_API_URL=https://api.eppexchange.com
-EPP_EXCHANGE_API_KEY=xxxxx
+Tabla `visit_certificates`:
+```sql
+ALTER TABLE visit_certificates
+    ADD COLUMN blockchain_tx_hash VARCHAR(100) NULL,
+    ADD COLUMN blockchain_anchored_at TIMESTAMP NULL;
 ```
+
+Tabla `consultoras`:
+```sql
+ALTER TABLE consultoras
+    ADD COLUMN blockchain_enabled BOOLEAN DEFAULT FALSE,
+    ADD COLUMN blockchain_credits INT DEFAULT 0;
+```
+
+#### Estado
+
+| Item | Estado |
+|---|---|
+| Diseño técnico | ✅ Definido |
+| Implementación | ⏳ Pendiente (Post-MVP) |
+| Red objetivo | Polygon (MATIC) — bajo costo |
+| Wallet management | A definir: billetera maestra XamaSafe o billetera propia por consultora |
+
+### 7.2 Notificaciones Push / Email para Hallazgos
+
+Sistema de alertas automáticas cuando un hallazgo crítico no tiene seguimiento en X días.
+
+### 7.3 App Mobile (React Native o Flutter)
+
+Versión nativa para técnicos con capacidades offline: 
+- Completar checklists sin conexión (sincronización posterior)
+- Tomar fotos de hallazgos
+- Captura de firma en pantalla táctil
+
+### 7.4 Dashboard de Auditoría para el Cliente (Empresa)
+
+Portal de solo lectura para que las empresas clientes vean:
+- Sus propios informes mensuales
+- Estado de hallazgos abiertos
+- Constancias de visita firmadas
 
 ---
 
-## 6. Flujo completo del Trigger a Cotización (MVP con Mock)
+## 8. Checklist de Auditoría del Sistema (Estado Actual)
 
-```
-1. Técnico hace visita y marca ítem crítico "No Conforme" en checklist
-   [OPCIÓN A] → Escanea QR del EPP con la app (Res. 18/2025) ← **Néxo legal**
-   [OPCIÓN B] → Marca manualmente el epp_item vinculado al checklist (Sello S legacy)
-       ↓
-2. Sistema detecta el epp_item_id vinculado al ítem de checklist
-   └── Verifica lote: ¿otras unidades del mismo lote también están en campo? ← Alerta masiva de lote
-       ↓
-3. Módulo de Inventario evalúa:
-   ¿Hay `stock_actual` para cubrir la baja sin perforar el `stock_seguridad`?
-   ├── SÍ → Se repone del pañol / depósito local. Fin.
-   └── NO → Pasa al paso 4...
-       ↓
-4. Se crea EppReplacementAlert {
-     epp_delivery_item_id, motivo, urgencia, cantidad_requerida_para_comprar
-   }
-       ↓
-5. EppExchangeService::submitReplacementRequest() es llamado
-   [MVP] → Devuelve datos del products.json + providers.json filtrados
-   [PROD] → Llama a POST /api/v1/replacement-requests en EPP Exchange
-       ↓
-6. La empresa ve en su panel:
-   "Se necesitan comprar 50 cascos (30 para reposición inmediata + 20 para stock de seguridad) — 3 proveedores disponibles"
-   con precios referenciales, scorecard y enlace a certificación Res. 18/2025 de cada proveedor
-       ↓
-7. Empresa aprueba la cotización → (MVP: simula confirmación)
-                                    (PROD: genera orden en EPP Exchange)
-       ↓
-8. EPP Exchange envía webhook a EPP SaaS con datos de la compra
-   └── Incluye: exchange_order_id, lote, fecha_fabricacion, fecha_vencimiento_fabricante
-       ↓
-9. Al recibir la mercancía, el Gestor registra la entrega:
-   └── Se generan nuevos epp_delivery_items con `lote`, `exchange_order_id`, y `codigo_qr_trazabilidad`
-   └── El tecnico puede ahora entregar y el PDF de constancia incluye el QR ← Cierra ciclo legal
-```
+> Esta sección sirve para validar periódicamente la integridad del sistema.
 
----
+### 8.1 Rutas y Acceso
 
-## 7. Roadmap de Implementación
+- [ ] Todas las rutas de técnico requieren autenticación + rol
+- [ ] Todas las rutas de gestor requieren autenticación + rol administrador
+- [ ] No existen rutas huérfanas apuntando a controladores o componentes eliminados
+- [ ] Los redirects tras acciones (crear, finalizar) son correctos por rol
 
-### ✅ Fase 1 — Base de datos extendida *(Completada)*
+### 8.2 Vistas y Componentes Livewire
 
-- [x] Migración: campos faltantes en `epp_delivery_items` (lote, fechas, estado, motivo_baja)
-- [x] Migración: campos faltantes en `epp_items` (vida_util_fabricante_anios, requiere_control_critico, unidad_medida)
-- [x] Crear modelo `EppReplacementAlert` con sus relaciones
+- [ ] No hay referencias a variables EPP en ninguna vista Blade
+- [ ] No hay imports de modelos eliminados en ningún componente Livewire
+- [ ] Los modales de visita en progreso no tienen secciones EPP
+- [ ] Branding (logo + colores) se aplica a todos los PDFs
 
-### ✅ Fase 2 — Motor de Triggers *(Completada)*
+### 8.3 Base de Datos
 
-- [x] Job `EvaluarVencimientosEppJob` diario: evalúa vencimientos y genera alertas
-- [ ] Vinculación de checklist ítem → epp_item (campo en DynamicQuestion o en la respuesta) ← *Pendiente Fase 2b*
-- [ ] Disparador desde registro de incidente crítico ← *Pendiente Fase 2b*
+- [ ] Tablas EPP han sido eliminadas (verificar en la DB del servidor)
+- [ ] No hay claves foráneas rotas apuntando a tablas inexistentes
+- [ ] Las migraciones se ejecutan correctamente en entorno limpio (`migrate:fresh`)
 
-### Fase 2b — Trazabilidad Legal QR (Res. 18/2025) ← **Siguiente sprint**
+### 8.4 PDFs y Documentos
 
-> Ancla legal de la plataforma. Sin esto, la trazabilidad es incompleta.
+- [ ] PDF de Constancia de Visita se genera correctamente
+- [ ] PDF de Informe Maestro incluye visitas, checklists, capacitaciones, hallazgos e incidentes
+- [ ] PDFs de capacitaciones e inspecciones se generan con branding de la consultora
 
-- [ ] Campo `codigo_qr_trazabilidad` en `epp_delivery_items` (UUID único auto-generado al entregar)
-- [ ] QR incluido en el PDF de constancia de entrega SRT 299/11
-- [ ] Vista pública `/qr/{token}` para escaneo en campo: muestra estado del ítem, norma, vencimiento
-- [ ] Modo de escaneo en wizard de visita: técnico escanea QR del EPP y el sistema vincula automáticamente el `epp_delivery_item`
-- [ ] Soporte para carga manual de datos (Sello S legacy): productos pre-norma sin QR físico
-- [ ] Alerta de lote cruzado: si un ítem del lote X falla, alertar sobre todas las unidades del lote X en campo
+### 8.5 Seguridad
 
-### ✅ Fase 3 — Integración Mock Exchange + UI *(Completada)*
-
-- [x] Crear `storage/app/mock_exchange/` con los JSON definidos en este PRD
-- [x] Implementar `MockEppExchangeService` con interfaz `EppExchangeContract`
-- [x] UI en panel de gestor: vista `/gestor/epp/alerts` — Alertas con cotizaciones del Exchange
-
-### Fase 4 — Integración API Real *(Post-lanzamiento Exchange)*
-
-- [ ] Implementar `ApiEppExchangeService`
-- [ ] Configurar webhook receiver para confirmar compras
-- [ ] Sistema de scoring/ranking de proveedores en tiempo real
+- [ ] Los técnicos solo ven sus propios informes y visitas
+- [ ] Los gestores solo ven datos de su propia consultora
+- [ ] No hay endpoints API sin autenticación
+- [ ] Las firmas digitales se almacenan de forma segura
 
 ---
 
-## 8. Reglas de Negocio Clave
-
-| Regla | Descripción |
-|---|—-|
-| **El técnico aprueba, no vende** | Ninguna cotización llega a la empresa sin validación del técnico de H&S. |
-| **Un item bajado nunca se reactiva** | Una vez `motivo_baja` registrado, el `epp_delivery_item` es inmutable. Solo se crea uno nuevo. |
-| **QR es obligatorio (post Oct-2025)** | Todo EPP entregado desde la plataforma debe generar `codigo_qr_trazabilidad`. Para productos pre-norma con Sello S: carga manual habilitada. |
-| **Alerta de lote cruzado** | Si un operario reporta falla en lote X, el sistema alerta sobre TODAS las unidades del lote X activas en campo, no solo la del afectado. |
-| **El proveedor sin QR vigente se marca** | El sistema indica si el proveedor en EPP Exchange comercializa bajo norma nueva (QR) o sello S legacy, pero no lo oculta. |
-| **La reposición cierra el ciclo** | Un ítem dado de baja con `exchange_order_id` se considera trazado. Sin ese campo, la auditoría queda incompleta. |
-| **Lectura bidireccional del QR** | El QR del fabricante (Res. 18/2025) alimenta la ficha del producto en la plataforma. El QR de XamaSafe (por entrega) acredita la asignación al trabajador. Son dos dimensiones complementarias. |
+*Documento actualizado: 2026-03-07 | XamaSafe v1.0 MVP*

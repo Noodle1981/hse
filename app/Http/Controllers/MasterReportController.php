@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MasterReport;
 use App\Models\Sede;
+use App\Services\BrandingService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
@@ -27,14 +28,14 @@ class MasterReportController extends Controller
 
     public function preview($id)
     {
-        $report = MasterReport::with(['sede.empresa', 'tecnico', 'gestor'])->findOrFail($id);
-        
-        // Simular agregación de datos si no están en datos_anexo
-        $data = $this->aggregatePeriodData($report);
-        
+        $report   = MasterReport::with(['sede.empresa', 'tecnico', 'gestor'])->findOrFail($id);
+        $data     = $this->aggregatePeriodData($report);
+        $branding = BrandingService::forUser($report->tecnico ?? $report->gestor);
+
         $pdf = Pdf::loadView('pdf.master-report-pdf', [
-            'report' => $report,
-            'data' => $data
+            'report'   => $report,
+            'data'     => $data,
+            'branding' => $branding,
         ]);
 
         return $pdf->stream("Informe_Maestro_{$report->periodo}.pdf");
@@ -46,12 +47,15 @@ class MasterReportController extends Controller
         $endDate = Carbon::parse($report->periodo . '-01')->endOfMonth();
 
         $visits = $report->sede->visitCertificates()
-            ->with(['checklistCompletions.assignment.checklist', 'trainings', 'eppDeliveries', 'hallazgos', 'incidentes'])
+            ->with(['checklistCompletions.assignment.checklist', 'trainings', 'hallazgos', 'incidentes'])
             ->whereBetween('visit_date', [$startDate, $endDate])
             ->whereIn('status', ['completed', 'signed'])
             ->get();
 
         return [
+            'visits' => $visits,
+            'checklists' => $visits->flatMap->checklistCompletions,
+            'trainings' => $visits->flatMap->trainings,
             'hallazgos' => $visits->flatMap->hallazgos,
             'incidentes' => $visits->flatMap->incidentes,
             'annual_plan' => $report->sede->annualPlans()->where('year', $startDate->year)->get(),

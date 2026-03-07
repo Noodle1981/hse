@@ -95,16 +95,7 @@ Route::middleware(['auth'])->group(function () {
         */
 
         // Gestión EPP
-         Route::prefix('epp')->name('epp.')->group(function () {
-            Route::get('/catalog', \App\Livewire\Epp\EppCatalog::class)->name('catalog');
-            Route::get('/alerts', \App\Livewire\Epp\EppAlerts::class)->name('alerts'); // <- NUEVO
-            Route::get('/import-employees', \App\Livewire\Epp\EmployeeImporter::class)->name('employees.import');
-            Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('employees.index');
-            Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
-            Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('delivery.pdf');
-            Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('delivery.pdf.preview');
-            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('deliver');
-        });
+
 
         // Hallazgos
         Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
@@ -163,9 +154,8 @@ Route::middleware(['auth'])->group(function () {
 
         // Ejecuciones Avanzadas (solo Contrato Anual)
         Route::middleware(['role:Administrador'])->group(function () {
-            Route::get('/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
-            Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
-            Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
+            Route::get('/contrato-anual', \App\Livewire\Contracts\AnnualContractDashboard::class)->name('annual-contract.index');
+            Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Contracts\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
         });
 
         // Informe Maestro (Informe de la Muerte)
@@ -216,17 +206,11 @@ Route::middleware(['auth'])->group(function () {
         });
 
         // Ejecuciones Avanzadas (solo Contrato Anual)
-        Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
-        Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
+        Route::get('/contrato-anual', \App\Livewire\Contracts\AnnualContractDashboard::class)->name('annual-contract.index');
+        Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Contracts\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
 
         // Gestión EPP
-        Route::prefix('epp')->name('epp.')->group(function () {
-            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('deliver');
-            Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
-            Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('employees.index'); // Solo lectura?
-            Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('delivery.pdf');
-            Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('delivery.pdf.preview');
-        });
+
 
         // Mis Hallazgos
         Route::get('/mis-hallazgos', \App\Livewire\Hallazgos\MisHallazgos::class)->name('hallazgos.index');

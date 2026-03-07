@@ -31,10 +31,6 @@ class Employee extends Model
         return $this->belongsTo(Sede::class);
     }
 
-    public function deliveries()
-    {
-        return $this->hasMany(EppDelivery::class);
-    }
 
     public function getFullNameAttribute()
     {

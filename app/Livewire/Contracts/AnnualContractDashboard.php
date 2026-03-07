@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\Risks;
+namespace App\Livewire\Contracts;
 
 use App\Models\AnnualPlan;
 use App\Models\Sede;
@@ -150,7 +150,7 @@ class AnnualContractDashboard extends Component
         // Precalcular datos de cumplimiento
         $complianceData = $this->calculateComplianceData($plans);
 
-        return view('livewire.risks.annual-contract-dashboard', [
+        return view('livewire.contracts.annual-contract-dashboard', [
             'plans' => $plans,
             'sedes' => $sedes,
             'checklists' => DynamicChecklist::all(),

@@ -8,9 +8,7 @@ use App\Models\{
     ChecklistAssignment,
     Training,
     TrainingAttendance,
-    EppDelivery,
     Employee,
-    EppItem,
     AnnualPlan,
     GeneradorConstancia
 };
@@ -74,9 +72,7 @@ class AdminDashboard extends Component
                 'upcoming_7_days' => Training::whereBetween('date', [now(), now()->addDays(7)])->count(),
             ],
             'epp' => [
-                'deliveries_this_month' => EppDelivery::whereMonth('delivery_date', now()->month)->count(),
                 'active_employees' => Employee::where('is_active', true)->count(),
-                'catalog_items' => EppItem::where('is_active', true)->count(),
             ],
             'annual' => [
                 'compliance_percentage' => $this->calculateAnnualCompliance(),

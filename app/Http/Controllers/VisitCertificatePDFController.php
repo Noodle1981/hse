@@ -3,71 +3,65 @@
 namespace App\Http\Controllers;
 
 use App\Models\VisitCertificate;
+use App\Services\BrandingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class VisitCertificatePDFController extends Controller
 {
-    public function preview($id)
+    private function loadVisit($id): VisitCertificate
     {
-        $visit = VisitCertificate::with([
+        return VisitCertificate::with([
             'empresa',
             'sede',
             'user',
             'checklistCompletions.assignment.checklist',
             'trainings.training',
-            'eppDeliveries.employee',
             'hallazgos.fotos',
             'incidentes.fotos'
         ])->findOrFail($id);
+    }
 
-        $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit'));
-        
+    public function preview($id)
+    {
+        $visit    = $this->loadVisit($id);
+        $branding = BrandingService::forUser($visit->user);
+
+        $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit', 'branding'));
         return $pdf->stream('constancia-visita-' . $visit->id . '.pdf');
     }
 
     public function download($id)
     {
-        $visit = VisitCertificate::with([
-            'empresa',
-            'sede',
-            'user',
-            'checklistCompletions.assignment.checklist',
-            'trainings.training',
-            'eppDeliveries.employee',
-            'hallazgos.fotos',
-            'incidentes.fotos'
-        ])->findOrFail($id);
+        $visit    = $this->loadVisit($id);
+        $branding = BrandingService::forUser($visit->user);
 
-        $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit'));
-        
+        $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit', 'branding'));
         return $pdf->download('constancia-visita-' . $visit->id . '.pdf');
     }
 
     public function checklistPreview($id)
     {
         $completion = \App\Models\VisitChecklistCompletion::with([
-            'visit.empresa',
-            'visit.sede',
-            'visit.user',
+            'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections'
         ])->findOrFail($id);
 
-        $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion'));
-        
+        $branding = BrandingService::forUser($completion->visit->user);
+
+        $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion', 'branding'));
         return $pdf->stream('inspeccion-' . $completion->id . '.pdf');
     }
 
     public function checklistDownload($id)
     {
         $completion = \App\Models\VisitChecklistCompletion::with([
-            'visit.empresa',
-            'visit.sede',
-            'visit.user',
+            'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections'
         ])->findOrFail($id);
 
-        $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion'));
-        
+        $branding = BrandingService::forUser($completion->visit->user);
+
+        $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion', 'branding'));
         return $pdf->download('inspeccion-' . $completion->id . '.pdf');
     }
 }

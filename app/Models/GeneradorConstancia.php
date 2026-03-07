@@ -66,10 +66,6 @@ class GeneradorConstancia extends Model
         return $this->morphedByMany(Training::class, 'actividad', 'constancia_actividades');
     }
 
-    public function eppDeliveries()
-    {
-        return $this->morphedByMany(EppDelivery::class, 'actividad', 'constancia_actividades');
-    }
 
     public function hallazgosActividades()
     {
@@ -81,7 +77,7 @@ class GeneradorConstancia extends Model
         return [
             'inspections' => $this->inspections,
             'trainings' => $this->trainings,
-            'eppDeliveries' => $this->eppDeliveries,
+
             'hallazgos' => $this->hallazgosActividades,
         ];
     }

@@ -19,9 +19,12 @@
                 <div class="bg-gradient-to-r from-gray-900 to-gray-800 px-8 py-8 md:py-10 text-white">
                     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
-                            <!-- Logo -->
                             <div class="bg-white p-3 rounded-xl shadow-sm shrink-0">
-                                <img src="{{ asset('images/logo.png') }}?v={{ time() }}" alt="Logo" class="h-24 w-auto object-contain">
+                                @if($c->logo_path)
+                                    <img src="{{ asset('storage/' . $c->logo_path) }}?v={{ time() }}" alt="Logo" class="h-24 w-auto object-contain">
+                                @else
+                                    <img src="{{ asset('images/logo.png') }}?v={{ time() }}" alt="Logo" class="h-24 w-auto object-contain">
+                                @endif
                             </div>
                             
                             <!-- Text Info -->
@@ -208,13 +211,15 @@
                                     <div class="shrink-0">
                                         @if ($logo)
                                             <img class="h-12 w-auto object-contain rounded-lg border border-gray-200 p-1" src="{{ $logo->temporaryUrl() }}" alt="Previsualización">
+                                        @elseif($existingLogo)
+                                            <img class="h-12 w-auto object-contain rounded-lg border border-gray-200 p-1" src="{{ asset('storage/' . $existingLogo) }}?v={{ time() }}" alt="Logo Actual">
                                         @else
                                             <img class="h-12 w-auto object-contain opacity-50 grayscale" src="{{ asset('images/logo.png') }}?v={{ time() }}" alt="Logo Actual">
                                         @endif
                                     </div>
                                     <label class="block w-full">
                                         <span class="sr-only">Elegir logo</span>
-                                        <input type="file" wire:model="logo" accept="image/png" class="block w-full text-sm text-gray-500
+                                        <input type="file" wire:model="logo" accept="image/png,image/jpeg,image/jpg,image/svg+xml" class="block w-full text-sm text-gray-500
                                           file:mr-4 file:py-2 file:px-4
                                           file:rounded-full file:border-0
                                           file:text-xs file:font-semibold
@@ -223,7 +228,7 @@
                                         "/>
                                     </label>
                                 </div>
-                                <p class="mt-1 text-[10px] text-gray-400">Se recomienda formato PNG con fondo transparente. Este archivo reemplazará al logo actual en todos los reportes.</p>
+                                <p class="mt-1 text-[10px] text-gray-400">PNG, JPG o SVG con fondo transparente. Se guardará por consultora y se usará en todos sus reportes PDF.</p>
                                 @error('logo') <span class="text-red-500 text-xs font-bold mt-1 block">{{ $message }}</span> @enderror
                             </div>
 
@@ -242,6 +247,44 @@
                                     <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Localidad</label>
                                     <input type="text" wire:model="locality" class="w-full rounded-xl border-gray-200 focus:ring-2 focus:ring-ep-primary/20 focus:border-ep-primary text-sm py-2.5 transition-all">
                                     @error('locality') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Sección Colores Corporativos --}}
+                        <div class="border-t border-gray-100 pt-6">
+                            <h4 class="text-sm font-bold text-gray-900 mb-1 flex items-center">
+                                <svg class="w-4 h-4 mr-2 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                                Colores Corporativos
+                            </h4>
+                            <p class="text-xs text-gray-400 mb-4">Se usarán en el encabezado, pie de página y tablas de todos los reportes PDF generados por esta consultora.</p>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Primario</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" wire:model.live="color_primary" class="h-10 w-10 rounded-lg border border-gray-200 cursor-pointer p-0.5">
+                                        <input type="text" wire:model.live="color_primary" maxlength="7" class="flex-1 rounded-xl border-gray-200 text-sm py-2 font-mono" placeholder="#1e40af">
+                                    </div>
+                                    <div class="mt-2 h-4 rounded" style="background-color: {{ $color_primary }}"></div>
+                                    @error('color_primary') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Secundario</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" wire:model.live="color_secondary" class="h-10 w-10 rounded-lg border border-gray-200 cursor-pointer p-0.5">
+                                        <input type="text" wire:model.live="color_secondary" maxlength="7" class="flex-1 rounded-xl border-gray-200 text-sm py-2 font-mono" placeholder="#6b7280">
+                                    </div>
+                                    <div class="mt-2 h-4 rounded" style="background-color: {{ $color_secondary }}"></div>
+                                    @error('color_secondary') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Acento</label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="color" wire:model.live="color_accent" class="h-10 w-10 rounded-lg border border-gray-200 cursor-pointer p-0.5">
+                                        <input type="text" wire:model.live="color_accent" maxlength="7" class="flex-1 rounded-xl border-gray-200 text-sm py-2 font-mono" placeholder="#16a34a">
+                                    </div>
+                                    <div class="mt-2 h-4 rounded" style="background-color: {{ $color_accent }}"></div>
+                                    @error('color_accent') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                 </div>
                             </div>
                         </div>

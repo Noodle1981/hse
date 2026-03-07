@@ -67,15 +67,6 @@
         <div class="page-break"></div>
     @endif
 
-    {{-- 4. Anexos: Entregas EPP --}}
-    @if(isset($visit->eppDeliveries) && $visit->eppDeliveries->count() > 0)
-        <h3 class="text-primary" style="border-bottom: 2px solid #1e3a8a; margin-bottom: 15px;">Anexo III: Entregas de EPP</h3>
-        @foreach($visit->eppDeliveries as $delivery)
-            <x-pdf.epp-delivery :delivery="$delivery" />
-            <div style="margin-bottom: 20px;"></div>
-        @endforeach
-        <div class="page-break"></div>
-    @endif
 
     {{-- 5. Cierre y Firmas --}}
     <x-pdf.card title="Conformidad del Servicio">

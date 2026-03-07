@@ -222,74 +222,7 @@
                 </div>
             </div>
 
-            <!-- Entregas EPP -->
-            <div class="md:col-span-1">
-                <div class="bg-white rounded-lg shadow p-4 border-l-4 border-orange-500">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-semibold text-gray-800">Entregas EPP</h2>
-                        <button wire:click="openEppModal" class="text-sm bg-orange-50 text-orange-700 px-2 py-1 rounded hover:bg-orange-100">
-                            + Entregar
-                        </button>
-                    </div>
 
-                    <!-- Solicitudes de Entrega Pendientes -->
-                    @php
-                        $pendingRequests = $assignedEppRequests->where('status', 'pending');
-                    @endphp
-                    @if($pendingRequests->count() > 0)
-                        <div class="mb-4 space-y-2">
-                             <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider">Solicitudes Pendientes</h3>
-                             @foreach($pendingRequests as $eppRequest)
-                                <div class="p-3 bg-orange-50 rounded border border-orange-200">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <h3 class="text-sm font-bold text-gray-800">{{ $eppRequest->employee->name }} {{ $eppRequest->employee->last_name }}</h3>
-                                            <p class="text-xs text-orange-600 mt-0.5">{{ count($eppRequest->items) }} ítems solicitados</p>
-                                        </div>
-                                        <button 
-                                            wire:click="executeEppRequest({{ $eppRequest->id }})"
-                                            class="btn-xs bg-orange-600 text-white rounded px-3 py-1 hover:bg-orange-700 transition-colors shadow-sm"
-                                        >
-                                            Entregar
-                                        </button>
-                                    </div>
-                                </div>
-                             @endforeach
-                        </div>
-                        <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Entregas Realizadas</h3>
-                    @endif
-
-                    @if(count($eppDeliveries) > 0)
-                        <div class="space-y-3">
-                            @foreach($eppDeliveries as $delivery)
-                                <div class="p-3 bg-gray-50 rounded border border-gray-100">
-                                    <div class="flex justify-between items-start">
-                                        <div class="flex-1">
-                                            <h3 class="text-sm font-medium text-gray-900">{{ $delivery->employee->name }} {{ $delivery->employee->last_name }}</h3>
-                                            <span class="text-xs text-orange-600 font-semibold">{{ count($delivery->epp_items ?? []) }} ítems</span>
-                                        </div>
-                                        <span class="bg-green-100 text-green-700 text-xs px-2 py-1 rounded-full font-medium">
-                                            ✓ Entregado
-                                        </span>
-                                    </div>
-                                    <div class="mt-2 text-xs text-gray-500">
-                                        @foreach(array_slice($delivery->epp_items ?? [], 0, 2) as $item)
-                                            <span class="inline-block bg-white border border-gray-200 rounded px-1">{{ $item['name'] }}</span>
-                                        @endforeach
-                                        @if(count($delivery->epp_items ?? []) > 2)
-                                            <span class="text-gray-400">+{{ count($delivery->epp_items) - 2 }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @else
-                         <div class="text-center py-6 text-gray-400 text-sm italic">
-                            No se han registrado entregas
-                        </div>
-                    @endif
-                </div>
-            </div>
 
             <!-- Hallazgos / Incidentes (Accesos rápidos) -->
             <div class="grid grid-cols-2 gap-4">
@@ -519,13 +452,7 @@
     
 
 
-    <!-- Modal Entrega EPP -->
-    @if($showEppModal)
-        @livewire('visits.epp-delivery', [
-            'visit' => $visit,
-            'requestId' => $selectedEppRequestId
-        ], key('epp-form-'.($selectedEppRequestId ?? 'new')))
-    @endif
+
 
     <!-- Modal Hallazgo Rápido -->
     @if($showHallazgoModal)

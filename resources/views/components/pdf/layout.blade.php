@@ -5,9 +5,15 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>{{ $title ?? 'Documento' }}</title>
     <style>
+        @php
+            $cp  = $branding['primary']   ?? '#1e40af';
+            $cs  = $branding['secondary'] ?? '#6b7280';
+            $ca  = $branding['accent']    ?? '#16a34a';
+        @endphp
+
         /** 
             Global Styles for DomPDF 
-            Define corporate colors and typography here.
+            Colors are injected dynamically from Consultora branding.
         */
         @page {
             margin: 100px 25px 60px 25px; /* Top margin space for Header */
@@ -20,11 +26,11 @@
             line-height: 1.4;
         }
 
-        /* Colors - Matching Platform (Tailwind Blue-800 based) */
-        .text-primary { color: #1e40af; } /* Blue-800 */
-        .bg-primary { background-color: #1e40af; color: white; }
-        .text-secondary { color: #6b7280; } /* Gray-500 */
-        .bg-gray { background-color: #f9fafb; } /* Gray-50 */
+        /* Colors — Dynamic from Consultora */
+        .text-primary   { color: {{ $cp }}; }
+        .bg-primary     { background-color: {{ $cp }}; color: white; }
+        .text-secondary { color: {{ $cs }}; }
+        .bg-gray        { background-color: #f9fafb; }
         
         /* Header & Footer */
         header {
@@ -33,7 +39,7 @@
             left: 0px;
             right: 0px;
             height: 80px;
-            border-bottom: 2px solid #1e40af;
+            border-bottom: 3px solid {{ $cp }};
             padding-bottom: 10px;
         }
 
@@ -53,7 +59,7 @@
         /* Tables */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: left; }
-        th { background-color: #f1f5f9; font-weight: bold; color: #1e3a8a; font-size: 9pt; }
+        th { background-color: #f1f5f9; font-weight: bold; color: {{ $cp }}; font-size: 9pt; }
         
         .no-border td { border: none; }
         .text-right { text-align: right; }
@@ -83,7 +89,11 @@
         }
         .badge-success { background-color: #16a34a; }
         .badge-warning { background-color: #ca8a04; }
-        .badge-danger { background-color: #dc2626; }
+        .badge-danger  { background-color: #dc2626; }
+
+        /* Accent color utility */
+        .text-accent { color: {{ $ca }}; }
+        .border-primary { border-color: {{ $cp }}; }
 
     </style>
 </head>
@@ -94,8 +104,13 @@
         <table class="header-table">
             <tr>
                 <td style="width: 30%;">
-                    {{-- Dynamic Logo --}}
-                    <img src="{{ public_path('images/logo.png') }}" class="logo" alt="XAMASAFE" style="max-height: 50px; max-width: 200px;">
+                    {{-- Logo dinámico de la Consultora --}}
+                    @php $logoPath = $branding['logo'] ?? public_path('images/logo.png'); @endphp
+                    @if(file_exists($logoPath))
+                        <img src="{{ $logoPath }}" class="logo" alt="{{ $branding['name'] ?? 'Logo' }}" style="max-height: 50px; max-width: 200px;">
+                    @else
+                        <span style="font-size: 14pt; font-weight: bold; color: {{ $cp }};">{{ $branding['name'] ?? 'XAMASAFE' }}</span>
+                    @endif
                 </td>
                 <td style="width: 40%; text-align: center;">
                     <h3 style="margin: 5px 0 0 0; text-transform: uppercase; color: #111827;">{{ $title ?? 'Reporte' }}</h3>
@@ -121,7 +136,7 @@
         <table class="no-border">
             <tr>
                 <td style="width: 33%; text-align: left;">
-                    GENERADO AUTOMÁTICAMENTE POR XAMASAFE
+                    {{ strtoupper($branding['name'] ?? 'XAMASAFE') }} — Sistema HSE
                 </td>
                 <td style="width: 33%; text-align: center;">
                     Página <span class="page-number"></span>
@@ -138,7 +153,7 @@
         {{ $slot }}
     </main>
     
-    <!-- Script for Page Numbers (DomPDF specific PHP inline used sometimes, but CSS counters act weird. text/php script is robust) -->
+    <!-- Script for Page Numbers (DomPDF) -->
     <script type="text/php">
         if (isset($pdf)) {
             $x = 280;
@@ -147,9 +162,9 @@
             $font = null;
             $size = 8;
             $color = array(0.4, 0.45, 0.55); // #64748b
-            $word_space = 0.0;  //  default
-            $char_space = 0.0;  //  default
-            $angle = 0.0;   //  default
+            $word_space = 0.0;
+            $char_space = 0.0;
+            $angle = 0.0;
             $pdf->page_text($x, $y, $text, $font, $size, $color, $word_space, $char_space, $angle);
         }
     </script>

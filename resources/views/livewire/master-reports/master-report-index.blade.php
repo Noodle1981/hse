@@ -51,7 +51,7 @@
                                 <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf' : 'tecnico.master-reports.pdf', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 mr-3">Ver PDF</a>
                             @endif
                             
-                            @if(auth()->user()->hasRole('Técnico') && $report->estado !== 'finalizado')
+                            @if(auth()->user()->isTechnician() && $report->estado !== 'finalizado')
                                 <a href="{{ route('tecnico.master-reports.edit', $report->id) }}" class="text-indigo-600 hover:text-indigo-900">Redactar</a>
                             @endif
                         </td>

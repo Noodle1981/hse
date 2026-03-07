@@ -66,7 +66,7 @@ class MasterReportWizard extends Component
         if (!$sede) return;
 
         $visits = $sede->visitCertificates()
-            ->with(['checklistCompletions.assignment.checklist', 'trainings', 'eppDeliveries', 'hallazgos', 'incidentes'])
+            ->with(['checklistCompletions.assignment.checklist', 'trainings', 'hallazgos', 'incidentes'])
             ->whereBetween('visit_date', [$startDate, $endDate])
             ->whereIn('status', ['completed', 'signed'])
             ->get();
@@ -75,7 +75,6 @@ class MasterReportWizard extends Component
             'visits' => $visits,
             'checklists' => $visits->flatMap->checklistCompletions,
             'trainings' => $visits->flatMap->trainings,
-            'epp_deliveries' => $visits->flatMap->eppDeliveries,
             'hallazgos' => $visits->flatMap->hallazgos,
             'incidentes' => $visits->flatMap->incidentes,
             'annual_plan_status' => $this->calculateAnnualPlanStatus($sede, $startDate->year),

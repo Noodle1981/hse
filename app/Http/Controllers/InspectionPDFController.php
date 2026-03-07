@@ -3,14 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\DynamicInspection;
+use App\Services\BrandingService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 
 class InspectionPDFController extends Controller
 {
-    /**
-     * Genera y descarga el PDF de una inspección completada
-     */
     public function download(int $id)
     {
         $inspection = DynamicInspection::with([
@@ -20,17 +17,18 @@ class InspectionPDFController extends Controller
             'answers.question'
         ])->findOrFail($id);
 
-        // Usar Policy para autorización
         \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
+
+        $branding = BrandingService::forUser($inspection->user);
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,
-            'answers' => $inspection->answers,
-            'sections' => $inspection->checklist->sections->sortBy('order'),
+            'answers'    => $inspection->answers,
+            'sections'   => $inspection->checklist->sections->sortBy('order'),
+            'branding'   => $branding,
         ]);
 
-        $filename = 'reporte_inspeccion_' . $inspection->id . '.pdf';
-        return $pdf->download($filename);
+        return $pdf->download('reporte_inspeccion_' . $inspection->id . '.pdf');
     }
 
     public function preview(int $id)
@@ -42,13 +40,15 @@ class InspectionPDFController extends Controller
             'answers.question'
         ])->findOrFail($id);
 
-        // Usar Policy para autorización
         \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
+
+        $branding = BrandingService::forUser($inspection->user);
 
         $pdf = Pdf::loadView('pdf.inspection', [
             'inspection' => $inspection,
-            'answers' => $inspection->answers,
-            'sections' => $inspection->checklist->sections->sortBy('order'),
+            'answers'    => $inspection->answers,
+            'sections'   => $inspection->checklist->sections->sortBy('order'),
+            'branding'   => $branding,
         ]);
 
         return $pdf->stream('reporte_inspeccion_' . $inspection->id . '.pdf');

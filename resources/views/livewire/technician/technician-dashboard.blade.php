@@ -66,24 +66,6 @@
                 </div>
             </div>
 
-            {{-- Mis Entregas EPP --}}
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-orange-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Entregas EPP (Mes)</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $kpis['my_epp_deliveries']['this_month'] }}</p>
-                    </div>
-                    <div class="bg-orange-100 rounded-full p-3">
-                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                        </svg>
-                    </div>
-                </div>
-                <div class="mt-4 text-sm">
-                    <span class="text-orange-600">{{ $kpis['my_epp_deliveries']['total'] }} total</span>
-                </div>
-            </div>
-
 
         </div>
 

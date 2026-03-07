@@ -6,7 +6,7 @@ use App\Models\GeneradorConstancia;
 use App\Models\Sede;
 use App\Models\DynamicInspection;
 use App\Models\Training;
-use App\Models\EppDelivery;
+
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
@@ -25,10 +25,9 @@ class VisitCertificateWizard extends Component
     // Step 2: Observaciones
     public $observacion = '';
 
-    // Step 3: Actividades (NUEVO)
+    // Step 3: Actividades
     public $selectedInspections = [];
     public $selectedTrainings = [];
-    public $selectedEppDeliveries = [];
     public $selectedHallazgos = [];
 
     // Step 4: Firmas (antes era Step 3)
@@ -151,9 +150,6 @@ class VisitCertificateWizard extends Component
         if (!empty($this->selectedTrainings)) {
             $this->certificate->trainings()->attach($this->selectedTrainings);
         }
-        if (!empty($this->selectedEppDeliveries)) {
-            $this->certificate->eppDeliveries()->attach($this->selectedEppDeliveries);
-        }
         if (!empty($this->selectedHallazgos)) {
             $this->certificate->hallazgosActividades()->attach($this->selectedHallazgos);
         }
@@ -179,10 +175,9 @@ class VisitCertificateWizard extends Component
     {
         if (empty($this->sede_id)) {
             return [
-                'inspections' => collect(),
-                'trainings' => collect(),
-                'riskEvaluations' => collect(),
-                'eppDeliveries' => collect(),
+                'inspections'    => collect(),
+                'trainings'      => collect(),
+                'hallazgos'      => collect(),
             ];
         }
 
@@ -201,13 +196,6 @@ class VisitCertificateWizard extends Component
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get(),
             
-            'eppDeliveries' => EppDelivery::where('user_id', auth()->id())
-                ->whereHas('employee', function($q) {
-                    $q->where('sede_id', $this->sede_id);
-                })
-                ->whereBetween('delivery_date', [$startDate, $endDate])
-                ->with('employee:id,name,last_name')
-                ->get(),
 
             'hallazgos' => \App\Models\Hallazgo::where('user_id', auth()->id())
                 ->where('sede_id', $this->sede_id)

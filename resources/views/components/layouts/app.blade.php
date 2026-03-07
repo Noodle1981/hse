@@ -302,54 +302,15 @@
                         </a>
                     </li>
 
-                    <li>
-                        @if(auth()->user()->isAdmin())
-                            <a href="{{ route('gestor.epp.history') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('gestor.epp.history') ? 'menu-item-active text-white' : '' }}">
-                               <span class="menu-icon mr-3 flex-shrink-0">
-                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 00-9 9h18a9 9 0 00-9-9zM3 12v1h18v-1M12 3v3m5 1l-1 2m-7-2l1 2"/>
-                                   </svg>
-                               </span>
-                               <span x-show="sidebarOpen" class="menu-text">Gestión EPP</span>
-                            </a>
-                        </li>
-                        <li class="mt-1">
-                            <a href="{{ route('gestor.epp.alerts') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('gestor.epp.alerts') ? 'menu-item-active text-white' : '' }}">
-                               <span class="menu-icon mr-3 flex-shrink-0">
-                                   <!-- Icono de Campanita -->
-                                   <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                   </svg>
-                               </span>
-                               <span x-show="sidebarOpen" class="menu-text flex justify-between w-full">
-                                   Alertas EPP
-                               </span>
-                            </a>
-                        @else
-                            <a href="{{ route('tecnico.epp.deliver') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                      {{ request()->routeIs('tecnico.epp.deliver') ? 'menu-item-active text-white' : '' }}">
-                               <span class="menu-icon mr-3 flex-shrink-0">
-                                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 00-9 9h18a9 9 0 00-9-9zM3 12v1h18v-1M12 3v3m5 1l-1 2m-7-2l1 2"/>
-                                   </svg>
-                               </span>
-                               <span x-show="sidebarOpen" class="menu-text">Entrega de EPP</span>
-                            </a>
-                        @endif
-                    </li>
+
 
 
 
                     @if(auth()->user()->isAdmin())
                     <li>
-                        <a href="{{ route('gestor.advanced-executions.hub') }}" 
+                        <a href="{{ route('gestor.annual-contract.index') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('gestor.advanced-executions.hub') || request()->routeIs('gestor.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
+                                  {{ request()->routeIs('gestor.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -380,7 +341,7 @@
                     <li>
                         <a href="{{ route('gestor.administration.hub') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('gestor.administration.hub') || request()->routeIs('gestor.users.*') || request()->routeIs('gestor.technicians.*') || request()->routeIs('gestor.companies.*') || request()->routeIs('gestor.epp.employees.*') ? 'menu-item-active text-white' : '' }}">
+                                  {{ request()->routeIs('gestor.administration.hub') || request()->routeIs('gestor.users.*') || request()->routeIs('gestor.technicians.*') || request()->routeIs('gestor.companies.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>

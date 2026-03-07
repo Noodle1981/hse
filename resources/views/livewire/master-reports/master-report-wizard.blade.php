@@ -200,6 +200,7 @@
                                 @endforelse
                             </ul>
                         </div>
+                    </div>
                     <div class="mt-4 pt-4 border-t border-gray-100">
                         <label class="block text-sm font-bold text-gray-700 mb-2 uppercase italic">Observaciones de Hallazgos e Incidentes</label>
                         <textarea wire:model="observaciones_hallazgos_incidentes" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500" placeholder="Comentarios sobre los desvíos y eventos detectados..."></textarea>

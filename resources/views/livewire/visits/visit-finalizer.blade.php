@@ -22,7 +22,7 @@
                                 Por favor confirme que ha completado todas las actividades.
                             </p>
 
-                            <div class="bg-gray-50 rounded-lg p-3 grid grid-cols-3 gap-2 mb-4 border border-gray-100">
+                            <div class="bg-gray-50 rounded-lg p-3 grid grid-cols-2 gap-2 mb-4 border border-gray-100">
                                 <div class="text-center">
                                     <span class="block text-xl font-bold text-gray-800">{{ $checklistsCount }}</span>
                                     <span class="text-xs text-gray-500 uppercase tracking-wide">Checklists</span>
@@ -30,10 +30,6 @@
                                 <div class="text-center border-l border-gray-200">
                                     <span class="block text-xl font-bold text-blue-600">{{ $trainingsCount }}</span>
                                     <span class="text-xs text-gray-500 uppercase tracking-wide">Capacit.</span>
-                                </div>
-                                <div class="text-center border-l border-gray-200">
-                                    <span class="block text-xl font-bold text-orange-600">{{ $eppCount }}</span>
-                                    <span class="text-xs text-gray-500 uppercase tracking-wide">Entregas</span>
                                 </div>
                             </div>
                         </div>

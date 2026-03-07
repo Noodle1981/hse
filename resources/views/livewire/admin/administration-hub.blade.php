@@ -101,36 +101,7 @@
                 </div>
             </a>
 
-            <!-- Empleados Card -->
-            <a href="{{ route('gestor.epp.employees.index') }}" 
-               class="group bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-xl hover:border-ep-primary/30 transition-all duration-300 transform hover:-translate-y-1">
-                <div class="flex flex-col items-center text-center">
-                    <!-- Icon -->
-                    <div class="w-20 h-20 bg-gradient-to-br from-teal-500 to-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-teal-500/30">
-                        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                    </div>
-                    
-                    <!-- Title -->
-                    <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:text-ep-primary transition-colors">
-                        Empleados
-                    </h3>
-                    
-                    <!-- Description -->
-                    <p class="text-sm text-gray-600 mb-4">
-                        Empleados de clientes para EPP, entregas y capacitaciones
-                    </p>
-                    
-                    <!-- Action Indicator -->
-                    <div class="flex items-center text-ep-primary font-semibold text-sm group-hover:gap-2 transition-all">
-                        <span>Acceder</span>
-                        <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </div>
-                </div>
-            </a>
+
         </div>
 
         <!-- Info Footer -->
@@ -141,7 +112,7 @@
                 </svg>
                 <div>
                     <p class="text-sm text-indigo-900 font-semibold">Panel de Administración</p>
-                    <p class="text-sm text-indigo-700 mt-1">Gestiona usuarios, técnicos, empresas clientes y sus empleados desde un solo lugar. Para importar empleados masivamente, accede a la vista de Empleados.</p>
+                    <p class="text-sm text-indigo-700 mt-1">Gestiona usuarios, técnicos y empresas clientes desde un solo lugar.</p>
                 </div>
             </div>
         </div>

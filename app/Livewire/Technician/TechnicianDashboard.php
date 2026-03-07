@@ -7,7 +7,6 @@ use App\Models\{
     ChecklistAssignment,
     Training,
     TrainingAttendance,
-    EppDelivery,
     GeneradorConstancia
 };
 use Illuminate\Support\Facades\DB;
@@ -64,11 +63,7 @@ class TechnicianDashboard extends Component
                         $q->whereIn('id', $user->sedes->pluck('id'));
                     })->count(),
             ],
-            'my_epp_deliveries' => [
-                'this_month' => EppDelivery::where('user_id', $user->id)
-                    ->whereMonth('delivery_date', now()->month)->count(),
-                'total' => EppDelivery::where('user_id', $user->id)->count(),
-            ],
+
             'my_visit_certificates' => [
                 'this_month' => GeneradorConstancia::where('user_id', $user->id)
                     ->whereMonth('created_at', now()->month)->count(),

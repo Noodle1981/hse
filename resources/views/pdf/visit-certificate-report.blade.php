@@ -365,37 +365,6 @@
     </div>
     @endif
 
-    {{-- 6. ENTREGAS EPP --}}
-    @if($visit->eppDeliveries->count() > 0)
-    <div class="section">
-        <div class="section-header"><h2>6. Gestión de EPP</h2></div>
-        @foreach($visit->eppDeliveries as $delivery)
-            <div style="margin-bottom: 15px; border: 1px dashed #cbd5e1; padding: 10px;">
-                <div style="font-size: 10px; font-weight: bold; color: #1e293b; margin-bottom: 5px;">
-                    RECEPTOR: {{ $delivery->employee->name ?? '' }} {{ $delivery->employee->last_name ?? '' }} ({{ $delivery->employee->document_number ?? '-' }})
-                </div>
-                <table class="detail-table">
-                    <thead>
-                        <tr>
-                            <th>Elemento Entregado</th>
-                            <th style="text-align: center; width: 80px;">Cantidad</th>
-                            <th style="text-align: center; width: 60px;">Talle</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($delivery->epp_items ?? [] as $item)
-                        <tr>
-                            <td>{{ $item['name'] ?? 'Protección' }}</td>
-                            <td style="text-align: center;">{{ $item['quantity'] ?? $item['qty'] ?? 1 }}</td>
-                            <td style="text-align: center;">{{ $item['size'] ?? '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endforeach
-    </div>
-    @endif
 
     {{-- 7. FIRMAS --}}
     <table class="signature-table">

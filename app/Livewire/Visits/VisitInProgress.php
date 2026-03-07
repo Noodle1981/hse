@@ -21,13 +21,9 @@ class VisitInProgress extends Component
     public $checklists = [];
     public $trainings = [];
     public $assignedTrainings = [];
-    public $eppDeliveries = [];
     public $hallazgos = [];
     public $incidentes = [];
-    
-    // EPP Requests
-    public $assignedEppRequests = [];
-    public $selectedEppRequestId = null;
+
 
     public function updatedSignatureUnavailable($value)
     {
@@ -59,38 +55,6 @@ class VisitInProgress extends Component
 
 
 
-    public function executeEppRequest($requestId)
-    {
-        $this->selectedEppRequestId = $requestId;
-        $this->showEppModal = true;
-    }
-
-    public function openEppModal()
-    {
-        $this->selectedEppRequestId = null;
-        $this->showEppModal = true;
-    }
-
-    public function closeEppModal()
-    {
-        $this->showEppModal = false;
-        $this->selectedEppRequestId = null;
-    }
-
-    public function onEppDelivered()
-    {
-        // Si venía de una request, actualizar estado
-        if ($this->selectedEppRequestId) {
-            $eppRequest = \App\Models\EppDeliveryRequest::find($this->selectedEppRequestId);
-            if ($eppRequest) {
-                $eppRequest->update(['status' => 'completed']);
-            }
-        }
-
-        $this->closeEppModal();
-        $this->loadChecklists(); // Recargar todo
-        session()->flash('message', 'EPP entregado exitosamente.');
-    }
 
     // Estado de modales
     public $showAutoAssignModal = false;
@@ -119,16 +83,14 @@ class VisitInProgress extends Component
     // Capacitación Ad-Hoc
     public $showTrainingModal = false;
 
-    // Entrega EPP
-    public $showEppModal = false;
+
 
     protected $listeners = [
         'checklistCompleted' => 'onChecklistCompleted',
         'closeChecklistFiller' => 'closeFillModal',
         'trainingAdded' => 'onTrainingAdded',
         'closeTrainingAdHoc' => 'closeTrainingModal',
-        'eppDelivered' => 'onEppDelivered',
-        'closeEppDelivery' => 'closeEppModal',
+
         'hallazgoCreated' => 'onHallazgoCreated',
         'closeHallazgoQuick' => 'closeHallazgoModal',
         'incidenteCreated' => 'onIncidenteCreated',
@@ -178,23 +140,15 @@ class VisitInProgress extends Component
             ->where('user_id', Auth::id())
             ->where('sede_id', $this->visit->sede_id)
             ->where('status', 'scheduled') // Solo programadas
+            ->whereDate('date', '<=', now())
             ->orderBy('date', 'asc')
             ->get();
-
-        // 3.2 Cargar Solicitudes de EPP (Pendientes)
-        $this->assignedEppRequests = \App\Models\EppDeliveryRequest::where('sede_id', $this->visit->sede_id)
-            ->where('status', 'pending')
-            ->with(['employee']) 
-            ->get();
-
-        // 4. Cargar entregas de EPP realizadas
-        $this->eppDeliveries = $this->visit->eppDeliveries()->with('employee')->latest()->get();
-
-        // 5. Cargar hallazgos
+            
+        // 4. Cargar hallazgos registrados en la visita
         $this->hallazgos = $this->visit->hallazgos()->latest()->get();
 
-        // 6. Cargar incidentes
-        $this->incidentes = \App\Models\Incidente::where('visit_certificate_id', $this->visit->id)->latest()->get();
+        // 5. Cargar incidentes registrados en la visita
+        $this->incidentes = $this->visit->incidentes()->latest()->get();
     }
 
     public function executeTraining($trainingId)

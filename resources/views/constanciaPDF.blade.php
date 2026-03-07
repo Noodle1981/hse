@@ -108,10 +108,8 @@
 
             <!-- Actividades Realizadas -->
             @if(isset($data['actividades']) && 
-                ($data['actividades']['inspections']->isNotEmpty() || 
+                            ($data['actividades']['inspections']->isNotEmpty() || 
                  $data['actividades']['trainings']->isNotEmpty() || 
-                 $data['actividades']['riskEvaluations']->isNotEmpty() || 
-                 $data['actividades']['eppDeliveries']->isNotEmpty() ||
                  $data['actividades']['hallazgos']->isNotEmpty()))
                 <div class="observations" style="margin-top: 10px;">
                     <div class="obs-title">ACTIVIDADES REALIZADAS DURANTE LA VISITA</div>
@@ -143,23 +141,6 @@
                             </ul>
                         @endif
 
-                        @if($data['actividades']['riskEvaluations']->isNotEmpty())
-                            <strong>Evaluaciones de Riesgo:</strong>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                @foreach($data['actividades']['riskEvaluations'] as $evaluation)
-                                    <li>{{ $evaluation->risk->name }} ({{ $evaluation->evaluation_date->format('H:i') }})</li>
-                                @endforeach
-                            </ul>
-                        @endif
-
-                        @if($data['actividades']['eppDeliveries']->isNotEmpty())
-                            <strong>Entregas de EPP:</strong>
-                            <ul style="margin: 5px 0; padding-left: 20px;">
-                                @foreach($data['actividades']['eppDeliveries'] as $delivery)
-                                    <li>{{ $delivery->employee->name }} {{ $delivery->employee->last_name }} ({{ $delivery->delivery_date->format('H:i') }})</li>
-                                @endforeach
-                            </ul>
-                        @endif
                     </div>
                 </div>
             @endif

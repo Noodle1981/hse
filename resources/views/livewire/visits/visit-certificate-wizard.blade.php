@@ -137,42 +137,8 @@
                         </div>
                     @endif
                     
-                    <!-- Evaluaciones de Riesgo -->
-                    @if($activities['riskEvaluations']->isNotEmpty())
-                        <div class="mb-6">
-                            <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-yellow-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-                                Evaluaciones de Riesgo
-                            </h3>
-                            <div class="space-y-2">
-                                @foreach($activities['riskEvaluations'] as $evaluation)
-                                    <label class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors">
-                                        <input type="checkbox" wire:model="selectedRiskEvaluations" value="{{ $evaluation->id }}" class="h-4 w-4 text-ep-primary focus:ring-ep-primary border-gray-300 rounded">
-                                        <span class="ml-3 text-sm font-medium text-gray-700">{{ $evaluation->risk->name }} - <span class="text-gray-500">{{ $evaluation->evaluation_date->format('H:i') }}</span></span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                    
-                    <!-- Entregas EPP -->
-                    @if($activities['eppDeliveries']->isNotEmpty())
-                        <div class="mb-6">
-                            <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                                <svg class="w-5 h-5 mr-2 text-orange-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 0l-2 2a1 1 0 101.414 1.414L8 10.414l1.293 1.293a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                                Entregas de EPP
-                            </h3>
-                            <div class="space-y-2">
-                                @foreach($activities['eppDeliveries'] as $delivery)
-                                    <label class="flex items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 cursor-pointer transition-colors">
-                                        <input type="checkbox" wire:model="selectedEppDeliveries" value="{{ $delivery->id }}" class="h-4 w-4 text-ep-primary focus:ring-ep-primary border-gray-300 rounded">
-                                        <span class="ml-3 text-sm font-medium text-gray-700">{{ $delivery->employee->name }} {{ $delivery->employee->last_name }} - <span class="text-gray-500">{{ $delivery->delivery_date->format('H:i') }}</span></span>
-                                    </label>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
-                    
+
+
                     <!-- Hallazgos Detectados -->
                     @if($activities['hallazgos']->isNotEmpty())
                         <div class="mb-6">
@@ -199,8 +165,7 @@
                         </div>
                     @endif
 
-                    @if($activities['inspections']->isEmpty() && $activities['trainings']->isEmpty() && 
-                        $activities['riskEvaluations']->isEmpty() && $activities['eppDeliveries']->isEmpty() &&
+                    @if($activities['inspections']->isEmpty() && $activities['trainings']->isEmpty() &&
                         $activities['hallazgos']->isEmpty())
                         <div class="text-center p-8 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                             <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
