@@ -19,7 +19,7 @@
                         @endforeach
                     </select>
 
-                    @if(auth()->user()->rol === 'Administrador')
+                    @if(auth()->user()->isAdmin())
                     <button wire:click="$toggle('editMode')" class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center {{ $editMode ? 'bg-indigo-600 text-white shadow-indigo-100' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50' }}">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         {{ $editMode ? 'Finalizar Edición' : 'Planificar Actividades' }}
@@ -45,42 +45,62 @@
         </div>
 
         {{-- Formulario de Planificación (Solo en editMode y Admin) --}}
-        @if($editMode && auth()->user()->rol === 'Administrador')
+        @if($editMode && auth()->user()->isAdmin())
         <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-6 mb-8 animate-in fade-in duration-500">
             <h3 class="text-sm font-bold text-indigo-700 mb-4 flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                 Programar Nueva Actividad Anual
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
                 <div class="md:col-span-1">
                     <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Categoría</label>
-                    <select wire:model="category" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500">
+                    <select wire:model.live="category" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500">
                         <option value="Capacitación">Capacitación (E)</option>
                         <option value="Inspección">Inspección (I)</option>
-                        <option value="Registro">Registro (R)</option>
+                        <option value="Informe">Informe (M/B/T)</option>
                     </select>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Nombre Actividad</label>
-                    <input type="text" wire:model="activity_name" placeholder="Ej: Control Matafuegos" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500">
+
+                @if($category === 'Informe')
+                <div class="md:col-span-1 animate-in fade-in slide-in-from-left-4 duration-300">
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Frecuencia</label>
+                    <select wire:model="frequency" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500 font-bold text-indigo-700 bg-indigo-50">
+                        <option value="none">Manual</option>
+                        <option value="mensual">Mensual (12)</option>
+                        <option value="bimestral">Bimestral (6)</option>
+                        <option value="trimestral">Trimestral (4)</option>
+                    </select>
                 </div>
-                <div class="md:col-span-1">
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Código Interno</label>
-                    <input type="text" wire:model="activity_code" placeholder="Ej: EP-REG-001" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500">
-                </div>
-                <div class="md:col-span-1">
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Checklist Vinculado (Opcional)</label>
-                    <select wire:model="checklist_id" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500">
-                        <option value="">Ninguno</option>
+                @else
+                <div class="md:col-span-1 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">Checklist Vinculado <span class="text-indigo-400">(auto-rellena campos)</span></label>
+                    <select wire:model.live="checklist_id" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500">
+                        <option value="">— Seleccionar checklist —</option>
                         @foreach($checklists as $c)
                             <option value="{{ $c->id }}">{{ $c->title }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="md:col-span-1">
-                    <button wire:click="addActivity" class="w-full py-2 bg-indigo-600 text-white font-bold rounded-lg text-sm hover:bg-indigo-700 transition-all shadow-md">
-                        Añadir al Plan
-                    </button>
+                @endif
+                
+                <div class="md:col-span-{{ $category === 'Informe' ? '1' : '1' }}">
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">
+                        Nombre Actividad
+                        @if($activity_name && $category !== 'Informe') <span class="text-emerald-500 normal-case font-normal">✓ auto</span> @endif
+                    </label>
+                    <input type="text" wire:model="activity_name" placeholder="{{ $category === 'Informe' ? 'Ej: Informe Mensual' : 'Ej: Control Matafuegos' }}" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500 {{ $activity_name && $category !== 'Informe' ? 'bg-emerald-50 border-emerald-200' : '' }}">
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 uppercase">
+                        Código Interno
+                        @if($activity_code && $category !== 'Informe') <span class="text-emerald-500 normal-case font-normal">✓ auto</span> @endif
+                    </label>
+                    <div class="flex gap-4">
+                        <input type="text" wire:model="activity_code" placeholder="Ej: EP-REG-001" class="w-full rounded-lg border-gray-200 text-sm focus:ring-indigo-500 {{ $activity_code && $category !== 'Informe' ? 'bg-emerald-50 border-emerald-200' : '' }}">
+                        <button wire:click="addActivity" class="w-full py-2 bg-indigo-600 text-white font-bold rounded-lg text-sm hover:bg-indigo-700 transition-all shadow-md whitespace-nowrap px-4">
+                            Añadir
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -112,10 +132,10 @@
                                 </tr>
                                 @php $currentCategory = $plan->category; @endphp
                             @endif
-                            <tr class="group hover:bg-gray-50/80 transition-colors">
+                                <tr class="group hover:bg-gray-50/80 transition-colors">
                                 <td class="sticky left-0 z-10 bg-white group-hover:bg-gray-50 px-6 py-4">
                                     <div class="flex items-center">
-                                        <div class="w-2 h-2 rounded-full mr-3 {{ $plan->category === 'Capacitación' ? 'bg-blue-400' : ($plan->category === 'Inspección' ? 'bg-orange-400' : 'bg-purple-400') }}"></div>
+                                        <div class="w-2 h-2 rounded-full mr-3 {{ $plan->category === 'Capacitación' ? 'bg-blue-400' : ($plan->category === 'Inspección' ? 'bg-orange-400' : 'bg-gray-600') }}"></div>
                                         <div>
                                             <div class="text-xs font-bold text-gray-800">{{ $plan->activity_name }}</div>
                                             <div class="text-[9px] text-gray-400 font-medium tracking-tighter">{{ $plan->activity_code ?: 'S/C' }}</div>
@@ -166,7 +186,7 @@
                             <tr>
                                 <td colspan="15" class="px-6 py-20 text-center">
                                     <div class="text-gray-400 text-xs font-bold uppercase tracking-widest">No hay actividades planificadas para este año</div>
-                                    @if(!$editMode && auth()->user()->rol === 'Administrador')
+                                    @if(!$editMode && auth()->user()->isAdmin())
                                         <button wire:click="$set('editMode', true)" class="mt-4 text-indigo-600 font-bold text-sm hover:underline">Comenzar Planificación</button>
                                     @endif
                                 </td>

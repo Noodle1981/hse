@@ -121,47 +121,110 @@
             </div>
         </div>
 
-        {{-- Actividad Reciente --}}
+        {{-- Actividades y Asignaciones --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {{-- Inspecciones Recientes --}}
+            {{-- Bitácora de Actividades --}}
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Inspecciones Recientes</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Bitácora de Actividades</h3>
                 </div>
                 <div class="p-6">
                     <div class="space-y-3">
-                        @forelse($recentActivity['inspections'] as $inspection)
-                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $inspection->checklist->title }}</p>
-                                    <p class="text-sm text-gray-600">{{ $inspection->user->nombres }} {{ $inspection->user->apellidos }}</p>
+                        @forelse($recentActivity as $activity)
+                            <div class="flex items-start gap-4 py-3 border-b border-gray-100 last:border-0">
+                                <div class="mt-1 flex-shrink-0">
+                                    @if($activity->type === 'visita')
+                                        <span class="inline-flex items-center justify-center p-2 bg-blue-100 rounded-lg">
+                                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                        </span>
+                                    @elseif($activity->type === 'inspeccion')
+                                        <span class="inline-flex items-center justify-center p-2 bg-green-100 rounded-lg">
+                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        </span>
+                                    @elseif($activity->type === 'capacitacion')
+                                        <span class="inline-flex items-center justify-center p-2 bg-purple-100 rounded-lg">
+                                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center justify-center p-2 bg-orange-100 rounded-lg">
+                                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                                        </span>
+                                    @endif
                                 </div>
-                                <span class="text-sm text-gray-500">{{ $inspection->completed_at?->format('d/m/Y') }}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate" title="{{ $activity->title }}">
+                                        {{ $activity->title }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                        <span class="font-medium text-gray-700">{{ $activity->empresa }}</span>
+                                        <span>&bull;</span>
+                                        <span>{{ $activity->user_name }}</span>
+                                    </p>
+                                </div>
+                                <div class="text-xs text-gray-500 whitespace-nowrap">
+                                    {{ $activity->date ? \Carbon\Carbon::parse($activity->date)->format('d/m/Y') : '-' }}
+                                </div>
                             </div>
                         @empty
-                            <p class="text-gray-500 text-center py-4">No hay inspecciones recientes</p>
+                            <div class="text-center py-6 text-gray-500">
+                                <svg class="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                No hay actividades recientes
+                            </div>
                         @endforelse
                     </div>
                 </div>
             </div>
 
-            {{-- Capacitaciones Próximas --}}
+            {{-- Actividades Asignadas / Próximas --}}
             <div class="bg-white rounded-lg shadow">
                 <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Capacitaciones Próximas</h3>
+                    <h3 class="text-lg font-semibold text-gray-900">Actividades Asignadas / Próximas</h3>
                 </div>
                 <div class="p-6">
                     <div class="space-y-3">
-                        @forelse($recentActivity['trainings'] as $training)
-                            <div class="flex items-center justify-between py-2 border-b border-gray-100">
-                                <div>
-                                    <p class="font-medium text-gray-900">{{ $training->title }}</p>
-                                    <p class="text-sm text-gray-600">{{ $training->sede->nombre_sede }}</p>
+                        @forelse($upcomingActivities as $upcoming)
+                            <div class="flex items-start gap-4 py-3 border-b border-gray-100 last:border-0">
+                                <div class="mt-1 flex-shrink-0">
+                                    @if($upcoming->type === 'capacitacion')
+                                        <span class="inline-flex items-center justify-center p-2 bg-purple-100 rounded-lg" title="Capacitación">
+                                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center justify-center p-2 bg-yellow-100 rounded-lg" title="Checklist Asignado">
+                                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                                        </span>
+                                    @endif
                                 </div>
-                                <span class="text-sm text-gray-500">{{ $training->date?->format('d/m/Y') }}</span>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 truncate">
+                                        {{ $upcoming->title }}
+                                    </p>
+                                    <p class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
+                                        <span class="font-medium text-gray-700">{{ $upcoming->empresa }}</span>
+                                        <span>&bull;</span>
+                                        <span>{{ $upcoming->user_name }}</span>
+                                    </p>
+                                </div>
+                                <div class="flex flex-col items-end gap-1">
+                                    <span class="text-xs font-medium {{ $upcoming->date && \Carbon\Carbon::parse($upcoming->date)->isPast() ? 'text-red-500' : 'text-gray-500' }}">
+                                        {{ $upcoming->date ? \Carbon\Carbon::parse($upcoming->date)->format('d/m/Y') : 'Sin fecha limite' }}
+                                    </span>
+                                    @if($upcoming->type !== 'capacitacion' && $upcoming->status === 'in_progress')
+                                        <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-medium">En curso</span>
+                                    @elseif($upcoming->type !== 'capacitacion' && $upcoming->status === 'pending')
+                                        <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-[10px] font-medium">Pendiente</span>
+                                    @endif
+                                </div>
                             </div>
                         @empty
-                            <p class="text-gray-500 text-center py-4">No hay capacitaciones programadas</p>
+                            <div class="text-center py-6 text-gray-500">
+                                <svg class="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                No hay actividades pendientes
+                            </div>
                         @endforelse
                     </div>
                 </div>

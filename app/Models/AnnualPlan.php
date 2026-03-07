@@ -12,6 +12,7 @@ class AnnualPlan extends Model
     protected $fillable = [
         'sede_id',
         'category',
+        'frequency',
         'activity_name',
         'activity_code',
         'checklist_id',

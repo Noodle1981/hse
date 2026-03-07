@@ -4,11 +4,8 @@ namespace App\Livewire\Contracts;
 
 use App\Models\AnnualPlan;
 use App\Models\Sede;
-use App\Models\Empresa;
 use App\Models\DynamicChecklist;
-use App\Models\Inspection;
 use Livewire\Component;
-use Illuminate\Support\Facades\DB;
 
 class AnnualContractDashboard extends Component
 {
@@ -18,6 +15,7 @@ class AnnualContractDashboard extends Component
     
     // Form fields for new activity
     public $category = 'Capacitación';
+    public $frequency = 'none';
     public $activity_name;
     public $activity_code;
     public $checklist_id;
@@ -36,10 +34,36 @@ class AnnualContractDashboard extends Component
         }
     }
 
+    public function updatedCategory($value)
+    {
+        if ($value === 'Informe') {
+            $this->activity_name = 'Informe HSE';
+            $this->activity_code = 'EP-INF-01';
+            $this->checklist_id = null;
+        } else {
+            $this->activity_name = '';
+            $this->activity_code = '';
+        }
+    }
+
+    public function updatedChecklistId($value)
+    {
+        if (!$value) {
+            $this->activity_name = '';
+            $this->activity_code = '';
+            return;
+        }
+
+        $checklist = DynamicChecklist::find($value);
+        if ($checklist) {
+            $this->activity_name = $checklist->title;
+            $this->activity_code = $checklist->registry_code ?? '';
+        }
+    }
+
     public function toggleMonth($planId, $month)
     {
-        $role = strtolower(auth()->user()->rol);
-        if (($role !== 'administrador' && $role !== 'admin') || !$this->editMode) return;
+        if (!auth()->user()->isAdmin() || !$this->editMode) return;
         
         $plan = AnnualPlan::findOrFail($planId);
         $plan->$month = !$plan->$month;
@@ -48,31 +72,57 @@ class AnnualContractDashboard extends Component
 
     public function addActivity()
     {
-        $role = strtolower(auth()->user()->rol);
-        if ($role !== 'administrador' && $role !== 'admin') return;
+        if (!auth()->user()->isAdmin()) return;
         
         $this->validate([
             'activity_name' => 'required|string|max:255',
-            'category' => 'required|in:Capacitación,Inspección,Registro',
+            'category' => 'required|in:Capacitación,Inspección,Informe',
+            'frequency' => 'required|in:none,mensual,bimestral,trimestral',
             'sedeId' => 'required|exists:sedes,id',
         ]);
 
-        AnnualPlan::create([
+        $planData = [
             'sede_id' => $this->sedeId,
             'year' => $this->year,
             'category' => $this->category,
+            'frequency' => $this->category === 'Informe' ? $this->frequency : 'none',
             'activity_name' => $this->activity_name,
             'activity_code' => $this->activity_code,
-            'checklist_id' => $this->checklist_id,
-        ]);
+            'checklist_id' => $this->category === 'Inspección' ? $this->checklist_id : null,
+        ];
 
-        $this->reset(['activity_name', 'activity_code', 'checklist_id']);
+        // Autocompletar meses si es Informe con frecuencia
+        if ($this->category === 'Informe' && $this->frequency !== 'none') {
+            $months = [
+                'january', 'february', 'march', 'april', 'may', 'june',
+                'july', 'august', 'september', 'october', 'november', 'december'
+            ];
+            
+            foreach ($months as $index => $m) {
+                $monthNum = $index + 1;
+                $shouldCheck = false;
+                
+                if ($this->frequency === 'mensual') {
+                    $shouldCheck = true;
+                } elseif ($this->frequency === 'bimestral' && $monthNum % 2 === 0) {
+                    $shouldCheck = true; // Feb, Abr, Jun, Ago, Oct, Dic
+                } elseif ($this->frequency === 'trimestral' && $monthNum % 3 === 0) {
+                    $shouldCheck = true; // Mar, Jun, Sep, Dic
+                }
+                
+                $planData[$m] = $shouldCheck;
+            }
+        }
+
+        AnnualPlan::create($planData);
+
+        $this->reset(['activity_name', 'activity_code', 'checklist_id', 'frequency']);
+        $this->category = 'Capacitación';
     }
 
     public function deleteActivity($id)
     {
-        $role = strtolower(auth()->user()->rol);
-        if ($role !== 'administrador' && $role !== 'admin') return;
+        if (!auth()->user()->isAdmin()) return;
         
         AnnualPlan::findOrFail($id)->delete();
     }
@@ -80,7 +130,12 @@ class AnnualContractDashboard extends Component
     public function downloadPdf()
     {
         if (!$this->sedeId) return;
-        $url = route('annual-contract.pdf', ['sede_id' => $this->sedeId, 'year' => $this->year]);
+        
+        $routeName = auth()->user()->isAdmin() 
+            ? 'gestor.annual-contract.pdf' 
+            : 'tecnico.annual-contract.pdf';
+            
+        $url = route($routeName, ['sede_id' => $this->sedeId, 'year' => $this->year]);
         $this->dispatch('open-url', url: $url);
     }
 
@@ -142,8 +197,7 @@ class AnnualContractDashboard extends Component
             ->orderBy('category')
             ->get();
 
-        $role = strtolower(auth()->user()->rol);
-        $sedes = ($role === 'administrador' || $role === 'admin') 
+        $sedes = auth()->user()->isAdmin()
             ? Sede::all() 
             : auth()->user()->sedes;
 
