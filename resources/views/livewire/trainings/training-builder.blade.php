@@ -96,7 +96,7 @@
                                 {{ !$sede_id ? 'disabled' : '' }}>
                             <option value="">Seleccione un responsable</option>
                             @foreach($tecnicos as $tecnico)
-                                <option value="{{ $tecnico->id }}">{{ $tecnico->apellidos }}, {{ $tecnico->name }}</option>
+                                <option value="{{ $tecnico->id }}">{{ $tecnico->apellidos }}, {{ $tecnico->nombres }}</option>
                             @endforeach
                         </select>
                         <p class="text-[10px] text-gray-400 mt-1 italic">El técnico que supervisa o lleva a cabo la capacitación.</p>

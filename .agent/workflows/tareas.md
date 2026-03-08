@@ -1,38 +1,35 @@
 ---
-description: Ultra minización
+description: Generación de Uni Test y otras
 ---
 
-Etapa 1
+Para los test phpunit Existentes y nuevos
 
-Para el perfil de gestor, necesito quitar las siguientes vistas
+Test de usuarios y roles
+test de lo que puede ver y no (si cumple)
 
-http://127.0.0.1:8000/gestor/epp/history
+test de plantillas de checklist
 
-http://127.0.0.1:8000/gestor/epp/alerts
-
-quitar las rutas, revisar si no se rompe algo, quitar todos los enlaces que haya en navbar lateral
-
-Etapa 2 
-
-Para el perfil de técnico, necesito quitar la siguiente vista
-
-http://127.0.0.1:8000/tecnico/epp/deliver
-
-quitar las rutas, revisar si no se rompe algo, quitar todos los enlaces que haya en navbar lateral
+test de Capacitaciones
 
 
-Etapa 3
+test de asignacion de checklist
 
-borrar controladores, modelos referido a EP, entregas, alertas, stock, ect. incluyendo controladores de pdf referido a eso
+test 1 opcion es completar una visita con un check y una capacitacion dentro y completarlo
 
-Etapa 4
+test 2 opcion es completar una visita sin tener nada asignado por parte del gestor, pero si autoasignarse una check y una capacitacion, otra 1 check solo, otra una capacitacion sola
 
-borrar los campos de borrar controladores, modelos referido a EP, entregas, alertas, stock, ect. DB
+test 3 opcion tener un checklist asignado, auto asignarse una capacitaciones, reportar un hallazgo y un incidente
+
+test 4 opcion, si la visita no se completa ninguno
+
+test informe maestro
+
+test de contrato anual
+
+test de aministracion
 
 
-Etapa 5
+esos test son mas que nada en gestor, en su contraparte estaría el del tecnico
 
-renombrar la carpeta risk por contrato anual y revisar que no rompa el namespace 
-revisar si el controlador AngularController.php es necesario
 
-armar un roadmap para ello, llamado ultraminimizacion.md
+
