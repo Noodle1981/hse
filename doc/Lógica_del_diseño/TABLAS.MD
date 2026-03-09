@@ -40,29 +40,11 @@
 21. [generador_constancias](#21-generador_constancias) - Constancias
 22. [constancia_actividades](#22-constancia_actividades) - Actividades vinculadas
 
-### Entrega de EPP
-23. [epp_items](#23-epp_items) - Catálogo EPP
-24. [employees](#24-employees) - Empleados
-25. [epp_deliveries](#25-epp_deliveries) - Entregas
-26. [epp_delivery_items](#26-epp_delivery_items) - Items entregados
-
-### Matriz de Riesgos
-27. [risk_matrices](#27-risk_matrices) - Matrices de riesgo
-28. [risks](#28-risks) - Riesgos
-29. [risk_evaluations](#29-risk_evaluations) - Evaluaciones
-30. [risk_controls](#30-risk_controls) - Controles
-
-### Hallazgos e Incidentes
-31. [hallazgos](#31-hallazgos) - Hallazgos
-32. [hallazgo_seguimientos](#32-hallazgo_seguimientos) - Seguimientos
-33. [hallazgo_fotos](#33-hallazgo_fotos) - Fotos de evidencia
-34. [incidentes](#34-incidentes) - Incidentes
-
 ### Otros
-35. [annual_plans](#35-annual_plans) - Planes anuales
-36. [informes](#36-informes) - Informes (Legacy)
-37. [items](#37-items) - Items (Legacy)
-38. [registros](#38-registros) - Registros (Legacy)
+35. [annual_plans](#27-annual_plans) - Planes anuales
+36. [informes](#28-informes) - Informes (Legacy)
+37. [items](#29-items) - Items (Legacy)
+38. [registros](#30-registros) - Registros (Legacy)
 
 ---
 
@@ -428,10 +410,14 @@ trainings
 ├── id (PK)
 ├── empresa_id (FK → empresas)
 ├── sede_id (FK → sedes)
-├── user_id (FK → users)
+├── user_id (FK → users, responsable)
+├── created_by_user_id (FK → users, creador)
 ├── title
 ├── description
 ├── type                 -- presencial|virtual
+├── notes
+├── is_template          -- boolean
+├── dynamic_checklist_id (FK → checklists, nullable)
 ├── training_date
 ├── duration
 ├── trainer_name
@@ -510,8 +496,6 @@ generador_constancias
 - `belongsTo` → user
 - `morphToMany` → inspections
 - `morphToMany` → trainings
-- `morphToMany` → riskEvaluations
-- `morphToMany` → eppDeliveries
 - `morphToMany` → hallazgos
 
 ---
@@ -536,196 +520,7 @@ constancia_actividades
 
 ---
 
-### 23. epp_items
 
-**Descripción:** Catálogo de EPP
-
-```sql
-epp_items
-├── id (PK)
-├── nombre
-├── descripcion
-├── tipo
-├── vida_util_meses
-├── codigo_norma
-├── is_active
-├── created_at
-└── updated_at
-```
-
-**Relaciones:**
-- `belongsToMany` → deliveries
-
----
-
-### 24. employees
-
-**Descripción:** Empleados de las empresas
-
-```sql
-employees
-├── id (PK)
-├── empresa_id (FK → empresas)
-├── sede_id (FK → sedes)
-├── name
-├── last_name
-├── dni
-├── cuil
-├── puesto
-├── is_active
-├── created_at
-└── updated_at
-```
-
-**Relaciones:**
-- `belongsTo` → empresa
-- `belongsTo` → sede
-- `hasMany` → deliveries
-
----
-
-### 25. epp_deliveries
-
-**Descripción:** Entregas de EPP
-
-```sql
-epp_deliveries
-├── id (PK)
-├── employee_id (FK → employees)
-├── user_id (FK → users)
-├── delivery_date
-├── signature           -- Base64
-├── observaciones
-├── created_at
-└── updated_at
-```
-
-**Relaciones:**
-- `belongsTo` → employee
-- `belongsTo` → user
-- `belongsToMany` → items (via epp_delivery_items)
-- `morphToMany` → constancias
-
----
-
-### 26. epp_delivery_items
-
-**Descripción:** Tabla pivot - Items entregados
-
-```sql
-epp_delivery_items
-├── id (PK)
-├── epp_delivery_id (FK → epp_deliveries)
-├── epp_item_id (FK → epp_items)
-├── cantidad
-├── tipo_entrega        -- inicial|reposicion|renovacion
-├── created_at
-└── updated_at
-```
-
----
-
-### 27. risk_matrices
-
-**Descripción:** Matrices de riesgo
-
-```sql
-risk_matrices
-├── id (PK)
-├── title
-├── description
-├── area
-├── process
-├── empresa_id (FK → empresas)
-├── sede_id (FK → sedes)
-├── user_id (FK → users)
-├── status              -- draft|active|archived
-├── created_at
-└── updated_at
-```
-
-**Relaciones:**
-- `belongsTo` → empresa
-- `belongsTo` → sede
-- `belongsTo` → creator (user)
-- `hasMany` → risks
-
----
-
-### 28. risks
-
-**Descripción:** Riesgos dentro de matrices
-
-```sql
-risks
-├── id (PK)
-├── risk_matrix_id (FK → risk_matrices)
-├── hazard
-├── type
-├── consequence
-├── order
-├── created_at
-└── updated_at
-```
-
-**Relaciones:**
-- `belongsTo` → matrix
-- `hasMany` → evaluations
-- `hasMany` → controls
-- `hasMany` → hallazgos
-
----
-
-### 29. risk_evaluations
-
-**Descripción:** Evaluaciones de riesgos (5×5)
-
-```sql
-risk_evaluations
-├── id (PK)
-├── risk_id (FK → risks)
-├── sede_id (FK → sedes)
-├── user_id (FK → users)
-├── probability         -- 1-5
-├── impact             -- 1-5
-├── risk_level         -- Calculado: P × I
-├── risk_category      -- trivial|tolerable|moderado|importante|intolerable
-├── existing_controls
-├── additional_controls
-├── evaluation_date
-├── created_at
-└── updated_at
-```
-
-**Relaciones:**
-- `belongsTo` → risk
-- `belongsTo` → sede
-- `belongsTo` → user
-- `morphToMany` → constancias
-
----
-
-### 30. risk_controls
-
-**Descripción:** Controles de mitigación
-
-```sql
-risk_controls
-├── id (PK)
-├── risk_id (FK → risks)
-├── measure
-├── type
-├── status              -- planned|implementing|implemented
-├── responsible
-├── deadline
-├── created_at
-└── updated_at
-```
-
-**Relaciones:**
-- `belongsTo` → risk
-
----
 
 ### 31. hallazgos
 
@@ -747,7 +542,9 @@ hallazgos
 ├── fecha_resolucion
 ├── origen_type        -- Polimórfico
 ├── origen_id
-├── risk_id (FK → risks, nullable)
+├── visit_certificate_id (FK → visit_certificates, nullable)
+├── checklist_completion_id (FK → visit_checklist_completions, nullable)
+├── question_id (FK → dynamic_questions, nullable)
 ├── created_at
 └── updated_at
 ```
@@ -756,7 +553,6 @@ hallazgos
 - `belongsTo` → sede
 - `belongsTo` → user
 - `morphTo` → origen
-- `belongsTo` → risk
 - `hasMany` → seguimientos
 - `hasMany` → fotos
 - `hasMany` → incidentes
@@ -852,6 +648,7 @@ annual_plans
 ├── activity_code
 ├── checklist_id (FK → dynamic_checklists, nullable)
 ├── year
+├── frequency            -- enum(monthly, quarterly, bi_annual, annual, ad_hoc)
 ├── january (boolean)
 ├── february (boolean)
 ├── march (boolean)

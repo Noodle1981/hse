@@ -75,12 +75,6 @@ app/Livewire/
 │   ├── CompanyIndex.php             # Listado de empresas
 │   ├── CompanyBuilder.php           # CRUD empresas
 │   └── LocationManager.php          # Gestión de sedes
-├── Epp/
-│   ├── EppCatalog.php               # Catálogo de EPP
-│   ├── EmployeeManager.php          # Gestión de empleados
-│   ├── EmployeeImporter.php         # Importador Excel empleados
-│   ├── EppDeliveryWizard.php        # Wizard entrega EPP
-│   └── EppHistory.php               # Historial de entregas
 ├── Hallazgos/
 │   ├── HallazgoManager.php          # Gestión de hallazgos
 │   ├── HallazgoWizard.php           # Wizard crear/editar hallazgo
@@ -89,10 +83,6 @@ app/Livewire/
 ├── Incidentes/
 │   └── IncidenteManager.php         # Gestión de incidentes
 ├── Risks/
-│   ├── RiskMatrixManager.php        # Gestión de matrices de riesgo
-│   ├── RiskMatrixEditor.php         # Editor de matriz
-│   ├── RiskEvaluator.php            # Evaluador de riesgos
-│   ├── RiskDashboard.php            # Dashboard de riesgos
 │   └── AnnualContractDashboard.php  # Dashboard contrato anual
 ├── Technician/
 │   ├── TechnicianDashboard.php      # Dashboard técnico
@@ -129,7 +119,6 @@ app/Http/Controllers/
 ├── Hallazgos/
 │   └── HallazgoPDFController.php       # PDF hallazgos
 ├── Risks/
-│   ├── RiskMatrixReportController.php  # PDF matriz de riesgo
 │   └── AnnualContractReportController.php # PDF contrato anual
 ├── AngularController.php               # Controlador legacy Angular
 ├── CapacitacionPresencialController.php
@@ -139,7 +128,6 @@ app/Http/Controllers/
 ├── CorreoContactoController.php
 ├── CorreoController.php                # Envío de correos
 ├── EmpresaController.php
-├── EppPDFController.php                # PDF entregas EPP
 ├── GeneradorConstanciaController.php
 ├── InformeController.php
 ├── InspectionPDFController.php         # PDF inspecciones
@@ -315,54 +303,6 @@ capacitacion_presencials
 capacitacion_viruals
 capacitacion_virual_asistentes
 
--- EPP (Equipos de Protección Personal)
-employees
-├── id
-├── nombre
-├── dni
-└── ...
-
-epp_items
-├── id
-├── nombre
-├── descripcion
-└── ...
-
-epp_deliveries
-├── id
-├── employee_id (FK)
-├── user_id (FK)
-├── fecha_entrega
-└── ...
-
-epp_delivery_items (pivot)
-
--- Matriz de Riesgo
-risk_matrices
-├── id
-├── nombre
-├── empresa_id (FK)
-└── ...
-
-risks
-├── id
-├── risk_matrix_id (FK)
-├── descripcion
-└── ...
-
-risk_evaluations
-├── id
-├── risk_id (FK)
-├── probabilidad
-├── severidad
-└── nivel_riesgo
-
-risk_controls
-├── id
-├── risk_id (FK)
-├── medida_control
-└── ...
-
 annual_plans
 ├── id
 ├── empresa_id (FK)
@@ -451,12 +391,7 @@ $middleware->alias([
 | **Usuarios** | CRUD | ✅ | ❌ |
 | **Capacitaciones** | CRUD | ✅ | ❌ |
 | | Tomar asistencia | ✅ | ✅ |
-| **EPP** | Catálogo | ✅ | ❌ |
-| | Entregar | ❌ | ✅ |
-| | Ver historial | ✅ | ✅ |
-| **Matriz de Riesgo** | Diseñar | ✅ | ❌ |
-| | Evaluar | ✅ | ✅ |
-| | Dashboard | ✅ | ✅ |
+| **Contrato Anual** | Gestionar | ✅ | ✅ |
 | **Hallazgos** | Gestionar todos | ✅ | ❌ |
 | | Crear/Ver propios | ✅ | ✅ |
 | **Incidentes** | Gestionar | ✅ | ❌ |
@@ -512,25 +447,7 @@ resources/views/layouts/
   - Registro de asistencia
   - Generación de certificados PDF
 
-### 4. EPP (Equipos de Protección Personal)
-- **Componentes:** EppCatalog, EmployeeManager, EppDeliveryWizard
-- **Características:**
-  - Catálogo de EPP
-  - Importación Excel de empleados
-  - Wizard de entrega en campo
-  - Historial de entregas
-  - PDF de constancia
-
-### 5. Matriz de Riesgo
-- **Componentes:** RiskMatrixManager, RiskMatrixEditor, RiskEvaluator
-- **Características:**
-  - Diseño de matrices personalizadas
-  - Evaluación de riesgos (probabilidad × severidad)
-  - Controles y medidas
-  - Dashboard de riesgos
-  - Integración con contrato anual
-
-### 6. Hallazgos e Incidentes
+### 4. Hallazgos e Incidentes
 - **Componentes:** HallazgoManager, HallazgoWizard, IncidenteManager
 - **Características:**
   - Registro de hallazgos con fotos
@@ -539,7 +456,7 @@ resources/views/layouts/
   - Estados de resolución
   - Gestión de incidentes
 
-### 7. Constancias de Visita
+### 5. Constancias de Visita
 - **Componentes:** VisitCertificateManager, VisitCertificateWizard
 - **Características:**
   - Registro de visitas técnicas
@@ -547,20 +464,20 @@ resources/views/layouts/
   - Firma digital
   - Generación PDF
 
-### 8. Usuarios y Roles
+### 6. Usuarios y Roles
 - **Componentes:** UserManager, UserBuilder
 - **Características:**
   - CRUD usuarios
   - Sistema de roles (Administrador, Técnico)
   - Asignación a empresas/sedes
 
-### 9. Categorías y Subcategorías
+### 7. Categorías y Subcategorías
 - **Componentes:** CategoryIndex, CategoryBuilder, SubcategoryManager
 - **Características:**
   - Organización jerárquica
   - Vinculación con checklists
 
-### 10. Dashboards
+### 8. Dashboards
 - **Componentes:** AdminDashboard, TechnicianDashboard
 - **Características:**
   - KPIs y métricas
@@ -592,15 +509,7 @@ resources/views/layouts/
 | `/users` | UserManager | ✅ | Admin |
 | `/trainings` | TrainingIndex | ✅ | Admin |
 | `/trainings/{id}/attendance` | AttendanceTracker | ✅ | Admin+Técnico |
-| `/epp/catalog` | EppCatalog | ✅ | Admin |
-| `/epp/deliver` | EppDeliveryWizard | ✅ | Técnico |
-| `/epp/employees` | EmployeeManager | ✅ | Admin+Técnico |
-| `/epp/history` | EppHistory | ✅ | Admin+Técnico |
-| `/risk-matrices` | RiskMatrixManager | ✅ | Admin+Técnico |
-| `/risk-matrices/{id}/editor` | RiskMatrixEditor | ✅ | Admin |
-| `/risk-matrices/{id}/evaluate` | RiskEvaluator | ✅ | Admin+Técnico |
-| `/risk-matrices/dashboard-riesgos` | RiskDashboard | ✅ | Admin+Técnico |
-| `/risk-matrices/contrato-anual` | AnnualContractDashboard | ✅ | Admin+Técnico |
+| `/contrato-anual` | AnnualContractDashboard | ✅ | Admin+Técnico |
 | `/hallazgos` | HallazgoManager | ✅ | Admin |
 | `/hallazgos/crear` | HallazgoWizard | ✅ | Admin+Técnico |
 | `/hallazgos/{id}` | HallazgoDetail | ✅ | Admin+Técnico |
@@ -672,43 +581,7 @@ resources/views/layouts/
    └─ Ve historial completo con filtros
 ```
 
-### 2. Entrega de EPP
-
-```
-1. Admin → /epp/import-employees
-   └─ Importa empleados desde Excel
-
-2. Técnico → /epp/deliver
-   └─ Wizard de entrega en campo
-   └─ Selecciona empleado + items EPP
-   └─ Captura firma
-
-3. Sistema → Guarda en epp_deliveries
-   └─ Genera PDF de constancia
-
-4. Usuario → /epp/history
-   └─ Ve historial de entregas
-```
-
-### 3. Evaluación de Riesgos
-
-```
-1. Admin → /risk-matrices/{id}/editor
-   └─ Diseña matriz personalizada
-
-2. Técnico → /risk-matrices/{id}/evaluate
-   └─ Identifica riesgos
-   └─ Evalúa probabilidad × severidad
-   └─ Define controles
-
-3. Usuario → /risk-matrices/dashboard-riesgos
-   └─ Ve dashboard con métricas de riesgo
-
-4. Sistema → Vincula con contrato anual
-   └─ /risk-matrices/contrato-anual
-```
-
-### 4. Registro de Hallazgos
+### 2. Registro de Hallazgos
 
 ```
 1. Técnico → /hallazgos/crear
@@ -752,7 +625,7 @@ resources/views/layouts/
 - **33 Modelos Eloquent**
 - **46 Migraciones**
 - **25+ Controladores**
-- **10 Módulos Principales**
+- **8 Módulos Principales**
 - **3 Dashboards**
 - **Múltiples generadores PDF**
 - **Sistema de importación Excel**

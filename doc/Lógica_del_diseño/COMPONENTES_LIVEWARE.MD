@@ -12,16 +12,13 @@
 1. [Checklists Dinámicos](#1-checklists-dinámicos-8-componentes)
 2. [Capacitaciones](#2-capacitaciones-3-componentes)
 3. [Constancias de Visita](#3-constancias-de-visita-3-componentes)
-4. [Entrega de EPP](#4-entrega-de-epp-5-componentes)
-5. [Empresas y Sedes](#5-empresas-y-sedes-3-componentes)
-6. [Hallazgos](#6-hallazgos-4-componentes)
-7. [Matriz de Riesgos](#7-matriz-de-riesgos-4-componentes)
-8. [Dashboards](#8-dashboards-2-componentes)
-9. [Categorías](#9-categorías-2-componentes)
-10. [Usuarios](#10-usuarios-1-componente)
-11. [Auditoría EDUGE](#11-auditoría-eduge-3-componentes)
+4. [Empresas y Sedes](#4-empresas-y-sedes-3-componentes)
+5. [Hallazgos](#5-hallazgos-4-componentes)
+6. [Dashboards](#6-dashboards-3-componentes)
+7. [Categorías](#7-categorías-2-componentes)
+8. [Usuarios](#8-usuarios-1-componente)
 
-**Total:** 41 componentes Livewire
+**Total:** 27 componentes Livewire
 
 ---
 
@@ -176,60 +173,7 @@
 
 ---
 
-## 4. Entrega de EPP (5 componentes)
-
-### EppCatalog
-- **Ruta:** `app/Livewire/Epp/EppCatalog.php`
-- **Función:** Catálogo de EPP
-- **Características:**
-  - CRUD de items EPP
-  - Búsqueda
-  - Vida útil en meses
-  - Códigos de norma
-- **Permisos:** Solo Admin
-
-### EmployeeManager
-- **Ruta:** `app/Livewire/Epp/EmployeeManager.php`
-- **Función:** Gestión de empleados
-- **Características:**
-  - CRUD de empleados
-  - Filtros por empresa/sede
-  - Búsqueda por nombre/DNI
-- **Permisos:** Admin + Técnico
-
-### EmployeeImporter
-- **Ruta:** `app/Livewire/Epp/EmployeeImporter.php`
-- **Función:** Importación masiva desde Excel
-- **Características:**
-  - Upload de archivo
-  - Validación de datos
-  - Preview de importación
-  - Reporte de errores
-- **Permisos:** Solo Admin
-
-### EppDeliveryWizard
-- **Ruta:** `app/Livewire/Epp/EppDeliveryWizard.php`
-- **Función:** Wizard de entrega en 3 pasos
-- **Características:**
-  - Paso 1: Seleccionar empleado
-  - Paso 2: Seleccionar EPP
-  - Paso 3: Firma del empleado
-  - Tipos de entrega
-- **Permisos:** Admin + Técnico
-
-### EppHistory
-- **Ruta:** `app/Livewire/Epp/EppHistory.php`
-- **Función:** Historial de entregas
-- **Características:**
-  - Filtros por empresa/sede/empleado
-  - Ver detalles de entrega
-  - Descargar PDF
-  - Admin ve todas, Técnico solo propias
-- **Permisos:** Admin + Técnico
-
----
-
-## 5. Empresas y Sedes (3 componentes)
+## 4. Empresas y Sedes (3 componentes)
 
 ### CompanyIndex
 - **Ruta:** `app/Livewire/Companies/CompanyIndex.php`
@@ -261,7 +205,7 @@
 
 ---
 
-## 6. Hallazgos (4 componentes)
+## 5. Hallazgos (4 componentes)
 
 ### HallazgoManager
 - **Ruta:** `app/Livewire/Hallazgos/HallazgoManager.php`
@@ -304,52 +248,7 @@
   - Estadísticas personales
 - **Permisos:** Técnico
 
----
-
-## 7. Matriz de Riesgos (4 componentes)
-
-### RiskMatrixManager
-- **Ruta:** `app/Livewire/Risks/RiskMatrixManager.php`
-- **Función:** Gestión de matrices de riesgo
-- **Características:**
-  - CRUD de matrices
-  - Duplicación de matrices
-  - Búsqueda
-  - Asignación a empresa/sede
-- **Permisos:** Solo Admin
-
-### RiskManager
-- **Ruta:** `app/Livewire/Risks/RiskManager.php`
-- **Función:** Gestión de riesgos dentro de matriz
-- **Características:**
-  - CRUD de riesgos
-  - Ordenamiento
-  - Vinculación con controles
-- **Permisos:** Solo Admin
-
-### RiskEvaluationManager
-- **Ruta:** `app/Livewire/Risks/RiskEvaluationManager.php`
-- **Función:** Evaluación de riesgos (5×5)
-- **Características:**
-  - Evaluación de probabilidad e impacto
-  - Cálculo automático de nivel
-  - Categorización automática
-  - Historial de evaluaciones
-- **Permisos:** Admin + Técnico
-
-### AnnualContractDashboard
-- **Ruta:** `app/Livewire/Risks/AnnualContractDashboard.php`
-- **Función:** Dashboard de plan anual
-- **Características:**
-  - Matriz de planificación mensual
-  - Modo edición
-  - Seguimiento de cumplimiento
-  - Exportar PDF
-- **Permisos:** Admin + Técnico
-
----
-
-## 8. Dashboards (2 componentes)
+## 6. Dashboards (3 componentes)
 
 ### AdminDashboard
 - **Ruta:** `app/Livewire/Dashboards/AdminDashboard.php`
@@ -361,19 +260,19 @@
   - Acciones rápidas
 - **Permisos:** Solo Admin
 
-### TechnicianDashboard
-- **Ruta:** `app/Livewire/Dashboards/TechnicianDashboard.php`
-- **Función:** Dashboard para técnico
+### AnnualContractDashboard
+- **Ruta:** `app/Livewire/Contracts/AnnualContractDashboard.php`
+- **Función:** Dashboard de plan anual
 - **Características:**
-  - KPIs personales
-  - Asignaciones pendientes
-  - Mis estadísticas
-  - Accesos rápidos
+  - Matriz de planificación mensual
+  - Modo edición
+  - Seguimiento de cumplimiento
+  - Estadísticas de frecuencias
 - **Permisos:** Admin + Técnico
 
 ---
 
-## 9. Categorías (2 componentes)
+## 7. Categorías (2 componentes)
 
 ### CategoryManager
 - **Ruta:** `app/Livewire/Categories/CategoryManager.php`
@@ -396,7 +295,7 @@
 
 ---
 
-## 10. Usuarios (1 componente)
+## 8. Usuarios (1 componente)
 
 ### UserManager
 - **Ruta:** `app/Livewire/Users/UserManager.php`
@@ -408,71 +307,29 @@
   - Cambio de estado
 - **Permisos:** Solo Admin
 
----
-
-## 11. Auditoría EDUGE (3 componentes)
-
-### EdugeBuildingsList
-- **Ruta:** `app/Livewire/Eduge/EdugeBuildingsList.php`
-- **Función:** Listado de edificios EDUGE
-- **Características:**
-  - Listado completo
-  - Filtros por modalidad
-  - Búsqueda
-  - Validación de datos
-- **Permisos:** Solo Admin
-
-### EdugeAuditForm
-- **Ruta:** `app/Livewire/Eduge/EdugeAuditForm.php`
-- **Función:** Formulario de auditoría
-- **Características:**
-  - Cotejo de datos
-  - Registro de discrepancias
-  - Validación
-  - Observaciones
-- **Permisos:** Solo Admin
-
-### EdugeEstablishmentsList
-- **Ruta:** `app/Livewire/Eduge/EdugeEstablishmentsList.php`
-- **Función:** Listado de establecimientos
-- **Características:**
-  - Listado completo
-  - Filtros
-  - Validación de datos
-  - Exportación
-- **Permisos:** Solo Admin
-
----
-
-## 📊 Estadísticas de Componentes
-
-### Por Tipo
-
-| Tipo | Cantidad |
-|------|----------|
-| Managers/Index (CRUD) | 15 |
-| Wizards (Multi-step) | 5 |
+| Managers/Index (CRUD) | 12 |
+| Wizards (Multi-step) | 3 |
 | Builders (Constructores) | 4 |
-| Dashboards | 2 |
+| Dashboards | 3 |
 | Historiales | 3 |
 | Importadores | 1 |
 | Trackers | 1 |
-| **Total** | **41** |
+| **Total** | **27** |
 
 ### Por Complejidad
 
 | Complejidad | Cantidad |
 |-------------|----------|
-| Alta (Wizards, Managers complejos) | 12 |
-| Media (CRUD estándar) | 20 |
-| Baja (Vistas simples) | 9 |
+| Alta (Wizards, Managers complejos) | 8 |
+| Media (CRUD estándar) | 12 |
+| Baja (Vistas simples) | 7 |
 
 ### Por Permisos
 
 | Permisos | Cantidad |
 |----------|----------|
-| Solo Admin | 18 |
-| Admin + Técnico | 23 |
+| Solo Admin | 15 |
+| Admin + Técnico | 12 |
 | Solo Técnico | 0 |
 
 ---
@@ -480,7 +337,7 @@
 ## 🎯 Patrones de Diseño
 
 ### Patrón Manager
-**Componentes:** 15
+**Componentes:** 12
 - Listado con paginación
 - Búsqueda y filtros
 - CRUD completo
@@ -505,7 +362,7 @@ class HallazgoManager extends Component
 ```
 
 ### Patrón Wizard
-**Componentes:** 5
+**Componentes:** 3
 - Navegación paso a paso
 - Validación por paso
 - Guardado de progreso
@@ -620,4 +477,4 @@ protected $queryString = [
 
 ---
 
-*EP-Back V2.0.0.0 | Catálogo de 41 Componentes Livewire | Diciembre 2024*
+*EP-Back V2.0.0.0 | Catálogo de 27 Componentes Livewire | Diciembre 2024*

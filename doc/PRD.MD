@@ -173,10 +173,6 @@ Los siguientes módulos fueron removidos completamente para reducir la complejid
 | **Alertas de Vencimiento EPP** | ❌ Eliminado | El job diario fue removido |
 | **QR de Trazabilidad EPP** | ❌ Eliminado | Form parte del roadmap de la Tienda EPP |
 | **Módulo de Riesgos (heatmap)** | ❌ Eliminado | Sin demanda en MVP |
-| **Módulo Angular/Landing** | ❌ Eliminado | Código muerto |
-| **Hub de Ejecuciones Avanzadas** | ❌ Eliminado | Pantalla intermedia innecesaria |
-
----
 
 ## 6. Ecosistema Futuro — Tienda EPP (Plataforma Separada)
 

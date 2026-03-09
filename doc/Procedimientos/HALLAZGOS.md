@@ -7,7 +7,7 @@
 
 ## 🎯 Descripción
 
-Sistema integral para detectar, registrar y hacer seguimiento de hallazgos de seguridad e higiene en campo. Permite vincular hallazgos con inspecciones, constancias de visita, matriz de riesgo, y registrar incidentes relacionados con evidencia fotográfica.
+Sistema integral para detectar, registrar y hacer seguimiento de hallazgos de seguridad e higiene en campo. Permite vincular hallazgos con inspecciones, constancias de visita, y registrar incidentes relacionados con evidencia fotográfica.
 
 ### URL de Acceso
 ```
@@ -94,9 +94,12 @@ hallazgos
 ├── responsable_correccion            -- Responsable de corregir
 ├── fecha_deteccion                   -- Cuándo se detectó
 ├── fecha_resolucion                  -- Cuándo se resolvió
-├── origen_type                       -- Tipo de origen (polimórfico)
-├── origen_id                         -- ID del origen
-├── risk_id (FK → risks, nullable)    -- Riesgo asociado
+├── origen_type                       -- Tipo de origen (polimórfico - opcional)
+├── origen_id                         -- ID del origen (opcional)
+├── visit_certificate_id (FK → visit_certificates, nullable) -- Vinculación directa con visita
+├── checklist_completion_id (FK → visit_checklist_completions, nullable) -- Checklist finalizado
+├── question_id (FK → dynamic_questions, nullable) -- Pregunta específica del checklist
+
 ├── created_at
 └── updated_at
 ```
@@ -225,9 +228,6 @@ pendiente → en_proceso → resuelto → verificado → cerrado
   - Manual (detección directa)
 - ID del origen
 
-**Paso 4: Riesgo (Opcional)**
-- Vincular con riesgo de la matriz
-- Actualización automática de riesgo
 
 ### 4. Sistema de Seguimiento
 
@@ -303,8 +303,7 @@ pendiente → en_proceso → resuelto → verificado → cerrado
    ├─ Tipo: DynamicInspection
    └─ ID: 45 (automático)
 
-7. Paso 4: Riesgo
-   └─ Vincula con "Riesgo de Caídas" (ID: 12)
+
 
 8. Guarda hallazgo
    └─ Sistema crea registro
@@ -351,7 +350,6 @@ pendiente → en_proceso → resuelto → verificado → cerrado
    └─ Estado: Verificado → Cerrado
 
 8. Sistema actualiza
-   ├─ Riesgo en matriz actualizado
    └─ Estadísticas actualizadas
 ```
 
@@ -426,7 +424,7 @@ Sede: [▼] Técnico: [▼] Vencidos: [▼]
 **Paso 1:**
 ```
 ┌─────────────────────────────────────┐
-│ Paso 1 de 4: Información Básica    │
+│ Paso 1 de 3: Información Básica    │
 ├─────────────────────────────────────┤
 │ Título: *                           │
 │ [_________________________________] │
@@ -448,7 +446,7 @@ Sede: [▼] Técnico: [▼] Vencidos: [▼]
 **Paso 2:**
 ```
 ┌─────────────────────────────────────┐
-│ Paso 2 de 4: Clasificación         │
+│ Paso 2 de 3: Clasificación         │
 ├─────────────────────────────────────┤
 │ Criticidad: *                       │
 │ ○ Bajo  ○ Medio  ● Alto  ○ Crítico │
@@ -547,10 +545,15 @@ $hallazgo->diasRestantes();    // int
 
 ## 🔄 Integración con Otros Módulos
 
-### 1. Checklists/Inspecciones
+### 1. Checklists/Inspecciones e Integración Directa
 
 ```php
-// Crear hallazgo desde inspección
+// Un hallazgo ahora puede vincularse directamente a una pregunta específica
+// de la finalización de un checklist en una visita
+$hallazgo->checklist_completion_id = $completion->id;
+$hallazgo->question_id = $question->id;
+
+// También se mantiene la forma por origen polimórfico (legacy o flujos simples)
 $hallazgo->origen_type = 'DynamicInspection';
 $hallazgo->origen_id = $inspection->id;
 
@@ -561,28 +564,17 @@ $inspection->hallazgos;
 ### 2. Constancias de Visita
 
 ```php
-// Crear hallazgo desde visita
+// Crear hallazgo directamente ligado a una visita específica
+$hallazgo->visit_certificate_id = $visit->id;
+
+// O mediante origen polimórfico
 $hallazgo->origen_type = 'GeneradorConstancia';
 $hallazgo->origen_id = $constancia->id;
 
 // Hallazgos de una visita
-$constancia->hallazgos;
+$visit->hallazgos;
 ```
 
-### 3. Matriz de Riesgo
-
-```php
-// Vincular con riesgo
-$hallazgo->risk_id = $risk->id;
-
-// Hallazgos de un riesgo
-$risk->hallazgos;
-
-// Actualizar riesgo al resolver
-if ($hallazgo->estado === 'resuelto') {
-    $risk->update(['nivel_actual' => 'bajo']);
-}
-```
 
 ---
 
@@ -637,7 +629,7 @@ if ($hallazgo->estado === 'resuelto') {
 - [ARQUITECTURA.md](../ARQUITECTURA.md) - Arquitectura completa del sistema
 - [CHECKLISTS_DINAMICOS.md](./CHECKLISTS_DINAMICOS.md) - Sistema de checklists
 - [CONTANCIAS_DE_VISITAS.MD](./CONTANCIAS_DE_VISITAS.MD) - Constancias de visitas
-- [MATRIZ_RIESGOS.md](./MATRIZ_RIESGOS.md) - Matriz de riesgos
+
 
 ---
 
@@ -652,7 +644,7 @@ if ($hallazgo->estado === 'resuelto') {
 - ✅ Evidencia fotográfica (antes/durante/después)
 - ✅ Gestión de incidentes relacionados
 - ✅ Origen polimórfico (inspecciones/visitas/manual)
-- ✅ Vinculación con matriz de riesgo
+
 - ✅ Scopes y helpers completos
 - ✅ KPIs y estadísticas
 - ✅ Filtros avanzados

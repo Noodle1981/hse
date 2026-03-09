@@ -34,20 +34,10 @@
 - [x] Vinculación polimórfica de actividades
 - [x] Integración con inspecciones
 - [x] Integración con capacitaciones
-- [x] Integración con entregas EPP
 - [x] Integración con hallazgos
 - [x] Sistema de token para firma remota
 - [x] Generación de PDF
 
-### 4. Entrega de EPP ✅
-- [x] Catálogo de EPP
-- [x] Gestión de empleados
-- [x] Importación masiva desde Excel
-- [x] Wizard de entrega (3 pasos)
-- [x] Tipos de entrega (inicial/reposición/renovación)
-- [x] Firma digital del empleado
-- [x] Generación de PDF
-- [x] Historial completo
 
 ### 5. Empresas, Sedes y Empleados ✅
 - [x] CRUD de empresas
@@ -67,18 +57,7 @@
 - [x] Evidencia fotográfica (antes/durante/después)
 - [x] Gestión de incidentes
 - [x] Origen polimórfico
-- [x] Vinculación con matriz de riesgo
 
-### 7. Matriz de Riesgos ✅
-- [x] CRUD de matrices
-- [x] Gestión de riesgos
-- [x] Evaluación 5×5 (Probabilidad × Impacto)
-- [x] Cálculo automático de nivel
-- [x] 5 categorías de riesgo
-- [x] Gestión de controles
-- [x] Jerarquía de controles
-- [x] Duplicación de matrices
-- [x] Historial de evaluaciones
 
 ### 8. Contrato Anual ✅
 - [x] Matriz de planificación mensual
@@ -115,22 +94,14 @@
 - [x] Filtros por sede
 - [x] Navegación rápida
 
-### 12. Auditoría EDUGE ✅
-- [x] Importación de datos EDUGE
-- [x] Validación de datos
-- [x] Cotejo de información
-- [x] Registro de discrepancias
-- [x] Generación de reportes
-- [x] PDF de auditoría
-
-### 13. Incidentes ✅
+### 12. Incidentes ✅
 - [x] Registro de incidentes
 - [x] Vinculación con hallazgos
 - [x] Niveles de gravedad
 - [x] Acciones inmediatas
 - [x] Personas afectadas
 
-### 14. Usuarios ✅
+### 13. Usuarios ✅
 - [x] CRUD de usuarios
 - [x] Asignación de roles
 - [x] Asignación a sedes
@@ -147,10 +118,9 @@
 - [x] **CAPACITACIONES.MD** - Sistema de capacitaciones
 - [x] **CONTANCIAS_DE_VISITAS.MD** - Constancias de visitas
 - [x] **CONTRATO_ANUAL.MD** - Contrato anual
-- [x] **ENTREGA_EPP.MD** - Entrega de EPP
+- [x] **CONTRATO_ANUAL.MD** - Contrato anual
 - [x] **EMPRESAS_SEDE_EMPLEADOS.MD** - Empresas y sedes
 - [x] **HALLAZGOS.md** - Sistema de hallazgos
-- [x] **MATRIZ_RIESGOS.md** - Matriz de riesgos
 - [x] **ROLES Y SUS ALCANCES.MD** - Roles y permisos
 
 ### Características de las Documentaciones ✅
@@ -176,11 +146,6 @@
 - [ ] Notificación de asignaciones nuevas
 - [ ] Confirmación de firma completada
 
-#### 2. Heatmap Interactivo (Matriz de Riesgos)
-- [ ] Visualización 5×5 con colores
-- [ ] Click en celda para ver riesgos
-- [ ] Filtrado por nivel
-- [ ] Exportar imagen del heatmap
 
 #### 3. Dashboard de Hallazgos
 - [ ] Gráficos de tendencias
@@ -205,24 +170,16 @@
 - [ ] Rutas de técnicos
 
 #### 6. Alertas de Vencimiento
-- [ ] Email cuando EPP está por vencer
 - [ ] Dashboard de vencimientos
 - [ ] Programación de renovaciones
-- [ ] Alertas de controles vencidos (Matriz)
 
 ### Prioridad Baja 🟢
 
 #### 7. Códigos QR
-- [ ] QR por empleado (EPP)
+- [ ] QR por empleado
 - [ ] QR por hallazgo
-- [ ] Escaneo rápido para entrega
 - [ ] Trazabilidad instantánea
 
-#### 8. Stock de EPP
-- [ ] Control de inventario
-- [ ] Alertas de stock bajo
-- [ ] Solicitud de compra automática
-- [ ] Historial de movimientos
 
 #### 9. PWA Offline
 - [ ] Capacitaciones offline
@@ -321,8 +278,7 @@
 
 ### Corto Plazo (1-2 semanas)
 1. Implementar notificaciones por email
-2. Crear heatmap interactivo para matriz de riesgos
-3. Desarrollar dashboard de hallazgos
+2. Desarrollar dashboard de hallazgos
 
 ### Medio Plazo (1-2 meses)
 1. Implementar reportes avanzados
@@ -358,4 +314,4 @@
 
 ---
 
-*EP-Back V2.0.0.0 | Sistema Completo y Documentado | Diciembre 2024*
+*EP-Back V2.0.0.0 | Sistema Completo y Documentado | Marzo 2026*

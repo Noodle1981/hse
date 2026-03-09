@@ -91,7 +91,10 @@ trainings
 ├── id
 ├── empresa_id (FK → empresas)
 ├── sede_id (FK → sedes)
-├── user_id (FK → users, nullable) -- Técnico responsable
+├── user_id (FK → users, nullable)  -- Técnico responsable
+├── created_by_user_id (FK → users) -- Creador (admin o técnico ad-hoc)
+├── dynamic_checklist_id (FK → dynamic_checklists, nullable)
+├── is_template                     -- boolean (true=plantilla admin, false=ad-hoc)
 ├── title                           -- Título de la capacitación
 ├── description                     -- Descripción
 ├── type                            -- 'presencial' | 'virtual'
@@ -99,6 +102,7 @@ trainings
 ├── duration                        -- Duración en minutos
 ├── trainer_name                    -- Nombre del capacitador
 ├── status                          -- 'scheduled' | 'completed' | 'cancelled'
+├── notes                           -- Notas adicionales
 ├── created_at
 └── updated_at
 ```
@@ -145,6 +149,9 @@ training_attendances
 - Estado (Programada/Completada/Cancelada)
 - Empresa y Sede
 - Técnico responsable (opcional)
+- Notas
+- Checklist Dinámico asociado (opcional)
+- Plantilla (indica si es base de Admin o ad-hoc)
 
 **Estados:**
 - `scheduled` - Programada
@@ -401,8 +408,11 @@ $trainings = Training::withCount('attendances')->get();
 ### 4. Integración con Constancias de Visita
 
 ```php
-// Relación polimórfica
+// Relación polimórfica principal
 $training->constancias(); // Constancias que incluyen esta capacitación
+
+// Certificados de capacitaciones ejecutadas durante visitas
+$training->visitTrainings(); 
 ```
 
 ---

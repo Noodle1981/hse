@@ -73,13 +73,6 @@ El diseño visual de EP-Back se basa en:
 --estado-proceso: #3b82f6;       /* Azul */
 --estado-resuelto: #22c55e;      /* Verde */
 --estado-cerrado: #6b7280;       /* Gris */
-
-/* Riesgo (Matriz 5x5) */
---riesgo-trivial: #22c55e;       /* Verde */
---riesgo-tolerable: #eab308;     /* Amarillo */
---riesgo-moderado: #f97316;      /* Naranja */
---riesgo-importante: #ef4444;    /* Rojo */
---riesgo-intolerable: #1f2937;   /* Negro */
 ```
 
 ### Colores Neutros (Grises)

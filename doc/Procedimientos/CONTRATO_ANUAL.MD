@@ -11,7 +11,7 @@ Sistema de planificación y seguimiento del contrato anual de servicios de segur
 
 ### URL de Acceso
 ```
-http://localhost:8000/risk-matrices/contrato-anual    # Dashboard del contrato
+http://localhost:8000/contrato-anual                  # Dashboard del contrato
 http://localhost:8000/contrato-anual/pdf              # Exportar PDF
 ```
 
@@ -66,7 +66,7 @@ app/Http/Controllers/Risks/
 
 | Ruta | Componente | Función | Rol |
 |------|------------|---------|-----|
-| `/risk-matrices/contrato-anual` | AnnualContractDashboard | Dashboard | Admin+Técnico |
+| `/contrato-anual` | AnnualContractDashboard | Dashboard | Admin+Técnico |
 | `/contrato-anual/pdf` | AnnualContractReportController | Exportar PDF | Admin+Técnico |
 
 ---
@@ -80,6 +80,7 @@ annual_plans
 ├── id
 ├── sede_id (FK → sedes)
 ├── category                        -- 'Capacitación' | 'Inspección' | 'Registro'
+├── frequency                       -- 'Mensual', 'Bimestral', 'Trimestral', 'Semestral', 'Anual', 'A Demanda'
 ├── activity_name                   -- Nombre de la actividad
 ├── activity_code                   -- Código de la actividad (opcional)
 ├── checklist_id (FK → dynamic_checklists, nullable)
@@ -134,7 +135,7 @@ annual_plans
 ┌─────────────────┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
 │ Actividad       │ E │ F │ M │ A │ M │ J │ J │ A │ S │ O │ N │ D │
 ├─────────────────┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-│ Cap. EPP        │ X │   │ X │   │ X │   │ X │   │ X │   │ X │   │
+│ Cap. Seguridad  │ X │   │ X │   │ X │   │ X │   │ X │   │ X │   │
 │ Insp. Vehículos │ X │ X │ X │ X │ X │ X │ X │ X │ X │ X │ X │ X │
 │ Reg. Incidentes │ X │   │   │   │   │   │ X │   │   │   │   │   │
 └─────────────────┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
@@ -213,7 +214,7 @@ if ($count > 0) {
 
 ```
 1. Admin accede al dashboard
-   └─ /risk-matrices/contrato-anual
+   └─ /contrato-anual
 
 2. Selecciona sede y año
    ├─ Sede: Obra Centro
@@ -224,10 +225,10 @@ if ($count > 0) {
 
 4. Agrega actividades:
    
-   a) Capacitación EPP
+   a) Capacitación de Inducción
       ├─ Categoría: Capacitación
-      ├─ Nombre: "Capacitación Uso de EPP"
-      ├─ Código: "CAP-EPP-001"
+      ├─ Nombre: "Capacitación de Inducción"
+      ├─ Código: "CAP-IND-001"
       ├─ Checklist: (ninguno)
       └─ Meses: Ene, Mar, May, Jul, Sep, Nov
    
@@ -263,7 +264,7 @@ if ($count > 0) {
 3. Ve estado de actividades:
    
    Enero (pasado):
-   ├─ Cap. EPP: ✓ Completado (verde)
+   ├─ Cap. Inducción: ✓ Completado (verde)
    ├─ Insp. Vehículos: ✓ Completado (verde)
    └─ Reg. Incidentes: ⚠ Vencido (rojo)
    
@@ -272,7 +273,7 @@ if ($count > 0) {
    
    Diciembre (actual):
    ├─ Insp. Vehículos: ○ Pendiente (amarillo)
-   └─ Cap. EPP: ○ Pendiente (amarillo)
+   └─ Cap. Inducción: ○ Pendiente (amarillo)
 
 4. Identifica actividades vencidas
    └─ Reg. Incidentes de Enero no se completó
@@ -293,8 +294,8 @@ if ($count > 0) {
 2. Revisa cumplimiento Q1 (Ene-Mar):
    
    Capacitaciones:
-   ├─ Cap. EPP (Ene): ✓
-   ├─ Cap. EPP (Mar): ✓
+   ├─ Cap. Inducción (Ene): ✓
+   ├─ Cap. Inducción (Mar): ✓
    └─ Cumplimiento: 100%
    
    Inspecciones:
@@ -350,7 +351,7 @@ if ($count > 0) {
 ┌──────────────────────────────────────────────────────────────┐
 │ CAPACITACIONES                                               │
 ├────────────────┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┤
-│ Cap. EPP       │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ○ │   │
+│ Cap. Seguridad │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ○ │   │
 │ [Eliminar]     │ E │ F │ M │ A │ M │ J │ J │ A │ S │ O │ N │ D │
 └────────────────┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
 
@@ -433,7 +434,7 @@ return $pdf->stream("plan_anual_{sede}_{year}.pdf");
 │ ┌────────────┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
 │ │ Actividad  │ E │ F │ M │ A │ M │ J │ J │ A │ S │ O │ N │ D │
 │ ├────────────┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┼───┤
-│ │ Cap. EPP   │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │
+│ │ Cap. Segur. │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │ ✓ │   │
 │ └────────────┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
 │                                                             │
 │ INSPECCIONES                                                │
@@ -649,7 +650,6 @@ $count = $inspections[$key]->count() ?? 0;
 - [ARQUITECTURA.md](../ARQUITECTURA.md) - Arquitectura completa del sistema
 - [CHECKLISTS_DINAMICOS.md](./CHECKLISTS_DINAMICOS.md) - Sistema de checklists
 - [CONTANCIAS_DE_VISITAS.MD](./CONTANCIAS_DE_VISITAS.MD) - Constancias de visitas
-- [MATRIZ_RIESGOS.md](./MATRIZ_RIESGOS.md) - Matriz de riesgos
 
 ---
 

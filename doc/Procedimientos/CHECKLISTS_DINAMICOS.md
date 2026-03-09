@@ -163,7 +163,9 @@ $question->section_id = $section->id;
 ### 2. Integración con Categorías
 
 ```php
-// Relación con categorías y subcategorías
+// Relaciones estandarizadas con modelos Category y Subcategory
+// El campo 'category' tipo texto se mantiene por retrocompatibilidad momentánea, 
+// pero el estándar es utilizar las relaciones:
 $checklist->category_id = $category->id;
 $checklist->subcategory_id = $subcategory->id;
 
@@ -172,8 +174,9 @@ $checklist->registry_code = 'EP-REG-008';
 ```
 
 **Características:**
-- Categorización jerárquica
-- Filtrado por categoría/subcategoría
+- Categorización jerárquica robusta (tabla models)
+- Filtrado por categoría/subcategoría en el index
+- Integración en reportes
 - Códigos normativos
 
 ### 3. Sistema de Asignaciones
@@ -195,6 +198,13 @@ ChecklistAssignment::create([
 - `in_progress` - En progreso
 - `completed` - Completada
 - `cancelled` - Cancelada
+
+### 4. Relación con Capacitaciones
+
+```php
+// Un checklist puede vincularse a una Capacitación (Training)
+$checklist->trainings; // Entrenamientos en los que este checklist es utilizado/necesario
+```
 
 ### 4. Wizard de Inspección
 

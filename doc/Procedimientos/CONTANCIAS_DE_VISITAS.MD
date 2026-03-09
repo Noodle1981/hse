@@ -122,8 +122,6 @@ constancia_actividades
 **Tipos de actividades vinculables:**
 - `DynamicInspection` - Inspecciones/Checklists
 - `Training` - Capacitaciones
-- `RiskEvaluation` - Evaluaciones de riesgo
-- `EppDelivery` - Entregas de EPP
 - `Hallazgo` - Hallazgos detectados
 
 ---
@@ -145,8 +143,6 @@ constancia_actividades
 **Paso 3: Vinculación de Actividades** ✨
 - Inspecciones/Checklists realizados
 - Capacitaciones dictadas
-- Evaluaciones de riesgo
-- Entregas de EPP
 - Hallazgos detectados
 
 **Paso 4: Firmas**
@@ -179,8 +175,6 @@ constancia_actividades
 // La constancia puede vincular múltiples tipos de actividades
 $constancia->inspections()      // Checklists completados
 $constancia->trainings()         // Capacitaciones dictadas
-$constancia->riskEvaluations()   // Evaluaciones de riesgo
-$constancia->eppDeliveries()     // Entregas de EPP
 $constancia->hallazgosActividades() // Hallazgos detectados
 ```
 
@@ -243,8 +237,7 @@ $constancia->hallazgosActividades() // Hallazgos detectados
 
 5. Paso 3: Vincula Actividades
    ├─ ✅ Checklist "Inspección EPP" (ID: 45)
-   ├─ ✅ Capacitación "Uso de Arnés" (ID: 12)
-   └─ ✅ Entrega EPP (ID: 8)
+   └─ ✅ Capacitación "Uso de Arnés" (ID: 12)
 
 6. Paso 4: Firmas
    ├─ Firma técnico: [captura digital]
@@ -374,11 +367,6 @@ $constancia->hallazgosActividades() // Hallazgos detectados
 │ Capacitaciones:                     │
 │ ☐ Uso de Arnés - 2024-12-30         │
 │                                     │
-│ Evaluaciones de Riesgo:             │
-│ ☐ Matriz Construcción - 2024-12-30  │
-│                                     │
-│ Entregas de EPP:                    │
-│ ☐ Entrega #8 - 5 items              │
 │                                     │
 │ Hallazgos:                          │
 │ ☐ Escalera dañada - Gravedad Alta   │
@@ -485,7 +473,6 @@ $constancia->hallazgosActividades() // Hallazgos detectados
 │ Actividades Vinculadas:             │
 │ • Inspecciones: 2                   │
 │ • Capacitaciones: 1                 │
-│ • Entregas EPP: 1                   │
 │ • Hallazgos: 1                      │
 ├─────────────────────────────────────┤
 │ DETALLE DE ACTIVIDADES              │
@@ -542,23 +529,8 @@ $training = Training::find($id);
 $constancia->trainings()->attach($training->id);
 ```
 
-### 4. Matriz de Riesgo
 
-```php
-// Evaluación de riesgo realizada
-$evaluation = RiskEvaluation::find($id);
-$constancia->riskEvaluations()->attach($evaluation->id);
-```
-
-### 5. EPP
-
-```php
-// Entrega de EPP durante la visita
-$delivery = EppDelivery::find($id);
-$constancia->eppDeliveries()->attach($delivery->id);
-```
-
-### 6. Hallazgos
+### 4. Hallazgos
 
 ```php
 // Hallazgos detectados durante la visita
@@ -604,7 +576,6 @@ Flujo:
 1. Técnico ejecuta durante el día:
    - Inspección de EPP (checklist)
    - Capacitación sobre arnés (15 asistentes)
-   - Entrega de EPP (5 cascos nuevos)
    - Detecta hallazgo (escalera dañada)
 
 2. Al finalizar, crea constancia:
@@ -616,7 +587,6 @@ Flujo:
 3. Vincula actividades:
    - ✅ Inspección EPP
    - ✅ Capacitación Arnés
-   - ✅ Entrega EPP #8
    - ✅ Hallazgo escalera
 
 4. Firmas:
@@ -674,8 +644,6 @@ Flujo:
 1. Técnico ejecuta plan de auditoría:
    - 5 inspecciones diferentes
    - 2 capacitaciones
-   - Evaluación de matriz de riesgo
-   - 3 entregas de EPP
 
 2. Crea constancia:
    - Tipo: "Auditoría Trimestral Q4"
@@ -684,8 +652,6 @@ Flujo:
 3. Vincula todas las actividades:
    - ✅ 5 inspecciones
    - ✅ 2 capacitaciones
-   - ✅ 1 evaluación de riesgo
-   - ✅ 3 entregas EPP
 
 4. Firmas:
    - Técnico firma
@@ -796,8 +762,7 @@ Flujo:
 - ✅ Vinculación polimórfica de actividades:
   - Inspecciones/Checklists
   - Capacitaciones
-  - Evaluaciones de riesgo
-  - Entregas de EPP
+  - Hallazgos
   - Hallazgos
 - ✅ Firma diferida con token y código
 - ✅ Justificación de firma no disponible

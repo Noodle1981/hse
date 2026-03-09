@@ -40,8 +40,6 @@ Sistema de control de acceso basado en roles (RBAC) que define permisos granular
 **Características:**
 - ✅ Ejecución de inspecciones
 - ✅ Registro de capacitaciones
-- ✅ Entrega de EPP
-- ✅ Creación de hallazgos
 - ✅ Constancias de visita
 - ❌ Sin acceso a configuración
 - ❌ Sin gestión de usuarios
@@ -127,44 +125,7 @@ Sistema de control de acceso basado en roles (RBAC) que define permisos granular
 | Descargar PDF | ✅ | ✅ |
 | Filtrar por técnico | ✅ | ❌ (solo propias) |
 
-### 7. Entrega de EPP
 
-| Funcionalidad | Administrador | Técnico |
-|---------------|---------------|---------|
-| Ver catálogo EPP | ✅ | ❌ |
-| CRUD catálogo EPP | ✅ | ❌ |
-| Ver empleados | ✅ (todos) | ✅ (de sus sedes) |
-| CRUD empleados | ✅ | ✅ |
-| Importar empleados | ✅ | ❌ |
-| Realizar entrega | ✅ | ✅ |
-| Ver historial completo | ✅ | ❌ (solo propias) |
-| Descargar PDF | ✅ | ✅ |
-
-### 8. Hallazgos
-
-| Funcionalidad | Administrador | Técnico |
-|---------------|---------------|---------|
-| Ver todos los hallazgos | ✅ | ❌ |
-| Ver mis hallazgos | ✅ | ✅ |
-| Crear hallazgo | ✅ | ✅ |
-| Editar hallazgo | ✅ | ✅ (solo propios) |
-| Eliminar hallazgo | ✅ | ❌ |
-| Agregar seguimiento | ✅ | ✅ |
-| Subir fotos | ✅ | ✅ |
-| Registrar incidente | ✅ | ✅ |
-| Ver KPIs completos | ✅ | ❌ |
-
-### 9. Matriz de Riesgos
-
-| Funcionalidad | Administrador | Técnico |
-|---------------|---------------|---------|
-| Ver matrices | ✅ (todas) | ✅ (de sus sedes) |
-| CRUD matrices | ✅ | ❌ |
-| Gestionar riesgos | ✅ | ❌ |
-| Evaluar riesgos | ✅ | ✅ |
-| Gestionar controles | ✅ | ❌ |
-| Duplicar matrices | ✅ | ❌ |
-| Ver plan anual | ✅ | ✅ |
 
 ### 10. Contrato Anual
 
@@ -302,7 +263,6 @@ Sedes asignadas: Según configuración
 **Puede:**
 - Ejecutar inspecciones
 - Registrar capacitaciones
-- Entregar EPP
 - Crear hallazgos
 - Ver solo sus sedes
 
@@ -323,9 +283,7 @@ Sedes asignadas: Según configuración
 
 3. Configura operaciones
    ├─ Crea catálogo de checklists
-   ├─ Crea catálogo de EPP
-   ├─ Define matrices de riesgo
-   └─ Configura plan anual
+   ├─ Configura plan anual
 
 4. Asigna trabajo
    ├─ Asigna checklists a técnicos
@@ -353,7 +311,6 @@ Sedes asignadas: Según configuración
 3. Ejecuta trabajo en campo
    ├─ Completa inspecciones
    ├─ Toma asistencia en capacitaciones
-   ├─ Entrega EPP a empleados
    └─ Registra hallazgos
 
 4. Documenta
@@ -364,7 +321,6 @@ Sedes asignadas: Según configuración
 
 5. Reporta
    └─ Constancias de visita
-   └─ PDFs de entregas
    └─ Seguimiento de hallazgos
 ```
 
@@ -418,10 +374,7 @@ Objetivo: Completar asignaciones del día
 4. Dicta capacitación
    └─ Toma asistencia de 15 empleados
 
-5. Entrega EPP
-   └─ Entrega arnés nuevo a empleado
-
-6. Genera constancia de visita
+5. Genera constancia de visita
    └─ Vincula todas las actividades
 
 7. Fin del día

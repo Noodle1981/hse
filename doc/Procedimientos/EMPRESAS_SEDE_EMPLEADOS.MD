@@ -15,7 +15,7 @@ http://localhost:8000/companies                    # Listado de empresas (Admin)
 http://localhost:8000/companies/create             # Crear empresa (Admin)
 http://localhost:8000/companies/{id}/edit          # Editar empresa (Admin)
 http://localhost:8000/companies/{id}/locations     # Gestionar sedes (Admin)
-http://localhost:8000/epp/employees                # Gestionar empleados (Admin+Técnico)
+http://localhost:8000/companies/{id}/locations     # Gestionar sedes (Admin)
 ```
 
 ---
@@ -448,17 +448,6 @@ $training->sede_id = $sede->id;
 $trainings = Training::whereIn('sede_id', auth()->user()->sedes->pluck('id'));
 ```
 
-### 3. EPP
-
-```php
-// Empleados por sede
-$employees = Employee::where('sede_id', $sede->id)->get();
-
-// Entregas en sede
-$deliveries = EppDelivery::whereHas('employee', fn($q) => 
-    $q->where('sede_id', $sede->id)
-);
-```
 
 ### 4. Constancias de Visita
 
@@ -472,15 +461,6 @@ $constancias = GeneradorConstancia::whereIn('sede_id',
 );
 ```
 
-### 5. Matriz de Riesgo
-
-```php
-// Matriz de riesgo por sede
-$matrix->sede_id = $sede->id;
-
-// Plan anual por sede
-$plan = AnnualPlan::where('sede_id', $sede->id)->get();
-```
 
 ---
 
@@ -495,7 +475,6 @@ $sede->inspections;          // Inspecciones
 $sede->trainings;            // Capacitaciones
 $sede->constancias;          // Constancias de visita
 $sede->assignments;          // Asignaciones de checklists
-$sede->riskMatrices;         // Matrices de riesgo
 $sede->annualPlans;          // Planes anuales
 ```
 
@@ -611,7 +590,7 @@ Bodega 123 S.A.
 ## 📚 Referencias
 
 - [ARQUITECTURA.md](../ARQUITECTURA.md) - Arquitectura completa del sistema
-- [ENTREGA_EPP.MD](./ENTREGA_EPP.MD) - Sistema de EPP
+
 - [CHECKLISTS_DINAMICOS.md](./CHECKLISTS_DINAMICOS.md) - Sistema de checklists
 
 ---
