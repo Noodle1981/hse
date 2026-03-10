@@ -22,14 +22,22 @@ class ChecklistFillerTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = User::factory()->create();
+        $this->user = User::factory()->inspector()->create();
         $this->checklist = DynamicChecklist::factory()->create([
             'title' => 'Test Checklist',
         ]);
 
-        // Agregar preguntas
+        // Crear una sección ya que el Wizard la requiere para mostrar preguntas
+        $section = \App\Models\ChecklistSection::create([
+            'dynamic_checklist_id' => $this->checklist->id,
+            'title' => 'Datos Generales',
+            'order' => 0,
+        ]);
+
+        // Agregar preguntas vinculadas a la sección
         DynamicQuestion::factory()->create([
             'dynamic_checklist_id' => $this->checklist->id,
+            'section_id' => $section->id,
             'label' => '¿Nombre del inspector?',
             'type' => 'text',
             'is_required' => true,
@@ -38,6 +46,7 @@ class ChecklistFillerTest extends TestCase
 
         DynamicQuestion::factory()->create([
             'dynamic_checklist_id' => $this->checklist->id,
+            'section_id' => $section->id,
             'label' => '¿Cumple con la norma?',
             'type' => 'radio',
             'options' => ['Sí', 'No', 'N/A'],
@@ -47,6 +56,7 @@ class ChecklistFillerTest extends TestCase
 
         DynamicQuestion::factory()->create([
             'dynamic_checklist_id' => $this->checklist->id,
+            'section_id' => $section->id,
             'label' => 'Observaciones',
             'type' => 'textarea',
             'is_required' => false,
@@ -57,11 +67,12 @@ class ChecklistFillerTest extends TestCase
     /** @test */
     public function filler_page_can_be_rendered(): void
     {
-        $response = $this->get("/checklists/{$this->checklist->id}/fill");
+        $response = $this->actingAs($this->user)->get("/tecnico/checklists/{$this->checklist->id}/fill");
 
         $response->assertStatus(200);
         $response->assertSee($this->checklist->title);
-        $response->assertSee('¿Nombre del inspector?');
+        // En el Wizard (Paso 0 - Intro), se ve el botón "Empezar"
+        $response->assertSee('Empezar');
     }
 
     /** @test */
@@ -71,13 +82,17 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test('checklists.checklist-filler', ['id' => $this->checklist->id])
+        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+            ->set('currentStep', 1) // Saltar intro a sección 1
             ->set("answers.{$questions[0]->id}", 'Juan Pérez')
             ->set("answers.{$questions[1]->id}", 'Sí')
             ->set("answers.{$questions[2]->id}", 'Todo en orden')
-            ->set('notes', 'Inspección sin novedades')
-            ->call('save')
-            ->assertRedirect(route('checklists.index'));
+            ->set('currentStep', 2) // Avanzar al paso final
+            ->set('supervisorName', 'Supervisor Test')
+            ->set('supervisorSignature', 'data:image/png;base64,123')
+            ->set('technicianSignature', 'data:image/png;base64,456')
+            ->call('complete')
+            ->assertRedirect(route('tecnico.inspections.show', \App\Models\DynamicInspection::latest()->first()->id));
 
         $this->assertDatabaseHas('dynamic_inspections', [
             'dynamic_checklist_id' => $this->checklist->id,
@@ -95,10 +110,11 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test('checklists.checklist-filler', ['id' => $this->checklist->id])
-            ->set("answers.{$questions[0]->id}", '') // Requerido
-            ->set("answers.{$questions[1]->id}", '') // Requerido
-            ->call('save')
+        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+            ->set('currentStep', 1)
+            ->set("answers.{$questions[0]->id}", '') 
+            ->set("answers.{$questions[1]->id}", '')
+            ->call('nextStep')
             ->assertHasErrors(["answers.{$questions[0]->id}", "answers.{$questions[1]->id}"]);
     }
 
@@ -109,11 +125,12 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test('checklists.checklist-filler', ['id' => $this->checklist->id])
+        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+            ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'Juan')
             ->set("answers.{$questions[1]->id}", 'Sí')
-            ->set("answers.{$questions[2]->id}", '') // No requerido
-            ->call('save')
+            ->set("answers.{$questions[2]->id}", '') 
+            ->call('nextStep')
             ->assertHasNoErrors();
     }
 
@@ -124,10 +141,15 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test('checklists.checklist-filler', ['id' => $this->checklist->id])
+        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+            ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'Test')
             ->set("answers.{$questions[1]->id}", 'Sí')
-            ->call('save');
+            ->set('currentStep', 2)
+            ->set('supervisorName', 'Test Supervisor')
+            ->set('supervisorSignature', 'data:image/png;base64,123')
+            ->set('technicianSignature', 'data:image/png;base64,456')
+            ->call('complete');
 
         $inspection = DynamicInspection::first();
         
@@ -142,10 +164,15 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test('checklists.checklist-filler', ['id' => $this->checklist->id])
+        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+            ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'María López')
             ->set("answers.{$questions[1]->id}", 'No')
-            ->call('save');
+            ->set('currentStep', 2)
+            ->set('supervisorName', 'Test Supervisor')
+            ->set('supervisorSignature', 'data:image/png;base64,123')
+            ->set('technicianSignature', 'data:image/png;base64,456')
+            ->call('complete');
 
         $answer = DynamicAnswer::where('dynamic_question_id', $questions[0]->id)->first();
         
@@ -170,11 +197,16 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->fresh()->questions;
 
-        Livewire::test('checklists.checklist-filler', ['id' => $this->checklist->id])
+        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+            ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'Test')
             ->set("answers.{$questions[1]->id}", 'Sí')
             ->set("answers.{$checkboxQuestion->id}", ['Casco', 'Guantes'])
-            ->call('save');
+            ->set('currentStep', 2)
+            ->set('supervisorName', 'Test Supervisor')
+            ->set('supervisorSignature', 'data:image/png;base64,123')
+            ->set('technicianSignature', 'data:image/png;base64,456')
+            ->call('complete');
 
         $answer = DynamicAnswer::where('dynamic_question_id', $checkboxQuestion->id)->first();
         

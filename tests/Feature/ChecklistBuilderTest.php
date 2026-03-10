@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\DynamicChecklist;
 use App\Models\DynamicQuestion;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -15,7 +16,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function checklist_builder_page_can_be_rendered(): void
     {
-        $response = $this->get('/checklists/create');
+        $response = $this->actingAs(User::factory()->admin()->create())->get('/gestor/checklists/create');
 
         $response->assertStatus(200);
         $response->assertSee('Nuevo Checklist');
@@ -24,7 +25,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function can_create_a_checklist_with_questions(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('title', 'Control de EPP')
             ->set('description', 'Checklist para verificar equipos de protección personal')
             ->set('category', 'hys')
@@ -35,6 +36,9 @@ class ChecklistBuilderTest extends TestCase
                     'options' => ['Sí', 'No', 'N/A'],
                     'is_required' => true,
                     'help_text' => '',
+                    'min_value' => null,
+                    'max_value' => null,
+                    'failure_values' => null,
                 ],
                 [
                     'label' => 'Observaciones',
@@ -42,10 +46,13 @@ class ChecklistBuilderTest extends TestCase
                     'options' => [],
                     'is_required' => false,
                     'help_text' => 'Ingrese cualquier observación',
+                    'min_value' => null,
+                    'max_value' => null,
+                    'failure_values' => null,
                 ],
             ])
             ->call('save')
-            ->assertRedirect(route('checklists.index'));
+            ->assertRedirect(route('gestor.checklists.index'));
 
         $this->assertDatabaseHas('dynamic_checklists', [
             'title' => 'Control de EPP',
@@ -58,10 +65,10 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function title_is_required(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('title', '')
             ->set('questions', [
-                ['label' => 'Pregunta', 'type' => 'text', 'options' => [], 'is_required' => false, 'help_text' => ''],
+                ['label' => 'Pregunta', 'type' => 'text', 'options' => [], 'is_required' => false, 'help_text' => '', 'min_value' => null, 'max_value' => null, 'failure_values' => null],
             ])
             ->call('save')
             ->assertHasErrors(['title' => 'required']);
@@ -70,7 +77,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function at_least_one_question_is_required(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('title', 'Test Checklist')
             ->set('questions', [])
             ->call('save')
@@ -80,7 +87,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function can_add_a_question(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('newQuestion.label', '¿Cumple con la norma?')
             ->set('newQuestion.type', 'radio')
             ->call('addQuestion')
@@ -92,7 +99,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function can_add_options_to_a_question(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('newQuestion.type', 'select')
             ->set('optionInput', 'Opción 1')
             ->call('addOption')
@@ -104,7 +111,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function can_remove_an_option(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('newQuestion.options', ['A', 'B', 'C'])
             ->call('removeOption', 1)
             ->assertSet('newQuestion.options', ['A', 'C']);
@@ -113,7 +120,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function can_remove_a_question(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('questions', [
                 ['label' => 'Q1', 'type' => 'text', 'options' => [], 'is_required' => false, 'help_text' => ''],
                 ['label' => 'Q2', 'type' => 'text', 'options' => [], 'is_required' => false, 'help_text' => ''],
@@ -135,7 +142,7 @@ class ChecklistBuilderTest extends TestCase
             'label' => 'Original Question',
         ]);
 
-        $response = $this->get("/checklists/{$checklist->id}/edit");
+        $response = $this->actingAs(User::factory()->admin()->create())->get("/gestor/checklists/{$checklist->id}/edit");
         $response->assertStatus(200);
         $response->assertSee('Editar Checklist');
     }
@@ -143,7 +150,7 @@ class ChecklistBuilderTest extends TestCase
     /** @test */
     public function can_reorder_questions(): void
     {
-        Livewire::test('checklists.checklist-builder')
+        Livewire::actingAs(User::factory()->admin()->create())->test('checklists.checklist-builder')
             ->set('questions', [
                 ['label' => 'Q1', 'type' => 'text', 'options' => [], 'is_required' => false, 'help_text' => ''],
                 ['label' => 'Q2', 'type' => 'text', 'options' => [], 'is_required' => false, 'help_text' => ''],

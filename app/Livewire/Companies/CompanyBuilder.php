@@ -51,7 +51,16 @@ class CompanyBuilder extends Component
     public function mount(?int $id = null)
     {
         if ($id) {
-            $this->empresa = Empresa::findOrFail($id);
+            $query = Empresa::query();
+            
+            // Tenancy isolation
+            if (!auth()->user()->isSuperAdmin()) {
+                $query->where('consultora_id', auth()->user()->consultora_id);
+            }
+
+            $this->empresa = $query->find($id);
+            abort_if(!$this->empresa, 404);
+            
             $this->nombre = $this->empresa->nombre;
             $this->razonSocial = $this->empresa->razon_social;
             $this->cuit = $this->empresa->cuit;

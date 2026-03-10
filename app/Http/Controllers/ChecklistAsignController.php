@@ -7,18 +7,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rule;
 
-use App\Models\ChecklistAsign;
-use App\Models\ChecklistOt;
-use App\Models\ChecklistCar;
-use App\Models\ChecklistSga;
-use App\Models\ChecklistHe;
-use App\Models\ChecklistVeh;
-use App\Models\ChecklistOl;
-use App\Models\ChecklistEpp;
-use App\Models\ChecklistExt;
-use App\Models\ChecklistExtItem;
-use App\Models\ChecklistHm;
-use App\Models\ChecklistHmItem;
+use App\Models\DynamicChecklist as ChecklistEpp; // Alias temporal para no romper si se usa
 use App\Models\Sede;
 use App\Models\SedeUser;
 use App\Models\User;

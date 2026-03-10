@@ -33,10 +33,11 @@ class UserFactory extends Factory
             'genero' => fake()->randomElement(['M', 'F']),
             'telefono' => fake()->optional()->phoneNumber(),
             'n_doc' => fake()->optional()->numerify('########'),
-            'rol' => fake()->randomElement(['admin', 'usuario', 'inspector']),
+            'rol' => fake()->randomElement(['Administrador', 'Técnico']),
             'matricula' => fake()->numerify('MAT-####'),
             'estado' => true,
             'firma' => 'data:image/png;base64,' . fake()->regexify('[A-Za-z0-9]{20}'),
+            'consultora_id' => \App\Models\Consultora::factory(),
         ];
     }
 
@@ -56,7 +57,7 @@ class UserFactory extends Factory
     public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'rol' => 'admin',
+            'rol' => 'Administrador',
         ]);
     }
 
@@ -66,7 +67,7 @@ class UserFactory extends Factory
     public function inspector(): static
     {
         return $this->state(fn (array $attributes) => [
-            'rol' => 'inspector',
+            'rol' => 'Técnico',
         ]);
     }
 }

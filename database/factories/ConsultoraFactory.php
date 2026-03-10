@@ -17,7 +17,12 @@ class ConsultoraFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->company(),
+            'cuit' => $this->faker->unique()->numerify('###########'),
+            'max_tecnicos' => 10,
+            'description' => $this->faker->paragraph(),
+            'email' => $this->faker->companyEmail(),
+            'phone' => $this->faker->phoneNumber(),
         ];
     }
 }

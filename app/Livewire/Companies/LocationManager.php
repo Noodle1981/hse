@@ -53,6 +53,11 @@ class LocationManager extends Component
 
     public function mount(Empresa $empresa)
     {
+        // Tenancy isolation
+        if (!auth()->user()->isSuperAdmin() && $empresa->consultora_id !== auth()->user()->consultora_id) {
+            abort(403, 'No tienes permiso para gestionar sedes de esta empresa.');
+        }
+
         $this->empresa = $empresa;
         $this->loadSedes();
         $this->loadAvailableUsers();
@@ -112,7 +117,7 @@ class LocationManager extends Component
     {
         if (!$this->sedeToDeleteId) return;
 
-        $sede = Sede::findOrFail($this->sedeToDeleteId);
+        $sede = $this->empresa->sedes()->findOrFail($this->sedeToDeleteId);
         $sede->delete();
         
         $this->loadSedes();
@@ -122,7 +127,7 @@ class LocationManager extends Component
 
     public function restore($id)
     {
-        $sede = Sede::withTrashed()->findOrFail($id);
+        $sede = $this->empresa->sedes()->withTrashed()->findOrFail($id);
         $sede->restore();
         
         $this->loadSedes();
@@ -170,7 +175,7 @@ class LocationManager extends Component
     public function manageUsers(int $sedeId)
     {
         $this->managingUsersForSede = $sedeId;
-        $sede = Sede::findOrFail($sedeId);
+        $sede = $this->empresa->sedes()->findOrFail($sedeId);
         $this->assignedUsers = $sede->users()->pluck('users.id')->toArray();
     }
 
@@ -178,7 +183,7 @@ class LocationManager extends Component
     {
         if (!$this->managingUsersForSede) return;
 
-        $sede = Sede::findOrFail($this->managingUsersForSede);
+        $sede = $this->empresa->sedes()->findOrFail($this->managingUsersForSede);
         
         if (in_array($userId, $this->assignedUsers)) {
             // Desasignar
@@ -250,7 +255,7 @@ class LocationManager extends Component
 
     public function edit(int $id)
     {
-        $sede = Sede::findOrFail($id);
+        $sede = $this->empresa->sedes()->findOrFail($id);
         $this->editingId = $id;
         $this->editNombreSede = $sede->nombre_sede;
         $this->editDireccion = $sede->direccion ?? '';
@@ -273,7 +278,7 @@ class LocationManager extends Component
             'editLongitud' => 'nullable|numeric|between:-180,180',
         ]);
 
-        $sede = Sede::findOrFail($this->editingId);
+        $sede = $this->empresa->sedes()->findOrFail($this->editingId);
         $sede->update([
             'nombre_sede' => $this->editNombreSede,
             'direccion' => $this->editDireccion ?: null,

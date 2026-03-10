@@ -12,7 +12,7 @@ class HallazgoPDFController extends Controller
     public function download(int $id)
     {
         $hallazgo = Hallazgo::with([
-            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'risk.matrix', 'origen'
+            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen'
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($hallazgo->user);
@@ -31,7 +31,7 @@ class HallazgoPDFController extends Controller
     public function preview(int $id)
     {
         $hallazgo = Hallazgo::with([
-            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'risk.matrix', 'origen'
+            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen'
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($hallazgo->user);

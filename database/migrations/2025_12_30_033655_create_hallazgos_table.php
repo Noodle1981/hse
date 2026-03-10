@@ -29,8 +29,8 @@ return new class extends Migration
             $table->string('origen_type')->nullable();
             $table->unsignedBigInteger('origen_id')->nullable();
             
-            // Vinculación opcional con matriz de riesgo
-            $table->foreignId('risk_id')->nullable()->constrained('risks')->nullOnDelete();
+            // Vinculación opcional con matriz de riesgo (Deprecado si la tabla risks no existe)
+            // $table->foreignId('risk_id')->nullable()->constrained('risks')->nullOnDelete();
             
             $table->timestamps();
             

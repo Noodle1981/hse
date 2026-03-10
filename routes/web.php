@@ -88,13 +88,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', \App\Livewire\Assignments\AssignmentManager::class)->name('index');
         });
         
-        /*
-        Route::prefix('projects')->name('projects.')->group(function () {
-            Route::get('/', \App\Livewire\Companies\ProjectManager::class)->name('index'); // Si existiera
-        });
-        */
-
-        // Gestión EPP
 
 
         // Hallazgos
@@ -209,7 +202,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/contrato-anual', \App\Livewire\Contracts\AnnualContractDashboard::class)->name('annual-contract.index');
         Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Contracts\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
 
-        // Gestión EPP
 
 
         // Mis Hallazgos
@@ -258,12 +250,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/consultants/{consultant}/users', \App\Livewire\Admin\ConsultantUsers::class)->name('consultants.users');
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rutas LEGACY (Mantener temporalmente para compatibilidad)
-    |--------------------------------------------------------------------------
-    */
-    
     // Logout
     // Logout
     Route::match(['get', 'post'], '/logout', function () {

@@ -70,8 +70,8 @@ class DynamicChecklistTest extends TestCase
         DynamicChecklist::factory()->category('hys')->count(2)->create();
         DynamicChecklist::factory()->category('calidad')->count(3)->create();
 
-        $hysChecklists = DynamicChecklist::category('hys')->get();
-        $calidadChecklists = DynamicChecklist::category('calidad')->get();
+        $hysChecklists = DynamicChecklist::byCategory('hys')->get();
+        $calidadChecklists = DynamicChecklist::byCategory('calidad')->get();
 
         $this->assertCount(2, $hysChecklists);
         $this->assertCount(3, $calidadChecklists);

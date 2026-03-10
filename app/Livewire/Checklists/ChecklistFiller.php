@@ -83,8 +83,12 @@ class ChecklistFiller extends Component
         // Ahora marcar como completada (esto disparará la evaluación de resultados)
         $inspection->markAsCompleted();
 
+        $route = Auth::user()?->rol === 'Administrador' 
+            ? 'gestor.checklists.index' 
+            : 'tecnico.checklists.tasks.index';
+            
         session()->flash('message', '¡Checklist completado con éxito!');
-        return redirect()->route('checklists.index');
+        return redirect()->route($route);
     }
 
     public function render()

@@ -1,6 +1,6 @@
 <div>
     <div class="mb-6">
-        <a href="{{ route('checklists.index') }}" class="text-ep-primary hover:underline">← Volver</a>
+        <a href="{{ route(auth()->user()?->rol === 'Administrador' ? 'gestor.checklists.index' : 'tecnico.checklists.tasks.index') }}" class="text-ep-primary hover:underline">← Volver</a>
         <h1 class="text-3xl font-bold text-ep-dark mt-2">{{ $checklist->title }}</h1>
         @if($checklist->description)
             <p class="text-gray-600 mt-1">{{ $checklist->description }}</p>
@@ -153,7 +153,7 @@
 
         <!-- Botones -->
         <div class="flex justify-end gap-4">
-            <a href="{{ route('checklists.index') }}"
+            <a href="{{ route(auth()->user()?->rol === 'Administrador' ? 'gestor.checklists.index' : 'tecnico.checklists.tasks.index') }}"
                class="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
                 Cancelar
             </a>

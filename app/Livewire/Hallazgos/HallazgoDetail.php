@@ -53,7 +53,6 @@ class HallazgoDetail extends Component
             'seguimientos.user',
             'fotos',
             'incidentes',
-            'risk',
             'origen'
         ])->findOrFail($this->hallazgoId);
 

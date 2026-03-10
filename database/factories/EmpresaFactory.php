@@ -17,7 +17,10 @@ class EmpresaFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nombre' => $this->faker->company(),
+            'razon_social' => $this->faker->company() . ' S.A.',
+            'cuit' => $this->faker->unique()->numerify('###########'),
+            'consultora_id' => \App\Models\Consultora::factory(),
         ];
     }
 }
