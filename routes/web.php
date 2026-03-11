@@ -247,6 +247,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function() {
         Route::get('/dashboard', \App\Livewire\Admin\EcosystemDashboard::class)->name('dashboard');
         Route::get('/consultants', \App\Livewire\Admin\ConsultantManager::class)->name('consultants');
+        Route::get('/consultants/{consultant}/edit', \App\Livewire\Admin\ConsultantEdit::class)->name('consultants.edit');
         Route::get('/consultants/{consultant}/users', \App\Livewire\Admin\ConsultantUsers::class)->name('consultants.users');
     });
 
