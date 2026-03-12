@@ -10,7 +10,6 @@ use App\Models\Empresa;
 use App\Models\Sede;
 use App\Models\Provincia;
 use App\Models\Employee;
-use App\Models\EppItem;
 
 class DevelopmentSeeder extends Seeder
 {
@@ -138,60 +137,5 @@ class DevelopmentSeeder extends Seeder
             );
         }
 
-        // 6. Catálogo EPP (EppItems)
-        $eppItems = [
-            [
-                'nombre' => 'Casco de Seguridad',
-                'tipo' => 'Cabeza',
-                'vida_util_meses' => 24,
-                'vida_util_fabricante_anios' => 5,
-                'unidad_medida' => 'Unidad',
-                'codigo_norma' => 'IRAM 3620',
-                'stock_actual' => 50,
-                'stock_seguridad' => 10,
-                'requiere_control_critico' => true,
-            ],
-            [
-                'nombre' => 'Guantes de Nitrilo',
-                'tipo' => 'Ocular', // Corrección: Ocular? No, debería ser Manos. El PRD decía "Ocular" en el ejemplo pero es un error común. Lo pongo según lógica.
-                'tipo' => 'Manos',
-                'vida_util_meses' => 1,
-                'vida_util_fabricante_anios' => 2,
-                'unidad_medida' => 'Par',
-                'codigo_norma' => 'IRAM 3610',
-                'stock_actual' => 200,
-                'stock_seguridad' => 50,
-                'requiere_control_critico' => false,
-            ],
-            [
-                'nombre' => 'Botas con puntera',
-                'tipo' => 'Pies',
-                'vida_util_meses' => 12,
-                'vida_util_fabricante_anios' => 3,
-                'unidad_medida' => 'Par',
-                'codigo_norma' => 'IRAM 3610-1',
-                'stock_actual' => 30,
-                'stock_seguridad' => 5,
-                'requiere_control_critico' => false,
-            ],
-            [
-                'nombre' => 'Arnés de seguridad - 4 puntos',
-                'tipo' => 'Cuerpo completo',
-                'vida_util_meses' => 60,
-                'vida_util_fabricante_anios' => 10,
-                'unidad_medida' => 'Unidad',
-                'codigo_norma' => 'IRAM 3622-1',
-                'stock_actual' => 15,
-                'stock_seguridad' => 3,
-                'requiere_control_critico' => true,
-            ],
-        ];
-
-        foreach ($eppItems as $itemData) {
-            EppItem::updateOrCreate(
-                ['nombre' => $itemData['nombre']],
-                array_merge($itemData, ['is_active' => true])
-            );
-        }
     }
 }

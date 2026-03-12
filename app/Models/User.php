@@ -104,10 +104,14 @@ class User extends Authenticatable
 
     public function hasRole(string|array $roles): bool
     {
+        $userRole = strtolower($this->rol);
+
         if (is_array($roles)) {
-            return in_array($this->rol, $roles);
+            $roles = array_map('strtolower', $roles);
+            return in_array($userRole, $roles);
         }
-        return $this->rol === $roles;
+        
+        return $userRole === strtolower($roles);
     }
 
     /**

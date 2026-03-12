@@ -59,7 +59,7 @@
         /* Tables */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
         th, td { padding: 6px; border: 1px solid #e2e8f0; text-align: left; }
-        th { background-color: #f1f5f9; font-weight: bold; color: {{ $cp }}; font-size: 9pt; }
+        th { background-color: #f1f5f9; font-weight: bold; color: {{ $cs }}; font-size: 9pt; }
         
         .no-border td { border: none; }
         .text-right { text-align: right; }

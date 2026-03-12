@@ -1,4 +1,5 @@
-<div class="space-y-8">
+<div class="py-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
     {{-- KPI Overview --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -21,10 +22,11 @@
 
     {{-- Monitoring Table --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-50 flex items-center justify-between">
+        <div class="px-6 py-4 border-b border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 class="font-bold text-gray-800">Monitoreo de Actividad por Empresa</h3>
-            <span class="text-[10px] bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold uppercase">Actualizado en tiempo real</span>
+            <span class="text-[10px] bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-bold uppercase self-start sm:self-auto w-max">Actualizado en tiempo real</span>
         </div>
+        <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50/50">
                 <tr>
@@ -73,6 +75,8 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
+    </div>
     </div>
 </div>
 
