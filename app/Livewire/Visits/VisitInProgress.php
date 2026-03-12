@@ -15,6 +15,12 @@ class VisitInProgress extends Component
 {
     public VisitCertificate $visit;
     
+    // Alertas de duración
+    public $durationMinutes = 0;
+    public $isVisitaExcedida = false;
+    public const ALERT_THRESHOLD = 180; // 3 horas por defecto
+
+    
     // Colecciones
     public $assignedChecklists = [];
     public $completedChecklists = [];
@@ -115,6 +121,15 @@ class VisitInProgress extends Component
         }
         
         $this->loadChecklists();
+        $this->calculateDuration();
+    }
+
+    public function calculateDuration()
+    {
+        if ($this->visit && $this->visit->start_time) {
+            $this->durationMinutes = $this->visit->start_time->diffInMinutes(now());
+            $this->isVisitaExcedida = $this->durationMinutes >= self::ALERT_THRESHOLD;
+        }
     }
 
     public function loadChecklists()

@@ -158,6 +158,23 @@ class TechnicianDashboard extends Component
                 ->where('status', 'pending')
                 ->whereBetween('due_date', [now(), now()->addDays(3)])
                 ->count(),
+            'active_visit_overdue' => $this->getActiveVisitOverdue($user),
         ];
+    }
+
+    private function getActiveVisitOverdue($user)
+    {
+        $activeVisit = \App\Models\VisitCertificate::where('user_id', $user->id)
+            ->where('status', 'in_progress')
+            ->first();
+            
+        if ($activeVisit && $activeVisit->start_time) {
+            $threshold = 180; // 3 horas
+            if ($activeVisit->start_time->diffInMinutes(now()) >= $threshold) {
+                return $activeVisit;
+            }
+        }
+        
+        return null;
     }
 }

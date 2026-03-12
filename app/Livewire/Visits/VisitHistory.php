@@ -16,6 +16,14 @@ class VisitHistory extends Component
     public $filterStatus = '';
     public $filterTechnician = '';
     public $filterSede = '';
+    
+    // Edición de Visita (Admin)
+    public $showEditModal = false;
+    public $selectedVisitId = null;
+    public $editStartTime = '';
+    public $editEndTime = '';
+    public $editVisitDate = '';
+
 
     public function resendEmail($id)
     {
@@ -29,6 +37,50 @@ class VisitHistory extends Component
                 session()->flash('error', 'Error enviando email: ' . $e->getMessage());
             }
         }
+    }
+
+    public function editVisit($id)
+    {
+        // Solo el administrador de la empresa (Gestor) puede editar, NO el super_admin
+        if (strtolower(auth()->user()->rol) !== 'administrador') {
+            return;
+        }
+
+        $visit = VisitCertificate::findOrFail($id);
+        $this->selectedVisitId = $visit->id;
+        $this->editVisitDate = $visit->visit_date->format('Y-m-d');
+        $this->editStartTime = $visit->start_time ? $visit->start_time->format('H:i') : '';
+        $this->editEndTime = $visit->end_time ? $visit->end_time->format('H:i') : '';
+        
+        $this->showEditModal = true;
+    }
+
+    public function updateVisit()
+    {
+        if (strtolower(auth()->user()->rol) !== 'administrador') {
+            return;
+        }
+
+        $this->validate([
+            'editVisitDate' => 'required|date',
+            'editStartTime' => 'required',
+            'editEndTime' => 'nullable',
+        ]);
+
+        $visit = VisitCertificate::findOrFail($this->selectedVisitId);
+        
+        // Combinar fecha con horas
+        $start = \Carbon\Carbon::parse($this->editVisitDate . ' ' . $this->editStartTime);
+        $end = $this->editEndTime ? \Carbon\Carbon::parse($this->editVisitDate . ' ' . $this->editEndTime) : null;
+
+        $visit->update([
+            'visit_date' => $this->editVisitDate,
+            'start_time' => $start,
+            'end_time' => $end,
+        ]);
+
+        $this->showEditModal = false;
+        session()->flash('message', 'Visita actualizada correctamente.');
     }
 
     public function render()

@@ -123,8 +123,8 @@
         </div>
 
         {{-- Mis Alertas --}}
-        @if($myAlerts['overdue_tasks'] > 0 || $myAlerts['tasks_due_soon'] > 0)
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+        @if($myAlerts['overdue_tasks'] > 0 || $myAlerts['tasks_due_soon'] > 0 || $myAlerts['active_visit_overdue'])
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg mb-8">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -135,6 +135,11 @@
                         <h3 class="text-sm font-medium text-yellow-800">Mis Alertas</h3>
                         <div class="mt-2 text-sm text-yellow-700">
                             <ul class="list-disc list-inside space-y-1">
+                                @if($myAlerts['active_visit_overdue'])
+                                    <li class="font-bold text-red-600 animate-pulse">
+                                        ⚠️ VISITA EN CURSO: Llevas más de 3 horas en la sede {{ $myAlerts['active_visit_overdue']->sede->nombre_sede }}. No olvides cerrarla.
+                                    </li>
+                                @endif
                                 @if($myAlerts['overdue_tasks'] > 0)
                                     <li>{{ $myAlerts['overdue_tasks'] }} tareas vencidas</li>
                                 @endif

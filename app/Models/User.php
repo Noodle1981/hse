@@ -139,6 +139,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Accesor para nombre completo (usado en vistas como ->name)
+     */
+    public function getNameAttribute(): string
+    {
+        return $this->full_name;
+    }
+
+    /**
      * Accesor para nombre completo
      */
     public function getFullNameAttribute(): string

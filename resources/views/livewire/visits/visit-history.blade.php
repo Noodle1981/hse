@@ -130,13 +130,22 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </a>
-                                @endif
-                                
-                                @if($visit->status === 'completed' && !$visit->responsible_signature && $visit->signature_skip_reason && $visit->email_responsable)
+                                    @if($visit->status === 'completed' && !$visit->responsible_signature && $visit->signature_skip_reason && $visit->email_responsable)
                                     <button wire:click="resendEmail({{ $visit->id }})" 
                                             wire:loading.attr="disabled"
                                             class="ml-2 btn-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200">
                                         Reenviar Email
+                                    </button>
+                                    @endif
+                                @endif
+
+                                @if(strtolower(auth()->user()->rol) === 'administrador')
+                                    <button wire:click="editVisit({{ $visit->id }})" 
+                                            class="ml-2 btn-xs bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
+                                            title="Editar Tiempos">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
                                     </button>
                                 @endif
                             </td>
@@ -157,4 +166,61 @@
         </div>
     </div>
 
+</div>
+
+    <!-- Modal Editar Visita (Admin) -->
+    @if($showEditModal)
+        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="$set('showEditModal', false)"></div>
+                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="flex items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                    Corregir Tiempos de Visita
+                                </h3>
+                                <div class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Fecha de Visita</label>
+                                        <input type="date" wire:model="editVisitDate" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-ep-primary focus:border-ep-primary sm:text-sm">
+                                        @error('editVisitDate') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Hora Inicio</label>
+                                            <input type="time" wire:model="editStartTime" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-ep-primary focus:border-ep-primary sm:text-sm">
+                                            @error('editStartTime') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700">Hora Fin</label>
+                                            <input type="time" wire:model="editEndTime" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-ep-primary focus:border-ep-primary sm:text-sm">
+                                            @error('editEndTime') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-500 italic">
+                                        Use esta herramienta para corregir registros donde el técnico olvidó cerrar la visita a tiempo.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" wire:click="updateVisit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Guardar Cambios
+                        </button>
+                        <button type="button" wire:click="$set('showEditModal', false)" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ep-primary sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

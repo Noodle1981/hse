@@ -1,5 +1,26 @@
-<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto" wire:poll.60s="calculateDuration">
     
+    <!-- Alerta de Duración Excedida -->
+    @if($isVisitaExcedida)
+        <div class="mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-xl shadow-sm animate-pulse">
+            <div class="flex items-center">
+                <div class="flex-shrink-0">
+                    <svg class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-bold text-red-800">
+                        ⚠️ ATENCIÓN: Esta visita lleva {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}min en curso.
+                    </p>
+                    <p class="text-xs text-red-700 mt-0.5">
+                        Por favor, asegúrese de finalizar la visita si ya ha concluido sus tareas para mantener la precisión de los registros.
+                    </p>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Header de Visita -->
     <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 mb-8">
         <div class="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
