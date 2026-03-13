@@ -13,7 +13,7 @@ class GeneradorConstanciaPolicy
     public function view(User $user, GeneradorConstancia $constancia): bool
     {
         // Admin puede ver todas
-        if ($user->rol === 'Administrador') {
+        if ($user->isGestor()) {
             return true;
         }
 
@@ -26,7 +26,7 @@ class GeneradorConstanciaPolicy
      */
     public function create(User $user): bool
     {
-        return in_array($user->rol, ['Administrador', 'Técnico']);
+        return $user->isAdmin() || $user->isTechnician();
     }
 
     /**
@@ -44,6 +44,6 @@ class GeneradorConstanciaPolicy
     public function delete(User $user, GeneradorConstancia $constancia): bool
     {
         // Solo admin puede eliminar
-        return $user->rol === 'Administrador';
+        return $user->isGestor();
     }
 }

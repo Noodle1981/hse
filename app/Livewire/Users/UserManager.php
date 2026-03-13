@@ -28,7 +28,7 @@ class UserManager extends Component
     public string $apellidos = '';
     public string $email = '';
     public string $password = '';
-    public string $rol = 'Técnico';
+    public string $rol = 'tecnico';
     public string $matricula = '';
     public string $telefono = '';
     public string $estado = 'activo';
@@ -87,9 +87,9 @@ class UserManager extends Component
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'email' => ['required', 'email', Rule::unique('users')->ignore($this->editingId)],
-            'rol' => 'required|in:Administrador,Técnico',
-            'matricula' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($this->editingId)],
-            'telefono' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($this->editingId)],
+            'rol' => 'required|in:gestor,tecnico',
+            'matricula' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($this->editingId)],
+            'telefono' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($this->editingId)],
             'estado' => 'required|in:activo,inactivo',
         ];
 
@@ -183,7 +183,7 @@ class UserManager extends Component
         $this->apellidos = '';
         $this->email = '';
         $this->password = '';
-        $this->rol = 'Técnico';
+        $this->rol = 'tecnico';
         $this->matricula = '';
         $this->telefono = '';
         $this->estado = 'activo';

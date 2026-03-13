@@ -102,40 +102,67 @@ class User extends Authenticatable
         return $this->hasMany(Registro::class);
     }
 
-    public function hasRole(string|array $roles): bool
-    {
-        $userRole = strtolower($this->rol);
 
-        if (is_array($roles)) {
-            $roles = array_map('strtolower', $roles);
-            return in_array($userRole, $roles);
+    // Role Constants
+    public const ROLE_SUPER_ADMIN = 'super_admin';
+    public const ROLE_GESTOR = 'gestor';
+    public const ROLE_TECNICO = 'tecnico';
+
+    /**
+     * Normaliza un nombre de rol a su valor estándar interno.
+     */
+    private function normalizeRole(string $role): string
+    {
+        $role = strtolower(trim($role));
+        
+        if (in_array($role, ['administrador', 'admin', 'gestor', 'administradores'])) {
+            return self::ROLE_GESTOR;
         }
         
-        return $userRole === strtolower($roles);
+        if (in_array($role, ['técnico', 'tecnico', 'technician', 'técnicos', 'tecnicos'])) {
+            return self::ROLE_TECNICO;
+        }
+        
+        return $role;
     }
 
     /**
-     * Verifica si el usuario es Super Administrador (Global)
+     * Verifica si el usuario tiene uno o más roles (soporta nombres viejos y nuevos).
      */
+    public function hasRole(string|array $roles): bool
+    {
+        $userRoleNormalized = $this->normalizeRole($this->rol ?? '');
+
+        if (is_array($roles)) {
+            foreach ($roles as $role) {
+                if ($userRoleNormalized === $this->normalizeRole($role)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        return $userRoleNormalized === $this->normalizeRole($roles);
+    }
+
     public function isSuperAdmin(): bool
     {
-        return strtolower($this->rol) === 'super_admin';
+        return $this->hasRole(self::ROLE_SUPER_ADMIN);
     }
 
-    /**
-     * Verifica si el usuario es Administrador
-     */
+    public function isGestor(): bool
+    {
+        return $this->hasRole(self::ROLE_GESTOR);
+    }
+
     public function isAdmin(): bool
     {
-        return in_array(strtolower($this->rol), ['administrador', 'admin', 'super_admin']);
+        return $this->hasRole([self::ROLE_GESTOR, self::ROLE_SUPER_ADMIN]);
     }
 
-    /**
-     * Verifica si el usuario es Técnico
-     */
     public function isTechnician(): bool
     {
-        return in_array(strtolower($this->rol), ['técnico', 'tecnico']);
+        return $this->hasRole(self::ROLE_TECNICO);
     }
 
     /**

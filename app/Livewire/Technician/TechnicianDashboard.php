@@ -169,7 +169,7 @@ class TechnicianDashboard extends Component
             ->first();
             
         if ($activeVisit && $activeVisit->start_time) {
-            $threshold = 180; // 3 horas
+            $threshold = 30; // 30 minutos
             if ($activeVisit->start_time->diffInMinutes(now()) >= $threshold) {
                 return $activeVisit;
             }

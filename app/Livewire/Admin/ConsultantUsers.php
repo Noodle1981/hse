@@ -22,7 +22,7 @@ class ConsultantUsers extends Component
     public $apellidos;
     public $email;
     public $password;
-    public $rol = 'Administrador'; // Default role
+    public $rol = 'gestor'; // Default role
     public $estado = 'activo';
 
     public function mount(Consultora $consultant)
@@ -40,7 +40,7 @@ class ConsultantUsers extends Component
     public function create()
     {
         $this->reset(['nombres', 'apellidos', 'email', 'password', 'rol', 'editingId']);
-        $this->rol = 'Administrador';
+        $this->rol = 'gestor';
         $this->estado = 'activo';
         $this->showModal = true;
     }
@@ -64,7 +64,7 @@ class ConsultantUsers extends Component
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . $this->editingId,
-            'rol' => 'required|string|in:Administrador,Técnico',
+            'rol' => 'required|string|in:gestor,tecnico',
         ];
 
         if (!$this->editingId) {

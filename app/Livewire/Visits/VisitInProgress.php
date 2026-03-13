@@ -18,7 +18,8 @@ class VisitInProgress extends Component
     // Alertas de duración
     public $durationMinutes = 0;
     public $isVisitaExcedida = false;
-    public const ALERT_THRESHOLD = 180; // 3 horas por defecto
+    public $dismissedAlertsCount = 0;
+    public const ALERT_THRESHOLD = 30; // 30 minutos
 
     
     // Colecciones
@@ -127,9 +128,25 @@ class VisitInProgress extends Component
     public function calculateDuration()
     {
         if ($this->visit && $this->visit->start_time) {
-            $this->durationMinutes = $this->visit->start_time->diffInMinutes(now());
-            $this->isVisitaExcedida = $this->durationMinutes >= self::ALERT_THRESHOLD;
+            $this->durationMinutes = (int) $this->visit->start_time->diffInMinutes(now());
+            
+            // Determinar en qué bloque de 30 minutos estamos
+            $currentBlock = (int) floor($this->durationMinutes / self::ALERT_THRESHOLD);
+            
+            // Mostrar alerta si estamos en un bloque > 0 y no ha sido descartado para este bloque
+            if ($currentBlock > 0 && $currentBlock > $this->dismissedAlertsCount) {
+                $this->isVisitaExcedida = true;
+            } else {
+                $this->isVisitaExcedida = false;
+            }
         }
+    }
+
+    public function dismissAlert()
+    {
+        // Marcar el bloque actual como descartado
+        $this->dismissedAlertsCount = (int) floor($this->durationMinutes / self::ALERT_THRESHOLD);
+        $this->isVisitaExcedida = false;
     }
 
     public function loadChecklists()

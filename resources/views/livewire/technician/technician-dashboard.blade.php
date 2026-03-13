@@ -137,7 +137,7 @@
                             <ul class="list-disc list-inside space-y-1">
                                 @if($myAlerts['active_visit_overdue'])
                                     <li class="font-bold text-red-600 animate-pulse">
-                                        ⚠️ VISITA EN CURSO: Llevas más de 3 horas en la sede {{ $myAlerts['active_visit_overdue']->sede->nombre_sede }}. No olvides cerrarla.
+                                        ⚠️ VISITA EN CURSO: Llevas más de 30 minutos en la sede {{ $myAlerts['active_visit_overdue']->sede->nombre_sede }}. No olvides cerrarla.
                                     </li>
                                 @endif
                                 @if($myAlerts['overdue_tasks'] > 0)

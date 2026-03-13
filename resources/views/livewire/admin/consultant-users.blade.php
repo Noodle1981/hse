@@ -42,7 +42,7 @@
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $user->rol === 'Administrador' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800' }}">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $user->isGestor() ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800' }}">
                             {{ $user->rol }}
                         </span>
                     </td>
@@ -125,8 +125,8 @@
                         <div>
                             <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Rol</label>
                             <select wire:model="rol" class="w-full rounded-lg border-gray-200 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
-                                <option value="Administrador">Administrador</option>
-                                <option value="Técnico">Técnico</option>
+                                <option value="gestor">Gestor</option>
+                                <option value="tecnico">Técnico</option>
                             </select>
                             @error('rol') <span class="text-red-500 text-[10px] font-bold">{{ $message }}</span> @enderror
                         </div>

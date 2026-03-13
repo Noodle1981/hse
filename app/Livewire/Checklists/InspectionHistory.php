@@ -40,7 +40,7 @@ class InspectionHistory extends Component
     public function render()
     {
         $user = auth()->user();
-        $isTech = $user->rol === 'Técnico';
+        $isTech = $user->isTechnician();
 
         $inspections = DynamicInspection::query()
             ->with(['checklist', 'user', 'sede.empresa'])

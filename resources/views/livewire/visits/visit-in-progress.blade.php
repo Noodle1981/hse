@@ -10,12 +10,19 @@
                     </svg>
                 </div>
                 <div class="ml-3">
-                    <p class="text-sm font-bold text-red-800">
-                        ⚠️ ATENCIÓN: Esta visita lleva {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}min en curso.
-                    </p>
-                    <p class="text-xs text-red-700 mt-0.5">
-                        Por favor, asegúrese de finalizar la visita si ya ha concluido sus tareas para mantener la precisión de los registros.
-                    </p>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-red-800">
+                                ⚠️ ATENCIÓN: Esta visita lleva {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}min en curso.
+                            </p>
+                            <p class="text-xs text-red-700 mt-0.5">
+                                Por favor, asegúrese de finalizar la visita si ya ha concluido sus tareas para mantener la precisión de los registros.
+                            </p>
+                        </div>
+                        <button wire:click="dismissAlert" class="ml-4 px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 text-xs font-bold rounded-lg transition-colors border border-red-200">
+                            Descartar por 30 min
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

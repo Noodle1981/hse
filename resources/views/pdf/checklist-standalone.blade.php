@@ -65,17 +65,18 @@
             $checklist = $completion->assignment->checklist;
             $sections = $checklist->sections->keyBy('id');
             
-            // Mapear respuestas a secciones si es posible
-            // (Nota: formatted_responses puede no tener question_id si es legacy, 
-            // pero para nuevas inspecciones sí lo tiene)
+            // Detectar si hay al menos una observación con contenido
+            $hasObservations = collect($responses)->contains(fn($r) => !empty(trim($r['observation'] ?? '')));
         @endphp
 
         <table style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
             <thead>
                 <tr style="background-color: #f8fafc;">
-                    <th style="padding: 12px 15px; text-align: left; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: 60%;">Punto de Control</th>
-                    <th style="padding: 12px 15px; text-align: center; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: 15%;">Cumplimiento</th>
-                    <th style="padding: 12px 15px; text-align: left; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: 25%;">Observaciones</th>
+                    <th style="padding: 12px 15px; text-align: left; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: {{ $hasObservations ? '60%' : '80%' }};">Punto de Control</th>
+                    <th style="padding: 12px 15px; text-align: center; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: {{ $hasObservations ? '15%' : '20%' }};">Cumplimiento</th>
+                    @if($hasObservations)
+                        <th style="padding: 12px 15px; text-align: left; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: 25%;">Observaciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
@@ -101,11 +102,13 @@
                                 </span>
                             @endif
                         </td>
-                        <td style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
-                            <div style="font-size: 8pt; color: #64748b; line-height: 1.4;">
-                                {{ $resp['observation'] ?? '-' }}
-                            </div>
-                        </td>
+                        @if($hasObservations)
+                            <td style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
+                                <div style="font-size: 8pt; color: #64748b; line-height: 1.4;">
+                                    {{ $resp['observation'] ?? '-' }}
+                                </div>
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>

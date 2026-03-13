@@ -128,7 +128,7 @@ class MasterReportWizard extends Component
     {
         return view('livewire.master-reports.master-report-wizard', [
             'sedes' => \App\Models\Sede::all(),
-            'tecnicos' => \App\Models\User::whereIn('rol', ['Técnico', 'tecnico'])->get(),
+            'tecnicos' => \App\Models\User::where('rol', \App\Models\User::ROLE_TECNICO)->get(),
         ]);
     }
 }

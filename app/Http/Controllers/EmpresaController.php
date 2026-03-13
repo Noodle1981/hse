@@ -14,7 +14,7 @@ class EmpresaController extends Controller
 {
     public function index(Request $request)
     {
-        if ($request->user()->rol == "Administrador") { 
+        if ($request->user()->isGestor()) { 
             return response()->json([
                 'data' => Empresa::with('sedes')->get(),
                 'message'=>'Ok'

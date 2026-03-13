@@ -183,9 +183,8 @@
                 <table class="detail-table">
                     <thead>
                         <tr>
-                            <th style="width: 60%">Punto de Control Evaluado</th>
-                            <th style="width: 10%; text-align: center;">Estado</th>
-                            <th style="width: 30%">Observaciones</th>
+                            <th style="width: 85%">Punto de Control Evaluado</th>
+                            <th style="width: 15%; text-align: center;">Estado</th>
                         </tr>
                     </thead>
                     <tbody>

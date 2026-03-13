@@ -35,8 +35,8 @@
 
                 <select wire:model.live="roleFilter" class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm">
                     <option value="all">Todos los roles</option>
-                    <option value="Administrador">Administradores</option>
-                    <option value="Técnico">Técnicos</option>
+                    <option value="gestor">Gestores</option>
+                    <option value="tecnico">Técnicos</option>
                 </select>
                 <button wire:click="toggleForm" 
                         class="w-full sm:w-auto justify-center hover:bg-opacity-90 text-white px-4 py-2 rounded-md whitespace-nowrap transition-colors duration-200 flex items-center gap-2 shadow-sm"
@@ -104,14 +104,14 @@
                             Rol <span class="text-red-500">*</span>
                         </label>
                         <select wire:model="rol" class="w-full rounded-md border-gray-300 shadow-sm">
-                            <option value="Técnico">Técnico</option>
-                            <option value="Administrador">Administrador</option>
+                            <option value="tecnico">Técnico</option>
+                            <option value="gestor">Gestor</option>
                         </select>
                         @error('rol') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Matrícula</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Matrícula <span class="text-red-500">*</span></label>
                         <input type="text" wire:model="matricula" 
                                class="w-full rounded-md border-gray-300 shadow-sm"
                                placeholder="MAT-001">
@@ -119,7 +119,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono <span class="text-red-500">*</span></label>
                         <input type="text" wire:model="telefono" 
                                class="w-full rounded-md border-gray-300 shadow-sm"
                                placeholder="011-1234-5678">
@@ -180,8 +180,8 @@
                             {{ $user->email }}
                         </td>
                         <td class="px-6 py-4">
-                            <span class="px-2 py-1 {{ $user->rol === 'Administrador' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }} rounded-full text-xs font-medium">
-                                {{ $user->rol }}
+                            <span class="px-2 py-1 {{ $user->isGestor() ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800' }} rounded-full text-xs font-medium">
+                                {{ $user->rol === 'gestor' ? 'Gestor' : 'Técnico' }}
                             </span>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">

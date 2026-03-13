@@ -122,7 +122,7 @@ class TechnicianManager extends Component
     public function render()
     {
         $query = User::query()
-            ->whereIn('rol', ['Técnico', 'tecnico', 'Technician']);
+            ->where('rol', User::ROLE_TECNICO);
             // If soft delete is enabled (which it is), those are excluded by default thanks to SoftDeletes trait.
 
         if ($this->search) {
