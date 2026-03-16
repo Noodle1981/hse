@@ -107,8 +107,9 @@
         @endif
 
         {{-- Master Board Table --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
+            <!-- Desktop Table (visible from md) -->
+            <div class="hidden md:block overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
                         <tr class="bg-gray-50 border-b border-gray-100">
@@ -135,7 +136,7 @@
                                 <tr class="group hover:bg-gray-50/80 transition-colors">
                                 <td class="sticky left-0 z-10 bg-white group-hover:bg-gray-50 px-6 py-4">
                                     <div class="flex items-center">
-                                        <div class="w-2 h-2 rounded-full mr-3 {{ $plan->category === 'Capacitación' ? 'bg-blue-400' : ($plan->category === 'Inspección' ? 'bg-orange-400' : 'bg-gray-600') }}"></div>
+                                        <div class="w-2 h-2 rounded-full mr-3 {{ $plan->category === 'Capacitación' ? 'bg-blue-400' : ($plan->category === 'Inspección' ? 'bg-orange-400' : 'bg-indigo-600') }}"></div>
                                         <div>
                                             <div class="text-xs font-bold text-gray-800">{{ $plan->activity_name }}</div>
                                             <div class="text-[9px] text-gray-400 font-medium tracking-tighter">{{ $plan->activity_code ?: 'S/C' }}</div>
@@ -173,7 +174,7 @@
                                         </div>
                                     </td>
                                 @endforeach
-
+    
                                 @if($editMode)
                                 <td class="px-6 py-4 text-right">
                                     <button wire:click="deleteActivity({{ $plan->id }})" class="text-gray-300 hover:text-red-500 transition-colors">
@@ -186,14 +187,83 @@
                             <tr>
                                 <td colspan="15" class="px-6 py-20 text-center">
                                     <div class="text-gray-400 text-xs font-bold uppercase tracking-widest">No hay actividades planificadas para este año</div>
-                                    @if(!$editMode && auth()->user()->isAdmin())
-                                        <button wire:click="$set('editMode', true)" class="mt-4 text-indigo-600 font-bold text-sm hover:underline">Comenzar Planificación</button>
-                                    @endif
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+    
+            <!-- Mobile View (visible strictly on < md) -->
+            <div class="md:hidden flex flex-col gap-4 p-4">
+                @php $mobileCategory = ''; @endphp
+                @forelse($plans as $plan)
+                    @if($mobileCategory !== $plan->category)
+                        <div class="text-[10px] font-black text-indigo-500 uppercase tracking-wider mt-4 first:mt-0">
+                            — {{ $plan->category }}
+                        </div>
+                        @php $mobileCategory = $plan->category; @endphp
+                    @endif
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:border-indigo-100 transition-all">
+                        <!-- Header: Title & Code -->
+                        <div class="flex justify-between items-start mb-3">
+                            <div>
+                                <div class="font-bold text-gray-900 leading-tight">
+                                    {{ $plan->activity_name }}
+                                </div>
+                                <div class="text-[9px] text-gray-400 font-medium mt-0.5 tracking-tighter">
+                                    {{ $plan->activity_code ?: 'S/C' }}
+                                </div>
+                            </div>
+                            <div class="w-2 h-2 rounded-full {{ $plan->category === 'Capacitación' ? 'bg-blue-400' : ($plan->category === 'Inspección' ? 'bg-orange-400' : 'bg-indigo-600') }}"></div>
+                        </div>
+    
+                        <!-- Body: Matrix of 12 Months -->
+                        <div class="grid grid-cols-4 gap-3 pt-3 border-t border-gray-50">
+                            @foreach($months as $name => $num)
+                                @php 
+                                    $data = $complianceData[$plan->id][$name] ?? ['status' => 'none', 'count' => 0];
+                                    $status = $data['status'];
+                                    $cnt = $data['count'];
+                                @endphp
+                                <div class="flex flex-col items-center">
+                                    <div class="text-[8px] font-black text-gray-400 uppercase mb-1">
+                                        {{ substr(strtoupper($name), 0, 3) }}
+                                    </div>
+                                    <div 
+                                        @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $name }}')" @endif
+                                        class="relative w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black transition-all border
+                                        {{ $status === 'completed' ? 'bg-emerald-500 border-white text-white shadow-sm' : '' }}
+                                        {{ $status === 'overdue' ? 'bg-red-500 border-white text-white shadow-sm animate-pulse' : '' }}
+                                        {{ $status === 'pending' ? 'bg-yellow-400 border-white text-white shadow-sm' : '' }}
+                                        {{ $status === 'none' ? 'bg-gray-50 border-gray-100 text-gray-200' : '' }}
+                                        {{ $editMode ? 'cursor-pointer hover:scale-105 active:scale-95' : 'cursor-default' }}">
+                                        
+                                        @if($status === 'completed')
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                        @elseif($status !== 'none')
+                                            X
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+    
+                        <!-- Footer: Delete Action (if Edit Mode) -->
+                        @if($editMode)
+                            <div class="flex justify-end pt-2 mt-2 border-t border-gray-50">
+                                <button wire:click="deleteActivity({{ $plan->id }})" class="text-gray-400 hover:text-red-500 text-xs flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    Eliminar
+                                </button>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <div class="p-4 text-center text-gray-500 text-xs font-bold uppercase tracking-widest">
+                        No hay actividades planificadas para este año
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>

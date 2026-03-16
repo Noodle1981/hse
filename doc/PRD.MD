@@ -13,7 +13,9 @@ XamaSafe es una plataforma SaaS B2B de **gestión integral de Higiene y Segurida
 
 ### 1.2 Estado Actual — v1.0 MVP
 
-El módulo EPP fue eliminado en esta versión para reducir la deuda técnica y enfocar el producto en su núcleo de valor. Toda la lógica de entrega, gestión de stock EPP y trazabilidad QR de EPP está documentada como **Ecosistema Futuro (Tienda EPP)** en la Sección 6 de este documento.
+La plataforma está enfocada en el ciclo completo de Higiene y Seguridad de campo: **Gestión de visitas, Checklists dinámicos, Capacitaciones, Hallazgos, Incidentes e Informes Maestros**. 
+
+Toda la lógica de entrega, gestión de stock y trazabilidad de Elementos de Protección Personal (EPP) se proyecta como una integración con un segundo módulo especializado (Sección 5).
 
 ### 1.3 Arquitectura del Ecosistema Completo (Visión Futura)
 
@@ -46,6 +48,7 @@ XamaSafe (este repositorio)          Tienda EPP (plataforma separada)
 | Contrato Anual | ✅ Activo | Dashboard de planificación anual de servicios |
 | Informe Maestro | ✅ Activo | Informe mensual de gestión con PDF profesional |
 | Bitácora del Sistema | ✅ Activo | Historial de cambios con filtros avanzados |
+| **Modo Alternancia** | ✅ Activo | Permite a los gestores actuar como técnicos temporalmente en la misma sesión |
 
 ### 2.2 Módulo de Visitas Técnicas (Core del Producto)
 
@@ -60,6 +63,7 @@ XamaSafe (este repositorio)          Tienda EPP (plataforma separada)
 | Constancia de Visita PDF | ✅ Activo | PDF con firma digital del responsable del cliente |
 | Firma Remota | ✅ Activo | Envío de link por email si el responsable no está presente |
 | Historial de Visitas | ✅ Activo | Filtros por estado, sede, técnico y fecha |
+| **Alertas de Duración** | ✅ Activo | Avisos automáticos cada 30 min para evitar olvidos de cierre |
 
 ### 2.3 Módulo de Checklists
 
@@ -122,8 +126,10 @@ XamaSafe (este repositorio)          Tienda EPP (plataforma separada)
 | Rol | Descripción |
 |---|---|
 | `super_admin` | Acceso total al sistema XamaSafe |
-| `Administrador` | Gestor de consultora: gestiona técnicos, empresas, informes |
-| `Técnico` / `tecnico` | Realiza visitas, completa checklists, genera hallazgos |
+| `gestor` | Gestor de consultora: gestiona técnicos, empresas, informes (ex *Administrador*) |
+| `tecnico` | Técnico de campo: realiza visitas, completa checklists, genera hallazgos |
+
+> **Nota sobre Modo Alternancia**: Los usuarios con rol `gestor` pueden activar el "Modo Técnico" (Modo Alternancia) para operar temporalmente con la visual y permisos de un técnico sin duplicar cuentas.
 
 ### 3.3 Flujo Central de una Visita
 
@@ -157,24 +163,13 @@ Sistema genera Constancia de Visita en PDF
 | **Informe Maestro con datos reales** | El wizard de redacción del informe pre-carga las visitas, checklists y capacitaciones del mes para esa sede. El técnico solo agrega el análisis profesional. |
 | **Un técnico ve solo sus asignaciones** | Las visitas, los checklists pendientes y los informes se filtran automáticamente por `user_id`. |
 | **Branding por consultora** | Cada consultora puede definir logo y colores que se aplican a todos los PDFs generados. |
-| **Firma remota** | Si el responsable del cliente no está disponible al momento del cierre, el sistema envía un enlace por email para firma diferida. El informe queda en estado "pendiente de firma" hasta que se complete. |
+| **Firma remota** | Si el responsable del cliente no está disponible al momento del cierre, el sistema envía un enlace por email para firma diferida. |
+| **Alertas de Cierre** | El sistema dispara una alerta visual (banner) cada 30 minutos de visita activa para evitar que el técnico olvide cerrarla al salir de la planta. |
+| **Trazabilidad de Alternancia** | Los registros generados por un gestor en modo técnico se guardan bajo su `user_id` original, asegurando que la autoría de la inspección esté respaldada. |
 
 ---
 
-## 5. Módulos Eliminados en v1.0 (Deuda Técnica Pagada)
-
-Los siguientes módulos fueron removidos completamente para reducir la complejidad y enfocar el producto:
-
-| Módulo | Estado | Razón |
-|---|---|---|
-| **Entrega de EPP** | ❌ Eliminado | Delegado a la futura Tienda EPP |
-| **Gestión de Empleados** | ❌ Eliminado | Dependía del módulo EPP |
-| **Catálogo de EPP** | ❌ Eliminado | Delegado a la futura Tienda EPP |
-| **Alertas de Vencimiento EPP** | ❌ Eliminado | El job diario fue removido |
-| **QR de Trazabilidad EPP** | ❌ Eliminado | Form parte del roadmap de la Tienda EPP |
-| **Módulo de Riesgos (heatmap)** | ❌ Eliminado | Sin demanda en MVP |
-
-## 6. Ecosistema Futuro — Tienda EPP (Plataforma Separada)
+## 5. Ecosistema Futuro — Tienda EPP (Plataforma Separada)
 
 ### 6.1 Concepto
 
@@ -242,9 +237,9 @@ Cuando un consultor conecte su cuenta XamaSafe a la Tienda EPP:
 
 ---
 
-## 7. Implementaciones Futuras — Tecnología
+## 6. Implementaciones Futuras — Tecnología
 
-### 7.1 Certificación Blockchain de Constancias (Add-on Premium)
+### 6.1 Certificación Blockchain de Constancias (Add-on Premium)
 
 #### ¿Por qué blockchain?
 
@@ -306,18 +301,33 @@ ALTER TABLE consultoras
 | Red objetivo | Polygon (MATIC) — bajo costo |
 | Wallet management | A definir: billetera maestra XamaSafe o billetera propia por consultora |
 
-### 7.2 Notificaciones Push / Email para Hallazgos
+### 6.2 Geolocalización / GPS en Visitas
+
+#### Concepto
+Registro de coordenadas geográficas (Latitud y Longitud) al momento de **Iniciar** y **Finalizar** una visita técnica para auditoría y respaldo legal de presencia.
+
+#### Requerimientos
+1. **Seguridad**: Uso obligatorio de HTTPS en servidor para habilitar el sensor en navegadores.
+2. **Frontend**: Uso de *HTML5 Geolocation API* (estándar en navegadores móviles).
+3. **Librería de Visualización**: *Leaflet.js + OpenStreetMap* (renderizado ágil y 100% gratuito).
+
+#### Casos de Uso
+* **Check-In/Check-Out**: Guardar las coordenadas del técnico junto al timestamp.
+* **Geocerca (Geofencing)**: Alertar si el inicio de visita se realiza fuera del radio de la sede registrada de la empresa.
+* **Respaldo de Firma**: Las coordenadas se estampan en el footer de la constancia PDF como sello de transparencia.
+
+### 6.3 Notificaciones Push / Email para Hallazgos
 
 Sistema de alertas automáticas cuando un hallazgo crítico no tiene seguimiento en X días.
 
-### 7.3 App Mobile (React Native o Flutter)
+### 6.4 App Mobile (React Native o Flutter)
 
 Versión nativa para técnicos con capacidades offline: 
 - Completar checklists sin conexión (sincronización posterior)
 - Tomar fotos de hallazgos
 - Captura de firma en pantalla táctil
 
-### 7.4 Dashboard de Auditoría para el Cliente (Empresa)
+### 6.5 Dashboard de Auditoría para el Cliente (Empresa)
 
 Portal de solo lectura para que las empresas clientes vean:
 - Sus propios informes mensuales
@@ -326,7 +336,7 @@ Portal de solo lectura para que las empresas clientes vean:
 
 ---
 
-## 8. Checklist de Auditoría del Sistema (Estado Actual)
+## 7. Checklist de Auditoría del Sistema (Estado Actual)
 
 > Esta sección sirve para validar periódicamente la integridad del sistema.
 
@@ -337,26 +347,25 @@ Portal de solo lectura para que las empresas clientes vean:
 - [ ] No existen rutas huérfanas apuntando a controladores o componentes eliminados
 - [ ] Los redirects tras acciones (crear, finalizar) son correctos por rol
 
-### 8.2 Vistas y Componentes Livewire
+### 7.2 Vistas y Componentes Livewire
 
-- [ ] No hay referencias a variables EPP en ninguna vista Blade
-- [ ] No hay imports de modelos eliminados en ningún componente Livewire
-- [ ] Los modales de visita en progreso no tienen secciones EPP
+- [ ] Las vistas Blade respetan la estructura de componentes modular
+- [ ] No hay imports huerfanos en ningún componente Livewire
+- [ ] Los modales de visita en progreso presentan vistas completas
 - [ ] Branding (logo + colores) se aplica a todos los PDFs
 
-### 8.3 Base de Datos
+### 7.3 Base de Datos
 
-- [ ] Tablas EPP han sido eliminadas (verificar en la DB del servidor)
-- [ ] No hay claves foráneas rotas apuntando a tablas inexistentes
 - [ ] Las migraciones se ejecutan correctamente en entorno limpio (`migrate:fresh`)
+- [ ] No hay claves foráneas rotas apuntando a tablas inexistentes
 
-### 8.4 PDFs y Documentos
+### 7.4 PDFs y Documentos
 
 - [ ] PDF de Constancia de Visita se genera correctamente
 - [ ] PDF de Informe Maestro incluye visitas, checklists, capacitaciones, hallazgos e incidentes
 - [ ] PDFs de capacitaciones e inspecciones se generan con branding de la consultora
 
-### 8.5 Seguridad
+### 7.5 Seguridad
 
 - [ ] Los técnicos solo ven sus propios informes y visitas
 - [ ] Los gestores solo ven datos de su propia consultora
@@ -365,4 +374,4 @@ Portal de solo lectura para que las empresas clientes vean:
 
 ---
 
-*Documento actualizado: 2026-03-07 | XamaSafe v1.0 MVP*
+*Documento actualizado: 2026-03-15 | XamaSafe v1.0 MVP*

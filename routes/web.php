@@ -252,6 +252,9 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Logout
+    // Role Switch
+    Route::get('/switch-role/{role}', [\App\Http\Controllers\SwitchRoleController::class, 'switch'])->name('switch-role');
+
     // Logout
     Route::match(['get', 'post'], '/logout', function () {
         Auth::logout();

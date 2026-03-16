@@ -128,10 +128,13 @@ class User extends Authenticatable
 
     /**
      * Verifica si el usuario tiene uno o más roles (soporta nombres viejos y nuevos).
+     * Toma en cuenta el rol activo en la sesión si existe.
      */
     public function hasRole(string|array $roles): bool
     {
-        $userRoleNormalized = $this->normalizeRole($this->rol ?? '');
+        // Prioridad: Rol activo en la sesión (Modo Alternancia)
+        $sessionRole = session('active_role');
+        $userRoleNormalized = $sessionRole ? $this->normalizeRole($sessionRole) : $this->normalizeRole($this->rol ?? '');
 
         if (is_array($roles)) {
             foreach ($roles as $role) {

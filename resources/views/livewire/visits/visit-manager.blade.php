@@ -24,9 +24,10 @@
     <!-- Active Visit Banner (if logic fails redirect) -->
     <!-- This is handled in mount/boot but just in case -->
 
-    <!-- Past Visits Table -->
+    <!-- Past Visits List (Cards on Mobile, Table on Desktop) -->
     <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Desktop Table (visible from md) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="table-auto w-full">
                 <thead class="bg-ep-dark text-white border-b border-gray-200">
                     <tr>
@@ -88,7 +89,6 @@
                             <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
                                 <div class="flex items-center justify-end gap-2">
                                     @if($visit->status === 'completed' || $visit->status === 'signed')
-                                        <!-- Ver PDF -->
                                         <a href="{{ route('tecnico.visits.certificate.preview', $visit->id) }}" 
                                            target="_blank"
                                            class="text-gray-400 hover:text-blue-600 transition-colors p-1" 
@@ -98,7 +98,6 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
                                         </a>
-                                        <!-- Descargar PDF -->
                                         <a href="{{ route('tecnico.visits.certificate.download', $visit->id) }}" 
                                            class="text-gray-400 hover:text-green-600 transition-colors p-1" 
                                            title="Descargar Constancia PDF">
@@ -121,6 +120,76 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile View (Cards, visible strictly on < md) -->
+        <div class="md:hidden divide-y divide-gray-100">
+            @forelse ($pastVisits as $visit)
+                <div class="p-4 hover:bg-gray-50 transition-colors">
+                    <!-- Header: Date and Badge -->
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 font-bold">
+                                {{ $visit->visit_date->format('d') }}
+                            </div>
+                            <div class="ml-3">
+                                <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->translatedFormat('F, Y')) }}</div>
+                                <div class="text-xs text-gray-500">
+                                    {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold {{ $visit->status_badge }}">
+                            {{ $visit->status_label }}
+                        </span>
+                    </div>
+
+                    <!-- Body: Location -->
+                    <div class="mb-3 pl-13">
+                        <div class="text-sm font-semibold text-gray-900">{{ $visit->sede->nombre_sede }}</div>
+                        <div class="text-xs text-gray-500">{{ $visit->empresa->nombre }}</div>
+                    </div>
+
+                    <!-- Footer: Duration and Actions -->
+                    <div class="flex justify-between items-center pt-3 border-t border-gray-100">
+                        <div class="text-xs text-gray-600 flex items-center">
+                            @if($visit->end_time && $visit->start_time)
+                                @php
+                                    $duration = $visit->start_time->diffInMinutes($visit->end_time);
+                                    $hours = floor($duration / 60);
+                                    $minutes = $duration % 60;
+                                @endphp
+                                <svg class="w-3.5 h-3.5 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                @if($hours > 0)
+                                    <span>{{ $hours }}:{{ str_pad($minutes, 2, '0', STR_PAD_LEFT) }} hrs</span>
+                                @else
+                                    <span>{{ $minutes }} min</span>
+                                @endif
+                            @else
+                                <span class="text-gray-400">-</span>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-2">
+                            @if($visit->status === 'completed' || $visit->status === 'signed')
+                                <a href="{{ route('tecnico.visits.certificate.download', $visit->id) }}" 
+                                   class="border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    Descargar PDF
+                                </a>
+                            @else
+                                <span class="text-xs text-gray-400 italic">Inconclusa</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="p-4 text-center text-gray-500">
+                    No has realizado visitas aún.
+                </div>
+            @endforelse
         </div>
         
         <div class="px-4 py-3 border-t border-gray-200">

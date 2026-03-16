@@ -121,6 +121,7 @@ class VisitInProgress extends Component
             return redirect()->route('tecnico.visits.index');
         }
         
+        $this->dismissedAlertsCount = session()->get('dismissed_visit_alerts_' . $this->visit->id, 0);
         $this->loadChecklists();
         $this->calculateDuration();
     }
@@ -132,6 +133,9 @@ class VisitInProgress extends Component
             
             // Determinar en qué bloque de 30 minutos estamos
             $currentBlock = (int) floor($this->durationMinutes / self::ALERT_THRESHOLD);
+            
+            // Cargar desde sesión por si acaso (aunque ya se hace en mount)
+            $this->dismissedAlertsCount = session()->get('dismissed_visit_alerts_' . $this->visit->id, 0);
             
             // Mostrar alerta si estamos en un bloque > 0 y no ha sido descartado para este bloque
             if ($currentBlock > 0 && $currentBlock > $this->dismissedAlertsCount) {
@@ -146,6 +150,10 @@ class VisitInProgress extends Component
     {
         // Marcar el bloque actual como descartado
         $this->dismissedAlertsCount = (int) floor($this->durationMinutes / self::ALERT_THRESHOLD);
+        
+        // Guardar en sesión para persistir entre navegaciones
+        session()->put('dismissed_visit_alerts_' . $this->visit->id, $this->dismissedAlertsCount);
+        
         $this->isVisitaExcedida = false;
     }
 

@@ -7,24 +7,24 @@
     </div>
 
     {{-- KPIs Personales --}}
-    <div class="flex overflow-x-auto md:grid md:grid-cols-5 gap-4 mb-6 pb-2 snap-x">
-        <div class="bg-white rounded-lg shadow p-4 min-w-[140px] snap-start">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mb-6">
+        <div class="bg-white rounded-lg shadow p-4">
             <div class="text-sm text-gray-600">Total</div>
             <div class="text-2xl font-bold text-ep-dark">{{ $kpis['total'] }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4 min-w-[140px] snap-start">
+        <div class="bg-white rounded-lg shadow p-4">
             <div class="text-sm text-gray-600">Pendientes</div>
             <div class="text-2xl font-bold text-red-600">{{ $kpis['pendientes'] }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4 min-w-[140px] snap-start">
+        <div class="bg-white rounded-lg shadow p-4">
             <div class="text-sm text-gray-600">En Proceso</div>
             <div class="text-2xl font-bold text-yellow-600">{{ $kpis['en_proceso'] }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4 min-w-[140px] snap-start">
+        <div class="bg-white rounded-lg shadow p-4">
             <div class="text-sm text-gray-600">Resueltos</div>
             <div class="text-2xl font-bold text-green-600">{{ $kpis['resueltos'] }}</div>
         </div>
-        <div class="bg-white rounded-lg shadow p-4 min-w-[160px] snap-start">
+        <div class="bg-white rounded-lg shadow p-4 col-span-2 sm:col-span-1">
             <div class="text-sm text-gray-600">Críticos Abiertos</div>
             <div class="text-2xl font-bold text-orange-600">{{ $kpis['criticos_abiertos'] }}</div>
         </div>
@@ -73,24 +73,40 @@
                         </div>
                         <p class="text-gray-600 mb-3 text-sm sm:text-base">{{ Str::limit($hallazgo->descripcion, 150) }}</p>
                         <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mb-3">
-                            <span class="flex items-center gap-1">📍 {{ $hallazgo->sede->nombre_sede }}</span>
-                            <span class="flex items-center gap-1">📅 {{ $hallazgo->plazo_correccion?->format('d/m/Y') ?? '-' }}</span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                {{ $hallazgo->sede->nombre_sede }}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                {{ $hallazgo->plazo_correccion?->format('d/m/Y') ?? '-' }}
+                            </span>
                             @if($hallazgo->estaVencido())
-                                <span class="text-red-600 font-bold whitespace-nowrap">⚠️ VENCIDO</span>
+                                <span class="text-red-600 font-bold whitespace-nowrap flex items-center gap-1">
+                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    VENCIDO
+                                </span>
                             @endif
                         </div>
-                        <div class="flex flex-wrap gap-3 text-xs text-gray-600">
+                        <div class="flex flex-wrap gap-2 text-xs text-gray-600">
                             @if($hallazgo->seguimientos_count > 0)
-                                <span class="bg-gray-100 px-2 py-1 rounded">📝 {{ $hallazgo->seguimientos_count }} seguimientos</span>
+                                <span class="bg-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    {{ $hallazgo->seguimientos_count }} seguimientos
+                                </span>
                             @endif
                             @if($hallazgo->fotos_count > 0)
-                                <span class="bg-gray-100 px-2 py-1 rounded">📷 {{ $hallazgo->fotos_count }} fotos</span>
+                                <span class="bg-gray-100 px-2.5 py-1 rounded-md flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    {{ $hallazgo->fotos_count }} fotos
+                                </span>
                             @endif
                         </div>
                     </div>
                     <div class="w-full sm:w-auto mt-2 sm:mt-0 flex flex-col items-stretch">
                         <a href="{{ route('tecnico.hallazgos.show', $hallazgo) }}"
-                           class="w-full text-center px-4 py-3 sm:py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark font-medium transition-colors">
+                           class="w-full text-center px-4 py-3 sm:py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark font-medium transition-colors shadow-sm text-sm"
+                        >
                             Ver Detalle
                         </a>
                     </div>

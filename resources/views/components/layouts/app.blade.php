@@ -431,15 +431,43 @@
                 </h1>
                 
                 <!-- Right side -->
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3 md:space-x-6">
+                    <!-- Role Switcher -->
+                    @if(auth()->user()->rol === \App\Models\User::ROLE_GESTOR || auth()->user()->rol === \App\Models\User::ROLE_SUPER_ADMIN)
+                        <div class="flex items-center">
+                            @if(session('active_role') === \App\Models\User::ROLE_TECNICO)
+                                <a href="{{ route('switch-role', \App\Models\User::ROLE_GESTOR) }}" 
+                                   class="bg-ep-primary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md hover:brightness-110 transition-all flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                                    </svg>
+                                    <span class="hidden xs:inline">Modo</span> Gestor
+                                </a>
+                            @else
+                                <a href="{{ route('switch-role', \App\Models\User::ROLE_TECNICO) }}" 
+                                   class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-gray-300 transition-all flex items-center gap-1 border border-gray-300">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                                    </svg>
+                                    <span class="hidden xs:inline">Modo</span> Técnico
+                                </a>
+                            @endif
+                        </div>
+                    @endif
+
                     <!-- User info -->
                     <div class="flex items-center space-x-2">
-                        <div class="w-8 h-8 bg-ep-primary rounded-full flex items-center justify-center text-white text-sm font-medium">
+                        <div class="flex flex-col items-end mr-1">
+                            <span class="hidden md:block text-xs font-bold text-gray-800">
+                                {{ auth()->user()->nombres }}
+                            </span>
+                            <span class="hidden md:block text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                {{ session('active_role') === 'tecnico' ? 'Modo Técnico' : 'Gestor' }}
+                            </span>
+                        </div>
+                        <div class="w-9 h-9 bg-ep-primary rounded-full flex items-center justify-center text-white text-sm font-black shadow-sm ring-2 ring-white">
                             {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
                         </div>
-                        <span class="hidden md:block text-sm text-gray-700">
-                            {{ auth()->user()->nombres ?? 'Usuario' }}
-                        </span>
                     </div>
                 </div>
             </header>

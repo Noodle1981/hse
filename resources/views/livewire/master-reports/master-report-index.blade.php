@@ -18,7 +18,8 @@
         @endif
     </div>
 
-    <div class="overflow-x-auto bg-white rounded-lg shadow">
+    <!-- Desktop Table (visible from md) -->
+    <div class="hidden md:block overflow-x-auto bg-white rounded-lg shadow">
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
@@ -31,7 +32,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($reports as $report)
-                    <tr>
+                    <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $report->titulo }}</div>
                             <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y') }}</div>
@@ -65,6 +66,56 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile View (visible strictly on < md) -->
+    <div class="md:hidden flex flex-col gap-4">
+        @forelse($reports as $report)
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 hover:border-ep-primary/30 transition-all">
+                <!-- Header: Title & Period -->
+                <div class="flex justify-between items-start mb-3">
+                    <div class="max-w-[70%]">
+                        <div class="font-bold text-gray-900 leading-tight">
+                            {{ $report->titulo }}
+                        </div>
+                        <div class="text-xs text-gray-500 mt-0.5">
+                            {{ \Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y') }}
+                        </div>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase
+                        {{ $report->estado === 'finalizado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
+                        {{ $report->estado === 'finalizado' ? 'Finalizado' : 'Redacción' }}
+                    </span>
+                </div>
+
+                <!-- Body: Sede and Técnico -->
+                <div class="mb-4">
+                    <div class="text-sm font-semibold text-ep-primary">Sede: {{ $report->sede->nombre_sede }}</div>
+                    @if(auth()->user()->isAdmin())
+                        <div class="text-xs text-gray-500 mt-1">Técnico: {{ $report->tecnico->nombres }} {{ $report->tecnico->apellidos }}</div>
+                    @endif
+                </div>
+
+                <!-- Footer: Actions -->
+                <div class="flex justify-end items-center gap-3 pt-3 border-t border-gray-100">
+                    @if($report->estado === 'finalizado')
+                        <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf' : 'tecnico.master-reports.pdf', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 font-bold text-xs flex items-center gap-1">
+                            Ver PDF
+                        </a>
+                    @endif
+                    
+                    @if(auth()->user()->isTechnician() && $report->estado !== 'finalizado')
+                        <a href="{{ route('tecnico.master-reports.edit', $report->id) }}" class="text-indigo-600 hover:text-indigo-900 font-bold text-xs flex items-center gap-1">
+                            Redactar
+                        </a>
+                    @endif
+                </div>
+            </div>
+        @empty
+            <div class="p-8 text-center bg-white rounded-xl border border-gray-200">
+                <p class="text-sm text-gray-500">No se encontraron informes.</p>
+            </div>
+        @endforelse
     </div>
 
     <div class="mt-4">
