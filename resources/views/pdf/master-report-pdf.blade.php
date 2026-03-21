@@ -294,6 +294,16 @@
                                         <td style="border: none; border-bottom: 1px solid #ebedf3; padding: 10px;">
                                             <div style="font-weight: bold;">{{ $hal->titulo }} <span class="badge {{ $hal->criticidad == 'Alta' ? 'badge-danger' : 'badge-warning' }}">{{ $hal->criticidad }}</span></div>
                                             <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $hal->descripcion }}</div>
+                                            @if(count($hal->fotos ?? []) > 0)
+                                                <div style="margin-top: 5px;">
+                                                    @foreach($hal->fotos as $foto)
+                                                        @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
+                                                        @if(file_exists($path))
+                                                            <img src="{{ $path }}" style="width: 40px; height: 40px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -309,6 +319,16 @@
                                             <div style="font-weight: bold;">{{ $inc->tipo_evento }}</div>
                                             <div style="color: #f64e60; font-size: 8px; margin-top: 2px;">FECHA: {{ \Carbon\Carbon::parse($inc->fecha_hora)->format('d/m/Y') }}</div>
                                             <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $inc->descripcion }}</div>
+                                            @if(count($inc->fotos ?? []) > 0)
+                                                <div style="margin-top: 5px;">
+                                                    @foreach($inc->fotos as $foto)
+                                                        @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
+                                                        @if(file_exists($path))
+                                                            <img src="{{ $path }}" style="width: 40px; height: 40px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
