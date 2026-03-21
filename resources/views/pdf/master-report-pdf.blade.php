@@ -299,7 +299,7 @@
                                                     @foreach($hal->fotos as $foto)
                                                         @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
                                                         @if(file_exists($path))
-                                                            <img src="{{ $path }}" style="width: 120px; height: 120px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                            <img src="{{ $path }}" style="width: 80px; height: 80px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
                                                         @endif
                                                     @endforeach
                                                 </div>
@@ -324,7 +324,7 @@
                                                     @foreach($inc->fotos as $foto)
                                                         @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
                                                         @if(file_exists($path))
-                                                            <img src="{{ $path }}" style="width: 120px; height: 120px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                            <img src="{{ $path }}" style="width: 80px; height: 80px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
                                                         @endif
                                                     @endforeach
                                                 </div>
