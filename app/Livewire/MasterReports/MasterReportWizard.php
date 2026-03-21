@@ -66,7 +66,12 @@ class MasterReportWizard extends Component
         if (!$sede) return;
 
         $visits = $sede->visitCertificates()
-            ->with(['checklistCompletions.assignment.checklist', 'trainings', 'hallazgos', 'incidentes'])
+            ->with([
+                'checklistCompletions.assignment.checklist', 
+                'trainings', 
+                'hallazgos.fotos', 
+                'incidentes.fotos'
+            ])
             ->whereBetween('visit_date', [$startDate, $endDate])
             ->whereIn('status', ['completed', 'signed'])
             ->get();

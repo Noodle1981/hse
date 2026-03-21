@@ -37,7 +37,7 @@
         .logo { max-width: 250px; margin-bottom: 30px; }
         .cover h1 { 
             font-size: 36px; 
-            color: #F69239; 
+            color: {{ $branding['primary'] }}; 
             text-transform: uppercase; 
             margin: 0; 
             letter-spacing: 2px; 
@@ -65,7 +65,7 @@
         }
 
         /* Header y Footer */
-        .header { border-bottom: 2px solid #F69239; margin-bottom: 20px; padding-bottom: 10px; width: 100%; }
+        .header { border-bottom: 2px solid {{ $branding['primary'] }}; margin-bottom: 20px; padding-bottom: 10px; width: 100%; }
         .header-title { font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .header-meta { float: right; font-size: 9px; color: #7e8299; }
         
@@ -87,7 +87,7 @@
         .section-header { 
             background: #f4f4f7; 
             padding: 8px 12px; 
-            border-left: 4px solid #F69239; 
+            border-left: 4px solid {{ $branding['primary'] }}; 
             margin-bottom: 10px; 
         }
         .section-header h3 { margin: 0; font-size: 10px; text-transform: uppercase; color: #1e1e2d; }
@@ -102,7 +102,7 @@
             text-align: center; 
             width: 25%;
         }
-        .kpi-val { font-size: 20px; font-weight: bold; color: #F69239; display: block; }
+        .kpi-val { font-size: 20px; font-weight: bold; color: {{ $branding['primary'] }}; display: block; }
         .kpi-label { font-size: 7px; text-transform: uppercase; color: #7e8299; font-weight: bold; }
 
         /* Tablas */
@@ -138,11 +138,10 @@
     {{-- 1. PORTADA --}}
     <div class="cover">
         <div class="cover-content">
-            @php $logoPath = public_path('images/logo_ep_viejo.jpg'); @endphp
-            @if(file_exists($logoPath))
-                <img src="{{ $logoPath }}" class="logo">
+            @if(file_exists($branding['logo'] ?? ''))
+                <img src="{{ $branding['logo'] }}" class="logo">
             @else
-                <div style="font-size: 40px; font-weight: bold; color: #F69239; margin-bottom: 40px;">EP SALUD Y SEGURIDAD</div>
+                <div style="font-size: 40px; font-weight: bold; color: {{ $branding['primary'] }}; margin-bottom: 40px;">{{ $branding['name'] ?? 'EP SALUD Y SEGURIDAD' }}</div>
             @endif
             
             <h1>INFORME DE GESTIÓN</h1>
@@ -331,8 +330,8 @@
 
         {{-- SECCIÓN 5: CONCLUSIÓN --}}
         <div class="section" style="margin-top: 50px;">
-            <div style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; border-top: 10px solid #F69239; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <h3 style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; color: #F69239; letter-spacing: 1px;">5. Resumen Ejecutivo Final</h3>
+            <div style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; border-top: 10px solid {{ $branding['primary'] }}; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; color: {{ $branding['primary'] }}; letter-spacing: 1px;">5. Resumen Ejecutivo Final</h3>
                 <div style="font-size: 12px; line-height: 1.8; color: #e2e8f0;">
                     {{ $report->resumen_ejecutivo ?: 'No se registró una conclusión final detallada para este periodo.' }}
                 </div>

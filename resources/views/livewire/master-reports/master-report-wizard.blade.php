@@ -168,7 +168,8 @@
                         {{-- Hallazgos --}}
                         <div class="bg-white p-4 rounded-lg border border-l-4 border-l-yellow-400">
                             <h5 class="font-bold text-gray-800 uppercase mb-3 text-sm">Hallazgos Detectados ({{ count($monthlyData['hallazgos'] ?? []) }})</h5>
-                            <ul class="space-y-3">
+                            <div class="max-h-96 overflow-y-auto pr-2 space-y-3">
+                                <ul class="space-y-3">
                                 @forelse($monthlyData['hallazgos'] ?? [] as $hallazgo)
                                     <li class="text-xs border-b pb-2">
                                         <div class="flex justify-between font-bold">
@@ -176,6 +177,13 @@
                                             <span class="px-1 rounded bg-yellow-100 text-yellow-800">{{ $hallazgo->criticidad }}</span>
                                         </div>
                                         <div class="text-gray-600 mt-1">{{ $hallazgo->descripcion }}</div>
+                                        @if(count($hallazgo->fotos ?? []) > 0)
+                                            <div class="flex overflow-x-auto gap-2 mt-2 pb-1 scrollbar-thin">
+                                                @foreach($hallazgo->fotos as $foto)
+                                                    <img src="{{ $foto->url }}" class="w-16 h-16 flex-none object-cover rounded shadow-md hover:scale-105 transition-transform duration-200 cursor-pointer" alt="Evidencia">
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </li>
                                 @empty
                                     <li class="text-xs text-gray-400">Sin hallazgos reportados en este periodo.</li>
@@ -186,7 +194,8 @@
                         {{-- Incidentes --}}
                         <div class="bg-white p-4 rounded-lg border border-l-4 border-l-red-500">
                             <h5 class="font-bold text-gray-800 uppercase mb-3 text-sm">Incidentes Registrados ({{ count($monthlyData['incidentes'] ?? []) }})</h5>
-                            <ul class="space-y-3">
+                            <div class="max-h-96 overflow-y-auto pr-2 space-y-3">
+                                <ul class="space-y-3">
                                 @forelse($monthlyData['incidentes'] ?? [] as $incidente)
                                     <li class="text-xs border-b pb-2">
                                         <div class="flex justify-between font-bold">
@@ -194,11 +203,19 @@
                                             <span class="text-red-600">{{ \Carbon\Carbon::parse($incidente->fecha_hora)->format('d/m/y') }}</span>
                                         </div>
                                         <div class="text-gray-600 mt-1">{{ $incidente->descripcion }}</div>
+                                        @if(count($incidente->fotos ?? []) > 0)
+                                            <div class="flex overflow-x-auto gap-2 mt-2 pb-1 scrollbar-thin">
+                                                @foreach($incidente->fotos as $foto)
+                                                    <img src="{{ $foto->getUrl() }}" class="w-16 h-16 flex-none object-cover rounded shadow-md hover:scale-105 transition-transform duration-200 cursor-pointer" alt="Evidencia">
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </li>
                                 @empty
                                     <li class="text-xs text-gray-400">Sin incidentes reportados en este periodo.</li>
                                 @endforelse
                             </ul>
+                            </div>
                         </div>
                     </div>
                     <div class="mt-4 pt-4 border-t border-gray-100">

@@ -47,7 +47,12 @@ class MasterReportController extends Controller
         $endDate = Carbon::parse($report->periodo . '-01')->endOfMonth();
 
         $visits = $report->sede->visitCertificates()
-            ->with(['checklistCompletions.assignment.checklist', 'trainings', 'hallazgos', 'incidentes'])
+            ->with([
+                'checklistCompletions.assignment.checklist', 
+                'trainings', 
+                'hallazgos.fotos', 
+                'incidentes.fotos'
+            ])
             ->whereBetween('visit_date', [$startDate, $endDate])
             ->whereIn('status', ['completed', 'signed'])
             ->get();
