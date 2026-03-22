@@ -71,19 +71,30 @@ composer install
 npm install
 
 # 4. Copiar archivo de configuración
+# Linux/Mac/Git Bash: cp .env.example .env
+# Windows (cmd): copy .env.example .env
 cp .env.example .env
 
 # 5. Generar app key
 php artisan key:generate
 
 # 6. Crear base de datos SQLite
+# Windows (PowerShell): New-Item database/database.sqlite -ItemType File
+# Linux/Mac/Git Bash: touch database/database.sqlite
 touch database/database.sqlite
 
-# 7. Ejecutar migraciones y seeders
+# 7. Crear enlace simbólico de almacenamiento (Requerido para fotos/firmas)
+php artisan storage:link
+
+# 8. Ejecutar migraciones y seeders
 php artisan migrate:fresh --seed
 php artisan db:seed --class=DemoChecklistsSeeder
 
-# 8. Iniciar servidor
+# 9. Compilar assets (Vite)
+npm run build
+# O para desarrollo continuo: npm run dev
+
+# 10. Iniciar servidor
 php artisan serve
 ```
 
