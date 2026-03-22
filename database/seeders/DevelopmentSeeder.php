@@ -9,7 +9,7 @@ use App\Models\Consultora;
 use App\Models\Empresa;
 use App\Models\Sede;
 use App\Models\Provincia;
-use App\Models\Employee;
+// use App\Models\Employee;
 
 class DevelopmentSeeder extends Seeder
 {
@@ -114,10 +114,11 @@ class DevelopmentSeeder extends Seeder
         $gestor->sedes()->sync([$sede1->id, $sede2->id]);
         $tecnico->sedes()->sync([$sede1->id, $sede2->id]);
 
-        // 5. Empleados de prueba
+        // 5. Empleados de prueba (Comentado en version-minina ya que el modelo fue eliminado)
+        /*
         $empleados = [
             ['name' => 'Juan', 'last_name' => 'Perez', 'dni' => '20111222', 'puesto' => 'Oficial Albañil', 'sede_id' => $sede1->id],
-            ['name' => 'Luis', 'last_name' => 'Gomez', 'dni' => '25333444', 'puesto' => 'Ayudante', 'sede_id' => $sede1->id],
+            ['name' => 'Luis', 'last_name' => 'Gomez', 'dni' => '253103444', 'puesto' => 'Ayudante', 'sede_id' => $sede1->id],
             ['name' => 'Ana', 'last_name' => 'Lopez', 'dni' => '30555666', 'puesto' => 'Soldadora', 'sede_id' => $sede2->id],
             ['name' => 'Marta', 'last_name' => 'Rodriguez', 'dni' => '35777888', 'puesto' => 'Operaria de Grúa', 'sede_id' => $sede2->id],
             ['name' => 'Ricardo', 'last_name' => 'Sanchez', 'dni' => '40999000', 'puesto' => 'Logística', 'sede_id' => $sede2->id],
@@ -136,6 +137,7 @@ class DevelopmentSeeder extends Seeder
                 ]
             );
         }
+        */
 
     }
 }

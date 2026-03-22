@@ -86,15 +86,17 @@ touch database/database.sqlite
 # 7. Crear enlace simbólico de almacenamiento (Requerido para fotos/firmas)
 php artisan storage:link
 
-# 8. Ejecutar migraciones y seeders
+# 8. Ejecutar migraciones y seeders base
 php artisan migrate:fresh --seed
-php artisan db:seed --class=DemoChecklistsSeeder
 
-# 9. Compilar assets (Vite)
+# 9. Importar Checklists de ejemplo (Requerido)
+php artisan db:seed --class=ChecklistsFromJsonSeeder
+
+# 10. Compilar assets (Vite)
 npm run build
 # O para desarrollo continuo: npm run dev
 
-# 10. Iniciar servidor
+# 11. Iniciar servidor
 php artisan serve
 ```
 

@@ -39,8 +39,8 @@ class ChecklistsFromJsonSeeder extends Seeder
                 'description'    => $data['description'],
                 'registry_code'  => $data['registry_code'],
                 'is_active'      => $data['is_active'] ?? true,
-                'category_id'    => $data['category_id'],
-                'subcategory_id' => $data['subcategory_id'],
+                'category_id'    => null, // Temporal para version-minina
+                'subcategory_id' => null, // Temporal para version-minina
             ]);
 
             // Crear preguntas sin sección
