@@ -74,7 +74,6 @@
                             <thead class="bg-gray-50 uppercase text-xs font-bold text-gray-600">
                                 <tr>
                                     <th class="px-4 py-2 text-left">Fecha</th>
-                                    <th class="px-4 py-2 text-left">Referencia / Código</th>
                                     <th class="px-4 py-2 text-left">Técnico</th>
                                     <th class="px-4 py-2 text-left">Observaciones de Visita</th>
                                 </tr>
@@ -83,8 +82,8 @@
                                 @forelse($monthlyData['visits'] ?? [] as $visit)
                                     <tr>
                                         <td class="px-4 py-3 font-medium">{{ $visit->visit_date->format('d/m/Y') }}</td>
-                                        <td class="px-4 py-3 text-gray-500">#{{ $visit->id }} - {{ $visit->code }}</td>
                                         <td class="px-4 py-3">{{ $visit->user->nombres }} {{ $visit->user->apellidos }}</td>
+
                                         <td class="px-4 py-3 truncate max-w-xs">{{ $visit->general_observations }}</td>
                                     </tr>
                                 @empty
@@ -197,12 +196,20 @@
                             <div class="max-h-96 overflow-y-auto pr-2 space-y-3">
                                 <ul class="space-y-3">
                                 @forelse($monthlyData['incidentes'] ?? [] as $incidente)
-                                    <li class="text-xs border-b pb-2">
+                                    <li class="text-xs border-b pb-2 space-y-1">
                                         <div class="flex justify-between font-bold">
-                                            <span>{{ $incidente->tipo_evento }}</span>
-                                            <span class="text-red-600">{{ \Carbon\Carbon::parse($incidente->fecha_hora)->format('d/m/y') }}</span>
+                                            <span class="uppercase">{{ str_replace('_', ' ', $incidente->tipo) }}</span>
+                                            <span class="text-red-600">{{ $incidente->fecha_ocurrencia->format('d/m/Y') }}</span>
                                         </div>
-                                        <div class="text-gray-600 mt-1">{{ $incidente->descripcion }}</div>
+                                        <div class="text-gray-600">{{ $incidente->descripcion }}</div>
+                                        <div class="flex gap-2 text-xxs mt-1 items-center">
+                                            <span class="font-medium text-gray-400">Afectados: {{ $incidente->personas_afectadas }}</span>
+                                            <span class="font-medium text-gray-400">|</span>
+                                            <span class="font-medium text-gray-400">Días Perdidos: {{ $incidente->dias_perdidos ?? 0 }}</span>
+                                            <span class="ml-auto px-1.5 py-0.5 rounded text-white font-bold {{ $incidente->estado === 'cerrado' ? 'bg-green-600' : 'bg-yellow-500' }}">
+                                                {{ ucfirst($incidente->estado ?? 'pendiente') }}
+                                            </span>
+                                        </div>
                                         @if(count($incidente->fotos ?? []) > 0)
                                             <div class="flex overflow-x-auto gap-2 mt-2 pb-1 scrollbar-thin">
                                                 @foreach($incidente->fotos as $foto)
@@ -234,7 +241,105 @@
                     @error('resumen_ejecutivo') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
 
+                {{-- SECCIÓN 6: FIRMA DEL PROFESIONAL --}}
+                <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-6" 
+                     x-data="{ 
+                        canvas: null,
+                        ctx: null,
+                        isDrawing: false,
+                        lastX: 0,
+                        lastY: 0,
+                        hasSignature: false,
+                        init() {
+                            this.$nextTick(() => {
+                                if (this.$refs.signatureCanvas) {
+                                    this.canvas = this.$refs.signatureCanvas;
+                                    this.ctx = this.canvas.getContext('2d');
+                                    const rect = this.canvas.getBoundingClientRect();
+                                    this.canvas.width = rect.width;
+                                    this.canvas.height = rect.height;
+                                    this.ctx.strokeStyle = '#EA580C'; 
+                                    this.ctx.lineWidth = 2;
+                                    this.ctx.lineCap = 'round';
+                                    this.ctx.lineJoin = 'round';
+                                }
+                            });
+                        },
+                        startDrawing(e) {
+                            this.isDrawing = true;
+                            const rect = this.canvas.getBoundingClientRect();
+                            this.lastX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                            this.lastY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                        },
+                        draw(e) {
+                            if (!this.isDrawing) return;
+                            const rect = this.canvas.getBoundingClientRect();
+                            const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+                            const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+                            this.ctx.beginPath();
+                            this.ctx.moveTo(this.lastX, this.lastY);
+                            this.ctx.lineTo(x, y);
+                            this.ctx.stroke();
+                            this.lastX = x;
+                            this.lastY = y;
+                            this.hasSignature = true;
+                        },
+                        stopDrawing() {
+                            this.isDrawing = false;
+                            if (this.hasSignature) {
+                                const signatureData = this.canvas.toDataURL('image/png');
+                                @this.set('signature', signatureData);
+                            }
+                        },
+                        clearSignature() {
+                            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                            this.hasSignature = false;
+                            @this.set('signature', null);
+                        }
+                     }"
+                     @mouseup="stopDrawing()"
+                     @mouseleave="stopDrawing()"
+                     @touchend="stopDrawing()">
+                    <div class="flex items-center mb-4 pb-2 border-b border-orange-100">
+                        <div class="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center text-white font-bold mr-3 text-sm">6</div>
+                        <h4 class="text-lg font-bold text-gray-800 uppercase tracking-tight">Firma del Técnico Responsable</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                        <div>
+                            @if(auth()->user()->firma)
+                                <div class="mb-4">
+                                    <span class="block text-sm font-medium text-gray-600 mb-2">Firma Guardada en Perfil:</span>
+                                    <img src="{{ asset('storage/' . auth()->user()->firma) }}" class="h-24 bg-gray-50 p-2 border rounded-lg shadow-sm" alt="Firma Perfil">
+                                </div>
+                            @endif
+                            <p class="text-sm text-gray-500">
+                                Si deseas actualizar la firma para este informe en particular, dibújala en el recuadro adjunto. De lo contrario, se utilizará la firma de tu perfil o el nombre predeterminado.
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <div wire:ignore class="relative bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl overflow-hidden touch-none h-40">
+                                <canvas x-ref="signatureCanvas" 
+                                        @mousedown="startDrawing($event)"
+                                        @mousemove="draw($event)"
+                                        @touchstart="startDrawing($event)"
+                                        @touchmove="draw($event)"
+                                        class="w-full h-full cursor-crosshair"></canvas>
+                                <button type="button" @click="clearSignature()" 
+                                        class="absolute top-2 right-2 p-2 bg-white/90 backdrop-blur shadow-sm rounded-lg text-gray-500 hover:text-red-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Lienzo táctil. Al dibujar se guardará para el reporte.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="flex justify-end pt-10 border-t-2 border-gray-100 pb-12">
+
                     <button type="submit" class="bg-ep-primary text-white px-12 py-4 rounded-xl font-black text-lg hover:bg-ep-primary-dark shadow-2xl transform hover:-translate-y-1 transition-all duration-300 flex items-center">
                         <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         GENERAR INFORME

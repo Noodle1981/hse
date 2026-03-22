@@ -52,7 +52,7 @@
                         <th class="px-4 py-3 whitespace-nowrap text-left">Sede / Cliente</th>
                         <th class="px-4 py-3 whitespace-nowrap text-left">Duración</th>
                         <th class="px-4 py-3 whitespace-nowrap text-center">Estado</th>
-                        <th class="px-4 py-3 whitespace-nowrap text-right">Acciones</th>
+                        <th class="px-4 py-3 whitespace-nowrap text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class="text-sm divide-y divide-gray-200">
@@ -81,7 +81,24 @@
                             </td>
                             <td class="px-4 py-3 text-gray-500">
                                 @if($visit->end_time && $visit->start_time)
-                                    {{ $visit->start_time->diffInMinutes($visit->end_time) }} min
+                                    @php
+                                        $mins = $visit->start_time->diffInMinutes($visit->end_time);
+                                        $hours = floor($mins / 60);
+                                        $remainingMins = $mins % 60;
+                                        $isExcessive = $hours >= 8;
+                                    @endphp
+                                    @if($isExcessive)
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-700 border border-red-200" title="Posible olvido de cierre">
+                                            <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            {{ $hours }}h {{ $remainingMins }}m
+                                        </span>
+                                    @else
+                                        @if($hours > 0)
+                                            {{ $hours }}h {{ $remainingMins }}m
+                                        @else
+                                            {{ $remainingMins }} min
+                                        @endif
+                                    @endif
                                 @else
                                     <span class="text-blue-600">En progreso</span>
                                 @endif
@@ -105,7 +122,8 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3 text-right">
+                            <td class="px-4 py-3 text-center">
+                                <div class="flex justify-center items-center space-x-2">
                                 @if($visit->status === 'in_progress')
                                     <a href="{{ route('gestor.visits.in-progress', $visit) }}" 
                                        class="btn-xs bg-blue-500 hover:bg-blue-600 text-white">
@@ -139,7 +157,7 @@
                                     @endif
                                 @endif
 
-                                @if(strtolower(auth()->user()->rol) === 'administrador')
+                                @if(auth()->user()->isAdmin())
                                     <button wire:click="editVisit({{ $visit->id }})" 
                                             class="ml-2 btn-xs bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200"
                                             title="Editar Tiempos">
@@ -148,6 +166,7 @@
                                         </svg>
                                     </button>
                                 @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -165,8 +184,6 @@
             {{ $visits->links() }}
         </div>
     </div>
-
-</div>
 
     <!-- Modal Editar Visita (Admin) -->
     @if($showEditModal)

@@ -50,7 +50,7 @@
             <select wire:model.live="filterSede" class="px-4 py-2 border border-gray-300 rounded-lg">
                 <option value="">Todas las sedes</option>
                 @foreach($sedes as $sede)
-                    <option value="{{ $sede->id }}">{{ $sede->nombre }}</option>
+                    <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
                 @endforeach
             </select>
         </div>
@@ -72,6 +72,7 @@
                         <th class="px-4 py-3 text-left">Descripción</th>
                         <th class="px-4 py-3 text-center">Afectados</th>
                         <th class="px-4 py-3 text-center">Días Perdidos</th>
+                        <th class="px-4 py-3 text-center">Estado Licencias</th>
                         <th class="px-4 py-3 text-center">Acciones</th>
                     </tr>
                 </thead>
@@ -98,12 +99,24 @@
                             </td>
                             <td class="px-4 py-3">
                                 <div class="max-w-xs truncate">{{ $incidente->descripcion }}</div>
-                                <div class="text-xs text-gray-500">{{ $incidente->sede->nombre }}</div>
+                                <div class="text-xs text-gray-500">{{ $incidente->sede->nombre_sede }}</div>
                             </td>
                             <td class="px-4 py-3 text-center">{{ $incidente->personas_afectadas }}</td>
                             <td class="px-4 py-3 text-center">{{ $incidente->dias_perdidos ?? '-' }}</td>
                             <td class="px-4 py-3 text-center">
+                                <span class="px-2 py-1 rounded text-xs font-semibold
+                                    @if($incidente->estado === 'cerrado') bg-green-100 text-green-800
+                                    @else bg-yellow-100 text-yellow-800 @endif">
+                                    {{ ucfirst($incidente->estado ?? 'pendiente') }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
                                 <div class="flex items-center justify-center space-x-2">
+                                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.incidentes.show', $incidente) : route('tecnico.incidentes.show', $incidente) }}" 
+                                       class="p-1 px-2 bg-green-50 text-green-600 rounded hover:bg-green-100 text-xs font-bold"
+                                       title="Ver Detalle">
+                                        VER
+                                    </a>
                                     <a href="{{ auth()->user()->isAdmin() ? route('gestor.incidentes.pdf.preview', $incidente) : route('tecnico.incidentes.pdf.preview', $incidente) }}" 
                                        target="_blank"
                                        class="p-1 px-2 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 text-xs font-bold"

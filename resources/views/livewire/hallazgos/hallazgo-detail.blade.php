@@ -4,8 +4,8 @@
         <div class="flex justify-between items-start">
             <div>
                 <div class="flex items-center gap-3 mb-2">
-                    <a href="{{ auth()->user()->rol === 'Administrador' ? route('hallazgos.index') : route('mis-hallazgos') }}" 
-                       class="text-gray-600 hover:text-gray-900">
+                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.index') : route('tecnico.hallazgos.index') }}" 
+                       class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
                         ← Volver
                     </a>
                 </div>
@@ -13,15 +13,15 @@
                 <p class="text-gray-600 mt-2">ID Global #{{ $hallazgo->id }} • Creado el {{ $hallazgo->created_at->format('d/m/Y H:i') }} por {{ $hallazgo->user->nombres }}</p>
             </div>
             <div class="flex gap-2">
-                <a href="{{ route('hallazgos.pdf', $hallazgo) }}" 
-                   class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors flex items-center gap-2">
+                <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.pdf', $hallazgo) : route('tecnico.hallazgos.pdf', $hallazgo) }}" 
+                    class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                     </svg>
                     Descargar PDF
                 </a>
-                @if(auth()->user()->rol === 'Administrador')
-                    <a href="{{ route('hallazgos.edit', $hallazgo) }}" 
+                @if(auth()->user()->isAdmin())
+                    <a href="{{ route('gestor.hallazgos.edit', $hallazgo) }}" 
                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
                         Editar
                     </a>
@@ -83,7 +83,7 @@
                     @if($hallazgo->ubicacion_especifica)
                     <div class="col-span-2">
                         <label class="text-sm font-medium text-gray-600">Ubicación Específica</label>
-                        <p class="mt-1 text-gray-900">📍 {{ $hallazgo->ubicacion_especifica }}</p>
+                        <p class="mt-1 text-gray-900">{{ $hallazgo->ubicacion_especifica }}</p>
                     </div>
                     @endif
 
@@ -179,7 +179,7 @@
             </div>
 
             {{-- Galería de Fotos --}}
-            <div class="bg-white rounded-lg shadow p-6">
+            <div class="bg-white rounded-lg shadow p-6" x-data="{ openModal: false, modalImage: '', modalDesc: '' }">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-bold text-ep-dark">Evidencia Fotográfica</h2>
                     <button wire:click="$set('showFotoForm', true)"
@@ -230,7 +230,8 @@
                         <div class="relative group border rounded-lg overflow-hidden bg-gray-100">
                             <img src="{{ $foto->url }}" 
                                  alt="{{ $foto->descripcion }}"
-                                 class="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105">
+                                 @click="openModal = true; modalImage = '{{ $foto->url }}'; modalDesc = '{{ $foto->descripcion }}'"
+                                 class="w-full h-48 object-cover cursor-pointer transition-transform duration-300 group-hover:scale-105">
                             <div class="absolute top-2 left-2">
                                 <span class="px-2 py-1 bg-black bg-opacity-70 text-white text-[10px] uppercase font-bold rounded">
                                     {{ ucfirst($foto->tipo) }}
@@ -254,6 +255,43 @@
                             No hay fotos cargadas
                         </div>
                     @endforelse
+                </div>
+
+                <!-- Modal de Previsualización -->
+                <div x-show="openModal" 
+                     class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-80 flex items-center justify-center p-4"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     style="display: none;"
+                     @keydown.escape.window="openModal = false">
+                    <div class="relative max-w-4xl max-h-[90vh] bg-white rounded-lg shadow-2xl overflow-hidden flex flex-col" @click.away="openModal = false">
+                        <!-- Botón Cerrar -->
+                        <button @click="openModal = false" class="absolute top-3 right-3 text-gray-500 hover:text-gray-800 bg-white rounded-full p-1.5 shadow-md z-10 transition-transform hover:scale-105">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        
+                        <!-- Imagen -->
+                        <div class="overflow-hidden flex items-center justify-center bg-gray-100 flex-1">
+                            <img :src="modalImage" class="max-w-full max-h-[70vh] object-contain">
+                        </div>
+                        
+                        <!-- Pie de Modal (Descripción y Descarga) -->
+                        <div class="p-4 bg-white border-t border-gray-200 flex justify-between items-center">
+                            <p class="text-sm text-gray-700 flex-1 mr-4 font-medium" x-text="modalDesc || 'Sin descripción'"></p>
+                            <a :href="modalImage" download class="flex-shrink-0 px-4 py-2 bg-ep-primary hover:bg-ep-primary-dark text-white text-sm font-semibold rounded-lg flex items-center gap-2 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Descargar
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

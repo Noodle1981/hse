@@ -35,33 +35,52 @@
                             <label class="relative cursor-pointer">
                                 <input type="radio" wire:model="tipo_incidente" value="accidente" class="peer sr-only">
                                 <div class="p-3 border-2 rounded-xl text-center transition-all peer-checked:border-red-500 peer-checked:bg-red-50 hover:bg-gray-50">
-                                    <div class="text-xl mb-1">🤕</div>
+                                    <div class="mb-1 text-red-600">
+                                        <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    </div>
                                     <div class="font-semibold text-sm">Accidente</div>
                                 </div>
                             </label>
                             <label class="relative cursor-pointer">
                                 <input type="radio" wire:model="tipo_incidente" value="casi_accidente" class="peer sr-only">
                                 <div class="p-3 border-2 rounded-xl text-center transition-all peer-checked:border-orange-500 peer-checked:bg-orange-50 hover:bg-gray-50">
-                                    <div class="text-xl mb-1">⚠️</div>
+                                    <div class="mb-1 text-orange-500">
+                                        <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    </div>
                                     <div class="font-semibold text-sm">Casi Accidente</div>
                                 </div>
                             </label>
                             <label class="relative cursor-pointer">
                                 <input type="radio" wire:model="tipo_incidente" value="condicion_insegura" class="peer sr-only">
                                 <div class="p-3 border-2 rounded-xl text-center transition-all peer-checked:border-yellow-500 peer-checked:bg-yellow-50 hover:bg-gray-50">
-                                    <div class="text-xl mb-1">⚡</div>
+                                    <div class="mb-1 text-yellow-500">
+                                        <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                    </div>
                                     <div class="font-semibold text-sm">Condición Insegura</div>
                                 </div>
                             </label>
                             <label class="relative cursor-pointer">
                                 <input type="radio" wire:model="tipo_incidente" value="acto_inseguro" class="peer sr-only">
                                 <div class="p-3 border-2 rounded-xl text-center transition-all peer-checked:border-purple-500 peer-checked:bg-purple-50 hover:bg-gray-50">
-                                    <div class="text-xl mb-1">🚫</div>
+                                    <div class="mb-1 text-purple-500">
+                                        <svg class="w-6 h-6 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                                    </div>
                                     <div class="font-semibold text-sm">Acto Inseguro</div>
                                 </div>
                             </label>
                         </div>
                         @error('tipo_incidente') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Personas Afectadas -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Personas Afectadas <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" min="0" wire:model="personas_afectadas" 
+                               class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                               placeholder="0">
+                        @error('personas_afectadas') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                     </div>
 
                     <!-- Descripción -->
@@ -84,6 +103,18 @@
                                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
                                placeholder="Ej: Área de producción, línea 3, estación de soldadura">
                         @error('ubicacion_especifica') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Medidas Tomadas -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">
+                            Medidas Tomadas / Respuesta Inmediata <span class="text-red-500">*</span>
+                        </label>
+                        <textarea wire:model="medidas_tomadas" rows="3"
+                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
+                                  placeholder="Describa las acciones inmediatas realizadas..."></textarea>
+                        @error('medidas_tomadas') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                        <p class="text-xs text-gray-500 mt-1">💡 Nota: Los "Días Perdidos" u datos de Licencia se cargarán a posteriori desde el panel de control.</p>
                     </div>
 
                     <!-- Gravedad -->

@@ -9,6 +9,40 @@ class MasterReportIndex extends Component
     public $search = '';
     public $status = '';
 
+    // Solicitud de Revisión
+    public $observacion_revision = '';
+    public $reporteIdParaRevisar = null;
+    public $showRevisarModal = false;
+
+    public function prepararRevision($id)
+    {
+        $this->reporteIdParaRevisar = $id;
+        $this->observacion_revision = '';
+        $this->showRevisarModal = true;
+    }
+
+    public function enviarRevision()
+    {
+        $this->validate([
+            'observacion_revision' => 'required|string|min:5|max:1000',
+        ], [
+            'observacion_revision.required' => 'La observación es obligatoria para solicitar correcciones.',
+        ]);
+
+        $report = \App\Models\MasterReport::findOrFail($this->reporteIdParaRevisar);
+        
+        $report->update([
+            'estado' => 'en_redaccion',
+            'observacion_revision' => $this->observacion_revision,
+        ]);
+
+        $this->showRevisarModal = false;
+        $this->observacion_revision = '';
+        $this->reporteIdParaRevisar = null;
+
+        session()->flash('success', 'Solicitud de corrección enviada al Técnico.');
+    }
+
     public function render()
     {
         $query = \App\Models\MasterReport::with(['sede', 'tecnico', 'gestor'])

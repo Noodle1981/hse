@@ -478,12 +478,7 @@
                     {{ $slot }}
                 </div>
                 
-                <!-- Footer -->
-                <footer class="bg-white border-t border-gray-200 py-4 px-8">
-                    <div class="text-center text-sm text-gray-500">
-                        XamaSafe © {{ date('Y') }}
-                    </div>
-                </footer>
+
             </main>
         </div>
     </div>

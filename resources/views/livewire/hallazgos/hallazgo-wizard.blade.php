@@ -210,7 +210,8 @@
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
                                 <option value="">Manual (sin vincular)</option>
                                 <option value="App\Models\DynamicInspection">Inspección de Checklist</option>
-                                <option value="App\Models\GeneradorConstancia">Constancia de Visita</option>
+                                 <option value="App\Models\GeneradorConstancia">Constancia de Visita</option>
+                                 <option value="App\Models\VisitCertificate">Visita Técnica</option>
                             </select>
                         </div>
 
@@ -253,6 +254,25 @@
                                 @error('origen_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
                         @endif
+
+                        {{-- Selección de Visita Técnica --}}
+                        @if($origen_type === 'App\Models\VisitCertificate')
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Seleccionar Visita Técnica
+                                </label>
+                                <select wire:model="origen_id"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
+                                    <option value="">Seleccione una visita</option>
+                                    @foreach($visitas as $v)
+                                        <option value="{{ $v->id }}">
+                                            Visita #{{ $v->id }} - {{ $v->created_at->format('d/m/Y') }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('origen_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
                     </div>
                 @endif
 
@@ -266,8 +286,8 @@
                                 ← Anterior
                             </button>
                         @else
-                            <a href="{{ route('hallazgos.index') }}"
-                               class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors inline-block">
+                            <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.index') : route('tecnico.hallazgos.index') }}"
+                               class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors inline-block">
                                 Cancelar
                             </a>
                         @endif

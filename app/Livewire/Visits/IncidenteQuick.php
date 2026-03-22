@@ -18,6 +18,8 @@ class IncidenteQuick extends Component
     public $ubicacion_especifica = '';
     public $gravedad = 'leve';
     public $tipo_incidente = 'accidente';
+    public $personas_afectadas = 0;
+    public $medidas_tomadas = '';
     public $photos = [];
 
     protected $rules = [
@@ -26,6 +28,8 @@ class IncidenteQuick extends Component
         'ubicacion_especifica' => 'nullable|string|max:255',
         'gravedad' => 'required|in:leve,moderado,grave,muy_grave',
         'tipo_incidente' => 'required|in:accidente,casi_accidente,condicion_insegura,acto_inseguro',
+        'personas_afectadas' => 'required|integer|min:0',
+        'medidas_tomadas' => 'required|string',
         'photos.*' => 'image|max:5120',
     ];
 
@@ -53,8 +57,14 @@ class IncidenteQuick extends Component
             'descripcion' => $this->descripcion,
             'ubicacion_especifica' => $this->ubicacion_especifica,
             'gravedad' => $this->gravedad === 'muy_grave' ? 'fatal' : $this->gravedad,
-            'tipo' => $this->tipo_incidente === 'casi_accidente' ? 'cuasi_accidente' : 'accidente', // Mapeo para cumplir con enum DB
-            'estado' => 'reportado',
+            'tipo' => match($this->tipo_incidente) {
+                 'casi_accidente' => 'cuasi_accidente',
+                 'condicion_insegura', 'acto_inseguro' => 'incidente',
+                 default => 'accidente',
+            },
+            'estado' => 'pendiente',
+            'personas_afectadas' => $this->personas_afectadas,
+            'medidas_tomadas' => $this->medidas_tomadas,
             'fecha_ocurrencia' => now(),
         ]);
 

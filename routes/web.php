@@ -103,6 +103,7 @@ Route::middleware(['auth'])->group(function () {
         // Incidentes
         Route::prefix('incidentes')->name('incidentes.')->group(function () {
             Route::get('/', \App\Livewire\Incidentes\IncidenteManager::class)->name('index');
+            Route::get('/{id}', \App\Livewire\Incidentes\IncidenteDetail::class)->name('show');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('pdf');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('pdf.preview');
         });
@@ -225,6 +226,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Mis Incidentes
         Route::get('/incidentes', \App\Livewire\Incidentes\IncidenteManager::class)->name('incidentes.index');
+        Route::get('/incidentes/{id}', \App\Livewire\Incidentes\IncidenteDetail::class)->name('incidentes.show');
         Route::get('/incidentes/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('incidentes.pdf');
         Route::get('/incidentes/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('incidentes.pdf.preview');
 

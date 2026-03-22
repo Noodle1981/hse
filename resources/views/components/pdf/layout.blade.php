@@ -121,8 +121,13 @@
                     <div><strong>Código:</strong> {{ $code ?? 'N/A' }}</div>
                     @if(isset($status))
                         <div style="margin-top: 2px;">
-                            <span class="badge {{ match($status) { 'completed' => 'badge-success', 'pending' => 'badge-warning', default => 'badge' } }}">
-                                {{ ucfirst($status) }}
+                            <span class="badge {{ match($status) { 
+                                'cerrado', 'verificado', 'resuelto', 'completed' => 'badge-success', 
+                                'en_proceso', 'pending' => 'badge-warning', 
+                                'pendiente' => 'badge-danger', 
+                                default => 'badge' 
+                            } }}">
+                                {{ ucfirst(str_replace('_', ' ', $status)) }}
                             </span>
                         </div>
                     @endif

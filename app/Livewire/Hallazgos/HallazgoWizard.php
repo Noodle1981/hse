@@ -15,7 +15,7 @@ class HallazgoWizard extends Component
 
     public $hallazgoId = null;
     public $currentStep = 1;
-    public $totalSteps = 4; // Dynamic: 3 if from visit, 4 if standalone
+    public $totalSteps = 3; // 3 steps standalone (Info, Class, Origen)
 
     // Paso 1: Información Básica
     public $titulo = '';
@@ -93,7 +93,7 @@ class HallazgoWizard extends Component
                     $this->sede_id = $visit->sede_id;
                 }
                 // Reduce steps: skip "Origen" step when from visit
-                $this->totalSteps = 3;
+                $this->totalSteps = 2; // Solo 2 pasos (Información, Clasificación)
             }
         }
     }
@@ -112,6 +112,12 @@ class HallazgoWizard extends Component
         $this->responsable_correccion = $hallazgo->responsable_correccion;
         $this->origen_type = $hallazgo->origen_type;
         $this->origen_id = $hallazgo->origen_id;
+
+        // Inferir origen si fue creado desde una visita
+        if (!$this->origen_type && $hallazgo->visit_certificate_id) {
+            $this->origen_type = 'App\Models\VisitCertificate';
+            $this->origen_id = $hallazgo->visit_certificate_id;
+        }
     }
 
     public function nextStep()
@@ -120,11 +126,6 @@ class HallazgoWizard extends Component
 
         if ($this->currentStep < $this->totalSteps) {
             $this->currentStep++;
-            
-            // Skip step 3 (Origen) if from visit context
-            if ($this->visitId && $this->currentStep == 3) {
-                $this->currentStep = 4;
-            }
         }
     }
 
@@ -180,8 +181,14 @@ class HallazgoWizard extends Component
 
         // Origen (opcional)
         if ($this->origen_type && $this->origen_id) {
-            $data['origen_type'] = $this->origen_type;
-            $data['origen_id'] = $this->origen_id;
+            if ($this->origen_type === 'App\Models\VisitCertificate') {
+                $data['visit_certificate_id'] = $this->origen_id;
+                $data['origen_type'] = null;
+                $data['origen_id'] = null;
+            } else {
+                $data['origen_type'] = $this->origen_type;
+                $data['origen_id'] = $this->origen_id;
+            }
         }
 
         // Visit association (if created from visit context)
@@ -218,10 +225,23 @@ class HallazgoWizard extends Component
             ? $user->sedes()->orderBy('nombre_sede')->get()
             : Sede::orderBy('nombre_sede')->get();
 
+        $inspecciones = $this->sede_id 
+            ? DynamicInspection::where('sede_id', $this->sede_id)->orderBy('created_at', 'desc')->get()
+            : collect();
+            
+        $constancias = $this->sede_id 
+            ? GeneradorConstancia::where('sede_id', $this->sede_id)->orderBy('created_at', 'desc')->get()
+            : collect();
+
+        $visitas = $this->sede_id 
+            ? \App\Models\VisitCertificate::where('sede_id', $this->sede_id)->orderBy('created_at', 'desc')->get()
+            : collect();
+
         return view('livewire.hallazgos.hallazgo-wizard', [
             'sedes' => $sedes,
             'inspecciones' => $inspecciones,
             'constancias' => $constancias,
+            'visitas' => $visitas,
         ])->layout('components.layouts.app');
     }
 }

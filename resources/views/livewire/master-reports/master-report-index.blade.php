@@ -1,4 +1,9 @@
 <div>
+    @if (session()->has('success'))
+        <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+            {{ session('success') }}
+        </div>
+    @endif
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <input wire:model.live="search" type="text" placeholder="Buscar por sede o título..." class="w-full sm:w-auto rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500">
@@ -36,6 +41,11 @@
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm font-medium text-gray-900">{{ $report->titulo }}</div>
                             <div class="text-sm text-gray-500">{{ \Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y') }}</div>
+                            @if(auth()->user()->isTechnician() && $report->estado === 'en_redaccion' && $report->observacion_revision)
+                                <div class="mt-1 p-2 bg-yellow-50 border-l-4 border-yellow-400 text-xxs text-yellow-800 rounded">
+                                    <strong>Nota de Corrección:</strong> {{ $report->observacion_revision }}
+                                </div>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm text-gray-900">{{ $report->sede->nombre_sede }}</div>
@@ -52,6 +62,9 @@
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             @if($report->estado === 'finalizado')
                                 <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf' : 'tecnico.master-reports.pdf', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 mr-3">Ver PDF</a>
+                                @if(auth()->user()->isAdmin())
+                                    <button wire:click="prepararRevision({{ $report->id }})" class="text-red-600 hover:text-red-900 mr-3">Corregir</button>
+                                @endif
                             @endif
                             
                             @if(auth()->user()->isTechnician() && $report->estado !== 'finalizado')
@@ -81,6 +94,11 @@
                         <div class="text-xs text-gray-500 mt-0.5">
                             {{ \Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y') }}
                         </div>
+                        @if(auth()->user()->isTechnician() && $report->estado === 'en_redaccion' && $report->observacion_revision)
+                            <div class="mt-1 p-2 bg-yellow-50 border-l-4 border-yellow-400 text-xxs text-yellow-800 rounded">
+                                <strong>Nota de Corrección:</strong> {{ $report->observacion_revision }}
+                            </div>
+                        @endif
                     </div>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase
                         {{ $report->estado === 'finalizado' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
@@ -102,6 +120,11 @@
                         <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf' : 'tecnico.master-reports.pdf', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 font-bold text-xs flex items-center gap-1">
                             Ver PDF
                         </a>
+                        @if(auth()->user()->isAdmin())
+                            <button wire:click="prepararRevision({{ $report->id }})" class="text-red-600 hover:text-red-900 font-bold text-xs flex items-center gap-1">
+                                Corregir
+                            </button>
+                        @endif
                     @endif
                     
                     @if(auth()->user()->isTechnician() && $report->estado !== 'finalizado')
@@ -121,4 +144,22 @@
     <div class="mt-4">
         {{ $reports->links() }}
     </div>
+    @if($showRevisarModal)
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg shadow-xl p-6 max-w-lg w-full m-4">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Solicitar Corrección al Técnico</h3>
+                <form wire:submit.prevent="enviarRevision">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Observaciones / Motivo del Rechazo</label>
+                        <textarea wire:model="observacion_revision" rows="4" class="w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 text-sm" placeholder="Escribe las correcciones que debe hacer el técnico..."></textarea>
+                        @error('observacion_revision') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" wire:click="$set('showRevisarModal', false)" class="px-4 py-2 border rounded-md text-gray-700 hover:bg-gray-50 text-sm">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm">Enviar Solicitud</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    @endif
 </div>

@@ -1,4 +1,4 @@
-<x-pdf.layout :title="'Reporte de Hallazgo/Incidente'" :code="'FIND-'.$finding->id" :status="$finding->status">
+<x-pdf.layout :title="'Reporte de Hallazgo/Incidente'" :code="'FIND-'.$finding->id" :status="$finding->estado">
     
     <style>
         .context-table { width: 100%; border-collapse: collapse; }
@@ -71,9 +71,16 @@
                     
                     <div style="margin-top: 10px;">
                         <span class="label-sm">Estado Actual</span>
-                        {{-- Esto asume que tienes badges configurados en tu CSS --}}
-                        <span style="text-transform: uppercase; font-size: 8pt; font-weight: bold; color: {{ $finding->status == 'open' ? '#dc2626' : '#16a34a' }}">
-                            ● {{ $finding->status_label ?? $finding->status }}
+                        <span style="text-transform: uppercase; font-size: 8pt; font-weight: bold; color: {{ 
+                            match($finding->estado) {
+                                'pendiente' => '#dc2626',
+                                'en_proceso' => '#ca8a04',
+                                'resuelto' => '#0891b2',
+                                'cerrado' => '#16a34a',
+                                default => '#64748b'
+                            }
+                        }}">
+                            ● {{ ucfirst(str_replace('_', ' ', $finding->estado)) }}
                         </span>
                     </div>
                 </td>

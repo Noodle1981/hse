@@ -107,7 +107,7 @@ class IncidenteManager extends Component
             'personas_afectadas' => Incidente::sum('personas_afectadas'),
         ];
 
-        $sedes = Sede::orderBy('nombre')->get();
+        $sedes = Sede::orderBy('nombre_sede')->get();
         $hallazgos = Hallazgo::abiertos()->orderBy('titulo')->get();
 
         return view('livewire.incidentes.incidente-manager', [

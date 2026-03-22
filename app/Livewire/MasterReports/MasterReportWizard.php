@@ -20,6 +20,7 @@ class MasterReportWizard extends Component
     public $observaciones_checklists;
     public $observaciones_capacitaciones;
     public $observaciones_hallazgos_incidentes;
+    public $signature; // Base64 Drawn Signature
     
     public $currentStep = 1;
     public $monthlyData = [];
@@ -48,6 +49,7 @@ class MasterReportWizard extends Component
             $this->observaciones_checklists = $this->report->observaciones_checklists;
             $this->observaciones_capacitaciones = $this->report->observaciones_capacitaciones;
             $this->observaciones_hallazgos_incidentes = $this->report->observaciones_hallazgos_incidentes;
+            $this->signature = $this->report->datos_anexo['firma_tecnico'] ?? null;
             $this->loadMonthlyData();
         } else {
             $this->periodo = now()->format('Y-m');
@@ -115,6 +117,11 @@ class MasterReportWizard extends Component
             session()->flash('success', 'Informe solicitado exitosamente.');
             return redirect()->route('gestor.master-reports.index');
         } else {
+            $datos_anexo = $this->report->datos_anexo ?? [];
+            if ($this->signature) {
+                $datos_anexo['firma_tecnico'] = $this->signature;
+            }
+
             $this->report->update([
                 'resumen_ejecutivo' => $this->resumen_ejecutivo,
                 'observaciones_matriz' => $this->observaciones_matriz,
@@ -122,6 +129,7 @@ class MasterReportWizard extends Component
                 'observaciones_checklists' => $this->observaciones_checklists,
                 'observaciones_capacitaciones' => $this->observaciones_capacitaciones,
                 'observaciones_hallazgos_incidentes' => $this->observaciones_hallazgos_incidentes,
+                'datos_anexo' => $datos_anexo,
                 'estado' => 'finalizado',
             ]);
             session()->flash('success', 'Informe finalizado exitosamente.');

@@ -145,7 +145,7 @@
             @endif
             
             <h1>INFORME DE GESTIÓN</h1>
-            <h2>{{ strtoupper(\Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y')) }}</h2>
+            <h2>{{ strtoupper(\Carbon\Carbon::parse($report->periodo)->locale('es')->translatedFormat('F Y')) }}</h2>
             
             <table class="cover-info-table">
                 <tr>
@@ -187,8 +187,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 15%">Fecha</th>
-                        <th style="width: 20%">Referencia</th>
+                        <th style="width: 25%">Fecha</th>
                         <th>Observaciones de Campo</th>
                     </tr>
                 </thead>
@@ -196,7 +195,6 @@
                     @foreach($data['visits'] as $visit)
                         <tr>
                             <td><strong>{{ $visit->visit_date->format('d/m/Y') }}</strong></td>
-                            <td style="color: #7e8299;">{{ $visit->code ?? 'VIS-'.$visit->id }}</td>
                             <td>{{ $visit->general_observations ?: 'Sin observaciones' }}</td>
                         </tr>
                     @endforeach
@@ -360,9 +358,17 @@
 
         <div style="position: absolute; bottom: 50px; left: 0; right: 0; text-align: center;">
             <div style="width: 250px; margin: 0 auto; border-top: 1px solid #1e1e2d; padding-top: 15px;">
-                <div style="font-weight: bold; font-size: 12px;">{{ strtoupper($report->tecnico->nombres) }} {{ strtoupper($report->tecnico->apellidos) }}</div>
-                <div style="font-size: 10px; color: #7e8299; margin-top: 5px;">Técnico Responsable HyS</div>
-                <div style="font-size: 9px; color: #b5b5c3;">XamaSafe Reporting System</div>
+                @if(isset($report->datos_anexo['firma_tecnico']) && $report->datos_anexo['firma_tecnico'])
+                    <img src="{{ $report->datos_anexo['firma_tecnico'] }}" style="width: 140px; height: 60px; margin: 0 auto 5px auto; display: block; object-fit: contain;">
+                @elseif($report->tecnico->firma && file_exists(public_path('storage/' . $report->tecnico->firma)))
+                    <img src="{{ public_path('storage/' . $report->tecnico->firma) }}" style="width: 140px; height: 60px; margin: 0 auto 5px auto; display: block; object-fit: contain;">
+                @else
+                    <div style="height: 40px;"></div> {{-- Espacio para firma en blanco --}}
+                @endif
+
+                <div style="font-weight: bold; font-size: 11px;">{{ strtoupper($report->tecnico->nombres) }} {{ strtoupper($report->tecnico->apellidos) }}</div>
+                <div style="font-size: 9px; color: #7e8299; margin-top: 3px;">Técnico Responsable HyS</div>
+                <div style="font-size: 8px; color: #b5b5c3;">XamaSafe Reporting System</div>
             </div>
         </div>
     </div>

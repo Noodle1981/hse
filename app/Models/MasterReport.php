@@ -20,6 +20,7 @@ class MasterReport extends Model
         'observaciones_matriz',
         'estado',
         'datos_anexo',
+        'observacion_revision',
     ];
 
     protected $casts = [

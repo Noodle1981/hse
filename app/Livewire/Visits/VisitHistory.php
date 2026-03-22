@@ -41,8 +41,8 @@ class VisitHistory extends Component
 
     public function editVisit($id)
     {
-        // Solo el administrador de la empresa (Gestor) puede editar, NO el super_admin
-        if (strtolower(auth()->user()->rol) !== 'administrador') {
+        // Solo el administrador de la empresa (Gestor) puede editar
+        if (!auth()->user()->isAdmin()) {
             return;
         }
 
@@ -57,7 +57,7 @@ class VisitHistory extends Component
 
     public function updateVisit()
     {
-        if (strtolower(auth()->user()->rol) !== 'administrador') {
+        if (!auth()->user()->isAdmin()) {
             return;
         }
 
