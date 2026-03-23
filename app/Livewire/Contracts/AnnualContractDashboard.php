@@ -146,13 +146,29 @@ class AnnualContractDashboard extends Component
     {
         $data = [];
         
-        // Una sola query para todas las inspecciones del año
+        // 1. Inspecciones
         $inspections = \App\Models\DynamicInspection::where('sede_id', $this->sedeId)
             ->whereYear('completed_at', $this->year)
             ->where('status', 'completed')
             ->get()
             ->groupBy(function($i) {
                 return $i->dynamic_checklist_id . '_' . $i->completed_at->month;
+            });
+            
+        // 2. Capacitaciones
+        $trainings = \App\Models\Training::where('sede_id', $this->sedeId)
+            ->whereYear('date', $this->year)
+            ->get()
+            ->groupBy(function($t) {
+                return \Carbon\Carbon::parse($t->date ?? $t->created_at)->month;
+            });
+
+        // 3. Informes Maestros
+        $reports = \App\Models\MasterReport::where('sede_id', $this->sedeId)
+            ->whereYear('created_at', $this->year)
+            ->get()
+            ->groupBy(function($r) {
+                return \Carbon\Carbon::parse($r->periodo . '-01')->month;
             });
         
         $currentMonth = (int)date('m');
@@ -175,6 +191,10 @@ class AnnualContractDashboard extends Component
                 if ($plan->category === 'Inspección' && $plan->checklist_id) {
                     $key = $plan->checklist_id . '_' . $monthNumber;
                     $count = isset($inspections[$key]) ? $inspections[$key]->count() : 0;
+                } elseif ($plan->category === 'Capacitación') {
+                    $count = isset($trainings[$monthNumber]) ? $trainings[$monthNumber]->count() : 0;
+                } elseif ($plan->category === 'Informe') {
+                    $count = isset($reports[$monthNumber]) ? $reports[$monthNumber]->count() : 0;
                 }
                 
                 if ($count > 0) {
