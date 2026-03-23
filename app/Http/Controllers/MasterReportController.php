@@ -28,6 +28,10 @@ class MasterReportController extends Controller
 
     public function preview($id)
     {
+        // Aumentar límites para procesar múltiples imágenes en DomPDF sin causar Error 500
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', 300);
+
         $report   = MasterReport::with(['sede.empresa', 'tecnico', 'gestor'])->findOrFail($id);
         $data     = $this->aggregatePeriodData($report);
         $branding = BrandingService::forUser($report->tecnico ?? $report->gestor);

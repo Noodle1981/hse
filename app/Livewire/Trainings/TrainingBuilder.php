@@ -101,7 +101,8 @@ class TrainingBuilder extends Component
         }
 
         if ($this->visitId) {
-            return redirect()->route('visits.in-progress', $this->visitId);
+            $prefix = auth()->user()->hasRole('Administrador') ? 'gestor' : 'tecnico';
+            return redirect()->route($prefix . '.visits.in-progress', $this->visitId);
         }
 
         if (auth()->user()->isAdmin()) {

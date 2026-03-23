@@ -20,8 +20,8 @@
                     </svg>
                     Descargar PDF
                 </a>
-                @if(auth()->user()->isAdmin())
-                    <a href="{{ route('gestor.hallazgos.edit', $hallazgo) }}" 
+                @if(auth()->user()->isAdmin() || auth()->user()->hasRole(['Técnico', 'tecnico']))
+                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.edit', $hallazgo) : route('tecnico.hallazgos.edit', $hallazgo) }}" 
                        class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
                         Editar
                     </a>
@@ -303,19 +303,19 @@
                 <h3 class="font-bold text-ep-dark mb-4">Cambiar Estado</h3>
                 <div class="space-y-2">
                     @if($hallazgo->estado !== 'en_proceso')
-                        <button wire:click="cambiarEstadoRapido('en_proceso')" 
+                        <button wire:click="prepararSeguimiento('en_proceso')" 
                                 class="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm">
                             → En Proceso
                         </button>
                     @endif
                     @if($hallazgo->estado !== 'resuelto')
-                        <button wire:click="cambiarEstadoRapido('resuelto')" 
+                        <button wire:click="prepararSeguimiento('resuelto')" 
                                 class="w-full px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm">
                             ✓ Resuelto
                         </button>
                     @endif
                     @if($hallazgo->estado !== 'cerrado')
-                        <button wire:click="cambiarEstadoRapido('cerrado')" 
+                        <button wire:click="prepararSeguimiento('cerrado')" 
                                 class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
                             ✓✓ Cerrado
                         </button>

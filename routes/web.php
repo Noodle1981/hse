@@ -211,6 +211,7 @@ Route::middleware(['auth'])->group(function () {
         // Hallazgos (Crear/Ver) - Nota: Crear principal es via Modal en visitas, pero mantenemos wizard si existe
         Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
              Route::get('/crear', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('create');
+             Route::get('/{id}/editar', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('edit');
              Route::get('/{id}', \App\Livewire\Hallazgos\HallazgoDetail::class)->name('show');
              Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
              Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');

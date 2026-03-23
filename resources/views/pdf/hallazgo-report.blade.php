@@ -99,4 +99,37 @@
         <x-pdf.finding-detail :finding="$finding" />
     </div>
 
+    @if(isset($seguimientos) && $seguimientos->count() > 0)
+        <div class="separator" style="height: 20px;"></div>
+        <x-pdf.card title="Historial de Seguimientos e Intervenciones">
+            <table style="width: 100%; border-collapse: collapse; font-size: 10pt; text-align: left;">
+                <thead>
+                    <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
+                        <th style="padding: 10px; width: 15%; color: #334155;">Fecha</th>
+                        <th style="padding: 10px; width: 25%; color: #334155;">Responsable</th>
+                        <th style="padding: 10px; width: 20%; color: #334155;">Evolución</th>
+                        <th style="padding: 10px; width: 40%; color: #334155;">Comentario Técnico</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($seguimientos as $seguimiento)
+                        <tr style="border-bottom: 1px solid #e2e8f0;">
+                            <td style="padding: 10px; color: #475569;">{{ $seguimiento->fecha_seguimiento->format('d/m/Y H:i') }}</td>
+                            <td style="padding: 10px; color: #1e293b; font-weight: bold;">{{ $seguimiento->user->nombres ?? 'Sistema' }} {{ $seguimiento->user->apellidos ?? '' }}</td>
+                            <td style="padding: 10px;">
+                                @if($seguimiento->estado_anterior !== $seguimiento->estado_nuevo)
+                                    <span style="color: #64748b; font-size: 8pt;">De: {{ ucfirst($seguimiento->estado_anterior) }}</span><br>
+                                    <span style="color: #0f172a; font-weight: bold;">A: {{ ucfirst($seguimiento->estado_nuevo) }}</span>
+                                @else
+                                    <span style="color: #64748b;">Mantenimiento: {{ ucfirst($seguimiento->estado_nuevo) }}</span>
+                                @endif
+                            </td>
+                            <td style="padding: 10px; color: #334155;">{{ $seguimiento->comentario }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </x-pdf.card>
+    @endif
+
 </x-pdf.layout>

@@ -31,7 +31,8 @@
             <table class="table-auto w-full">
                 <thead class="bg-ep-dark text-white border-b border-gray-200">
                     <tr>
-                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider pl-6">Fecha / Horario</th>
+                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider pl-6">Fecha</th>
+                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Horario</th>
                         <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Ubicación</th>
                         <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Duración</th>
                         <th class="px-4 py-4 whitespace-nowrap text-center text-xs font-bold uppercase tracking-wider">Estado</th>
@@ -41,18 +42,18 @@
                 <tbody class="text-sm divide-y divide-gray-200">
                     @forelse ($pastVisits as $visit)
                         <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-4 py-4 whitespace-nowrap">
+                            <td class="px-4 py-4 whitespace-nowrap pl-6">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 font-bold">
                                         {{ $visit->visit_date->format('d') }}
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->translatedFormat('F, Y')) }}</div>
-                                        <div class="text-xs text-gray-500">
-                                            {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
-                                        </div>
+                                        <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->locale('es')->translatedFormat('F, Y')) }}</div>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                                {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
                             </td>
                             <td class="px-4 py-4 whitespace-nowrap">
                                 <div class="flex flex-col">
@@ -113,7 +114,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                             <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                 No has realizado visitas aún.
                             </td>
                         </tr>
@@ -133,7 +134,7 @@
                                 {{ $visit->visit_date->format('d') }}
                             </div>
                             <div class="ml-3">
-                                <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->translatedFormat('F, Y')) }}</div>
+                                <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->locale('es')->translatedFormat('F, Y')) }}</div>
                                 <div class="text-xs text-gray-500">
                                     {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
                                 </div>

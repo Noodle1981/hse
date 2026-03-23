@@ -114,16 +114,11 @@ class HallazgoDetail extends Component
         session()->flash('message', 'Foto eliminada correctamente.');
     }
 
-    public function cambiarEstadoRapido($nuevoEstado)
+    public function prepararSeguimiento($nuevoEstado)
     {
-        $this->hallazgo->agregarSeguimiento(
-            $nuevoEstado,
-            'Cambio de estado rápido desde la vista de detalle',
-            auth()->id()
-        );
-
-        $this->loadHallazgo();
-        session()->flash('message', 'Estado actualizado correctamente.');
+        $this->nuevoEstado = $nuevoEstado;
+        $this->comentarioSeguimiento = '';
+        $this->showSeguimientoForm = true;
     }
 
     public function render()

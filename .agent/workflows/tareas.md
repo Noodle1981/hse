@@ -1,35 +1,5 @@
 ---
-description: Generación de Uni Test y otras
+description: Mejoras de textos de casos de usos
 ---
 
-Para los test phpunit Existentes y nuevos
-
-Test de usuarios y roles
-test de lo que puede ver y no (si cumple)
-
-test de plantillas de checklist
-
-test de Capacitaciones
-
-
-test de asignacion de checklist
-
-test 1 opcion es completar una visita con un check y una capacitacion dentro y completarlo
-
-test 2 opcion es completar una visita sin tener nada asignado por parte del gestor, pero si autoasignarse una check y una capacitacion, otra 1 check solo, otra una capacitacion sola
-
-test 3 opcion tener un checklist asignado, auto asignarse una capacitaciones, reportar un hallazgo y un incidente
-
-test 4 opcion, si la visita no se completa ninguno
-
-test informe maestro
-
-test de contrato anual
-
-test de aministracion
-
-
-esos test son mas que nada en gestor, en su contraparte estaría el del tecnico
-
-
-
+te voy algo bastante complejo, la idea principal es darle un contexto más serio a esto, en el sentido de que es un demo, los registros que tengo son  datos muy poco serio, quiero que cada registro y este bien seria y profesionalla informacion, digamos en todas las observaciones. ect. no se si empezar con hallazgos, incidentes, capacitaciones, luegos visitas, aclarando que no todos tienen el mismo tipo de checklist y no todos tienen hallazgos y demas, hacer todo serio concluyendo el informes, la fotos las voy a generar depende de lo que completes. ¿Debatamos por favor? hize una copia a la base de datos por las dudas

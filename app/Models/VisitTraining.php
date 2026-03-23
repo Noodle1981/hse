@@ -50,7 +50,18 @@ class VisitTraining extends Model
     public function getDurationMinutesAttribute($value)
     {
         $duration = $this->training ? $this->training->duration : $value;
-        return $duration ?: 0;
+        
+        if ($duration && $duration > 0) {
+            return $duration;
+        }
+
+        // Si es 0 o null, armar desde la lógica (diferencia de timestamps)
+        if ($this->created_at && $this->updated_at) {
+            $diff = $this->created_at->diffInMinutes($this->updated_at);
+            return $diff > 0 ? $diff : 15; // 15 min de mínimo
+        }
+
+        return 15; // Fallback por defecto en lugar de 0
     }
 
     public function getNotesAttribute($value)
