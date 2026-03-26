@@ -61,7 +61,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             @if($report->estado === 'finalizado')
-                                <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf' : 'tecnico.master-reports.pdf', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 mr-3">Ver PDF</a>
+                                <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf.loading' : 'tecnico.master-reports.pdf.loading', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 mr-3">Ver PDF</a>
                                 @if(auth()->user()->isAdmin())
                                     <button wire:click="prepararRevision({{ $report->id }})" class="text-red-600 hover:text-red-900 mr-3">Corregir</button>
                                 @endif
@@ -117,7 +117,7 @@
                 <!-- Footer: Actions -->
                 <div class="flex justify-end items-center gap-3 pt-3 border-t border-gray-100">
                     @if($report->estado === 'finalizado')
-                        <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf' : 'tecnico.master-reports.pdf', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 font-bold text-xs flex items-center gap-1">
+                        <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf.loading' : 'tecnico.master-reports.pdf.loading', $report->id) }}" target="_blank" class="text-orange-600 hover:text-orange-900 font-bold text-xs flex items-center gap-1">
                             Ver PDF
                         </a>
                         @if(auth()->user()->isAdmin())

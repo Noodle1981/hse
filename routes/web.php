@@ -158,6 +158,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/create', [\App\Http\Controllers\MasterReportController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\MasterReportController::class, 'store'])->name('store');
             Route::get('/{id}/pdf', [\App\Http\Controllers\MasterReportController::class, 'preview'])->name('pdf');
+            Route::get('/{id}/pdf/loading', [\App\Http\Controllers\MasterReportController::class, 'loading'])->name('pdf.loading');
         });
 
         // Personalización de Empresa
@@ -237,6 +238,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}/edit', [\App\Http\Controllers\MasterReportController::class, 'edit'])->name('edit');
             Route::put('/{id}', [\App\Http\Controllers\MasterReportController::class, 'update'])->name('update');
             Route::get('/{id}/pdf', [\App\Http\Controllers\MasterReportController::class, 'preview'])->name('pdf');
+            Route::get('/{id}/pdf/loading', [\App\Http\Controllers\MasterReportController::class, 'loading'])->name('pdf.loading');
         });
 
     });

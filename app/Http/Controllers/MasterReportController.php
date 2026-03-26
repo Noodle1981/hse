@@ -26,6 +26,12 @@ class MasterReportController extends Controller
         return view('master-reports.edit', compact('id'));
     }
 
+    public function loading($id)
+    {
+        $report = MasterReport::with('sede')->findOrFail($id);
+        return view('master-reports.loading', compact('report'));
+    }
+
     public function preview($id)
     {
         // Aumentar límites para procesar múltiples imágenes en DomPDF sin causar Error 500
