@@ -1,8 +1,30 @@
-<div>
-    <div class="mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Gestión de Usuarios</h1>
-        <p class="text-gray-600 mt-1">Administra técnicos y administradores del sistema</p>
-    </div>
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Gestión de <span class="text-ep-primary italic">Usuarios</span>
+                    </h1>
+                </div>
+
+                <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                    <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                        {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                    </div>
+                    <div class="h-4 w-px bg-white/10 mx-1"></div>
+                    <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                </a>
+            </div>
+        </header>
+    @endsection
 
     @if (session()->has('message'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

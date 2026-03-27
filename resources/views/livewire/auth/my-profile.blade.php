@@ -1,8 +1,31 @@
-<div class="max-w-4xl mx-auto py-8 px-4">
-    <div class="mb-8">
-        <h2 class="text-3xl font-extrabold text-gray-900">Mi Perfil</h2>
-        <p class="mt-1 text-sm text-gray-500">Gestiona tu información personal y la seguridad de tu cuenta.</p>
-    </div>
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Mi <span class="text-ep-primary italic">Perfil</span>
+                    </h1>
+                </div>
+
+                <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                    <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                        {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                    </div>
+                    <div class="h-4 w-px bg-white/10 mx-1"></div>
+                    <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                </a>
+            </div>
+        </header>
+    @endsection
+    <div class="max-w-4xl">
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <!-- Sidebar Info -->
@@ -120,4 +143,5 @@
             </div>
         </div>
     </div>
+</div>
 </div>

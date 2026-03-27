@@ -1,268 +1,242 @@
-<div class="py-6">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {{-- Header --}}
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-900">Dashboard Administrativo</h1>
-            <p class="text-gray-600">Vista ejecutiva del sistema</p>
-        </div>
-
-        {{-- KPIs Grid --}}
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {{-- Checklists --}}
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-blue-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Checklists Activos</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $kpis['checklists']['total_active'] }}</p>
-                    </div>
-                    <div class="bg-blue-100 rounded-full p-3">
-                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+<div class="min-h-screen bg-gray-50/50 pb-12">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+    
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
-                    </div>
+                    </button>
+    
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Dashboard <span class="text-ep-primary italic">Administrativo</span>
+                    </h1>
                 </div>
-                <div class="mt-4 flex gap-4 text-sm">
-                    <span class="text-yellow-600">{{ $kpis['checklists']['pending_assignments'] }} pendientes</span>
-                    <span class="text-red-600">{{ $kpis['checklists']['overdue_assignments'] }} vencidas</span>
+    
+                <div class="flex items-center space-x-3">
+                    @if(auth()->user()->rol === \App\Models\User::ROLE_GESTOR || auth()->user()->rol === \App\Models\User::ROLE_SUPER_ADMIN)
+                        <a href="{{ route('switch-role', \App\Models\User::ROLE_TECNICO) }}" 
+                           class="hidden xs:flex bg-white/10 backdrop-blur-md text-indigo-100 hover:bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
+                            Modo Técnico
+                        </a>
+                    @endif
+                    
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                    </a>
                 </div>
             </div>
+        </header>
+    @endsection
 
-            {{-- Inspecciones --}}
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-green-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Inspecciones (Mes)</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $kpis['inspections']['total_this_month'] }}</p>
-                    </div>
-                    <div class="bg-green-100 rounded-full p-3">
-                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    {{-- Main Content - No offset --}}
+    <div class="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 relative z-10">
+        {{-- KPI Cards - Premium Glassmorphism --}}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <!-- Inspecciones -->
+            <div class="group bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-6 border-b-4 border-green-500 hover:-translate-y-1 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-green-50 text-green-600 rounded-2xl group-hover:bg-green-500 group-hover:text-white transition-colors duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Mensual</span>
                 </div>
-                <div class="mt-4 flex gap-4 text-sm">
-                    <span class="text-green-600">{{ $kpis['inspections']['completed_today'] }} hoy</span>
-                    <span class="text-gray-600">{{ $kpis['inspections']['avg_per_day'] }} promedio/día</span>
+                <h3 class="text-sm font-bold text-gray-500 mb-1">Inspecciones</h3>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-black text-gray-900 tracking-tight">{{ $kpis['inspections']['total_this_month'] }}</span>
+                    <span class="text-xs font-bold text-green-500">+{{ $kpis['inspections']['completed_today'] }} hoy</span>
                 </div>
             </div>
 
-            {{-- Capacitaciones --}}
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-purple-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Capacitaciones</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $kpis['trainings']['total_scheduled'] }}</p>
-                    </div>
-                    <div class="bg-purple-100 rounded-full p-3">
-                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            <!-- Checklists Pendientes -->
+            <div class="group bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-6 border-b-4 border-orange-500 hover:-translate-y-1 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-orange-50 text-orange-600 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                     </div>
+                    <span class="text-xs font-bold text-red-500 animate-pulse uppercase tracking-wider">¡Urgente!</span>
                 </div>
-                <div class="mt-4 flex gap-4 text-sm">
-                    <span class="text-purple-600">{{ $kpis['trainings']['attendees_this_month'] }} asistentes</span>
-                    <span class="text-gray-600">{{ $kpis['trainings']['upcoming_7_days'] }} próximas</span>
+                <h3 class="text-sm font-bold text-gray-500 mb-1">Checklists Vencidos</h3>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-black text-gray-900 tracking-tight text-orange-600">{{ $kpis['checklists']['overdue_assignments'] }}</span>
+                    <span class="text-xs font-bold text-orange-400">{{ $kpis['checklists']['pending_assignments'] }} pendientes</span>
                 </div>
             </div>
 
-
-            {{-- Contrato Anual --}}
-            <div class="bg-white rounded-lg shadow p-6 border-l-4 border-indigo-500">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-600">Cumplimiento Anual</p>
-                        <p class="text-3xl font-bold text-gray-900">{{ $kpis['annual']['compliance_percentage'] }}%</p>
-                    </div>
-                    <div class="bg-indigo-100 rounded-full p-3">
-                        <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            <!-- Capacitaciones -->
+            <div class="group bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-6 border-b-4 border-indigo-500 hover:-translate-y-1 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-indigo-50 text-indigo-600 rounded-2xl group-hover:bg-indigo-500 group-hover:text-white transition-colors duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path>
                         </svg>
                     </div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Próximos</span>
                 </div>
-                <div class="mt-4 flex gap-4 text-sm">
-                    <span class="text-red-600">{{ $kpis['annual']['overdue_activities'] }} vencidas</span>
-                    <span class="text-gray-600">{{ $kpis['annual']['activities_this_month'] }} este mes</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Charts Grid --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {{-- Inspecciones por Mes --}}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Inspecciones por Mes</h3>
-                <div style="height: 300px;">
-                    <canvas id="inspectionsChart"></canvas>
+                <h3 class="text-sm font-bold text-gray-500 mb-1">Capacitaciones</h3>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-black text-gray-900 tracking-tight">{{ $kpis['trainings']['total_scheduled'] }}</span>
+                    <span class="text-xs font-bold text-indigo-500">{{ $kpis['trainings']['upcoming_7_days'] }} esta semana</span>
                 </div>
             </div>
 
-            {{-- Por Categoría --}}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Distribución por Categoría</h3>
-                <div style="height: 300px;">
-                    <canvas id="categoryChart"></canvas>
-                </div>
-            </div>
-
-            {{-- Top Checklists --}}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 5 Checklists</h3>
-                <div style="height: 300px;">
-                    <canvas id="topChecklistsChart"></canvas>
-                </div>
-            </div>
-
-            {{-- Cumplimiento Anual --}}
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Cumplimiento Anual</h3>
-                <div style="height: 300px;">
-                    <canvas id="complianceChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        {{-- Actividades y Asignaciones --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {{-- Bitácora de Actividades --}}
-            <div class="bg-white rounded-lg shadow">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Bitácora de Actividades</h3>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-3">
-                        @forelse($recentActivity as $activity)
-                            <div class="flex items-start gap-4 py-3 border-b border-gray-100 last:border-0">
-                                <div class="mt-1 flex-shrink-0">
-                                    @if($activity->type === 'visita')
-                                        <span class="inline-flex items-center justify-center p-2 bg-blue-100 rounded-lg">
-                                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
-                                        </span>
-                                    @elseif($activity->type === 'inspeccion')
-                                        <span class="inline-flex items-center justify-center p-2 bg-green-100 rounded-lg">
-                                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        </span>
-                                    @elseif($activity->type === 'capacitacion')
-                                        <span class="inline-flex items-center justify-center p-2 bg-purple-100 rounded-lg">
-                                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path></svg>
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center justify-center p-2 bg-orange-100 rounded-lg">
-                                            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
-                                        </span>
-                                    @endif
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate" title="{{ $activity->title }}">
-                                        {{ $activity->title }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
-                                        <span class="font-medium text-gray-700">{{ $activity->empresa }}</span>
-                                        <span>&bull;</span>
-                                        <span>{{ $activity->user_name }}</span>
-                                    </p>
-                                </div>
-                                <div class="text-xs text-gray-500 whitespace-nowrap">
-                                    {{ $activity->date ? \Carbon\Carbon::parse($activity->date)->format('d/m/Y') : '-' }}
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center py-6 text-gray-500">
-                                <svg class="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                No hay actividades recientes
-                            </div>
-                        @endforelse
+            <!-- Constancias -->
+            <div class="group bg-white rounded-3xl shadow-xl shadow-gray-200/50 p-6 border-b-4 border-ep-primary hover:-translate-y-1 transition-all duration-300">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="p-3 bg-orange-50 text-ep-primary rounded-2xl group-hover:bg-ep-primary group-hover:text-white transition-colors duration-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
                     </div>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Visitas</span>
                 </div>
-            </div>
-
-            {{-- Actividades Asignadas / Próximas --}}
-            <div class="bg-white rounded-lg shadow">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900">Actividades Asignadas / Próximas</h3>
-                </div>
-                <div class="p-6">
-                    <div class="space-y-3">
-                        @forelse($upcomingActivities as $upcoming)
-                            <div class="flex items-start gap-4 py-3 border-b border-gray-100 last:border-0">
-                                <div class="mt-1 flex-shrink-0">
-                                    @if($upcoming->type === 'capacitacion')
-                                        <span class="inline-flex items-center justify-center p-2 bg-purple-100 rounded-lg" title="Capacitación">
-                                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"></path></svg>
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center justify-center p-2 bg-yellow-100 rounded-lg" title="Checklist Asignado">
-                                            <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                                        </span>
-                                    @endif
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">
-                                        {{ $upcoming->title }}
-                                    </p>
-                                    <p class="text-xs text-gray-500 flex items-center gap-2 mt-0.5">
-                                        <span class="font-medium text-gray-700">{{ $upcoming->empresa }}</span>
-                                        <span>&bull;</span>
-                                        <span>{{ $upcoming->user_name }}</span>
-                                    </p>
-                                </div>
-                                <div class="flex flex-col items-end gap-1">
-                                    <span class="text-xs font-medium {{ $upcoming->date && \Carbon\Carbon::parse($upcoming->date)->isPast() ? 'text-red-500' : 'text-gray-500' }}">
-                                        {{ $upcoming->date ? \Carbon\Carbon::parse($upcoming->date)->format('d/m/Y') : 'Sin fecha limite' }}
-                                    </span>
-                                    @if($upcoming->type !== 'capacitacion' && $upcoming->status === 'in_progress')
-                                        <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-medium">En curso</span>
-                                    @elseif($upcoming->type !== 'capacitacion' && $upcoming->status === 'pending')
-                                        <span class="px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 text-[10px] font-medium">Pendiente</span>
-                                    @endif
-                                </div>
-                            </div>
-                        @empty
-                            <div class="text-center py-6 text-gray-500">
-                                <svg class="w-10 h-10 mx-auto text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                No hay actividades pendientes
-                            </div>
-                        @endforelse
-                    </div>
+                <h3 class="text-sm font-bold text-gray-500 mb-1">Constancias de Visita</h3>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-4xl font-black text-gray-900 tracking-tight">{{ $kpis['visit_certificates']['completed_this_month'] }}</span>
+                    <span class="text-xs font-bold text-orange-500">{{ $kpis['visit_certificates']['pending_signature'] }} por firmar</span>
                 </div>
             </div>
         </div>
 
-        {{-- Alertas --}}
+        {{-- Alerts Section if any --}}
         @if($alerts['overdue_assignments'] > 0 || $alerts['overdue_annual_activities'] > 0)
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+            <div class="mb-10 animate-fade-in">
+                <div class="bg-red-50 border-l-8 border-red-500 p-6 rounded-3xl shadow-lg flex items-center gap-6">
+                    <div class="bg-red-500 p-4 rounded-2xl text-white shadow-lg shadow-red-200">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
                         </svg>
                     </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-yellow-800">Alertas del Sistema</h3>
-                        <div class="mt-2 text-sm text-yellow-700">
-                            <ul class="list-disc list-inside space-y-1">
-                                @if($alerts['overdue_assignments'] > 0)
-                                    <li>{{ $alerts['overdue_assignments'] }} asignaciones vencidas</li>
-                                @endif
-                                @if($alerts['overdue_annual_activities'] > 0)
-                                    <li>{{ $alerts['overdue_annual_activities'] }} actividades del contrato vencidas</li>
-                                @endif
-                            </ul>
+                    <div>
+                        <h3 class="text-lg font-black text-red-900 uppercase tracking-widest">Alertas de Alta Prioridad</h3>
+                        <p class="text-red-700 font-medium">Hay elementos que requieren tu atención inmediata para mantener el cumplimiento.</p>
+                        <div class="mt-2 flex gap-4">
+                            @if($alerts['overdue_assignments'] > 0)
+                                <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">{{ $alerts['overdue_assignments'] }} Asignaciones Vencidas</span>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         @endif
+
+        {{-- Layout Grid for Charts and Lists --}}
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            {{-- Left Column: Charts and Stats (Col 8) --}}
+            <div class="lg:col-span-8 space-y-8">
+                <!-- Main Trend Chart -->
+                <div class="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 p-8 border border-gray-100">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h3 class="text-xl font-black text-gray-900 tracking-tight">Evolución de Inspecciones</h3>
+                            <p class="text-sm text-gray-500 font-medium">Cumplimiento operativo mes a mes ({{ now()->year }})</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                             <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-full">
+                                <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                                <span class="text-[10px] font-bold text-green-700 uppercase">Inspecciones</span>
+                             </div>
+                        </div>
+                    </div>
+                    <div style="height: 350px;">
+                        <canvas id="inspectionsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Secondary Charts Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 p-6 border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-6 px-2 border-l-4 border-indigo-500 pl-4">Por Categoría</h3>
+                        <div style="height: 250px;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 p-6 border border-gray-100">
+                        <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest mb-6 px-2 border-l-4 border-orange-500 pl-4">Top Actividad</h3>
+                        <div style="height: 250px;">
+                            <canvas id="topChecklistsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Right Column: Timeline and Upcoming (Col 4) --}}
+            <div class="lg:col-span-4 space-y-8">
+                <!-- Activity Timeline -->
+                <div class="bg-white rounded-[2rem] shadow-xl shadow-gray-200/50 flex flex-col h-full border border-gray-100 overflow-hidden">
+                    <div class="px-8 py-6 bg-gray-50/50 border-b border-gray-100 flex items-center justify-between">
+                        <h3 class="text-lg font-black text-gray-900 tracking-tight">Actividad <span class="text-ep-primary">Reciente</span></h3>
+                        <span class="p-2 bg-white rounded-xl shadow-sm">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </span>
+                    </div>
+                    <div class="p-6 overflow-y-auto max-h-[1000px] scrollbar-thin scrollbar-thumb-gray-200 scrollbar-track-transparent">
+                        <div class="relative ml-4 border-l-2 border-gray-100 space-y-8 pb-4">
+                            @forelse($recentActivity as $activity)
+                                <div class="relative pl-8">
+                                    {{-- Time Dot --}}
+                                    <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full border-4 border-white shadow-sm
+                                        {{ $activity->type === 'visita' ? 'bg-blue-500' : 
+                                           ($activity->type === 'inspeccion' ? 'bg-green-500' : 
+                                           ($activity->type === 'capacitacion' ? 'bg-indigo-500' : 'bg-orange-500')) }}">
+                                    </div>
+                                    
+                                    <div class="flex flex-col">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <p class="text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                                {{ $activity->type }}
+                                            </p>
+                                            <span class="text-[10px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                                {{ $activity->date ? \Carbon\Carbon::parse($activity->date)->format('d/m') : '-' }}
+                                            </span>
+                                        </div>
+                                        <p class="text-sm font-bold text-gray-800 leading-snug mb-1 group-hover:text-ep-primary transition-colors">
+                                            {{ $activity->title }}
+                                        </p>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-[10px] font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-100 truncate max-w-[120px]">
+                                                {{ $activity->empresa }}
+                                            </span>
+                                            <span class="text-[10px] font-medium text-gray-400 truncate">
+                                                por {{ $activity->user_name }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-center py-12">
+                                    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+                                      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <p class="text-sm text-gray-400 font-medium">Sin actividad reciente</p>
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-    // Dashboard Charts - Updated: {{ now()->timestamp }}
+    // Configuración Global de Charts para Estética Premium
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#64748b';
+    
     // Inspecciones por Mes
     new Chart(document.getElementById('inspectionsChart'), {
         type: 'line',
@@ -272,14 +246,34 @@
                 label: 'Inspecciones',
                 data: @json($charts['inspectionsPerMonth']['data']),
                 borderColor: '#10B981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                tension: 0.4
+                borderWidth: 4,
+                backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                fill: true,
+                tension: 0.4,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#10B981'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } }
+            interaction: { intersect: false, mode: 'index' },
+            scales: {
+                y: { grid: { borderDash: [5, 5], color: '#f1f5f9' }, border: { display: false } },
+                x: { grid: { display: false }, border: { display: false } }
+            },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#1e1e2d',
+                    padding: 12,
+                    titleFont: { size: 14, weight: 'bold' },
+                    bodyFont: { size: 13 },
+                    cornerRadius: 12,
+                    displayColors: false
+                }
+            }
         }
     });
 
@@ -290,12 +284,21 @@
             labels: @json($charts['checklistsByCategory']['labels']),
             datasets: [{
                 data: @json($charts['checklistsByCategory']['data']),
-                backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#6366F1']
+                backgroundColor: ['#292938', '#F69239', '#4F46E5', '#10B981', '#F59E0B', '#EF4444'],
+                borderWidth: 0,
+                hoverOffset: 20
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: false
+            maintainAspectRatio: false,
+            cutout: '75%',
+            plugins: { 
+                legend: { 
+                    position: 'bottom',
+                    labels: { usePointStyle: true, padding: 20, font: { weight: 'bold', size: 11 } }
+                }
+            }
         }
     });
 
@@ -305,40 +308,21 @@
         data: {
             labels: @json($charts['topChecklists']['labels']),
             datasets: [{
-                label: 'Inspecciones',
                 data: @json($charts['topChecklists']['data']),
-                backgroundColor: '#3B82F6'
+                backgroundColor: '#F69239',
+                borderRadius: 12,
+                barThickness: 20
             }]
         },
         options: {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
+            scales: {
+                x: { display: false },
+                y: { grid: { display: false }, border: { display: false }, ticks: { font: { weight: 'bold' } } }
+            },
             plugins: { legend: { display: false } }
-        }
-    });
-
-    // Cumplimiento Anual
-    new Chart(document.getElementById('complianceChart'), {
-        type: 'bar',
-        data: {
-            labels: @json($charts['annualCompliance']['labels']),
-            datasets: [
-                {
-                    label: 'Planificado',
-                    data: @json($charts['annualCompliance']['planned']),
-                    backgroundColor: '#93C5FD'
-                },
-                {
-                    label: 'Completado',
-                    data: @json($charts['annualCompliance']['completed']),
-                    backgroundColor: '#3B82F6'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
         }
     });
 </script>

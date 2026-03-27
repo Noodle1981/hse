@@ -1,16 +1,41 @@
-<div class="py-6">
-    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-        {{-- Header Executivo --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 relative overflow-hidden">
-            <div class="absolute top-0 right-0 p-8 opacity-5">
-                <svg class="w-32 h-32 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
-            </div>
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-[1600px] mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
 
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                    <h2 class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Contrato Anual Higiene y Seguridad</h2>
-                    <h1 class="text-3xl font-black text-gray-900 leading-tight">Tablero de Cumplimiento {{ $year }}</h1>
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Tablero de <span class="text-ep-primary italic">Cumplimiento {{ $year }}</span>
+                    </h1>
                 </div>
+
+                <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                    <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                        {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                    </div>
+                    <div class="h-4 w-px bg-white/10 mx-1"></div>
+                    <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                </a>
+            </div>
+        </header>
+    @endsection
+    {{-- Header Ejecutico (Filters Row) --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 p-8 opacity-5">
+            <svg class="w-32 h-32 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/></svg>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h2 class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-1">Contrato Anual Higiene y Seguridad</h2>
+                <h3 class="text-xl font-black text-gray-900 leading-tight">Sede: {{ $sedes->find($sedeId)?->nombre_sede }}</h3>
+            </div>
 
                 <div class="flex flex-wrap items-center gap-3">
                     <select wire:model.live="sedeId" class="rounded-xl border-gray-200 text-sm font-bold text-gray-700 focus:ring-indigo-500 min-w-[200px] shadow-sm">

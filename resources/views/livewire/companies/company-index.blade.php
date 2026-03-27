@@ -1,21 +1,46 @@
-<div>
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Gestión de <span class="text-ep-primary italic">Empresas</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('gestor.companies.create') }}" 
+                       class="hidden xs:flex bg-ep-primary text-white hover:bg-ep-primary-dark px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Nueva Empresa
+                    </a>
+
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+    @endsection
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">Empresas</h2>
+        <div></div> {{-- Spacer for layout alignment if needed --}}
         <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full md:w-auto">
             <label class="inline-flex items-center cursor-pointer">
                 <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
                 <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
                 <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300 whitespace-nowrap">Ver Eliminados</span>
             </label>
-
-            <a href="{{ route('gestor.companies.create') }}" 
-            class="w-full sm:w-auto justify-center hover:bg-opacity-90 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2 shadow-sm"
-            style="background-color: #292938;">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-                Nueva Empresa
-            </a>
         </div>
     </div>
 

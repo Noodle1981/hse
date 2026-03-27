@@ -1,17 +1,38 @@
-<div>
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <h1 class="text-2xl sm:text-3xl font-bold text-ep-dark">Plantillas de Checklists</h1>
-        <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 w-full md:w-auto">
-            <a href="{{ route('gestor.assignments.index') }}" 
-               class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-semibold flex justify-center items-center w-full sm:w-auto">
-                ← Volver
-            </a>
-            <a href="{{ route('gestor.checklists.create') }}" 
-               class="px-6 py-3 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors font-semibold flex justify-center items-center w-full sm:w-auto">
-                + Nuevo Checklist
-            </a>
-        </div>
-    </div>
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Plantillas de <span class="text-ep-primary italic">Checklists</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('gestor.checklists.create') }}" 
+                       class="hidden xs:flex bg-ep-primary text-white hover:bg-ep-primary-dark px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Nuevo Checklist
+                    </a>
+
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+    @endsection
 
     @if (session()->has('message'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

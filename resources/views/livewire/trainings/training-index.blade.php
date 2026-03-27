@@ -1,19 +1,38 @@
-<div class="py-6">
-    <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
-        <!-- Header & Actions -->
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Capacitaciones</h1>
-                <p class="mt-1 text-sm text-gray-500">Gestión de sesiones formativas y registro de asistencia.</p>
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Gestión de <span class="text-ep-primary italic">Capacitaciones</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <a href="{{ route('gestor.trainings.create') }}" 
+                       class="hidden xs:flex bg-ep-primary text-white hover:bg-ep-primary-dark px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Nueva Capacitación
+                    </a>
+
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                    </a>
+                </div>
             </div>
-            <div class="mt-4 md:mt-0">
-                <a href="{{ route('gestor.trainings.create') }}" 
-                   class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-bold rounded-xl shadow-sm text-white bg-ep-primary hover:bg-ep-primary-dark transition-all">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                    Nueva Capacitación
-                </a>
-            </div>
-        </div>
+        </header>
+    @endsection
 
         <!-- Filters Section -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">

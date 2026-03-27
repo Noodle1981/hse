@@ -1,12 +1,33 @@
-<div class="px-4 sm:px-6 lg:px-8 py-8 w-full max-w-9xl mx-auto">
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
 
-    <!-- Page Header -->
-    <div class="sm:flex sm:justify-between sm:items-center mb-8">
-        <div class="mb-4 sm:mb-0">
-            <h1 class="text-2xl md:text-3xl text-gray-800 font-bold">Mis Visitas</h1>
-            <p class="text-gray-500 mt-1">Historial y gestión de visitas técnicas</p>
-        </div>
-        <div class="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Mis <span class="text-ep-primary italic">Visitas</span>
+                    </h1>
+                </div>
+
+                <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                    <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                        {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                    </div>
+                    <div class="h-4 w-px bg-white/10 mx-1"></div>
+                    <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                </a>
+            </div>
+        </header>
+    @endsection
+
+    <!-- Page Header Actions -->
+    <div class="flex justify-end mb-8">
             <button 
                 wire:click="openStartVisitModal"
                 class="bg-ep-primary text-white rounded-xl px-5 py-2.5 font-bold shadow-lg shadow-ep-primary/30 hover:shadow-ep-primary/50 hover:bg-ep-primary-dark hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2 group"
@@ -19,7 +40,6 @@
                 <span>Iniciar Nueva Visita</span>
             </button>
         </div>
-    </div>
 
     <!-- Active Visit Banner (if logic fails redirect) -->
     <!-- This is handled in mount/boot but just in case -->

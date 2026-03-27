@@ -1,37 +1,37 @@
-<div>
-    <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Asignación de Checklists</h1>
-            <p class="text-gray-600 mt-1">Asigna checklists a técnicos en sedes específicas</p>
-        </div>
-        <div class="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-3 w-full md:w-auto">
-            <a href="{{ route('gestor.inspections.index') }}" 
-               class="flex justify-center items-center gap-2 text-gray-600 hover:text-gray-800 font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200 hover:shadow-md w-full sm:w-auto">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-                </svg>
-                Volver
-            </a>
-            <button wire:click="toggleForm" 
-                    class="flex justify-center items-center gap-2 {{ $showForm ? 'bg-gray-500 hover:bg-gray-600' : 'bg-ep-dark hover:bg-opacity-90' }} text-white px-4 py-2 rounded-lg shadow-sm transition-colors w-full sm:w-auto">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    @if($showForm)
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    @else
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    @endif
-                </svg>
-                {{ $showForm ? 'Cancelar' : 'Nueva Asignación' }}
-            </button>
-            <a href="{{ route('gestor.checklists.index') }}" 
-               class="flex justify-center items-center gap-2 text-ep-primary hover:text-ep-primary-dark font-medium transition-colors bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100 hover:shadow-md w-full sm:w-auto">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                </svg>
-                Gestor de Plantillas
-            </a>
-        </div>
-    </div>
+<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        Asignación de <span class="text-ep-primary italic">Checklists</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button wire:click="toggleForm" 
+                            class="hidden xs:flex bg-white/10 backdrop-blur-md text-indigo-100 hover:bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
+                        {{ $showForm ? 'Cancelar' : 'Nueva Asignación' }}
+                    </button>
+                    
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+    @endsection
 
     @if (session()->has('message'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4 shadow-sm flex items-center gap-2">

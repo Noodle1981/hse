@@ -23,11 +23,25 @@ class AdminDashboard extends Component
     public $dateTo;
     public $empresaId = null;
     public $sedeId = null;
+    public $greeting;
 
     public function mount()
     {
         $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
         $this->dateTo = now()->format('Y-m-d');
+        $this->setGreeting();
+    }
+
+    private function setGreeting()
+    {
+        $hour = now()->hour;
+        if ($hour < 12) {
+            $this->greeting = '¡Buenos días!';
+        } elseif ($hour < 20) {
+            $this->greeting = '¡Buenas tardes!';
+        } else {
+            $this->greeting = '¡Buenas noches!';
+        }
     }
 
     public function render()

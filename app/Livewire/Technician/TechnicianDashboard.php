@@ -17,8 +17,11 @@ use Livewire\Attributes\{Layout, Title};
 #[Title('Mi Dashboard')]
 class TechnicianDashboard extends Component
 {
+    public $greeting;
+
     public function render()
     {
+        $this->setGreeting();
         $user = auth()->user();
         
         $kpis = $this->getPersonalKPIs($user);
@@ -176,5 +179,17 @@ class TechnicianDashboard extends Component
         }
         
         return null;
+    }
+
+    private function setGreeting()
+    {
+        $hour = now()->hour;
+        if ($hour < 12) {
+            $this->greeting = '¡Buenos días!';
+        } elseif ($hour < 20) {
+            $this->greeting = '¡Buenas tardes!';
+        } else {
+            $this->greeting = '¡Buenas noches!';
+        }
     }
 }

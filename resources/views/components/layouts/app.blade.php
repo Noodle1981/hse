@@ -126,19 +126,6 @@
             <!-- Menu -->
             <nav class="flex-1 overflow-y-auto sidebar-scroll py-4">
                 <ul class="space-y-1 px-3">
-                    <!-- Mi Perfil -->
-                    <li>
-                        <a href="{{ route('profile') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
-                                  {{ request()->routeIs('profile') ? 'menu-item-active text-white' : '' }}">
-                            <span class="menu-icon mr-3 flex-shrink-0">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                </svg>
-                            </span>
-                            <span x-show="sidebarOpen || mobileMenuOpen" class="menu-text">Mi Perfil</span>
-                        </a>
-                    </li>
 
                     <!-- Visitas (diferente para cada rol) -->
                     <!-- Mis Tareas (Solo Técnico) -->
@@ -386,6 +373,20 @@
                             <span x-show="sidebarOpen || mobileMenuOpen" class="menu-text">Dashboard</span>
                         </a>
                     </li>
+
+                    <!-- Mi Perfil -->
+                    <li>
+                        <a href="{{ route('profile') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('profile') ? 'menu-item-active text-white' : '' }}">
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen || mobileMenuOpen" class="menu-text">Mi Perfil</span>
+                        </a>
+                    </li>
                 </ul>
             </nav>
             
@@ -425,61 +426,65 @@
         
         <!-- Main Content -->
         <div class="flex-1 flex flex-col h-screen overflow-hidden">
-            <!-- Top Header -->
-            <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 lg:px-8 flex-shrink-0 z-20">
-                <!-- Mobile menu button -->
-                <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-600 hover:text-gray-900">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                    </svg>
-                </button>
-                
-                <!-- Page Title -->
-                <h1 class="text-xl font-semibold text-gray-800">
-                    {{ $title ?? 'XamaSafe' }}
-                </h1>
-                
-                <!-- Right side -->
-                <div class="flex items-center space-x-3 md:space-x-6">
-                    <!-- Role Switcher -->
-                    @if(auth()->user()->rol === \App\Models\User::ROLE_GESTOR || auth()->user()->rol === \App\Models\User::ROLE_SUPER_ADMIN)
-                        <div class="flex items-center">
-                            @if(session('active_role') === \App\Models\User::ROLE_TECNICO)
-                                <a href="{{ route('switch-role', \App\Models\User::ROLE_GESTOR) }}" 
-                                   class="bg-ep-primary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md hover:brightness-110 transition-all flex items-center gap-1">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
-                                    </svg>
-                                    <span class="hidden xs:inline">Modo</span> Gestor
-                                </a>
-                            @else
-                                <a href="{{ route('switch-role', \App\Models\User::ROLE_TECNICO) }}" 
-                                   class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-gray-300 transition-all flex items-center gap-1 border border-gray-300">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
-                                    </svg>
-                                    <span class="hidden xs:inline">Modo</span> Técnico
-                                </a>
-                            @endif
-                        </div>
-                    @endif
+            <!-- Top Header (Customizable) -->
+            @if(View::hasSection('header_custom'))
+                @yield('header_custom')
+            @else
+                <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 lg:px-8 flex-shrink-0 z-20">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-600 hover:text-gray-900">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                    
+                    <!-- Page Title -->
+                    <h1 class="text-xl font-semibold text-gray-800">
+                        {{ $title ?? 'XamaSafe' }}
+                    </h1>
+                    
+                    <!-- Right side -->
+                    <div class="flex items-center space-x-3 md:space-x-6">
+                        <!-- Role Switcher -->
+                        @if(auth()->user()->rol === \App\Models\User::ROLE_GESTOR || auth()->user()->rol === \App\Models\User::ROLE_SUPER_ADMIN)
+                            <div class="flex items-center">
+                                @if(session('active_role') === \App\Models\User::ROLE_TECNICO)
+                                    <a href="{{ route('switch-role', \App\Models\User::ROLE_GESTOR) }}" 
+                                       class="bg-ep-primary text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md hover:brightness-110 transition-all flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                                        </svg>
+                                        <span class="hidden xs:inline">Modo</span> Gestor
+                                    </a>
+                                @else
+                                    <a href="{{ route('switch-role', \App\Models\User::ROLE_TECNICO) }}" 
+                                       class="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-gray-300 transition-all flex items-center gap-1 border border-gray-300">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
+                                        </svg>
+                                        <span class="hidden xs:inline">Modo</span> Técnico
+                                    </a>
+                                @endif
+                            </div>
+                        @endif
 
-                    <!-- User info -->
-                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-                        <div class="flex flex-col items-end mr-1">
-                            <span class="hidden md:block text-xs font-bold text-gray-800">
-                                {{ auth()->user()->nombres }}
-                            </span>
-                            <span class="hidden md:block text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                {{ session('active_role') === 'tecnico' ? 'Modo Técnico' : 'Gestor' }}
-                            </span>
-                        </div>
-                        <div class="w-9 h-9 bg-ep-primary rounded-full flex items-center justify-center text-white text-sm font-black shadow-sm ring-2 ring-white">
-                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
-                        </div>
-                    </a>
-                </div>
-            </header>
+                        <!-- User info -->
+                        <a href="{{ route('profile') }}" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                            <div class="flex flex-col items-end mr-1">
+                                <span class="hidden md:block text-xs font-bold text-gray-800">
+                                    {{ auth()->user()->nombres }}
+                                </span>
+                                <span class="hidden md:block text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                    {{ session('active_role') === 'tecnico' ? 'Modo Técnico' : 'Gestor' }}
+                                </span>
+                            </div>
+                            <div class="w-9 h-9 bg-ep-primary rounded-full flex items-center justify-center text-white text-sm font-black shadow-sm ring-2 ring-white">
+                                {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                            </div>
+                        </a>
+                    </div>
+                </header>
+            @endif
             
             <!-- Main Content Area with Scroll -->
             <main class="flex-1 overflow-y-auto bg-gray-100">
