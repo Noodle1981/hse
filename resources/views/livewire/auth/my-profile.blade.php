@@ -51,6 +51,63 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Transmutador (Role Switcher) -->
+            @php
+                $baseRol = auth()->user()->rol;
+                $isBaseAdmin = in_array($baseRol, [\App\Models\User::ROLE_GESTOR, \App\Models\User::ROLE_SUPER_ADMIN, 'administrador', 'admin']);
+            @endphp
+
+            @if($isBaseAdmin)
+            <div class="mt-8 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                    Modo de Interfaz
+                </h3>
+                
+                <div class="space-y-3">
+                    @php
+                        $activeRole = session('active_role', auth()->user()->rol);
+                        $isGestorActive = $activeRole === \App\Models\User::ROLE_GESTOR || $activeRole === \App\Models\User::ROLE_SUPER_ADMIN;
+                        $isTecnicoActive = $activeRole === \App\Models\User::ROLE_TECNICO;
+                    @endphp
+
+                    <!-- Gestor Option -->
+                    <a href="{{ route('switch-role', \App\Models\User::ROLE_GESTOR) }}" 
+                       class="flex items-center gap-3 p-3 rounded-xl border-2 transition-all group {{ $isGestorActive ? 'border-ep-primary bg-indigo-50/50' : 'border-gray-50 hover:border-gray-200 hover:bg-gray-50' }}">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center transition-all {{ $isGestorActive ? 'bg-ep-primary text-white shadow-md' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        </div>
+                        <div class="text-left">
+                            <span class="block text-xs font-black {{ $isGestorActive ? 'text-indigo-900' : 'text-gray-600' }}">Gestión</span>
+                            <span class="text-[10px] font-medium {{ $isGestorActive ? 'text-indigo-600' : 'text-gray-400' }}">Panel Administrativo</span>
+                        </div>
+                        @if($isGestorActive)
+                            <div class="ml-auto w-2 h-2 bg-ep-primary rounded-full shadow-sm"></div>
+                        @endif
+                    </a>
+
+                    <!-- Técnico Option -->
+                    <a href="{{ route('switch-role', \App\Models\User::ROLE_TECNICO) }}" 
+                       class="flex items-center gap-3 p-3 rounded-xl border-2 transition-all group {{ $isTecnicoActive ? 'border-ep-primary bg-indigo-50/50' : 'border-gray-50 hover:border-gray-200 hover:bg-gray-50' }}">
+                        <div class="w-10 h-10 rounded-lg flex items-center justify-center transition-all {{ $isTecnicoActive ? 'bg-ep-primary text-white shadow-md' : 'bg-gray-100 text-gray-400 group-hover:bg-gray-200' }}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+                        </div>
+                        <div class="text-left">
+                            <span class="block text-xs font-black {{ $isTecnicoActive ? 'text-indigo-900' : 'text-gray-600' }}">Técnico</span>
+                            <span class="text-[10px] font-medium {{ $isTecnicoActive ? 'text-indigo-600' : 'text-gray-400' }}">Interfaz Operativa</span>
+                        </div>
+                        @if($isTecnicoActive)
+                            <div class="ml-auto w-2 h-2 bg-ep-primary rounded-full shadow-sm"></div>
+                        @endif
+                    </a>
+                </div>
+                
+                <p class="mt-4 text-[9px] text-gray-400 leading-tight italic">
+                    * Cambia el modo para acceder a funciones administrativas o de inspección técnica.
+                </p>
+            </div>
+            @endif
         </div>
 
         <!-- Forms Column -->

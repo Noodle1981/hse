@@ -74,6 +74,28 @@ class TechnicianDashboard extends Component
                     ->whereNull('firma_responsable')->count(),
                 'total' => GeneradorConstancia::where('user_id', $user->id)->count(),
             ],
+
+            'my_findings' => [
+                'total' => \App\Models\Hallazgo::where('inspector_id', $user->id)->count(),
+                'pending' => \App\Models\Hallazgo::where('inspector_id', $user->id)
+                    ->where('estado', '!=', 'resuelto')->count(),
+                'critical' => \App\Models\Hallazgo::where('inspector_id', $user->id)
+                    ->where('criticidad', 'alta')->where('estado', '!=', 'resuelto')->count(),
+            ],
+
+            'my_incidents' => [
+                'total' => \App\Models\Incidente::where('inspector_id', $user->id)->count(),
+                'this_month' => \App\Models\Incidente::where('inspector_id', $user->id)
+                    ->whereMonth('fecha', now()->month)->count(),
+            ],
+
+            'my_reports' => [
+                'total_master' => \App\Models\MasterReport::where('autor_id', $user->id)->count(),
+                'completed' => \App\Models\MasterReport::where('autor_id', $user->id)
+                    ->where('status', 'finalizado')->count(),
+                'pending' => \App\Models\MasterReport::where('autor_id', $user->id)
+                    ->where('status', '!=', 'finalizado')->count(),
+            ],
         ];
     }
 

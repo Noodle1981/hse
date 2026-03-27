@@ -61,7 +61,7 @@ class Sede extends Model
 
     public function checklists()
     {
-        return $this->hasMany(ChecklistsAsign::class);
+        return $this->hasMany(ChecklistAssignment::class);
     }
 
     public function assignments()
@@ -111,5 +111,15 @@ class Sede extends Model
     public function visitCertificates()
     {
         return $this->hasMany(VisitCertificate::class);
+    }
+
+    public function hallazgos()
+    {
+        return $this->hasMany(Hallazgo::class);
+    }
+
+    public function incidentes()
+    {
+        return $this->hasMany(Incidente::class);
     }
 }

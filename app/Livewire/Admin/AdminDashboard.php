@@ -21,15 +21,45 @@ class AdminDashboard extends Component
 {
     public $dateFrom;
     public $dateTo;
+    public $period = 'this_month';
     public $empresaId = null;
     public $sedeId = null;
     public $greeting;
 
     public function mount()
     {
-        $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
-        $this->dateTo = now()->format('Y-m-d');
+        $this->updateDates();
         $this->setGreeting();
+    }
+
+    public function updatedPeriod()
+    {
+        $this->updateDates();
+        $this->dispatch('periodUpdated');
+    }
+
+    private function updateDates()
+    {
+        switch ($this->period) {
+            case 'this_month':
+                $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+                $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'last_3_months':
+                $this->dateFrom = now()->subMonths(3)->startOfMonth()->format('Y-m-d');
+                $this->dateTo = now()->format('Y-m-d');
+                break;
+            case 'this_year':
+                $this->dateFrom = now()->startOfYear()->format('Y-m-d');
+                $this->dateTo = now()->endOfYear()->format('Y-m-d');
+                break;
+            case 'custom':
+                // Mantener fechas actuales
+                break;
+            default:
+                $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+                $this->dateTo = now()->format('Y-m-d');
+        }
     }
 
     private function setGreeting()
@@ -51,53 +81,108 @@ class AdminDashboard extends Component
         $recentActivity = $this->getRecentActivity();
         $upcomingActivities = $this->getUpcomingActivities();
         $alerts = $this->getAlerts();
+        $rankings = $this->getRankings();
 
         return view('livewire.admin.admin-dashboard', compact(
             'kpis',
             'charts',
             'recentActivity',
             'upcomingActivities',
-            'alerts'
+            'alerts',
+            'rankings'
         ));
     }
 
     private function getKPIs()
     {
+        $from = $this->dateFrom . ' 00:00:00';
+        $to = $this->dateTo . ' 23:59:59';
+
         return [
             'checklists' => [
                 'total_active' => DynamicChecklist::where('is_active', true)->count(),
                 'pending_assignments' => ChecklistAssignment::where('status', 'pending')->count(),
                 'overdue_assignments' => ChecklistAssignment::overdue()->count(),
+                'completed_period' => ChecklistAssignment::where('status', 'completed')
+                    ->whereBetween('updated_at', [$from, $to])->count(),
             ],
             'inspections' => [
-                'total_this_month' => DynamicInspection::whereMonth('completed_at', now()->month)
-                    ->whereYear('completed_at', now()->year)
-                    ->count(),
+                'total_period' => DynamicInspection::whereBetween('completed_at', [$from, $to])->count(),
                 'completed_today' => DynamicInspection::whereDate('completed_at', today())->count(),
-                'avg_per_day' => round(
-                    DynamicInspection::whereMonth('completed_at', now()->month)->count() / now()->day,
-                    1
-                ),
+                'avg_per_day' => $this->calculateAvgInspections($from, $to),
+            ],
+            'findings' => [
+                'total' => \App\Models\Hallazgo::whereBetween('fecha_deteccion', [$from, $to])->count(),
+                'pending' => \App\Models\Hallazgo::whereIn('estado', ['pendiente', 'en_proceso'])
+                    ->whereBetween('fecha_deteccion', [$from, $to])->count(),
+                'critical' => \App\Models\Hallazgo::where('criticidad', 'critico')
+                    ->whereBetween('fecha_deteccion', [$from, $to])->count(),
+                'resolved' => \App\Models\Hallazgo::whereIn('estado', ['resuelto', 'cerrado', 'verificado'])
+                    ->whereBetween('fecha_resolucion', [$from, $to])->count(),
+            ],
+            'incidents' => [
+                'total' => \App\Models\Incidente::whereBetween('fecha_ocurrencia', [$from, $to])->count(),
+                'serious' => \App\Models\Incidente::whereIn('gravedad', ['grave', 'fatal'])
+                    ->whereBetween('fecha_ocurrencia', [$from, $to])->count(),
+                'lost_days' => \App\Models\Incidente::whereBetween('fecha_ocurrencia', [$from, $to])->sum('dias_perdidos'),
+            ],
+            'reports' => [
+                'total_master' => \App\Models\MasterReport::whereBetween('created_at', [$from, $to])->count(),
+                'completed' => \App\Models\MasterReport::where('estado', 'finalizado')
+                    ->whereBetween('updated_at', [$from, $to])->count(),
+                'pending' => \App\Models\MasterReport::whereIn('estado', ['pendiente', 'en_revision'])
+                    ->whereBetween('created_at', [$from, $to])->count(),
+            ],
+            'ecosystem' => [
+                'total_companies' => \App\Models\Empresa::count(),
+                'active_technicians' => \App\Models\User::where('rol', 'tecnico')
+                    ->whereHas('checklists', function($q) use ($from, $to) {
+                        $q->whereBetween('updated_at', [$from, $to]);
+                    })->count(),
             ],
             'trainings' => [
-                'total_scheduled' => Training::where('date', '>=', now())->count(),
-                'attendees_this_month' => TrainingAttendance::whereHas('training', function($q) {
-                    $q->whereMonth('date', now()->month);
+                'total_scheduled' => Training::whereBetween('date', [$from, $to])->count(),
+                'attendees_period' => TrainingAttendance::whereHas('training', function($q) use ($from, $to) {
+                    $q->whereBetween('date', [$from, $to]);
                 })->count(),
-                'upcoming_7_days' => Training::whereBetween('date', [now(), now()->addDays(7)])->count(),
             ],
-
             'annual' => [
                 'compliance_percentage' => $this->calculateAnnualCompliance(),
-                'overdue_activities' => 0, // No status column exists in AnnualPlan
-                'activities_this_month' => AnnualPlan::whereMonth('created_at', now()->month)->count(),
             ],
             'visit_certificates' => [
-                'total' => GeneradorConstancia::count(),
+                'total_period' => GeneradorConstancia::whereBetween('fecha_visita', [$from, $to])->count(),
                 'pending_signature' => GeneradorConstancia::whereNull('firma_responsable')->count(),
-                'completed_this_month' => GeneradorConstancia::whereNotNull('firma_responsable')
-                    ->whereMonth('date_firma_responsable', now()->month)->count(),
             ],
+        ];
+    }
+
+    private function calculateAvgInspections($from, $to)
+    {
+        $days = \Carbon\Carbon::parse($from)->diffInDays(\Carbon\Carbon::parse($to)) ?: 1;
+        $total = DynamicInspection::whereBetween('completed_at', [$from, $to])->count();
+        return round($total / $days, 1);
+    }
+
+    private function getRankings()
+    {
+        $from = $this->dateFrom . ' 00:00:00';
+        $to = $this->dateTo . ' 23:59:59';
+
+        return [
+            'top_technicians' => \App\Models\User::where('rol', 'tecnico')
+                ->withCount(['checklists' => function($q) use ($from, $to) {
+                    $q->where('status', 'completed')->whereBetween('updated_at', [$from, $to]);
+                }])
+                ->orderByDesc('checklists_count')
+                ->take(5)
+                ->get(),
+            
+            'top_companies_findings' => \App\Models\Empresa::withCount(['hallazgos as findings_count' => function($q) use ($from, $to) {
+                    $q->whereIn('estado', ['pendiente', 'en_proceso']);
+                }])
+                ->orderByDesc('findings_count')
+                ->take(5)
+                ->get(),
         ];
     }
 
@@ -108,18 +193,62 @@ class AdminDashboard extends Component
             'checklistsByCategory' => $this->getChecklistsByCategory(),
             'annualCompliance' => $this->getAnnualComplianceChart(),
             'topChecklists' => $this->getTopChecklists(),
+            'findingsByStatus' => $this->getFindingsByStatus(),
+            'incidentsPerMonth' => $this->getIncidentsPerMonth(),
+        ];
+    }
+
+    private function getFindingsByStatus()
+    {
+        $from = $this->dateFrom . ' 00:00:00';
+        $to = $this->dateTo . ' 23:59:59';
+
+        $data = \App\Models\Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
+            ->select('estado', DB::raw('count(*) as total'))
+            ->groupBy('estado')
+            ->get();
+
+        return [
+            'labels' => $data->pluck('estado')->map(fn($s) => ucfirst($s))->toArray(),
+            'data' => $data->pluck('total')->toArray(),
+        ];
+    }
+
+    private function getIncidentsPerMonth()
+    {
+        $from = $this->dateFrom . ' 00:00:00';
+        $to = $this->dateTo . ' 23:59:59';
+
+        $data = \App\Models\Incidente::selectRaw("strftime('%m', fecha_ocurrencia) as month, count(*) as total")
+            ->whereBetween('fecha_ocurrencia', [$from, $to])
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        $result = array_fill(0, 12, 0);
+        foreach ($data as $month => $total) {
+            $monthIndex = (int)$month - 1;
+            if ($monthIndex >= 0 && $monthIndex < 12) {
+                $result[$monthIndex] = $total;
+            }
+        }
+
+        return [
+            'labels' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+            'data' => $result,
         ];
     }
 
     private function getInspectionsPerMonth()
     {
+        $from = $this->dateFrom . ' 00:00:00';
+        $to = $this->dateTo . ' 23:59:59';
+
         $data = DynamicInspection::selectRaw("strftime('%m', completed_at) as month, count(*) as total")
-            ->whereYear('completed_at', now()->year)
+            ->whereBetween('completed_at', [$from, $to])
             ->whereNotNull('completed_at')
             ->groupBy('month')
             ->pluck('total', 'month');
 
-        // Note: strftime returns '01', '02'...
         $monthsLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
         $result = array_fill(0, 12, 0);
 

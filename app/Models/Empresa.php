@@ -49,4 +49,9 @@ class Empresa extends Model
     {
         return $this->hasMany(ChecklistAssignment::class);
     }
+
+    public function hallazgos()
+    {
+        return $this->hasManyThrough(Hallazgo::class, Sede::class);
+    }
 }

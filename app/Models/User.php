@@ -79,7 +79,7 @@ class User extends Authenticatable
 
     public function checklists()
     {
-        return $this->hasMany(ChecklistsAsign::class);
+        return $this->hasMany(ChecklistAssignment::class);
     }
 
     public function capacitacionesPresenciales()
