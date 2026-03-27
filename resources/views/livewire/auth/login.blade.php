@@ -1,4 +1,4 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-ep-dark to-gray-900">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-ep-dark to-gray-900" x-data="{ showResetModal: false }">
     <div class="max-w-md w-full mx-4">
         <!-- Logo -->
         <div class="text-center mb-8">
@@ -75,17 +75,57 @@
 
                 <!-- Submit Button -->
                 <button type="submit" 
-                        class="w-full bg-ep-primary hover:bg-ep-primary-dark text-white font-semibold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        class="w-full bg-ep-primary hover:bg-ep-primary-dark text-white font-semibold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mb-4">
                     Iniciar Sesión
                 </button>
-            </form>
 
-            <!-- Demo Credentials -->
-            <div class="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <p class="text-xs text-gray-500 text-center mb-2 font-semibold">Problemas de ingreso</p>
-                <p class="text-xs text-gray-600 text-center">
-                    <span class="font-mono">soporte@xamasafe.com.ar</span>
-                </p>
+                <div class="text-center">
+                    <button type="button" @click="showResetModal = true" class="text-xs text-gray-500 hover:text-ep-primary transition-colors font-semibold underline decoration-gray-300 underline-offset-4">
+                        ¿Olvidaste tu contraseña?
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Password Reset Modal -->
+        <div x-show="showResetModal" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+             style="display: none;">
+            
+            <div @click.away="showResetModal = false" 
+                 class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all">
+                <div class="p-6">
+                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 text-center mb-2">Recuperar Contraseña</h3>
+                    <p class="text-sm text-gray-500 text-center mb-6">Por motivos de seguridad y privacidad, sigue estos pasos:</p>
+                    
+                    <div class="space-y-4">
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Si eres Técnico</p>
+                            <p class="text-sm text-gray-700 leading-tight">Contacta directamente a tu <span class="font-bold text-ep-primary">Gestor Administrativo</span> para que blanquee tu clave desde el panel de usuarios.</p>
+                        </div>
+                        
+                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Si eres Gestor / Admin</p>
+                            <p class="text-sm text-gray-700 leading-tight">Contacta al Soporte Técnico oficial de <span class="font-bold text-ep-primary">XamaSafe</span> enviando un mail a:</p>
+                            <p class="text-xs font-mono mt-1 text-gray-500">soporte@xamasafe.com.ar</p>
+                        </div>
+                    </div>
+                    
+                    <button @click="showResetModal = false" class="mt-6 w-full py-2 bg-gray-900 text-white rounded-lg font-bold text-sm hover:bg-black transition-colors">
+                        Entendido
+                    </button>
+                </div>
             </div>
         </div>
 
