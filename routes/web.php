@@ -46,6 +46,8 @@ Route::middleware(['auth'])->group(function () {
         }
         return redirect()->route('tecnico.dashboard');
     })->name('dashboard');
+
+    Route::get('/perfil', \App\Livewire\Auth\MyProfile::class)->name('profile');
     
     /*
     |--------------------------------------------------------------------------

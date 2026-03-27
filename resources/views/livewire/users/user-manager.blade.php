@@ -96,6 +96,9 @@
                         </label>
                         <input type="password" wire:model="password" 
                                class="w-full rounded-md border-gray-300 shadow-sm">
+                        <p class="mt-1 text-[10px] text-gray-400 leading-tight">
+                            <span class="font-bold text-orange-500 uppercase">Aviso:</span> Esta es una clave temporal. Informe al usuario que debe cambiarla desde su panel "Mi Perfil" al ingresar.
+                        </p>
                         @error('password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 

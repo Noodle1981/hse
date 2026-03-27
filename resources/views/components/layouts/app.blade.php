@@ -126,10 +126,19 @@
             <!-- Menu -->
             <nav class="flex-1 overflow-y-auto sidebar-scroll py-4">
                 <ul class="space-y-1 px-3">
-                    <!-- Dashboard -->
-                    <!-- Plantillas (Solo Admin) -->
-
-                    
+                    <!-- Mi Perfil -->
+                    <li>
+                        <a href="{{ route('profile') }}" 
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('profile') ? 'menu-item-active text-white' : '' }}">
+                            <span class="menu-icon mr-3 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </span>
+                            <span x-show="sidebarOpen || mobileMenuOpen" class="menu-text">Mi Perfil</span>
+                        </a>
+                    </li>
 
                     <!-- Visitas (diferente para cada rol) -->
                     <!-- Mis Tareas (Solo Técnico) -->
@@ -456,7 +465,7 @@
                     @endif
 
                     <!-- User info -->
-                    <div class="flex items-center space-x-2">
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                         <div class="flex flex-col items-end mr-1">
                             <span class="hidden md:block text-xs font-bold text-gray-800">
                                 {{ auth()->user()->nombres }}
@@ -468,7 +477,7 @@
                         <div class="w-9 h-9 bg-ep-primary rounded-full flex items-center justify-center text-white text-sm font-black shadow-sm ring-2 ring-white">
                             {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
                         </div>
-                    </div>
+                    </a>
                 </div>
             </header>
             
