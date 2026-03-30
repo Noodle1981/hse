@@ -30,11 +30,11 @@
     <div class="flex justify-end mb-8">
             <button 
                 wire:click="openStartVisitModal"
-                class="bg-ep-primary text-white rounded-xl px-5 py-2.5 font-bold shadow-lg shadow-ep-primary/30 hover:shadow-ep-primary/50 hover:bg-ep-primary-dark hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2 group"
+                class="bg-ep-primary text-white rounded-xl px-5 py-2.5 font-black shadow-lg shadow-ep-primary/20 hover:brightness-110 transition-all flex items-center gap-2 group uppercase tracking-widest text-[10px]"
             >
-                <div class="bg-white/20 rounded-full p-1 group-hover:bg-white/30 transition-colors">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/>
+                <div class="bg-white/20 rounded-lg p-1 group-hover:bg-white/30 transition-colors">
+                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
                 </div>
                 <span>Iniciar Nueva Visita</span>
@@ -218,58 +218,70 @@
         </div>
     </div>
 
-    <!-- Start Visit Modal -->
+    <!-- Start Visit Modal Premium -->
     @if($showStartVisitModal)
-        <div class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="fixed inset-0 z-50 overflow-y-auto" x-data="{ show: true }" x-show="show" x-cloak>
             <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                 
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" wire:click="$set('showStartVisitModal', false)"></div>
+                {{-- Backdrop --}}
+                <div class="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity" 
+                     aria-hidden="true" 
+                     wire:click="$set('showStartVisitModal', false)"></div>
 
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
-                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                {{-- Modal Content --}}
+                <div class="inline-block align-bottom bg-ep-dark text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full rounded-3xl border border-white/10">
+                    <div class="px-4 pt-5 pb-4 sm:p-8 sm:pb-6">
                         <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <svg class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-2xl bg-white/5 border border-white/10 sm:mx-0 sm:h-12 sm:w-12 shadow-inner">
+                                <svg class="h-6 w-6 text-ep-primary" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                    Iniciar Nueva Visita
+                            <div class="mt-4 text-center sm:mt-0 sm:ml-6 sm:text-left w-full">
+                                <h3 class="text-xl font-black text-white tracking-tight italic uppercase">
+                                    Iniciar Nueva <span class="text-ep-primary">Visita</span>
                                 </h3>
-                                <div class="mt-2 text-sm text-gray-500">
-                                    Selecciona la sede o cliente donde realizarás la visita técnica.
+                                <div class="mt-2">
+                                    <p class="text-sm font-medium text-indigo-100/60 italic leading-relaxed">
+                                        Selecciona la sede o cliente donde realizarás la visita técnica interactiva.
+                                    </p>
                                 </div>
 
-                                <div class="mt-4">
-                                    <label for="sede" class="block text-sm font-medium text-gray-700">Sede</label>
-                                    <select 
-                                        id="sede" 
-                                        wire:model.live="selectedSedeId"
-                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md"
-                                    >
-                                        <option value="">Seleccionar Sede...</option>
-                                        @foreach($sedes as $sede)
-                                            <option value="{{ $sede->id }}">
-                                                {{ $sede->empresa->nombre }} - {{ $sede->nombre_sede }}
-                                            </option>
-                                        @endforeach
-                                    </select>
+                                <div class="mt-6">
+                                    <label class="block text-[10px] font-black text-ep-primary uppercase tracking-widest mb-2">Seleccionar Sede</label>
+                                    <div class="relative group">
+                                        <select 
+                                            wire:model.live="selectedSedeId"
+                                            class="block w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all appearance-none cursor-pointer group-hover:bg-white/10"
+                                        >
+                                            <option value="" class="bg-ep-dark text-gray-400">Seleccionar Sede...</option>
+                                            @foreach($sedes as $sede)
+                                                <option value="{{ $sede->id }}" class="bg-ep-dark text-white">
+                                                    {{ $sede->empresa->nombre }} - {{ $sede->nombre_sede }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-ep-primary">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                        </div>
+                                    </div>
                                     @error('selectedSedeId') 
-                                        <span class="text-red-500 text-xs mt-1">{{ $message }}</span> 
+                                        <span class="text-red-400 text-xs mt-2 block font-medium italic">{{ $message }}</span> 
                                     @enderror
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    
+                    {{-- Footer --}}
+                    <div class="bg-black/20 px-6 py-4 sm:flex sm:flex-row-reverse gap-3 border-t border-white/10">
                         <button 
                             type="button" 
                             wire:click="startVisit"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-ep-primary text-base font-medium text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm"
+                            class="w-full inline-flex justify-center rounded-xl px-6 py-2.5 bg-ep-primary text-white text-[10px] font-black shadow-lg shadow-ep-primary/20 hover:brightness-110 focus:outline-none transition-all sm:w-auto uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed disabled:grayscale"
                             @if(!$selectedSedeId) disabled @endif
                         >
                             Iniciar Visita
@@ -277,7 +289,7 @@
                         <button 
                             type="button" 
                             wire:click="$set('showStartVisitModal', false)"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                            class="mt-3 w-full inline-flex justify-center rounded-xl bg-white/5 px-6 py-2.5 text-white text-[10px] font-black border border-white/10 hover:bg-white/10 focus:outline-none transition-all sm:mt-0 sm:w-auto uppercase tracking-widest"
                         >
                             Cancelar
                         </button>

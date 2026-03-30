@@ -5,47 +5,82 @@
         </div>
     @endif
 
-    {{-- Banner de Estado --}}
+    {{-- Banner de Estado Premium --}}
     @if($incidente->estado === 'pendiente')
-        <div class="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded-r-lg flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                <span class="font-medium">Atención: El incidente se encuentra **Pendiente** de carga de Licencia Médica / Cierre.</span>
+        <div class="mb-8 flex items-center justify-between bg-ep-dark border-l-4 border-yellow-500 p-5 rounded-2xl shadow-xl overflow-hidden relative group">
+            <div class="absolute -right-4 -top-4 w-24 h-24 bg-yellow-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+            <div class="relative flex items-center gap-4">
+                <div class="p-3 bg-white/5 rounded-xl border border-white/10 text-yellow-500 shadow-inner">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-white text-sm font-black uppercase tracking-widest italic leading-none mb-1">
+                        Atención: Incidente <span class="text-yellow-500">Pendiente</span>
+                    </p>
+                    <p class="text-indigo-100/60 text-[11px] font-medium italic">
+                        El incidente requiere carga de Licencia Médica o Cierre administrativo.
+                    </p>
+                </div>
             </div>
             @if(auth()->user()->isAdmin())
-                <button @click="showGestion = true" class="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-bold rounded-lg transition-colors">
+                <button @click="showGestion = true" 
+                        class="relative px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white text-[10px] font-black rounded-xl transition-all shadow-lg shadow-yellow-900/20 uppercase tracking-widest">
                     Gestionar Ahora
                 </button>
             @endif
         </div>
     @endif
 
-    {{-- Encabezado --}}
-    <div class="mb-6 flex justify-between items-center">
-        <div>
-            <a href="{{ auth()->user()->isAdmin() ? route('gestor.incidentes.index') : route('tecnico.incidentes.index') }}" 
-               class="text-ep-primary hover:underline text-sm font-semibold flex items-center gap-1">
-               ← Volver al Listado
-            </a>
-            <h1 class="text-3xl font-bold text-ep-dark mt-2">Detalle de Incidente #{{ $incidente->id }}</h1>
-        </div>
-        <div class="flex gap-2">
-            @if(auth()->user()->isAdmin())
-                <button @click="showGestion = true" 
-                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow flex items-center gap-2 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                    Gestionar
-                </button>
-            @endif
-            <a href="{{ auth()->user()->isAdmin() ? route('gestor.incidentes.pdf', $incidente) : route('tecnico.incidentes.pdf', $incidente) }}" 
-               class="px-4 py-2 bg-ep-primary hover:bg-ep-primary-dark text-white font-semibold rounded-lg shadow flex items-center gap-2 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-                Descargar PDF
-            </a>
-        </div>
-    </div>
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight italic">
+                        Detalle de Incidente <span class="text-ep-primary">#{{ $incidente->id }}</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.incidentes.index') : route('tecnico.incidentes.index') }}" 
+                       class="hidden xs:flex bg-white/10 text-white hover:bg-white/20 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest">
+                        <svg class="w-3.5 h-3.5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Volver
+                    </a>
+
+                    @if(auth()->user()->isAdmin())
+                        <button @click="showGestion = true" 
+                                class="hidden sm:flex bg-white/10 text-white hover:bg-white/20 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest">
+                            <svg class="w-3.5 h-3.5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Gestionar
+                        </button>
+                    @endif
+
+                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.incidentes.pdf', $incidente) : route('tecnico.incidentes.pdf', $incidente) }}" 
+                       class="bg-ep-primary text-white hover:brightness-110 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest shadow-lg shadow-ep-primary/20">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        PDF
+                    </a>
+                </div>
+            </div>
+        </header>
+    @endsection
+
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
 
     {{-- Contenido Principal --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -225,11 +260,11 @@
                         @error('medidas_tomadas') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="pt-2 flex justify-end gap-2">
-                        <button type="button" @click="showGestion = false" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium">
+                    <div class="pt-4 flex justify-end gap-2 border-t border-gray-100 italic">
+                        <button type="button" @click="showGestion = false" class="px-5 py-2 bg-white border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 text-[10px] font-black uppercase tracking-widest transition-all">
                             Cancelar
                         </button>
-                        <button type="submit" class="px-4 py-2 bg-ep-primary hover:bg-ep-primary-dark text-white rounded-lg text-sm font-medium shadow">
+                        <button type="submit" class="px-6 py-2 bg-ep-primary hover:brightness-110 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-ep-primary/20 transition-all">
                             Guardar Cambios
                         </button>
                     </div>

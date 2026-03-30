@@ -6,14 +6,43 @@
         // So validation: If admin, go to index. If technician, go to dashboard or previous page.
         $backRoute = auth()->user()->isAdmin() ? route('gestor.trainings.index') : route('tecnico.dashboard');
     @endphp
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="mb-8">
-            <a href="{{ $backRoute }}" class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-ep-primary transition-colors">
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                Volver
-            </a>
-            <h1 class="text-3xl font-bold text-gray-900 mt-2">{{ $trainingId ? 'Editar' : 'Nueva' }} Capacitación</h1>
-        </div>
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight italic">
+                        {{ $trainingId ? 'Editar' : 'Nueva' }} <span class="text-ep-primary">Capacitación</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <a href="{{ $backRoute }}" class="hidden xs:flex bg-white/10 text-white hover:bg-white/20 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest">
+                        <svg class="w-3.5 h-3.5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Volver
+                    </a>
+
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+    @endsection
+
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
 
         <form wire:submit="save" class="space-y-8">
             <!-- Información Básica -->
@@ -132,13 +161,13 @@
             </div>
 
             <!-- Botones de Acción -->
-            <div class="flex items-center justify-end gap-4">
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 mt-6">
                 <a href="{{ $backRoute }}" 
-                   class="px-6 py-3 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all">
+                   class="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-[10px] font-black transition-all shadow-sm uppercase tracking-widest">
                     Cancelar
                 </a>
                 <button type="submit" 
-                        class="px-8 py-3 bg-ep-primary text-white rounded-xl shadow-lg shadow-ep-primary/30 hover:bg-ep-primary-dark transition-all font-bold text-sm">
+                        class="px-8 py-2.5 bg-ep-primary text-white rounded-xl shadow-lg shadow-ep-primary/20 hover:brightness-110 transition-all font-black text-[10px] uppercase tracking-widest">
                     {{ $trainingId ? 'Actualizar' : 'Guardar' }} Capacitación
                 </button>
             </div>

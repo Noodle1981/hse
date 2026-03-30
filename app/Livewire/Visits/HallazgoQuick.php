@@ -12,7 +12,7 @@ class HallazgoQuick extends Component
 {
     use WithFileUploads;
 
-    public $visit;
+    public \App\Models\VisitCertificate $visit;
     public $titulo = '';
     public $descripcion = '';
     public $ubicacion_especifica = '';
@@ -21,12 +21,13 @@ class HallazgoQuick extends Component
     public $photos = [];
 
     protected $rules = [
+        'visit' => 'nullable',
         'titulo' => 'required|string|max:255',
         'descripcion' => 'required|string',
         'ubicacion_especifica' => 'nullable|string|max:255',
         'criticidad' => 'required|in:bajo,medio,alto,critico',
         'plazo_correccion' => 'required|date|after:today',
-        'photos.*' => 'image|max:5120', // Máximo 5MB por foto
+        'photos.*' => 'image|max:20480', // Aumentado a 20MB para fotos de alta resolución
     ];
 
     protected $messages = [

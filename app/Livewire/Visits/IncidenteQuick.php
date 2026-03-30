@@ -12,7 +12,7 @@ class IncidenteQuick extends Component
 {
     use WithFileUploads;
 
-    public $visit;
+    public \App\Models\VisitCertificate $visit;
     public $titulo = '';
     public $descripcion = '';
     public $ubicacion_especifica = '';
@@ -23,6 +23,7 @@ class IncidenteQuick extends Component
     public $photos = [];
 
     protected $rules = [
+        'visit' => 'nullable',
         'titulo' => 'required|string|max:255',
         'descripcion' => 'required|string',
         'ubicacion_especifica' => 'nullable|string|max:255',
@@ -30,7 +31,7 @@ class IncidenteQuick extends Component
         'tipo_incidente' => 'required|in:accidente,casi_accidente,condicion_insegura,acto_inseguro',
         'personas_afectadas' => 'required|integer|min:0',
         'medidas_tomadas' => 'required|string',
-        'photos.*' => 'image|max:5120',
+        'photos.*' => 'image|max:20480', // Aumentado a 20MB para fotos de alta resolución
     ];
 
     protected $messages = [

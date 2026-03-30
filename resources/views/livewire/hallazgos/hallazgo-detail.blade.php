@@ -1,34 +1,53 @@
 <div>
     {{-- Header --}}
-    <div class="mb-6">
-        <div class="flex justify-between items-start">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.index') : route('tecnico.hallazgos.index') }}" 
-                       class="inline-flex items-center text-sm font-medium text-blue-600 hover:text-blue-800">
-                        ← Volver
-                    </a>
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight italic">
+                        Hallazgo <span class="text-ep-primary">#{{ $hallazgo->visit_counter }}</span> • {{ $hallazgo->titulo }}
+                    </h1>
                 </div>
-                <h1 class="text-3xl font-bold text-ep-dark">Hallazgo #{{ $hallazgo->visit_counter }} • {{ $hallazgo->titulo }}</h1>
-                <p class="text-gray-600 mt-2">ID Global #{{ $hallazgo->id }} • Creado el {{ $hallazgo->created_at->format('d/m/Y H:i') }} por {{ $hallazgo->user->nombres }}</p>
-            </div>
-            <div class="flex gap-2">
-                <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.pdf', $hallazgo) : route('tecnico.hallazgos.pdf', $hallazgo) }}" 
-                    class="px-4 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors flex items-center gap-2">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                    </svg>
-                    Descargar PDF
-                </a>
-                @if(auth()->user()->isAdmin() || auth()->user()->hasRole(['Técnico', 'tecnico']))
-                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.edit', $hallazgo) : route('tecnico.hallazgos.edit', $hallazgo) }}" 
-                       class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
-                        Editar
+
+                <div class="flex items-center space-x-3">
+                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.index') : route('tecnico.hallazgos.index') }}" 
+                       class="hidden xs:flex bg-white/10 text-white hover:bg-white/20 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest">
+                        <svg class="w-3.5 h-3.5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Volver
                     </a>
-                @endif
+
+                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.pdf', $hallazgo) : route('tecnico.hallazgos.pdf', $hallazgo) }}" 
+                       class="hidden sm:flex bg-ep-primary text-white hover:brightness-110 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest shadow-lg shadow-ep-primary/20">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        PDF
+                    </a>
+
+                    @if(auth()->user()->isAdmin() || auth()->user()->hasRole(['Técnico', 'tecnico']))
+                        <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.edit', $hallazgo) : route('tecnico.hallazgos.edit', $hallazgo) }}" 
+                           class="bg-white/5 text-white hover:bg-white/10 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest">
+                            <svg class="w-3.5 h-3.5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                            </svg>
+                            Editar
+                        </a>
+                    @endif
+                </div>
             </div>
-        </div>
-    </div>
+        </header>
+    @endsection
+
+    <div class="px-4 sm:px-6 lg:px-8 py-6">
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {{-- Columna Principal --}}
@@ -237,8 +256,14 @@
                                     {{ ucfirst($foto->tipo) }}
                                 </span>
                             </div>
-                            <button wire:click="eliminarFoto({{ $foto->id }})"
-                                    wire:confirm="¿Eliminar esta foto?"
+                            <button @click="$dispatch('open-confirm-modal', { 
+                                        id: {{ $foto->id }}, 
+                                        title: '¿Eliminar Foto?', 
+                                        message: '¿Estás seguro de eliminar esta evidencia fotográfica? Esta acción no se puede deshacer.',
+                                        action: 'eliminarFoto',
+                                        confirmLabel: 'Eliminar',
+                                        confirmColor: 'bg-red-600 shadow-red-200'
+                                    })"
                                     class="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -304,19 +329,19 @@
                 <div class="space-y-2">
                     @if($hallazgo->estado !== 'en_proceso')
                         <button wire:click="prepararSeguimiento('en_proceso')" 
-                                class="w-full px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 text-sm">
+                                class="w-full px-4 py-2 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm">
                             → En Proceso
                         </button>
                     @endif
                     @if($hallazgo->estado !== 'resuelto')
                         <button wire:click="prepararSeguimiento('resuelto')" 
-                                class="w-full px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm">
+                                class="w-full px-4 py-2 bg-cyan-600 text-white rounded-xl hover:bg-cyan-700 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm">
                             ✓ Resuelto
                         </button>
                     @endif
                     @if($hallazgo->estado !== 'cerrado')
                         <button wire:click="prepararSeguimiento('cerrado')" 
-                                class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm">
+                                class="w-full px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm">
                             ✓✓ Cerrado
                         </button>
                     @endif
@@ -339,4 +364,6 @@
             {{ session('message') }}
         </div>
     @endif
+
+    <x-modal-confirm />
 </div>

@@ -1,28 +1,58 @@
 <div>
-    <!-- Encabezado -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-ep-dark flex items-center gap-3">
-                <span class="text-3xl">📱</span>
-                Emulador: {{ $checklist->title }}
-            </h1>
-            <p class="text-gray-500 mt-1">
-                Visualización previa de cómo el técnico verá e interactuará con este checklist.
-                <strong>(Modo de solo lectura interactivo)</strong>
-            </p>
-        </div>
-        <div class="flex gap-3">
-            <a href="{{ route('gestor.checklists.index') }}" 
-               class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors font-medium">
-                ← Volver a Checklists
-            </a>
-            <button onclick="window.print()" 
-                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg print:hidden">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+
+                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
+                        📱 Emulador: <span class="text-ep-primary italic">{{ $checklist->title }}</span>
+                    </h1>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <button onclick="window.print()" 
+                            class="hidden xs:flex bg-white/10 text-white hover:bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                        Imprimir PDF
+                    </button>
+
+                    <a href="{{ route('gestor.checklists.index') }}" 
+                       class="flex items-center space-x-2 bg-ep-primary text-white hover:bg-ep-primary-dark px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all">
+                        <span>← Volver</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+    @endsection
+
+    <!-- Información informativa (Modo interactivo) -->
+    <div class="mb-8 flex items-center justify-between bg-ep-dark border-l-4 border-ep-primary p-5 rounded-2xl shadow-xl overflow-hidden relative group print:hidden">
+        <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
+        <div class="relative flex items-center gap-4">
+            <div class="p-3 bg-white/5 rounded-xl border border-white/10 text-ep-primary shadow-inner">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                Vista de Impresión (PDF)
-            </button>
+            </div>
+            <div>
+                <p class="text-white text-sm font-black uppercase tracking-widest italic leading-none mb-1">
+                    Modo <span class="text-ep-primary">Interactivo</span>
+                </p>
+                <p class="text-indigo-100/60 text-[11px] font-medium italic">
+                    Esta es una visualización previa de cómo el técnico interactuará con el checklist.
+                </p>
+            </div>
+        </div>
+        <div class="hidden sm:block opacity-20 group-hover:opacity-40 transition-opacity">
+            <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17 2H7C5.89 2 5 2.89 5 4V20C5 21.11 5.89 22 7 22H17C18.11 22 19 21.11 19 20V4C19 2.89 18.11 2 17 2M17 19H7V5H17V19Z"/>
+            </svg>
         </div>
     </div>
 
