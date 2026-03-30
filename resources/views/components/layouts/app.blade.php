@@ -92,7 +92,7 @@
     
     @livewireStyles
 </head>
-<body class="bg-gray-100 min-h-screen" x-data="{ sidebarOpen: window.innerWidth >= 1024, mobileMenuOpen: false }">
+<body class="bg-[#11111d] min-h-screen text-white" x-data="{ sidebarOpen: window.innerWidth >= 1024, mobileMenuOpen: false }">
     <div class="flex min-h-screen">
         <!-- Sidebar -->
         <aside class="fixed left-0 top-0 h-screen bg-ep-sidebar sidebar-transition z-40 flex flex-col lg:relative lg:translate-x-0"
@@ -425,12 +425,12 @@
              class="fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
         
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        <div class="flex-1 flex flex-col h-screen overflow-hidden bg-ep-dark">
             <!-- Top Header (Customizable) -->
             @if(View::hasSection('header_custom'))
                 @yield('header_custom')
             @else
-                <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 lg:px-8 flex-shrink-0 z-20">
+                <header class="h-16 bg-ep-dark/80 backdrop-blur-md shadow-lg border-b border-white/5 flex items-center justify-between px-3 sm:px-6 lg:px-8 flex-shrink-0 z-20">
                     <!-- Mobile menu button -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-600 hover:text-gray-900">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -439,7 +439,7 @@
                     </button>
                     
                     <!-- Page Title -->
-                    <h1 class="text-xl font-semibold text-gray-800">
+                    <h1 class="text-sm sm:text-xl font-bold text-white tracking-tight uppercase italic truncate max-w-[150px] sm:max-w-none">
                         {{ $title ?? 'XamaSafe' }}
                     </h1>
                     
@@ -470,15 +470,15 @@
 
                         <!-- User info -->
                         <a href="{{ route('profile') }}" class="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-                            <div class="flex flex-col items-end mr-1">
-                                <span class="hidden md:block text-xs font-bold text-gray-800">
+                            <div class="hidden sm:flex flex-col items-end mr-1">
+                                <span class="text-xs font-black text-white uppercase italic tracking-wide">
                                     {{ auth()->user()->nombres }}
                                 </span>
-                                <span class="hidden md:block text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                                <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
                                     {{ session('active_role') === 'tecnico' ? 'Modo Técnico' : 'Gestor' }}
                                 </span>
                             </div>
-                            <div class="w-9 h-9 bg-ep-primary rounded-full flex items-center justify-center text-white text-sm font-black shadow-sm ring-2 ring-white">
+                            <div class="w-8 h-8 sm:w-9 sm:h-9 bg-ep-primary rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-black shadow-sm ring-2 ring-white/10">
                                 {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
                             </div>
                         </a>
@@ -487,8 +487,8 @@
             @endif
             
             <!-- Main Content Area with Scroll -->
-            <main class="flex-1 overflow-y-auto bg-gray-100">
-                <div class="p-6">
+            <main class="flex-1 overflow-y-auto bg-[#11111d]">
+                <div class="p-3 sm:p-6">
                     {{ $slot }}
                 </div>
                 

@@ -29,8 +29,8 @@
         </header>
     @endsection
 
-    <div class="py-6 min-h-screen bg-[#11111d] text-white selection:bg-ep-primary/30">
-        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="py-4 sm:py-8 min-h-screen bg-[#11111d] text-white selection:bg-ep-primary/30">
+        <div class="max-w-5xl mx-auto px-1 sm:px-6 lg:px-8">
 
             {{-- Banner contextual Premium (Ahora con estilo de alerta técnica integrada) --}}
             @if($visitId)
@@ -69,7 +69,7 @@
                 
                 <!-- Step 0: Intro / Context Premium -->
                 @if($currentStep === 0)
-                    <div class="p-8 sm:p-12 relative">
+                    <div class="p-5 sm:p-12 relative">
                         <div class="text-center mb-10">
                             <div class="mx-auto h-20 w-20 bg-ep-primary/10 rounded-2xl border border-ep-primary/20 flex items-center justify-center mb-6 shadow-inner rotate-3 group-hover:rotate-0 transition-all duration-700">
                                 <svg class="h-10 w-10 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
@@ -108,7 +108,7 @@
                 <!-- Steps 1 to N: Sections Premium -->
                 @foreach($sections as $index => $section)
                     @if($currentStep === ($index + 1))
-                        <div class="p-8 sm:p-12 animate-fade-in">
+                        <div class="p-5 sm:p-12 animate-fade-in">
                             <div class="mb-10 flex items-center gap-4">
                                 <span class="text-2xl font-black text-ep-primary italic">#{{ str_pad($index + 1, 2, '0', STR_PAD_LEFT) }}</span>
                                 <div class="flex-1">
@@ -201,7 +201,7 @@
 
                 <!-- Step Final: Notes and Signatures Premium -->
                 @if($currentStep === ($totalSteps - 1))
-                    <div class="p-8 sm:p-12 animate-fade-in space-y-10">
+                    <div class="p-5 sm:p-12 animate-fade-in space-y-10">
                         <div class="text-center">
                             <h2 class="text-3xl font-black text-white italic uppercase tracking-tight mb-2">Protocolo de Cierre</h2>
                             <p class="text-xs font-medium text-indigo-100/40 italic uppercase tracking-[0.2em]">Validación de Registro e Integración</p>
