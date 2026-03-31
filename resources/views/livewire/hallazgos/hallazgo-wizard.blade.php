@@ -300,7 +300,7 @@
                                     class="px-6 py-2 bg-ep-primary text-white rounded-lg hover:bg-ep-primary-dark transition-colors">
                                 Siguiente →
                             </button>
-                        @else
+                        @elseif(!auth()->user()->isAdmin()) {{-- Solo el técnico puede guardar cambios --}}
                             <button type="submit"
                                     class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-semibold">
                                 💾 {{ $hallazgoId ? 'Actualizar' : 'Crear' }} Hallazgo

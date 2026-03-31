@@ -33,15 +33,7 @@
                         PDF
                     </a>
 
-                    @if(auth()->user()->isAdmin() || auth()->user()->hasRole(['Técnico', 'tecnico']))
-                        <a href="{{ auth()->user()->isAdmin() ? route('gestor.hallazgos.edit', $hallazgo) : route('tecnico.hallazgos.edit', $hallazgo) }}" 
-                           class="bg-white/5 text-white hover:bg-white/10 px-3 py-1 rounded-full text-[10px] font-black border border-white/10 transition-all items-center gap-1 uppercase tracking-widest">
-                            <svg class="w-3.5 h-3.5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                            </svg>
-                            Editar
-                        </a>
-                    @endif
+                    {{-- Botón Editar removido para el Gestor (acción exclusiva del Técnico) --}}
                 </div>
             </div>
         </header>

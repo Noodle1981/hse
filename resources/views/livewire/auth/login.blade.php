@@ -1,137 +1,193 @@
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-ep-dark to-gray-900" x-data="{ showResetModal: false }">
-    <div class="max-w-md w-full mx-4">
-        <!-- Logo -->
-        <div class="text-center mb-8">
-            <div class="w-20 h-20 bg-ep-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <span class="text-white font-bold text-1xl">XamaSafe</span>
+<div class="min-h-screen flex items-center justify-center bg-[#11111d] relative overflow-hidden" x-data="{ showResetModal: false }">
+    <!-- Quantum Background Effects -->
+    <div class="absolute inset-0 z-0">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-ep-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03]"></div>
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0); background-size: 40px 40px;"></div>
+    </div>
+
+    <div class="max-w-md w-full mx-4 relative z-10 animate-fade-in-up">
+        <!-- Identity Header (XamaSafe Ecosystem Core Style) -->
+        <div class="text-center mb-12 group cursor-pointer">
+            <div class="relative inline-block mb-8">
+                <!-- Outer glow -->
+                <div class="absolute inset-0 bg-ep-primary/20 blur-[60px] rounded-full group-hover:bg-ep-primary/40 transition-all duration-700"></div>
+                
+                <!-- Large X Box (Ecosystem Style) -->
+                <div class="w-48 h-48 bg-ep-dark/60 backdrop-blur-xl rounded-[3rem] flex items-center justify-center rotate-3 group-hover:rotate-0 transition-all duration-700 border border-white/10 shadow-2xl relative overflow-hidden shadow-[0_0_40px_rgba(246,146,57,0.15)]">
+                    <div class="absolute inset-0 bg-gradient-to-br from-ep-primary/30 via-transparent to-transparent"></div>
+                    <div class="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-1000"></div>
+                    
+                    <span class="text-white font-black text-8xl italic tracking-tighter relative z-10 select-none group-hover:scale-110 transition-transform duration-700">X</span>
+                    
+                    <!-- Tactical Scanner Line -->
+                    <div class="absolute inset-x-0 h-1 bg-ep-primary/30 top-0 scan-line opacity-0 group-hover:opacity-100"></div>
+                </div>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Plataforma de Higiene y Seguridad</h1>
-            <p class="text-gray-400">Ingrese sus credenciales para continuar</p>
+            
+            <div class="flex flex-col items-center gap-2">
+                <h1 class="text-5xl font-black text-white italic tracking-tighter leading-none">
+                    Xama<span class="text-ep-primary">Safe</span>
+                </h1>
+                <div class="flex items-center gap-3">
+                    <div class="h-px w-8 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                    <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.6em] italic">Ecosystem Core</span>
+                    <div class="h-px w-8 bg-gradient-to-l from-transparent via-white/20 to-transparent"></div>
+                </div>
+            </div>
         </div>
 
-        <!-- Login Card -->
-        <div class="bg-white rounded-2xl shadow-2xl p-8">
-            <form wire:submit="login">
-                <!-- Email -->
-                <div class="mb-6">
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
-                        Correo Electrónico
+        <!-- Security Portal Card (Glass-morphism) -->
+        <div class="bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/10 p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden group/card shadow-[0_0_30px_rgba(246,146,57,0.05)]">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-ep-primary/50 to-transparent"></div>
+            
+            <form wire:submit="login" class="space-y-8">
+                <!-- Access Identity (Email) -->
+                <div class="space-y-2 relative group/input">
+                    <label for="email" class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4 italic group-focus-within/input:text-ep-primary transition-colors">
+                        Identidad (Email)
                     </label>
-                    <input type="email" 
-                           id="email"
-                           wire:model="email" 
-                           class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all
-                                  @error('email') border-red-500 @enderror"
-                           placeholder="correo@ejemplo.com"
-                           autofocus>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-white/20 group-focus-within/input:text-ep-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <input type="email" 
+                               id="email"
+                               wire:model="email" 
+                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary/50 transition-all placeholder-white/5 uppercase italic @error('email') border-red-500/50 @enderror"
+                               placeholder="CORREO@XAMASAFE.COM"
+                               autofocus>
+                    </div>
                     @error('email')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-2 text-[10px] font-black text-red-500 uppercase italic tracking-widest ml-4 animate-pulse">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Password -->
-                <div class="mb-6" x-data="{ show: false }">
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
-                        Contraseña
+                <!-- Access Key (Password) -->
+                <div class="space-y-2 relative group/input" x-data="{ show: false }">
+                    <label for="password" class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4 italic group-focus-within/input:text-ep-primary transition-colors">
+                        Clave de Enlace
                     </label>
                     <div class="relative">
+                        <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-white/20 group-focus-within/input:text-ep-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM10 11V7a2 2 0 114 0v4" />
+                            </svg>
+                        </div>
                         <input :type="show ? 'text' : 'password'" 
                                id="password"
                                wire:model="password" 
-                               class="w-full px-4 py-3 pr-12 rounded-lg border border-gray-300 focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all
-                                      @error('password') border-red-500 @enderror"
+                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-transparent transition-all placeholder-white/5 uppercase italic @error('password') border-red-500/50 @enderror"
                                placeholder="••••••••">
                         
                         <button type="button" 
                                 @click="show = !show" 
                                 tabindex="-1"
-                                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-colors">
-                            <!-- Eye Icon (when show is false) -->
-                            <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/20 hover:text-ep-primary focus:outline-none transition-colors">
+                            <svg x-show="!show" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            <!-- Eye Slash Icon (when show is true) -->
-                            <svg x-show="show" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.978 9.978 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            <svg x-show="show" style="display: none;" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.978 9.978 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                             </svg>
                         </button>
                     </div>
                     @error('password')
-                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        <p class="mt-2 text-[10px] font-black text-red-500 uppercase italic tracking-widest ml-4 animate-pulse">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <!-- Remember Me -->
-                <div class="flex items-center mb-6">
-                    <input type="checkbox" 
-                           id="remember"
-                           wire:model="remember" 
-                           class="w-4 h-4 text-ep-primary border-gray-300 rounded focus:ring-ep-primary">
-                    <label for="remember" class="ml-2 text-sm text-gray-700">
-                        Recordarme
+                <!-- Security Options -->
+                <div class="flex items-center justify-between px-2">
+                    <label class="flex items-center cursor-pointer group">
+                        <input type="checkbox" wire:model="remember" class="sr-only peer">
+                        <div class="w-5 h-5 border-2 border-white/10 rounded-md bg-black/40 peer-checked:bg-ep-primary peer-checked:border-ep-primary transition-all flex items-center justify-center">
+                            <svg class="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
+                                <path d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <span class="ml-3 text-[9px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-white/60 transition-colors">Mantener Operativo</span>
                     </label>
                 </div>
 
-                <!-- Submit Button -->
+                <!-- Activation Button -->
                 <button type="submit" 
-                        class="w-full bg-ep-primary hover:bg-ep-primary-dark text-white font-semibold py-3 rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 mb-4">
-                    Iniciar Sesión
+                        class="w-full relative group/btn overflow-hidden rounded-2xl transition-all active:scale-95">
+                    <div class="absolute inset-0 bg-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.3)] transition-all"></div>
+                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
+                    <div class="relative py-5 flex items-center justify-center gap-3">
+                        <span class="text-[11px] font-black text-white uppercase tracking-[0.3em] italic">Iniciar Operación</span>
+                        <svg class="w-4 h-4 text-white group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
                 </button>
 
-                <div class="text-center">
-                    <button type="button" @click="showResetModal = true" class="text-xs text-gray-500 hover:text-ep-primary transition-colors font-semibold underline decoration-gray-300 underline-offset-4">
-                        ¿Olvidaste tu contraseña?
+                <!-- Recovery Protocol -->
+                <div class="text-center pt-4">
+                    <button type="button" @click="showResetModal = true" class="text-[9px] font-black text-white/20 hover:text-ep-primary uppercase tracking-[0.2em] italic transition-all border-b border-transparent hover:border-ep-primary/30 pb-1">
+                        ¿Protocolo de Emergencia? (Olvidé mi Clave)
                     </button>
                 </div>
             </form>
         </div>
 
-        <!-- Password Reset Modal -->
-        <div x-show="showResetModal" 
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-             style="display: none;">
-            
-            <div @click.away="showResetModal = false" 
-                 class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden transform transition-all">
-                <div class="p-6">
-                    <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4 text-orange-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-gray-900 text-center mb-2">Recuperar Contraseña</h3>
-                    <p class="text-sm text-gray-500 text-center mb-6">Por motivos de seguridad y privacidad, sigue estos pasos:</p>
-                    
-                    <div class="space-y-4">
-                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Si eres Técnico</p>
-                            <p class="text-sm text-gray-700 leading-tight">Contacta directamente a tu <span class="font-bold text-ep-primary">Gestor Administrativo</span> para que blanquee tu clave desde el panel de usuarios.</p>
-                        </div>
-                        
-                        <div class="p-3 bg-gray-50 rounded-xl border border-gray-100">
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Si eres Gestor / Admin</p>
-                            <p class="text-sm text-gray-700 leading-tight">Contacta al Soporte Técnico oficial de <span class="font-bold text-ep-primary">XamaSafe</span> enviando un mail a:</p>
-                            <p class="text-xs font-mono mt-1 text-gray-500">soporte@xamasafe.com.ar</p>
-                        </div>
-                    </div>
-                    
-                    <button @click="showResetModal = false" class="mt-6 w-full py-2 bg-gray-900 text-white rounded-lg font-bold text-sm hover:bg-black transition-colors">
-                        Entendido
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <p class="text-center text-gray-400 text-sm mt-6">
-            XamaSafe - Sistema de Checklists Dinámicos V1.2.0.0
+        <!-- Security Disclaimer -->
+        <p class="text-center text-[8px] font-black text-white/10 uppercase tracking-[0.6em] mt-10 italic animate-fade-in opacity-0" style="animation-delay: 1.5s; animation-fill-mode: forwards;">
+            XamaSafe Ecosystem Core • Security Authorized Only
         </p>
     </div>
+
+    <!-- Security Recovery Terminal (Modal) -->
+    <template x-if="showResetModal">
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div class="absolute inset-0 bg-black/90 backdrop-blur-md" @click="showResetModal = false"></div>
+            
+            <div class="bg-ep-dark border border-white/10 rounded-[3rem] p-10 max-w-sm w-full relative z-10 shadow-2xl overflow-hidden animate-fade-in-up">
+                <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-ep-primary to-transparent"></div>
+                
+                <div class="text-center mb-8">
+                    <div class="w-16 h-16 bg-ep-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6 text-ep-primary border border-ep-primary/20">
+                        <svg class="w-8 h-8 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                            <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM10 11V7a2 2 0 114 0v4"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-black text-white uppercase italic tracking-widest mb-2">Protocolo de Rescate</h3>
+                    <p class="text-[10px] font-bold text-white/30 uppercase tracking-widest italic">Restablecimiento de Identidad</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="p-5 bg-black/40 rounded-2xl border border-white/5 group hover:border-indigo-500/30 transition-all">
+                        <p class="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-2 leading-none">Unidades Técnicas</p>
+                        <p class="text-xs text-white/60 font-bold italic leading-relaxed uppercase">Contacte a su <span class="text-ep-primary">Gestor Administrativo</span> para blanqueo de credenciales.</p>
+                    </div>
+                    
+                    <div class="p-5 bg-black/40 rounded-2xl border border-white/5 group hover:border-amber-500/30 transition-all">
+                        <p class="text-[8px] font-black text-amber-500 uppercase tracking-[0.3em] mb-2 leading-none">Control Gestor / Admin</p>
+                        <p class="text-xs text-white/60 font-bold italic leading-relaxed uppercase">Contacte a <span class="text-ep-primary">Soporte Central</span> vía canal encriptado:</p>
+                        <p class="text-[10px] font-black mt-2 text-white/40 tracking-wider">SOPORTE@XAMASAFE.COM.AR</p>
+                    </div>
+                </div>
+                
+                <button @click="showResetModal = false" class="mt-10 w-full py-4 bg-white/5 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest italic hover:bg-white/10 transition-all border border-white/10">
+                    Cerrar Protocolo
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <style>
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.6s ease-out forwards; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scan {
+            from { transform: translateY(0); }
+            to { transform: translateY(192px); }
+        }
+    </style>
 </div>

@@ -1,4 +1,4 @@
-<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+<div class="w-full mx-auto">
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -10,280 +10,328 @@
                         </svg>
                     </button>
 
-                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
-                        Gestión de <span class="text-ep-primary italic">Hallazgos</span>
-                    </h1>
+                    <div class="flex flex-col">
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                            Auditoría <span class="text-white">Forense</span>
+                        </h1>
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
+                            Gestión Centralizada de Hallazgos
+                        </h2>
+                    </div>
                 </div>
 
-                <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
-                    <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
-                        {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
-                    </div>
-                    <div class="h-4 w-px bg-white/10 mx-1"></div>
-                    <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
-                </a>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg group-hover:scale-110 transition-transform">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100 italic">{{ auth()->user()->nombres }}</span>
+                    </a>
+                </div>
             </div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
         </header>
     @endsection
-    {{-- Header con KPIs --}}
-    <div class="mb-6">
 
-        {{-- KPIs --}}
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">Total Hallazgos</div>
-                <div class="text-2xl font-bold text-ep-dark">{{ $kpis['total'] }}</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">Pendientes</div>
-                <div class="text-2xl font-bold text-red-600">{{ $kpis['pendientes'] }}</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">Críticos Abiertos</div>
-                <div class="text-2xl font-bold text-orange-600">{{ $kpis['criticos'] }}</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">Vencidos</div>
-                <div class="text-2xl font-bold text-yellow-600">{{ $kpis['vencidos'] }}</div>
-            </div>
-            <div class="bg-white rounded-lg shadow p-4">
-                <div class="text-sm text-gray-600">Resueltos (Mes)</div>
-                <div class="text-2xl font-bold text-green-600">{{ $kpis['resueltos_mes'] }}</div>
-            </div>
-        </div>
-    </div>
+    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
+        <div class="max-w-[95rem] mx-auto space-y-10 animate-fade-in">
+            
+            {{-- INTELIGENCIA DE RIESGO: KPIs --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 animate-fade-in-down">
+                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-6 flex items-center justify-between group/stat hover:bg-white/5 transition-all">
+                    <div>
+                        <p class="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic mb-1">Total Sistema</p>
+                        <p class="text-2xl font-black text-white italic leading-none">{{ $kpis['total'] }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    </div>
+                </div>
 
-    {{-- Filtros --}}
-    <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            {{-- Búsqueda --}}
-            <div class="lg:col-span-2">
-                <input type="text" 
-                       wire:model.live.debounce.300ms="search"
-                       placeholder="Buscar por título, descripción o ubicación..."
-                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary focus:border-ep-primary">
-            </div>
+                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-6 flex items-center justify-between group/stat hover:bg-white/5 transition-all">
+                    <div>
+                        <p class="text-[8px] font-black text-amber-500/40 uppercase tracking-[0.3em] italic mb-1">Pendientes</p>
+                        <p class="text-2xl font-black text-amber-500 italic leading-none">{{ $kpis['pendientes'] }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
 
-            {{-- Filtro Estado --}}
-            <div>
-                <select wire:model.live="filterEstado" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
-                    <option value="">Todos los estados</option>
-                    <option value="pendiente">Pendiente</option>
-                    <option value="en_proceso">En Proceso</option>
-                    <option value="resuelto">Resuelto</option>
-                    <option value="verificado">Verificado</option>
-                    <option value="cerrado">Cerrado</option>
-                </select>
-            </div>
+                <div class="bg-red-500/10 backdrop-blur-md rounded-3xl border border-red-500/20 p-6 flex items-center justify-between group/stat hover:bg-red-500/20 transition-all">
+                    <div>
+                        <p class="text-[8px] font-black text-red-500/40 uppercase tracking-[0.3em] italic mb-1">Críticos Abiertos</p>
+                        <p class="text-2xl font-black text-red-500 italic leading-none animate-pulse">{{ $kpis['criticos'] }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-500">
+                        <svg class="w-5 h-5 shadow-[0_0_10px_#ef4444]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    </div>
+                </div>
 
-            {{-- Filtro Criticidad --}}
-            <div>
-                <select wire:model.live="filterCriticidad" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
-                    <option value="">Todas las criticidades</option>
-                    <option value="bajo">Bajo</option>
-                    <option value="medio">Medio</option>
-                    <option value="alto">Alto</option>
-                    <option value="critico">Crítico</option>
-                </select>
-            </div>
-        </div>
+                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-6 flex items-center justify-between group/stat hover:bg-white/5 transition-all">
+                    <div>
+                        <p class="text-[8px] font-black text-ep-primary/40 uppercase tracking-[0.3em] italic mb-1">Vencidos Total</p>
+                        <p class="text-2xl font-black text-ep-primary italic leading-none leading-tight">{{ $kpis['vencidos'] }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-ep-primary/20 flex items-center justify-center text-ep-primary">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    </div>
+                </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {{-- Filtro Sede --}}
-            <div>
-                <select wire:model.live="filterSede" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
-                    <option value="">Todas las sedes</option>
-                    @foreach($sedes as $sede)
-                        <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
-                    @endforeach
-                </select>
+                <div class="bg-emerald-500/10 backdrop-blur-md rounded-3xl border border-emerald-500/20 p-6 flex items-center justify-between group/stat hover:bg-emerald-500/20 transition-all">
+                    <div>
+                        <p class="text-[8px] font-black text-emerald-500/40 uppercase tracking-[0.3em] italic mb-1">Cerrados (Mes)</p>
+                        <p class="text-2xl font-black text-emerald-500 italic leading-none">{{ $kpis['resueltos_mes'] }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                </div>
             </div>
 
-            {{-- Filtro Técnico --}}
-            <div>
-                <select wire:model.live="filterTecnico" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
-                    <option value="">Todos los técnicos</option>
-                    @foreach($tecnicos as $tecnico)
-                        <option value="{{ $tecnico->id }}">{{ $tecnico->nombres }}</option>
-                    @endforeach
-                </select>
+            {{-- HUB DE FILTRADO TÁCTICO --}}
+            <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-8 shadow-2xl relative animate-fade-in-down overflow-hidden">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
+                
+                <div class="space-y-8 relative z-10">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
+                        <div class="md:col-span-6 relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Buscador Forense</span>
+                            <input type="text" 
+                                   wire:model.live.debounce.300ms="search"
+                                   placeholder="TÍTULO, DESCRIPCIÓN O UBICACIÓN..."
+                                   class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all placeholder-white/5 italic uppercase">
+                        </div>
+
+                        <div class="md:col-span-3 relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10">Estado Operativo</span>
+                            <select wire:model.live="filterEstado" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
+                                <option value="">TODOS LOS ESTADOS</option>
+                                <option value="pendiente">PENDIENTE</option>
+                                <option value="en_proceso">EN PROCESO</option>
+                                <option value="resuelto">RESUELTO</option>
+                                <option value="verificado">VERIFICADO</option>
+                                <option value="cerrado">CERRADO</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-3 relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Filtro Criticidad</span>
+                            <select wire:model.live="filterCriticidad" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
+                                <option value="">TODAS LAS CRITICIDADES</option>
+                                <option value="bajo">BAJO RIESGO</option>
+                                <option value="medio">RIESGO MEDIO</option>
+                                <option value="alto">ALTO RIESGO</option>
+                                <option value="critico">CRÍTICO / EMERGENCIA</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Sede Operativa</span>
+                            <select wire:model.live="filterSede" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase">
+                                <option value="">TODAS LAS SEDES</option>
+                                @foreach($sedes as $sede)
+                                    <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Técnico Auditor</span>
+                            <select wire:model.live="filterTecnico" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase">
+                                <option value="">TODOS LOS TÉCNICOS</option>
+                                @foreach($tecnicos as $tecnico)
+                                    <option value="{{ $tecnico->id }}">{{ $tecnico->nombres }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Rango Temporal</span>
+                            <select wire:model.live="filterVencidos" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase">
+                                <option value="">VENCIMIENTO (TODOS)</option>
+                                <option value="si">SOLO VENCIDOS</option>
+                                <option value="no">DENTRO DE PLAZO</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-end">
+                            @if($search || $filterEstado || $filterCriticidad || $filterSede || $filterTecnico || $filterVencidos)
+                                <button wire:click="clearFilters" class="px-6 py-3 bg-white/5 border border-white/10 text-white/40 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all group/clear flex items-center gap-2">
+                                    <svg class="w-3 h-3 group-hover/clear:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="3"/></svg>
+                                    Limpiar Inteligencia
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {{-- Filtro Vencidos --}}
-            <div>
-                <select wire:model.live="filterVencidos" 
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-ep-primary">
-                    <option value="">Vencimiento (todos)</option>
-                    <option value="si">Solo vencidos</option>
-                    <option value="no">No vencidos</option>
-                </select>
-            </div>
-        </div>
-
-        @if($search || $filterEstado || $filterCriticidad || $filterSede || $filterTecnico || $filterVencidos)
-            <div class="mt-4">
-                <button wire:click="clearFilters" 
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm">
-                    Limpiar Filtros
-                </button>
-            </div>
-        @endif
-    </div>
-
-    {{-- Tabla de Hallazgos --}}
-    <div class="bg-white rounded-lg shadow overflow-hidden">
-        @if($hallazgos->isEmpty())
-            <div class="p-12 text-center text-gray-500">
-                <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
-                <p class="text-xl">No se encontraron hallazgos</p>
-                <p class="text-sm mt-2">Intenta ajustar los filtros o crea un nuevo hallazgo</p>
-            </div>
-        @else
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-ep-dark text-white">
-                        <tr>
-                            <th class="px-4 py-3 text-left cursor-pointer hover:bg-opacity-80" wire:click="sortBy('titulo')">
-                                <div class="flex items-center gap-2">
-                                    Título
-                                    @if($sortField === 'titulo')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left">Sede</th>
-                            <th class="px-4 py-3 text-center cursor-pointer hover:bg-opacity-80" wire:click="sortBy('criticidad')">
-                                <div class="flex items-center justify-center gap-2">
-                                    Criticidad
-                                    @if($sortField === 'criticidad')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-center cursor-pointer hover:bg-opacity-80" wire:click="sortBy('estado')">
-                                <div class="flex items-center justify-center gap-2">
-                                    Estado
-                                    @if($sortField === 'estado')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-center cursor-pointer hover:bg-opacity-80" wire:click="sortBy('plazo_correccion')">
-                                <div class="flex items-center justify-center gap-2">
-                                    Plazo
-                                    @if($sortField === 'plazo_correccion')
-                                        <span>{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="px-4 py-3 text-left">Técnico</th>
-                            <th class="px-4 py-3 text-center">Info</th>
-                            <th class="px-4 py-3 text-center">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @foreach($hallazgos as $hallazgo)
-                            <tr class="hover:bg-gray-50 {{ $hallazgo->estaVencido() ? 'bg-red-50' : '' }}">
-                                <td class="px-4 py-3">
-                                    <div class="font-semibold text-ep-dark">{{ $hallazgo->titulo }}</div>
-                                    <div class="text-sm text-gray-500 truncate max-w-xs">{{ Str::limit($hallazgo->descripcion, 60) }}</div>
-                                    @if($hallazgo->ubicacion_especifica)
-                                        <div class="text-xs text-gray-400 mt-1">📍 {{ $hallazgo->ubicacion_especifica }}</div>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="text-sm">{{ $hallazgo->sede->nombre_sede ?? '-' }}</div>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium
-                                        @if($hallazgo->criticidad === 'critico') bg-red-100 text-red-800
-                                        @elseif($hallazgo->criticidad === 'alto') bg-orange-100 text-orange-800
-                                        @elseif($hallazgo->criticidad === 'medio') bg-yellow-100 text-yellow-800
-                                        @else bg-green-100 text-green-800 @endif">
-                                        {{ ucfirst($hallazgo->criticidad) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <span class="px-3 py-1 rounded-full text-xs font-medium
-                                        @if($hallazgo->estado === 'cerrado') bg-green-100 text-green-800
-                                        @elseif($hallazgo->estado === 'verificado') bg-blue-100 text-blue-800
-                                        @elseif($hallazgo->estado === 'resuelto') bg-cyan-100 text-cyan-800
-                                        @elseif($hallazgo->estado === 'en_proceso') bg-yellow-100 text-yellow-800
-                                        @else bg-red-100 text-red-800 @endif">
-                                        {{ ucfirst(str_replace('_', ' ', $hallazgo->estado)) }}
-                                    </span>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    @if($hallazgo->plazo_correccion)
-                                        <div class="text-sm {{ $hallazgo->estaVencido() ? 'text-red-600 font-bold' : 'text-gray-700' }}">
-                                            {{ $hallazgo->plazo_correccion->format('d/m/Y') }}
-                                        </div>
-                                        @if($hallazgo->estaVencido())
-                                            <div class="text-xs text-red-600">⚠️ Vencido</div>
-                                        @endif
-                                    @else
-                                        <span class="text-gray-400">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="text-sm">{{ $hallazgo->user->nombres ?? '-' }}</div>
-                                </td>
-                                <td class="px-4 py-3 text-center">
-                                    <div class="flex justify-center gap-2 text-xs text-gray-600">
-                                        @if($hallazgo->seguimientos_count > 0)
-                                            <span title="Seguimientos">📝 {{ $hallazgo->seguimientos_count }}</span>
-                                        @endif
-                                        @if($hallazgo->fotos_count > 0)
-                                            <span title="Fotos">📷 {{ $hallazgo->fotos_count }}</span>
-                                        @endif
-                                        @if($hallazgo->incidentes_count > 0)
-                                            <span title="Incidentes" class="text-red-600">⚠️ {{ $hallazgo->incidentes_count }}</span>
-                                        @endif
+            {{-- MASTER TABLE: MATRIZ FORENSE --}}
+            <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-black/20 text-left">
+                                <th class="px-8 py-6 cursor-pointer group/th" wire:click="sortBy('titulo')">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Hallazgo / Detalles</span>
+                                        @if($sortField === 'titulo') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
                                     </div>
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex justify-center gap-2 flex-wrap">
-                                        <a href="{{ route('gestor.hallazgos.show', $hallazgo) }}"
-                                           class="px-3 py-1 bg-ep-primary text-white rounded hover:bg-ep-primary-dark text-sm">
-                                            Ver
-                                        </a>
-                                        <a href="{{ route('gestor.hallazgos.edit', $hallazgo) }}"
-                                           class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm">
-                                            Editar
-                                        </a>
-                                        <button wire:click="delete({{ $hallazgo->id }})"
-                                                wire:confirm="¿Estás seguro de eliminar este hallazgo? Se eliminarán también todos sus seguimientos y fotos."
-                                                class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm">
-                                            Eliminar
-                                        </button>
+                                </th>
+                                <th class="px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Ubicación Sede</span></th>
+                                <th class="px-8 py-6 text-center cursor-pointer" wire:click="sortBy('criticidad')">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Riesgo</span>
+                                        @if($sortField === 'criticidad') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
                                     </div>
-                                </td>
+                                </th>
+                                <th class="px-8 py-6 text-center cursor-pointer" wire:click="sortBy('estado')">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Status</span>
+                                        @if($sortField === 'estado') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
+                                    </div>
+                                </th>
+                                <th class="px-8 py-6 text-center cursor-pointer" wire:click="sortBy('plazo_correccion')">
+                                    <div class="flex items-center justify-center gap-2">
+                                        <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Plazo</span>
+                                        @if($sortField === 'plazo_correccion') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
+                                    </div>
+                                </th>
+                                <th class="px-8 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Evidencias</span></th>
+                                <th class="px-8 py-6 text-right"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Comandos</span></th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse($hallazgos as $hallazgo)
+                                <tr class="group/row hover:bg-white/5 transition-all duration-500 relative {{ $hallazgo->estaVencido() ? 'bg-red-500/5' : '' }}">
+                                    <td class="px-8 py-8">
+                                        <div class="text-sm font-black text-white italic uppercase tracking-tight leading-none mb-1 group-hover/row:text-ep-primary transition-colors">{{ $hallazgo->titulo }}</div>
+                                        <div class="text-[10px] font-bold text-white/30 italic max-w-xs truncate">{{ $hallazgo->descripcion }}</div>
+                                        @if($hallazgo->ubicacion_especifica)
+                                            <div class="text-[9px] font-black text-indigo-400/60 mt-2 uppercase italic tracking-widest leading-none">📍 {{ $hallazgo->ubicacion_especifica }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-8 py-8">
+                                        <div class="text-[11px] font-black text-white/60 italic uppercase tracking-tight leading-none">{{ $hallazgo->sede->nombre_sede ?? 'SIN ASIGNAR' }}</div>
+                                    </td>
+                                    <td class="px-8 py-8 text-center">
+                                        @php
+                                            $critColor = match($hallazgo->criticidad) {
+                                                'critico' => 'text-red-500 bg-red-500/10 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.3)] animate-pulse',
+                                                'alto' => 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+                                                'medio' => 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+                                                default => 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                                            };
+                                        @endphp
+                                        <span class="inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest italic border {{ $critColor }}">
+                                            {{ strtoupper($hallazgo->criticidad) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-8 text-center">
+                                        @php
+                                            $stateColor = match($hallazgo->estado) {
+                                                'cerrado' => 'text-emerald-400 border-emerald-500/20',
+                                                'verificado' => 'text-blue-400 border-blue-500/20',
+                                                'resuelto' => 'text-cyan-400 border-cyan-500/20',
+                                                'en_proceso' => 'text-amber-400 border-amber-500/20',
+                                                default => 'text-red-500 border-red-500/20'
+                                            };
+                                        @endphp
+                                        <span class="inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest italic border {{ $stateColor }} bg-black/20">
+                                            {{ strtoupper(str_replace('_', ' ', $hallazgo->estado)) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-8 text-center">
+                                        @if($hallazgo->plazo_correccion)
+                                            <div class="text-[10px] font-black italic {{ $hallazgo->estaVencido() ? 'text-red-500 animate-pulse' : 'text-white/60' }}">
+                                                {{ $hallazgo->plazo_correccion->format('d/m/Y') }}
+                                            </div>
+                                            @if($hallazgo->estaVencido()) <div class="text-[8px] font-black text-red-500 uppercase tracking-widest mt-1">⚠️ VENCIMIENTO</div> @endif
+                                        @else
+                                            <span class="text-white/10 italic text-xs">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-8 py-8 text-center">
+                                        <div class="flex justify-center items-center gap-4">
+                                            @if($hallazgo->fotos_count > 0)
+                                                <div class="flex items-center gap-1.5" title="{{ $hallazgo->fotos_count }} Fotos">
+                                                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                    <span class="text-[10px] font-black text-indigo-400 leading-none">{{ $hallazgo->fotos_count }}</span>
+                                                </div>
+                                            @endif
+                                            @if($hallazgo->seguimientos_count > 0)
+                                                <div class="flex items-center gap-1.5" title="{{ $hallazgo->seguimientos_count }} Seguimientos">
+                                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    <span class="text-[10px] font-black text-emerald-400 leading-none">{{ $hallazgo->seguimientos_count }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-8 text-right">
+                                        <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
+                                            <a href="{{ route('gestor.hallazgos.show', $hallazgo) }}" class="h-10 w-10 bg-ep-primary/10 border border-ep-primary/20 text-ep-primary hover:bg-ep-primary hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg" title="Auditar">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            </a>
+                                            <button wire:click="delete({{ $hallazgo->id }})" wire:confirm="¿Desea purgar este hallazgo y sus evidencias del sistema?" class="h-10 w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">No se detectaron hallazgos en la zona de búsqueda <br> <span class="text-[9px] tracking-widest text-white/3 italic">Ajuste los filtros tácticos para ampliar la exploración</span></td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-10 py-6 border-t border-white/5 bg-black/20 pagination-tactical">
+                    {{ $hallazgos->links() }}
+                </div>
             </div>
 
-            {{-- Paginación --}}
-            <div class="px-6 py-4 border-t border-gray-200">
-                {{ $hallazgos->links() }}
+            <div class="text-center pb-20 mt-12 animate-fade-in opacity-0" style="animation-delay: 0.5s; animation-fill-mode: forwards;">
+                <p class="text-[9px] font-black text-white/5 uppercase tracking-[0.8em] italic leading-relaxed">XamaSafe Audit Logic • Unified Risk Intelligence • High Performance Analytics</p>
             </div>
-        @endif
+        </div>
     </div>
 
-    {{-- Mensaje de éxito --}}
+    {{-- NOTIFICACIONES HUD --}}
     @if (session()->has('message'))
         <div x-data="{ show: true }" 
              x-show="show" 
              x-init="setTimeout(() => show = false, 3000)"
-             class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
-            {{ session('message') }}
+             class="fixed bottom-8 right-8 bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-xl text-emerald-400 px-8 py-4 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.2)] z-50 flex items-center gap-3 animate-fade-in-up">
+            <div class="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
+            <span class="text-[10px] font-black uppercase tracking-widest italic">{{ session('message') }}</span>
         </div>
     @endif
+
+    <style>
+        .animate-fade-in-down { animation: fade-in-down 0.6s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+        @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        
+        .pagination-tactical nav div:first-child { display: none; }
+        .pagination-tactical nav span, .pagination-tactical nav a {
+            background-color: transparent !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+            color: rgba(255,255,255,0.2) !important;
+            border-radius: 12px !important; margin: 0 4px !important; padding: 8px 14px !important;
+            font-weight: 900 !important; font-size: 10px !important; transition: all 0.3s !important;
+        }
+        .pagination-tactical nav span[aria-current="page"] {
+            border-color: rgba(246,146,57,0.3) !important;
+            color: #f69239 !important;
+            background: rgba(246,146,57,0.1) !important;
+        }
+    </style>
 </div>

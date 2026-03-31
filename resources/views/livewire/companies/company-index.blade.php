@@ -1,4 +1,4 @@
-<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+<div class="w-full mx-auto">
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -10,169 +10,209 @@
                         </svg>
                     </button>
 
-                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
-                        Gestión de <span class="text-ep-primary italic">Empresas</span>
-                    </h1>
+                    <div class="flex flex-col">
+                        <h1 class="text-[10px] font-black text-blue-400 uppercase tracking-widest italic leading-none mb-1">
+                            Consola <span class="text-white">Corporativa</span>
+                        </h1>
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
+                            Gestión de Activos Cliente
+                        </h2>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-3">
+                <div class="flex items-center gap-4">
                     <a href="{{ route('gestor.companies.create') }}" 
-                       class="hidden xs:flex bg-ep-primary text-white hover:bg-ep-primary-dark px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                       class="hidden xs:flex bg-ep-primary text-white hover:brightness-110 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest italic border border-white/10 transition-all items-center gap-2 shadow-lg shadow-ep-primary/20 group/btn">
+                        <svg class="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                            <path d="M12 4v16m8-8H4"/>
+                        </svg>
                         Nueva Empresa
                     </a>
 
-                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
                         <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
                             {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
                         </div>
                         <div class="h-4 w-px bg-white/10 mx-1"></div>
-                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                        <span class="text-[10px] font-bold text-indigo-100 italic">{{ auth()->user()->nombres }}</span>
                     </a>
                 </div>
             </div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
         </header>
     @endsection
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div></div> {{-- Spacer for layout alignment if needed --}}
-        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center w-full md:w-auto">
-            <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
-                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
-                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300 whitespace-nowrap">Ver Eliminados</span>
-            </label>
+
+    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white">
+        <div class="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
+            
+            {{-- HUB DE FILTRADO TÁCTICO --}}
+            <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-6 shadow-2xl relative overflow-hidden animate-fade-in-down">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/30 to-transparent"></div>
+                
+                <div class="flex flex-col lg:flex-row gap-6 justify-between items-center relative z-10">
+                    <div class="w-full lg:w-1/2 relative group">
+                        <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Buscador Corporativo</span>
+                        <input wire:model.live="search" 
+                               type="text" 
+                               placeholder="BUSCAR POR NOMBRE, RAZÓN SOCIAL O CUIT..."
+                               class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-white/5 italic uppercase">
+                    </div>
+
+                    <div class="flex items-center gap-6 bg-black/20 px-8 py-4 rounded-2xl border border-white/5">
+                        <label class="inline-flex items-center cursor-pointer group">
+                            <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
+                            <div class="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500/50"></div>
+                            <span class="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-red-400 transition-colors">Historial de Bajas</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            {{-- NOTIFICACIONES --}}
+            @if (session()->has('message'))
+                <div class="bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 p-5 rounded-[2rem] flex items-center gap-4 animate-fade-in shadow-xl backdrop-blur-md">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <p class="text-[10px] font-black uppercase italic tracking-widest">{{ session('message') }}</p>
+                </div>
+            @endif
+
+            {{-- MATRIZ CORPORATIVA --}}
+            <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
+                
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-black/20 text-left">
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Entidad / Marca</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Razón Operativa</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Registro Fiscal (CUIT)</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Activos (Sedes)</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse($companies as $company)
+                                <tr class="group/row hover:bg-white/5 transition-all duration-500 relative {{ $company->trashed() ? 'bg-red-500/5 opacity-50' : '' }}">
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-xs font-black group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(59,130,246,0.1)]">
+                                                {{ substr($company->nombre, 0, 2) }}
+                                            </div>
+                                            <div>
+                                                <div class="text-sm font-black text-white italic uppercase tracking-tight leading-none group-hover/row:text-blue-400 transition-colors {{ $company->trashed() ? 'line-through' : '' }}">
+                                                    {{ $company->nombre }}
+                                                </div>
+                                                @if($company->trashed()) <span class="text-[8px] font-black text-red-500 uppercase tracking-widest mt-1.5 inline-block animate-pulse">Entidad Desactivada</span> @endif
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="text-[11px] font-bold text-white/40 italic uppercase tracking-widest leading-none">{{ $company->razon_social }}</div>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span class="inline-flex px-4 py-2 rounded-xl text-[10px] font-black text-indigo-400/60 uppercase tracking-widest italic bg-black/40 border border-white/5">
+                                            {{ $company->cuit }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest italic border {{ $company->sedes_count > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-white/10 border-white/5 bg-white/5' }}">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                            {{ $company->sedes_count }} Sedes
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-right">
+                                        <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
+                                            @if($company->trashed())
+                                                <button wire:click="restore({{ $company->id }})" class="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white rounded-xl flex items-center gap-2 text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3"/></svg>
+                                                    Reactivar
+                                                </button>
+                                            @else
+                                                <a href="{{ route('gestor.companies.locations', $company) }}" 
+                                                    class="h-10 px-5 bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500 hover:text-white rounded-xl flex items-center gap-2 text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="3"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="3"/></svg>
+                                                    Gestionar Sedes
+                                                </a>
+                                                <a href="{{ route('gestor.companies.edit', $company) }}" 
+                                                    class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2"/></svg>
+                                                </a>
+                                                <button wire:click="confirmDelete({{ $company->id }}, '{{ $company->nombre }}')" 
+                                                        class="h-10 w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2"/></svg>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">No se detectan entidades corporativas <br> <span class="text-[9px] tracking-widest text-white/3 italic">Inicie el registro de empresas para desplegar activos</span></td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-10 py-6 border-t border-white/5 bg-black/20 pagination-tactical">
+                    {{ $companies->links() }}
+                </div>
+            </div>
         </div>
     </div>
 
-    @if (session()->has('message'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('message') }}
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <div class="bg-white rounded-lg shadow overflow-x-auto">
-        <div class="p-4 border-b">
-            <input 
-                wire:model.live="search" 
-                type="text" 
-                placeholder="Buscar por nombre, razón social o CUIT..."
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-            >
-        </div>
-
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Razón Social</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CUIT</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sedes</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($companies as $company)
-                    <tr>
-                        <td class="px-6 py-4">
-                            <span class="font-medium text-gray-900 {{ $company->trashed() ? 'line-through text-red-500' : '' }}">
-                                {{ $company->nombre }}
-                                @if($company->trashed()) <span class="text-xs text-red-500 ml-1">(Baja)</span> @endif
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $company->razon_social }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $company->cuit }}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
-                            {{ $company->sedes_count }} sedes
-                        </td>
-                        <td class="px-6 py-4 text-sm">
-                            <div class="flex items-center gap-3">
-                                @if($company->trashed())
-                                    <button wire:click="restore({{ $company->id }})"
-                                            class="text-green-600 hover:text-green-900 transition-colors duration-150 p-1 hover:bg-green-50 rounded"
-                                            title="Restaurar Empresa">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                        </svg>
-                                    </button>
-                                @else
-                                    <a href="{{ route('gestor.companies.locations', $company) }}" 
-                                    class="text-blue-600 hover:text-blue-900 text-sm font-medium pr-3 border-r border-gray-200"
-                                    title="Gestionar Sedes">
-                                        Sedes
-                                    </a>
-                                    <a href="{{ route('gestor.companies.edit', $company) }}" 
-                                    class="text-indigo-600 hover:text-indigo-900 transition-colors duration-150 p-1 hover:bg-indigo-50 rounded"
-                                    title="Editar">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                        </svg>
-                                    </a>
-                                    <button wire:click="confirmDelete({{ $company->id }}, '{{ $company->nombre }}')" 
-                                            class="text-red-600 hover:text-red-900 transition-colors duration-150 p-1 hover:bg-red-50 rounded"
-                                            title="Dar de baja">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 000-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                        </svg>
-                                    </button>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                            No se encontraron empresas
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-
-        <div class="p-4">
-            {{ $companies->links() }}
-        </div>
-    </div>
-
-    <!-- Modal de Confirmación de Baja (Soft Delete) -->
+    {{-- MODAL DE BAJA CORPORATIVA --}}
     @if($confirmingDeletion)
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-yellow-100 rounded-full mb-4">
-                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
-                    </div>
-                    <h3 class="text-lg font-bold text-center text-gray-900 mb-2">
-                        ¿Dar de baja a la empresa?
-                    </h3>
-                    <p class="text-sm text-gray-500 text-center mb-6">
-                        Estás a punto de dar de baja a <span class="font-bold text-gray-700">{{ $companyToDeleteName }}</span>.
-                        <br><br>
-                        ⚠️ <span class="font-semibold">Nota Importante:</span> La empresa NO se eliminará permanentemente. Se conservará el historial de sus sedes y datos, pero dejará de estar activa en los listados principales.
-                    </p>
-                    <div class="flex justify-center gap-3">
-                        <button wire:click="cancelDelete" 
-                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium">
-                            Salir
-                        </button>
-                        <button wire:click="delete" 
-                                class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors font-bold shadow-sm">
-                            Dar de Baja
-                        </button>
-                    </div>
+        <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div class="absolute inset-0 bg-black/85 backdrop-blur-md" wire:click="cancelDelete"></div>
+            <div class="bg-ep-dark border border-white/10 rounded-[3rem] p-12 max-w-xl w-full relative z-10 shadow-2xl text-center overflow-hidden">
+                <div class="absolute inset-x-0 top-0 h-1.5 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.5)]"></div>
+                <div class="w-24 h-24 bg-red-600/20 rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-red-500 border border-red-500/20">
+                    <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <h3 class="text-2xl font-black text-white uppercase italic tracking-widest mb-4">Revocación Corporativa</h3>
+                <p class="text-sm text-white/40 mb-12 font-bold leading-relaxed italic uppercase">
+                    ESTÁ A PUNTO DE DAR DE BAJA A: <br> <span class="text-xl text-red-400 mt-2 block">{{ $companyToDeleteName }}</span> <br>
+                    EL REGISTRO Y SUS SEDES SE MANTENDRÁN EN EL ARCHIVO HISTÓRICO, PERO DEJAREIS DE OPERAR CON ESTA ENTIDAD.
+                </p>
+                <div class="flex justify-center gap-6">
+                    <button wire:click="cancelDelete" class="flex-1 py-5 bg-white/5 text-white/40 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
+                        Abortar
+                    </button>
+                    <button wire:click="delete" class="flex-1 py-5 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg shadow-red-600/30 hover:brightness-110 active:scale-95">
+                        Dar de Baja
+                    </button>
                 </div>
             </div>
         </div>
     @endif
+
+    <style>
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+        .animate-fade-in-down { animation: fade-in-down 0.6s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pagination-tactical nav div:first-child { display: none; }
+        .pagination-tactical nav span, .pagination-tactical nav a {
+            background-color: transparent !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+            color: rgba(255,255,255,0.2) !important;
+            border-radius: 12px !important; margin: 0 4px !important; padding: 8px 14px !important;
+            font-weight: 900 !important; font-size: 10px !important; transition: all 0.3s !important;
+        }
+        .pagination-tactical nav span[aria-current="page"] {
+            border-color: rgba(59,130,246,0.3) !important;
+            color: #3b82f6 !important;
+            background: rgba(59,130,246,0.1) !important;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.3); }
+    </style>
 </div>

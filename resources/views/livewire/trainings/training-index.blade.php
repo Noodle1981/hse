@@ -1,4 +1,4 @@
-<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+<div class="w-full mx-auto">
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -10,184 +10,232 @@
                         </svg>
                     </button>
 
-                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
-                        Gestión de <span class="text-ep-primary italic">Capacitaciones</span>
-                    </h1>
+                    <div class="flex flex-col">
+                        <h1 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic leading-none mb-1">
+                            Centro de <span class="text-white">Entrenamiento</span>
+                        </h1>
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
+                            Gestión de Capacitaciones
+                        </h2>
+                    </div>
                 </div>
 
-                <div class="flex items-center space-x-3">
-                    <a href="{{ route('gestor.trainings.create') }}" 
-                       class="hidden xs:flex bg-ep-primary text-white hover:bg-ep-primary-dark px-3 py-1 rounded-full text-[10px] font-bold border border-white/10 transition-all items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                        Nueva Capacitación
-                    </a>
-
-                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
                         <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
                             {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
                         </div>
                         <div class="h-4 w-px bg-white/10 mx-1"></div>
-                        <span class="text-[10px] font-bold text-indigo-100">{{ auth()->user()->nombres }}</span>
+                        <span class="text-[10px] font-bold text-indigo-100 italic">{{ auth()->user()->nombres }}</span>
                     </a>
                 </div>
             </div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
         </header>
     @endsection
 
-        <!-- Filters Section -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="md:col-span-2">
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Buscador</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        </span>
-                        <input wire:model.live.debounce.300ms="search" 
-                               type="text" 
-                               class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-gray-50 placeholder-gray-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-ep-primary/20 focus:border-ep-primary transition-all text-sm" 
-                               placeholder="Buscar por título o instructor...">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white">
+        <div class="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
+            
+            {{-- HUB DE COMANDOS: FILTROS Y ACCIÓN MAESTRA --}}
+            <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden animate-fade-in-down">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-end relative z-10">
+                    {{-- BUSCADOR TÁCTICO --}}
+                    <div class="md:col-span-5 relative group">
+                        <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10">Terminal de Escaneo</span>
+                        <div class="relative">
+                            <input type="text" wire:model.live.debounce.300ms="search" 
+                                   placeholder="BUSCAR ENTRENAMIENTO O INSTRUCTOR..."
+                                   class="w-full bg-black/40 border border-white/10 rounded-2xl px-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all placeholder-white/5 italic uppercase">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-indigo-500/30 group-focus-within:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- FILTROS DE INTELIGENCIA --}}
+                    <div class="md:col-span-4 grid grid-cols-2 gap-4">
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Empresa</span>
+                            <select wire:model.live="empresaFilter" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer">
+                                <option value="">TODAS</option>
+                                @foreach($empresas as $empresa)
+                                    <option value="{{ $empresa->id }}">{{ $empresa->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Sede</span>
+                            <select wire:model.live="sedeFilter" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer {{ !$empresaFilter ? 'opacity-20 cursor-not-allowed' : '' }}" {{ !$empresaFilter ? 'disabled' : '' }}>
+                                <option value="">TODAS</option>
+                                @foreach($sedes as $sede)
+                                    <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- ACCIÓN PRIMARIA (FUERA DEL BANNER) --}}
+                    <div class="md:col-span-3">
+                        <a href="{{ route('gestor.trainings.create') }}" 
+                           class="flex h-14 bg-ep-primary text-white hover:brightness-110 active:scale-95 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] italic transition-all items-center justify-center gap-3 shadow-[0_0_25px_rgba(246,146,57,0.3)] group/btn relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/10 translate-y-14 group-hover/btn:translate-y-0 transition-transform duration-500"></div>
+                            <svg class="w-5 h-5 group-hover/btn:rotate-90 transition-transform duration-500 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                <path d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span class="relative z-10">Asignar Capacitación</span>
+                        </a>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Empresa</label>
-                    <select wire:model.live="empresaFilter" 
-                            class="block w-full py-2 pl-3 pr-10 text-sm border-gray-200 focus:outline-none focus:ring-ep-primary focus:border-ep-primary rounded-xl bg-gray-50">
-                        <option value="">Todas las empresas</option>
-                        @foreach($empresas as $empresa)
-                            <option value="{{ $empresa->id }}">{{ $empresa->nombre }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Sede</label>
-                    <select wire:model.live="sedeFilter" 
-                            class="block w-full py-2 pl-3 pr-10 text-sm border-gray-200 focus:outline-none focus:ring-ep-primary focus:border-ep-primary rounded-xl bg-gray-50 {{ !$empresaFilter ? 'opacity-50 cursor-not-allowed' : '' }}"
-                            {{ !$empresaFilter ? 'disabled' : '' }}>
-                        <option value="">Todas las sedes</option>
-                        @foreach($sedes as $sede)
-                            <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
-                        @endforeach
-                    </select>
-                </div>
             </div>
-        </div>
 
-        <!-- Table / List -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-100">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Capacitación</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Responsable</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Ubicación</th>
-                            <th scope="col" class="px-3 py-3 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Fecha</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Asistentes</th>
-                            <th scope="col" class="px-3 py-3 text-center text-xs font-bold text-gray-400 uppercase tracking-widest">Estado</th>
-                            <th scope="col" class="relative px-3 py-3">
-                                <span class="sr-only">Acciones</span>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100">
-                        @forelse($trainings as $training)
-                            <tr class="hover:bg-gray-50/50 transition-colors">
-                                <td class="px-3 py-3 whitespace-nowrap">
-                                    <div class="flex flex-col">
-                                        <div class="text-sm font-bold text-gray-900">{{ $training->title }}</div>
-                                        <div class="text-xs text-gray-500">{{ $training->trainer_name ?: 'Sin instructor' }}</div>
-                                    </div>
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                                    <div class="flex items-center">
-                                        @if($training->responsibleUser)
-                                            <div class="h-8 w-8 rounded-full bg-ep-primary/10 flex items-center justify-center text-ep-primary font-bold text-xs mr-3">
-                                                {{ substr($training->responsibleUser->name, 0, 1) }}{{ substr($training->responsibleUser->apellidos, 0, 1) }}
+            {{-- MATRIZ DE ENTRENAMIENTO --}}
+            <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-black/20 text-left">
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Capacitación / Instructor</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Responsable Unidad</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Punto de Despliegue</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Cronograma</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Asistencia</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Status HUD</th>
+                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse($trainings as $training)
+                                <tr class="group/row hover:bg-white/5 transition-all duration-500 relative">
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-xs font-black group-hover:scale-110 transition-transform">
+                                                <svg class="w-6 h-6 shadow-[0_0_10px_rgba(99,102,241,0.3)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z" stroke-width="2"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" stroke-width="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" stroke-width="2"/></svg>
                                             </div>
                                             <div>
-                                                <div class="font-medium text-gray-900">{{ $training->responsibleUser->name }} {{ $training->responsibleUser->apellidos }}</div>
-                                                <div class="text-xs text-gray-500">{{ $training->responsibleUser->email }}</div>
+                                                <div class="text-sm font-black text-white italic uppercase tracking-tight leading-none group-hover/row:text-indigo-400 transition-colors">
+                                                    {{ $training->title }}
+                                                </div>
+                                                <div class="text-[9px] font-black text-white/20 uppercase tracking-widest mt-1.5 italic">
+                                                    Instructor: <span class="text-white/40">{{ $training->trainer_name ?: 'NO ASIGNADO' }}</span>
+                                                </div>
                                             </div>
-                                        @else
-                                            <span class="text-gray-400 italic">Sin asignar</span>
-                                        @endif
-                                    </div>
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                                    <div class="flex flex-col">
-                                        <div class="font-medium text-gray-700">{{ $training->empresa->nombre ?? 'N/A' }}</div>
-                                        <div class="text-xs">{{ $training->sede->nombre_sede ?? 'N/A' }}</div>
-                                    </div>
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-sm text-gray-500">
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                        {{ $training->date->format('d/m/Y H:i') }}
-                                    </div>
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-center text-sm">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700">
-                                        {{ $training->attendances_count }}
-                                    </span>
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-center">
-                                    @php
-                                        $statusClasses = [
-                                            'scheduled' => 'bg-yellow-100 text-yellow-800',
-                                            'completed' => 'bg-green-100 text-green-800',
-                                            'cancelled' => 'bg-red-100 text-red-800',
-                                        ];
-                                        $statusLabels = [
-                                            'scheduled' => 'Programada',
-                                            'completed' => 'Finalizada',
-                                            'cancelled' => 'Cancelada',
-                                        ];
-                                    @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $statusClasses[$training->status] ?? $statusClasses['scheduled'] }}">
-                                        {{ $statusLabels[$training->status] ?? $training->status }}
-                                    </span>
-                                </td>
-                                <td class="px-3 py-3 whitespace-nowrap text-right text-sm font-medium">
-                                    <div class="flex justify-end gap-2">
-                                        @if(auth()->user()->isTechnician())
-                                            <a href="{{ route('gestor.trainings.attendance', $training) }}" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Tomar Asistencia">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-3">
+                                            @if($training->responsibleUser)
+                                                <div class="w-8 h-8 bg-ep-primary/10 rounded-xl border border-ep-primary/20 flex items-center justify-center text-ep-primary text-[10px] font-black">
+                                                    {{ substr($training->responsibleUser->nombres, 0, 1) }}
+                                                </div>
+                                                <div>
+                                                    <div class="text-xs font-black text-white/60 italic uppercase leading-none">{{ $training->responsibleUser->name }}</div>
+                                                    <div class="text-[9px] font-bold text-white/20 italic mt-0.5">{{ $training->responsibleUser->email }}</div>
+                                                </div>
+                                            @else
+                                                <span class="text-[9px] font-black text-white/10 uppercase tracking-widest italic">Protocolo Libre</span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="text-[11px] font-black text-white italic uppercase tracking-tight leading-none mb-1 group-hover/row:text-ep-primary transition-colors">{{ $training->empresa->nombre ?? 'N/A' }}</div>
+                                        <div class="text-[9px] font-bold text-white/20 italic tracking-widest uppercase">{{ $training->sede->nombre_sede ?? 'N/A' }}</div>
+                                    </td>
+                                    <td class="px-8 py-6">
+                                        <div class="flex items-center gap-2 text-[11px] font-black text-white/60 italic">
+                                            <svg class="w-3.5 h-3.5 text-indigo-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                            {{ $training->date->format('d/m/Y') }}
+                                            <span class="text-[9px] text-indigo-400 font-black">@ {{ $training->date->format('H:i') }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                            {{ $training->attendances_count }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-center">
+                                        @php
+                                            $statusBadge = match($training->status) {
+                                                'scheduled' => 'text-amber-400 border-amber-500/30 bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
+                                                'completed' => 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.1)]',
+                                                'cancelled' => 'text-red-400 border-red-500/30 bg-red-500/10 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
+                                                default => 'text-white/20 border-white/5 bg-white/5'
+                                            };
+                                            $statusText = match($training->status) {
+                                                'scheduled' => 'PROGRAMADA',
+                                                'completed' => 'FINALIZADA',
+                                                'cancelled' => 'CANCELADA',
+                                                default => strtoupper($training->status)
+                                            };
+                                        @endphp
+                                        <span class="inline-flex px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest italic border {{ $statusBadge }}">
+                                            {{ $statusText }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-6 text-right">
+                                        <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
+                                            @if(auth()->user()->isTechnician())
+                                                <a href="{{ route('gestor.trainings.attendance', $training) }}" class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                                                </a>
+                                            @endif
+                                            <a href="{{ route('gestor.trainings.pdf.preview', $training) }}" target="_blank" class="h-10 w-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                             </a>
-                                        @endif
-                                        <a href="{{ route('gestor.trainings.pdf.preview', $training) }}" target="_blank" class="p-1.5 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Ver PDF">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                        </a>
-                                        <a href="{{ route('gestor.trainings.edit', $training) }}" class="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" title="Editar">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                        </a>
-                                        <button wire:click="delete({{ $training->id }})" 
-                                                wire:confirm="¿Estás seguro de eliminar esta capacitación?"
-                                                class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                                    <div class="flex flex-col items-center">
-                                        <svg class="w-12 h-12 text-gray-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 9.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                        <p class="text-sm font-medium">No se encontraron capacitaciones.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            @if($trainings->hasPages())
-                <div class="px-6 py-4 bg-gray-50 border-t border-gray-100">
+                                            <a href="{{ route('gestor.trainings.edit', $training) }}" class="h-10 w-10 bg-white/5 border border-white/10 text-white/40 hover:bg-white/20 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            </a>
+                                            <button wire:click="delete({{ $training->id }})" 
+                                                    wire:confirm="¿Estás seguro de eliminar esta capacitación?"
+                                                    class="h-10 w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">Sin registros de entrenamiento <br> <span class="text-[9px] tracking-widest text-white/3 italic">Inyecte una nueva capacitación para iniciar el seguimiento</span></td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-10 py-6 border-t border-white/5 bg-black/20 pagination-tactical">
                     {{ $trainings->links() }}
                 </div>
-            @endif
+            </div>
         </div>
     </div>
+
+    <style>
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
+        .animate-fade-in-down { animation: fade-in-down 0.6s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .pagination-tactical nav div:first-child { display: none; }
+        .pagination-tactical nav span, .pagination-tactical nav a {
+            background-color: transparent !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+            color: rgba(255,255,255,0.2) !important;
+            border-radius: 12px !important; margin: 0 4px !important; padding: 8px 14px !important;
+            font-weight: 900 !important; font-size: 10px !important; transition: all 0.3s !important;
+        }
+        .pagination-tactical nav span[aria-current="page"] {
+            border-color: rgba(99,102,241,0.3) !important;
+            color: #6366f1 !important;
+            background: rgba(99,102,241,0.1) !important;
+        }
+    </style>
 </div>
