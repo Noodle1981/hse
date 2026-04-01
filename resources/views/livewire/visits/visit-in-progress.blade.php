@@ -20,33 +20,7 @@
                 </div>
 
                 <div class="flex items-center space-x-3">
-                    {{-- Cronómetro --}}
-                    <div class="hidden sm:flex items-center px-4 py-1.5 bg-white/5 rounded-2xl border border-white/10 text-white gap-2 shadow-inner group">
-                        <div class="flex items-center gap-2 overflow-hidden">
-                            <div class="w-2.5 h-2.5 rounded-full bg-ep-primary animate-pulse shadow-[0_0_10px_rgba(246,146,57,0.5)]"></div>
-                            <span class="text-[11px] font-black uppercase tracking-[0.2em] tabular-nums italic text-indigo-100/80">
-                                {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}m
-                            </span>
-                        </div>
-                    </div>
-
-                    {{-- Acciones --}}
-                    <a href="{{ auth()->user()->isAdmin() ? route('gestor.visits.history') : route('tecnico.visits.index') }}" 
-                       class="bg-white/5 text-white hover:bg-white/10 px-4 py-1.5 rounded-xl text-[10px] font-black border border-white/10 transition-all items-center gap-2 uppercase tracking-widest hidden xs:flex">
-                        <svg class="w-3.5 h-3.5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
-                        </svg>
-                        Pausar
-                    </a>
-                    
-                    <button wire:click="$set('showFinalizeModal', true)"
-                            class="bg-emerald-500 text-white hover:bg-emerald-400 px-4 py-1.5 rounded-xl text-[10px] font-black border border-emerald-400/30 transition-all items-center gap-2 uppercase tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.2)] flex group relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        <svg class="w-3.5 h-3.5 relative shadow-[0_0_8px_rgba(255,255,255,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span class="relative">Finalizar</span>
-                    </button>
+                    {{-- Espacio para acciones futuras si se requieren --}}
                 </div>
             </div>
             <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent opacity-50"></div>
@@ -181,6 +155,52 @@
 
                 <!-- Columna Derecha (5 cols) -->
                 <div class="lg:col-span-5 space-y-10 animate-fade-in" style="animation-delay: 0.2s">
+                    <!-- Control de Jornada -->
+                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
+                        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none"></div>
+                        <div class="px-8 py-6 bg-black/20 border-b border-white/5 flex justify-between items-center relative z-10">
+                            <div class="flex items-center gap-4">
+                                <div class="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-inner">
+                                    <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2.5"/></svg>
+                                </div>
+                                <h2 class="font-black text-white uppercase tracking-[0.2em] text-[11px] italic leading-none">Control de <span class="text-emerald-500">Jornada</span></h2>
+                            </div>
+                        </div>
+                        <div class="p-8 space-y-8 relative z-10">
+                            <!-- Duración Principal -->
+                            <div class="flex flex-col items-center justify-center p-6 bg-white/5 rounded-3xl border border-white/10 shadow-inner">
+                                <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-[0.4em] mb-2 italic">Tiempo de Operación</span>
+                                <span class="text-4xl font-black text-white italic tracking-tighter tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                                    {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}m
+                                </span>
+                                <div class="mt-4 flex gap-2">
+                                    <div class="h-1 w-8 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
+                                    <div class="h-1 w-2 rounded-full bg-emerald-500/20"></div>
+                                    <div class="h-1 w-2 rounded-full bg-emerald-500/20"></div>
+                                </div>
+                            </div>
+
+                            <!-- Acciones Críticas -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <a href="{{ auth()->user()->isAdmin() ? route('gestor.visits.history') : route('tecnico.visits.index') }}" 
+                                   class="flex flex-col items-center justify-center gap-3 p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all group">
+                                    <div class="h-10 w-10 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-indigo-100/40 group-hover:text-ep-primary transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z" stroke-width="2.5"/></svg>
+                                    </div>
+                                    <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic group-hover:text-white">Pausar</span>
+                                </a>
+
+                                <button wire:click="$set('showFinalizeModal', true)"
+                                        class="flex flex-col items-center justify-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl hover:bg-emerald-500/20 hover:border-emerald-500/40 transition-all group">
+                                    <div class="h-10 w-10 bg-emerald-500 border border-emerald-400 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-900/40 group-hover:scale-110 transition-transform">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="3"/></svg>
+                                    </div>
+                                    <span class="text-[9px] font-black text-emerald-500 uppercase tracking-widest italic">Finalizar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Capacitaciones -->
                     <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
                         <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
@@ -606,6 +626,30 @@
         }
         .animate-bounce-subtle {
             animation: bounce-subtle 2s infinite;
+        }
+
+        /* Custom Premium Orange Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #11111D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F69239;
+            border-radius: 20px;
+            border: 2px solid #11111D;
+            box-shadow: 0 0 10px rgba(246, 146, 57, 0.2);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF9F4D;
+        }
+        
+        /* Para Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #F69239 #11111D;
         }
     </style>
 </div>

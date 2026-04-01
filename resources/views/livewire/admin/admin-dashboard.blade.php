@@ -535,7 +535,7 @@
                              </div>
                         </div>
                     </div>
-                    <div style="height: 380px;" class="px-4">
+                    <div wire:ignore style="height: 380px;" class="px-4">
                         <canvas id="mainTrendChart"></canvas>
                     </div>
                 </div>
@@ -544,13 +544,13 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div class="bg-white/5 backdrop-blur-xl rounded-[3rem] border border-white/10 p-10 shadow-2xl group overflow-hidden">
                         <h3 class="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-10 px-4 border-l-4 border-red-500 italic leading-none">Estado de Hallazgos</h3>
-                        <div style="height: 280px;" class="scale-90 group-hover:scale-100 transition-transform duration-1000">
+                        <div wire:ignore style="height: 280px;" class="scale-90 group-hover:scale-100 transition-transform duration-1000">
                             <canvas id="findingsStatusChart"></canvas>
                         </div>
                     </div>
                     <div class="bg-white/5 backdrop-blur-xl rounded-[3rem] border border-white/10 p-10 shadow-2xl group overflow-hidden">
                         <h3 class="text-[10px] font-black text-white uppercase tracking-[0.4em] mb-10 px-4 border-l-4 border-ep-primary italic leading-none">Top Servicios Activos</h3>
-                        <div style="height: 280px;" class="group-hover:translate-x-2 transition-transform duration-1000 px-2">
+                        <div wire:ignore style="height: 280px;" class="group-hover:translate-x-2 transition-transform duration-1000 px-2">
                             <canvas id="topChecklistsChart"></canvas>
                         </div>
                     </div>
@@ -822,10 +822,25 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+    let mainTrendChartInstance = null;
+    let findingsChartInstance = null;
+    let topChecklistsChartInstance = null;
+
     document.addEventListener('livewire:navigated', initDashboardCharts);
     document.addEventListener('DOMContentLoaded', initDashboardCharts);
     
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('charts-updated', ({ charts }) => {
+            updateDashboardCharts(charts);
+        });
+    });
+
     function initDashboardCharts() {
+        let initialCharts = @json($charts);
+        updateDashboardCharts(initialCharts);
+    }
+
+    function updateDashboardCharts(charts) {
         const dashboardTheme = {
             font: "'Inter', sans-serif",
             colors: {
@@ -846,148 +861,171 @@
         // 1. Main Trend Chart (Inspections vs Incidents) - NEON STYLE
         const trendCtx = document.getElementById('mainTrendChart');
         if (trendCtx) {
-            new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: @json($charts['inspectionsPerMonth']['labels']),
-                    datasets: [
-                        {
-                            label: 'Inspecciones',
-                            data: @json($charts['inspectionsPerMonth']['data']),
-                            borderColor: dashboardTheme.colors.success,
-                            borderWidth: 4,
-                            backgroundColor: 'rgba(52, 211, 153, 0.05)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 4,
-                            pointBackgroundColor: dashboardTheme.colors.success,
-                            pointBorderColor: 'rgba(52, 211, 153, 0.2)',
-                            pointBorderWidth: 10
-                        },
-                        {
-                            label: 'Incidentes',
-                            data: @json($charts['incidentsPerMonth']['data']),
-                            borderColor: dashboardTheme.colors.danger,
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            backgroundColor: 'transparent',
-                            fill: false,
-                            tension: 0.4,
-                            pointRadius: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { intersect: false, mode: 'index' },
-                    scales: {
-                        y: { 
-                            grid: { color: dashboardTheme.gridColor }, 
-                            border: { display: false },
-                            ticks: { font: { size: 10, weight: 'bold' } }
-                        },
-                        x: { 
-                            grid: { display: false }, 
-                            border: { display: false },
-                            ticks: { font: { size: 10, weight: 'bold' } }
-                        }
+            if (mainTrendChartInstance) {
+                // Determine if we are drawing lines vs points
+                let isDays = charts.inspectionsPerMonth.labels.length > 12;
+                mainTrendChartInstance.data.labels = charts.inspectionsPerMonth.labels;
+                mainTrendChartInstance.data.datasets[0].data = charts.inspectionsPerMonth.data;
+                mainTrendChartInstance.data.datasets[0].pointRadius = isDays ? 2 : 4;
+                mainTrendChartInstance.data.datasets[1].data = charts.incidentsPerMonth.data;
+                mainTrendChartInstance.update();
+            } else {
+                let isDays = charts.inspectionsPerMonth.labels.length > 12;
+                mainTrendChartInstance = new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: charts.inspectionsPerMonth.labels,
+                        datasets: [
+                            {
+                                label: 'Inspecciones',
+                                data: charts.inspectionsPerMonth.data,
+                                borderColor: dashboardTheme.colors.success,
+                                borderWidth: 4,
+                                backgroundColor: 'rgba(52, 211, 153, 0.05)',
+                                fill: true,
+                                tension: 0.4,
+                                pointRadius: isDays ? 2 : 4,
+                                pointBackgroundColor: dashboardTheme.colors.success,
+                                pointBorderColor: 'rgba(52, 211, 153, 0.2)',
+                                pointBorderWidth: isDays ? 2 : 10
+                            },
+                            {
+                                label: 'Incidentes',
+                                data: charts.incidentsPerMonth.data,
+                                borderColor: dashboardTheme.colors.danger,
+                                borderWidth: 2,
+                                borderDash: [5, 5],
+                                backgroundColor: 'transparent',
+                                fill: false,
+                                tension: 0.4,
+                                pointRadius: 0
+                            }
+                        ]
                     },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { 
-                            backgroundColor: '#1e1e2d', 
-                            cornerRadius: 12, 
-                            padding: 12,
-                            titleFont: { size: 12, weight: 'bold' },
-                            bodyFont: { size: 11 },
-                            borderColor: 'rgba(255,255,255,0.1)',
-                            borderWidth: 1
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { intersect: false, mode: 'index' },
+                        scales: {
+                            y: { 
+                                grid: { color: dashboardTheme.gridColor }, 
+                                border: { display: false },
+                                ticks: { font: { size: 10, weight: 'bold' } }
+                            },
+                            x: { 
+                                grid: { display: false }, 
+                                border: { display: false },
+                                ticks: { font: { size: 10, weight: 'bold' } }
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: { 
+                                backgroundColor: '#1e1e2d', 
+                                cornerRadius: 12, 
+                                padding: 12,
+                                titleFont: { size: 12, weight: 'bold' },
+                                bodyFont: { size: 11 },
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                borderWidth: 1
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         // 2. Findings Status Chart (HUD Doughnut)
         const findingsCtx = document.getElementById('findingsStatusChart');
         if (findingsCtx) {
-            new Chart(findingsCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: @json($charts['findingsByStatus']['labels']),
-                    datasets: [{
-                        data: @json($charts['findingsByStatus']['data']),
-                        backgroundColor: [
-                            dashboardTheme.colors.warning, 
-                            dashboardTheme.colors.info, 
-                            dashboardTheme.colors.success, 
-                            dashboardTheme.colors.danger
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 20
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: { 
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { 
-                                usePointStyle: true, 
-                                padding: 25, 
-                                color: 'rgba(255,255,255,0.6)',
-                                font: { size: 10, weight: 'black' } 
-                            } 
+            if (findingsChartInstance) {
+                findingsChartInstance.data.labels = charts.findingsByStatus.labels;
+                findingsChartInstance.data.datasets[0].data = charts.findingsByStatus.data;
+                findingsChartInstance.update();
+            } else {
+                findingsChartInstance = new Chart(findingsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: charts.findingsByStatus.labels,
+                        datasets: [{
+                            data: charts.findingsByStatus.data,
+                            backgroundColor: [
+                                dashboardTheme.colors.warning, 
+                                dashboardTheme.colors.info, 
+                                dashboardTheme.colors.success, 
+                                dashboardTheme.colors.danger
+                            ],
+                            borderWidth: 0,
+                            hoverOffset: 20
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '75%',
+                        plugins: { 
+                            legend: { 
+                                position: 'bottom', 
+                                labels: { 
+                                    usePointStyle: true, 
+                                    padding: 25, 
+                                    color: 'rgba(255,255,255,0.6)',
+                                    font: { size: 10, weight: 'black' } 
+                                } 
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         // 3. Top Checklists (HUD Bar)
         const topCtx = document.getElementById('topChecklistsChart');
         if (topCtx) {
-            new Chart(topCtx, {
-                type: 'bar',
-                data: {
-                    labels: @json($charts['topChecklists']['labels']),
-                    datasets: [{
-                        data: @json($charts['topChecklists']['data']),
-                        backgroundColor: dashboardTheme.colors.primary,
-                        borderRadius: 15,
-                        barThickness: 18,
-                        borderWidth: 0,
-                        borderColor: 'transparent',
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: { display: false },
-                        y: { 
-                            grid: { display: false }, 
-                            border: { display: false }, 
-                            ticks: { 
-                                color: 'rgba(255,255,255,0.8)',
-                                font: { size: 10, weight: 'bold' } 
-                            } 
-                        }
+            if (topChecklistsChartInstance) {
+                topChecklistsChartInstance.data.labels = charts.topChecklists.labels;
+                topChecklistsChartInstance.data.datasets[0].data = charts.topChecklists.data;
+                topChecklistsChartInstance.update();
+            } else {
+                topChecklistsChartInstance = new Chart(topCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: charts.topChecklists.labels,
+                        datasets: [{
+                            data: charts.topChecklists.data,
+                            backgroundColor: dashboardTheme.colors.primary,
+                            borderRadius: 15,
+                            barThickness: 18,
+                            borderWidth: 0,
+                            borderColor: 'transparent',
+                        }]
                     },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { 
-                            backgroundColor: '#1E1E2D',
-                            padding: 12,
-                            titleFont: { size: 12, weight: 'bold' }
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { display: false },
+                            y: { 
+                                grid: { display: false }, 
+                                border: { display: false }, 
+                                ticks: { 
+                                    color: 'rgba(255,255,255,0.8)',
+                                    font: { size: 10, weight: 'bold' } 
+                                } 
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: { 
+                                backgroundColor: '#1E1E2D',
+                                padding: 12,
+                                titleFont: { size: 12, weight: 'bold' }
+                            }
                         }
                     }
-                }
-            });
+                });
+            }
         }
     }
 </script>

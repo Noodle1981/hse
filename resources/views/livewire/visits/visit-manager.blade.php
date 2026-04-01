@@ -1,4 +1,5 @@
-<div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+<div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white">
+    <div class="max-w-7xl mx-auto">
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
@@ -10,8 +11,8 @@
                         </svg>
                     </button>
 
-                    <h1 class="text-lg md:text-xl font-medium text-white tracking-tight">
-                        Mis <span class="text-ep-primary italic">Visitas</span>
+                    <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.3em] mb-1 italic">
+                        Mis <span class="text-white">Visitas</span>
                     </h1>
                 </div>
 
@@ -27,17 +28,17 @@
     @endsection
 
     <!-- Page Header Actions -->
-    <div class="flex justify-end mb-8">
+    <div class="flex justify-end mb-10">
             <button 
                 wire:click="openStartVisitModal"
-                class="bg-ep-primary text-white rounded-xl px-5 py-2.5 font-black shadow-lg shadow-ep-primary/20 hover:brightness-110 transition-all flex items-center gap-2 group uppercase tracking-widest text-[10px]"
+                class="bg-ep-primary text-white rounded-2xl px-8 py-4 font-black shadow-xl shadow-ep-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-4 group uppercase tracking-[0.2em] text-[11px] italic"
             >
-                <div class="bg-white/20 rounded-lg p-1 group-hover:bg-white/30 transition-colors">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <div class="bg-white/20 rounded-xl p-1.5 group-hover:rotate-90 transition-transform">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
                 </div>
-                <span>Iniciar Nueva Visita</span>
+                <span>Protocolo Nueva Visita</span>
             </button>
         </div>
 
@@ -45,89 +46,91 @@
     <!-- This is handled in mount/boot but just in case -->
 
     <!-- Past Visits List (Cards on Mobile, Table on Desktop) -->
-    <div class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <div class="bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden mb-10">
+        <div class="px-8 py-6 bg-black/20 border-b border-white/5 flex items-center gap-4">
+            <div class="h-10 w-10 rounded-xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary flex items-center justify-center shadow-inner italic">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h2 class="font-black text-white uppercase tracking-[0.2em] text-[11px] italic leading-none">Historial de <span class="text-ep-primary">Operaciones</span></h2>
+        </div>
+
         <!-- Desktop Table (visible from md) -->
         <div class="hidden md:block overflow-x-auto">
-            <table class="table-auto w-full">
-                <thead class="bg-ep-dark text-white border-b border-gray-200">
-                    <tr>
-                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider pl-6">Fecha</th>
-                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Horario</th>
-                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Ubicación</th>
-                        <th class="px-4 py-4 whitespace-nowrap text-left text-xs font-bold uppercase tracking-wider">Duración</th>
-                        <th class="px-4 py-4 whitespace-nowrap text-center text-xs font-bold uppercase tracking-wider">Estado</th>
-                        <th class="px-4 py-4 whitespace-nowrap text-right text-xs font-bold uppercase tracking-wider pr-6">Acciones</th>
+            <table class="table-auto w-full text-left">
+                <thead class="bg-black/30 text-white border-b border-white/5">
+                    <tr class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-100/40 italic">
+                        <th class="px-6 py-5 whitespace-nowrap">Registro Temporal</th>
+                        <th class="px-4 py-5 whitespace-nowrap">Cronología</th>
+                        <th class="px-4 py-5 whitespace-nowrap">Ubicación / Nodo</th>
+                        <th class="px-4 py-5 whitespace-nowrap">Escala Operativa</th>
+                        <th class="px-4 py-5 whitespace-nowrap text-center">Estado</th>
+                        <th class="px-6 py-5 whitespace-nowrap text-right">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="text-sm divide-y divide-gray-200">
+                <tbody class="divide-y divide-white/5">
                     @forelse ($pastVisits as $visit)
-                        <tr class="hover:bg-gray-50 transition-colors">
-                            <td class="px-4 py-4 whitespace-nowrap pl-6">
+                        <tr class="hover:bg-white/[0.04] transition-all duration-300 group/row border-transparent border-l-2 hover:border-ep-primary">
+                            <td class="px-6 py-6 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 font-bold">
+                                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary font-black italic shadow-inner">
                                         {{ $visit->visit_date->format('d') }}
                                     </div>
                                     <div class="ml-4">
-                                        <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->locale('es')->translatedFormat('F, Y')) }}</div>
+                                        <div class="text-[11px] font-black text-white uppercase italic tracking-widest">{{ ucfirst($visit->visit_date->locale('es')->translatedFormat('F, Y')) }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">
+                            <td class="px-4 py-4 whitespace-nowrap text-[10px] font-black text-indigo-100/60 uppercase tracking-widest italic">
                                 {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
                             </td>
                             <td class="px-4 py-4 whitespace-nowrap">
                                 <div class="flex flex-col">
-                                    <span class="text-sm font-semibold text-gray-900">{{ $visit->sede->nombre_sede }}</span>
-                                    <span class="text-xs text-gray-500">{{ $visit->empresa->nombre }}</span>
+                                    <span class="text-[11px] font-black text-white uppercase italic tracking-tight group-hover/row:text-ep-primary transition-colors leading-none">{{ $visit->sede->nombre_sede }}</span>
+                                    <span class="text-[9px] font-bold text-indigo-100/20 uppercase tracking-widest mt-1 italic">{{ $visit->empresa->nombre }}</span>
                                 </div>
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-600">
+                            <td class="px-4 py-4 whitespace-nowrap text-[10px] font-black text-indigo-100/40 uppercase tracking-widest italic leading-none">
                                 @if($visit->end_time && $visit->start_time)
                                     @php
                                         $duration = $visit->start_time->diffInMinutes($visit->end_time);
                                         $hours = floor($duration / 60);
                                         $minutes = $duration % 60;
                                     @endphp
-                                    <div class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
+                                    <div class="flex items-center gap-2">
+                                        <svg class="w-3.5 h-3.5 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/></svg>
                                         @if($hours > 0)
-                                            <span class="font-medium">{{ $hours }}:{{ str_pad($minutes, 2, '0', STR_PAD_LEFT) }} hrs</span>
+                                            <span class="text-white">{{ $hours }}:{{ str_pad($minutes, 2, '0', STR_PAD_LEFT) }} hrs</span>
                                         @else
-                                            <span>{{ $minutes }} min</span>
+                                            <span class="text-white">{{ $minutes }} min</span>
                                         @endif
                                     </div>
                                 @else
-                                    <span class="text-gray-400">-</span>
+                                    <span class="text-red-500/30">Inconclusa</span>
                                 @endif
                             </td>
                             <td class="px-4 py-4 whitespace-nowrap text-center">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold {{ $visit->status_badge }}">
+                                <span class="bg-white/5 border border-white/5 px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest {{ $visit->status_badge }} italic shadow-lg">
                                     {{ $visit->status_label }}
                                 </span>
                             </td>
-                            <td class="px-4 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex items-center justify-end gap-2">
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <div class="flex items-center justify-end gap-3 text-indigo-100/30">
                                     @if($visit->status === 'completed' || $visit->status === 'signed')
                                         <a href="{{ route('tecnico.visits.certificate.preview', $visit->id) }}" 
                                            target="_blank"
-                                           class="text-gray-400 hover:text-blue-600 transition-colors p-1" 
+                                           class="hover:text-ep-primary transition-all p-2 bg-white/5 rounded-xl border border-white/5 hover:border-ep-primary/30 active:scale-95" 
                                            title="Ver Constancia PDF">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                            </svg>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </a>
                                         <a href="{{ route('tecnico.visits.certificate.download', $visit->id) }}" 
-                                           class="text-gray-400 hover:text-green-600 transition-colors p-1" 
+                                           class="hover:text-emerald-500 transition-all p-2 bg-white/5 rounded-xl border border-white/5 hover:border-emerald-500/30 active:scale-95" 
                                            title="Descargar Constancia PDF">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                            </svg>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                         </a>
                                     @else
-                                        <span class="text-xs text-gray-400 italic">Visita no finalizada</span>
+                                        <span class="text-[9px] font-black uppercase tracking-widest text-red-500/40 italic">Inconclusa</span>
                                     @endif
                                 </div>
                             </td>
@@ -143,80 +146,107 @@
             </table>
         </div>
 
-        <!-- Mobile View (Cards, visible strictly on < md) -->
-        <div class="md:hidden divide-y divide-gray-100">
+        <!-- Mobile View (Cards) -->
+        <div class="md:hidden divide-y divide-white/5">
             @forelse ($pastVisits as $visit)
-                <div class="p-4 hover:bg-gray-50 transition-colors">
-                    <!-- Header: Date and Badge -->
-                    <div class="flex justify-between items-start mb-3">
+                <div class="p-8 hover:bg-white/[0.04] transition-all group">
+                    <div class="flex justify-between items-start mb-6">
                         <div class="flex items-center">
-                            <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-lg bg-orange-50 text-orange-600 font-bold">
+                            <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary font-black italic shadow-inner">
                                 {{ $visit->visit_date->format('d') }}
                             </div>
-                            <div class="ml-3">
-                                <div class="text-sm font-bold text-gray-900 capitalize">{{ ucfirst($visit->visit_date->locale('es')->translatedFormat('F, Y')) }}</div>
-                                <div class="text-xs text-gray-500">
+                            <div class="ml-4">
+                                <div class="text-[11px] font-black text-white uppercase italic tracking-widest leading-none">{{ ucfirst($visit->visit_date->locale('es')->translatedFormat('F, Y')) }}</div>
+                                <div class="text-[9px] font-bold text-indigo-100/20 uppercase tracking-[0.2em] mt-2 italic">
                                     {{ $visit->start_time?->format('H:i') }} - {{ $visit->end_time?->format('H:i') }}
                                 </div>
                             </div>
                         </div>
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold {{ $visit->status_badge }}">
+                        <span class="bg-white/5 border border-white/5 px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest {{ $visit->status_badge }} italic">
                             {{ $visit->status_label }}
                         </span>
                     </div>
 
-                    <!-- Body: Location -->
-                    <div class="mb-3 pl-13">
-                        <div class="text-sm font-semibold text-gray-900">{{ $visit->sede->nombre_sede }}</div>
-                        <div class="text-xs text-gray-500">{{ $visit->empresa->nombre }}</div>
+                    <div class="mb-6 pl-1 pr-2">
+                        <div class="text-xs font-black text-white uppercase italic tracking-tighter group-hover:text-ep-primary transition-colors leading-tight">{{ $visit->sede->nombre_sede }}</div>
+                        <div class="text-[9px] font-bold text-indigo-100/20 uppercase tracking-[0.2em] mt-2 italic">{{ $visit->empresa->nombre }}</div>
                     </div>
 
-                    <!-- Footer: Duration and Actions -->
-                    <div class="flex justify-between items-center pt-3 border-t border-gray-100">
-                        <div class="text-xs text-gray-600 flex items-center">
+                    <div class="flex justify-between items-center pt-6 border-t border-white/5">
+                        <div class="text-[9px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic flex items-center gap-2">
                             @if($visit->end_time && $visit->start_time)
                                 @php
                                     $duration = $visit->start_time->diffInMinutes($visit->end_time);
                                     $hours = floor($duration / 60);
                                     $minutes = $duration % 60;
                                 @endphp
-                                <svg class="w-3.5 h-3.5 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                @if($hours > 0)
-                                    <span>{{ $hours }}:{{ str_pad($minutes, 2, '0', STR_PAD_LEFT) }} hrs</span>
-                                @else
-                                    <span>{{ $minutes }} min</span>
-                                @endif
+                                <svg class="w-3.5 h-3.5 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/></svg>
+                                <span class="text-white">{{ $hours > 0 ? $hours . ':' . str_pad($minutes, 2, '0', STR_PAD_LEFT) . ' hrs' : $minutes . ' min' }}</span>
                             @else
-                                <span class="text-gray-400">-</span>
+                                <span class="text-red-500/30">Inconclusa</span>
                             @endif
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-3">
                             @if($visit->status === 'completed' || $visit->status === 'signed')
                                 <a href="{{ route('tecnico.visits.certificate.download', $visit->id) }}" 
-                                   class="border border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm"
+                                   class="bg-ep-primary/10 border border-ep-primary/20 text-ep-primary hover:bg-ep-primary hover:text-white font-black text-[9px] px-4 py-2 rounded-xl flex items-center gap-2 transition-all uppercase tracking-widest italic shadow-lg"
                                 >
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    Descargar PDF
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    PDF
                                 </a>
-                            @else
-                                <span class="text-xs text-gray-400 italic">Inconclusa</span>
                             @endif
                         </div>
                     </div>
                 </div>
             @empty
-                <div class="p-4 text-center text-gray-500">
-                    No has realizado visitas aún.
+                <div class="p-12 text-center text-indigo-100/10">
+                    <p class="text-[10px] font-black uppercase tracking-[0.4em] italic mb-1 group-hover:text-white transition-colors">Sistema Limpio</p>
+                    <p class="text-[8px] font-bold uppercase tracking-[0.2em] italic">Sin registros registrados</p>
                 </div>
             @endforelse
         </div>
         
-        <div class="px-4 py-3 border-t border-gray-200">
+        <div class="px-8 py-5 border-t border-white/5 bg-black/10">
             {{ $pastVisits->links() }}
         </div>
     </div>
+
+    <style>
+        /* Custom Premium Orange Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #11111D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F69239;
+            border-radius: 20px;
+            border: 2px solid #11111D;
+            box-shadow: 0 0 10px rgba(246, 146, 57, 0.2);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF9F4D;
+        }
+        
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #F69239 #11111D;
+        }
+
+        /* Override Pagination Styles for Dark Theme */
+        .pagination { @apply flex gap-2; }
+        .page-item .page-link { 
+            @apply bg-white/5 border border-white/10 text-indigo-100/40 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase italic transition-all;
+        }
+        .page-item.active .page-link {
+            @apply bg-ep-primary border-ep-primary text-white shadow-lg shadow-ep-primary/20;
+        }
+        .page-item .page-link:hover:not(.disabled) {
+            @apply bg-white/10 text-white border-white/20;
+        }
+    </style>
 
     <!-- Start Visit Modal Premium -->
     @if($showStartVisitModal)

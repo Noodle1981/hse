@@ -40,6 +40,13 @@ class AdminDashboard extends Component
         $this->dispatch('periodUpdated');
     }
 
+    public function updated($property)
+    {
+        if (in_array($property, ['period', 'empresaId', 'sedeId', 'tecnicoId'])) {
+            $this->dispatch('charts-updated', charts: $this->getCharts());
+        }
+    }
+
     public function updatedEmpresaId()
     {
         $this->sedeId = null;
@@ -52,6 +59,7 @@ class AdminDashboard extends Component
         $this->tecnicoId = null;
         $this->period = 'this_month';
         $this->updateDates();
+        $this->dispatch('charts-updated', charts: $this->getCharts());
     }
 
     private function updateDates()
@@ -205,15 +213,21 @@ class AdminDashboard extends Component
             ],
             'reports' => [
                 'total_master' => \App\Models\MasterReport::whereBetween('created_at', [$from, $to])
-                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
                     ->count(),
                 'completed' => \App\Models\MasterReport::where('estado', 'finalizado')
                     ->whereBetween('updated_at', [$from, $to])
-                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
                     ->count(),
                 'pending' => \App\Models\MasterReport::whereIn('estado', ['pendiente', 'en_revision'])
                     ->whereBetween('created_at', [$from, $to])
-                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
                     ->count(),
             ],
             'ecosystem' => [
@@ -304,6 +318,7 @@ class AdminDashboard extends Component
         $data = \App\Models\Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
             ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
             ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
             ->select('estado', DB::raw('count(*) as total'))
             ->groupBy('estado')
             ->get();
@@ -319,25 +334,53 @@ class AdminDashboard extends Component
         $from = $this->dateFrom . ' 00:00:00';
         $to = $this->dateTo . ' 23:59:59';
 
-        $data = \App\Models\Incidente::selectRaw("strftime('%m', fecha_ocurrencia) as month, count(*) as total")
-            ->whereBetween('fecha_ocurrencia', [$from, $to])
+        $daysDiff = \Carbon\Carbon::parse($from)->diffInDays(\Carbon\Carbon::parse($to));
+        $groupByDay = $daysDiff <= 31;
+
+        $query = \App\Models\Incidente::whereBetween('fecha_ocurrencia', [$from, $to])
             ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
             ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
-            ->groupBy('month')
-            ->pluck('total', 'month');
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId));
 
-        $result = array_fill(0, 12, 0);
-        foreach ($data as $month => $total) {
-            $monthIndex = (int)$month - 1;
-            if ($monthIndex >= 0 && $monthIndex < 12) {
-                $result[$monthIndex] = $total;
+        if ($groupByDay) {
+            $data = (clone $query)->selectRaw("strftime('%Y-%m-%d', fecha_ocurrencia) as date_unit, count(*) as total")
+                ->groupBy('date_unit')
+                ->pluck('total', 'date_unit');
+
+            $labels = [];
+            $result = [];
+            $currentDate = \Carbon\Carbon::parse($from);
+            $endDate = \Carbon\Carbon::parse($to);
+
+            while ($currentDate <= $endDate) {
+                $dateStr = $currentDate->format('Y-m-d');
+                $labels[] = $currentDate->format('d/m');
+                $result[] = $data[$dateStr] ?? 0;
+                $currentDate->addDay();
             }
-        }
 
-        return [
-            'labels' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-            'data' => $result,
-        ];
+            return [
+                'labels' => $labels,
+                'data' => $result,
+            ];
+        } else {
+            $data = (clone $query)->selectRaw("strftime('%m', fecha_ocurrencia) as month, count(*) as total")
+                ->groupBy('month')
+                ->pluck('total', 'month');
+
+            $result = array_fill(0, 12, 0);
+            foreach ($data as $month => $total) {
+                $monthIndex = (int)$month - 1;
+                if ($monthIndex >= 0 && $monthIndex < 12) {
+                    $result[$monthIndex] = $total;
+                }
+            }
+
+            return [
+                'labels' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                'data' => $result,
+            ];
+        }
     }
 
     private function getInspectionsPerMonth()
@@ -345,29 +388,54 @@ class AdminDashboard extends Component
         $from = $this->dateFrom . ' 00:00:00';
         $to = $this->dateTo . ' 23:59:59';
 
-        $data = DynamicInspection::selectRaw("strftime('%m', completed_at) as month, count(*) as total")
-            ->whereBetween('completed_at', [$from, $to])
+        $daysDiff = \Carbon\Carbon::parse($from)->diffInDays(\Carbon\Carbon::parse($to));
+        $groupByDay = $daysDiff <= 31;
+
+        $query = DynamicInspection::whereBetween('completed_at', [$from, $to])
             ->whereNotNull('completed_at')
             ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
             ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
-            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
-            ->groupBy('month')
-            ->pluck('total', 'month');
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId));
 
-        $monthsLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-        $result = array_fill(0, 12, 0);
+        if ($groupByDay) {
+            $data = (clone $query)->selectRaw("strftime('%Y-%m-%d', completed_at) as date_unit, count(*) as total")
+                ->groupBy('date_unit')
+                ->pluck('total', 'date_unit');
 
-        foreach ($data as $month => $total) {
-            $monthIndex = (int)$month - 1;
-            if ($monthIndex >= 0 && $monthIndex < 12) {
-                $result[$monthIndex] = $total;
+            $labels = [];
+            $result = [];
+            $currentDate = \Carbon\Carbon::parse($from);
+            $endDate = \Carbon\Carbon::parse($to);
+
+            while ($currentDate <= $endDate) {
+                $dateStr = $currentDate->format('Y-m-d');
+                $labels[] = $currentDate->format('d/m');
+                $result[] = $data[$dateStr] ?? 0;
+                $currentDate->addDay();
             }
-        }
 
-        return [
-            'labels' => $monthsLabels,
-            'data' => $result,
-        ];
+            return [
+                'labels' => $labels,
+                'data' => $result,
+            ];
+        } else {
+            $data = (clone $query)->selectRaw("strftime('%m', completed_at) as month, count(*) as total")
+                ->groupBy('month')
+                ->pluck('total', 'month');
+
+            $result = array_fill(0, 12, 0);
+            foreach ($data as $month => $total) {
+                $monthIndex = (int)$month - 1;
+                if ($monthIndex >= 0 && $monthIndex < 12) {
+                    $result[$monthIndex] = $total;
+                }
+            }
+
+            return [
+                'labels' => ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+                'data' => $result,
+            ];
+        }
     }
 
     private function getChecklistsByCategory()
@@ -415,6 +483,7 @@ class AdminDashboard extends Component
     private function getTopChecklists()
     {
         $data = DynamicInspection::select('dynamic_checklist_id', DB::raw('count(*) as total'))
+            ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
             ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
             ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
             ->groupBy('dynamic_checklist_id')

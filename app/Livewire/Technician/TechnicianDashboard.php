@@ -17,24 +17,68 @@ use Livewire\Attributes\{Layout, Title};
 #[Title('Mi Dashboard')]
 class TechnicianDashboard extends Component
 {
-    public $greeting;
+    public $misionActiva;
+    public $proximasMisiones;
+    public $proximasCapacitaciones;
 
     public function render()
     {
-        $this->setGreeting();
         $user = auth()->user();
+        
+        $this->misionActiva = $this->getActiveMission($user);
+        $this->proximasMisiones = $this->getUpcomingMissions($user);
+        $this->proximasCapacitaciones = $this->getUpcomingTrainings($user);
         
         $kpis = $this->getPersonalKPIs($user);
         $charts = $this->getPersonalCharts($user);
-        $myTasks = $this->getMyTasks($user);
         $myAlerts = $this->getMyAlerts($user);
 
-        return view('livewire.technician.technician-dashboard', compact(
-            'kpis',
-            'charts',
-            'myTasks',
-            'myAlerts'
-        ));
+        return view('livewire.technician.technician-dashboard', [
+            'kpis' => $kpis,
+            'charts' => $charts,
+            'myAlerts' => $myAlerts,
+            'misionActiva' => $this->misionActiva,
+            'proximasMisiones' => $this->proximasMisiones,
+            'proximasCapacitaciones' => $this->proximasCapacitaciones,
+        ]);
+    }
+
+    private function getActiveMission($user)
+    {
+        return \App\Models\VisitCertificate::with(['sede', 'empresa'])
+            ->where('user_id', $user->id)
+            ->where('status', 'in_progress')
+            ->first();
+    }
+
+    private function getUpcomingMissions($user)
+    {
+        $all = ChecklistAssignment::with(['checklist:id,title,category_id', 'checklist.categoryRelation:id,name', 'sede:id,nombre_sede'])
+            ->where('user_id', $user->id)
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->orderBy('due_date')
+            ->get();
+
+        return [
+            'hoy' => $all->filter(fn($t) => $t->due_date?->isToday()),
+            'semana' => $all->filter(fn($t) => $t->due_date?->isAfter(now()) && $t->due_date?->isBefore(now()->addDays(7))),
+            'vencidas' => $all->filter(fn($t) => $t->isOverdue()),
+            'otras' => $all->filter(fn($t) => $t->due_date?->isAfter(now()->addDays(7)) && !$t->isOverdue()),
+        ];
+    }
+
+    private function getUpcomingTrainings($user)
+    {
+        return Training::with(['sede', 'empresa'])
+            ->where('date', '>=', now())
+            ->whereHas('sede', function($q) use ($user) {
+                // Si el técnico tiene sedes asociadas (asumiendo relación o filtro por empresa)
+                // Por ahora filtramos por las del usuario si tiene la relación sedeUser
+                $q->whereIn('id', $user->sedes->pluck('id'));
+            })
+            ->orderBy('date')
+            ->limit(3)
+            ->get();
     }
 
     private function getPersonalKPIs($user)
@@ -164,16 +208,6 @@ class TechnicianDashboard extends Component
         ];
     }
 
-    private function getMyTasks($user)
-    {
-        return ChecklistAssignment::with(['checklist:id,title', 'sede:id,nombre_sede'])
-            ->where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'in_progress'])
-            ->orderBy('due_date')
-            ->limit(10)
-            ->get();
-    }
-
     private function getMyAlerts($user)
     {
         return [
@@ -201,17 +235,5 @@ class TechnicianDashboard extends Component
         }
         
         return null;
-    }
-
-    private function setGreeting()
-    {
-        $hour = now()->hour;
-        if ($hour < 12) {
-            $this->greeting = '¡Buenos días!';
-        } elseif ($hour < 20) {
-            $this->greeting = '¡Buenas tardes!';
-        } else {
-            $this->greeting = '¡Buenas noches!';
-        }
     }
 }
