@@ -51,13 +51,22 @@ class AnnualContractReportController extends Controller
     {
         if (!$plan->$monthName) return ['status' => 'none', 'count' => 0];
 
-        $count = 0;
         if ($plan->category === 'Inspección' && $plan->checklist_id) {
-            $count = DynamicInspection::where('dynamic_checklist_id', $plan->checklist_id)
+            $count = \App\Models\DynamicInspection::where('dynamic_checklist_id', $plan->checklist_id)
                 ->where('sede_id', $sedeId)
                 ->where('status', 'completed')
                 ->whereMonth('completed_at', $monthNumber)
                 ->whereYear('completed_at', $year)
+                ->count();
+        } elseif ($plan->category === 'Capacitación') {
+            $count = \App\Models\Training::where('sede_id', $sedeId)
+                ->whereMonth('date', $monthNumber)
+                ->whereYear('date', $year)
+                ->count();
+        } elseif ($plan->category === 'Informe') {
+            $periodo = $year . '-' . str_pad($monthNumber, 2, '0', STR_PAD_LEFT);
+            $count = \App\Models\MasterReport::where('sede_id', $sedeId)
+                ->where('periodo', $periodo)
                 ->count();
         }
         

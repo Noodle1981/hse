@@ -221,19 +221,71 @@ class AnnualContractDashboard extends Component
             ? Sede::all() 
             : auth()->user()->sedes;
 
+        $activeSede = Sede::find($this->sedeId);
+        
         // Precalcular datos de cumplimiento
         $complianceData = $this->calculateComplianceData($plans);
+        $efficiency = $this->calculateEfficiencyMetrics($complianceData);
 
         return view('livewire.contracts.annual-contract-dashboard', [
             'plans' => $plans,
             'sedes' => $sedes,
+            'activeSede' => $activeSede,
             'checklists' => DynamicChecklist::all(),
             'complianceData' => $complianceData,
+            'efficiency' => $efficiency,
             'months' => [
                 'january' => 1, 'february' => 2, 'march' => 3, 'april' => 4,
                 'may' => 5, 'june' => 6, 'july' => 7, 'august' => 8,
                 'september' => 9, 'october' => 10, 'november' => 11, 'december' => 12
             ]
         ])->layout('components.layouts.app');
+    }
+
+    private function calculateEfficiencyMetrics($complianceData)
+    {
+        $stats = [
+            'global' => 0,
+            'inspeccion' => 0,
+            'capacitacion' => 0,
+            'informe' => 0,
+            'counts' => [
+                'total' => 0, 'completed' => 0, 'overdue' => 0, 'pending' => 0,
+                'insp_total' => 0, 'insp_done' => 0,
+                'cap_total' => 0, 'cap_done' => 0,
+                'inf_total' => 0, 'inf_done' => 0,
+            ]
+        ];
+
+        foreach ($complianceData as $planId => $months) {
+            $plan = AnnualPlan::find($planId);
+            foreach ($months as $month => $data) {
+                if ($data['status'] === 'none') continue;
+
+                $stats['counts']['total']++;
+                if ($data['status'] === 'completed') $stats['counts']['completed']++;
+                if ($data['status'] === 'overdue') $stats['counts']['overdue']++;
+                if ($data['status'] === 'pending') $stats['counts']['pending']++;
+
+                $cat = strtolower($plan->category);
+                if ($cat === 'inspección') {
+                    $stats['counts']['insp_total']++;
+                    if ($data['status'] === 'completed') $stats['counts']['insp_done']++;
+                } elseif ($cat === 'capacitación') {
+                    $stats['counts']['cap_total']++;
+                    if ($data['status'] === 'completed') $stats['counts']['cap_done']++;
+                } elseif ($cat === 'informe') {
+                    $stats['counts']['inf_total']++;
+                    if ($data['status'] === 'completed') $stats['counts']['inf_done']++;
+                }
+            }
+        }
+
+        $stats['global'] = $stats['counts']['total'] > 0 ? round(($stats['counts']['completed'] / $stats['counts']['total']) * 100) : 0;
+        $stats['inspeccion'] = $stats['counts']['insp_total'] > 0 ? round(($stats['counts']['insp_done'] / $stats['counts']['insp_total']) * 100) : 0;
+        $stats['capacitacion'] = $stats['counts']['cap_total'] > 0 ? round(($stats['counts']['cap_done'] / $stats['counts']['cap_total']) * 100) : 0;
+        $stats['informe'] = $stats['counts']['inf_total'] > 0 ? round(($stats['counts']['inf_done'] / $stats['counts']['inf_total']) * 100) : 0;
+
+        return $stats;
     }
 }
