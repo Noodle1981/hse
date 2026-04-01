@@ -114,7 +114,7 @@
                         </div>
                         <div class="flex-1 min-w-[200px]">
                             <span class="text-[9px] font-black text-ep-primary uppercase tracking-[0.4em] italic mb-1 block">Selección de Activos</span>
-                            <select wire:model.live="sedeId" class="w-full bg-transparent border-none text-xl font-black text-white italic uppercase tracking-tight focus:ring-0 cursor-pointer [color-scheme:dark]">
+                            <select wire:model.live="sedeId" class="w-full bg-transparent border-none text-xl font-black text-white italic uppercase tracking-tight focus:ring-0 cursor-pointer [color-scheme:dark] [&>option]:bg-[#1e1e2d] [&>option]:text-white">
                                 @foreach($sedes as $s)
                                     <option value="{{ $s->id }}">{{ $s->nombre_sede }}</option>
                                 @endforeach

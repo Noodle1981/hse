@@ -53,17 +53,58 @@ class TechnicianDashboard extends Component
 
     private function getUpcomingMissions($user)
     {
-        $all = ChecklistAssignment::with(['checklist:id,title,category_id', 'checklist.categoryRelation:id,name', 'sede:id,nombre_sede'])
+        // 1. Manual Assignments (Solicitudes)
+        $manualAssignments = ChecklistAssignment::with(['checklist:id,title,category_id', 'checklist.categoryRelation:id,name', 'sede:id,nombre_sede'])
             ->where('user_id', $user->id)
             ->whereIn('status', ['pending', 'in_progress'])
             ->orderBy('due_date')
-            ->get();
+            ->get()
+            ->map(function($a) {
+                return (object)[
+                    'id' => $a->id,
+                    'dynamic_checklist_id' => $a->dynamic_checklist_id,
+                    'checklist' => $a->checklist,
+                    'sede' => $a->sede,
+                    'due_date' => $a->due_date,
+                    'source' => 'manual',
+                    'status' => $a->status,
+                    'is_overdue' => method_exists($a, 'isOverdue') ? $a->isOverdue() : false
+                ];
+            });
+
+        // 2. Annual Plan Tasks (Contratos)
+        $month = strtolower(now()->format('F'));
+        $year = now()->year;
+        
+        $contractPlans = \App\Models\AnnualPlan::with(['checklist:id,title,category_id', 'checklist.categoryRelation:id,name', 'sede:id,nombre_sede'])
+            ->whereIn('sede_id', $user->sedes->pluck('id'))
+            ->where($month, true)
+            ->where('year', $year)
+            ->get()
+            ->map(function($p) {
+                return (object)[
+                    'id' => null, 
+                    'plan_id' => $p->id,
+                    'dynamic_checklist_id' => $p->checklist_id,
+                    'checklist' => $p->checklist ?? (object)['title' => $p->activity_name, 'registry_code' => $p->activity_code],
+                    'sede' => $p->sede,
+                    'due_date' => now()->endOfMonth(),
+                    'source' => 'contract',
+                    'category' => $p->category,
+                    'status' => 'pending',
+                    'is_overdue' => false,
+                    'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,
+                ];
+            });
+
+        // Merge using base collection to avoid EloquentCollectionSynth issues
+        $all = collect($manualAssignments)->concat($contractPlans);
 
         return [
-            'hoy' => $all->filter(fn($t) => $t->due_date?->isToday()),
-            'semana' => $all->filter(fn($t) => $t->due_date?->isAfter(now()) && $t->due_date?->isBefore(now()->addDays(7))),
-            'vencidas' => $all->filter(fn($t) => $t->isOverdue()),
-            'otras' => $all->filter(fn($t) => $t->due_date?->isAfter(now()->addDays(7)) && !$t->isOverdue()),
+            'hoy' => $all->filter(fn($t) => $t->due_date?->isToday() || $t->source === 'contract'),
+            'semana' => $all->filter(fn($t) => $t->source !== 'contract' && $t->due_date?->isAfter(now()) && $t->due_date?->isBefore(now()->addDays(7))),
+            'vencidas' => $all->filter(fn($t) => $t->source !== 'contract' && $t->is_overdue),
+            'otras' => $all->filter(fn($t) => $t->source !== 'contract' && $t->due_date?->isAfter(now()->addDays(7))),
         ];
     }
 

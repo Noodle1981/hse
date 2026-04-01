@@ -60,6 +60,16 @@ class ChecklistBuilder extends Component
         'description' => '',
     ];
 
+    // Modal de categoría
+    public bool $showCategoryModal = false;
+    public array $newCategory = [
+        'code' => '',
+        'name' => '',
+        'description' => '',
+        'color' => '#f69239',
+        'icon' => 'tag',
+    ];
+
 
 
     protected function rules()
@@ -370,6 +380,63 @@ class ChecklistBuilder extends Component
         // Cerrar modal y mostrar mensaje
         $this->closeSubcategoryModal();
         session()->flash('message', 'Subcategoría creada exitosamente.');
+    }
+
+    public function openCategoryModal()
+    {
+        $this->showCategoryModal = true;
+    }
+
+    public function closeCategoryModal()
+    {
+        $this->showCategoryModal = false;
+        $this->newCategory = [
+            'code' => '',
+            'name' => '',
+            'description' => '',
+            'color' => '#f69239',
+            'icon' => 'tag',
+        ];
+        $this->resetErrorBag();
+    }
+
+    public function saveCategory()
+    {
+        $this->validate([
+            'newCategory.code' => 'required|string|max:50|unique:categories,code',
+            'newCategory.name' => 'required|string|max:255',
+            'newCategory.description' => 'nullable|string',
+        ], [
+            'newCategory.code.required' => 'El código es requerido.',
+            'newCategory.code.unique' => 'Ya existe una categoría con este código.',
+            'newCategory.name.required' => 'El nombre es requerido.',
+        ]);
+
+        // Obtener el último order
+        $lastOrder = Category::max('order') ?? 0;
+
+        // Crear la categoría
+        $category = Category::create([
+            'code' => $this->newCategory['code'],
+            'name' => $this->newCategory['name'],
+            'description' => $this->newCategory['description'] ?: null,
+            'color' => $this->newCategory['color'],
+            'icon' => $this->newCategory['icon'],
+            'is_active' => true,
+            'order' => $lastOrder + 1,
+        ]);
+
+        // Recargar categorías
+        $this->loadCategories();
+
+        // Seleccionar automáticamente la nueva categoría
+        $this->categoryId = $category->id;
+        $this->subcategoryId = null;
+        $this->loadSubcategories();
+
+        // Cerrar modal y mostrar mensaje
+        $this->closeCategoryModal();
+        session()->flash('message', 'Categoría creada exitosamente.');
     }
 
     private function resetNewQuestion()

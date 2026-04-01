@@ -82,7 +82,21 @@
                                         <h3 class="text-lg font-black text-white italic uppercase tracking-tight group-hover:text-ep-primary transition-colors leading-none mb-1">
                                             {{ $report->titulo }}
                                         </h3>
-                                        <span class="text-[9px] font-black text-indigo-100/20 uppercase tracking-[0.4em] italic">{{ \Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y') }}</span>
+                                        @php
+                                            $periodStr = $report->periodo;
+                                            if (str_contains($periodStr, '-Q')) {
+                                                $qNum = substr($periodStr, -1);
+                                                $yNum = substr($periodStr, 0, 4);
+                                                $periodDisplay = "TRIMESTRE $qNum - $yNum";
+                                            } else {
+                                                try {
+                                                    $periodDisplay = \Carbon\Carbon::parse($periodStr)->translatedFormat('F Y');
+                                                } catch (\Exception $e) {
+                                                    $periodDisplay = $periodStr;
+                                                }
+                                            }
+                                        @endphp
+                                        <span class="text-[9px] font-black text-indigo-100/20 uppercase tracking-[0.4em] italic">{{ $periodDisplay }}</span>
                                     </div>
                                     
                                     <div class="flex gap-2">

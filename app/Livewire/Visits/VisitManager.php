@@ -13,6 +13,15 @@ class VisitManager extends Component
 {
     use WithPagination;
 
+    #[\Livewire\Attributes\Url]
+    public $sede_id;
+    #[\Livewire\Attributes\Url]
+    public $task_id;
+    #[\Livewire\Attributes\Url]
+    public $type;
+    #[\Livewire\Attributes\Url]
+    public $source;
+
     // Estado para iniciar visita
     public $showStartVisitModal = false;
     public $selectedSedeId;
@@ -33,7 +42,16 @@ class VisitManager extends Component
         // Redirigir si ya hay visita en progreso
         $activeVisit = $this->visitService->getActiveVisit(Auth::user());
         if ($activeVisit) {
-            return redirect()->route('tecnico.visits.in-progress', $activeVisit);
+            return redirect()->route('tecnico.visits.in-progress', array_merge(['visit' => $activeVisit], array_filter([
+                'task_id' => $this->task_id,
+                'type' => $this->type,
+                'source' => $this->source
+            ])));
+        }
+
+        if ($this->sede_id) {
+            $this->selectedSedeId = $this->sede_id;
+            $this->openStartVisitModal();
         }
     }
 

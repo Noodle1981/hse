@@ -21,14 +21,6 @@
                 </div>
 
                 <div class="flex items-center gap-4 lg:gap-6">
-                    {{-- BOTÓN CRÍTICO: NUEVO CHECKLIST --}}
-                    <a href="{{ route('gestor.checklists.create') }}" 
-                       class="flex h-10 px-6 bg-ep-primary text-white hover:brightness-110 active:scale-95 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic transition-all items-center gap-3 shadow-[0_0_15px_rgba(246,146,57,0.3)] group/btn">
-                        <svg class="w-4 h-4 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M12 4v16m8-8H4"/></svg>
-                        <span class="hidden sm:inline">Nuevo Protocolo</span>
-                        <span class="sm:hidden">+</span>
-                    </a>
-
                     <a href="{{ route('profile') }}" class="h-10 w-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-ep-primary group hover:bg-white/10 transition-all shadow-inner">
                         <span class="text-sm font-black">{{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}</span>
                     </a>
@@ -44,9 +36,9 @@
             {{-- TOOLBAR TÁCTICO: FILTROS --}}
             <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-6 lg:p-10 mb-10 shadow-2xl relative animate-fade-in-down overflow-hidden group/filters">
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-end relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-end relative z-10">
                     
-                    <div class="md:col-span-6 relative group">
+                    <div class="md:col-span-4 relative group">
                         <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Buscador de Protocolos</span>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-white/20 group-focus-within:text-ep-primary">
@@ -58,7 +50,7 @@
                         </div>
                     </div>
 
-                    <div class="md:col-span-3 relative group">
+                    <div class="md:col-span-3 lg:col-span-2 relative group">
                         <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10">Categoría</span>
                         <select wire:model.live="categoryFilter" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
                             <option value="">TODAS LAS CATEGORÍAS</option>
@@ -71,7 +63,7 @@
                         </div>
                     </div>
 
-                    <div class="md:col-span-3 relative group">
+                    <div class="md:col-span-3 lg:col-span-3 relative group">
                         <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-emerald-400 uppercase tracking-[0.3em] italic z-10">Estado Operativo</span>
                         <select wire:model.live="statusFilter" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
                             <option value="all">TODOS LOS ESTADOS</option>
@@ -81,6 +73,15 @@
                         <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none text-emerald-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M19 9l-7 7-7-7"/></svg>
                         </div>
+                    </div>
+
+                    {{-- BOTÓN CRÍTICO: NUEVO CHECKLIST --}}
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <a href="{{ route('gestor.checklists.create') }}" 
+                           class="flex h-14 px-8 bg-ep-primary text-white hover:brightness-110 active:scale-95 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] italic transition-all items-center justify-center gap-4 shadow-[0_0_25px_rgba(246,146,57,0.2)] group/btn">
+                            <svg class="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M12 4v16m8-8H4"/></svg>
+                            <span>Nuevo Protocolo</span>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -111,11 +112,11 @@
                         <table class="table-auto w-full border-collapse">
                             <thead>
                                 <tr class="bg-black/20 text-left">
-                                    <th class="px-10 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Diseño de Protocolo</span></th>
-                                    <th class="px-10 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Categorización Máxima</span></th>
-                                    <th class="px-10 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Variables</span></th>
-                                    <th class="px-10 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Estado</span></th>
-                                    <th class="px-10 py-6 text-right"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Comandos</span></th>
+                                    <th class="px-10 py-6"><span class="text-[11px] font-black text-indigo-100/50 uppercase tracking-[0.3em] italic leading-none">Diseño de Protocolo</span></th>
+                                    <th class="px-10 py-6"><span class="text-[11px] font-black text-indigo-100/50 uppercase tracking-[0.3em] italic leading-none">Categorización Máxima</span></th>
+                                    <th class="px-10 py-6 text-center"><span class="text-[11px] font-black text-indigo-100/50 uppercase tracking-[0.3em] italic leading-none">Variables</span></th>
+                                    <th class="px-10 py-6 text-center"><span class="text-[11px] font-black text-indigo-100/50 uppercase tracking-[0.3em] italic leading-none">Estado</span></th>
+                                    <th class="px-10 py-6 text-right"><span class="text-[11px] font-black text-indigo-100/50 uppercase tracking-[0.3em] italic leading-none">Comandos</span></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-white/5">
@@ -124,9 +125,9 @@
                                         <td class="px-10 py-8 relative">
                                             <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-10 {{ $checklist->is_active ? 'bg-ep-primary shadow-[0_0_15px_#f69239]' : 'bg-white/10' }} rounded-r-full transition-all opacity-0 group-hover/row:opacity-100"></div>
                                             <div class="flex flex-col">
-                                                <div class="text-base font-black text-white italic uppercase tracking-tight leading-none mb-2">{{ $checklist->title }}</div>
+                                                <div class="text-base font-bold text-white italic uppercase tracking-tight leading-tight mb-2 max-w-2xl">{{ $checklist->title }}</div>
                                                 @if($checklist->description)
-                                                    <div class="text-[10px] text-white/30 font-medium italic truncate max-w-xs mb-2">{{ $checklist->description }}</div>
+                                                    <div class="text-[11px] text-indigo-100/60 font-medium italic mb-3 leading-relaxed max-w-xl">{{ $checklist->description }}</div>
                                                 @endif
                                                 @if($checklist->registry_code)
                                                     <div class="inline-flex items-center px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[9px] font-black text-indigo-400 italic w-fit uppercase tracking-widest leading-none">

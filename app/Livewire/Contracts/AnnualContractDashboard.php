@@ -168,7 +168,16 @@ class AnnualContractDashboard extends Component
             ->whereYear('created_at', $this->year)
             ->get()
             ->groupBy(function($r) {
-                return \Carbon\Carbon::parse($r->periodo . '-01')->month;
+                $period = $r->periodo;
+                if (str_contains($period, '-Q')) {
+                    $q = (int)substr($period, -1);
+                    return ($q - 1) * 3 + 1; // Q1=1, Q2=4, Q3=7, Q4=10
+                }
+                try {
+                    return \Carbon\Carbon::parse($period . '-01')->month;
+                } catch (\Exception $e) {
+                    return $r->created_at->month;
+                }
             });
         
         $currentMonth = (int)date('m');

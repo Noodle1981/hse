@@ -83,14 +83,20 @@ class VisitInProgress extends Component
     public $availableChecklists = [];
     public $selectedChecklistIdToAssign;
 
+    // Contexto de activación automática
+    #[\Livewire\Attributes\Url]
+    public $task_id;
+    #[\Livewire\Attributes\Url]
+    public $type;
+    #[\Livewire\Attributes\Url]
+    public $source;
+
     // Llenado de Checklist
     public $showFillModal = false;
     public $selectedAssignmentToFill = null;
 
     // Capacitación Ad-Hoc
     public $showTrainingModal = false;
-
-
 
     protected $listeners = [
         'checklistCompleted' => 'onChecklistCompleted',
@@ -124,6 +130,39 @@ class VisitInProgress extends Component
         $this->dismissedAlertsCount = session()->get('dismissed_visit_alerts_' . $this->visit->id, 0);
         $this->loadChecklists();
         $this->calculateDuration();
+
+        // Activación Contextual
+        if ($this->task_id && $this->type) {
+            $this->handleAutoTaskTrigger();
+        }
+    }
+
+    private function handleAutoTaskTrigger()
+    {
+        if ($this->type === 'Inspección') {
+            if ($this->source === 'manual') {
+                $this->openFillModal($this->task_id);
+            } else {
+                // Para contrato, como no tiene "Asignación ID", lo tratamos como auto-asignación rápida
+                // O simplemente lo redireccionamos al filler con el checklist_id
+                session()->put('wizard_visit_id', $this->visit->id);
+                $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+                return redirect()->route($prefix . '.checklists.fill', [
+                    'id' => $this->task_id, // Aquí task_id es el dynamic_checklist_id
+                ]);
+            }
+        } elseif ($this->type === 'Capacitación') {
+            // Si es una capacitación programada (manual) vinculada al id
+            if ($this->source === 'manual') {
+                $this->executeTraining($this->task_id);
+            } else {
+                // Para capacitación de contrato
+                $this->openTrainingModal();
+            }
+        } elseif ($this->type === 'Informe') {
+            $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+            return redirect()->route($prefix . '.master-reports.index', ['visit_id' => $this->visit->id]);
+        }
     }
 
     public function calculateDuration()

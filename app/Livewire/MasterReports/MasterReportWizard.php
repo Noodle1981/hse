@@ -29,7 +29,7 @@ class MasterReportWizard extends Component
         'sede_id' => 'required|exists:sedes,id',
         'user_id' => 'required|exists:users,id',
         'titulo' => 'required|string|max:255',
-        'periodo' => 'required|date_format:Y-m',
+        'periodo' => 'required|string|max:10', // Puede ser YYYY-MM o YYYY-QX
     ];
 
     public function mount($mode = 'create', $reportId = null)
@@ -61,8 +61,22 @@ class MasterReportWizard extends Component
     {
         if (!$this->sede_id || !$this->periodo) return;
 
-        $startDate = \Carbon\Carbon::parse($this->periodo . '-01')->startOfMonth();
-        $endDate = \Carbon\Carbon::parse($this->periodo . '-01')->endOfMonth();
+        $period = $this->periodo;
+        if (str_contains($period, '-Q')) {
+            $q = (int)substr($period, -1);
+            $y = (int)substr($period, 0, 4);
+            $startMonth = ($q - 1) * 3 + 1;
+            $startDate = \Carbon\Carbon::create($y, $startMonth, 1)->startOfMonth();
+            $endDate = \Carbon\Carbon::create($y, $startMonth + 2, 1)->endOfMonth();
+        } else {
+            try {
+                $startDate = \Carbon\Carbon::parse($period . '-01')->startOfMonth();
+                $endDate = \Carbon\Carbon::parse($period . '-01')->endOfMonth();
+            } catch (\Exception $e) {
+                $startDate = now()->startOfMonth();
+                $endDate = now()->endOfMonth();
+            }
+        }
 
         $sede = \App\Models\Sede::find($this->sede_id);
         if (!$sede) return;

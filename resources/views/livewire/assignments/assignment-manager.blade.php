@@ -119,6 +119,56 @@
                     </div>
                 </div>
             </div>
+            {{-- Categorías Premium (Tabs de Gestión) --}}
+            <div class="mb-10 flex flex-wrap items-center gap-6 animate-fade-in-down" style="animation-delay: 0.1s">
+                <button wire:click="setActiveTab('inspections')" 
+                        class="flex-1 min-w-[250px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'inspections' ? 'bg-ep-primary border-ep-primary shadow-[0_0_40px_rgba(31,34,117,0.4)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-ep-primary/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-8 py-7 flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-5">
+                            <div class="h-14 w-14 rounded-[2rem] flex items-center justify-center {{ $activeTab === 'inspections' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-ep-primary group-hover:rotate-12 transition-transform' }}">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[9px] font-black {{ $activeTab === 'inspections' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-[0.3em] italic leading-none mb-1.5">Control de</p>
+                                <h3 class="text-base font-black text-white uppercase italic tracking-tight">Inspecciones</h3>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-black italic {{ $activeTab === 'inspections' ? 'text-white' : 'text-ep-primary' }}">{{ $inspectionsCount }}</div>
+                    </div>
+                </button>
+
+                <button wire:click="setActiveTab('trainings')" 
+                        class="flex-1 min-w-[250px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'trainings' ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_40px_rgba(79,70,229,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-indigo-600/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-8 py-7 flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-5">
+                            <div class="h-14 w-14 rounded-[2rem] flex items-center justify-center {{ $activeTab === 'trainings' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-indigo-400 group-hover:rotate-12 transition-transform' }}">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[9px] font-black {{ $activeTab === 'trainings' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-[0.3em] italic leading-none mb-1.5">Control de</p>
+                                <h3 class="text-base font-black text-white uppercase italic tracking-tight">Capacitaciones</h3>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-black italic {{ $activeTab === 'trainings' ? 'text-white' : 'text-indigo-400' }}">{{ $trainingsCount }}</div>
+                    </div>
+                </button>
+
+                <button wire:click="setActiveTab('reports')" 
+                        class="flex-1 min-w-[250px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'reports' ? 'bg-emerald-600 border-emerald-600 shadow-[0_0_40px_rgba(16,185,129,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-emerald-600/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-8 py-7 flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-5">
+                            <div class="h-14 w-14 rounded-[2rem] flex items-center justify-center {{ $activeTab === 'reports' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-emerald-400 group-hover:rotate-12 transition-transform' }}">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[9px] font-black {{ $activeTab === 'reports' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-[0.3em] italic leading-none mb-1.5">Control de</p>
+                                <h3 class="text-base font-black text-white uppercase italic tracking-tight">Informes</h3>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-black italic {{ $activeTab === 'reports' ? 'text-white' : 'text-emerald-400' }}">{{ $reportsCount }}</div>
+                    </div>
+                </button>
+            </div>
 
             {{-- FORMULARIO DE INYECCIÓN DE TAREAS (HUD) --}}
             @if($showForm)
@@ -246,10 +296,26 @@
                     <table class="w-full border-collapse">
                         <thead>
                             <tr class="bg-black/20 text-left">
-                                <th class="px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Protocolo / Registro</span></th>
+                                <th class="px-8 py-6">
+                                    <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">
+                                        {{ match($activeTab) {
+                                            'trainings' => 'Programa / Temario',
+                                            'reports' => 'Título del Reporte',
+                                            default => 'Tarea Técnica / Registro'
+                                        } }}
+                                    </span>
+                                </th>
                                 <th class="px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Operador Técnico</span></th>
                                 <th class="px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Sede / Cliente</span></th>
-                                <th class="px-8 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Programación</span></th>
+                                <th class="px-8 py-6 text-center">
+                                    <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">
+                                        {{ match($activeTab) {
+                                            'trainings' => 'Duración / Tipo',
+                                            'reports' => 'Periodo Técnico',
+                                            default => 'Programación'
+                                        } }}
+                                    </span>
+                                </th>
                                 <th class="px-8 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Estado de Despacho</span></th>
                                 <th class="px-8 py-6 text-right"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Comandos</span></th>
                             </tr>
@@ -258,17 +324,31 @@
                             @forelse($assignments as $assignment)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 relative">
                                     <td class="px-8 py-8">
-                                        <div class="text-sm font-black text-white italic uppercase tracking-tight leading-none mb-1">{{ $assignment->checklist->title }}</div>
-                                        @if($assignment->checklist->registry_code)
-                                            <div class="text-[9px] font-bold text-white/20 italic font-mono">{{ $assignment->checklist->registry_code }}</div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <div class="text-sm font-black text-white italic uppercase tracking-tight leading-none group-hover/row:text-ep-primary transition-colors">{{ $assignment->checklist->title ?? 'Sin Título' }}</div>
+                                            @if(($assignment->source ?? 'manual') === 'contract')
+                                                <span class="text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase italic">Contrato</span>
+                                            @else
+                                                <span class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase italic">Solicitud</span>
+                                            @endif
+                                        </div>
+                                        @if($assignment->registry_code)
+                                            <div class="text-[9px] font-bold text-white/20 italic font-mono">{{ $assignment->registry_code }}</div>
                                         @endif
                                     </td>
                                     <td class="px-8 py-8">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-ep-primary/20 border border-ep-primary/30 flex items-center justify-center text-[10px] font-black text-ep-primary group-hover/row:scale-110 transition-transform">
-                                                {{ substr($assignment->user->nombres, 0, 1) }}
-                                            </div>
-                                            <div class="text-sm font-bold text-indigo-100 italic">{{ $assignment->user->apellidos }}, {{ $assignment->user->nombres }}</div>
+                                            @if(($assignment->source ?? 'manual') === 'manual')
+                                                <div class="w-8 h-8 rounded-full bg-ep-primary/20 border border-ep-primary/30 flex items-center justify-center text-[10px] font-black text-ep-primary group-hover/row:scale-110 transition-transform">
+                                                    {{ substr($assignment->user->nombres ?? 'U', 0, 1) }}
+                                                </div>
+                                                <div class="text-sm font-bold text-indigo-100 italic">{{ $assignment->user->apellidos ?? '' }}, {{ $assignment->user->nombres ?? 'N/A' }}</div>
+                                            @else
+                                                <div class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[10px] font-black text-indigo-100 group-hover/row:scale-110 transition-transform">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                                </div>
+                                                <div class="text-xs font-black text-white/40 uppercase italic tracking-widest leading-none">Operadores de Sede</div>
+                                            @endif
                                         </div>
                                     </td>
                                     <td class="px-8 py-8">
@@ -276,12 +356,26 @@
                                         <div class="text-[9px] font-bold text-white/20 italic uppercase tracking-widest">{{ $assignment->empresa->nombre }}</div>
                                     </td>
                                     <td class="px-8 py-8 text-center">
-                                        <div class="text-[10px] font-black text-white/60 mb-1 italic">{{ $assignment->due_date ? $assignment->due_date->format('d/M/Y') : 'SIN FECHA' }}</div>
-                                        <div class="text-[8px] font-bold text-indigo-400 uppercase tracking-widest italic">{{ $assignment->getFrequencyLabel() }}</div>
+                                        @if($activeTab === 'trainings')
+                                            <div class="text-[10px] font-black text-white/60 mb-1 italic">
+                                                {{ $assignment->duration ?? 'S/D' }} min
+                                            </div>
+                                            <div class="text-[8px] font-bold text-indigo-400 uppercase tracking-widest italic">{{ $assignment->type ?? 'Presencial' }}</div>
+                                        @elseif($activeTab === 'reports')
+                                            <div class="text-[10px] font-black text-white/60 mb-1 italic">
+                                                {{ $assignment->periodo ?? 'S/P' }}
+                                            </div>
+                                            <div class="text-[8px] font-bold text-emerald-400 uppercase tracking-widest italic">Anual / Mensual</div>
+                                        @else
+                                            <div class="text-[10px] font-black text-white/60 mb-1 italic">
+                                                {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/M/Y')) : 'SIN FECHA' }}
+                                            </div>
+                                            <div class="text-[8px] font-bold text-indigo-400 uppercase tracking-widest italic">{{ $assignment->frequency_label }}</div>
+                                        @endif
                                     </td>
                                     <td class="px-8 py-8 text-center">
                                         @php
-                                            $color = $assignment->getStatusBadgeColor();
+                                            $color = $assignment->status_badge_color ?? 'gray';
                                             $statusClasses = match($color) {
                                                 'emerald', 'green' => 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]',
                                                 'blue', 'indigo' => 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]',
@@ -297,7 +391,7 @@
                                             };
                                         @endphp
                                         <div class="inline-flex items-center px-4 py-1.5 border rounded-xl text-[9px] font-black uppercase tracking-[0.2em] italic {{ $statusClasses }}">
-                                            @if($assignment->isOverdue())
+                                            @if($assignment->is_overdue ?? false)
                                                 VENCIDO CRÍTICO
                                             @else
                                                 {{ $statusLabel }}
@@ -306,10 +400,16 @@
                                     </td>
                                     <td class="px-8 py-8 text-right">
                                         <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
-                                            @if($assignment->canBeEdited())
+                                            @if($assignment->can_be_edited)
                                                 <button wire:click="edit({{ $assignment->id }})" class="h-10 w-10 bg-white/5 border border-white/10 text-white hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all shadow-lg">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                                 </button>
+                                            @endif
+
+                                            @if(($assignment->source ?? 'manual') === 'contract')
+                                                <a href="{{ route('gestor.checklists.index') }}" class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg" title="Ver Plan Maestro">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                </a>
                                             @endif
 
                                             @if($assignment->status === 'completed')
@@ -318,9 +418,16 @@
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                     </a>
                                                 @endif
+                                            @else
+                                                {{-- Botón de Acción Directa --}}
+                                                @if(($assignment->category ?? 'Inspección') === 'Informe')
+                                                    <a href="{{ route('gestor.master-reports.index') }}" class="h-10 px-4 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl flex items-center gap-2 transition-all shadow-lg text-[9px] font-black uppercase tracking-widest italic">
+                                                        Redactar Informe
+                                                    </a>
+                                                @endif
                                             @endif
 
-                                            @if($assignment->canBeDeleted())
+                                            @if($assignment->can_be_deleted)
                                                 <button wire:click="delete({{ $assignment->id }})" wire:confirm="¿Desea abortar esta asignación táctica?" class="h-10 w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                 </button>

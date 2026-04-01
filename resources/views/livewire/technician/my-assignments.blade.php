@@ -93,6 +93,57 @@
                 </div>
             </div>
 
+            {{-- Categorías Premium (Tabs) --}}
+            <div class="mb-10 flex flex-wrap items-center gap-4 animate-fade-in-down" style="animation-delay: 0.1s">
+                <button wire:click="setActiveTab('inspections')" 
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'inspections' ? 'bg-ep-primary border-ep-primary shadow-[0_0_30px_rgba(31,34,117,0.4)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-ep-primary/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-8 py-6 flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'inspections' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-ep-primary' }}">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[10px] font-black {{ $activeTab === 'inspections' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-widest italic leading-none mb-1">Misiones</p>
+                                <h3 class="text-sm font-black text-white uppercase italic tracking-tight">Inspecciones</h3>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black italic {{ $activeTab === 'inspections' ? 'text-white' : 'text-ep-primary' }}">{{ $inspectionsCount }}</div>
+                    </div>
+                </button>
+
+                <button wire:click="setActiveTab('trainings')" 
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'trainings' ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_30px_rgba(79,70,229,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-indigo-600/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-8 py-6 flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'trainings' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-indigo-400' }}">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[10px] font-black {{ $activeTab === 'trainings' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-widest italic leading-none mb-1">Educación</p>
+                                <h3 class="text-sm font-black text-white uppercase italic tracking-tight">Capacitaciones</h3>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black italic {{ $activeTab === 'trainings' ? 'text-white' : 'text-indigo-400' }}">{{ $trainingsCount }}</div>
+                    </div>
+                </button>
+
+                <button wire:click="setActiveTab('reports')" 
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'reports' ? 'bg-emerald-600 border-emerald-600 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-emerald-600/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-8 py-6 flex items-center justify-between relative z-10">
+                        <div class="flex items-center gap-4">
+                            <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'reports' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-emerald-400' }}">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            </div>
+                            <div class="text-left">
+                                <p class="text-[10px] font-black {{ $activeTab === 'reports' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-widest italic leading-none mb-1">Métricas</p>
+                                <h3 class="text-sm font-black text-white uppercase italic tracking-tight">Informes</h3>
+                            </div>
+                        </div>
+                        <div class="text-2xl font-black italic {{ $activeTab === 'reports' ? 'text-white' : 'text-emerald-400' }}">{{ $reportsCount }}</div>
+                    </div>
+                </button>
+            </div>
+
             {{-- Vista Desktop Table Premium --}}
             <div class="hidden md:block animate-fade-in" style="animation-delay: 0.2s">
                 <div class="bg-ep-dark/40 backdrop-blur-sm rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
@@ -101,9 +152,21 @@
                     <table class="min-w-full divide-y divide-white/5 relative z-10">
                         <thead>
                             <tr class="bg-black/20">
-                                <th class="px-8 py-6 text-left text-[10px] font-black text-ep-primary uppercase tracking-[0.3em] italic">Checklist Técnico</th>
+                                <th class="px-8 py-6 text-left text-[10px] font-black text-ep-primary uppercase tracking-[0.3em] italic">
+                                    {{ match($activeTab) {
+                                        'trainings' => 'Programa / Temario',
+                                        'reports' => 'Título del Reporte',
+                                        default => 'Tarea Técnica'
+                                    } }}
+                                </th>
                                 <th class="px-8 py-6 text-left text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">Ubicación de Sede</th>
-                                <th class="px-8 py-6 text-left text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">Planificación</th>
+                                <th class="px-8 py-6 text-left text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">
+                                    {{ match($activeTab) {
+                                        'trainings' => 'Duración / Tipo',
+                                        'reports' => 'Periodo / Alcance',
+                                        default => 'Ubicación de Sede'
+                                    } }}
+                                </th>
                                 <th class="px-8 py-6 text-center text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">Estado</th>
                                 <th class="px-8 py-6 text-right text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">Operaciones</th>
                             </tr>
@@ -114,31 +177,56 @@
                                     <td class="px-8 py-6">
                                         <div class="flex items-center gap-4">
                                             <div class="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-ep-primary shadow-inner rotate-3 group-hover:rotate-0 transition-all duration-500">
-                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                @if(($assignment->category ?? 'Inspección') === 'Capacitación')
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                                @elseif(($assignment->category ?? 'Inspección') === 'Informe')
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                @else
+                                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                @endif
                                             </div>
                                             <div>
-                                                <div class="text-sm font-black text-white uppercase italic tracking-tight group-hover:text-ep-primary transition-colors">
-                                                    {{ $assignment->checklist->title }}
-                                                </div>
-                                                    <div class="text-[11px] text-indigo-100/50 mt-1 uppercase tracking-widest font-black italic leading-none">
-                                                        CID: {{ $assignment->checklist->registry_code }}
+                                                <div class="flex items-center gap-2 mb-1">
+                                                    <div class="text-sm font-black text-white uppercase italic tracking-tight group-hover:text-ep-primary transition-colors">
+                                                        {{ $assignment->checklist?->title ?? 'Sin Título' }}
                                                     </div>
+                                                    @if(($assignment->source ?? 'manual') === 'contract')
+                                                        <span class="text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase italic">Contrato</span>
+                                                    @else
+                                                        <span class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase italic">Solicitud</span>
+                                                    @endif
+                                                </div>
+                                                <div class="text-[11px] text-indigo-100/50 uppercase tracking-widest font-black italic leading-none">
+                                                    CID: {{ $assignment->registry_code ?? 'N/A' }}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-8 py-6">
-                                        <div class="text-[11px] font-black text-ep-primary/80 uppercase italic tracking-wide">{{ $assignment->empresa->nombre }}</div>
-                                        <div class="text-[10px] text-indigo-100/40 font-bold uppercase mt-1">{{ $assignment->sede->nombre_sede }}</div>
+                                        <div class="text-[11px] font-black text-ep-primary/80 uppercase italic tracking-wide">{{ $assignment->empresa?->nombre ?? 'N/A' }}</div>
+                                        <div class="text-[10px] text-indigo-100/40 font-bold uppercase mt-1">{{ $assignment->sede?->nombre_sede ?? 'N/A' }}</div>
                                     </td>
                                     <td class="px-8 py-6">
-                                        <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">{{ $assignment->getFrequencyLabel() }}</div>
-                                        <div class="text-[11px] font-black {{ $assignment->isOverdue() && $assignment->status !== 'completed' ? 'text-red-500 glow-text-red' : 'text-white/60' }}">
-                                            {{ $assignment->due_date ? $assignment->due_date->format('d/m/Y') : 'S/F' }}
-                                        </div>
+                                        @if($activeTab === 'trainings')
+                                            <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">{{ $assignment->duration ?? 'Duración N/A' }} min</div>
+                                            <div class="text-[11px] font-black text-white/60">
+                                                {{ $assignment->type ?? 'Presencial' }}
+                                            </div>
+                                        @elseif($activeTab === 'reports')
+                                            <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">Periodo: {{ $assignment->periodo ?? 'S/P' }}</div>
+                                            <div class="text-[11px] font-black text-white/60">
+                                                Vence: {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}
+                                            </div>
+                                        @else
+                                            <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">{{ $assignment->frequency_label }}</div>
+                                            <div class="text-[11px] font-black {{ $assignment->is_overdue && $assignment->status !== 'completed' ? 'text-red-500 glow-text-red' : 'text-white/60' }}">
+                                                {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-8 py-6 text-center">
                                         @php
-                                            $vencido = $assignment->isOverdue() && $assignment->status !== 'completed';
+                                            $vencido = ($assignment->is_overdue ?? false) && $assignment->status !== 'completed';
                                             $statusClass = match($assignment->status) {
                                                 'pending' => 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',
                                                 'in_progress' => 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',
@@ -148,7 +236,16 @@
                                             if($vencido) $statusClass = 'bg-red-500/10 border-red-500/30 text-red-500 animate-pulse';
                                         @endphp
                                         <span class="inline-flex items-center px-4 py-1.5 rounded-full text-[9px] font-black tracking-[0.2em] uppercase italic border {{ $statusClass }}">
-                                            @if($vencido) CRÍTICO @else {{ strtoupper($assignment->status) }} @endif
+                                            @if($vencido) 
+                                                CRÍTICO 
+                                            @else 
+                                                {{ match($assignment->status) {
+                                                    'pending' => 'PENDIENTE',
+                                                    'in_progress' => 'EN CURSO',
+                                                    'completed' => 'FINALIZADA',
+                                                    default => strtoupper($assignment->status)
+                                                } }} 
+                                            @endif
                                         </span>
                                     </td>
                                     <td class="px-8 py-6 text-right">
@@ -167,10 +264,28 @@
                                                     </a>
                                                 @endif
                                             @else
-                                                <a href="{{ route('tecnico.checklists.fill', ['id' => $assignment->dynamic_checklist_id, 'assignment' => $assignment->id]) }}" 
+                                                @php
+                                                    $category = $assignment->category ?? 'Inspección';
+                                                    $btnText = match($category) {
+                                                        'Capacitación' => 'Ejecutar Capacitación',
+                                                        'Informe' => 'Redactar Informe',
+                                                        default => 'Ejecutar Inspección'
+                                                    };
+                                                    
+                                                    // Redirección condicional: Los informes no van a Visitas
+                                                    $btnRoute = $category === 'Informe' 
+                                                        ? route('tecnico.master-reports.index')
+                                                        : route('tecnico.visits.index', [
+                                                            'sede_id' => $assignment->sede->id,
+                                                            'task_id' => $assignment->id ?? $assignment->dynamic_checklist_id,
+                                                            'type' => $category,
+                                                            'source' => $assignment->source ?? 'manual'
+                                                        ]);
+                                                @endphp
+                                                <a href="{{ $btnRoute }}" 
                                                    class="h-10 px-6 flex items-center gap-2 bg-ep-primary text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-ep-primary/20 group/exec overflow-hidden relative">
                                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/exec:translate-x-full transition-transform duration-1000"></div>
-                                                    <span class="relative">Ejecutar Misión</span>
+                                                    <span class="relative">{{ $btnText }}</span>
                                                     <svg class="w-4 h-4 animate-pulse relative" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
                                                 </a>
                                             @endif
@@ -209,16 +324,27 @@
                         
                         <div class="flex justify-between items-start mb-6">
                             <div class="flex items-center gap-3">
-                                <div class="h-10 w-10 flex items-center justify-center bg-white/5 rounded-2xl border border-white/10 text-ep-primary">
-                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                </div>
+                            <div class="h-10 w-10 flex items-center justify-center bg-white/5 rounded-2xl border border-white/10 text-ep-primary">
+                                @if(($assignment->category ?? 'Inspección') === 'Capacitación')
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                @elseif(($assignment->category ?? 'Inspección') === 'Informe')
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                @else
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                @endif
+                            </div>
                                 <div>
-                                    <h3 class="text-sm font-black text-white italic uppercase leading-none">{{ $assignment->checklist->title }}</h3>
-                                    <p class="text-[11px] text-indigo-100/50 font-black tracking-widest mt-1.5 uppercase italic leading-none">CID: {{ $assignment->checklist->registry_code ?? 'N/A' }}</p>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h3 class="text-sm font-black text-white italic uppercase leading-none">{{ $assignment->checklist?->title ?? 'Sin Título' }}</h3>
+                                        @if(($assignment->source ?? 'manual') === 'contract')
+                                            <span class="text-[7px] font-black text-indigo-400 bg-indigo-500/10 px-1 py-0.5 rounded border border-indigo-500/20 uppercase italic">Contrato</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-[11px] text-indigo-100/50 font-black tracking-widest mt-1.5 uppercase italic leading-none">CID: {{ $assignment->registry_code ?? 'N/A' }}</p>
                                 </div>
                             </div>
                             @php
-                                $vencido = $assignment->isOverdue() && $assignment->status !== 'completed';
+                                $vencido = ($assignment->is_overdue ?? false) && $assignment->status !== 'completed';
                                 $statusClass = match($assignment->status) {
                                     'pending' => 'text-yellow-500 border-yellow-500/20 bg-yellow-500/5',
                                     'in_progress' => 'text-indigo-400 border-indigo-400/20 bg-indigo-400/5',
@@ -228,25 +354,54 @@
                                 if($vencido) $statusClass = 'text-red-500 border-red-500/30 bg-red-500/10 animate-pulse';
                             @endphp
                             <span class="px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest italic border {{ $statusClass }}">
-                                {{ $vencido ? 'VENCIDO' : strtoupper($assignment->status) }}
+                                @if($vencido) 
+                                    CRÍTICO 
+                                @else 
+                                    {{ match($assignment->status) {
+                                        'pending' => 'PENDIENTE',
+                                        'in_progress' => 'EN CURSO',
+                                        'completed' => 'FINALIZADA',
+                                        default => strtoupper($assignment->status)
+                                    } }} 
+                                @endif
                             </span>
                         </div>
 
                         <div class="space-y-4 mb-6 bg-black/20 p-4 rounded-3xl border border-white/5">
                             <div>
                                 <p class="text-[9px] font-black text-ep-primary/60 uppercase tracking-widest mb-1 italic">Entidad / Sede</p>
-                                <p class="text-xs font-black text-white uppercase italic">{{ $assignment->empresa->nombre }}</p>
-                                <p class="text-[10px] text-indigo-100/40 font-bold uppercase">{{ $assignment->sede->nombre_sede }}</p>
+                                <p class="text-xs font-black text-white uppercase italic">{{ $assignment->empresa?->nombre ?? 'N/A' }}</p>
+                                <p class="text-[10px] text-indigo-100/40 font-bold uppercase">{{ $assignment->sede?->nombre_sede ?? 'N/A' }}</p>
                             </div>
                             <div class="grid grid-cols-2 gap-4 pt-4 border-t border-white/5">
-                                <div>
-                                    <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Frecuencia</p>
-                                    <p class="text-[10px] font-black text-indigo-100 uppercase italic">{{ $assignment->getFrequencyLabel() }}</p>
-                                </div>
-                                <div>
-                                    <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Límite</p>
-                                    <p class="text-[10px] font-black {{ $vencido ? 'text-red-500' : 'text-white' }} uppercase italic">{{ $assignment->due_date ? $assignment->due_date->format('d/m/Y') : 'S/F' }}</p>
-                                </div>
+                                @if($activeTab === 'trainings')
+                                    <div>
+                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Duración</p>
+                                        <p class="text-[10px] font-black text-indigo-100 uppercase italic">{{ $assignment->duration ?? 'S/D' }} min</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Tipo</p>
+                                        <p class="text-[10px] font-black text-white uppercase italic">{{ $assignment->type ?? 'Presencial' }}</p>
+                                    </div>
+                                @elseif($activeTab === 'reports')
+                                    <div>
+                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Periodo</p>
+                                        <p class="text-[10px] font-black text-indigo-100 uppercase italic">{{ $assignment->periodo ?? 'S/P' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Límite</p>
+                                        <p class="text-[10px] font-black text-white uppercase italic">{{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}</p>
+                                    </div>
+                                @else
+                                    <div>
+                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Frecuencia</p>
+                                        <p class="text-[10px] font-black text-indigo-100 uppercase italic">{{ $assignment->frequency_label }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Límite</p>
+                                        <p class="text-[10px] font-black {{ $vencido ? 'text-red-500' : 'text-white' }} uppercase italic">{{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}</p>
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
@@ -257,7 +412,25 @@
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                 </a>
                             @else
-                                <a href="{{ route('tecnico.checklists.fill', ['id' => $assignment->dynamic_checklist_id, 'assignment' => $assignment->id]) }}" class="flex-1 h-12 flex items-center justify-center bg-ep-primary text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl shadow-xl shadow-ep-primary/20">Ejecutar Misión</a>
+                                @php
+                                    $category = $assignment->category ?? 'Inspección';
+                                    $btnText = match($category) {
+                                        'Capacitación' => 'Registrar Capacitación',
+                                        'Informe' => 'Redactar Informe',
+                                        default => 'Ejecutar Inspección'
+                                    };
+                                    
+                                    // Redirección condicional para Mobile
+                                    $btnRoute = $category === 'Informe' 
+                                        ? route('tecnico.master-reports.index')
+                                        : route('tecnico.visits.index', [
+                                            'sede_id' => $assignment->sede->id,
+                                            'task_id' => $assignment->id ?? $assignment->dynamic_checklist_id,
+                                            'type' => $category,
+                                            'source' => $assignment->source ?? 'manual'
+                                        ]);
+                                @endphp
+                                <a href="{{ $btnRoute }}" class="flex-1 h-12 flex items-center justify-center bg-ep-primary text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl shadow-xl shadow-ep-primary/20">{{ $btnText }}</a>
                             @endif
                         </div>
                     </div>

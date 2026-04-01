@@ -54,7 +54,10 @@
                             </div>
 
                             <div class="relative group">
-                                <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10">Categoría Maestra</span>
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic">Categoría Maestra</span>
+                                    <button type="button" wire:click="openCategoryModal" class="text-[9px] font-black text-ep-primary hover:text-ep-primary/80 uppercase tracking-widest italic transition-colors">+ Crear Nueva</button>
+                                </div>
                                 <select wire:model.live="categoryId" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
                                     <option value="">SIN CATEGORÍA</option>
                                     @foreach($categories as $cat)
@@ -91,11 +94,10 @@
                             <div class="flex flex-col gap-4 p-6 bg-black/20 rounded-[2rem] border border-white/5">
                                 <label class="flex items-center gap-4 cursor-pointer group/toggle">
                                     <div class="relative">
-                                        <input type="checkbox" wire:model="is_active" class="sr-only">
-                                        <div class="w-10 h-5 bg-white/10 rounded-full transition-colors group-hover/toggle:bg-white/20"></div>
+                                        <input type="checkbox" wire:model.live="is_active" class="sr-only peer">
+                                        <div class="w-10 h-5 bg-white/10 rounded-full transition-colors group-hover/toggle:bg-white/20 border border-white/5 peer-checked:bg-emerald-500/20"></div>
                                         <div class="absolute left-1 top-1 w-3 h-3 bg-white/40 rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-emerald-400"></div>
                                     </div>
-                                    <input type="checkbox" wire:model="is_active" class="hidden">
                                     <span class="text-[10px] font-black uppercase tracking-widest italic {{ $is_active ? 'text-emerald-400' : 'text-white/20' }}">Checklist Publicado</span>
                                 </label>
 
@@ -302,11 +304,10 @@
                                 <div class="flex items-center gap-10">
                                     <label class="flex items-center gap-4 cursor-pointer group/toggle">
                                         <div class="relative">
-                                            <input type="checkbox" wire:model="newQuestion.is_required" class="sr-only">
-                                            <div class="w-10 h-5 bg-white/10 rounded-full transition-colors group-hover/toggle:bg-white/20 border border-white/5"></div>
+                                            <input type="checkbox" wire:model.live="newQuestion.is_required" class="sr-only peer">
+                                            <div class="w-10 h-5 bg-white/10 rounded-full transition-colors group-hover/toggle:bg-white/20 border border-white/5 peer-checked:bg-red-500/20"></div>
                                             <div class="absolute left-1 top-1 w-3 h-3 bg-white/40 rounded-full transition-all peer-checked:translate-x-5 peer-checked:bg-red-500"></div>
                                         </div>
-                                        <input type="checkbox" wire:model="newQuestion.is_required" class="hidden">
                                         <span class="text-[10px] font-black uppercase tracking-widest italic {{ $newQuestion['is_required'] ? 'text-red-500' : 'text-white/20' }}">REQUERIDO</span>
                                     </label>
 
@@ -339,9 +340,16 @@
 
             {{-- FOOTER DE ACCIONES FINAL: PROTOCOLO --}}
             <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 p-8 shadow-2xl animate-fade-in-up flex items-center justify-between mb-20">
-                <div class="flex items-center gap-6">
-                    <div class="h-1 w-20 bg-gradient-to-r from-ep-primary to-transparent rounded-full"></div>
-                    <span class="text-[9px] font-black text-white/20 uppercase tracking-[0.5em] italic">XamaSafe Build Protocol v4.5</span>
+                <div class="flex flex-col gap-2">
+                    <div class="flex items-center gap-6">
+                        <div class="h-1 w-20 bg-gradient-to-r from-ep-primary to-transparent rounded-full"></div>
+                        <span class="text-[9px] font-black text-white/20 uppercase tracking-[0.5em] italic">XamaSafe Build Protocol v4.5</span>
+                    </div>
+                    @if ($errors->any())
+                        <div class="text-[10px] font-black text-red-500 uppercase italic tracking-widest animate-pulse ml-26">
+                            ⚠️ Faltan campos obligatorios (Título o puntos de control)
+                        </div>
+                    @endif
                 </div>
                 <div class="flex gap-6">
                     <a href="{{ route('gestor.checklists.index') }}" class="h-14 px-10 bg-white/5 border border-white/10 text-white hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest italic flex items-center transition-all">Descartar Cambios</a>
@@ -400,6 +408,64 @@
                             <div class="flex gap-4 pt-4">
                                 <button type="submit" class="flex-1 h-14 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/20 active:scale-95">CONSOLIDAR</button>
                                 <button type="button" wire:click="closeSubcategoryModal" class="h-14 px-8 bg-white/5 text-white/40 rounded-2xl text-[10px] font-black uppercase tracking-widest italic border border-white/5">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        {{-- MODAL HUD: CATEGORÍA MAESTRA --}}
+        @if($showCategoryModal)
+            <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" x-data x-transition>
+                <div class="absolute inset-0 bg-[#0a0a0f]/90 backdrop-blur-xl" wire:click.self="closeCategoryModal"></div>
+                
+                <div class="relative bg-ep-dark/80 border border-white/10 w-full max-w-lg rounded-[3rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] overflow-hidden animate-fade-in-up">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-ep-primary/40 to-transparent"></div>
+                    
+                    <div class="p-10">
+                        <div class="flex items-center gap-6 mb-10">
+                            <div class="w-16 h-16 rounded-[2rem] bg-ep-primary/10 border border-ep-primary/20 flex items-center justify-center text-ep-primary rotate-12">
+                                <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-white italic uppercase tracking-tight leading-none mb-2">Nueva Categoría Maestra</h3>
+                                <p class="text-[10px] font-bold text-ep-primary uppercase tracking-widest italic italic">Estructura Global de Procesos</p>
+                            </div>
+                        </div>
+
+                        <form wire:submit.prevent="saveCategory" class="space-y-8">
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Código de Referencia</span>
+                                <input type="text" wire:model="newCategory.code" class="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/40 transition-all placeholder-white/5 italic" placeholder="ej: seg-higiene">
+                                @error('newCategory.code') <span class="text-red-500 text-[8px] font-black uppercase mt-2 block ml-2">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-white uppercase tracking-[0.3em] italic z-10">Nombre de la Categoría</span>
+                                <input type="text" wire:model="newCategory.name" class="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/40 transition-all placeholder-white/5 italic" placeholder="Ej: Seguridad e Higiene">
+                                @error('newCategory.name') <span class="text-red-500 text-[8px] font-black uppercase mt-2 block ml-2">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic z-10">Misión de Categoría</span>
+                                <textarea wire:model="newCategory.description" rows="3" class="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/10 transition-all italic placeholder-white/5"></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-6">
+                                <div class="relative group">
+                                    <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic z-10">Color Distintivo</span>
+                                    <input type="color" wire:model="newCategory.color" class="w-full bg-black/60 border border-white/5 h-14 rounded-2xl p-1 cursor-pointer">
+                                </div>
+                                <div class="relative group">
+                                    <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-white/30 uppercase tracking-[0.3em] italic z-10">Icono (Lucide)</span>
+                                    <input type="text" wire:model="newCategory.icon" class="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/10 transition-all italic placeholder-white/5">
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4 pt-4">
+                                <button type="submit" class="flex-1 h-14 bg-ep-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:brightness-110 transition-all shadow-xl shadow-ep-primary/20 active:scale-95">CONSOLIDAR CATEGORÍA</button>
+                                <button type="button" wire:click="closeCategoryModal" class="h-14 px-8 bg-white/5 text-white/40 rounded-2xl text-[10px] font-black uppercase tracking-widest italic border border-white/5">Cancelar</button>
                             </div>
                         </form>
                     </div>
