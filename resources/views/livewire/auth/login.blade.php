@@ -8,33 +8,12 @@
     </div>
 
     <div class="max-w-md w-full mx-4 relative z-10 animate-fade-in-up">
-        <!-- Identity Header (XamaSafe Ecosystem Core Style) -->
+        <!-- Identity Header (Simplified Style) -->
         <div class="text-center mb-12 group cursor-pointer">
-            <div class="relative inline-block mb-8">
-                <!-- Outer glow -->
-                <div class="absolute inset-0 bg-ep-primary/20 blur-[60px] rounded-full group-hover:bg-ep-primary/40 transition-all duration-700"></div>
-                
-                <!-- Large X Box (Ecosystem Style) -->
-                <div class="w-48 h-48 bg-ep-dark/60 backdrop-blur-xl rounded-[3rem] flex items-center justify-center rotate-3 group-hover:rotate-0 transition-all duration-700 border border-white/10 shadow-2xl relative overflow-hidden shadow-[0_0_40px_rgba(246,146,57,0.15)]">
-                    <div class="absolute inset-0 bg-gradient-to-br from-ep-primary/30 via-transparent to-transparent"></div>
-                    <div class="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-1000"></div>
-                    
-                    <span class="text-white font-black text-8xl italic tracking-tighter relative z-10 select-none group-hover:scale-110 transition-transform duration-700">X</span>
-                    
-                    <!-- Tactical Scanner Line -->
-                    <div class="absolute inset-x-0 h-1 bg-ep-primary/30 top-0 scan-line opacity-0 group-hover:opacity-100"></div>
-                </div>
-            </div>
-            
             <div class="flex flex-col items-center gap-2">
                 <h1 class="text-5xl font-black text-white italic tracking-tighter leading-none">
                     Xama<span class="text-ep-primary">Safe</span>
                 </h1>
-                <div class="flex items-center gap-3">
-                    <div class="h-px w-8 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                    <span class="text-[10px] font-black text-white/30 uppercase tracking-[0.6em] italic">Ecosystem Core</span>
-                    <div class="h-px w-8 bg-gradient-to-l from-transparent via-white/20 to-transparent"></div>
-                </div>
             </div>
         </div>
 
@@ -57,8 +36,8 @@
                         <input type="email" 
                                id="email"
                                wire:model="email" 
-                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary/50 transition-all placeholder-white/5 uppercase italic @error('email') border-red-500/50 @enderror"
-                               placeholder="CORREO@XAMASAFE.COM"
+                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary/50 transition-all placeholder-white/5 @error('email') border-red-500/50 @enderror"
+                               placeholder="correo@xamasafe.com"
                                autofocus>
                     </div>
                     @error('email')
@@ -80,7 +59,7 @@
                         <input :type="show ? 'text' : 'password'" 
                                id="password"
                                wire:model="password" 
-                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-transparent transition-all placeholder-white/5 uppercase italic @error('password') border-red-500/50 @enderror"
+                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-transparent transition-all placeholder-white/5 @error('password') border-red-500/50 @enderror"
                                placeholder="••••••••">
                         
                         <button type="button" 

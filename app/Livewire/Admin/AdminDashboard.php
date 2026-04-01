@@ -24,6 +24,8 @@ class AdminDashboard extends Component
     public $period = 'this_month';
     public $empresaId = null;
     public $sedeId = null;
+    public $tecnicoId = null;
+    public $showOverdueModal = false;
     public $greeting;
 
     public function mount()
@@ -38,6 +40,20 @@ class AdminDashboard extends Component
         $this->dispatch('periodUpdated');
     }
 
+    public function updatedEmpresaId()
+    {
+        $this->sedeId = null;
+    }
+
+    public function resetFilters()
+    {
+        $this->empresaId = null;
+        $this->sedeId = null;
+        $this->tecnicoId = null;
+        $this->period = 'this_month';
+        $this->updateDates();
+    }
+
     private function updateDates()
     {
         switch ($this->period) {
@@ -45,20 +61,32 @@ class AdminDashboard extends Component
                 $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
                 $this->dateTo = now()->endOfMonth()->format('Y-m-d');
                 break;
+            case 'last_month':
+                $this->dateFrom = now()->subMonth()->startOfMonth()->format('Y-m-d');
+                $this->dateTo = now()->subMonth()->endOfMonth()->format('Y-m-d');
+                break;
             case 'last_3_months':
                 $this->dateFrom = now()->subMonths(3)->startOfMonth()->format('Y-m-d');
                 $this->dateTo = now()->format('Y-m-d');
                 break;
+            case 'this_quarter':
+                $this->dateFrom = now()->startOfQuarter()->format('Y-m-d');
+                $this->dateTo = now()->endOfQuarter()->format('Y-m-d');
+                break;
             case 'this_year':
                 $this->dateFrom = now()->startOfYear()->format('Y-m-d');
                 $this->dateTo = now()->endOfYear()->format('Y-m-d');
+                break;
+            case 'last_year':
+                $this->dateFrom = now()->subYear()->startOfYear()->format('Y-m-d');
+                $this->dateTo = now()->subYear()->endOfYear()->format('Y-m-d');
                 break;
             case 'custom':
                 // Mantener fechas actuales
                 break;
             default:
                 $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
-                $this->dateTo = now()->format('Y-m-d');
+                $this->dateTo = now()->endOfMonth()->format('Y-m-d');
         }
     }
 
@@ -82,6 +110,13 @@ class AdminDashboard extends Component
         $upcomingActivities = $this->getUpcomingActivities();
         $alerts = $this->getAlerts();
         $rankings = $this->getRankings();
+        $overdueAssignments = $this->showOverdueModal ? $this->getOverdueAssignments() : collect();
+
+        $empresas = \App\Models\Empresa::orderBy('nombre')->get();
+        $sedes = $this->empresaId 
+            ? \App\Models\Sede::where('empresa_id', $this->empresaId)->orderBy('nombre_sede')->get() 
+            : collect();
+        $tecnicos = \App\Models\User::where('rol', 'tecnico')->orderBy('nombres')->get();
 
         return view('livewire.admin.admin-dashboard', compact(
             'kpis',
@@ -89,8 +124,23 @@ class AdminDashboard extends Component
             'recentActivity',
             'upcomingActivities',
             'alerts',
-            'rankings'
+            'rankings',
+            'overdueAssignments',
+            'empresas',
+            'sedes',
+            'tecnicos'
         ));
+    }
+
+    private function getOverdueAssignments()
+    {
+        return \App\Models\ChecklistAssignment::overdue()
+            ->with(['checklist', 'empresa', 'sede', 'user'])
+            ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
+            ->orderBy('due_date')
+            ->get();
     }
 
     private function getKPIs()
@@ -107,31 +157,64 @@ class AdminDashboard extends Component
                     ->whereBetween('updated_at', [$from, $to])->count(),
             ],
             'inspections' => [
-                'total_period' => DynamicInspection::whereBetween('completed_at', [$from, $to])->count(),
-                'completed_today' => DynamicInspection::whereDate('completed_at', today())->count(),
+                'total_period' => DynamicInspection::whereBetween('completed_at', [$from, $to])
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+                    ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
+                    ->count(),
+                'completed_today' => DynamicInspection::whereDate('completed_at', today())
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
+                    ->count(),
                 'avg_per_day' => $this->calculateAvgInspections($from, $to),
             ],
             'findings' => [
-                'total' => \App\Models\Hallazgo::whereBetween('fecha_deteccion', [$from, $to])->count(),
+                'total' => \App\Models\Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
+                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->tecnicoId, fn($q) => $q->where('creado_por', $this->tecnicoId))
+                    ->count(),
                 'pending' => \App\Models\Hallazgo::whereIn('estado', ['pendiente', 'en_proceso'])
-                    ->whereBetween('fecha_deteccion', [$from, $to])->count(),
+                    ->whereBetween('fecha_deteccion', [$from, $to])
+                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->count(),
                 'critical' => \App\Models\Hallazgo::where('criticidad', 'critico')
-                    ->whereBetween('fecha_deteccion', [$from, $to])->count(),
+                    ->whereBetween('fecha_deteccion', [$from, $to])
+                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->count(),
                 'resolved' => \App\Models\Hallazgo::whereIn('estado', ['resuelto', 'cerrado', 'verificado'])
-                    ->whereBetween('fecha_resolucion', [$from, $to])->count(),
+                    ->whereBetween('fecha_resolucion', [$from, $to])
+                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->count(),
             ],
             'incidents' => [
-                'total' => \App\Models\Incidente::whereBetween('fecha_ocurrencia', [$from, $to])->count(),
+                'total' => \App\Models\Incidente::whereBetween('fecha_ocurrencia', [$from, $to])
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+                    ->count(),
                 'serious' => \App\Models\Incidente::whereIn('gravedad', ['grave', 'fatal'])
-                    ->whereBetween('fecha_ocurrencia', [$from, $to])->count(),
-                'lost_days' => \App\Models\Incidente::whereBetween('fecha_ocurrencia', [$from, $to])->sum('dias_perdidos'),
+                    ->whereBetween('fecha_ocurrencia', [$from, $to])
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->count(),
+                'lost_days' => \App\Models\Incidente::whereBetween('fecha_ocurrencia', [$from, $to])
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->sum('dias_perdidos'),
             ],
             'reports' => [
-                'total_master' => \App\Models\MasterReport::whereBetween('created_at', [$from, $to])->count(),
+                'total_master' => \App\Models\MasterReport::whereBetween('created_at', [$from, $to])
+                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->count(),
                 'completed' => \App\Models\MasterReport::where('estado', 'finalizado')
-                    ->whereBetween('updated_at', [$from, $to])->count(),
+                    ->whereBetween('updated_at', [$from, $to])
+                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->count(),
                 'pending' => \App\Models\MasterReport::whereIn('estado', ['pendiente', 'en_revision'])
-                    ->whereBetween('created_at', [$from, $to])->count(),
+                    ->whereBetween('created_at', [$from, $to])
+                    ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+                    ->count(),
             ],
             'ecosystem' => [
                 'total_companies' => \App\Models\Empresa::count(),
@@ -141,17 +224,28 @@ class AdminDashboard extends Component
                     })->count(),
             ],
             'trainings' => [
-                'total_scheduled' => Training::whereBetween('date', [$from, $to])->count(),
+                'total_scheduled' => Training::whereBetween('date', [$from, $to])
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->tecnicoId, fn($q) => $q->where('responsible_user_id', $this->tecnicoId))
+                    ->count(),
                 'attendees_period' => TrainingAttendance::whereHas('training', function($q) use ($from, $to) {
-                    $q->whereBetween('date', [$from, $to]);
+                    $q->whereBetween('date', [$from, $to])
+                      ->when($this->sedeId, fn($sq) => $sq->where('sede_id', $this->sedeId))
+                      ->when($this->tecnicoId, fn($sq) => $sq->where('responsible_user_id', $this->tecnicoId));
                 })->count(),
             ],
             'annual' => [
                 'compliance_percentage' => $this->calculateAnnualCompliance(),
             ],
             'visit_certificates' => [
-                'total_period' => GeneradorConstancia::whereBetween('fecha_visita', [$from, $to])->count(),
-                'pending_signature' => GeneradorConstancia::whereNull('firma_responsable')->count(),
+                'total_period' => GeneradorConstancia::whereBetween('fecha_visita', [$from, $to])
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+                    ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
+                    ->count(),
+                'pending_signature' => GeneradorConstancia::whereNull('firma_responsable')
+                    ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+                    ->count(),
             ],
         ];
     }
@@ -171,15 +265,19 @@ class AdminDashboard extends Component
         return [
             'top_technicians' => \App\Models\User::where('rol', 'tecnico')
                 ->withCount(['checklists' => function($q) use ($from, $to) {
-                    $q->where('status', 'completed')->whereBetween('updated_at', [$from, $to]);
+                    $q->where('status', 'completed')->whereBetween('updated_at', [$from, $to])
+                      ->when($this->sedeId, fn($sq) => $sq->where('sede_id', $this->sedeId))
+                      ->when($this->empresaId, fn($sq) => $sq->whereHas('sede', fn($ssq) => $ssq->where('empresa_id', $this->empresaId)));
                 }])
                 ->orderByDesc('checklists_count')
                 ->take(5)
                 ->get(),
             
             'top_companies_findings' => \App\Models\Empresa::withCount(['hallazgos as findings_count' => function($q) use ($from, $to) {
-                    $q->whereIn('estado', ['pendiente', 'en_proceso']);
+                    $q->whereIn('estado', ['pendiente', 'en_proceso'])
+                      ->when($this->sedeId, fn($sq) => $sq->where('sede_id', $this->sedeId));
                 }])
+                ->when($this->empresaId, fn($q) => $q->where('id', $this->empresaId))
                 ->orderByDesc('findings_count')
                 ->take(5)
                 ->get(),
@@ -204,6 +302,8 @@ class AdminDashboard extends Component
         $to = $this->dateTo . ' 23:59:59';
 
         $data = \App\Models\Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
+            ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
             ->select('estado', DB::raw('count(*) as total'))
             ->groupBy('estado')
             ->get();
@@ -221,6 +321,8 @@ class AdminDashboard extends Component
 
         $data = \App\Models\Incidente::selectRaw("strftime('%m', fecha_ocurrencia) as month, count(*) as total")
             ->whereBetween('fecha_ocurrencia', [$from, $to])
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
             ->groupBy('month')
             ->pluck('total', 'month');
 
@@ -246,6 +348,9 @@ class AdminDashboard extends Component
         $data = DynamicInspection::selectRaw("strftime('%m', completed_at) as month, count(*) as total")
             ->whereBetween('completed_at', [$from, $to])
             ->whereNotNull('completed_at')
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
             ->groupBy('month')
             ->pluck('total', 'month');
 
@@ -310,6 +415,8 @@ class AdminDashboard extends Component
     private function getTopChecklists()
     {
         $data = DynamicInspection::select('dynamic_checklist_id', DB::raw('count(*) as total'))
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
             ->groupBy('dynamic_checklist_id')
             ->orderByDesc('total')
             ->take(5)
@@ -334,6 +441,9 @@ class AdminDashboard extends Component
 
         // 1. Visitas (GeneradorConstancia)
         $visitas = GeneradorConstancia::with(['sede.empresa', 'user'])
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
             ->latest('fecha_visita')
             ->limit(15)
             ->get()
@@ -351,6 +461,9 @@ class AdminDashboard extends Component
         // 2. Inspecciones completadas
         $inspecciones = DynamicInspection::with(['checklist:id,title', 'user:id,nombres,apellidos', 'sede.empresa', 'assignment.empresa'])
             ->completed()
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
             ->latest('completed_at')
             ->limit(15)
             ->get()
@@ -371,6 +484,8 @@ class AdminDashboard extends Component
         // 3. Capacitaciones realizadas
         $capacitaciones = Training::with(['sede.empresa', 'responsibleUser'])
             ->where('date', '<=', now())
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->tecnicoId, fn($q) => $q->where('responsible_user_id', $this->tecnicoId))
             ->latest('date')
             ->limit(15)
             ->get()
@@ -388,6 +503,9 @@ class AdminDashboard extends Component
         // 4. Checklists completados (ChecklistAssignment status completed)
         $checklists = ChecklistAssignment::with(['checklist:id,title', 'empresa', 'user:id,nombres,apellidos'])
             ->completed()
+            ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
+            ->when($this->empresaId, fn($q) => $q->where('empresa_id', $this->empresaId))
+            ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
             ->latest('updated_at')
             ->limit(15)
             ->get()
