@@ -51,31 +51,114 @@ class TrainingIndex extends Component
 
     public function render()
     {
+        $month = strtolower(now()->format('F'));
         $trainings = collect();
         
         if ($this->viewMode === 'templates') {
-            $trainings = Training::query()
-                ->with(['empresa', 'sede'])
+            // 1. Manual Trainings (Solicitados)
+            $manualQuery = Training::query()
+                ->with(['empresa', 'sede', 'responsibleUser'])
                 ->withCount('attendances')
                 ->when($this->search, fn($q) => $q->where('title', 'like', '%' . $this->search . '%'))
                 ->when($this->empresaFilter, fn($q) => $q->where('empresa_id', $this->empresaFilter))
                 ->when($this->sedeFilter, fn($q) => $q->where('sede_id', $this->sedeFilter))
-                ->latest()
-                ->paginate(10);
+                ->latest();
+
+            // 2. Contractual Trainings (Plan Anual)
+            $contractQuery = \App\Models\AnnualPlan::with(['sede', 'sede.empresa'])
+                ->where('category', 'Capacitación')
+                ->where($month, true)
+                ->where('year', now()->year)
+                ->when($this->search, function ($q) {
+                    $q->where('activity_name', 'like', '%' . $this->search . '%');
+                })
+                ->when($this->empresaFilter, function ($q) {
+                    $q->whereHas('sede', fn($s) => $s->where('empresa_id', $this->empresaFilter));
+                })
+                ->when($this->sedeFilter, fn($q) => $q->where('sede_id', $this->sedeFilter));
+
+            // Mapping & Merging
+            $manualResults = $manualQuery->get()->map(fn($t) => (object)[
+                'id' => $t->id,
+                'title' => $t->title,
+                'trainer_name' => $t->trainer_name,
+                'responsibleUser' => $t->responsibleUser,
+                'empresa' => $t->empresa,
+                'sede' => $t->sede,
+                'date' => $t->date,
+                'status' => $t->status,
+                'attendances_count' => $t->attendances_count,
+                'source' => 'manual',
+                'duration' => $t->duration . ' min',
+                'type' => $t->type,
+                'registry_code' => 'CAP-' . $t->id
+            ]);
+
+            $contractResults = $contractQuery->get()->map(fn($p) => (object)[
+                'id' => null,
+                'title' => $p->activity_name,
+                'trainer_name' => 'Operadores de Sede',
+                'responsibleUser' => null,
+                'empresa' => $p->sede?->empresa,
+                'sede' => $p->sede,
+                'date' => now()->endOfMonth(),
+                'status' => 'scheduled',
+                'attendances_count' => 0,
+                'view_attendances_count' => null,
+                'source' => 'contract',
+                'duration' => '60 min',
+                'type' => 'Presencial',
+                'registry_code' => $p->activity_code
+            ]);
+
+            $allTrainings = $manualResults->concat($contractResults)->sortByDesc('date');
+            
+            // Manual Pagination
+            $currentPage = $this->getPage();
+            $perPage = 10;
+            $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+                $allTrainings->forPage($currentPage, $perPage),
+                $allTrainings->count(),
+                $perPage,
+                $currentPage,
+                ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
+            );
+
+            $trainings = $paginated;
+
         } else {
-            // Modo executions (VisitTraining)
-            $trainings = \App\Models\VisitTraining::query()
+            // Modo executions (VisitTraining - Mapeo Estándar)
+            $execQuery = \App\Models\VisitTraining::query()
                 ->with(['visit.empresa', 'visit.sede', 'visit.user'])
                 ->when($this->search, fn($q) => $q->where('title', 'like', '%' . $this->search . '%'))
-                // Filtrar por empresa/sede a través de la visita
                 ->when($this->empresaFilter, function($q) {
                     $q->whereHas('visit', fn($v) => $v->where('empresa_id', $this->empresaFilter));
                 })
                 ->when($this->sedeFilter, function($q) {
                     $q->whereHas('visit', fn($v) => $v->where('sede_id', $this->sedeFilter));
                 })
-                ->latest()
-                ->paginate(10);
+                ->latest();
+
+            $execResults = $execQuery->paginate(10);
+            
+            // Transformar la colección paginada manteniendo la estructura de paginación
+            $transformed = $execResults->getCollection()->map(fn($vt) => (object)[
+                'id' => $vt->id,
+                'title' => $vt->title,
+                'trainer_name' => $vt->visit?->user?->name ?? 'Técnico Externo',
+                'responsibleUser' => $vt->visit?->user,
+                'empresa' => $vt->visit?->empresa,
+                'sede' => $vt->visit?->sede,
+                'date' => $vt->created_at,
+                'status' => 'completed',
+                'attendances_count' => $vt->attendees_count,
+                'source' => 'execution',
+                'duration' => $vt->duration_minutes . ' min',
+                'type' => 'Presencial (Visita)',
+                'registry_code' => 'EXEC-' . $vt->id
+            ]);
+
+            $trainings = $execResults->setCollection($transformed);
         }
 
         $empresas = Empresa::orderBy('nombre')->get();

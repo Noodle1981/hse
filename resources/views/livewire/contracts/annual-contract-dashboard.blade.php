@@ -32,77 +32,7 @@
     <div class="px-4 sm:px-6 lg:px-8 py-10 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
         <div class="max-w-[98rem] mx-auto">
             
-            {{-- TOP ROW: STRATEGIC EFFICIENCY PILLARS --}}
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12 animate-fade-in-down">
-                {{-- Global Compliance Gauge --}}
-                <div class="md:col-span-1 bg-gradient-to-br from-indigo-600/30 to-indigo-900/10 backdrop-blur-xl p-8 rounded-[3.5rem] border border-white/10 shadow-2xl relative overflow-hidden group">
-                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-[80px] group-hover:scale-125 transition-transform duration-1000"></div>
-                    <div class="relative z-10 flex flex-col items-center text-center">
-                        <span class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] italic mb-6">EFICIENCIA GLOBAL</span>
-                        <div class="relative w-32 h-32 mb-6">
-                            <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                                <circle cx="18" cy="18" r="16" fill="none" class="stroke-white/5" stroke-width="3"></circle>
-                                <circle cx="18" cy="18" r="16" fill="none" class="stroke-indigo-500" stroke-width="3" stroke-dasharray="{{ $efficiency['global'] }}, 100" stroke-linecap="round" style="transition: stroke-dasharray 1.5s ease-in-out;"></circle>
-                            </svg>
-                            <div class="absolute inset-0 flex items-center justify-center">
-                                <span class="text-3xl font-black text-white italic tracking-tighter">{{ $efficiency['global'] }}%</span>
-                            </div>
-                        </div>
-                        <p class="text-[9px] font-bold text-indigo-100/40 uppercase tracking-widest italic leading-relaxed">Nivel de Salud del Contrato: <span class="{{ $efficiency['global'] > 80 ? 'text-emerald-400' : 'text-orange-400' }}">{{ $efficiency['global'] > 80 ? 'ÓPTIMO' : 'REQUIERE ACCIÓN' }}</span></p>
-                    </div>
-                </div>
-
-                {{-- Pillar: Inspecciones --}}
-                <div class="bg-ep-dark/40 backdrop-blur-md p-8 rounded-[3.5rem] border border-white/5 shadow-2xl relative group border-l-4 border-orange-500/40">
-                    <div class="flex items-center justify-between mb-8">
-                        <div class="h-12 w-12 bg-orange-500/10 rounded-2xl border border-orange-500/20 text-orange-500 flex items-center justify-center shadow-inner">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2"/></svg>
-                        </div>
-                        <span class="text-4xl font-black text-white italic">{{ $efficiency['inspeccion'] }}%</span>
-                    </div>
-                    <h3 class="text-xs font-black text-white uppercase tracking-[0.2em] mb-2 italic">Inspecciones Técnicas</h3>
-                    <div class="flex justify-between items-end">
-                        <p class="text-[9px] font-bold text-indigo-100/20 uppercase tracking-widest italic">{{ $efficiency['counts']['insp_done'] }} de {{ $efficiency['counts']['insp_total'] }} compromisos</p>
-                        <div class="h-10 w-1 bg-white/5 rounded-full overflow-hidden">
-                            <div class="w-full bg-orange-500" style="height: {{ $efficiency['inspeccion'] }}%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Pillar: Capacitaciones --}}
-                <div class="bg-ep-dark/40 backdrop-blur-md p-8 rounded-[3.5rem] border border-white/5 shadow-2xl relative group border-l-4 border-blue-500/40">
-                    <div class="flex items-center justify-between mb-8">
-                        <div class="h-12 w-12 bg-blue-500/10 rounded-2xl border border-blue-500/20 text-blue-500 flex items-center justify-center shadow-inner">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>
-                        </div>
-                        <span class="text-4xl font-black text-white italic">{{ $efficiency['capacitacion'] }}%</span>
-                    </div>
-                    <h3 class="text-xs font-black text-white uppercase tracking-[0.2em] mb-2 italic">Capacitaciones HSE</h3>
-                    <div class="flex justify-between items-end">
-                        <p class="text-[9px] font-bold text-indigo-100/20 uppercase tracking-widest italic">{{ $efficiency['counts']['cap_done'] }} de {{ $efficiency['counts']['cap_total'] }} compromisos</p>
-                        <div class="h-10 w-1 bg-white/5 rounded-full overflow-hidden">
-                            <div class="w-full bg-blue-500" style="height: {{ $efficiency['capacitacion'] }}%"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Pillar: Informes --}}
-                <div class="bg-ep-dark/40 backdrop-blur-md p-8 rounded-[3.5rem] border border-white/5 shadow-2xl relative group border-l-4 border-emerald-500/40">
-                    <div class="flex items-center justify-between mb-8">
-                        <div class="h-12 w-12 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-500 flex items-center justify-center shadow-inner">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        </div>
-                        <span class="text-4xl font-black text-white italic">{{ $efficiency['informe'] }}%</span>
-                    </div>
-                    <h3 class="text-xs font-black text-white uppercase tracking-[0.2em] mb-2 italic">Reportes Gerenciales</h3>
-                    <div class="flex justify-between items-end">
-                        <p class="text-[9px] font-bold text-indigo-100/20 uppercase tracking-widest italic">{{ $efficiency['counts']['inf_done'] }} de {{ $efficiency['counts']['inf_total'] }} compromisos</p>
-                        <div class="h-10 w-1 bg-white/5 rounded-full overflow-hidden">
-                            <div class="w-full bg-emerald-500" style="height: {{ $efficiency['informe'] }}%"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {{-- INDICATORS REMOVED: NOW CENTRALIZED IN MAIN DASHBOARD --}}
 
             {{-- MASTER CONTROLS --}}
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
@@ -136,24 +66,7 @@
                     </div>
                 </div>
 
-                {{-- Status de Sede --}}
-                <div class="lg:col-span-4 bg-indigo-600/20 backdrop-blur-md rounded-[2.5rem] border border-indigo-500/20 p-8 shadow-2xl relative overflow-hidden group">
-                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-2xl"></div>
-                    <span class="text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] italic mb-6 block">ESTADO DE COMPROMISO</span>
-                    <div class="flex items-center gap-6">
-                        <div class="h-16 w-16 bg-white/5 rounded-3xl border border-white/10 flex flex-col items-center justify-center">
-                            <span class="text-2xl font-black text-white italic leading-none">{{ $efficiency['counts']['completed'] }}</span>
-                            <span class="text-[8px] font-black text-indigo-100/40 uppercase tracking-widest italic mt-1">Éxitos</span>
-                        </div>
-                        <div>
-                             <h4 class="text-xl font-black text-white italic uppercase tracking-tight mb-1">CUMPLIMIENTO</h4>
-                             <div class="flex items-center gap-2">
-                                 <span class="w-2 h-2 rounded-full {{ $efficiency['global'] > 80 ? 'bg-emerald-500 shadow-[0_0_8px_#10b981]' : 'bg-orange-500 shadow-[0_0_8px_#f59e0b]' }}"></span>
-                                 <span class="text-[10px] font-bold text-indigo-100/60 uppercase tracking-widest italic">{{ $efficiency['global'] > 80 ? 'Protocolo Conforme' : 'Advertencia de Riesgo' }}</span>
-                             </div>
-                        </div>
-                    </div>
-                </div>
+                {{-- STATUS DE SEDE REMOVED: CONSOLIDATED IN MAIN DASHBOARD --}}
             </div>
 
             {{-- FORMULARIO DE PLANIFICACIÓN --}}

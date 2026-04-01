@@ -41,10 +41,11 @@ Route::middleware(['auth'])->group(function () {
         if ($user->isSuperAdmin()) {
             return redirect()->route('admin.dashboard');
         }
-        if ($user->isAdmin()) {
-            return redirect()->route('gestor.dashboard');
+        if ($user->isTechnician()) {
+            return redirect()->route('tecnico.checklists.tasks.index');
         }
-        return redirect()->route('tecnico.dashboard');
+        // Redireccionar al Dashboard de Gestor por defecto para Administradores/Otros
+        return redirect()->route('gestor.dashboard');
     })->name('dashboard');
 
     Route::get('/perfil', \App\Livewire\Auth\MyProfile::class)->name('profile');

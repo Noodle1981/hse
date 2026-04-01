@@ -334,7 +334,7 @@ class AssignmentManager extends Component
             });
 
         // 1.2 Manual Reports (Informes Maestros en Borrador)
-        $reportsQuery = \App\Models\MasterReport::with(['sede', 'sede.empresa', 'user'])
+        $reportsQuery = \App\Models\MasterReport::with(['sede', 'sede.empresa', 'tecnico'])
             ->where('estado', '!=', 'finalizado')
             ->when($this->selectedEmpresa, function ($q) {
                 $q->whereHas('sede', function($sub) {
@@ -393,7 +393,7 @@ class AssignmentManager extends Component
             'id' => $r->id,
             'dynamic_checklist_id' => null,
             'checklist' => (object)['title' => $r->titulo, 'registry_code' => 'REP-' . $r->id],
-            'user' => $r->user,
+            'user' => $r->tecnico,
             'sede' => $r->sede,
             'empresa' => $r->sede?->empresa,
             'due_date' => $r->created_at->addDays(7),
@@ -447,7 +447,10 @@ class AssignmentManager extends Component
             'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
             'can_be_edited' => false,
             'can_be_deleted' => false,
-            'status_badge_color' => 'yellow'
+            'status_badge_color' => 'yellow',
+            'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
+            'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,
+            'periodo' => ($p->category === 'Informe') ? now()->translatedFormat('F Y') : null
         ]);
 
         // Merge all into categorized collections (con manejo defensivo de nulos)

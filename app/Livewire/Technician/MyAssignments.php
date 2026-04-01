@@ -11,6 +11,10 @@ use Livewire\WithPagination;
 class MyAssignments extends Component
 {
     use WithPagination;
+    
+    // Nueva Inteligencia Operativa
+    public $activeVisit;
+    public $strategicKPIs = [];
 
     public string $search = '';
     public ?int $selectedEmpresa = null;
@@ -50,9 +54,48 @@ class MyAssignments extends Component
         $this->resetPage();
     }
 
-    public function render()
+    private function getStrategicKPIs($user)
+    {
+        $month = strtolower(now()->format('F'));
+        $year = now()->year;
+
+        // 1. Cumplimiento Mensual (Contrato Anual)
+        $totalPlan = \App\Models\AnnualPlan::whereIn('sede_id', $user->sedes->pluck('id'))
+            ->where($month, true)
+            ->where('year', $year)
+            ->count();
+            
+        $completedCount = \App\Models\DynamicInspection::where('user_id', $user->id)
+            ->whereMonth('completed_at', now()->month)
+            ->whereYear('completed_at', $year)
+            ->count();
+            
+        $compliance = $totalPlan > 0 ? min(100, round(($completedCount / $totalPlan) * 100)) : 100;
+
+        // 2. Hallazgos Críticos
+        $criticalCount = \App\Models\Hallazgo::where('inspector_id', $user->id)
+            ->where('criticidad', 'alta')
+            ->where('estado', '!=', 'resuelto')
+            ->count();
+
+        // 3. Inspecciones del Mes
+        $totalMonth = \App\Models\DynamicInspection::where('user_id', $user->id)
+            ->whereMonth('completed_at', now()->month)
+            ->count();
+
+        return [
+            'compliance' => $compliance,
+            'criticalCount' => $criticalCount,
+            'totalMonth' => $totalMonth
+        ];
+    }
+
+    public function render(\App\Services\VisitService $visitService)
     {
         $user = auth()->user();
+        $this->activeVisit = $visitService->getActiveVisit($user);
+        $this->strategicKPIs = $this->getStrategicKPIs($user);
+        
         $month = strtolower(now()->format('F'));
 
         // 1. Manual Assignments (Solicitudes)
@@ -180,8 +223,11 @@ class MyAssignments extends Component
                 $q->where('sede_id', $this->selectedSede);
             })
             ->when($this->statusFilter, function ($q) {
-                if ($this->statusFilter !== 'pending') {
-                    $q->whereRaw('1 = 0');
+                // Si filtra por 'pending', incluimos 'scheduled' (programadas)
+                if ($this->statusFilter === 'pending') {
+                    $q->whereIn('status', ['pending', 'scheduled']);
+                } else {
+                    $q->where('status', $this->statusFilter);
                 }
             });
 
@@ -192,14 +238,16 @@ class MyAssignments extends Component
             'sede' => $p->sede,
             'empresa' => $p->sede?->empresa,
             'due_date' => now()->endOfMonth(),
-            'status' => 'pending',
+            'status' => 'scheduled',
             'source' => 'contract',
-            'category' => $p->category, // 'Inspección', 'Capacitación', 'Informe'
+            'category' => $p->category,
             'is_overdue' => false,
             'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,
             'created_at' => $p->created_at,
             'inspection' => null,
             'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
+            'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
+            'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,
             'periodo' => ($p->category === 'Informe') ? now()->translatedFormat('F Y') : null
         ]);
 
@@ -243,6 +291,8 @@ class MyAssignments extends Component
             'reportsCount' => $allReports->count(),
             'empresas' => $empresas,
             'sedes' => $sedes,
+            'activeVisit' => $this->activeVisit,
+            'kpis' => $this->strategicKPIs,
         ])->layout('components.layouts.app');
     }
 }

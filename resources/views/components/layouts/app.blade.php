@@ -360,7 +360,8 @@
 
 
                     
-                    <!-- Dashboard/Estadísticas -->
+                    <!-- Dashboard/Estadísticas (Solo para Gestores/Admin) -->
+                    @if(!auth()->user()->isTechnician())
                     <li>
                         <a href="{{ route('dashboard') }}" 
                            class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
@@ -373,6 +374,7 @@
                             <span x-show="sidebarOpen || mobileMenuOpen" class="menu-text">Dashboard</span>
                         </a>
                     </li>
+                    @endif
 
                     <!-- Mi Perfil -->
                     <li>

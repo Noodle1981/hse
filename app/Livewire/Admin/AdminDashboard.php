@@ -25,13 +25,21 @@ class AdminDashboard extends Component
     public $empresaId = null;
     public $sedeId = null;
     public $tecnicoId = null;
+    public $year;
     public $showOverdueModal = false;
     public $greeting;
+    public $efficiency;
 
     public function mount()
     {
+        $this->year = date('Y');
         $this->updateDates();
         $this->setGreeting();
+        
+        // Default to first available sede if none selected
+        if (!$this->sedeId) {
+            $this->sedeId = \App\Models\Sede::first()?->id;
+        }
     }
 
     public function updatedPeriod()
@@ -42,7 +50,7 @@ class AdminDashboard extends Component
 
     public function updated($property)
     {
-        if (in_array($property, ['period', 'empresaId', 'sedeId', 'tecnicoId'])) {
+        if (in_array($property, ['period', 'empresaId', 'sedeId', 'tecnicoId', 'year'])) {
             $this->dispatch('charts-updated', charts: $this->getCharts());
         }
     }
@@ -55,63 +63,128 @@ class AdminDashboard extends Component
     public function resetFilters()
     {
         $this->empresaId = null;
-        $this->sedeId = null;
+        $this->sedeId = \App\Models\Sede::first()?->id;
         $this->tecnicoId = null;
         $this->period = 'this_month';
+        $this->year = date('Y');
         $this->updateDates();
         $this->dispatch('charts-updated', charts: $this->getCharts());
     }
 
-    private function updateDates()
+    // Logic for Strategic Compliance (Ported from AnnualContractDashboard)
+    private function calculateEfficiencyMetrics($complianceData)
     {
-        switch ($this->period) {
-            case 'this_month':
-                $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
-                $this->dateTo = now()->endOfMonth()->format('Y-m-d');
-                break;
-            case 'last_month':
-                $this->dateFrom = now()->subMonth()->startOfMonth()->format('Y-m-d');
-                $this->dateTo = now()->subMonth()->endOfMonth()->format('Y-m-d');
-                break;
-            case 'last_3_months':
-                $this->dateFrom = now()->subMonths(3)->startOfMonth()->format('Y-m-d');
-                $this->dateTo = now()->format('Y-m-d');
-                break;
-            case 'this_quarter':
-                $this->dateFrom = now()->startOfQuarter()->format('Y-m-d');
-                $this->dateTo = now()->endOfQuarter()->format('Y-m-d');
-                break;
-            case 'this_year':
-                $this->dateFrom = now()->startOfYear()->format('Y-m-d');
-                $this->dateTo = now()->endOfYear()->format('Y-m-d');
-                break;
-            case 'last_year':
-                $this->dateFrom = now()->subYear()->startOfYear()->format('Y-m-d');
-                $this->dateTo = now()->subYear()->endOfYear()->format('Y-m-d');
-                break;
-            case 'custom':
-                // Mantener fechas actuales
-                break;
-            default:
-                $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
-                $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+        $stats = [
+            'global' => 0,
+            'inspeccion' => 0,
+            'capacitacion' => 0,
+            'informe' => 0,
+            'timelines' => [
+                'inspeccion' => array_fill(1, 12, 'none'),
+                'capacitacion' => array_fill(1, 12, 'none'),
+                'informe' => array_fill(1, 12, 'none'),
+            ],
+            'counts' => [
+                'total' => 0, 'completed' => 0, 'overdue' => 0, 'pending' => 0,
+                'insp_total' => 0, 'insp_done' => 0,
+                'cap_total' => 0, 'cap_done' => 0,
+                'inf_total' => 0, 'inf_done' => 0,
+            ]
+        ];
+
+        $monthNames = ['january'=>1,'february'=>2,'march'=>3,'april'=>4,'may'=>5,'june'=>6,'july'=>7,'august'=>8,'september'=>9,'october'=>10,'november'=>11,'december'=>12];
+
+        foreach ($complianceData as $planId => $months) {
+            $plan = \App\Models\AnnualPlan::find($planId);
+            if (!$plan) continue;
+            
+            $cat = strtolower($plan->category);
+            $catKey = ($cat === 'inspección') ? 'inspeccion' : (($cat === 'capacitación') ? 'capacitacion' : 'informe');
+
+            foreach ($months as $monthName => $data) {
+                if ($data['status'] === 'none') continue;
+                $monthNum = $monthNames[$monthName];
+
+                $stats['counts']['total']++;
+                if ($data['status'] === 'completed') $stats['counts']['completed']++;
+                if ($data['status'] === 'overdue') $stats['counts']['overdue']++;
+                if ($data['status'] === 'pending') $stats['counts']['pending']++;
+
+                // Aggregating for Pillar (category) counts
+                if ($catKey === 'inspeccion') {
+                    $stats['counts']['insp_total']++;
+                    if ($data['status'] === 'completed') $stats['counts']['insp_done']++;
+                } elseif ($catKey === 'capacitacion') {
+                    $stats['counts']['cap_total']++;
+                    if ($data['status'] === 'completed') $stats['counts']['cap_done']++;
+                } elseif ($catKey === 'informe') {
+                    $stats['counts']['inf_total']++;
+                    if ($data['status'] === 'completed') $stats['counts']['inf_done']++;
+                }
+
+                // Update Timeline for Pillar: Priority Overdue > Pending > Completed
+                $currentStatus = $stats['timelines'][$catKey][$monthNum];
+                if ($data['status'] === 'overdue') {
+                    $stats['timelines'][$catKey][$monthNum] = 'overdue';
+                } elseif ($data['status'] === 'pending' && $currentStatus !== 'overdue') {
+                    $stats['timelines'][$catKey][$monthNum] = 'pending';
+                } elseif ($data['status'] === 'completed' && $currentStatus === 'none') {
+                    $stats['timelines'][$catKey][$monthNum] = 'completed';
+                }
+            }
         }
+
+        $stats['global'] = $stats['counts']['total'] > 0 ? round(($stats['counts']['completed'] / $stats['counts']['total']) * 100) : 0;
+        $stats['inspeccion'] = $stats['counts']['insp_total'] > 0 ? round(($stats['counts']['insp_done'] / $stats['counts']['insp_total']) * 100) : 0;
+        $stats['capacitacion'] = $stats['counts']['cap_total'] > 0 ? round(($stats['counts']['cap_done'] / $stats['counts']['cap_total']) * 100) : 0;
+        $stats['informe'] = $stats['counts']['inf_total'] > 0 ? round(($stats['counts']['inf_done'] / $stats['counts']['inf_total']) * 100) : 0;
+        
+        return $stats;
     }
 
-    private function setGreeting()
+    private function calculateComplianceData($plans)
     {
-        $hour = now()->hour;
-        if ($hour < 12) {
-            $this->greeting = '¡Buenos días!';
-        } elseif ($hour < 20) {
-            $this->greeting = '¡Buenas tardes!';
-        } else {
-            $this->greeting = '¡Buenas noches!';
+        $data = [];
+        $inspections = \App\Models\DynamicInspection::where('sede_id', $this->sedeId)
+            ->whereYear('completed_at', $this->year)->where('status', 'completed')->get()
+            ->groupBy(fn($i) => $i->dynamic_checklist_id . '_' . $i->completed_at->month);
+        $trainings = \App\Models\Training::where('sede_id', $this->sedeId)
+            ->whereYear('date', $this->year)->get()
+            ->groupBy(fn($t) => \Carbon\Carbon::parse($t->date ?? $t->created_at)->month);
+        $reports = \App\Models\MasterReport::where('sede_id', $this->sedeId)
+            ->whereYear('created_at', $this->year)->get()
+            ->groupBy(fn($r) => \Carbon\Carbon::now()->month); // Simplified for DB port
+
+        $currentMonth = (int)date('m');
+        $months = ['january'=>1, 'february'=>2, 'march'=>3, 'april'=>4, 'may'=>5, 'june'=>6, 'july'=>7, 'august'=>8, 'september'=>9, 'october'=>10, 'november'=>11, 'december'=>12];
+        
+        foreach ($plans as $plan) {
+            $data[$plan->id] = [];
+            foreach ($months as $monthName => $monthNumber) {
+                if (!$plan->$monthName) { $data[$plan->id][$monthName] = ['status' => 'none', 'count' => 0]; continue; }
+                $count = 0;
+                if ($plan->category === 'Inspección' && $plan->checklist_id) {
+                    $key = $plan->checklist_id . '_' . $monthNumber;
+                    $count = isset($inspections[$key]) ? $inspections[$key]->count() : 0;
+                } elseif ($plan->category === 'Capacitación') { $count = isset($trainings[$monthNumber]) ? $trainings[$monthNumber]->count() : 0;
+                } elseif ($plan->category === 'Informe') { $count = isset($reports[$monthNumber]) ? $reports[$monthNumber]->count() : 0; }
+                
+                if ($count > 0) $data[$plan->id][$monthName] = ['status' => 'completed', 'count' => $count];
+                elseif ($monthNumber < $currentMonth) $data[$plan->id][$monthName] = ['status' => 'overdue', 'count' => 0];
+                else $data[$plan->id][$monthName] = ['status' => 'pending', 'count' => 0];
+            }
         }
+        return $data;
     }
 
     public function render()
     {
+        // Calculate Strategic Multi-pillar Efficiency
+        $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)->where('year', $this->year)->get();
+        $complianceData = $this->calculateComplianceData($plans);
+        $this->efficiency = $this->calculateEfficiencyMetrics($complianceData);
+        $efficiency = $this->efficiency;
+
         $kpis = $this->getKPIs();
         $charts = $this->getCharts();
         $recentActivity = $this->getRecentActivity();
@@ -123,20 +196,13 @@ class AdminDashboard extends Component
         $empresas = \App\Models\Empresa::orderBy('nombre')->get();
         $sedes = $this->empresaId 
             ? \App\Models\Sede::where('empresa_id', $this->empresaId)->orderBy('nombre_sede')->get() 
-            : collect();
+            : \App\Models\Sede::orderBy('nombre_sede')->get();
         $tecnicos = \App\Models\User::where('rol', 'tecnico')->orderBy('nombres')->get();
+        $activeSede = \App\Models\Sede::find($this->sedeId);
 
         return view('livewire.admin.admin-dashboard', compact(
-            'kpis',
-            'charts',
-            'recentActivity',
-            'upcomingActivities',
-            'alerts',
-            'rankings',
-            'overdueAssignments',
-            'empresas',
-            'sedes',
-            'tecnicos'
+            'kpis', 'charts', 'recentActivity', 'upcomingActivities', 'alerts', 'rankings', 'overdueAssignments',
+            'empresas', 'sedes', 'tecnicos', 'efficiency', 'activeSede'
         ));
     }
 
@@ -640,16 +706,63 @@ class AdminDashboard extends Component
     {
         return [
             'overdue_assignments' => ChecklistAssignment::overdue()->count(),
-            'overdue_annual_activities' => AnnualPlan::where('status', 'overdue')->count(),
+            'overdue_annual_activities' => $this->efficiency['counts']['overdue'] ?? 0,
         ];
+    }
+
+    private function updateDates()
+    {
+        switch ($this->period) {
+            case 'this_month':
+                $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+                $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'last_month':
+                $this->dateFrom = now()->subMonth()->startOfMonth()->format('Y-m-d');
+                $this->dateTo = now()->subMonth()->endOfMonth()->format('Y-m-d');
+                break;
+            case 'this_quarter':
+                $this->dateFrom = now()->startOfQuarter()->format('Y-m-d');
+                $this->dateTo = now()->endOfQuarter()->format('Y-m-d');
+                break;
+            case 'this_year':
+                $this->dateFrom = now()->startOfYear()->format('Y-m-d');
+                $this->dateTo = now()->endOfYear()->format('Y-m-d');
+                break;
+            case 'last_year':
+                $this->dateFrom = now()->subYear()->startOfYear()->format('Y-m-d');
+                $this->dateTo = now()->subYear()->endOfYear()->format('Y-m-d');
+                break;
+            case 'custom':
+                // Do nothing, let the user set the dates
+                break;
+            default:
+                $this->dateFrom = now()->startOfMonth()->format('Y-m-d');
+                $this->dateTo = now()->endOfMonth()->format('Y-m-d');
+                break;
+        }
+    }
+
+    private function setGreeting()
+    {
+        $hour = now()->hour;
+        $name = auth()->user()->nombres;
+
+        if ($hour < 12) {
+            $this->greeting = "¡Buenos días, $name!";
+        } elseif ($hour < 18) {
+            $this->greeting = "¡Buenas tardes, $name!";
+        } else {
+            $this->greeting = "¡Buenas noches, $name!";
+        }
     }
 
     private function calculateAnnualCompliance()
     {
-        $total = AnnualPlan::whereYear('created_at', now()->year)->count();
-        if ($total == 0) return 0;
-
-        // Broken query fixed: no status column exists
-        return 0; 
+        // Use the same logic as render or just return the pre-calculated value
+        $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)->where('year', $this->year)->get();
+        $complianceData = $this->calculateComplianceData($plans);
+        $efficiency = $this->calculateEfficiencyMetrics($complianceData);
+        return $efficiency['global'];
     }
 }

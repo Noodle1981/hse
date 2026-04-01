@@ -36,6 +36,81 @@
     <div class="py-8 min-h-screen bg-[#11111d] text-white selection:bg-ep-primary/30">
         <div class="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
 
+            {{-- Tactical Dashboard Integration --}}
+            <div class="mb-10 grid grid-cols-1 lg:grid-cols-4 gap-6 animate-fade-in-down">
+                {{-- KPI Mini-Matrix --}}
+                <div class="lg:col-span-1 grid grid-cols-2 lg:grid-cols-1 gap-4">
+                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-4 flex items-center gap-4 group/kpi hover:border-indigo-500/30 transition-all">
+                        <div class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center rounded-xl font-black italic shadow-inner group-hover/kpi:scale-110 transition-transform">
+                            %
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic leading-none mb-1">Cumplimiento</p>
+                            <p class="text-lg font-black text-white italic leading-none">{{ $kpis['compliance'] }}%</p>
+                        </div>
+                    </div>
+                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-4 flex items-center gap-4 group/kpi hover:border-red-500/30 transition-all">
+                        <div class="h-10 w-10 bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center rounded-xl font-black italic shadow-inner group-hover/kpi:scale-110 transition-transform">
+                             !
+                        </div>
+                        <div>
+                            <p class="text-[9px] font-black text-red-500/40 uppercase tracking-widest italic leading-none mb-1">Críticos</p>
+                            <p class="text-lg font-black text-white italic leading-none">{{ $kpis['criticalCount'] }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Operational HUD --}}
+                <div class="lg:col-span-3">
+                    @if($activeVisit)
+                        <div class="h-full bg-gradient-to-r from-emerald-500/10 to-transparent backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/30 p-1 group overflow-hidden relative shadow-2xl">
+                             <div class="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]"></div>
+                             <div class="relative h-full bg-[#11111d]/80 rounded-[2.4rem] px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                                 <div class="flex items-center gap-6">
+                                     <div class="relative">
+                                         <div class="h-14 w-14 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-500 flex items-center justify-center animate-pulse">
+                                             <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                         </div>
+                                         <div class="absolute -top-1 -right-1 h-3 w-3 bg-emerald-500 rounded-full border-2 border-[#11111d] animate-ping"></div>
+                                     </div>
+                                     <div>
+                                         <span class="text-[10px] font-black text-emerald-500 uppercase tracking-[0.4em] italic leading-none mb-2 block animate-pulse">Misión en Curso</span>
+                                         <h3 class="text-xl font-black text-white uppercase italic tracking-tight">{{ $activeVisit->sede->nombre_sede }}</h3>
+                                     </div>
+                                 </div>
+                                 <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                                     <a href="{{ route('tecnico.hallazgos.create') }}" class="flex-1 md:flex-none h-12 px-6 flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-orange-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl hover:bg-orange-500 hover:text-white transition-all shadow-lg group/btn_h">
+                                         <svg class="w-4 h-4 group-hover/btn_h:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                         Hallazgo
+                                     </a>
+                                     <a href="{{ route('tecnico.visits.in-progress', $activeVisit->id) }}" class="flex-1 md:flex-none h-12 px-8 flex items-center justify-center bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-emerald-900/40">
+                                         REANUDAR
+                                     </a>
+                                 </div>
+                             </div>
+                        </div>
+                    @else
+                        <div class="h-full bg-ep-dark/40 backdrop-blur-xl rounded-[2.5rem] border border-white/5 p-1 group overflow-hidden transition-all hover:border-ep-primary/30">
+                            <div class="relative h-full bg-[#11111d]/40 rounded-[2.4rem] px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                                <div class="flex items-center gap-6">
+                                    <div class="h-14 w-14 bg-white/5 rounded-2xl border border-white/10 text-indigo-100/20 flex items-center justify-center group-hover:text-ep-primary transition-colors">
+                                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-black text-indigo-100/20 uppercase tracking-[0.4em] italic mb-2 block">Estado: Planificación</span>
+                                        <h3 class="text-xl font-black text-white/40 uppercase italic tracking-tight italic">Consola Desconectada</h3>
+                                    </div>
+                                </div>
+                                <a href="{{ route('tecnico.visits.index') }}" class="w-full md:w-auto h-16 px-12 flex items-center justify-center bg-ep-primary text-white text-[11px] font-black uppercase tracking-[0.3em] italic rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-2xl shadow-ep-primary/20 group/btn relative overflow-hidden">
+                                     <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
+                                     🚢 INICIAR NUEVA VISITA
+                                </a>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
             {{-- Filtros Premium Dark --}}
             <div class="mb-10 animate-fade-in-down">
                 <div class="bg-ep-dark/50 backdrop-blur-xl rounded-[2.5rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden group">
@@ -191,9 +266,9 @@
                                                         {{ $assignment->checklist?->title ?? 'Sin Título' }}
                                                     </div>
                                                     @if(($assignment->source ?? 'manual') === 'contract')
-                                                        <span class="text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase italic">Contrato</span>
+                                                        <span class="text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase italic">🚢 CONTRATO</span>
                                                     @else
-                                                        <span class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase italic">Solicitud</span>
+                                                        <span class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase italic">⚡ SOLICITUD</span>
                                                     @endif
                                                 </div>
                                                 <div class="text-[11px] text-indigo-100/50 uppercase tracking-widest font-black italic leading-none">
@@ -228,6 +303,7 @@
                                         @php
                                             $vencido = ($assignment->is_overdue ?? false) && $assignment->status !== 'completed';
                                             $statusClass = match($assignment->status) {
+                                                'scheduled' => 'bg-amber-500/10 border-amber-500/30 text-amber-500',
                                                 'pending' => 'bg-yellow-500/10 border-yellow-500/30 text-yellow-500',
                                                 'in_progress' => 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',
                                                 'completed' => 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500',
@@ -240,6 +316,7 @@
                                                 CRÍTICO 
                                             @else 
                                                 {{ match($assignment->status) {
+                                                    'scheduled' => 'PROGRAMADA',
                                                     'pending' => 'PENDIENTE',
                                                     'in_progress' => 'EN CURSO',
                                                     'completed' => 'FINALIZADA',

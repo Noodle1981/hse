@@ -12,6 +12,7 @@ class AnnualContractDashboard extends Component
     public $sedeId;
     public $year;
     public $editMode = false;
+    public $filterCategory = null;
     
     // Form fields for new activity
     public $category = 'Capacitación';
@@ -20,17 +21,20 @@ class AnnualContractDashboard extends Component
     public $activity_code;
     public $checklist_id;
 
-    public function mount()
+    public function mount($sede_id = null, $year = null, $category = null)
     {
-        $this->year = date('Y');
+        $this->year = $year ?? date('Y');
+        $this->filterCategory = $category;
         $user = auth()->user();
         
         // Default to first available sede
         $role = strtolower($user->rol);
-        if ($role === 'técnico' || $role === 'tecnico') {
+        if ($sede_id) {
+            $this->sedeId = $sede_id;
+        } elseif ($role === 'técnico' || $role === 'tecnico') {
             $this->sedeId = $user->sedes()->first()?->id;
         } else {
-            $this->sedeId = Sede::first()?->id;
+            $this->sedeId = Sede::where('id', '>', 0)->first()?->id; // Use where to ensure query
         }
     }
 
@@ -223,6 +227,7 @@ class AnnualContractDashboard extends Component
     {
         $plans = AnnualPlan::where('sede_id', $this->sedeId)
             ->where('year', $this->year)
+            ->when($this->filterCategory, fn($q) => $q->where('category', $this->filterCategory))
             ->orderBy('category')
             ->get();
 
