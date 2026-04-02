@@ -1,22 +1,50 @@
 <div> {{-- Unico Elemento Raiz --}}
-    <div class="px-4 sm:px-6 lg:px-8 py-10 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
+
         <div class="max-w-[98rem] mx-auto">
             
-            {{-- TACTICAL HUD: LOCALIZED SELECTORS --}}
-            <div class="flex flex-wrap items-center justify-between gap-6 mb-12 animate-fade-in-down">
-                <div class="flex flex-col">
-                    <h1 class="text-[10px] font-black text-ep-primary uppercase tracking-[0.4em] italic mb-1">DASHBOARD ESTRATÉGICO</h1>
-                    <div class="flex items-center gap-3">
-                        <div class="w-1.5 h-1.5 bg-ep-primary rounded-full animate-pulse shadow-[0_0_8px_var(--tw-shadow-color)] shadow-ep-primary"></div>
-                        <h2 class="text-2xl font-black text-white italic tracking-tighter uppercase">COMANDO CENTRAL</h2>
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+
+                    <div class="flex flex-col">
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.4em] italic mb-1 leading-none">
+                            Dashboard <span class="text-white">Estratégico</span>
+                        </h1>
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                            Comando Central
+                        </h2>
                     </div>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-4 bg-black/20 backdrop-blur-3xl p-2 rounded-[2rem] border border-white/5 shadow-2xl">
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100 italic tracking-tight">{{ auth()->user()->nombres }}</span>
+                    </a>
+                </div>
+            </div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
+        </header>
+    @endsection
+
+    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
+        <div class="max-w-[98rem] mx-auto">
+            
+            {{-- TACTICAL HUD: SELECTORS (Bajo el header, dentro de la vista) --}}
+            <div class="flex flex-wrap items-center justify-between gap-6 mb-12 animate-fade-in-down">
+                <div class="flex flex-wrap items-center gap-4 bg-black/20 backdrop-blur-3xl p-2.5 rounded-[2.5rem] border border-white/5 shadow-2xl">
                     {{-- Selector Empresa --}}
-                    <div class="flex items-center bg-white/5 border border-white/5 rounded-2xl px-4 py-1.5 group hover:border-ep-primary/30 transition-all">
-                        <span class="text-[8px] font-black text-indigo-100/30 uppercase tracking-widest mr-3 italic group-hover:text-ep-primary transition-colors">Empresa</span>
-                        <select wire:model.live="empresaId" class="bg-transparent border-none text-[10px] font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark]">
+                    <div class="flex items-center bg-white/5 border border-white/5 rounded-2xl px-5 py-2 group hover:border-ep-primary/40 transition-all">
+                        <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest mr-4 italic group-hover:text-ep-primary transition-colors">Empresa</span>
+                        <select wire:model.live="empresaId" class="bg-transparent border-none text-xs font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark] p-0 h-auto">
                             <option value="">Todas las Empresas</option>
                             @foreach($empresas as $e)
                                 <option value="{{ $e->id }}">{{ $e->nombre }}</option>
@@ -25,9 +53,9 @@
                     </div>
 
                     {{-- Selector Sede --}}
-                    <div class="flex items-center bg-white/5 border border-white/5 rounded-2xl px-4 py-1.5 group hover:border-ep-primary/30 transition-all">
-                        <span class="text-[8px] font-black text-indigo-100/30 uppercase tracking-widest mr-3 italic group-hover:text-ep-primary transition-colors">Sede</span>
-                        <select wire:model.live="sedeId" class="bg-transparent border-none text-[10px] font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark]">
+                    <div class="flex items-center bg-white/5 border border-white/5 rounded-2xl px-5 py-2 group hover:border-ep-primary/40 transition-all">
+                        <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest mr-4 italic group-hover:text-ep-primary transition-colors">Sede</span>
+                        <select wire:model.live="sedeId" class="bg-transparent border-none text-xs font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark] p-0 h-auto">
                             @if(!$empresaId) <option value="">Todas las Sedes</option> @endif
                             @foreach($sedes as $s)
                                 <option value="{{ $s->id }}">{{ $s->nombre_sede }}</option>
@@ -35,20 +63,28 @@
                         </select>
                     </div>
 
-                    {{-- Selector Ciclo (Year) --}}
+                    {{-- Selector Ciclo --}}
                     <div x-data="{ open: false, selected: @entangle('year') }" class="relative" @click.away="open = false text-white">
-                        <button @click="open = !open" class="h-10 px-5 bg-ep-primary/10 border border-ep-primary/20 rounded-2xl flex items-center gap-3 hover:bg-ep-primary/20 transition-all shadow-inner group">
-                            <span class="text-[8px] font-black text-ep-primary italic tracking-[0.2em] uppercase">CICLO</span>
-                            <span class="text-xs font-black text-white italic" x-text="selected"></span>
+                        <button @click="open = !open" class="h-11 px-6 bg-ep-primary/10 border border-ep-primary/20 rounded-2xl flex items-center gap-4 hover:bg-ep-primary/20 transition-all shadow-inner group">
+                            <span class="text-[9px] font-black text-ep-primary italic tracking-[0.2em] uppercase">CICLO</span>
+                            <span class="text-sm font-black text-white italic" x-text="selected"></span>
                             <svg class="w-3 h-3 text-ep-primary group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
                         <div x-show="open" x-cloak class="absolute top-full right-0 mt-3 w-32 bg-[#1E1E2D] border border-white/10 rounded-[1.5rem] shadow-2xl py-3 z-50">
                             @foreach([2024, 2025, 2026] as $y)
-                                <div @click="selected = {{ $y }}; open = false; $wire.set('year', {{ $y }})" class="px-6 py-2.5 text-[10px] font-black text-white/50 hover:text-white hover:bg-ep-primary/20 cursor-pointer transition-colors uppercase italic tracking-widest">
+                                <div @click="selected = {{ $y }}; open = false; $wire.set('year', {{ $y }})" class="px-6 py-2.5 text-[10px] font-black text-white/50 hover:text-white hover:bg-ep-primary/20 cursor-pointer transition-colors uppercase italic tracking-widest text-center">
                                     {{ $y }}
                                 </div>
                             @endforeach
                         </div>
+                    </div>
+                </div>
+
+                <div class="hidden sm:flex flex-col items-end">
+                    <span class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] italic mb-1">Estatus Táctico</span>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-ep-primary rounded-full animate-pulse shadow-[0_0_10px_#f69239]"></div>
+                        <span class="text-[11px] font-black text-white uppercase italic tracking-tighter">{{ $activeSede ? $activeSede->nombre_sede : 'Global' }}</span>
                     </div>
                 </div>
             </div>

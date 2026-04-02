@@ -2,22 +2,23 @@
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                <div class="flex items-center gap-6">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-[#855533] hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-    
+
                     <div class="flex flex-col">
-                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
-                            SISTEMA DE <span class="text-white">OPERACIONES</span>
+                        <h1 class="text-[10px] font-black text-[#855533] uppercase tracking-[0.4em] italic mb-1 leading-none">
+                            Sistema de <span class="text-white">Operaciones</span>
                         </h1>
-                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
-                            CENTRO DE MANDO
+                        <h2 class="text-sm font-bold text-white/90 uppercase tracking-tight leading-none italic">
+                            Centro de Mando
                         </h2>
                     </div>
                 </div>
-    
-                <div class="flex items-center space-x-4">
+
+                <div class="flex items-center gap-4">
                     @php
                         $user = auth()->user();
                         $canSwitch = $user->rol === \App\Models\User::ROLE_GESTOR || 
@@ -27,21 +28,22 @@
 
                     @if($canSwitch)
                         <a href="{{ route('switch-role', \App\Models\User::ROLE_GESTOR) }}" 
-                           class="hidden md:flex bg-white/5 hover:bg-white/10 text-indigo-100/60 hover:text-white px-4 py-1.5 rounded-xl text-[9px] font-black border border-white/10 transition-all items-center gap-2 uppercase tracking-widest italic">
-                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                           class="hidden md:flex bg-white/5 hover:bg-white/10 text-[#855533]/60 hover:text-white px-3 py-1.5 rounded-xl text-[8px] font-black border border-white/5 transition-all items-center gap-2 uppercase tracking-widest italic">
+                           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             Modo Gestor
                         </a>
                     @endif
-                    
-                    <a href="{{ route('profile') }}" class="flex items-center gap-3 bg-white/5 p-1 pr-4 rounded-2xl border border-white/5 hover:bg-white/10 transition-all group">
-                        <div class="w-8 h-8 bg-ep-primary rounded-xl flex items-center justify-center text-white text-xs font-black shadow-lg group-hover:scale-105 transition-transform">
+
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
                             {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
                         </div>
-                        <span class="text-[10px] font-black text-indigo-100 uppercase tracking-widest italic">{{ auth()->user()->nombres }}</span>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-white/80 italic tracking-tight">{{ auth()->user()->nombres }}</span>
                     </a>
                 </div>
             </div>
-            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-[#855533]/30 to-transparent"></div>
         </header>
     @endsection
 
@@ -374,3 +376,4 @@
     }
 </script>
 @endpush
+

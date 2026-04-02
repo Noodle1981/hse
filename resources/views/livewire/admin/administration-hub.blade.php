@@ -34,7 +34,7 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-12 bg-[#11111d] min-h-screen text-white">
+    <div class="px-4 sm:px-6 lg:px-8 py-12 text-white">
         <div class="max-w-[95rem] mx-auto space-y-12 animate-fade-in">
             
             <!-- Central Intelligence Block -->
@@ -153,3 +153,4 @@
         @keyframes fade-in-down { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </div>
+

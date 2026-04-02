@@ -2,41 +2,37 @@
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-6">
                     <!-- Mobile menu button -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
 
                     <div class="flex flex-col">
-                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.4em] italic mb-1 leading-none">
                             Consola de <span class="text-white">Identidad</span>
                         </h1>
-                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
-                            Gestión de Usuario de Élite
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                            Gestión de Perfil de Élite
                         </h2>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <div class="hidden sm:flex flex-col items-end">
-                        <span class="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic leading-none mb-1">Nivel de Acceso</span>
-                        <span class="text-xs font-black text-white italic uppercase">
-                            {{ auth()->user()->rol === 'gestor' ? 'Gestor Master' : (auth()->user()->rol === 'tecnico' ? 'Especialista Técnico' : 'Administrador de Sistema') }}
-                        </span>
-                    </div>
-                    <div class="h-10 w-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-ep-primary shadow-inner">
-                        <span class="text-sm font-black">{{ substr($nombres, 0, 1) }}</span>
-                    </div>
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100 italic tracking-tight">{{ auth()->user()->nombres }}</span>
+                    </a>
                 </div>
             </div>
             <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
         <div class="max-w-[95rem] mx-auto">
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-fade-in-down">
@@ -231,9 +227,7 @@
                 </div>
             </div>
             
-            <div class="text-center mt-12 pb-20">
-                <p class="text-[9px] font-black text-white/5 uppercase tracking-[0.8em] italic leading-relaxed">XamaSafe Identity Console • Technician Access Protocol Level 4</p>
-            </div>
+
         </div>
     </div>
 
@@ -254,3 +248,4 @@
         }
     </style>
 </div>
+

@@ -1,35 +1,45 @@
 <div class="w-full mx-auto">
     @section('header_custom')
-        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg border-b border-white/5">
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 <div class="flex items-center gap-6">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+
                     <div class="flex flex-col">
-                        <h1 class="text-[10px] font-black text-ep-primary uppercase tracking-[0.3em] italic leading-none mb-1">
-                            CERTIFICADO DE <span class="text-white">CUMPLIMIENTO PLAN ANUAL</span>
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.4em] italic mb-1 leading-none">
+                            Cumplimiento <span class="text-white">Plan Anual</span>
                         </h1>
-                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
-                            CICLO OPERATIVO {{ $year }} // ID-{{ strtoupper(substr(md5($sedeId), 0, 6)) }}
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                            Ciclo Operativo {{ $year }}
                         </h2>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-6">
-                    <div class="hidden md:flex flex-col items-end">
-                        <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic leading-none mb-1">Sede de Operaciones</span>
-                        <span class="text-xs font-black text-white italic uppercase">{{ $activeSede?->nombre_sede }}</span>
-                    </div>
+                <div class="flex items-center gap-4">
                     @if($efficiency['counts']['overdue'] > 0)
-                        <div class="px-3 py-1 bg-red-500/10 border border-red-500/30 rounded-lg animate-pulse flex items-center gap-2">
+                        <div class="hidden sm:flex px-3 py-1 bg-red-500/10 border border-red-500/30 rounded-lg animate-pulse items-center gap-2 mr-2">
                             <span class="w-1.5 h-1.5 bg-red-500 rounded-full shadow-[0_0_8px_#ef4444]"></span>
                             <span class="text-[9px] font-black text-red-400 uppercase tracking-widest italic">{{ $efficiency['counts']['overdue'] }} ALERTAS</span>
                         </div>
                     @endif
+
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100 italic tracking-tight">{{ auth()->user()->nombres }}</span>
+                    </a>
                 </div>
             </div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-10 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
+    <div class="px-4 sm:px-6 lg:px-8 py-10 text-white selection:bg-ep-primary/30">
         <div class="max-w-[98rem] mx-auto">
             
             {{-- INDICATORS REMOVED: NOW CENTRALIZED IN MAIN DASHBOARD --}}
@@ -257,10 +267,7 @@
                 </div>
             </div>
             
-            <div class="mt-20 text-center pb-20 opacity-30">
-                <p class="text-[10px] font-black text-indigo-100 uppercase tracking-[1em] italic leading-relaxed">XamaSafe Annual Matrix HUD • Master Compliance Specialist Protocol • 593-HSE-SYS</p>
-                <div class="h-1 w-20 bg-indigo-500/20 mx-auto mt-4 rounded-full"></div>
-            </div>
+
         </div>
     </div>
 

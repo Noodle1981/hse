@@ -174,7 +174,7 @@ Route::middleware(['auth'])->group(function () {
     | Rutas TÉCNICO (Prefijo: /tecnico)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico,tecnico'])->group(function() {
+    Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico,tecnico,gestor,Administrador,Socio'])->group(function() {
         // Dashboard
         Route::get('/dashboard', TechnicianDashboard::class)->name('dashboard');
 

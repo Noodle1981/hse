@@ -115,10 +115,7 @@
             </form>
         </div>
 
-        <!-- Security Disclaimer -->
-        <p class="text-center text-[8px] font-black text-white/10 uppercase tracking-[0.6em] mt-10 italic animate-fade-in opacity-0" style="animation-delay: 1.5s; animation-fill-mode: forwards;">
-            XamaSafe Ecosystem Core • Security Authorized Only
-        </p>
+        
     </div>
 
     <!-- Security Recovery Terminal (Modal) -->
@@ -170,3 +167,4 @@
         }
     </style>
 </div>
+

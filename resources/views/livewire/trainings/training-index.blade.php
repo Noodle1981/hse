@@ -5,16 +5,14 @@
                 <div class="flex items-center gap-4">
                     <!-- Mobile menu button -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
 
                     <div class="flex flex-col">
-                        <h1 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest italic leading-none mb-1">
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
                             Centro de <span class="text-white">Entrenamiento</span>
                         </h1>
-                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
                             Gestión de Capacitaciones
                         </h2>
                     </div>
@@ -26,15 +24,15 @@
                             {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
                         </div>
                         <div class="h-4 w-px bg-white/10 mx-1"></div>
-                        <span class="text-[10px] font-bold text-indigo-100 italic">{{ auth()->user()->nombres }}</span>
+                        <span class="text-[10px] font-bold text-indigo-100 italic tracking-tight">{{ auth()->user()->nombres }}</span>
                     </a>
                 </div>
             </div>
-            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white">
         <div class="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
             
             {{-- HUB DE COMANDOS: FILTROS Y ACCIÓN MAESTRA --}}

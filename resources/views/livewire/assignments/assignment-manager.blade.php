@@ -28,7 +28,7 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
         <div class="max-w-[95rem] mx-auto space-y-10 animate-fade-in">
             
             {{-- STATUS BAR: CARGA DE TRABAJO --}}
@@ -452,9 +452,7 @@
                 </div>
             </div>
 
-            <div class="text-center pb-20 mt-12 animate-fade-in opacity-0" style="animation-delay: 0.5s; animation-fill-mode: forwards;">
-                <p class="text-[9px] font-black text-white/5 uppercase tracking-[0.8em] italic leading-relaxed">XamaSafe Mission Control • Professional Logistics Hub • Alpha Branch</p>
-            </div>
+            
         </div>
     </div>
 
@@ -481,3 +479,4 @@
         }
     </style>
 </div>
+

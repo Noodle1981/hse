@@ -51,9 +51,8 @@
             </div>
 
             <div class="flex items-center gap-4">
-                <a href="{{ route('login') }}" class="text-[10px] font-black uppercase tracking-widest italic text-white/40 hover:text-white transition-colors mr-4">Terminal Acceso</a>
                 <a href="{{ route('login') }}" class="bg-white/5 border border-white/10 hover:bg-ep-primary hover:border-ep-primary text-white px-8 py-3 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl">
-                    Iniciar Sistema
+                    ingresar
                 </a>
             </div>
         </div>

@@ -88,6 +88,28 @@
             scrollbar-width: thin;
             scrollbar-color: rgba(246, 146, 57, 0.4) rgba(255, 255, 255, 0.05);
         }
+
+        /* Global Orange Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #11111D;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F69239;
+            border-radius: 20px;
+            border: 2px solid #11111D;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF9F4D;
+        }
+        
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #F69239 #11111D;
+        }
     </style>
     
     @livewireStyles
@@ -490,11 +512,7 @@
             
             <!-- Main Content Area with Scroll -->
             <main class="flex-1 overflow-y-auto bg-[#11111d]">
-                <div class="p-3 sm:p-6">
-                    {{ $slot }}
-                </div>
-                
-
+                {{ $slot }}
             </main>
         </div>
     </div>

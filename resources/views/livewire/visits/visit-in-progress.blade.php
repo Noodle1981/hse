@@ -27,7 +27,7 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white">
         <div class="max-w-7xl mx-auto">
             
             <!-- Alerta de Duración Excedida Premium -->
@@ -653,3 +653,4 @@
         }
     </style>
 </div>
+

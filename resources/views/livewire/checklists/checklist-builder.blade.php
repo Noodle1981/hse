@@ -32,7 +32,7 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
         <form wire:submit="save" class="max-w-[95rem] mx-auto space-y-10 animate-fade-in">
             
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -488,3 +488,4 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(246,146,57,0.3); }
     </style>
 </div>
+

@@ -35,7 +35,7 @@ class SwitchRoleController extends Controller
 
         // Redirigir según el nuevo rol activo
         if ($targetRole === User::ROLE_TECNICO) {
-            return redirect()->route('tecnico.dashboard')->with('message', 'Modo Técnico activado.');
+            return redirect()->route('tecnico.checklists.tasks.index')->with('message', 'Modo Técnico activado.');
         }
 
         return redirect()->route('gestor.dashboard')->with('message', 'Modo Gestor activado.');

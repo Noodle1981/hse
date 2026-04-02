@@ -2,27 +2,29 @@
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-6">
                     <!-- Mobile menu button -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
 
                     <div class="flex flex-col">
-                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic mb-1 leading-none">
                             Laboratorio de <span class="text-white">Protocolos</span>
                         </h1>
-                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
                             Configuración Maestra de Checklists
                         </h2>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4 lg:gap-6">
-                    <a href="{{ route('profile') }}" class="h-10 w-10 flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-ep-primary group hover:bg-white/10 transition-all shadow-inner">
-                        <span class="text-sm font-black">{{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}</span>
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100 italic tracking-tight">{{ auth()->user()->nombres }}</span>
                     </a>
                 </div>
             </div>
@@ -30,7 +32,7 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 bg-[#11111d] min-h-screen text-white selection:bg-ep-primary/30">
+    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
         <div class="max-w-[95rem] mx-auto overflow-hidden">
             
             {{-- TOOLBAR TÁCTICO: FILTROS --}}
@@ -220,9 +222,7 @@
                 </div>
             </div>
 
-            <div class="text-center pb-20 mt-12 animate-fade-in opacity-0" style="animation-delay: 0.5s; animation-fill-mode: forwards;">
-                <p class="text-[9px] font-black text-white/5 uppercase tracking-[0.8em] italic leading-relaxed">XamaSafe Protocol Lab • Master Gestor Control Protocol Level 5</p>
-            </div>
+            
         </div>
     </div>
 
@@ -262,3 +262,4 @@
         }
     </style>
 </div>
+
