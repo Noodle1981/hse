@@ -242,15 +242,34 @@
         }
 
         /* Override Pagination Styles for Dark Theme */
-        .pagination { @apply flex gap-2; }
+        .pagination { 
+            display: flex;
+            gap: 0.5rem; /* gap-2 */
+        }
         .page-item .page-link { 
-            @apply bg-white/5 border border-white/10 text-indigo-100/40 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase italic transition-all;
+            background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* border-white/10 */
+            color: rgba(199, 210, 254, 0.4); /* text-indigo-100/40 */
+            padding: 0.375rem 0.75rem; /* px-3 py-1.5 approx */
+            border-radius: 0.75rem; /* rounded-xl */
+            font-size: 10px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-style: italic;
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 150ms;
         }
         .page-item.active .page-link {
-            @apply bg-ep-primary border-ep-primary text-white shadow-lg shadow-ep-primary/20;
+            background-color: #F69239; /* bg-ep-primary */
+            border-color: #F69239;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(246, 146, 57, 0.2);
         }
         .page-item .page-link:hover:not(.disabled) {
-            @apply bg-white/10 text-white border-white/20;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.2);
         }
     </style>
 

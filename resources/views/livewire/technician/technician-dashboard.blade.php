@@ -267,7 +267,7 @@
                          <span class="text-3xl font-black text-white italic leading-none">{{ $kpis['my_findings']['pending'] }}</span>
                      </div>
                      <div class="h-1 bg-white/5 rounded-full overflow-hidden">
-                         <div class="h-full bg-orange-500" style="width: {{ $kpis['my_findings']['total'] > 0 ? ($kpis['my_findings']['pending'] / max(1, $kpis['my_findings']['total'])) * 100 : 0 }}%"></div>
+                         <div class="h-full bg-orange-500" style="width: <?php echo $kpis['my_findings']['total'] > 0 ? ($kpis['my_findings']['pending'] / max(1, $kpis['my_findings']['total'])) * 100 : 0; ?>%"></div>
                      </div>
                  </div>
 
@@ -317,6 +317,11 @@
             animation: fade-in-up 0.6s ease-out forwards;
         }
     </style>
+    {{-- Hidden data bridge for Chart.js --}}
+    <div id="productivity-data" 
+         data-labels="{{ json_encode($charts['myProductivity']['labels']) }}" 
+         data-points="{{ json_encode($charts['myProductivity']['data']) }}" 
+         class="hidden"></div>
 </div>
 
 @push('scripts')
@@ -342,13 +347,15 @@
 
         // Productivity Bar Chart
         const prodCtx = document.getElementById('productivityChart');
-        if (prodCtx) {
+        const dataBridge = document.getElementById('productivity-data');
+
+        if (prodCtx && dataBridge) {
             new Chart(prodCtx, {
                 type: 'bar',
                 data: {
-                    labels: @json($charts['myProductivity']['labels']),
+                    labels: JSON.parse(dataBridge.getAttribute('data-labels')),
                     datasets: [{
-                        data: @json($charts['myProductivity']['data']),
+                        data: JSON.parse(dataBridge.getAttribute('data-points')),
                         backgroundColor: config.colors.primary,
                         borderRadius: 8,
                         barThickness: 12,

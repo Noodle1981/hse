@@ -152,7 +152,7 @@
                         <div class="grid grid-cols-3 gap-6 opacity-30 group-hover:opacity-100 transition-opacity duration-1000">
                             @for($i=0; $i<3; $i++)
                             <div class="h-1.5 bg-ep-primary/20 rounded-full overflow-hidden">
-                                <div class="h-full bg-ep-primary animate-[scan_2s_linear_infinite]" style="animation-delay: {{ $i * 0.5 }}s"></div>
+                                <div class="h-full bg-ep-primary animate-[scan_2s_linear_infinite]" style="animation-delay: <?php echo $i * 0.5; ?>s"></div>
                             </div>
                             @endfor
                         </div>
@@ -187,7 +187,7 @@
                         <div class="w-12 h-12 bg-red-500/10 rounded-2xl flex items-center justify-center border border-red-500/20">
                             <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         </div>
-                        <h4 class="text-xl font-black italic uppercase italic leading-none">Terminal de Hallazgos</h4>
+                        <h4 class="text-xl font-black italic uppercase leading-none">Terminal de Hallazgos</h4>
                         <p class="text-[10px] font-black text-white/30 uppercase tracking-widest italic">Evidencia fotográfica y trazabilidad de riesgos.</p>
                     </div>
                     <div class="w-24 h-24 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all"></div>
@@ -199,7 +199,7 @@
                         <div class="w-12 h-12 bg-indigo-500/10 rounded-2xl flex items-center justify-center border border-indigo-500/20">
                             <svg class="w-6 h-6 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         </div>
-                        <h4 class="text-xl font-black italic uppercase italic leading-none">Validación Remota</h4>
+                        <h4 class="text-xl font-black italic uppercase leading-none">Validación Remota</h4>
                         <p class="text-[10px] font-black text-white/30 uppercase tracking-widest italic">Cierre de visitas con firma en pantalla o enlace encriptado.</p>
                     </div>
                     <div class="w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
@@ -303,7 +303,7 @@
             </div>
             
             <div class="flex flex-col md:flex-row justify-between items-center gap-8 pt-12 border-t border-white/5">
-                <p class="text-[9px] font-black text-white/10 uppercase tracking-[0.5em] italic italic">&copy; 2026 XamaSafe Ecosystem • Engineered for Prevention Experts</p>
+                <p class="text-[9px] font-black text-white/10 uppercase tracking-[0.5em] italic">&copy; 2026 XamaSafe Ecosystem • Engineered for Prevention Experts</p>
                 <div class="flex gap-10">
                     <div class="flex items-center gap-2">
                         <span class="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></span>

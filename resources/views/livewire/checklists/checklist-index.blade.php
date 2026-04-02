@@ -143,7 +143,7 @@
                                             <div class="flex flex-col gap-3">
                                                 @if($checklist->categoryRelation)
                                                     <div class="inline-flex items-center gap-3">
-                                                        <div class="w-2.5 h-2.5 rounded-full shadow-lg" style="background-color: {{ $checklist->categoryRelation->color }}; box-shadow: 0 0 8px {{ $checklist->categoryRelation->color }}"></div>
+                                                        <div class="w-2.5 h-2.5 rounded-full shadow-lg" style="background-color: <?php echo $checklist->categoryRelation->color; ?>; box-shadow: 0 0 8px <?php echo $checklist->categoryRelation->color; ?>"></div>
                                                         <span class="text-[10px] font-black text-white uppercase tracking-widest italic">{{ $checklist->categoryRelation->name }}</span>
                                                     </div>
                                                 @endif
