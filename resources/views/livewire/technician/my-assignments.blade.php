@@ -34,7 +34,7 @@
     @endsection
 
     <div class="py-8 min-h-screen bg-[#11111d] text-white selection:bg-ep-primary/30">
-        <div class="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[90rem] mx-auto px-2 sm:px-6 lg:px-8">
 
             {{-- Tactical Dashboard Integration --}}
             <div class="mb-10 grid grid-cols-1 lg:grid-cols-4 gap-6 animate-fade-in-down">
@@ -63,9 +63,9 @@
                 {{-- Operational HUD --}}
                 <div class="lg:col-span-3">
                     @if($activeVisit)
-                        <div class="h-full bg-gradient-to-r from-emerald-500/10 to-transparent backdrop-blur-xl rounded-[2.5rem] border border-emerald-500/30 p-1 group overflow-hidden relative shadow-2xl">
+                        <div class="h-full bg-gradient-to-r from-emerald-500/10 to-transparent backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] border border-emerald-500/30 p-1 group overflow-hidden relative shadow-2xl">
                              <div class="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]"></div>
-                             <div class="relative h-full bg-[#11111d]/80 rounded-[2.4rem] px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                             <div class="relative h-full bg-[#11111d]/80 rounded-[1.8rem] sm:rounded-[2.4rem] px-5 sm:px-8 py-5 sm:py-6 flex flex-col md:flex-row items-center justify-between gap-6">
                                  <div class="flex items-center gap-6">
                                      <div class="relative">
                                          <div class="h-14 w-14 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-500 flex items-center justify-center animate-pulse">
@@ -90,8 +90,8 @@
                              </div>
                         </div>
                     @else
-                        <div class="h-full bg-ep-dark/40 backdrop-blur-xl rounded-[2.5rem] border border-white/5 p-1 group overflow-hidden transition-all hover:border-ep-primary/30">
-                            <div class="relative h-full bg-[#11111d]/40 rounded-[2.4rem] px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div class="h-full bg-ep-dark/40 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-1 group overflow-hidden transition-all hover:border-ep-primary/30">
+                            <div class="relative h-full bg-[#11111d]/40 rounded-[1.8rem] sm:rounded-[2.4rem] px-5 sm:px-8 py-5 sm:py-6 flex flex-col md:flex-row items-center justify-between gap-6">
                                 <div class="flex items-center gap-6">
                                     <div class="h-14 w-14 bg-white/5 rounded-2xl border border-white/10 text-indigo-100/20 flex items-center justify-center group-hover:text-ep-primary transition-colors">
                                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -113,10 +113,10 @@
 
             {{-- Filtros Premium Dark --}}
             <div class="mb-10 animate-fade-in-down">
-                <div class="bg-ep-dark/50 backdrop-blur-xl rounded-[2.5rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden group">
+                <div class="bg-ep-dark/50 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-6 sm:p-8 shadow-2xl relative overflow-hidden group">
                     <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 relative z-10">
                         <div class="space-y-3">
                             <label class="flex items-center gap-2 text-[10px] font-black text-ep-primary uppercase tracking-[0.2em] italic ml-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -171,8 +171,8 @@
             {{-- Categorías Premium (Tabs) --}}
             <div class="mb-10 flex flex-wrap items-center gap-4 animate-fade-in-down" style="animation-delay: 0.1s">
                 <button wire:click="setActiveTab('inspections')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'inspections' ? 'bg-ep-primary border-ep-primary shadow-[0_0_30px_rgba(31,34,117,0.4)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-ep-primary/30 hover:bg-ep-dark/60' }}">
-                    <div class="px-8 py-6 flex items-center justify-between relative z-10">
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'inspections' ? 'bg-ep-primary border-ep-primary shadow-[0_0_30px_rgba(31,34,117,0.4)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-ep-primary/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between relative z-10">
                         <div class="flex items-center gap-4">
                             <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'inspections' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-ep-primary' }}">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -187,8 +187,8 @@
                 </button>
 
                 <button wire:click="setActiveTab('trainings')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'trainings' ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_30px_rgba(79,70,229,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-indigo-600/30 hover:bg-ep-dark/60' }}">
-                    <div class="px-8 py-6 flex items-center justify-between relative z-10">
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'trainings' ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_30px_rgba(79,70,229,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-indigo-600/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between relative z-10">
                         <div class="flex items-center gap-4">
                             <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'trainings' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-indigo-400' }}">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
@@ -203,8 +203,8 @@
                 </button>
 
                 <button wire:click="setActiveTab('reports')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'reports' ? 'bg-emerald-600 border-emerald-600 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-emerald-600/30 hover:bg-ep-dark/60' }}">
-                    <div class="px-8 py-6 flex items-center justify-between relative z-10">
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'reports' ? 'bg-emerald-600 border-emerald-600 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-emerald-600/30 hover:bg-ep-dark/60' }}">
+                    <div class="px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between relative z-10">
                         <div class="flex items-center gap-4">
                             <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'reports' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-emerald-400' }}">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -396,7 +396,7 @@
             {{-- Vista Mobile Premium Dark Cards --}}
             <div class="md:hidden space-y-6 animate-fade-in" style="animation-delay: 0.3s">
                 @forelse($assignments as $assignment)
-                    <div class="bg-ep-dark/60 backdrop-blur-md rounded-[2rem] border border-white/10 p-6 relative overflow-hidden group">
+                    <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-white/10 p-5 sm:p-6 relative overflow-hidden group">
                         <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
                         
                         <div class="flex justify-between items-start mb-6">
@@ -444,7 +444,7 @@
                             </span>
                         </div>
 
-                        <div class="space-y-4 mb-6 bg-black/20 p-4 rounded-3xl border border-white/5">
+                        <div class="space-y-4 mb-6 bg-black/20 p-3 sm:p-4 rounded-2xl sm:rounded-3xl border border-white/5">
                             <div>
                                 <p class="text-[9px] font-black text-ep-primary/60 uppercase tracking-widest mb-1 italic">Entidad / Sede</p>
                                 <p class="text-xs font-black text-white uppercase italic">{{ $assignment->empresa?->nombre ?? 'N/A' }}</p>

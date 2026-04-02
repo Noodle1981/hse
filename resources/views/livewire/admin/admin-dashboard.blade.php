@@ -35,17 +35,17 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
+    <div class="px-2 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
         <div class="max-w-[98rem] mx-auto">
             
             {{-- TACTICAL HUD: SELECTORS (Bajo el header, dentro de la vista) --}}
             <div class="flex flex-wrap items-center justify-between gap-6 mb-12 animate-fade-in-down">
-                <div class="flex flex-wrap items-center gap-4 bg-black/20 backdrop-blur-3xl p-2.5 rounded-[2.5rem] border border-white/5 shadow-2xl">
+                <div class="flex flex-wrap items-center gap-3 sm:gap-4 bg-black/20 backdrop-blur-3xl p-2 sm:p-2.5 rounded-3xl sm:rounded-[2.5rem] border border-white/5 shadow-2xl w-full lg:w-auto">
                     {{-- Selector Empresa --}}
-                    <div class="flex items-center bg-white/5 border border-white/5 rounded-2xl px-5 py-2 group hover:border-ep-primary/40 transition-all">
-                        <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest mr-4 italic group-hover:text-ep-primary transition-colors">Empresa</span>
-                        <select wire:model.live="empresaId" class="bg-transparent border-none text-xs font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark] p-0 h-auto">
-                            <option value="">Todas las Empresas</option>
+                    <div class="flex-1 sm:flex-none flex items-center bg-white/5 border border-white/5 rounded-2xl px-4 sm:px-5 py-2 group hover:border-ep-primary/40 transition-all">
+                        <span class="text-[8px] sm:text-[9px] font-black text-indigo-100/30 uppercase tracking-widest mr-3 sm:mr-4 italic group-hover:text-ep-primary transition-colors">Empresa</span>
+                        <select wire:model.live="empresaId" class="bg-transparent border-none text-[10px] sm:text-xs font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark] p-0 h-auto">
+                            <option value="">Todas</option>
                             @foreach($empresas as $e)
                                 <option value="{{ $e->id }}">{{ $e->nombre }}</option>
                             @endforeach
@@ -53,10 +53,10 @@
                     </div>
 
                     {{-- Selector Sede --}}
-                    <div class="flex items-center bg-white/5 border border-white/5 rounded-2xl px-5 py-2 group hover:border-ep-primary/40 transition-all">
-                        <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest mr-4 italic group-hover:text-ep-primary transition-colors">Sede</span>
-                        <select wire:model.live="sedeId" class="bg-transparent border-none text-xs font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark] p-0 h-auto">
-                            @if(!$empresaId) <option value="">Todas las Sedes</option> @endif
+                    <div class="flex-1 sm:flex-none flex items-center bg-white/5 border border-white/5 rounded-2xl px-4 sm:px-5 py-2 group hover:border-ep-primary/40 transition-all">
+                        <span class="text-[8px] sm:text-[9px] font-black text-indigo-100/30 uppercase tracking-widest mr-3 sm:mr-4 italic group-hover:text-ep-primary transition-colors">Sede</span>
+                        <select wire:model.live="sedeId" class="bg-transparent border-none text-[10px] sm:text-xs font-black text-white uppercase tracking-widest focus:ring-0 cursor-pointer [color-scheme:dark] p-0 h-auto">
+                            @if(!$empresaId) <option value="">Todas</option> @endif
                             @foreach($sedes as $s)
                                 <option value="{{ $s->id }}">{{ $s->nombre_sede }}</option>
                             @endforeach
@@ -65,9 +65,9 @@
 
                     {{-- Selector Ciclo --}}
                     <div x-data="{ open: false, selected: @entangle('year') }" class="relative" @click.away="open = false text-white">
-                        <button @click="open = !open" class="h-11 px-6 bg-ep-primary/10 border border-ep-primary/20 rounded-2xl flex items-center gap-4 hover:bg-ep-primary/20 transition-all shadow-inner group">
-                            <span class="text-[9px] font-black text-ep-primary italic tracking-[0.2em] uppercase">CICLO</span>
-                            <span class="text-sm font-black text-white italic" x-text="selected"></span>
+                        <button @click="open = !open" class="h-10 sm:h-11 px-4 sm:px-6 bg-ep-primary/10 border border-ep-primary/20 rounded-2xl flex items-center gap-3 sm:gap-4 hover:bg-ep-primary/20 transition-all shadow-inner group active:scale-95">
+                            <span class="text-[8px] sm:text-[9px] font-black text-ep-primary italic tracking-widest uppercase">CICLO</span>
+                            <span class="text-[11px] sm:text-sm font-black text-white italic" x-text="selected"></span>
                             <svg class="w-3 h-3 text-ep-primary group-hover:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         </button>
                         <div x-show="open" x-cloak class="absolute top-full right-0 mt-3 w-32 bg-[#1E1E2D] border border-white/10 rounded-[1.5rem] shadow-2xl py-3 z-50">
@@ -92,28 +92,28 @@
             {{-- HERO SECTION: STRATEGIC HEALTH --}}
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
                 {{-- Main Compliance Gauge --}}
-                <div class="lg:col-span-4 bg-gradient-to-br from-indigo-600/30 to-indigo-900/10 backdrop-blur-xl p-10 rounded-[3.5rem] border border-white/10 shadow-2xl relative overflow-hidden group">
+                <div class="lg:col-span-4 bg-gradient-to-br from-indigo-600/30 to-indigo-900/10 backdrop-blur-xl p-6 sm:p-10 rounded-3xl sm:rounded-[3.5rem] border border-white/10 shadow-2xl relative overflow-hidden group">
                     <div class="absolute -right-10 -top-10 w-40 h-40 bg-indigo-500/20 rounded-full blur-[80px] group-hover:scale-125 transition-transform duration-1000"></div>
                     <div class="relative z-10 flex flex-col items-center">
                         <span class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] italic mb-8">SALUD OPERATIVA GLOBAL</span>
-                        <div class="relative w-48 h-48 mb-8">
+                        <div class="relative w-40 h-40 sm:w-48 sm:h-48 mb-6 sm:mb-8">
                             <svg class="w-full h-full -rotate-90" viewBox="0 0 36 36">
                                 <circle cx="18" cy="18" r="16" fill="none" class="stroke-white/5" stroke-width="3"></circle>
                                 <circle cx="18" cy="18" r="16" fill="none" class="stroke-indigo-500 shadow-glow-indigo" stroke-width="3" stroke-dasharray="{{ $efficiency['global'] }}, 100" stroke-linecap="round" style="transition: stroke-dasharray 1.5s ease-in-out;"></circle>
                             </svg>
                             <div class="absolute inset-0 flex flex-col items-center justify-center">
-                                <span class="text-5xl font-black text-white italic tracking-tighter">{{ $efficiency['global'] }}%</span>
-                                <span class="text-[8px] font-bold text-indigo-100/40 uppercase tracking-widest mt-1">NIVEL DE ÉXITO</span>
+                                <span class="text-4xl sm:text-5xl font-black text-white italic tracking-tighter">{{ $efficiency['global'] }}%</span>
+                                <span class="text-[7px] sm:text-[8px] font-bold text-indigo-100/40 uppercase tracking-widest mt-1">NIVEL DE ÉXITO</span>
                             </div>
                         </div>
-                        <div class="flex gap-4">
-                            <div class="px-4 py-2 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[80px]">
-                                <p class="text-[8px] font-black text-indigo-100/30 uppercase tracking-widest mb-1 italic">Vencidos</p>
-                                <p class="text-xl font-black text-red-500 italic">{{ $efficiency['counts']['overdue'] }}</p>
+                        <div class="flex gap-3 sm:gap-4">
+                            <div class="px-3 sm:px-4 py-2 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[70px] sm:min-w-[80px]">
+                                <p class="text-[7px] sm:text-[8px] font-black text-indigo-100/30 uppercase tracking-widest mb-1 italic">Vencidos</p>
+                                <p class="text-lg sm:text-xl font-black text-red-500 italic">{{ $efficiency['counts']['overdue'] }}</p>
                             </div>
-                            <div class="px-4 py-2 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[80px]">
-                                <p class="text-[8px] font-black text-indigo-100/30 uppercase tracking-widest mb-1 italic">Conforme</p>
-                                <p class="text-xl font-black text-emerald-400 italic">{{ $efficiency['counts']['completed'] }}</p>
+                            <div class="px-3 sm:px-4 py-2 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[70px] sm:min-w-[80px]">
+                                <p class="text-[7px] sm:text-[8px] font-black text-indigo-100/30 uppercase tracking-widest mb-1 italic">Conforme</p>
+                                <p class="text-lg sm:text-xl font-black text-emerald-400 italic">{{ $efficiency['counts']['completed'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -130,11 +130,11 @@
                         ];
                     @endphp
                     @foreach($mainKpis as $kpi)
-                        <div class="bg-ep-dark/40 border border-white/5 backdrop-blur-md p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden group hover:border-{{ $kpi['color'] }}-500/30 transition-all">
+                        <div class="bg-ep-dark/40 border border-white/5 backdrop-blur-md p-4 sm:p-6 rounded-3xl sm:rounded-[2.5rem] shadow-xl relative overflow-hidden group hover:border-{{ $kpi['color'] }}-500/30 transition-all">
                             <div class="absolute -right-4 -bottom-4 w-20 h-20 bg-{{ $kpi['color'] }}-500/5 rounded-full blur-2xl group-hover:scale-150 transition-transform"></div>
                             <div class="relative z-10">
-                                <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] italic mb-4 block">{{ $kpi['label'] }}</span>
-                                <p class="text-4xl font-black text-white italic tracking-tighter mb-2">{{ $kpi['val'] }}</p>
+                                <span class="text-[7px] font-black text-white/20 uppercase tracking-[0.2em] italic mb-3 sm:mb-4 block leading-none">{{ $kpi['label'] }}</span>
+                                <p class="text-2xl sm:text-4xl font-black text-white italic tracking-tighter mb-2">{{ $kpi['val'] }}</p>
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-0.5 bg-{{ $kpi['color'] }}-500 rounded-full shadow-[0_0_8px_var(--tw-shadow-color)] shadow-{{ $kpi['color'] }}-500"></div>
                                     <span class="text-[9px] font-bold text-indigo-100/40 uppercase tracking-widest italic">{{ $kpi['sub'] }}</span>
@@ -155,19 +155,19 @@
                         ];
                         $periodLabel = $periodLabels[$period] ?? 'Este Mes';
                     @endphp
-                    <div class="col-span-2 md:col-span-4 bg-ep-dark/40 border border-white/5 backdrop-blur-md p-8 rounded-[3rem] shadow-xl flex items-center justify-between">
-                        <div class="flex items-center gap-10">
+                    <div class="col-span-2 md:col-span-4 bg-ep-dark/40 border border-white/5 backdrop-blur-md p-5 sm:p-8 rounded-3xl sm:rounded-[3rem] shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+                        <div class="flex items-center justify-between w-full sm:w-auto gap-4 sm:gap-10">
                             @foreach([
-                                ['label' => 'Visitas Registradas', 'val' => $kpis['visit_certificates']['total_period'], 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
-                                ['label' => 'Incidentes Graves', 'val' => $kpis['incidents']['serious'], 'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', 'color' => 'text-red-500'],
+                                ['label' => 'Visitas', 'val' => $kpis['visit_certificates']['total_period'], 'icon' => 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'],
+                                ['label' => 'Incid. Graves', 'val' => $kpis['incidents']['serious'], 'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', 'color' => 'text-red-500'],
                             ] as $skpi)
-                                <div class="flex items-center gap-4">
-                                    <div class="h-12 w-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/50 border border-white/10">
-                                        <svg class="w-6 h-6 {{ $skpi['color'] ?? '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $skpi['icon'] }}"/></svg>
+                                <div class="flex items-center gap-3 sm:gap-4">
+                                    <div class="h-10 w-10 sm:h-12 sm:w-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/50 border border-white/10">
+                                        <svg class="w-5 h-5 sm:w-6 sm:h-6 {{ $skpi['color'] ?? '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $skpi['icon'] }}"/></svg>
                                     </div>
                                     <div>
-                                        <p class="text-2xl font-black text-white italic leading-none">{{ $skpi['val'] }}</p>
-                                        <span class="text-[8px] font-black text-indigo-100/30 uppercase tracking-[0.2em] italic">{{ $skpi['label'] }}</span>
+                                        <p class="text-xl sm:text-2xl font-black text-white italic leading-none">{{ $skpi['val'] }}</p>
+                                        <span class="text-[7px] sm:text-[8px] font-black text-indigo-100/30 uppercase tracking-[0.2em] italic">{{ $skpi['label'] }}</span>
                                     </div>
                                 </div>
                             @endforeach
@@ -188,21 +188,21 @@
                     ['id' => 'informe', 'label' => 'Reportes Maestros', 'color' => 'emerald', 'route' => 'Informe'],
                 ] as $pilar)
                     <a href="{{ route('gestor.annual-contract.index', ['sede_id' => $sedeId, 'year' => $year, 'category' => $pilar['route']]) }}" 
-                       class="bg-ep-dark/60 backdrop-blur-md p-8 rounded-[3.5rem] border border-white/5 shadow-2xl relative group overflow-hidden border-l-4 border-{{ $pilar['color'] }}-500/40 hover:bg-{{ $pilar['color'] }}-500/5 transition-all">
+                       class="bg-ep-dark/60 backdrop-blur-md p-6 sm:p-8 rounded-3xl sm:rounded-[3.5rem] border border-white/5 shadow-2xl relative group overflow-hidden border-l-4 border-{{ $pilar['color'] }}-500/40 hover:bg-{{ $pilar['color'] }}-500/5 transition-all">
                         
-                        <div class="flex items-center justify-between mb-8">
-                            <div class="h-14 w-14 bg-{{ $pilar['color'] }}-500/10 rounded-2xl border border-{{ $pilar['color'] }}-500/20 text-{{ $pilar['color'] }}-500 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                        <div class="flex items-center justify-between mb-6 sm:mb-8">
+                            <div class="h-12 w-12 sm:h-14 sm:w-14 bg-{{ $pilar['color'] }}-500/10 rounded-2xl border border-{{ $pilar['color'] }}-500/20 text-{{ $pilar['color'] }}-500 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
                                 @if($pilar['id'] == 'inspeccion')
-                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2"/></svg>
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2"/></svg>
                                 @elseif($pilar['id'] == 'capacitacion')
-                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                 @else
-                                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                                 @endif
                             </div>
                             <div class="text-right">
-                                 <span class="text-4xl font-black text-white italic leading-none">{{ $efficiency[$pilar['id']] }}%</span>
-                                 <p class="text-[8px] font-black text-indigo-100/30 uppercase tracking-[0.2em] mt-1 italic">CUMPLIMIENTO</p>
+                                 <span class="text-3xl sm:text-4xl font-black text-white italic leading-none">{{ $efficiency[$pilar['id']] }}%</span>
+                                 <p class="text-[7px] sm:text-[8px] font-black text-indigo-100/30 uppercase tracking-[0.2em] mt-1 italic">CUMPLIMIENTO</p>
                             </div>
                         </div>
 
@@ -235,7 +235,7 @@
             {{-- SECONDARY SECTIONS: RISK & ACTIVITY --}}
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {{-- Risk Management --}}
-                <div class="lg:col-span-8 bg-ep-dark/40 backdrop-blur-md rounded-[3.5rem] border border-white/5 p-10">
+                <div class="lg:col-span-8 bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[3.5rem] border border-white/5 p-6 sm:p-10">
                     <div class="flex items-center justify-between mb-10">
                         @if($kpis['findings']['critical'] > 0 || $kpis['findings']['pending'] > 0 || ($alerts['overdue_assignments'] ?? 0) > 0)
                             <h3 class="text-[10px] font-black text-red-400 uppercase tracking-[0.4em] italic flex items-center gap-4">
@@ -261,9 +261,9 @@
                             <p class="text-[10px] font-bold text-indigo-100/30 italic text-center max-w-xs">No se han detectado hallazgos críticos ni tareas vencidas. El ecosistema operativo se encuentra en estado óptimo.</p>
                         </div>
                     @else
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                             {{-- Critical Findings --}}
-                            <div class="p-6 {{ $kpis['findings']['critical'] > 0 ? 'bg-red-500/5 border-red-500/20' : 'bg-white/[0.02] border-white/5' }} border rounded-[2rem] flex items-center justify-between">
+                            <div class="p-4 sm:p-6 {{ $kpis['findings']['critical'] > 0 ? 'bg-red-500/5 border-red-500/20' : 'bg-white/[0.02] border-white/5' }} border rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-between">
                                 <div>
                                     <p class="text-2xl font-black text-white italic">{{ $kpis['findings']['critical'] }}</p>
                                     <span class="text-[9px] font-black {{ $kpis['findings']['critical'] > 0 ? 'text-red-400/60' : 'text-indigo-100/20' }} uppercase tracking-widest italic">Hallazgos Críticos</span>
@@ -280,7 +280,7 @@
                             </div>
 
                             {{-- Pending Action --}}
-                            <div class="p-6 {{ $kpis['findings']['pending'] > 0 ? 'bg-amber-500/5 border-amber-500/20' : 'bg-white/[0.02] border-white/5' }} border rounded-[2rem] flex items-center justify-between">
+                            <div class="p-4 sm:p-6 {{ $kpis['findings']['pending'] > 0 ? 'bg-amber-500/5 border-amber-500/20' : 'bg-white/[0.02] border-white/5' }} border rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-between">
                                 <div>
                                     <p class="text-2xl font-black text-white italic">{{ $kpis['findings']['pending'] }}</p>
                                     <span class="text-[9px] font-black {{ $kpis['findings']['pending'] > 0 ? 'text-amber-500/60' : 'text-indigo-100/20' }} uppercase tracking-widest italic">Pendientes Acción</span>
@@ -293,7 +293,7 @@
                             </div>
 
                             {{-- Overdue Assignments --}}
-                            <div class="p-6 {{ ($alerts['overdue_assignments'] ?? 0) > 0 ? 'bg-orange-500/5 border-orange-500/20' : 'bg-white/[0.02] border-white/5' }} border rounded-[2rem] flex items-center justify-between">
+                            <div class="p-4 sm:p-6 {{ ($alerts['overdue_assignments'] ?? 0) > 0 ? 'bg-orange-500/5 border-orange-500/20' : 'bg-white/[0.02] border-white/5' }} border rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-between">
                                 <div>
                                     <p class="text-2xl font-black text-white italic">{{ $alerts['overdue_assignments'] ?? 0 }}</p>
                                     <span class="text-[9px] font-black {{ ($alerts['overdue_assignments'] ?? 0) > 0 ? 'text-orange-400/60' : 'text-indigo-100/20' }} uppercase tracking-widest italic">Tareas Vencidas</span>
@@ -309,7 +309,7 @@
                 </div>
 
                 {{-- Activity Stream --}}
-                <div class="lg:col-span-4 bg-ep-dark/40 backdrop-blur-md rounded-[3.5rem] border border-white/5 p-10 flex flex-col">
+                <div class="lg:col-span-4 bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[3.5rem] border border-white/5 p-6 sm:p-10 flex flex-col">
                     <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] italic mb-10">ACTIVIDAD RECIENTE</h3>
                     <div class="space-y-8 flex-1 overflow-y-auto max-h-[400px] custom-scrollbar pr-4">
                         @forelse($recentActivity as $activity)

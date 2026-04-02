@@ -33,32 +33,32 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white">
+    <div class="px-2 sm:px-6 lg:px-8 py-8 text-white">
         <div class="max-w-[90rem] mx-auto">
             
             {{-- KPIs Personales Tácticos --}}
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 mb-10 animate-fade-in-down">
-                <div class="bg-ep-dark/60 backdrop-blur-md rounded-[2rem] border border-white/5 p-6 shadow-xl relative overflow-hidden group">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 mb-10 animate-fade-in-down">
+                <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-white/5 p-4 sm:p-6 shadow-xl relative overflow-hidden group">
                     <div class="absolute -right-2 -top-2 w-10 h-10 bg-white/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
                     <div class="text-[9px] font-black text-indigo-100/40 uppercase tracking-[0.2em] mb-2 italic">Total</div>
                     <div class="text-3xl font-black text-white italic leading-none">{{ $kpis['total'] }}</div>
                 </div>
-                <div class="bg-ep-dark/60 backdrop-blur-md rounded-[2rem] border border-red-500/10 p-6 shadow-xl relative overflow-hidden group">
+                <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-red-500/10 p-4 sm:p-6 shadow-xl relative overflow-hidden group">
                     <div class="absolute -right-2 -top-2 w-10 h-10 bg-red-500/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
                     <div class="text-[9px] font-black text-red-500/60 uppercase tracking-[0.2em] mb-2 italic">Pendientes</div>
                     <div class="text-3xl font-black text-red-500 italic leading-none glow-text-red">{{ $kpis['pendientes'] }}</div>
                 </div>
-                <div class="bg-ep-dark/60 backdrop-blur-md rounded-[2rem] border border-yellow-500/10 p-6 shadow-xl relative overflow-hidden group">
+                <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-yellow-500/10 p-4 sm:p-6 shadow-xl relative overflow-hidden group">
                     <div class="absolute -right-2 -top-2 w-10 h-10 bg-yellow-500/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
                     <div class="text-[9px] font-black text-yellow-500/60 uppercase tracking-[0.2em] mb-2 italic">En Proceso</div>
                     <div class="text-3xl font-black text-yellow-500 italic leading-none">{{ $kpis['en_proceso'] }}</div>
                 </div>
-                <div class="bg-ep-dark/60 backdrop-blur-md rounded-[2rem] border border-emerald-500/10 p-6 shadow-xl relative overflow-hidden group">
+                <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-emerald-500/10 p-4 sm:p-6 shadow-xl relative overflow-hidden group">
                     <div class="absolute -right-2 -top-2 w-10 h-10 bg-emerald-500/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
                     <div class="text-[9px] font-black text-emerald-400/60 uppercase tracking-[0.2em] mb-2 italic">Resueltos</div>
                     <div class="text-3xl font-black text-emerald-400 italic leading-none glow-emerald-text">{{ $kpis['resueltos'] }}</div>
                 </div>
-                <div class="bg-ep-dark/60 backdrop-blur-md rounded-[2rem] border border-ep-primary/20 p-6 shadow-xl relative overflow-hidden group col-span-2 sm:col-span-1">
+                <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-ep-primary/20 p-4 sm:p-6 shadow-xl relative overflow-hidden group col-span-2 sm:col-span-1">
                     <div class="absolute -right-2 -top-2 w-10 h-10 bg-ep-primary/5 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
                     <div class="text-[9px] font-black text-ep-primary/60 uppercase tracking-[0.2em] mb-2 italic">Críticos</div>
                     <div class="text-3xl font-black text-ep-primary italic leading-none">{{ $kpis['criticos_abiertos'] }}</div>
@@ -67,7 +67,7 @@
 
             {{-- Filtros Premium Dark --}}
             <div class="mb-10 animate-fade-in" style="animation-delay: 0.2s">
-                <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-6 shadow-2xl">
+                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-5 sm:p-6 shadow-2xl">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none text-indigo-100/20 group-focus-within:text-ep-primary transition-colors">
@@ -101,7 +101,7 @@
             {{-- Lista de Hallazgos Estilo Táctico --}}
             <div class="space-y-6 animate-fade-in" style="animation-delay: 0.3s">
                 @forelse($hallazgos as $hallazgo)
-                    <div class="group bg-ep-dark/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-8 hover:border-white/20 transition-all duration-700 shadow-2xl relative overflow-hidden">
+                    <div class="group bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-6 sm:p-8 hover:border-white/20 transition-all duration-700 shadow-2xl relative overflow-hidden">
                         <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                         
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 relative z-10">

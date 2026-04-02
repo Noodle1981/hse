@@ -1,4 +1,4 @@
-<div class="px-4 sm:px-6 lg:px-8 py-8 text-white">
+<div class="px-2 sm:px-6 lg:px-8 py-8 text-white">
     <div class="max-w-7xl mx-auto">
     @section('header_custom')
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
@@ -34,13 +34,13 @@
     @endsection
 
     <!-- Page Header Actions -->
-    <div class="flex justify-end mb-10">
+    <div class="flex justify-center sm:justify-end mb-10">
             <button 
                 wire:click="openStartVisitModal"
-                class="bg-ep-primary text-white rounded-2xl px-8 py-4 font-black shadow-xl shadow-ep-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center gap-4 group uppercase tracking-[0.2em] text-[11px] italic"
+                class="w-full sm:w-auto bg-ep-primary text-white rounded-2xl px-6 sm:px-8 py-4 font-black shadow-xl shadow-ep-primary/20 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-4 group uppercase tracking-[0.2em] text-[10px] sm:text-[11px] italic"
             >
-                <div class="bg-white/20 rounded-xl p-1.5 group-hover:rotate-90 transition-transform">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                <div class="bg-white/20 rounded-xl p-1 sm:p-1.5 group-hover:rotate-90 transition-transform">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
                     </svg>
                 </div>
@@ -52,8 +52,8 @@
     <!-- This is handled in mount/boot but just in case -->
 
     <!-- Past Visits List (Cards on Mobile, Table on Desktop) -->
-    <div class="bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden mb-10">
-        <div class="px-8 py-6 bg-black/20 border-b border-white/5 flex items-center gap-4">
+    <div class="bg-white/5 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden mb-10">
+        <div class="px-6 sm:px-8 py-6 bg-black/20 border-b border-white/5 flex items-center gap-4">
             <div class="h-10 w-10 rounded-xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary flex items-center justify-center shadow-inner italic">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -155,7 +155,7 @@
         <!-- Mobile View (Cards) -->
         <div class="md:hidden divide-y divide-white/5">
             @forelse ($pastVisits as $visit)
-                <div class="p-8 hover:bg-white/[0.04] transition-all group">
+                <div class="p-6 sm:p-8 hover:bg-white/[0.04] transition-all group">
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary font-black italic shadow-inner">
@@ -267,8 +267,8 @@
                 <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
 
                 {{-- Modal Content --}}
-                <div class="inline-block align-bottom bg-ep-dark text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full rounded-3xl border border-white/10">
-                    <div class="px-4 pt-5 pb-4 sm:p-8 sm:pb-6">
+                <div class="inline-block align-bottom bg-ep-dark text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full rounded-3xl border border-white/10 mx-auto">
+                    <div class="px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-6">
                         <div class="sm:flex sm:items-start">
                             <div class="mx-auto flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-2xl bg-white/5 border border-white/10 sm:mx-0 sm:h-12 sm:w-12 shadow-inner">
                                 <svg class="h-6 w-6 text-ep-primary" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">

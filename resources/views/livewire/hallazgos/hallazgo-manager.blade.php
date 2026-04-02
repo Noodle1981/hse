@@ -34,7 +34,7 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
+    <div class="px-2 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
         <div class="max-w-[95rem] mx-auto space-y-10 animate-fade-in">
             
             {{-- INTELIGENCIA DE RIESGO: KPIs --}}
@@ -91,7 +91,7 @@
             </div>
 
             {{-- HUB DE FILTRADO TÁCTICO --}}
-            <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-8 shadow-2xl relative animate-fade-in-down overflow-hidden">
+            <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-5 sm:p-8 shadow-2xl relative animate-fade-in-down overflow-hidden">
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
                 
                 <div class="space-y-8 relative z-10">
@@ -168,56 +168,47 @@
             </div>
 
             {{-- MASTER TABLE: MATRIZ FORENSE --}}
-            <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
+            <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full border-collapse">
                         <thead>
                             <tr class="bg-black/20 text-left">
-                                <th class="px-8 py-6 cursor-pointer group/th" wire:click="sortBy('titulo')">
+                                <th class="px-4 lg:px-8 py-6 cursor-pointer group/th" wire:click="sortBy('titulo')">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Hallazgo / Detalles</span>
+                                        <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Hallazgo</span>
                                         @if($sortField === 'titulo') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
                                     </div>
                                 </th>
-                                <th class="px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Ubicación Sede</span></th>
-                                <th class="px-8 py-6 text-center cursor-pointer" wire:click="sortBy('criticidad')">
-                                    <div class="flex items-center justify-center gap-2">
+                                <th class="hidden md:table-cell px-4 lg:px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Sede</span></th>
+                                <th class="px-4 lg:px-8 py-6 text-center cursor-pointer" wire:click="sortBy('criticidad')">
                                         <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Riesgo</span>
-                                        @if($sortField === 'criticidad') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
-                                    </div>
                                 </th>
-                                <th class="px-8 py-6 text-center cursor-pointer" wire:click="sortBy('estado')">
-                                    <div class="flex items-center justify-center gap-2">
+                                <th class="px-4 lg:px-8 py-6 text-center cursor-pointer" wire:click="sortBy('estado')">
                                         <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Status</span>
-                                        @if($sortField === 'estado') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
-                                    </div>
                                 </th>
-                                <th class="px-8 py-6 text-center cursor-pointer" wire:click="sortBy('plazo_correccion')">
-                                    <div class="flex items-center justify-center gap-2">
+                                <th class="hidden xl:table-cell px-4 lg:px-8 py-6 text-center cursor-pointer" wire:click="sortBy('plazo_correccion')">
                                         <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Plazo</span>
-                                        @if($sortField === 'plazo_correccion') <span class="text-ep-primary text-[10px]">{{ $sortDirection === 'asc' ? '↑' : '↓' }}</span> @endif
-                                    </div>
                                 </th>
-                                <th class="px-8 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Evidencias</span></th>
-                                <th class="px-8 py-6 text-right"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Comandos</span></th>
+                                <th class="hidden lg:table-cell px-4 lg:px-8 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Docs</span></th>
+                                <th class="px-4 lg:px-8 py-6 text-right"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Comandos</span></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($hallazgos as $hallazgo)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 relative {{ $hallazgo->estaVencido() ? 'bg-red-500/5' : '' }}">
-                                    <td class="px-8 py-8">
-                                        <div class="text-sm font-black text-white italic uppercase tracking-tight leading-none mb-1 group-hover/row:text-ep-primary transition-colors">{{ $hallazgo->titulo }}</div>
-                                        <div class="text-[10px] font-bold text-white/30 italic max-w-xs truncate">{{ $hallazgo->descripcion }}</div>
+                                    <td class="px-4 lg:px-8 py-6 lg:py-8">
+                                        <div class="text-xs sm:text-sm font-black text-white italic uppercase tracking-tight leading-tight mb-1 lg:group-hover/row:text-ep-primary transition-colors">{{ $hallazgo->titulo }}</div>
+                                        <div class="text-[8px] sm:text-[10px] font-bold text-white/30 italic max-w-xs truncate">{{ $hallazgo->descripcion }}</div>
                                         @if($hallazgo->ubicacion_especifica)
-                                            <div class="text-[9px] font-black text-indigo-400/60 mt-2 uppercase italic tracking-widest leading-none">📍 {{ $hallazgo->ubicacion_especifica }}</div>
+                                            <div class="text-[7px] sm:text-[9px] font-black text-indigo-400/60 mt-2 uppercase italic tracking-widest leading-none">📍 {{ $hallazgo->ubicacion_especifica }}</div>
                                         @endif
                                     </td>
-                                    <td class="px-8 py-8">
-                                        <div class="text-[11px] font-black text-white/60 italic uppercase tracking-tight leading-none">{{ $hallazgo->sede->nombre_sede ?? 'SIN ASIGNAR' }}</div>
+                                    <td class="hidden md:table-cell px-4 lg:px-8 py-6 lg:py-8">
+                                        <div class="text-[10px] font-black text-white/60 italic uppercase tracking-tight leading-none">{{ $hallazgo->sede->nombre_sede ?? 'N/A' }}</div>
                                     </td>
-                                    <td class="px-8 py-8 text-center">
+                                    <td class="px-4 lg:px-8 py-6 lg:py-8 text-center">
                                         @php
                                             $critColor = match($hallazgo->criticidad) {
                                                 'critico' => 'text-red-500 bg-red-500/10 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.3)] animate-pulse',
@@ -226,11 +217,12 @@
                                                 default => 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
                                             };
                                         @endphp
-                                        <span class="inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest italic border {{ $critColor }}">
-                                            {{ strtoupper($hallazgo->criticidad) }}
+                                        <span class="inline-flex px-2 py-1 rounded-xl text-[7px] sm:text-[9px] font-black uppercase tracking-widest italic border {{ $critColor }}">
+                                            <span class="hidden xs:inline">{{ strtoupper($hallazgo->criticidad) }}</span>
+                                            <span class="xs:hidden">{{ substr(strtoupper($hallazgo->criticidad), 0, 4) }}</span>
                                         </span>
                                     </td>
-                                    <td class="px-8 py-8 text-center">
+                                    <td class="px-4 lg:px-8 py-6 lg:py-8 text-center">
                                         @php
                                             $stateColor = match($hallazgo->estado) {
                                                 'cerrado' => 'text-emerald-400 border-emerald-500/20',
@@ -239,22 +231,23 @@
                                                 'en_proceso' => 'text-amber-400 border-amber-500/20',
                                                 default => 'text-red-500 border-red-500/20'
                                             };
+                                            $stateLabel = strtoupper(str_replace('_', ' ', $hallazgo->estado));
                                         @endphp
-                                        <span class="inline-flex px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest italic border {{ $stateColor }} bg-black/20">
-                                            {{ strtoupper(str_replace('_', ' ', $hallazgo->estado)) }}
+                                        <span class="inline-flex px-2 py-1 rounded-xl text-[7px] sm:text-[9px] font-black uppercase tracking-widest italic border {{ $stateColor }} bg-black/20">
+                                            <span class="hidden xs:inline">{{ $stateLabel }}</span>
+                                            <span class="xs:hidden">{{ substr($stateLabel, 0, 4) }}</span>
                                         </span>
                                     </td>
-                                    <td class="px-8 py-8 text-center">
+                                    <td class="hidden xl:table-cell px-4 lg:px-8 py-6 lg:py-8 text-center">
                                         @if($hallazgo->plazo_correccion)
                                             <div class="text-[10px] font-black italic {{ $hallazgo->estaVencido() ? 'text-red-500 animate-pulse' : 'text-white/60' }}">
-                                                {{ $hallazgo->plazo_correccion->format('d/m/Y') }}
+                                                {{ $hallazgo->plazo_correccion->format('d/m/y') }}
                                             </div>
-                                            @if($hallazgo->estaVencido()) <div class="text-[8px] font-black text-red-500 uppercase tracking-widest mt-1">⚠️ VENCIMIENTO</div> @endif
                                         @else
-                                            <span class="text-white/10 italic text-xs">-</span>
+                                            <span class="text-white/10 italic text-[10px]">-</span>
                                         @endif
                                     </td>
-                                    <td class="px-8 py-8 text-center">
+                                    <td class="hidden lg:table-cell px-4 lg:px-8 py-6 lg:py-8 text-center">
                                         <div class="flex justify-center items-center gap-4">
                                             @if($hallazgo->fotos_count > 0)
                                                 <div class="flex items-center gap-1.5" title="{{ $hallazgo->fotos_count }} Fotos">
@@ -270,12 +263,12 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-8 py-8 text-right">
-                                        <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
-                                            <a href="{{ route('gestor.hallazgos.show', $hallazgo) }}" class="h-10 w-10 bg-ep-primary/10 border border-ep-primary/20 text-ep-primary hover:bg-ep-primary hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg" title="Auditar">
+                                    <td class="px-4 lg:px-8 py-6 lg:py-8 text-right">
+                                        <div class="flex justify-end gap-2 sm:gap-3 lg:translate-x-4 lg:opacity-0 lg:group-hover/row:translate-x-0 lg:group-hover/row:opacity-100 transition-all duration-500">
+                                            <a href="{{ route('gestor.hallazgos.show', $hallazgo) }}" class="h-9 w-9 sm:h-10 sm:w-10 bg-ep-primary/10 border border-ep-primary/20 text-ep-primary hover:bg-ep-primary hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95" title="Auditar">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                             </a>
-                                            <button wire:click="delete({{ $hallazgo->id }})" wire:confirm="¿Desea purgar este hallazgo y sus evidencias del sistema?" class="h-10 w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                            <button wire:click="delete({{ $hallazgo->id }})" wire:confirm="¿Desea purgar este hallazgo y sus evidencias del sistema?" class="h-9 w-9 sm:h-10 sm:w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                             </button>
                                         </div>
@@ -283,14 +276,14 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">No se detectaron hallazgos en la zona de búsqueda <br> <span class="text-[9px] tracking-widest text-white/3 italic">Ajuste los filtros tácticos para ampliar la exploración</span></td>
+                                    <td colspan="7" class="px-4 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">No se detectaron hallazgos <br> <span class="text-[9px] tracking-widest text-white/3 italic">Ajuste los filtros para ampliar la búsqueda</span></td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                <div class="px-10 py-6 border-t border-white/5 bg-black/20 pagination-tactical">
+                <div class="px-4 sm:px-10 py-6 border-t border-white/5 bg-black/20 pagination-tactical overflow-x-auto">
                     {{ $hallazgos->links() }}
                 </div>
             </div>

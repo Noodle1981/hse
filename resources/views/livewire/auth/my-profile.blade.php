@@ -32,13 +32,13 @@
         </header>
     @endsection
 
-    <div class="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
+    <div class="px-2 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
         <div class="max-w-[95rem] mx-auto">
             
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 animate-fade-in-down">
                 <!-- Sidebar Info: Tactical ID Card -->
                 <div class="lg:col-span-4 space-y-8">
-                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-[3rem] border border-white/5 p-8 text-center shadow-2xl relative overflow-hidden group">
+                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden group">
                         <div class="absolute inset-0 bg-gradient-to-b from-ep-primary/5 to-transparent pointer-events-none"></div>
                         
                         <div class="relative">
@@ -74,7 +74,7 @@
                     @endphp
 
                     @if($isBaseAdmin)
-                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-[3rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden group/sw">
+                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 p-6 sm:p-8 shadow-2xl relative overflow-hidden group/sw">
                         <h3 class="text-[10px] font-black text-white uppercase tracking-[0.3em] mb-8 italic flex items-center gap-3">
                             <svg class="w-4 h-4 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
                             Módulos de Interfaz
@@ -89,13 +89,13 @@
 
                             <!-- Gestor Option -->
                             <a href="{{ route('switch-role', \App\Models\User::ROLE_GESTOR) }}" 
-                               class="flex items-center gap-5 p-5 rounded-2xl border transition-all duration-500 group {{ $isGestorActive ? 'bg-ep-primary/20 border-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.1)]' : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20' }}">
-                                <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all {{ $isGestorActive ? 'bg-ep-primary text-white shadow-xl rotate-0' : 'bg-white/5 text-white/30 group-hover:text-white -rotate-6' }}">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                               class="flex items-center gap-4 sm:gap-5 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group {{ $isGestorActive ? 'bg-ep-primary/20 border-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.1)]' : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20' }}">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all {{ $isGestorActive ? 'bg-ep-primary text-white shadow-xl rotate-0' : 'bg-white/5 text-white/30 group-hover:text-white -rotate-6' }}">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                                 </div>
                                 <div class="text-left flex-1">
-                                    <span class="block text-sm font-black italic uppercase {{ $isGestorActive ? 'text-white' : 'text-white/40' }}">Módulo Gestión</span>
-                                    <span class="text-[9px] font-bold uppercase tracking-widest {{ $isGestorActive ? 'text-ep-primary' : 'text-white/20' }}">Consola Administrativa</span>
+                                    <span class="block text-xs sm:text-sm font-black italic uppercase {{ $isGestorActive ? 'text-white' : 'text-white/40' }}">Módulo Gestión</span>
+                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest {{ $isGestorActive ? 'text-ep-primary' : 'text-white/20' }}">Consola Administrativa</span>
                                 </div>
                                 @if($isGestorActive)
                                     <div class="w-2.5 h-2.5 bg-ep-primary rounded-full animate-pulse shadow-[0_0_10px_#f69239]"></div>
@@ -104,13 +104,13 @@
 
                             <!-- Técnico Option -->
                             <a href="{{ route('switch-role', \App\Models\User::ROLE_TECNICO) }}" 
-                               class="flex items-center gap-5 p-5 rounded-2xl border transition-all duration-500 group {{ $isTecnicoActive ? 'bg-ep-primary/20 border-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.1)]' : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20' }}">
-                                <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all {{ $isTecnicoActive ? 'bg-ep-primary text-white shadow-xl rotate-0' : 'bg-white/5 text-white/30 group-hover:text-white -rotate-6' }}">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+                               class="flex items-center gap-4 sm:gap-5 p-4 sm:p-5 rounded-2xl border transition-all duration-500 group {{ $isTecnicoActive ? 'bg-ep-primary/20 border-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.1)]' : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20' }}">
+                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all {{ $isTecnicoActive ? 'bg-ep-primary text-white shadow-xl rotate-0' : 'bg-white/5 text-white/30 group-hover:text-white -rotate-6' }}">
+                                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 011-1h1a2 2 0 100-4H7a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
                                 </div>
                                 <div class="text-left flex-1">
-                                    <span class="block text-sm font-black italic uppercase {{ $isTecnicoActive ? 'text-white' : 'text-white/40' }}">Módulo Operativo</span>
-                                    <span class="text-[9px] font-bold uppercase tracking-widest {{ $isTecnicoActive ? 'text-ep-primary' : 'text-white/20' }}">Interfaz de Campo</span>
+                                    <span class="block text-xs sm:text-sm font-black italic uppercase {{ $isTecnicoActive ? 'text-white' : 'text-white/40' }}">Módulo Operativo</span>
+                                    <span class="text-[8px] sm:text-[9px] font-bold uppercase tracking-widest {{ $isTecnicoActive ? 'text-ep-primary' : 'text-white/20' }}">Interfaz de Campo</span>
                                 </div>
                                 @if($isTecnicoActive)
                                     <div class="w-2.5 h-2.5 bg-ep-primary rounded-full animate-pulse shadow-[0_0_10px_#f69239]"></div>
@@ -128,17 +128,17 @@
                 <!-- Forms Column: Tactical Configuration Módulos -->
                 <div class="lg:col-span-8 space-y-10">
                     <!-- Basic Info Form -->
-                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl relative">
-                        <div class="px-10 py-6 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                            <h3 class="text-xs font-black text-white uppercase tracking-[0.3em] italic flex items-center gap-3">
+                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl relative">
+                        <div class="px-6 sm:px-10 py-6 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                            <h3 class="text-[11px] sm:text-xs font-black text-white uppercase tracking-[0.3em] italic flex items-center gap-3">
                                 <svg class="w-5 h-5 text-ep-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                Parametrización de Identidad
+                                Parametrización
                             </h3>
                             <div class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse"></div>
                         </div>
-                        <div class="p-10">
+                        <div class="p-6 sm:p-10">
                             @if (session()->has('message'))
                                 <div class="mb-8 p-5 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-r-2xl animate-fade-in">
                                     <div class="flex items-center gap-3">
@@ -149,7 +149,7 @@
                             @endif
 
                             <form wire:submit.prevent="updateProfile" class="space-y-8">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                                     <div class="relative group">
                                         <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Nombres</span>
                                         <input wire:model="nombres" type="text" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all uppercase placeholder-white/5">
@@ -177,19 +177,19 @@
                     </div>
 
                     <!-- Password Change Form -->
-                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl relative">
-                        <div class="px-10 py-6 bg-white/5 border-b border-white/5 flex items-center justify-between">
-                            <h3 class="text-xs font-black text-white uppercase tracking-[0.3em] italic flex items-center gap-3">
+                    <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl relative">
+                        <div class="px-6 sm:px-10 py-6 bg-white/5 border-b border-white/5 flex items-center justify-between">
+                            <h3 class="text-[11px] sm:text-xs font-black text-white uppercase tracking-[0.3em] italic flex items-center gap-3">
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                 </svg>
-                                Protocolo de Seguridad
+                                Protocolo
                             </h3>
                             <div class="p-2 bg-red-500/10 rounded-xl text-red-500 shadow-inner">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                             </div>
                         </div>
-                        <div class="p-10">
+                        <div class="p-6 sm:p-10">
                             @if (session()->has('password_message'))
                                 <div class="mb-8 p-5 bg-emerald-500/10 border-l-4 border-emerald-500 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-r-2xl animate-fade-in">
                                     <div class="flex items-center gap-3">
@@ -205,7 +205,7 @@
                                     <input wire:model="current_password" type="password" class="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:ring-2 focus:ring-red-500/40 transition-all">
                                     @error('current_password') <span class="text-red-500 text-[9px] font-black uppercase italic tracking-widest mt-2 block ml-2">{{ $message }}</span> @enderror
                                 </div>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                                     <div class="relative group">
                                         <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Nueva Clave</span>
                                         <input wire:model="new_password" type="password" class="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-sm text-white focus:ring-2 focus:ring-ep-primary/50 transition-all">
