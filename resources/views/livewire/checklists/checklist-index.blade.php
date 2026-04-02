@@ -157,7 +157,7 @@
                                         <td class="hidden lg:table-cell px-4 lg:px-10 py-6 lg:py-8 text-center">
                                             <div class="inline-flex flex-col items-center">
                                                 <div class="text-2xl font-black text-white italic leading-none mb-1">{{ $checklist->questions_count }}</div>
-                                                <div class="text-[8px] font-black text-white/20 uppercase tracking-widest italic uppercase">Puntos de Control</div>
+                                                <div class="text-[8px] font-black text-white/20 uppercase tracking-widest italic">Puntos de Control</div>
                                             </div>
                                         </td>
                                         <td class="px-4 lg:px-10 py-6 lg:py-8 text-center">
