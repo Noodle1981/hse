@@ -257,23 +257,13 @@
                                     
                                     <td class="hidden xl:table-cell px-4 lg:px-8 py-6">
                                         <div class="flex items-center gap-3">
-                                            @if(($assignment->source ?? 'manual') === 'manual')
-                                                <div class="w-8 h-8 rounded-xl border bg-ep-primary/10 border-ep-primary/20 text-ep-primary flex items-center justify-center text-[10px] font-black">
-                                                    {{ substr($assignment->user->nombres ?? 'U', 0, 1) }}
-                                                </div>
-                                                <div>
-                                                    <div class="text-xs font-black text-white/60 italic uppercase leading-none">{{ $assignment->user->nombres ?? 'N/A' }}</div>
-                                                    <div class="text-[9px] font-bold text-white/20 italic mt-0.5 whitespace-nowrap">{{ $assignment->user->apellidos ?? '' }}</div>
-                                                </div>
-                                            @else
-                                                <div class="w-8 h-8 rounded-xl border bg-indigo-500/10 border-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-black">
-                                                    {{ substr($assignment->user->nombres ?? 'O', 0, 1) }}
-                                                </div>
-                                                <div>
-                                                    <div class="text-xs font-black text-white/60 italic uppercase leading-none">{{ $assignment->user->nombres ?? 'N/A' }}</div>
-                                                    <div class="text-[9px] font-bold text-white/20 italic mt-0.5 whitespace-nowrap">{{ $assignment->user->apellidos ?? '' }}</div>
-                                                </div>
-                                            @endif
+                                            <div class="w-8 h-8 rounded-xl border {{ ($assignment->source ?? 'manual') === 'contract' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-ep-primary/10 border-ep-primary/20 text-ep-primary' }} flex items-center justify-center text-[10px] font-black shadow-inner">
+                                                {{ substr($assignment->user->nombres ?? 'U', 0, 1) }}
+                                            </div>
+                                            <div>
+                                                <div class="text-xs font-black text-white italic uppercase leading-none">{{ $assignment->user->nombres ?? 'NO ASIGNADO' }}</div>
+                                                <div class="text-[9px] font-bold text-white/20 italic mt-0.5 whitespace-nowrap">{{ $assignment->user->apellidos ?? '' }}</div>
+                                            </div>
                                         </div>
                                     </td>
                                     
@@ -311,13 +301,8 @@
                                                 default => strtoupper($assignment->status)
                                             };
                                         @endphp
-                                        <span class="inline-flex px-2 py-1 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest italic border {{ $statusClasses }}">
-                                            <span class="hidden xs:inline">
-                                                @if($assignment->is_overdue ?? false) VENCIDO @else {{ $statusLabel }} @endif
-                                            </span>
-                                            <span class="xs:hidden">
-                                                @if($assignment->is_overdue ?? false) VENC @else {{ substr($statusLabel, 0, 4) }} @endif
-                                            </span>
+                                        <span class="inline-flex px-2 sm:px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest italic border {{ $statusClasses }}">
+                                            @if($assignment->is_overdue ?? false) VENCIDO @else {{ $statusLabel }} @endif
                                         </span>
                                     </td>
                                     

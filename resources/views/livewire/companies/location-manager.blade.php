@@ -1,437 +1,338 @@
-<div>
-    <div class="mb-6">
-        <div class="flex items-center justify-between mb-4">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800">Sedes de {{ $empresa->nombre }}</h2>
-                <p class="text-gray-600 mt-1">CUIT: <span class="font-mono">{{ $empresa->cuit }}</span></p>
+<div class="w-full mx-auto">
+    @section('header_custom')
+        <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
+            <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <!-- Mobile menu button -->
+                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+
+                    <div class="flex flex-col">
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                            Control de <span class="text-white">Infraestructura</span>
+                        </h1>
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                            Gestión de Sedes - {{ $empresa->nombre }}
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <a href="{{ route('gestor.companies.index') }}" class="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-white/40 hover:text-white hover:bg-white/10 transition-all uppercase italic tracking-widest group">
+                        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Volver a Empresas
+                    </a>
+                </div>
             </div>
-            <a href="{{ route('gestor.companies.index') }}" class="text-blue-600 hover:text-blue-800">
-                ← Volver a empresas
-            </a>
-        </div>
-        
-        <div class="flex justify-end">
-             <label class="inline-flex items-center cursor-pointer">
-                <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
-                <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-red-600"></div>
-                <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">Ver Eliminados</span>
-            </label>
-        </div>
-    </div>
+            <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
+        </header>
+    @endsection
 
-    @if (session()->has('message'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('message') }}
-        </div>
-    @endif
+    <div class="px-2 sm:px-6 lg:px-8 py-8 text-white">
+        <div class="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
 
-    <!-- Botón para agregar nueva sede -->
-    <div class="mb-4">
-        <button 
-            wire:click="toggleForm" 
-            class="hover:bg-opacity-90 text-white px-4 py-2 rounded-md transition-colors duration-200 flex items-center gap-2 shadow-sm"
-            style="background-color: #292938;">
-            @if($showForm)
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-                Cancelar
-            @else
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-                Crear Sede
+            @if (session()->has('message'))
+                <div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-6 py-4 rounded-2xl flex items-center gap-3 animate-fade-in-down shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"/></svg>
+                    <span class="text-xs font-black uppercase italic tracking-widest">{{ session('message') }}</span>
+                </div>
             @endif
-        </button>
-    </div>
-
-    <!-- Formulario para nueva sede -->
-    @if($showForm)
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-            <h3 class="text-lg font-semibold mb-4">Nueva Sede</h3>
-            <form wire:submit.prevent="save">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Nombre de la Sede <span class="text-red-500">*</span>
-                        </label>
-                        <input 
-                            wire:model="newNombreSede" 
-                            type="text" 
-                            placeholder="Sede Central"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                        @error('newNombreSede') 
-                            <span class="text-red-500 text-sm">{{ $message }}</span> 
-                        @enderror
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Tipo de Sede
-                        </label>
-                        <input 
-                            wire:model="newTipoSede" 
-                            type="text" 
-                            list="tipos-list"
-                            placeholder="Oficina, Planta, Depósito..."
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Dirección
-                        </label>
-                        <input 
-                            wire:model="newDireccion" 
-                            type="text" 
-                            placeholder="Calle 123"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Provincia
-                        </label>
-                        <select 
-                            wire:model="newProvinciaId" 
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                            <option value="">Seleccione una provincia...</option>
-                            @foreach($existingProvincias as $provincia)
-                                <option value="{{ $provincia->id }}">{{ $provincia->nombre }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Localidad
-                        </label>
-                        <input 
-                            wire:model="newLocalidad" 
-                            type="text" 
-                            list="localidades-list"
-                            placeholder="Ciudad, Provincia"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Coordenadas (GPS)
-                        </label>
-                        <div class="flex gap-2">
-                            <input 
-                                wire:model="newLatitud" 
-                                type="text" 
-                                placeholder="Latitud (-34.6037)"
-                                class="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
-                            <input 
-                                wire:model="newLongitud" 
-                                type="text" 
-                                placeholder="Longitud (-58.3816)"
-                                class="w-1/2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            >
+            
+            {{-- HUB DE COMANDOS: FILTROS Y ACCIÓN MAESTRA --}}
+            <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-4 sm:p-6 lg:p-8 shadow-2xl relative overflow-hidden animate-fade-in-down">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/40 to-transparent"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-end relative z-10">
+                    {{-- BUSCADOR TÁCTICO --}}
+                    <div class="md:col-span-5 relative group">
+                        <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Localizador de Sedes</span>
+                        <div class="relative">
+                            <input type="text" wire:model.live.debounce.300ms="search" 
+                                   placeholder="BUSCAR SEDE, LOCALIDAD O DIRECCIÓN..."
+                                   class="w-full bg-black/40 border border-white/10 rounded-2xl px-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all placeholder-white/5 italic uppercase">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-ep-primary/30 group-focus-within:text-ep-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
                         </div>
-                        @error('newLatitud') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                        @error('newLongitud') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Teléfono
-                        </label>
-                        <input 
-                            wire:model="newTelefono" 
-                            type="text" 
-                            placeholder="011-1234-5678"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Correo
-                        </label>
-                        <input 
-                            wire:model="newCorreo" 
-                            type="email" 
-                            placeholder="sede@empresa.com"
-                            class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                        >
-                        @error('newCorreo') 
-                            <span class="text-red-500 text-sm">{{ $message }}</span> 
-                        @enderror
-                    </div>
-
-                    <!-- Datalists para autocompletado -->
-                    <datalist id="tipos-list">
-                        @foreach($existingTipos as $tipo)
-                            <option value="{{ $tipo }}">
-                        @endforeach
-                    </datalist>
-
-                    <datalist id="localidades-list">
-                        @foreach($existingLocalidades as $localidad)
-                            <option value="{{ $localidad }}">
-                        @endforeach
-                    </datalist>
-                </div>
-
-                <div class="mt-4 flex justify-end gap-2">
-                    <button 
-                        type="button"
-                        wire:click="toggleForm"
-                        class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-200">
-                        Cancelar
-                    </button>
-                    <button 
-                        type="submit" 
-                        wire:loading.attr="disabled"
-                        class="hover:bg-opacity-90 text-white px-4 py-2 rounded-md transition-colors duration-200 shadow-sm disabled:opacity-50"
-                        style="background-color: #292938;">
-                        <span wire:loading.remove>Crear Sede</span>
-                        <span wire:loading>Guardando...</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    @endif
-
-    <!-- Lista de sedes -->
-    <div class="bg-white rounded-lg shadow">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ubicación</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Técnicos</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                @forelse($sedes as $sede)
-                    <tr>
-                        <td class="px-6 py-4">
-                            @if($editingId === $sede->id)
-                                <input 
-                                    wire:model="editNombreSede" 
-                                    type="text" 
-                                    class="w-full rounded-md border-gray-300 shadow-sm text-sm mb-1"
-                                    placeholder="Nombre"
-                                >
-                            @else
-                                <span class="font-medium {{ $sede->trashed() ? 'line-through text-red-500' : '' }}">
-                                    {{ $sede->nombre_sede }}
-                                    @if($sede->trashed()) <span class="text-xs text-red-500 ml-1">(Baja)</span> @endif
-                                </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($editingId === $sede->id)
-                                <input 
-                                    wire:model="editTipoSede" 
-                                    type="text" 
-                                    class="w-full rounded-md border-gray-300 shadow-sm text-sm"
-                                    placeholder="Tipo"
-                                >
-                            @else
-                                <span class="text-sm text-gray-600">{{ $sede->tipo_sede ?: '-' }}</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($editingId === $sede->id)
-                                <div class="space-y-2">
-                                    <input wire:model="editDireccion" type="text" class="w-full rounded-md border-gray-300 shadow-sm text-sm" placeholder="Dirección">
-                                    <input wire:model="editLocalidad" type="text" class="w-full rounded-md border-gray-300 shadow-sm text-sm" placeholder="Localidad">
-                                    <select wire:model="editProvinciaId" class="w-full rounded-md border-gray-300 shadow-sm text-sm">
-                                        <option value="">Provincia...</option>
-                                        @foreach($existingProvincias as $provincia)
-                                            <option value="{{ $provincia->id }}">{{ $provincia->nombre }}</option>
-                                        @endforeach
-                                    </select>
-                                    <div class="flex gap-1">
-                                        <input wire:model="editLatitud" type="text" class="w-1/2 rounded-md border-gray-300 shadow-sm text-sm" placeholder="Lat">
-                                        <input wire:model="editLongitud" type="text" class="w-1/2 rounded-md border-gray-300 shadow-sm text-sm" placeholder="Lon">
-                                    </div>
-                                </div>
-                            @else
-                                <div class="text-sm text-gray-600">
-                                    <div>{{ $sede->direccion ?: 'Sin dirección' }}</div>
-                                    <div>
-                                        {{ $sede->localidad ?: '' }}
-                                        {{ ($sede->localidad && $sede->provincia) ? ',' : '' }}
-                                        {{ $sede->provincia ? $sede->provincia->nombre : '' }}
-                                    </div>
-                                    @if($sede->latitud && $sede->longitud)
-                                        <div class="text-xs text-gray-400 mt-1">
-                                            GPS: {{ number_format($sede->latitud, 4) }}, {{ number_format($sede->longitud, 4) }}
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4">
-                            @if($sede->users->count() > 0)
-                                <div class="flex flex-wrap gap-1">
-                                    @foreach($sede->users as $user)
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
-                                            {{ substr($user->nombres, 0, 1) }}. {{ $user->apellidos }}
-                                        </span>
-                                    @endforeach
-                                </div>
-                            @else
-                                <span class="text-xs text-gray-500 italic">Sin asignar</span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            @if($editingId === $sede->id)
-                                <div class="flex gap-2">
-                                    <button 
-                                        wire:click="update" 
-                                        class="text-green-600 hover:text-green-900">
-                                        Guardar
-                                    </button>
-                                    <button 
-                                        wire:click="cancelEdit" 
-                                        class="text-gray-600 hover:text-gray-900">
-                                        Cancelar
-                                    </button>
-                                </div>
-                            @else
-                                <div class="flex items-center gap-3">
-                                    @if($sede->trashed())
-                                        <button wire:click="restore({{ $sede->id }})"
-                                                class="text-green-600 hover:text-green-900 transition-colors duration-150 p-1 hover:bg-green-50 rounded"
-                                                title="Restaurar Sede">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                                            </svg>
-                                        </button>
-                                    @else
-                                        <button 
-                                            wire:click="manageUsers({{ $sede->id }})" 
-                                            class="text-blue-600 hover:text-blue-900 text-sm font-medium pr-3 border-r border-gray-200"
-                                            title="Gestionar Técnicos">
-                                            Técnicos
-                                        </button>
-                                        <button 
-                                            wire:click="edit({{ $sede->id }})" 
-                                            class="text-indigo-600 hover:text-indigo-900 transition-colors duration-150 p-1 hover:bg-indigo-50 rounded"
-                                            title="Editar">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                            </svg>
-                                        </button>
-                                        <button 
-                                            wire:click="confirmDelete({{ $sede->id }}, '{{ $sede->nombre_sede }}')" 
-                                            class="text-red-600 hover:text-red-900 transition-colors duration-150 p-1 hover:bg-red-50 rounded"
-                                            title="Eliminar">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 000-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                            </svg>
-                                        </button>
-                                    @endif
-                                </div>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                            No hay sedes creadas. Haz clic en "Nueva Sede" para agregar una.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Modal de gestión de usuarios -->
-    @if($managingUsersForSede)
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-900">Asignar Técnicos</h3>
-                    <button wire:click="closeUserManagement" class="text-gray-400 hover:text-gray-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
-                    </button>
-                </div>
-
-                <div class="p-6 overflow-y-auto max-h-[60vh]">
-                    @if(count($availableUsers) > 0)
-                        <div class="space-y-2">
-                            @foreach($availableUsers as $user)
-                                <label class="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer">
-                                    <input 
-                                        type="checkbox" 
-                                        wire:click="toggleUser({{ $user->id }})"
-                                        {{ in_array($user->id, $assignedUsers) ? 'checked' : '' }}
-                                        class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                                    >
-                                    <div class="ml-3">
-                                        <div class="font-medium text-gray-900">
-                                            {{ $user->apellidos }}, {{ $user->nombres }}
-                                        </div>
-                                        <div class="text-sm text-gray-500">{{ $user->email }}</div>
-                                    </div>
+                    {{-- FILTROS DE INTELIGENCIA --}}
+                    <div class="md:col-span-4 flex items-center gap-6">
+                        <div class="flex-1 px-6 py-4 bg-black/40 border border-white/10 rounded-2xl flex items-center justify-between group">
+                            <div>
+                                <p class="text-[8px] font-bold text-white/20 uppercase tracking-widest italic mb-0.5">Sincronización</p>
+                                <p class="text-[10px] font-black text-ep-primary uppercase italic tracking-tighter">RED ACTIVA</p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[9px] font-black text-white/40 uppercase italic tracking-widest">Eliminados</span>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
+                                    <div class="w-9 h-5 bg-white/10 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/20 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500/50 peer-checked:after:bg-white"></div>
                                 </label>
-                            @endforeach
+                            </div>
                         </div>
-                    @else
-                        <p class="text-gray-500 text-center py-4">
-                            No hay técnicos disponibles. Crea usuarios con rol "Técnico" primero.
-                        </p>
-                    @endif
+                    </div>
+
+                    {{-- ACCIÓN PRIMARIA --}}
+                    <div class="md:col-span-3">
+                        <button wire:click="toggleForm" 
+                           class="w-full flex h-14 bg-ep-primary text-white hover:brightness-110 active:scale-95 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] italic transition-all items-center justify-center gap-3 shadow-[0_0_25px_rgba(246,146,57,0.3)] group/btn relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/10 translate-y-14 group-hover/btn:translate-y-0 transition-transform duration-500"></div>
+                            <svg class="w-5 h-5 group-hover/btn:-rotate-90 transition-transform duration-500 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                <path d="{{ $showForm ? 'M6 18L18 6M6 6l12 12' : 'M12 4v16m8-8H4' }}"/>
+                            </svg>
+                            <span class="relative z-10">{{ $showForm ? 'Cerrar Registro' : 'Nueva Sede' }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            {{-- FORMULARIO DE INYECCIÓN DE SEDE (HUD) --}}
+            @if($showForm)
+                <div class="bg-ep-dark/60 backdrop-blur-xl rounded-3xl sm:rounded-[3rem] border-2 border-ep-primary/30 p-5 sm:p-10 shadow-[0_0_50px_rgba(246,146,57,0.1)] relative animate-fade-in-down overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-ep-primary/50 to-transparent"></div>
+                    
+                    <div class="flex items-center justify-between mb-10">
+                        <h3 class="text-xs font-black text-white italic uppercase tracking-[0.3em]">
+                            Inyección de <span class="text-ep-primary">Infraestructura</span>
+                        </h3>
+                        <div class="text-[10px] font-black text-white/20 uppercase tracking-widest italic">Protocolo de Registro de Localización</div>
+                    </div>
+
+                    <form wire:submit.prevent="save" class="space-y-10">
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Nombre Identificador</span>
+                                <input type="text" wire:model="newNombreSede" placeholder="EJ: SEDE CENTRAL / PLANTA ALPHA" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all placeholder-white/5 italic uppercase">
+                                @error('newNombreSede') <span class="text-red-500 text-[8px] font-black uppercase mt-2 block ml-2">{{ $message }}</span> @enderror
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Dirección Física</span>
+                                <input type="text" wire:model="newDireccion" placeholder="CALLE, NÚMERO, BARRIO..." class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic">
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Tipo de Sede</span>
+                                <input type="text" wire:model="newTipoSede" list="tipos-list" placeholder="OFICINA / DEPÓSITO / PLANTA..." class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic uppercase">
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Provincia</span>
+                                <select wire:model="newProvinciaId" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase">
+                                    <option value="">SELECCIONAR...</option>
+                                    @foreach($existingProvincias as $provincia)
+                                        <option value="{{ $provincia->id }}">{{ $provincia->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Localidad</span>
+                                <input type="text" wire:model="newLocalidad" list="localidades-list" placeholder="CIUDAD / MUNICIPIO..." class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic uppercase">
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Coordenadas GPS (Lat / Lon)</span>
+                                <div class="flex gap-2">
+                                    <input type="text" wire:model="newLatitud" placeholder="LAT" class="w-1/2 bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic">
+                                    <input type="text" wire:model="newLongitud" placeholder="LON" class="w-1/2 bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic">
+                                </div>
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Teléfono Directo</span>
+                                <input type="text" wire:model="newTelefono" placeholder="EJ: +54 9..." class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic">
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Email Institucional</span>
+                                <input type="email" wire:model="newCorreo" placeholder="CONTACTO@EMPRESA.COM" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic uppercase">
+                                @error('newCorreo') <span class="text-red-500 text-[8px] font-black uppercase mt-2 block ml-2">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end gap-6 pt-10 border-t border-white/5">
+                            <button type="button" wire:click="toggleForm" class="px-8 h-12 bg-white/5 border border-white/10 text-white/40 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic transition-all">Descartar</button>
+                            <button type="submit" wire:loading.attr="disabled" class="px-10 h-12 bg-ep-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-[0_0_20px_rgba(246,146,57,0.3)] hover:brightness-110 active:scale-95 transition-all">
+                                <span wire:loading.remove>Confirmar Registro</span>
+                                <span wire:loading class="flex items-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    Cargando...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            @endif
+
+            {{-- MATRIZ DE SEDES --}}
+            <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full border-collapse">
+                        <thead>
+                            <tr class="bg-black/20 text-left">
+                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Identificador / Sede</th>
+                                <th class="hidden md:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Tipo</th>
+                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Despliegue / Ubicación</th>
+                                <th class="hidden lg:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Equipo Técnico</th>
+                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse($sedes as $sede)
+                                <tr class="group/row hover:bg-white/5 transition-all duration-500 relative {{ $sede->trashed() ? 'opacity-50 grayscale' : '' }}">
+                                    <td class="px-4 lg:px-8 py-6">
+                                        <div class="flex items-center gap-3 sm:gap-4">
+                                            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary flex items-center justify-center group-hover/row:scale-110 transition-transform">
+                                                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" stroke-width="2"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" stroke-width="2"/></svg>
+                                            </div>
+                                            <div>
+                                                <div class="text-xs sm:text-sm font-black text-white italic uppercase tracking-tight leading-none group-hover/row:text-ep-primary transition-colors flex items-center gap-2">
+                                                    {{ $sede->nombre_sede }}
+                                                    @if($sede->trashed()) <span class="bg-red-500 text-white text-[7px] px-1.5 py-0.5 rounded italic">DE BAJA</span> @endif
+                                                </div>
+                                                <div class="text-[8px] sm:text-[9px] font-black text-white/20 uppercase tracking-widest italic mt-1">{{ $sede->correo ?: 'SIN EMAIL' }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="hidden md:table-cell px-4 lg:px-8 py-6 text-center">
+                                        <span class="px-3 py-1.5 rounded-xl text-[9px] font-black bg-white/5 border border-white/10 text-white/40 uppercase tracking-[0.2em] italic">
+                                            {{ $sede->tipo_sede ?: 'GENERAL' }}
+                                        </span>
+                                    </td>
+
+                                    <td class="px-4 lg:px-8 py-6">
+                                        <div class="text-[10px] font-black text-white/80 italic uppercase leading-none mb-1">{{ $sede->direccion ?: 'S/D' }}</div>
+                                        <div class="text-[9px] font-bold text-white/20 italic uppercase tracking-widest">
+                                            {{ $sede->localidad }}{{ $sede->provincia ? ' • ' . $sede->provincia->nombre : '' }}
+                                        </div>
+                                    </td>
+
+                                    <td class="hidden lg:table-cell px-4 lg:px-8 py-6">
+                                        @if($sede->users->count() > 0)
+                                            <div class="space-y-1">
+                                                @foreach($sede->users as $u)
+                                                    <div class="flex items-center gap-2 group/u">
+                                                        <div class="w-5 h-5 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-[8px] font-black text-indigo-400">
+                                                            {{ substr($u->nombres, 0, 1) }}
+                                                        </div>
+                                                        <span class="text-[10px] font-bold text-white/60 italic uppercase tracking-tight group-hover/u:text-white transition-colors">
+                                                            {{ $u->nombres }} {{ $u->apellidos }}
+                                                        </span>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="text-[10px] font-black text-white/5 uppercase italic tracking-widest">Sin asignar</span>
+                                        @endif
+                                    </td>
+
+                                    <td class="px-4 lg:px-8 py-6 text-right">
+                                        <div class="flex justify-end gap-2 sm:gap-3 lg:translate-x-4 lg:opacity-0 lg:group-hover/row:translate-x-0 lg:group-hover/row:opacity-100 transition-all duration-500">
+                                            @if($sede->trashed())
+                                                <button wire:click="restore({{ $sede->id }})" class="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] transition-all">Restaurar</button>
+                                            @else
+                                                <button wire:click="manageUsers({{ $sede->id }})" class="h-10 px-4 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] transition-all">Técnicos</button>
+                                                <button wire:click="edit({{ $sede->id }})" class="h-10 w-10 flex items-center justify-center bg-white/5 border border-white/10 text-white/40 hover:bg-white/20 hover:text-white rounded-xl transition-all shadow-lg active:scale-90"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" stroke-width="2.5"/></svg></button>
+                                                <button wire:click="confirmDelete({{ $sede->id }}, '{{ $sede->nombre_sede }}')" class="h-10 w-10 flex items-center justify-center bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl transition-all shadow-lg active:scale-90"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2.5"/></svg></button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="5" class="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">No se detectaron localizaciones activas <br> <span class="text-[9px] tracking-widest text-white/3 italic">Inicie un nuevo registro de infraestructura desde la barra superior</span></td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="px-6 py-4 border-t border-gray-200 flex justify-end">
-                    <button 
-                        wire:click="closeUserManagement"
-                        class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
-                        Cerrar
-                    </button>
+                <div class="px-4 sm:px-10 py-6 border-t border-white/5 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-6">
+                    <div class="hidden sm:block text-[9px] font-black text-white/10 uppercase tracking-[0.5em] italic">Infraestructura Monitorizada v4.0 • Consultora Autorizada</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL GESTIÓN DE TÉCNICOS --}}
+    @if($managingUsersForSede)
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <div class="bg-ep-dark border border-white/10 rounded-[2.5rem] w-full max-w-2xl overflow-hidden shadow-2xl animate-fade-in-up">
+                <div class="px-10 py-8 border-b border-white/5 bg-black/20 flex justify-between items-center">
+                    <div>
+                        <h3 class="text-sm font-black text-white italic uppercase tracking-[0.2em] leading-none mb-1">Escuadrón <span class="text-indigo-400">Técnico</span></h3>
+                        <p class="text-[9px] font-bold text-white/20 uppercase italic tracking-widest">Asignación de Responsabilidades</p>
+                    </div>
+                    <button wire:click="closeUserManagement" class="w-10 h-10 rounded-full bg-white/5 text-white/40 hover:text-white transition-all flex items-center justify-center"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2.5"/></svg></button>
+                </div>
+                
+                <div class="p-10 max-h-[60vh] overflow-y-auto space-y-4">
+                    @forelse($availableUsers as $user)
+                        @php $isSelected = in_array($user->id, $assignedUsers); @endphp
+                        <label wire:click="toggleUser({{ $user->id }})" class="group flex items-center justify-between p-5 rounded-3xl border transition-all cursor-pointer {{ $isSelected ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-white/5 border-white/5 hover:border-white/20' }}">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-2xl flex items-center justify-center text-xs font-black {{ $isSelected ? 'bg-indigo-500 text-white' : 'bg-white/10 text-white/40 group-hover:text-white' }}">
+                                    {{ substr($user->nombres, 0, 1) }}
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black {{ $isSelected ? 'text-white' : 'text-white/60' }} italic uppercase tracking-tight">{{ $user->apellidos }}, {{ $user->nombres }}</p>
+                                    <p class="text-[9px] font-bold text-white/20 italic">{{ $user->email }}</p>
+                                </div>
+                            </div>
+                            <div class="w-10 h-10 rounded-full flex items-center justify-center transition-all">
+                                @if($isSelected)
+                                    <svg class="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4" stroke-width="3"/></svg>
+                                @else
+                                    <div class="w-6 h-6 rounded-full border-2 border-white/10 group-hover:border-white/30"></div>
+                                @endif
+                            </div>
+                        </label>
+                    @empty
+                        <div class="py-10 text-center text-white/5 uppercase italic text-[10px] font-black tracking-widest leading-loose">No hay operarios detectados <br> Registre nuevos técnicos en el HUB maestro</div>
+                    @endforelse
+                </div>
+                
+                <div class="px-10 py-6 bg-black/20 border-t border-white/5 flex justify-end">
+                    <button wire:click="closeUserManagement" class="px-8 h-12 bg-white/5 border border-white/10 text-white/40 hover:text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all">Cerrar Protocolo</button>
                 </div>
             </div>
         </div>
     @endif
-    <!-- Modal de confirmación de eliminación -->
+
+    {{-- MODAL ELIMINACIÓN --}}
     @if($confirmingDeletion)
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 overflow-hidden">
-                <div class="p-6">
-                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-yellow-100 rounded-full mb-4">
-                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                        </svg>
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+            <div class="bg-ep-dark border border-red-500/30 rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-[0_0_50px_rgba(239,68,68,0.1)] animate-fade-in-up">
+                <div class="p-10 text-center">
+                    <div class="w-16 h-16 bg-red-500/10 border border-red-500/30 rounded-3xl mx-auto flex items-center justify-center text-red-500 mb-6 drop-shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" stroke-width="2"/></svg>
                     </div>
-                    <h3 class="text-lg font-bold text-center text-gray-900 mb-2">
-                        ¿Dar de baja a la sede?
-                    </h3>
-                    <p class="text-sm text-gray-500 text-center mb-6">
-                        Estás a punto de dar de baja a <span class="font-bold text-gray-700">{{ $sedeToDeleteName }}</span>.
-                        <br><br>
-                        ⚠️ <span class="font-semibold">Nota Importante:</span> La sede NO se eliminará permanentemente para preservar el historial de inspecciones y reportes.
+                    <h3 class="text-sm font-black text-white italic uppercase tracking-[0.2em] mb-3">Protocolo de <span class="text-red-500">Baja Táctica</span></h3>
+                    <p class="text-[10px] font-bold text-white/40 uppercase italic tracking-widest leading-relaxed mb-10">
+                        ¿CONFIRMAR DESCONEXIÓN DE <span class="text-white">{{ $sedeToDeleteName }}</span>?<br>
+                        EL HISTORIAL SE PRESERVARÁ PARA AUDITORÍAS FUTURAS.
                     </p>
-                    <div class="flex justify-center gap-3">
-                        <button wire:click="cancelDelete" 
-                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors font-medium">
-                            Salir
-                        </button>
-                        <button wire:click="delete" 
-                                class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 transition-colors font-bold shadow-sm">
-                            Dar de Baja
-                        </button>
+                    <div class="flex gap-4">
+                        <button wire:click="cancelDelete" class="flex-1 h-12 bg-white/5 border border-white/10 text-white/40 hover:text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all">Abortar</button>
+                        <button wire:click="delete" class="flex-1 h-12 bg-red-600 text-white rounded-xl text-[10px] font-black uppercase italic tracking-widest transition-all shadow-[0_0_20px_rgba(220,38,38,0.3)] hover:brightness-110 active:scale-95">Confirmar Baja</button>
                     </div>
                 </div>
             </div>
         </div>
     @endif
+
+    <style>
+        .animate-fade-in-down { animation: fade-in-down 0.6s ease-out forwards; }
+        .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
+        .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+        @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    </style>
 </div>

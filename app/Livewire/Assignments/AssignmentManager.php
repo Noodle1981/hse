@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\DynamicChecklist;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
 class AssignmentManager extends Component
 {
@@ -305,12 +306,11 @@ class AssignmentManager extends Component
         $this->tecnicos = [];
     }
 
+    #[Layout('components.layouts.app')]
     public function render()
     {
-        $month = strtolower(now()->format('F'));
-
         // 1. Manual Assignments (Solicitudes)
-        $manualQuery = ChecklistAssignment::with(['checklist', 'user', 'sede', 'empresa', 'visitCompletion.visit', 'inspection'])
+        $manualQuery = ChecklistAssignment::with(['checklist', 'user', 'sede', 'empresa', 'inspection'])
             ->when($this->search, function ($q) {
                 $q->whereHas('checklist', function ($c) {
                     $c->where('title', 'like', '%' . $this->search . '%')
@@ -325,42 +325,45 @@ class AssignmentManager extends Component
             })
             ->orderBy('created_at', 'desc');
 
-        $manual = $manualQuery->get()->map(fn($a) => (object)[
-            'id' => $a->id,
-            'dynamic_checklist_id' => $a->dynamic_checklist_id,
-            'checklist' => $a->checklist,
-            'user' => $a->user,
-            'sede' => $a->sede,
-            'empresa' => $a->empresa,
-            'due_date' => $a->due_date,
-            'status' => $a->status,
+        $manual = $manualQuery->get()->map(fn($p) => (object)[
+            'id' => $p->id,
+            'dynamic_checklist_id' => $p->dynamic_checklist_id,
+            'checklist' => $p->checklist,
+            'user' => $p->user,
+            'sede' => $p->sede,
+            'empresa' => $p->empresa,
+            'due_date' => $p->due_date,
+            'status' => $p->status,
             'source' => 'manual',
             'category' => 'Inspección',
-            'is_overdue' => method_exists($a, 'isOverdue') ? $a->isOverdue() : false,
-            'registry_code' => $a->checklist?->registry_code,
-            'created_at' => $a->created_at,
-            'inspection' => $a->inspection ?? ($a->completion?->inspection ?? null),
-            'frequency_label' => method_exists($a, 'getFrequencyLabel') ? $a->getFrequencyLabel() : 'Manual',
-            'can_be_edited' => method_exists($a, 'canBeEdited') ? $a->canBeEdited() : true,
-            'can_be_deleted' => method_exists($a, 'canBeDeleted') ? $a->canBeDeleted() : true,
-            'status_badge_color' => method_exists($a, 'getStatusBadgeColor') ? $a->getStatusBadgeColor() : 'gray'
+            'is_overdue' => $p->due_date < now() && $p->status !== 'completed',
+            'registry_code' => $p->checklist?->registry_code,
+            'created_at' => $p->created_at,
+            'inspection' => $p->inspection,
+            'frequency_label' => 'Manual',
+            'can_be_edited' => $p->status === 'pending',
+            'can_be_deleted' => $p->status === 'pending',
+            'status_badge_color' => match($p->status) {
+                'pending' => 'yellow',
+                'in_progress' => 'indigo',
+                'completed' => 'emerald',
+                default => 'gray'
+            }
         ]);
 
         // 2. Annual Plan Tasks (Contratos)
-        $contractQuery = \App\Models\AnnualPlan::with(['checklist', 'sede', 'sede.empresa', 'sede.users'])
+        $contractQuery = \App\Models\AnnualPlan::with(['sede.empresa', 'checklist'])
+            ->whereHas('sede', fn($q) => $q->whereIn('empresa_id', $this->empresas->pluck('id')))
             ->where('category', 'Inspección')
-            ->where($month, true)
-            ->where('year', now()->year)
             ->when($this->search, function ($q) {
                 $q->whereHas('checklist', function ($c) {
                     $c->where('title', 'like', '%' . $this->search . '%')
                       ->orWhere('registry_code', 'like', '%' . $this->search . '%');
-                })->orWhere('activity_name', 'like', '%' . $this->search . '%');
+                });
+                $q->orWhere('activity_name', 'like', '%' . $this->search . '%');
             })
             ->when($this->selectedEmpresa, function ($q) {
-                $q->whereHas('sede', function($sub) {
-                    $sub->where('empresa_id', $this->selectedEmpresa);
-                });
+                $q->whereHas('sede', fn($sub) => $sub->where('empresa_id', $this->selectedEmpresa));
             })
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
@@ -370,11 +373,12 @@ class AssignmentManager extends Component
             'id' => null,
             'dynamic_checklist_id' => $p->checklist_id,
             'checklist' => $p->checklist ?? (object)['title' => $p->activity_name, 'registry_code' => $p->activity_code],
-            'user' => (object)[
+            'user' => $p->sede?->users->first() ?? (object)[
                 'nombres' => 'Operadores',
                 'apellidos' => 'Sede',
                 'id' => null
             ],
+            'all_users' => $p->sede?->users, 
             'monitored_users' => $p->sede?->users ?? collect(),
             'sede' => $p->sede,
             'empresa' => $p->sede?->empresa,
@@ -390,9 +394,7 @@ class AssignmentManager extends Component
             'can_be_edited' => false,
             'can_be_deleted' => false,
             'status_badge_color' => 'yellow',
-            'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
-            'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,
-            'periodo' => ($p->category === 'Informe') ? now()->translatedFormat('F Y') : null
+            'periodo' => now()->translatedFormat('F Y')
         ]);
 
         // Merge all
@@ -410,6 +412,6 @@ class AssignmentManager extends Component
 
         return view('livewire.assignments.assignment-manager', [
             'assignments' => $paginated,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

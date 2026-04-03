@@ -7,6 +7,8 @@ use App\Models\Sede;
 use App\Models\User;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
 class LocationManager extends Component
 {
@@ -24,6 +26,14 @@ class LocationManager extends Component
     public string $newTelefono = '';
     public string $newCorreo = '';
     public bool $showForm = false;
+    public string $search = '';
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'showDeleted' => ['except' => false],
+    ];
+
+    public function updatingSearch() { $this->resetPage(); }
     
     // Edición
     public ?int $editingId = null;
@@ -51,10 +61,13 @@ class LocationManager extends Component
     public ?int $sedeToDeleteId = null;
     public string $sedeToDeleteName = '';
 
-    public function mount(Empresa $empresa)
+    public function mount(\App\Models\Empresa $empresa)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
         // Tenancy isolation
-        if (!auth()->user()->isSuperAdmin() && $empresa->consultora_id !== auth()->user()->consultora_id) {
+        if (!$user->isSuperAdmin() && $empresa->consultora_id !== $user->consultora_id) {
             abort(403, 'No tienes permiso para gestionar sedes de esta empresa.');
         }
 
@@ -72,6 +85,14 @@ class LocationManager extends Component
     public function loadSedes()
     {
         $query = $this->empresa->sedes()->with(['provincia', 'users'])->withCount('users');
+
+        if ($this->search) {
+            $query->where(function($q) {
+                $q->where('nombre_sede', 'like', '%' . $this->search . '%')
+                  ->orWhere('localidad', 'like', '%' . $this->search . '%')
+                  ->orWhere('direccion', 'like', '%' . $this->search . '%');
+            });
+        }
 
         if ($this->showDeleted) {
             $query->onlyTrashed();
@@ -311,9 +332,9 @@ class LocationManager extends Component
         $this->newCorreo = '';
     }
 
+    #[Layout('components.layouts.app')]
     public function render()
     {
-        return view('livewire.companies.location-manager')
-            ->layout('components.layouts.app');
+        return view('livewire.companies.location-manager');
     }
 }

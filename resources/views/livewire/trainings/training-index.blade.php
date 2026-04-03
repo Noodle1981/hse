@@ -183,9 +183,8 @@
                                                 default => strtoupper($training->status)
                                             };
                                         @endphp
-                                        <span class="inline-flex px-2 py-1 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest italic border {{ $statusBadge }}">
-                                            <span class="hidden xs:inline">{{ $statusText }}</span>
-                                            <span class="xs:hidden">{{ substr($statusText, 0, 4) }}</span>
+                                        <span class="inline-flex px-2 sm:px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest italic border {{ $statusBadge }}">
+                                            {{ $statusText }}
                                         </span>
                                     </td>
                                     <td class="px-4 lg:px-8 py-6 text-right">
