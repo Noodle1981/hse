@@ -37,9 +37,10 @@ Route::get('/constancia/firmar/{token}', \App\Livewire\Public\PublicSignature::c
 Route::middleware(['auth'])->group(function () {
     // Redirect condicional al dashboard correcto
     Route::get('/dashboard', function () {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
         if ($user->isSuperAdmin()) {
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('admin.consultants');
         }
         if ($user->isTechnician()) {
             return redirect()->route('tecnico.checklists.tasks.index');
