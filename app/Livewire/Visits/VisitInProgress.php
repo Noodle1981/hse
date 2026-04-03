@@ -83,13 +83,15 @@ class VisitInProgress extends Component
     public $availableChecklists = [];
     public $selectedChecklistIdToAssign;
 
-    // Contexto de activación automática
+    // Contexto de activación automática (Telemetría)
     #[\Livewire\Attributes\Url]
     public $task_id;
     #[\Livewire\Attributes\Url]
     public $type;
     #[\Livewire\Attributes\Url]
     public $source;
+
+    public $highlightTaskId = null;
 
     // Llenado de Checklist
     public $showFillModal = false;
@@ -114,14 +116,19 @@ class VisitInProgress extends Component
     {
         $this->visit = $visit;
         
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
         // Verificar que el usuario sea el dueño o Admin
-        if ($this->visit->user_id !== Auth::id() && !Auth::user()->hasRole('Administrador')) {
+        if ($this->visit->user_id !== Auth::id() && !$user->hasRole('Administrador')) {
             abort(403);
         }
         
-        // Verificar que esté en progreso
         if ($this->visit->status !== 'in_progress') {
-            if (Auth::user()->hasRole('Administrador')) {
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            if ($user->hasRole('Administrador')) {
                 return redirect()->route('gestor.visits.history');
             }
             return redirect()->route('tecnico.visits.index');
@@ -139,29 +146,35 @@ class VisitInProgress extends Component
 
     private function handleAutoTaskTrigger()
     {
-        if ($this->type === 'Inspección') {
-            if ($this->source === 'manual') {
-                $this->openFillModal($this->task_id);
-            } else {
-                // Para contrato, como no tiene "Asignación ID", lo tratamos como auto-asignación rápida
-                // O simplemente lo redireccionamos al filler con el checklist_id
-                session()->put('wizard_visit_id', $this->visit->id);
-                $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
-                return redirect()->route($prefix . '.checklists.fill', [
-                    'id' => $this->task_id, // Aquí task_id es el dynamic_checklist_id
+        // En modo táctico avanzado, ya no redirigimos automáticamente a la pantalla de llenado.
+        // En su lugar, simplemente resaltamos la tarea para que el técnico elija cuándo iniciarla
+        // dentro del contexto de su visita.
+        $this->highlightTaskId = $this->task_id;
+
+        // Si vienes de contrato, debemos asegurar que el checklist esté asignado a ti para esta sede
+        if ($this->source === 'contract' && $this->type === 'Inspección' && $this->task_id) {
+            $exists = ChecklistAssignment::where('user_id', Auth::id())
+                ->where('sede_id', $this->visit->sede_id)
+                ->where('dynamic_checklist_id', $this->task_id)
+                ->whereIn('status', ['pending', 'in_progress'])
+                ->exists();
+
+            if (!$exists) {
+                // Crear la asignación al vuelo para que aparezca en el dashboard
+                ChecklistAssignment::create([
+                    'dynamic_checklist_id' => $this->task_id,
+                    'user_id' => Auth::id(),
+                    'empresa_id' => $this->visit->empresa_id,
+                    'sede_id' => $this->visit->sede_id,
+                    'frequency' => 'once',
+                    'status' => 'pending',
+                    'due_date' => now(),
+                    'notes' => 'Vínculo automático desde Plan Anual'
                 ]);
+                
+                // Recargar las colecciones del componente para que el nuevo item sea visible
+                $this->loadChecklists();
             }
-        } elseif ($this->type === 'Capacitación') {
-            // Si es una capacitación programada (manual) vinculada al id
-            if ($this->source === 'manual') {
-                $this->executeTraining($this->task_id);
-            } else {
-                // Para capacitación de contrato
-                $this->openTrainingModal();
-            }
-        } elseif ($this->type === 'Informe') {
-            $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
-            return redirect()->route($prefix . '.master-reports.index', ['visit_id' => $this->visit->id]);
         }
     }
 
@@ -252,7 +265,9 @@ class VisitInProgress extends Component
         );
 
         // Redirigir a toma de asistencia con visit_id
-        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $prefix = $user->isAdmin() ? 'gestor' : 'tecnico';
         return redirect()->route($prefix . '.trainings.attendance', [
             'id' => $training->id,
             'visit_id' => $this->visit->id
@@ -308,7 +323,9 @@ class VisitInProgress extends Component
 
         // Redirigir al wizard de inspección con contexto de visita
         // assignment ahora es un parámetro de ruta, no query string
-        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $prefix = $user->isAdmin() ? 'gestor' : 'tecnico';
         return redirect()->route($prefix . '.checklists.fill', [
             'id'         => $assignment->dynamic_checklist_id,
             'assignment' => $assignment->id,
@@ -343,7 +360,9 @@ class VisitInProgress extends Component
     public function openTrainingModal()
     {
         // Redirigir al generador avanzado de capacitaciones (Admin Format)
-        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $prefix = $user->isAdmin() ? 'gestor' : 'tecnico';
         return redirect()->route($prefix . '.trainings.create', ['visit_id' => $this->visit->id]);
     }
 
@@ -351,7 +370,9 @@ class VisitInProgress extends Component
     {
         // Si es una capacitación vinculada (template), ir al tracker
         if ($visitTraining->training_id) {
-            $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $prefix = $user->isAdmin() ? 'gestor' : 'tecnico';
             return redirect()->route($prefix . '.trainings.attendance', $visitTraining->training_id);
         }
         // Si es ad-hoc (sin ID de training padre), quizás necesitemos otra vista o no soportarlo aún
@@ -466,7 +487,9 @@ class VisitInProgress extends Component
         session()->flash('message', 'Visita finalizada correctamente.');
         
         // Redirigir a lista de visitas
-        if (auth()->user()->hasRole('Administrador')) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->hasRole('Administrador')) {
             return redirect()->route('gestor.visits.history');
         }
         return redirect()->route('tecnico.visits.index');
@@ -474,6 +497,8 @@ class VisitInProgress extends Component
 
     public function render()
     {
-        return view('livewire.visits.visit-in-progress')->layout('components.layouts.app');
+        /** @var \Illuminate\View\View $view */
+        $view = view('livewire.visits.visit-in-progress');
+        return $view->layout('components.layouts.app');
     }
 }

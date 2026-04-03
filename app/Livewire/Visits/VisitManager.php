@@ -39,19 +39,39 @@ class VisitManager extends Component
 
     public function mount()
     {
-        // Redirigir si ya hay visita en progreso
+        // 1. Forzar captura de parámetros de la Request para telemetría
+        $this->sede_id = $this->sede_id ?: request()->query('sede_id');
+        $this->task_id = $this->task_id ?: request()->query('task_id');
+        $this->type = $this->type ?: request()->query('type');
+        $this->source = $this->source ?: request()->query('source');
+
+        // 2. Comprobar Visita Activa (Prioridad 1)
         $activeVisit = $this->visitService->getActiveVisit(Auth::user());
         if ($activeVisit) {
-            return redirect()->route('tecnico.visits.in-progress', array_merge(['visit' => $activeVisit], array_filter([
+            session()->flash('info', '🛰️ Reanudando visita en curso: ' . $activeVisit->sede->nombre_sede);
+            return redirect()->route('tecnico.visits.in-progress', array_merge(['visit' => $activeVisit->id], array_filter([
                 'task_id' => $this->task_id,
                 'type' => $this->type,
                 'source' => $this->source
             ])));
         }
 
+        // 3. Inicio Contextual (Prioridad 2)
         if ($this->sede_id) {
-            $this->selectedSedeId = $this->sede_id;
-            $this->openStartVisitModal();
+            $sede = Sede::with('empresa')->find($this->sede_id);
+            if ($sede) {
+                session()->flash('message', '🚀 Lanzando visitador táctico para: ' . $sede->nombre_sede);
+                $visit = $this->visitService->startVisit(Auth::user(), $sede);
+                
+                return redirect()->route('tecnico.visits.in-progress', [
+                    'visit' => $visit->id,
+                    'task_id' => $this->task_id,
+                    'type' => $this->type,
+                    'source' => $this->source
+                ]);
+            } else {
+                session()->flash('error', '❌ Sede no encontrada en zona de despliegue: ID ' . $this->sede_id);
+            }
         }
     }
 

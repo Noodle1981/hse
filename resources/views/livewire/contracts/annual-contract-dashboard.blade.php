@@ -10,10 +10,10 @@
 
                     <div class="flex flex-col">
                         <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.4em] italic mb-1 leading-none">
-                            Cumplimiento <span class="text-white">Plan Anual</span>
+                            {{ $activeSede?->empresa?->nombre ?? 'HSE' }} <span class="text-white">Plan Anual</span>
                         </h1>
                         <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
-                            Ciclo Operativo {{ $year }}
+                            {{ $activeSede?->nombre_sede ?? 'Global' }} — {{ $year }}
                         </h2>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                             <span class="text-[8px] sm:text-[9px] font-black text-ep-primary uppercase tracking-[0.4em] italic mb-1 block">Selección de Activos</span>
                             <select wire:model.live="sedeId" class="w-full bg-transparent border-none text-base sm:text-xl font-black text-white italic uppercase tracking-tight focus:ring-0 cursor-pointer [color-scheme:dark] [&>option]:bg-[#1e1e2d] [&>option]:text-white">
                                 @foreach($sedes as $s)
-                                    <option value="{{ $s->id }}">{{ $s->nombre_sede }}</option>
+                                    <option value="{{ $s->id }}">{{ $s->empresa?->nombre }} | {{ $s->nombre_sede }}</option>
                                 @endforeach
                             </select>
                         </div>

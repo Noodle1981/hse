@@ -232,10 +232,10 @@ class AnnualContractDashboard extends Component
             ->get();
 
         $sedes = auth()->user()->isAdmin()
-            ? Sede::all() 
-            : auth()->user()->sedes;
+            ? Sede::with('empresa')->orderBy('nombre_sede')->get() 
+            : auth()->user()->sedes()->with('empresa')->orderBy('nombre_sede')->get();
 
-        $activeSede = Sede::find($this->sedeId);
+        $activeSede = Sede::with('empresa')->find($this->sedeId);
         
         // Precalcular datos de cumplimiento
         $complianceData = $this->calculateComplianceData($plans);

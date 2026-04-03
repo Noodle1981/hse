@@ -178,67 +178,88 @@ class MyAssignments extends Component
                 $q->where('sede_id', $this->selectedSede);
             });
 
-        $manual = $manualQuery->get()->map(fn($a) => (object)[
-            'id' => $a->id,
-            'dynamic_checklist_id' => $a->dynamic_checklist_id,
-            'checklist' => $a->checklist,
-            'sede' => $a->sede,
-            'empresa' => $a->empresa,
-            'due_date' => $a->due_date,
-            'status' => $a->status,
-            'source' => 'manual',
-            'category' => 'Inspección',
-            'is_overdue' => method_exists($a, 'isOverdue') ? $a->isOverdue() : false,
-            'registry_code' => $a->checklist?->registry_code,
-            'created_at' => $a->created_at,
-            'inspection' => $a->inspection ?? ($a->completion?->inspection ?? null),
-            'frequency_label' => method_exists($a, 'getFrequencyLabel') ? $a->getFrequencyLabel() : 'Manual',
-            'notes' => $a->notes,
-            'description' => $a->checklist?->description,
-            'trainer_name' => null,
-        ]);
-        $manualReports = $reportsQuery->get()->map(fn($r) => (object)[
-            'id' => $r->id,
-            'dynamic_checklist_id' => null,
-            'checklist' => (object)['title' => $r->titulo, 'registry_code' => 'REP-' . $r->id],
-            'sede' => $r->sede,
-            'empresa' => $r->sede?->empresa,
-            'due_date' => $r->created_at->addDays(7),
-            'status' => $r->estado,
-            'source' => 'manual',
-            'category' => 'Informe',
-            'is_overdue' => false,
-            'registry_code' => 'REP-' . $r->id,
-            'created_at' => $r->created_at,
-            'inspection' => null,
-            'frequency_label' => 'Manual',
-            'periodo' => $r->periodo,
-            'notes' => null,
-            'description' => null,
-            'trainer_name' => null,
-        ]);
+        $now = \Carbon\Carbon::now();
 
-        $manualTrainings = $trainingsQuery->get()->map(fn($t) => (object)[
-            'id' => $t->id,
-            'dynamic_checklist_id' => $t->dynamic_checklist_id,
-            'checklist' => (object)['title' => $t->title, 'registry_code' => 'CAP-' . $t->id],
-            'sede' => $t->sede,
-            'empresa' => $t->empresa,
-            'due_date' => $t->date,
-            'status' => $t->status,
-            'source' => 'manual',
-            'category' => 'Capacitación',
-            'is_overdue' => $t->date?->isPast() && $t->status !== 'completed',
-            'registry_code' => 'CAP-' . $t->id,
-            'created_at' => $t->created_at,
-            'inspection' => null,
-            'frequency_label' => 'Manual',
-            'duration' => $t->duration,
-            'type' => $t->type,
-            'notes' => $t->notes,
-            'description' => $t->description,
-            'trainer_name' => $t->trainer_name,
-        ]);
+        $manual = $manualQuery->get()->map(function($a) use ($now) {
+            $dueDate = $a->due_date ? \Carbon\Carbon::parse($a->due_date) : null;
+            $daysRemaining = $dueDate ? (int) $now->diffInDays($dueDate, false) : null;
+            return (object)[
+                'id' => $a->id,
+                'dynamic_checklist_id' => $a->dynamic_checklist_id,
+                'checklist' => $a->checklist,
+                'sede' => $a->sede,
+                'empresa' => $a->empresa,
+                'due_date' => $dueDate,
+                'status' => $a->status,
+                'source' => 'manual',
+                'category' => 'Inspección',
+                'is_overdue' => method_exists($a, 'isOverdue') ? $a->isOverdue() : ($dueDate ? $dueDate->isPast() : false),
+                'days_remaining' => $daysRemaining,
+                'is_warning' => $daysRemaining !== null && $daysRemaining <= 7 && $daysRemaining >= 0 && $a->status !== 'completed',
+                'registry_code' => $a->checklist?->registry_code,
+                'created_at' => $a->created_at,
+                'inspection' => $a->inspection ?? ($a->completion?->inspection ?? null),
+                'frequency_label' => method_exists($a, 'getFrequencyLabel') ? $a->getFrequencyLabel() : 'Manual',
+                'notes' => $a->notes,
+                'description' => $a->checklist?->description,
+                'trainer_name' => null,
+            ];
+        });
+
+        $manualReports = $reportsQuery->get()->map(function($r) use ($now) {
+            $dueDate = $r->created_at->addDays(7);
+            $daysRemaining = (int) $now->diffInDays($dueDate, false);
+            return (object)[
+                'id' => $r->id,
+                'dynamic_checklist_id' => null,
+                'checklist' => (object)['title' => $r->titulo, 'registry_code' => 'REP-' . $r->id],
+                'sede' => $r->sede,
+                'empresa' => $r->sede?->empresa,
+                'due_date' => $dueDate,
+                'status' => $r->estado,
+                'source' => 'manual',
+                'category' => 'Informe',
+                'is_overdue' => $dueDate->isPast() && $r->estado !== 'finalizado',
+                'days_remaining' => $daysRemaining,
+                'is_warning' => $daysRemaining <= 7 && $daysRemaining >= 0 && $r->estado !== 'finalizado',
+                'registry_code' => 'REP-' . $r->id,
+                'created_at' => $r->created_at,
+                'inspection' => null,
+                'frequency_label' => 'Manual',
+                'periodo' => $r->periodo,
+                'notes' => null,
+                'description' => null,
+                'trainer_name' => null,
+            ];
+        });
+
+        $manualTrainings = $trainingsQuery->get()->map(function($t) use ($now) {
+            $dueDate = $t->date ? \Carbon\Carbon::parse($t->date) : null;
+            $daysRemaining = $dueDate ? (int) $now->diffInDays($dueDate, false) : null;
+            return (object)[
+                'id' => $t->id,
+                'dynamic_checklist_id' => $t->dynamic_checklist_id,
+                'checklist' => (object)['title' => $t->title, 'registry_code' => 'CAP-' . $t->id],
+                'sede' => $t->sede,
+                'empresa' => $t->empresa,
+                'due_date' => $dueDate,
+                'status' => $t->status,
+                'source' => 'manual',
+                'category' => 'Capacitación',
+                'is_overdue' => $dueDate ? ($dueDate->isPast() && $t->status !== 'completed') : false,
+                'days_remaining' => $daysRemaining,
+                'is_warning' => $daysRemaining !== null && $daysRemaining <= 7 && $daysRemaining >= 0 && $t->status !== 'completed',
+                'registry_code' => 'CAP-' . $t->id,
+                'created_at' => $t->created_at,
+                'inspection' => null,
+                'frequency_label' => 'Manual',
+                'duration' => $t->duration,
+                'type' => $t->type,
+                'notes' => $t->notes,
+                'description' => $t->description,
+                'trainer_name' => $t->trainer_name,
+            ];
+        });
 
         // 2. Annual Plan Tasks (Contratos)
         $contractQuery = \App\Models\AnnualPlan::with(['checklist', 'sede', 'sede.empresa'])
@@ -269,28 +290,34 @@ class MyAssignments extends Component
                 }
             });
 
-        $contract = $contractQuery->get()->map(fn($p) => (object)[
-            'id' => null,
-            'dynamic_checklist_id' => $p->checklist_id,
-            'checklist' => $p->checklist ?? (object)['title' => $p->activity_name, 'registry_code' => $p->activity_code],
-            'sede' => $p->sede,
-            'empresa' => $p->sede?->empresa,
-            'due_date' => \Carbon\Carbon::create(now()->year, $this->selectedMonth)->endOfMonth(),
-            'status' => 'scheduled',
-            'source' => 'contract',
-            'category' => $p->category,
-            'is_overdue' => false,
-            'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,
-            'created_at' => $p->created_at,
-            'inspection' => null,
-            'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
-            'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
-            'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,
-            'periodo' => ($p->category === 'Informe') ? \Carbon\Carbon::create(now()->year, $this->selectedMonth)->translatedFormat('F Y') : null,
-            'notes' => null,
-            'description' => $p->checklist?->description,
-            'trainer_name' => null,
-        ]);
+        $contract = $contractQuery->get()->map(function($p) use ($now) {
+            $dueDate = \Carbon\Carbon::create(now()->year, $this->selectedMonth)->endOfMonth();
+            $daysRemaining = (int) $now->diffInDays($dueDate, false);
+            return (object)[
+                'id' => null,
+                'dynamic_checklist_id' => $p->checklist_id,
+                'checklist' => $p->checklist ?? (object)['title' => $p->activity_name, 'registry_code' => $p->activity_code],
+                'sede' => $p->sede,
+                'empresa' => $p->sede?->empresa,
+                'due_date' => $dueDate,
+                'status' => 'scheduled',
+                'source' => 'contract',
+                'category' => $p->category,
+                'is_overdue' => $dueDate->isPast(),
+                'days_remaining' => $daysRemaining,
+                'is_warning' => $daysRemaining <= 7 && $daysRemaining >= 0 && $p->status !== 'completed',
+                'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,
+                'created_at' => $p->created_at,
+                'inspection' => null,
+                'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
+                'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
+                'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,
+                'periodo' => ($p->category === 'Informe') ? \Carbon\Carbon::create(now()->year, $this->selectedMonth)->translatedFormat('F Y') : null,
+                'notes' => null,
+                'description' => $p->checklist?->description,
+                'trainer_name' => null,
+            ];
+        });
 
         // Merge all into categorized collections (con manejo defensivo de nulos)
         $allInspections = $manual->concat($contract->where('category', 'Inspección'))->sortByDesc('created_at');

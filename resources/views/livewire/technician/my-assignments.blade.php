@@ -119,7 +119,7 @@
                                 </div>
                                 <a href="{{ route('tecnico.visits.index') }}" class="w-full md:w-auto h-16 px-12 flex items-center justify-center bg-ep-primary text-white text-[11px] font-black uppercase tracking-[0.3em] italic rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-2xl shadow-ep-primary/20 group/btn relative overflow-hidden">
                                      <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
-                                     🚢 INICIAR NUEVA VISITA
+                                     INICIAR NUEVA VISITA
                                 </a>
                             </div>
                         </div>
@@ -348,9 +348,9 @@
                                                         {{ $assignment->checklist?->title ?? 'Sin Título' }}
                                                     </div>
                                                     @if(($assignment->source ?? 'manual') === 'contract')
-                                                        <span class="text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase italic">🚢 CONTRATO</span>
+                                                        <span class="text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase italic">CONTRATO</span>
                                                     @else
-                                                        <span class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase italic">⚡ SOLICITUD</span>
+                                                        <span class="text-[8px] font-black text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 uppercase italic">SOLICITUD</span>
                                                     @endif
                                                 </div>
                                                 <div class="text-[11px] text-indigo-100/50 uppercase tracking-widest font-black italic leading-none">
@@ -369,16 +369,48 @@
                                             <div class="text-[11px] font-black text-white/60">
                                                 {{ $assignment->type ?? 'Presencial' }}
                                             </div>
+                                            @if($assignment->status !== 'completed' && $assignment->due_date)
+                                                <div class="mt-1 flex items-center justify-start">
+                                                    @if($assignment->is_overdue)
+                                                        <span class="text-[8px] font-black text-red-500 uppercase tracking-widest italic animate-pulse">Vencido</span>
+                                                    @elseif($assignment->is_warning)
+                                                        <span class="text-[8px] font-black text-amber-500 uppercase tracking-widest italic animate-pulse">⏱ Quedan {{ $assignment->days_remaining }} días</span>
+                                                    @else
+                                                        <span class="text-[8px] font-black text-white/40 uppercase tracking-widest italic">⏱ Quedan {{ $assignment->days_remaining }} días</span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                         @elseif($activeTab === 'reports')
                                             <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">Periodo: {{ $assignment->periodo ?? 'S/P' }}</div>
                                             <div class="text-[11px] font-black text-white/60">
                                                 Vence: {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}
                                             </div>
+                                            @if($assignment->status !== 'finalizado' && $assignment->status !== 'completed' && $assignment->due_date)
+                                                <div class="mt-1 flex items-center justify-start">
+                                                    @if($assignment->is_overdue)
+                                                        <span class="text-[8px] font-black text-red-500 uppercase tracking-widest italic animate-pulse">Vencido</span>
+                                                    @elseif($assignment->is_warning)
+                                                        <span class="text-[8px] font-black text-amber-500 uppercase tracking-widest italic animate-pulse">⏱ Quedan {{ $assignment->days_remaining }} días</span>
+                                                    @else
+                                                        <span class="text-[8px] font-black text-white/40 uppercase tracking-widest italic">⏱ Quedan {{ $assignment->days_remaining }} días</span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                         @else
-                                            <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">{{ $assignment->frequency_label }}</div>
                                             <div class="text-[11px] font-black {{ $assignment->is_overdue && $assignment->status !== 'completed' ? 'text-red-500 glow-text-red' : 'text-white/60' }}">
                                                 {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}
                                             </div>
+                                            @if($assignment->status !== 'completed' && $assignment->due_date)
+                                                <div class="mt-1 flex items-center justify-center">
+                                                    @if($assignment->is_overdue)
+                                                        <span class="text-[8px] font-black text-red-500 uppercase tracking-widest italic animate-pulse">Vencido</span>
+                                                    @elseif($assignment->is_warning)
+                                                        <span class="text-[8px] font-black text-amber-500 uppercase tracking-widest italic animate-pulse">⏱ Quedan {{ $assignment->days_remaining }} días</span>
+                                                    @else
+                                                        <span class="text-[8px] font-black text-white/40 uppercase tracking-widest italic">⏱ Quedan {{ $assignment->days_remaining }} días</span>
+                                                    @endif
+                                                </div>
+                                            @endif
                                         @endif
                                     </td>
                                     <td class="px-8 py-6 text-center">
@@ -523,7 +555,7 @@
                                                 </div>
                                                 <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
                                                     <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Fuente</p>
-                                                    <p class="text-xs font-black text-white uppercase italic">{{ ($assignment->source ?? 'manual') === 'contract' ? '🚢 Contrato' : '⚡ Solicitud' }}</p>
+                                                    <p class="text-xs font-black text-white uppercase italic">{{ ($assignment->source ?? 'manual') === 'contract' ? 'Contrato' : 'SOLICITUD' }}</p>
                                                 </div>
                                                 <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
                                                     <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Fecha Límite</p>
@@ -655,6 +687,17 @@
                                     <div>
                                         <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Límite</p>
                                         <p class="text-[10px] font-black {{ $vencido ? 'text-red-500' : 'text-white' }} uppercase italic">{{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}</p>
+                                        @if($assignment->status !== 'completed' && $assignment->due_date)
+                                            <div class="mt-1">
+                                                @if($vencido)
+                                                    <p class="text-[8px] font-black text-red-500 uppercase italic animate-pulse">Vencido</p>
+                                                @elseif(($assignment->days_remaining ?? 99) <= 3)
+                                                    <p class="text-[8px] font-black text-amber-500 uppercase italic animate-pulse">⏱ Quedan {{ $assignment->days_remaining }} días</p>
+                                                @else
+                                                    <p class="text-[8px] font-black text-white/40 uppercase italic">⏱ Quedan {{ $assignment->days_remaining }} días</p>
+                                                @endif
+                                            </div>
+                                        @endif
                                     </div>
                                 @endif
                             </div>
