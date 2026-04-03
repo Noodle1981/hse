@@ -5,174 +5,95 @@
                 <div class="flex items-center gap-4">
                     <!-- Mobile menu button -->
                     <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-indigo-200 hover:text-white transition-colors">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        </svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
 
                     <div class="flex flex-col">
                         <h1 class="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
                             Centro de <span class="text-white">Despacho</span>
                         </h1>
-                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none">
-                            Control Maestro de Asignaciones
+                        <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                            Gestión de Inspecciones
                         </h2>
                     </div>
                 </div>
 
                 <div class="flex items-center gap-4">
-                    {{-- Espacio para posibles acciones globales --}}
+                    <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
+                        <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
+                            {{ substr(auth()->user()->nombres ?? 'U', 0, 1) }}
+                        </div>
+                        <div class="h-4 w-px bg-white/10 mx-1"></div>
+                        <span class="text-[10px] font-bold text-indigo-100 italic tracking-tight">{{ auth()->user()->nombres }}</span>
+                    </a>
                 </div>
             </div>
             <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
         </header>
     @endsection
 
-    <div class="px-2 sm:px-6 lg:px-8 py-8 text-white selection:bg-ep-primary/30">
-        <div class="max-w-[95rem] mx-auto space-y-10 animate-fade-in">
+    <div class="px-2 sm:px-6 lg:px-8 py-8 text-white">
+        <div class="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
             
-            {{-- STATUS BAR: CARGA DE TRABAJO --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 animate-fade-in-down">
-                {{-- BOTÓN DE ACCIÓN MAESTRA --}}
-                <div class="lg:col-span-1 h-32 sm:h-auto">
-                    <button wire:click="toggleForm" class="w-full h-full bg-ep-primary rounded-3xl p-4 sm:p-6 flex flex-col items-center justify-center gap-2 group/btn hover:brightness-110 active:scale-95 transition-all shadow-[0_0_20px_rgba(246,146,57,0.3)]">
-                        <svg class="w-8 h-8 text-white group-hover/btn:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                            <path d="{{ $showForm ? 'M6 18L18 6M6 6l12 12' : 'M12 4v16m8-8H4' }}"/>
-                        </svg>
-                        <span class="text-[10px] font-black text-white uppercase tracking-widest italic">{{ $showForm ? 'Cerrar Panel' : 'Nueva Asignación' }}</span>
-                    </button>
-                </div>
-
-                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-6 flex items-center justify-between group/stat hover:bg-white/5 transition-all">
-                    <div>
-                        <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] italic mb-1">Pendientes</p>
-                        <p class="text-2xl font-black text-ep-primary italic leading-none">{{ \App\Models\ChecklistAssignment::where('status', 'pending')->count() }}</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-ep-primary/20 flex items-center justify-center text-ep-primary">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                </div>
-
-                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-6 flex items-center justify-between group/stat hover:bg-white/5 transition-all">
-                    <div>
-                        <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] italic mb-1">Vencidos</p>
-                        <p class="text-2xl font-black text-red-500 italic leading-none animate-pulse">{{ \App\Models\ChecklistAssignment::where('status', '!=', 'completed')->where('due_date', '<', now())->count() }}</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-500">
-                        <svg class="w-5 h-5 shadow-[0_0_10px_#ef4444]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    </div>
-                </div>
-
-                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-6 flex items-center justify-between group/stat hover:bg-white/5 transition-all">
-                    <div>
-                        <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] italic mb-1">En Curso</p>
-                        <p class="text-2xl font-black text-indigo-400 italic leading-none">{{ \App\Models\ChecklistAssignment::where('status', 'in_progress')->count() }}</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                    </div>
-                </div>
-
-                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-6 flex items-center justify-between group/stat hover:bg-white/5 transition-all">
-                    <div>
-                        <p class="text-[9px] font-black text-white/20 uppercase tracking-[0.3em] italic mb-1">Completados</p>
-                        <p class="text-2xl font-black text-emerald-400 italic leading-none">{{ \App\Models\ChecklistAssignment::where('status', 'completed')->count() }}</p>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                </div>
-            </div>
-
-            {{-- TOOLBAR TÁCTICO: FILTROS --}}
-            <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-4 sm:p-6 lg:p-10 mb-10 shadow-2xl relative animate-fade-in-down">
-                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
-                    
-                    <div class="relative group">
-                        <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Filtrar por Empresa</span>
-                        <select wire:model.live="selectedEmpresa" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
-                            <option value="">TODAS LAS EMPRESAS</option>
-                            @foreach($empresas as $empresa)
-                                <option value="{{ $empresa->id }}">{{ $empresa->nombre }}</option>
-                            @endforeach
-                        </select>
+            {{-- HUB DE COMANDOS: FILTROS Y ACCIÓN MAESTRA --}}
+            <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-4 sm:p-6 lg:p-8 shadow-2xl relative overflow-hidden animate-fade-in-down">
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/40 to-transparent"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 sm:gap-6 lg:gap-8 items-end relative z-10">
+                    {{-- BUSCADOR TÁCTICO --}}
+                    <div class="md:col-span-5 relative group">
+                        <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Terminal de Escaneo</span>
+                        <div class="relative">
+                            <input type="text" wire:model.live.debounce.300ms="search" 
+                                   placeholder="BUSCAR PROTOCOLO O CÓDIGO..."
+                                   class="w-full bg-black/40 border border-white/10 rounded-2xl px-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all placeholder-white/5 italic uppercase">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-ep-primary/30 group-focus-within:text-ep-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="relative group {{ !$selectedEmpresa ? 'opacity-20 pointer-events-none' : '' }}">
-                        <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10">Filtrar por Sede</span>
-                        <select wire:model.live="selectedSede" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
-                            <option value="">{{ $selectedEmpresa ? 'TODAS LAS SEDES' : 'BLOQUEADO' }}</option>
-                            @if($selectedEmpresa)
+                    {{-- FILTROS DE INTELIGENCIA --}}
+                    <div class="md:col-span-4 grid grid-cols-2 gap-4">
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Empresa</span>
+                            <select wire:model.live="selectedEmpresa" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer">
+                                <option value="">TODAS</option>
+                                @foreach($empresas as $empresa)
+                                    <option value="{{ $empresa->id }}">{{ $empresa->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Sede</span>
+                            <select wire:model.live="selectedSede" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer {{ !$selectedEmpresa ? 'opacity-20 cursor-not-allowed' : '' }}" {{ !$selectedEmpresa ? 'disabled' : '' }}>
+                                <option value="">TODAS</option>
                                 @foreach($sedes as $sede)
                                     <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
                                 @endforeach
-                            @endif
-                        </select>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="lg:col-span-2 flex items-center justify-end">
-                        <div class="flex items-center gap-4 px-6 py-3 bg-white/5 border border-white/10 rounded-[2rem]">
-                            <span class="text-[9px] font-black text-white/20 uppercase tracking-widest italic italic">Sincronización en Tiempo Real Active</span>
-                            <div class="w-2 h-2 bg-ep-primary rounded-full animate-ping"></div>
-                        </div>
+                    {{-- ACCIÓN PRIMARIA --}}
+                    <div class="md:col-span-3">
+                        <button wire:click="toggleForm" 
+                           class="w-full flex h-14 bg-ep-primary text-white hover:brightness-110 active:scale-95 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] italic transition-all items-center justify-center gap-3 shadow-[0_0_25px_rgba(246,146,57,0.3)] group/btn relative overflow-hidden">
+                            <div class="absolute inset-0 bg-white/10 translate-y-14 group-hover/btn:translate-y-0 transition-transform duration-500"></div>
+                            <svg class="w-5 h-5 group-hover/btn:-rotate-90 transition-transform duration-500 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                <path d="{{ $showForm ? 'M6 18L18 6M6 6l12 12' : 'M12 4v16m8-8H4' }}"/>
+                            </svg>
+                            <span class="relative z-10">{{ $showForm ? 'Cerrar Despacho' : 'Asignar Tarea' }}</span>
+                        </button>
                     </div>
                 </div>
-            </div>
-            {{-- Categorías Premium (Tabs de Gestión) --}}
-            <div class="mb-10 flex flex-wrap items-center gap-6 animate-fade-in-down" style="animation-delay: 0.1s">
-                <button wire:click="setActiveTab('inspections')" 
-                        class="flex-1 min-w-[250px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'inspections' ? 'bg-ep-primary border-ep-primary shadow-[0_0_40px_rgba(31,34,117,0.4)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-ep-primary/30 hover:bg-ep-dark/60' }}">
-                    <div class="px-8 py-7 flex items-center justify-between relative z-10">
-                        <div class="flex items-center gap-5">
-                            <div class="h-14 w-14 rounded-[2rem] flex items-center justify-center {{ $activeTab === 'inspections' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-ep-primary group-hover:rotate-12 transition-transform' }}">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-[9px] font-black {{ $activeTab === 'inspections' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-[0.3em] italic leading-none mb-1.5">Control de</p>
-                                <h3 class="text-base font-black text-white uppercase italic tracking-tight">Inspecciones</h3>
-                            </div>
-                        </div>
-                        <div class="text-3xl font-black italic {{ $activeTab === 'inspections' ? 'text-white' : 'text-ep-primary' }}">{{ $inspectionsCount }}</div>
-                    </div>
-                </button>
-
-                <button wire:click="setActiveTab('trainings')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'trainings' ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_40px_rgba(79,70,229,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-indigo-600/30 hover:bg-ep-dark/60' }}">
-                    <div class="px-6 sm:px-8 py-5 sm:py-7 flex items-center justify-between relative z-10">
-                        <div class="flex items-center gap-5">
-                            <div class="h-14 w-14 rounded-[2rem] flex items-center justify-center {{ $activeTab === 'trainings' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-indigo-400 group-hover:rotate-12 transition-transform' }}">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-[9px] font-black {{ $activeTab === 'trainings' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-[0.3em] italic leading-none mb-1.5">Control de</p>
-                                <h3 class="text-base font-black text-white uppercase italic tracking-tight">Capacitaciones</h3>
-                            </div>
-                        </div>
-                        <div class="text-3xl font-black italic {{ $activeTab === 'trainings' ? 'text-white' : 'text-indigo-400' }}">{{ $trainingsCount }}</div>
-                    </div>
-                </button>
-
-                <button wire:click="setActiveTab('reports')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'reports' ? 'bg-emerald-600 border-emerald-600 shadow-[0_0_40px_rgba(16,185,129,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-emerald-600/30 hover:bg-ep-dark/60' }}">
-                    <div class="px-6 sm:px-8 py-5 sm:py-7 flex items-center justify-between relative z-10">
-                        <div class="flex items-center gap-5">
-                            <div class="h-14 w-14 rounded-[2rem] flex items-center justify-center {{ $activeTab === 'reports' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-emerald-400 group-hover:rotate-12 transition-transform' }}">
-                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            </div>
-                            <div class="text-left">
-                                <p class="text-[9px] font-black {{ $activeTab === 'reports' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-[0.3em] italic leading-none mb-1.5">Control de</p>
-                                <h3 class="text-base font-black text-white uppercase italic tracking-tight">Informes</h3>
-                            </div>
-                        </div>
-                        <div class="text-3xl font-black italic {{ $activeTab === 'reports' ? 'text-white' : 'text-emerald-400' }}">{{ $reportsCount }}</div>
-                    </div>
-                </button>
             </div>
 
             {{-- FORMULARIO DE INYECCIÓN DE TAREAS (HUD) --}}
             @if($showForm)
-                <div class="bg-ep-dark/60 backdrop-blur-xl rounded-3xl sm:rounded-[3rem] border-2 border-ep-primary/30 p-5 sm:p-10 shadow-2xl relative animate-fade-in-down overflow-hidden">
+                <div class="bg-ep-dark/60 backdrop-blur-xl rounded-3xl sm:rounded-[3rem] border-2 border-ep-primary/30 p-5 sm:p-10 shadow-[0_0_50px_rgba(246,146,57,0.1)] relative animate-fade-in-down overflow-hidden">
                     <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-ep-primary/50 to-transparent"></div>
                     
                     <div class="flex items-center justify-between mb-10">
@@ -256,13 +177,13 @@
 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div class="relative group">
-                                        <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Fecha de Vencimiento</span>
+                                        <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Fecha Límite Táctica</span>
                                         <input type="date" wire:model="formDueDate" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark] italic">
                                     </div>
                                     <div class="relative group">
                                         <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Frecuencia (Manual Override)</span>
                                         <select class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white/20 italic uppercase" disabled>
-                                            <option>SEGÚN PROTOCOLO</option>
+                                            <option>ÚNICA / UNA VEZ</option>
                                         </select>
                                     </div>
                                 </div>
@@ -288,154 +209,170 @@
                 </div>
             @endif
 
-            {{-- MASTER TABLE: MATRIZ DE ASIGNACIONES --}}
+            {{-- MATRIZ DE DE ASIGNACIONES (REDISEÑO) --}}
             <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
-                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
+                <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
                 
                 <div class="overflow-x-auto">
                     <table class="w-full border-collapse">
                         <thead>
                             <tr class="bg-black/20 text-left">
-                                <th class="px-4 lg:px-8 py-6">
-                                    <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">
-                                        {{ match($activeTab) {
-                                            'trainings' => 'Programa',
-                                            'reports' => 'Reporte',
-                                            default => 'Tarea Técnica'
-                                        } }}
-                                    </span>
-                                </th>
-                                <th class="hidden xl:table-cell px-4 lg:px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Técnico</span></th>
-                                <th class="hidden md:table-cell px-4 lg:px-8 py-6"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Sede / Cliente</span></th>
-                                <th class="px-4 lg:px-8 py-6 text-center">
-                                    <span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">
-                                        Programación
-                                    </span>
-                                </th>
-                                <th class="px-4 lg:px-8 py-6 text-center"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">HUD</span></th>
-                                <th class="px-4 lg:px-8 py-6 text-right"><span class="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Comandos</span></th>
+                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Inspección / Protocolo</th>
+                                <th class="hidden xl:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Técnico</th>
+                                <th class="hidden md:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Punto de Despliegue</th>
+                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Cronograma</th>
+                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">HUD</th>
+                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($assignments as $assignment)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 relative">
-                                    <td class="px-4 lg:px-8 py-6 lg:py-8">
-                                        <div class="flex flex-wrap items-center gap-2 mb-1">
-                                            <div class="text-xs sm:text-sm font-black text-white italic uppercase tracking-tight leading-tight lg:group-hover/row:text-ep-primary transition-colors">{{ $assignment->checklist->title ?? 'Sin Título' }}</div>
-                                            @if(($assignment->source ?? 'manual') === 'contract')
-                                                <span class="text-[7px] sm:text-[8px] font-black text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 uppercase italic">Contrato</span>
-                                            @endif
+                                    <td class="px-4 lg:px-8 py-6">
+                                        <div class="flex items-center gap-3 sm:gap-4">
+                                            <div class="relative group/icon hidden xs:block">
+                                                <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl {{ ($assignment->source ?? 'manual') === 'contract' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-ep-primary/10 border-ep-primary/20 text-ep-primary' }} border flex items-center justify-center text-xs font-black group-hover:scale-110 transition-transform">
+                                                    @if(($assignment->source ?? 'manual') === 'contract')
+                                                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                                    @else
+                                                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                                    <div class="text-xs sm:text-sm font-black text-white italic uppercase tracking-tight leading-none lg:group-hover/row:text-ep-primary transition-colors">
+                                                        {{ $assignment->checklist->title ?? 'Sin Título' }}
+                                                    </div>
+                                                </div>
+                                                <div class="text-[8px] sm:text-[9px] font-black text-white/20 uppercase tracking-widest italic flex items-center gap-2">
+                                                    @if($assignment->registry_code)
+                                                        <span class="font-mono text-white/30 hidden sm:inline">[{{ $assignment->registry_code }}]</span>
+                                                    @endif
+                                                    <span class="text-white/40">{{ ($assignment->source ?? 'manual') === 'contract' ? 'Contrato Anual' : 'Despacho Manual' }}</span>
+                                                </div>
+                                            </div>
                                         </div>
-                                        @if($assignment->registry_code)
-                                            <div class="text-[8px] sm:text-[9px] font-bold text-white/20 italic font-mono">{{ $assignment->registry_code }}</div>
-                                        @endif
                                     </td>
-                                    <td class="hidden xl:table-cell px-4 lg:px-8 py-6 lg:py-8">
+                                    
+                                    <td class="hidden xl:table-cell px-4 lg:px-8 py-6">
                                         <div class="flex items-center gap-3">
                                             @if(($assignment->source ?? 'manual') === 'manual')
-                                                <div class="w-8 h-8 rounded-full bg-ep-primary/20 border border-ep-primary/30 flex items-center justify-center text-[10px] font-black text-ep-primary transition-transform lg:group-hover/row:scale-110">
+                                                <div class="w-8 h-8 rounded-xl border bg-ep-primary/10 border-ep-primary/20 text-ep-primary flex items-center justify-center text-[10px] font-black">
                                                     {{ substr($assignment->user->nombres ?? 'U', 0, 1) }}
                                                 </div>
-                                                <div class="text-xs font-bold text-indigo-100 italic">{{ $assignment->user->nombres ?? 'N/A' }}</div>
+                                                <div>
+                                                    <div class="text-xs font-black text-white/60 italic uppercase leading-none">{{ $assignment->user->nombres ?? 'N/A' }}</div>
+                                                    <div class="text-[9px] font-bold text-white/20 italic mt-0.5 whitespace-nowrap">{{ $assignment->user->apellidos ?? '' }}</div>
+                                                </div>
+                                            @else
+                                                <div class="w-8 h-8 rounded-xl border bg-indigo-500/10 border-indigo-500/20 text-indigo-400 flex items-center justify-center text-[10px] font-black">
+                                                    {{ substr($assignment->user->nombres ?? 'O', 0, 1) }}
+                                                </div>
+                                                <div>
+                                                    <div class="text-xs font-black text-white/60 italic uppercase leading-none">{{ $assignment->user->nombres ?? 'N/A' }}</div>
+                                                    <div class="text-[9px] font-bold text-white/20 italic mt-0.5 whitespace-nowrap">{{ $assignment->user->apellidos ?? '' }}</div>
+                                                </div>
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="hidden md:table-cell px-4 lg:px-8 py-6 lg:py-8">
-                                        <div class="text-[10px] font-black text-white italic uppercase tracking-tight leading-none mb-1">{{ $assignment->sede->nombre_sede }}</div>
-                                        <div class="text-[8px] font-bold text-white/20 italic uppercase tracking-widest">{{ $assignment->empresa->nombre }}</div>
+                                    
+                                    <td class="hidden md:table-cell px-4 lg:px-8 py-6">
+                                        <div class="text-[10px] font-black text-white italic uppercase tracking-tight leading-none mb-1 lg:group-hover/row:text-ep-primary transition-colors">{{ $assignment->empresa->nombre ?? 'N/A' }}</div>
+                                        <div class="text-[8px] font-bold text-white/20 italic tracking-widest uppercase">{{ $assignment->sede->nombre_sede ?? 'N/A' }}</div>
                                     </td>
-                                    <td class="px-4 lg:px-8 py-6 lg:py-8 text-center">
-                                        @if($activeTab === 'trainings')
-                                            <div class="text-[9px] font-black text-white/60 mb-1 italic">
-                                                {{ $assignment->duration ?? 'S/D' }}m
+                                    
+                                    <td class="px-4 lg:px-8 py-6">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="flex items-center gap-2 text-[10px] font-black text-white/60 italic">
+                                                <svg class="w-3 h-3 text-red-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/y')) : 'Sin Fecha' }}
                                             </div>
-                                        @elseif($activeTab === 'reports')
-                                            <div class="text-[9px] font-black text-white/60 mb-1 italic">
-                                                {{ $assignment->periodo ?? 'S/P' }}
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-[8px] font-black {{ ($assignment->source ?? 'manual') === 'contract' ? 'text-indigo-400' : 'text-ep-primary' }} uppercase italic">{{ $assignment->frequency_label ?? 'Manual' }}</span>
                                             </div>
-                                        @else
-                                            <div class="text-[9px] font-black text-white/60 mb-1 italic">
-                                                {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/M/y')) : 'S/F' }}
-                                            </div>
-                                        @endif
+                                        </div>
                                     </td>
-                                    <td class="px-4 lg:px-8 py-6 lg:py-8 text-center">
+                                    
+                                    <td class="px-4 lg:px-8 py-6 text-center">
                                         @php
                                             $color = $assignment->status_badge_color ?? 'gray';
                                             $statusClasses = match($color) {
-                                                'emerald', 'green' => 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]',
-                                                'blue', 'indigo' => 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.2)]',
-                                                'yellow', 'amber' => 'bg-amber-500/10 border-amber-500/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)]',
-                                                'red' => 'bg-red-500/10 border-red-500/20 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-pulse',
-                                                default => 'bg-white/5 border-white/10 text-white/30'
+                                                'emerald', 'green' => 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_10px_rgba(16,185,129,0.1)]',
+                                                'blue', 'indigo' => 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10 shadow-[0_0_10px_rgba(99,102,241,0.1)]',
+                                                'yellow', 'amber' => 'text-amber-400 border-amber-500/30 bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
+                                                'red' => 'text-red-400 border-red-500/30 bg-red-500/10 shadow-[0_0_10px_rgba(239,68,68,0.1)]',
+                                                default => 'text-white/20 border-white/5 bg-white/5'
                                             };
                                             $statusLabel = match($assignment->status) {
                                                 'pending' => 'PENDIENTE',
                                                 'in_progress' => 'EN CURSO',
-                                                'completed' => 'COMPLETADO',
+                                                'completed' => 'FINALIZADA',
                                                 default => strtoupper($assignment->status)
                                             };
                                         @endphp
-                                        <div class="inline-flex items-center px-2 sm:px-4 py-1 border rounded-xl text-[7px] sm:text-[9px] font-black uppercase tracking-widest italic {{ $statusClasses }}">
+                                        <span class="inline-flex px-2 py-1 rounded-full text-[7px] sm:text-[8px] font-black uppercase tracking-widest italic border {{ $statusClasses }}">
                                             <span class="hidden xs:inline">
                                                 @if($assignment->is_overdue ?? false) VENCIDO @else {{ $statusLabel }} @endif
                                             </span>
                                             <span class="xs:hidden">
-                                                {{ substr($statusLabel, 0, 4) }}
+                                                @if($assignment->is_overdue ?? false) VENC @else {{ substr($statusLabel, 0, 4) }} @endif
                                             </span>
-                                        </div>
+                                        </span>
                                     </td>
-                                    <td class="px-4 lg:px-8 py-6 lg:py-8 text-right">
+                                    
+                                    <td class="px-4 lg:px-8 py-6 text-right">
                                         <div class="flex justify-end gap-2 sm:gap-3 lg:translate-x-4 lg:opacity-0 lg:group-hover/row:translate-x-0 lg:group-hover/row:opacity-100 transition-all duration-500">
-                                            @if($assignment->can_be_edited)
-                                                <button wire:click="edit({{ $assignment->id }})" class="h-9 w-9 sm:h-10 sm:w-10 bg-white/5 border border-white/10 text-white hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                </button>
-                                            @endif
-
-                                            @if($assignment->status === 'completed' && $assignment->inspection)
-                                                <a href="{{ route('gestor.inspections.pdf.preview', $assignment->inspection->id) }}" target="_blank" class="h-9 w-9 sm:h-10 sm:w-10 bg-ep-primary/10 border border-ep-primary/20 text-ep-primary hover:bg-ep-primary hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95" title="Ver Reporte">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                            
+                                            @if(($assignment->source ?? 'manual') === 'contract')
+                                                <a href="{{ route('gestor.annual-contract.index') }}" class="h-9 w-9 sm:h-10 sm:w-auto sm:px-4 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg text-[9px] font-black uppercase italic tracking-widest">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                    <span class="hidden md:inline">Plan Maestro</span>
                                                 </a>
-                                            @endif
-
-                                            @if($assignment->can_be_deleted)
-                                                <button wire:click="delete({{ $assignment->id }})" wire:confirm="¿Desea abortar esta asignación táctica?" class="h-9 w-9 sm:h-10 sm:w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                                </button>
+                                            @else
+                                                @if($assignment->can_be_edited)
+                                                    <button wire:click="edit({{ $assignment->id }})" class="h-9 w-9 sm:h-10 sm:w-10 bg-white/5 border border-white/10 text-white hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                                    </button>
+                                                @endif
+                                                @if($assignment->status === 'completed' && isset($assignment->inspection))
+                                                    <a href="{{ route('gestor.inspections.pdf.preview', $assignment->inspection->id) }}" target="_blank" class="h-9 w-9 sm:h-10 sm:w-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95" title="Ver Reporte">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    </a>
+                                                @endif
+                                                @if($assignment->can_be_deleted)
+                                                    <button wire:click="delete({{ $assignment->id }})" wire:confirm="¿Desea abortar esta asignación táctica?" class="h-9 w-9 sm:h-10 sm:w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                    </button>
+                                                @endif
                                             @endif
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">No se detectaron órdenes de trabajo activas <br> <span class="text-[9px] tracking-widest text-white/3 italic">Inicie una nueva asignación desde el panel superior</span></td>
+                                    <td colspan="6" class="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">Sin Despliegues Activos <br> <span class="text-[9px] tracking-widest text-white/3 italic">Inicie una nueva asignación de protocolo desde la barra superior</span></td>
                                 </tr>
                             @endforelse
                         </tbody>
                     </table>
                 </div>
 
-                <div class="px-4 sm:px-10 py-6 border-t border-white/5 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-6">
-                    <div class="hidden sm:block text-[9px] font-black text-white/10 uppercase tracking-[0.5em] italic">XamaSafe Dispatch Engine v4.0 • Level 4 Clearance</div>
-                    <div class="pagination-tactical">
-                        {{ $assignments->links() }}
-                    </div>
+                <div class="px-4 sm:px-10 py-6 border-t border-white/5 bg-black/20 pagination-tactical">
+                    {{ $assignments->links() }}
                 </div>
             </div>
-
-            
         </div>
     </div>
 
     <style>
+        .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
         .animate-fade-in-down { animation: fade-in-down 0.6s ease-out forwards; }
         .animate-fade-in-up { animation: fade-in-up 0.5s ease-out forwards; }
-        .animate-fade-in { animation: fade-in 0.8s ease-out forwards; }
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-        
+
         .pagination-tactical nav div:first-child { display: none; }
         .pagination-tactical nav span, .pagination-tactical nav a {
             background-color: transparent !important;
@@ -451,4 +388,3 @@
         }
     </style>
 </div>
-

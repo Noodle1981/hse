@@ -7,7 +7,10 @@ use App\Models\Empresa;
 use App\Models\Sede;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class MyAssignments extends Component
 {
     use WithPagination;
@@ -21,6 +24,8 @@ class MyAssignments extends Component
     public ?int $selectedSede = null;
     public string $statusFilter = '';
 
+    public ?int $selectedMonth = null;
+
     #[\Livewire\Attributes\Url]
     public string $activeTab = 'inspections';
 
@@ -30,7 +35,13 @@ class MyAssignments extends Component
         'selectedSede' => ['except' => null],
         'statusFilter' => ['except' => ''],
         'activeTab' => ['except' => 'inspections'],
+        'selectedMonth' => ['except' => null],
     ];
+
+    public function mount()
+    {
+        $this->selectedMonth = $this->selectedMonth ?? now()->month;
+    }
 
     public function setActiveTab($tab)
     {
@@ -54,19 +65,24 @@ class MyAssignments extends Component
         $this->resetPage();
     }
 
+    public function updatedSelectedMonth()
+    {
+        $this->resetPage();
+    }
+
     private function getStrategicKPIs($user)
     {
-        $month = strtolower(now()->format('F'));
+        $monthName = strtolower(\Carbon\Carbon::create()->month($this->selectedMonth)->format('F'));
         $year = now()->year;
 
         // 1. Cumplimiento Mensual (Contrato Anual)
         $totalPlan = \App\Models\AnnualPlan::whereIn('sede_id', $user->sedes->pluck('id'))
-            ->where($month, true)
+            ->where($monthName, true)
             ->where('year', $year)
             ->count();
             
         $completedCount = \App\Models\DynamicInspection::where('user_id', $user->id)
-            ->whereMonth('completed_at', now()->month)
+            ->whereMonth('completed_at', $this->selectedMonth)
             ->whereYear('completed_at', $year)
             ->count();
             
@@ -80,7 +96,8 @@ class MyAssignments extends Component
 
         // 3. Inspecciones del Mes
         $totalMonth = \App\Models\DynamicInspection::where('user_id', $user->id)
-            ->whereMonth('completed_at', now()->month)
+            ->whereMonth('completed_at', $this->selectedMonth)
+            ->whereYear('completed_at', $year)
             ->count();
 
         return [
@@ -92,15 +109,19 @@ class MyAssignments extends Component
 
     public function render(\App\Services\VisitService $visitService)
     {
-        $user = auth()->user();
+        $user = Auth::user();
         $this->activeVisit = $visitService->getActiveVisit($user);
         $this->strategicKPIs = $this->getStrategicKPIs($user);
         
-        $month = strtolower(now()->format('F'));
+        $monthName = strtolower(\Carbon\Carbon::create()->month($this->selectedMonth)->format('F'));
 
         // 1. Manual Assignments (Solicitudes)
         $manualQuery = ChecklistAssignment::with(['checklist', 'sede', 'empresa', 'visitCompletion.visit'])
             ->where('user_id', $user->id)
+            ->when($this->selectedMonth, function($q) {
+                $q->whereMonth('due_date', $this->selectedMonth);
+            })
+            ->whereYear('due_date', now()->year)
             ->when($this->search, function ($q) {
                 $q->whereHas('checklist', function ($sub) {
                     $sub->where('title', 'like', '%' . $this->search . '%');
@@ -120,6 +141,10 @@ class MyAssignments extends Component
         $trainingsQuery = \App\Models\Training::with(['sede', 'empresa'])
             ->where('user_id', $user->id)
             ->where('status', '!=', 'completed')
+            ->when($this->selectedMonth, function($q) {
+                $q->whereMonth('date', $this->selectedMonth);
+            })
+            ->whereYear('date', now()->year)
             ->when($this->search, function ($q) {
                 $q->where('title', 'like', '%' . $this->search . '%');
             })
@@ -137,6 +162,10 @@ class MyAssignments extends Component
         $reportsQuery = \App\Models\MasterReport::with(['sede', 'sede.empresa'])
             ->where('user_id', $user->id)
             ->where('estado', '!=', 'finalizado')
+            ->when($this->selectedMonth, function($q) {
+                $q->whereMonth('created_at', $this->selectedMonth);
+            })
+            ->whereYear('created_at', now()->year)
             ->when($this->search, function ($q) {
                 $q->where('titulo', 'like', '%' . $this->search . '%');
             })
@@ -163,7 +192,10 @@ class MyAssignments extends Component
             'registry_code' => $a->checklist?->registry_code,
             'created_at' => $a->created_at,
             'inspection' => $a->inspection ?? ($a->completion?->inspection ?? null),
-            'frequency_label' => method_exists($a, 'getFrequencyLabel') ? $a->getFrequencyLabel() : 'Manual'
+            'frequency_label' => method_exists($a, 'getFrequencyLabel') ? $a->getFrequencyLabel() : 'Manual',
+            'notes' => $a->notes,
+            'description' => $a->checklist?->description,
+            'trainer_name' => null,
         ]);
         $manualReports = $reportsQuery->get()->map(fn($r) => (object)[
             'id' => $r->id,
@@ -171,7 +203,7 @@ class MyAssignments extends Component
             'checklist' => (object)['title' => $r->titulo, 'registry_code' => 'REP-' . $r->id],
             'sede' => $r->sede,
             'empresa' => $r->sede?->empresa,
-            'due_date' => $r->created_at->addDays(7), // Estimación
+            'due_date' => $r->created_at->addDays(7),
             'status' => $r->estado,
             'source' => 'manual',
             'category' => 'Informe',
@@ -180,7 +212,10 @@ class MyAssignments extends Component
             'created_at' => $r->created_at,
             'inspection' => null,
             'frequency_label' => 'Manual',
-            'periodo' => $r->periodo // Agregado para vista especializada
+            'periodo' => $r->periodo,
+            'notes' => null,
+            'description' => null,
+            'trainer_name' => null,
         ]);
 
         $manualTrainings = $trainingsQuery->get()->map(fn($t) => (object)[
@@ -198,14 +233,17 @@ class MyAssignments extends Component
             'created_at' => $t->created_at,
             'inspection' => null,
             'frequency_label' => 'Manual',
-            'duration' => $t->duration, // Agregado
-            'type' => $t->type // Agregado
+            'duration' => $t->duration,
+            'type' => $t->type,
+            'notes' => $t->notes,
+            'description' => $t->description,
+            'trainer_name' => $t->trainer_name,
         ]);
 
         // 2. Annual Plan Tasks (Contratos)
         $contractQuery = \App\Models\AnnualPlan::with(['checklist', 'sede', 'sede.empresa'])
             ->whereIn('sede_id', $user->sedes->pluck('id'))
-            ->where($month, true)
+            ->where($monthName, true)
             ->where('year', now()->year)
             ->when($this->search, function ($q) {
                 $q->where(function($sub) {
@@ -237,7 +275,7 @@ class MyAssignments extends Component
             'checklist' => $p->checklist ?? (object)['title' => $p->activity_name, 'registry_code' => $p->activity_code],
             'sede' => $p->sede,
             'empresa' => $p->sede?->empresa,
-            'due_date' => now()->endOfMonth(),
+            'due_date' => \Carbon\Carbon::create(now()->year, $this->selectedMonth)->endOfMonth(),
             'status' => 'scheduled',
             'source' => 'contract',
             'category' => $p->category,
@@ -248,7 +286,10 @@ class MyAssignments extends Component
             'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
             'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
             'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,
-            'periodo' => ($p->category === 'Informe') ? now()->translatedFormat('F Y') : null
+            'periodo' => ($p->category === 'Informe') ? \Carbon\Carbon::create(now()->year, $this->selectedMonth)->translatedFormat('F Y') : null,
+            'notes' => null,
+            'description' => $p->checklist?->description,
+            'trainer_name' => null,
         ]);
 
         // Merge all into categorized collections (con manejo defensivo de nulos)
@@ -293,6 +334,6 @@ class MyAssignments extends Component
             'sedes' => $sedes,
             'activeVisit' => $this->activeVisit,
             'kpis' => $this->strategicKPIs,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

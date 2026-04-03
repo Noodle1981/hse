@@ -10,7 +10,8 @@
                     </button>
 
                     <div class="flex flex-col">
-                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.4em] italic leading-none mb-1">
+                        <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.4em] italic leading-none mb-1 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                             Consola de <span class="text-white">Operaciones</span>
                         </h1>
                         <h2 class="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
@@ -41,17 +42,32 @@
                 {{-- KPI Mini-Matrix --}}
                 <div class="lg:col-span-1 grid grid-cols-2 lg:grid-cols-1 gap-4">
                     <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-4 flex items-center gap-4 group/kpi hover:border-indigo-500/30 transition-all">
-                        <div class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center rounded-xl font-black italic shadow-inner group-hover/kpi:scale-110 transition-transform">
-                            %
+                        <div class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center rounded-xl font-black italic shadow-inner group-hover/kpi:scale-110 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a.75.75 0 00-1.061 0l-4.5 4.5a.75.75 0 101.06 1.061l3.97-3.97 3.97 3.97a.75.75 0 101.06-1.061l-4.5-4.5zM16.165 19.303a.75.75 0 001.061 0l4.5-4.5a.75.75 0 10-1.06-1.061l-3.97 3.97-3.97-3.97a.75.75 0 10-1.06 1.061l4.5 4.5z"/></svg>
                         </div>
-                        <div>
-                            <p class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic leading-none mb-1">Cumplimiento</p>
-                            <p class="text-lg font-black text-white italic leading-none">{{ $kpis['compliance'] }}%</p>
+                    <div x-data="{
+                        compliance: {{ $kpis['compliance'] }},
+                        init() {
+                            // Animar la barra al cargar
+                            this.$nextTick(() => {
+                                this.$refs.bar.style.width = this.compliance + '%';
+                            });
+                        }
+                    }">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic leading-none">Cumplimiento</p>
+                            <p class="text-lg font-black text-white italic leading-none" x-text="compliance + '%'"></p>
+                        </div>
+                        <div class="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                            <div x-ref="bar" class="h-full rounded-full transition-all duration-1000 ease-out"
+                                 :style="`width: 0%; background: linear-gradient(to right, #6366f1, ${ compliance >= 80 ? '#10b981' : compliance >= 50 ? '#f59e0b' : '#ef4444' })`"
+                            ></div>
                         </div>
                     </div>
+                    </div>
                     <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl border border-white/5 p-4 flex items-center gap-4 group/kpi hover:border-red-500/30 transition-all">
-                        <div class="h-10 w-10 bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center rounded-xl font-black italic shadow-inner group-hover/kpi:scale-110 transition-transform">
-                             !
+                        <div class="h-10 w-10 bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center rounded-xl font-black italic shadow-inner group-hover/kpi:scale-110 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         </div>
                         <div>
                             <p class="text-[9px] font-black text-red-500/40 uppercase tracking-widest italic leading-none mb-1">Críticos</p>
@@ -98,7 +114,7 @@
                                     </div>
                                     <div>
                                         <span class="text-[10px] font-black text-indigo-100/20 uppercase tracking-[0.4em] italic mb-2 block">Estado: Planificación</span>
-                                        <h3 class="text-xl font-black text-white/40 uppercase italic tracking-tight italic">Consola Desconectada</h3>
+                                        <h3 class="text-xl font-black text-white/40 uppercase italic tracking-tight">Consola Desconectada</h3>
                                     </div>
                                 </div>
                                 <a href="{{ route('tecnico.visits.index') }}" class="w-full md:w-auto h-16 px-12 flex items-center justify-center bg-ep-primary text-white text-[11px] font-black uppercase tracking-[0.3em] italic rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-2xl shadow-ep-primary/20 group/btn relative overflow-hidden">
@@ -112,115 +128,178 @@
             </div>
 
             {{-- Filtros Premium Dark --}}
-            <div class="mb-10 animate-fade-in-down">
-                <div class="bg-ep-dark/50 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-6 sm:p-8 shadow-2xl relative overflow-hidden group">
+            <div class="mb-10 animate-fade-in-down relative z-[30]">
+                <div class="bg-ep-dark/50 backdrop-blur-xl rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-6 sm:p-8 shadow-2xl relative group">
                     <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 sm:gap-8 relative z-10">
+                    @php
+                        $months = [
+                            ['value' => 1, 'label' => 'Enero'], ['value' => 2, 'label' => 'Febrero'], 
+                            ['value' => 3, 'label' => 'Marzo'], ['value' => 4, 'label' => 'Abril'],
+                            ['value' => 5, 'label' => 'Mayo'], ['value' => 6, 'label' => 'Junio'],
+                            ['value' => 7, 'label' => 'Julio'], ['value' => 8, 'label' => 'Agosto'],
+                            ['value' => 9, 'label' => 'Septiembre'], ['value' => 10, 'label' => 'Octubre'],
+                            ['value' => 11, 'label' => 'Noviembre'], ['value' => 12, 'label' => 'Diciembre']
+                        ];
+                        $statusOptions = [
+                            ['value' => 'pending', 'label' => '🟡 Pendientes'],
+                            ['value' => 'in_progress', 'label' => '🔵 En Curso'],
+                            ['value' => 'completed', 'label' => '🟢 Finalizadas'],
+                        ];
+                        $empresaOptions = $empresas->map(fn($e) => ['value' => $e->id, 'label' => $e->nombre])->toArray();
+                        $sedeOptions = $sedes->map(fn($s) => ['value' => $s->id, 'label' => $s->nombre_sede])->toArray();
+                    @endphp
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 xl:gap-4 relative z-10">
+                        {{-- Búsqueda con botón limpiar Alpine --}}
                         <div class="space-y-3">
                             <label class="flex items-center gap-2 text-[10px] font-black text-ep-primary uppercase tracking-[0.2em] italic ml-1">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                Búsqueda Libre
+                                Búsqueda
                             </label>
-                            <input wire:model.live.debounce.300ms="search" type="text" placeholder="Checklist o Código..." 
-                                   class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-white placeholder-white/10 focus:outline-none focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary transition-all backdrop-blur-md">
+                            <div x-data="{}" class="relative">
+                                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Checklist..." 
+                                       class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 pr-10 text-sm font-bold text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-ep-primary/50 transition-all backdrop-blur-md hover:border-white/20">
+                                <button
+                                    x-show="$wire.search !== ''"
+                                    x-cloak
+                                    @click="$wire.search = ''"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 h-6 w-6 flex items-center justify-center text-white/30 hover:text-white transition-colors rounded-full hover:bg-white/10"
+                                    title="Limpiar búsqueda"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-2 text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                                Entidad / Cliente
-                            </label>
-                            <select wire:model.live="selectedEmpresa" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark]">
-                                <option value="">Todas las Entidades</option>
-                                @foreach($empresas as $empresa)
-                                    <option value="{{ $empresa->id }}">{{ $empresa->nombre }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-custom-select 
+                            label="Mes Consulta" 
+                            model="selectedMonth" 
+                            :options="$months" 
+                            placeholder="Mes..."
+                            icon='<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>' 
+                        />
 
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-2 text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                Sede Técnica
-                            </label>
-                            <select wire:model.live="selectedSede" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark]" {{ !$selectedEmpresa ? 'disabled' : '' }}>
-                                <option value="">Todas las Sedes</option>
-                                @foreach($sedes as $sede)
-                                    <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+                        <x-custom-select 
+                            label="Entidad" 
+                            model="selectedEmpresa" 
+                            :options="$empresaOptions" 
+                            placeholder="Todas"
+                            icon='<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>' 
+                        />
 
-                        <div class="space-y-3">
-                            <label class="flex items-center gap-2 text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                Estado de Misión
-                            </label>
-                            <select wire:model.live="statusFilter" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark]">
-                                <option value="">Todos los Estados</option>
-                                <option value="pending">🟡 Pendientes</option>
-                                <option value="in_progress">🔵 En Curso</option>
-                                <option value="completed">🟢 Finalizadas</option>
-                            </select>
-                        </div>
+                        <x-custom-select 
+                            label="Sede" 
+                            model="selectedSede" 
+                            :options="$sedeOptions" 
+                            placeholder="Todas"
+                            :disabled="!$selectedEmpresa"
+                            icon='<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' 
+                        />
+
+                        <x-custom-select 
+                            label="Estado" 
+                            model="statusFilter" 
+                            :options="$statusOptions" 
+                            placeholder="Todos"
+                            icon='<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' 
+                        />
                     </div>
                 </div>
             </div>
 
-            {{-- Categorías Premium (Tabs) --}}
-            <div class="mb-10 flex flex-wrap items-center gap-4 animate-fade-in-down" style="animation-delay: 0.1s">
-                <button wire:click="setActiveTab('inspections')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'inspections' ? 'bg-ep-primary border-ep-primary shadow-[0_0_30px_rgba(31,34,117,0.4)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-ep-primary/30 hover:bg-ep-dark/60' }}">
+            {{-- Categorías Premium (Tabs) - Alpine Instantáneo --}}
+            <div
+                x-data="{
+                    activeTab: @entangle('activeTab'),
+                    switchTab(tab) {
+                        this.activeTab = tab;
+                        $wire.setActiveTab(tab);
+                    }
+                }"
+                class="mb-10 flex flex-wrap items-center gap-4 animate-fade-in-down"
+                style="animation-delay: 0.1s"
+            >
+                {{-- TAB: Inspecciones --}}
+                <button @click="switchTab('inspections')" type="button"
+                        :class="activeTab === 'inspections' ? 'bg-ep-primary border-ep-primary shadow-[0_0_30px_rgba(31,34,117,0.4)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-ep-primary/30 hover:bg-ep-dark/60'"
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-300">
                     <div class="px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between relative z-10">
                         <div class="flex items-center gap-4">
-                            <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'inspections' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-ep-primary' }}">
+                            <div :class="activeTab === 'inspections' ? 'bg-white/20 text-white' : 'bg-white/5 border border-white/10 text-ep-primary'"
+                                 class="h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                             </div>
                             <div class="text-left">
-                                <p class="text-[10px] font-black {{ $activeTab === 'inspections' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-widest italic leading-none mb-1">Misiones</p>
+                                <p :class="activeTab === 'inspections' ? 'text-white/60' : 'text-indigo-100/40'" class="text-[10px] font-black uppercase tracking-widest italic leading-none mb-1">Misiones</p>
                                 <h3 class="text-sm font-black text-white uppercase italic tracking-tight">Inspecciones</h3>
                             </div>
                         </div>
-                        <div class="text-2xl font-black italic {{ $activeTab === 'inspections' ? 'text-white' : 'text-ep-primary' }}">{{ $inspectionsCount }}</div>
+                        <div :class="activeTab === 'inspections' ? 'text-white' : 'text-ep-primary'" class="text-2xl font-black italic">{{ $inspectionsCount }}</div>
                     </div>
                 </button>
 
-                <button wire:click="setActiveTab('trainings')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'trainings' ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_30px_rgba(79,70,229,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-indigo-600/30 hover:bg-ep-dark/60' }}">
+                {{-- TAB: Capacitaciones --}}
+                <button @click="switchTab('trainings')" type="button"
+                        :class="activeTab === 'trainings' ? 'bg-indigo-600 border-indigo-600 shadow-[0_0_30px_rgba(79,70,229,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-indigo-600/30 hover:bg-ep-dark/60'"
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-300">
                     <div class="px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between relative z-10">
                         <div class="flex items-center gap-4">
-                            <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'trainings' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-indigo-400' }}">
+                            <div :class="activeTab === 'trainings' ? 'bg-white/20 text-white' : 'bg-white/5 border border-white/10 text-indigo-400'"
+                                 class="h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
                             </div>
                             <div class="text-left">
-                                <p class="text-[10px] font-black {{ $activeTab === 'trainings' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-widest italic leading-none mb-1">Educación</p>
+                                <p :class="activeTab === 'trainings' ? 'text-white/60' : 'text-indigo-100/40'" class="text-[10px] font-black uppercase tracking-widest italic leading-none mb-1">Educación</p>
                                 <h3 class="text-sm font-black text-white uppercase italic tracking-tight">Capacitaciones</h3>
                             </div>
                         </div>
-                        <div class="text-2xl font-black italic {{ $activeTab === 'trainings' ? 'text-white' : 'text-indigo-400' }}">{{ $trainingsCount }}</div>
+                        <div :class="activeTab === 'trainings' ? 'text-white' : 'text-indigo-400'" class="text-2xl font-black italic">{{ $trainingsCount }}</div>
                     </div>
                 </button>
 
-                <button wire:click="setActiveTab('reports')" 
-                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-500 {{ $activeTab === 'reports' ? 'bg-emerald-600 border-emerald-600 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-emerald-600/30 hover:bg-ep-dark/60' }}">
+                {{-- TAB: Informes --}}
+                <button @click="switchTab('reports')" type="button"
+                        :class="activeTab === 'reports' ? 'bg-emerald-600 border-emerald-600 shadow-[0_0_30px_rgba(16,185,129,0.3)] scale-105' : 'bg-ep-dark/40 border-white/5 hover:border-emerald-600/30 hover:bg-ep-dark/60'"
+                        class="flex-1 min-w-[200px] group relative overflow-hidden rounded-3xl sm:rounded-[2.5rem] border transition-all duration-300">
                     <div class="px-5 sm:px-8 py-5 sm:py-6 flex items-center justify-between relative z-10">
                         <div class="flex items-center gap-4">
-                            <div class="h-12 w-12 rounded-2xl flex items-center justify-center {{ $activeTab === 'reports' ? 'bg-white/20' : 'bg-white/5 border border-white/10 text-emerald-400' }}">
+                            <div :class="activeTab === 'reports' ? 'bg-white/20 text-white' : 'bg-white/5 border border-white/10 text-emerald-400'"
+                                 class="h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-300">
                                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             </div>
                             <div class="text-left">
-                                <p class="text-[10px] font-black {{ $activeTab === 'reports' ? 'text-white/60' : 'text-indigo-100/40' }} uppercase tracking-widest italic leading-none mb-1">Métricas</p>
+                                <p :class="activeTab === 'reports' ? 'text-white/60' : 'text-indigo-100/40'" class="text-[10px] font-black uppercase tracking-widest italic leading-none mb-1">Métricas</p>
                                 <h3 class="text-sm font-black text-white uppercase italic tracking-tight">Informes</h3>
                             </div>
                         </div>
-                        <div class="text-2xl font-black italic {{ $activeTab === 'reports' ? 'text-white' : 'text-emerald-400' }}">{{ $reportsCount }}</div>
+                        <div :class="activeTab === 'reports' ? 'text-white' : 'text-emerald-400'" class="text-2xl font-black italic">{{ $reportsCount }}</div>
                     </div>
                 </button>
             </div>
 
+            @php
+                $isCurrentMonth = $selectedMonth == now()->month;
+            @endphp
+
+            {{-- Aviso Modo Consulta (Alpine.js reactivo) --}}
+            <div
+                x-data="{ get isFuture() { return parseInt($wire.selectedMonth) !== {{ now()->month }} } }"
+                x-show="isFuture"
+                style="display:none"
+                class="mb-6 flex items-center gap-3 px-6 py-3 bg-amber-500/10 border border-amber-500/20 rounded-2xl"
+            >
+                <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                <span class="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] italic">⚠ Modo Consulta — Solo lectura. Filtra un mes fuera del periodo activo.</span>
+            </div>
+
             {{-- Vista Desktop Table Premium --}}
-            <div class="hidden md:block animate-fade-in" style="animation-delay: 0.2s">
+            <div
+                x-data="{ get isFuture() { return parseInt($wire.selectedMonth) !== {{ now()->month }} } }"
+                x-bind:style="isFuture ? 'filter: grayscale(1); opacity: 0.4; pointer-events: none; user-select: none; transition: all 0.4s ease;' : 'transition: all 0.4s ease;'"
+                class="hidden md:block animate-fade-in"
+                style="animation-delay: 0.2s"
+            >
                 <div class="bg-ep-dark/40 backdrop-blur-sm rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
                     <div class="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent pointer-events-none opacity-20"></div>
                     
@@ -244,10 +323,13 @@
                                 </th>
                                 <th class="px-8 py-6 text-center text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">Estado</th>
                                 <th class="px-8 py-6 text-right text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">Operaciones</th>
+                                <th class="w-10"></th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-white/5">
-                            @forelse($assignments as $assignment)
+                        @forelse($assignments as $assignment)
+                            {{-- Nuevo tbody por fila: Alpine scope compartido entre la fila y el accordion --}}
+                            <tbody x-data="{ expanded: false }" class="divide-y divide-white/5 group relative transition-all duration-300">
+                                {{-- Fila Principal --}}
                                 <tr class="group hover:bg-white/[0.03] transition-all duration-300">
                                     <td class="px-8 py-6">
                                         <div class="flex items-center gap-4">
@@ -349,7 +431,6 @@
                                                         default => 'Ejecutar Inspección'
                                                     };
                                                     
-                                                    // Redirección condicional: Los informes no van a Visitas
                                                     $btnRoute = $category === 'Informe' 
                                                         ? route('tecnico.master-reports.index')
                                                         : route('tecnico.visits.index', [
@@ -358,18 +439,110 @@
                                                             'type' => $category,
                                                             'source' => $assignment->source ?? 'manual'
                                                         ]);
+                                                    $isFuture = $selectedMonth > now()->month;
                                                 @endphp
-                                                <a href="{{ $btnRoute }}" 
-                                                   class="h-10 px-6 flex items-center gap-2 bg-ep-primary text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-ep-primary/20 group/exec overflow-hidden relative">
-                                                    <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/exec:translate-x-full transition-transform duration-1000"></div>
-                                                    <span class="relative">{{ $btnText }}</span>
-                                                    <svg class="w-4 h-4 animate-pulse relative" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
-                                                </a>
+
+                                                @if($isFuture)
+                                                    <div class="h-10 px-6 flex items-center gap-2 bg-white/5 border border-white/10 text-white/20 text-[10px] font-black uppercase italic tracking-widest rounded-xl cursor-not-allowed group/lock relative">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                                        <span>Bloqueado</span>
+                                                        <div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-black text-white text-[9px] font-black uppercase rounded opacity-0 group-hover/lock:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-white/10">Mes Futuro</div>
+                                                    </div>
+                                                @else
+                                                    {{-- Botón Ejecutar con confirmación Alpine --}}
+                                                    <div x-data="{ confirming: false }" class="flex items-center gap-2">
+                                                        <div x-show="!confirming" @click="confirming = true"
+                                                             class="h-10 px-6 flex items-center gap-2 bg-ep-primary text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-ep-primary/20 cursor-pointer group/exec overflow-hidden relative">
+                                                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/exec:translate-x-full transition-transform duration-1000"></div>
+                                                            <span class="relative">{{ $btnText }}</span>
+                                                            <svg class="w-4 h-4 animate-pulse relative" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                                                        </div>
+                                                        <div x-show="confirming" x-cloak class="flex items-center gap-2 animate-fade-in">
+                                                            <span class="text-[9px] font-black text-white/50 uppercase italic">¿Confirmar?</span>
+                                                            <a href="{{ $btnRoute }}" class="h-10 px-4 flex items-center gap-1 bg-emerald-500 text-white text-[9px] font-black uppercase italic rounded-xl hover:brightness-110 transition-all">
+                                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                                Sí
+                                                            </a>
+                                                            <button @click="confirming = false" class="h-10 px-3 flex items-center bg-white/10 border border-white/10 text-white/40 text-[9px] font-black uppercase italic rounded-xl hover:bg-white/20 transition-all">
+                                                                No
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                @endif
                                             @endif
                                         </div>
                                     </td>
+                                    {{-- Chevron Accordion --}}
+                                    <td class="pr-4 py-6">
+                                        <button @click="expanded = !expanded" title="Ver detalles"
+                                                class="h-8 w-8 flex items-center justify-center rounded-xl border border-white/10 text-white/20 hover:border-ep-primary/40 hover:text-ep-primary transition-all">
+                                            <svg class="w-4 h-4 transition-transform duration-300" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                        </button>
+                                    </td>
                                 </tr>
+                                {{-- Fila expandida (Accordion) --}}
+                                <tr x-show="expanded" x-collapse style="display:none">
+                                    <td colspan="7" class="bg-black/30 border-t border-ep-primary/10">
+                                        <div class="px-8 py-6 space-y-4">
+
+                                            {{-- Descripción del Checklist --}}
+                                            @if($assignment->description ?? null)
+                                                <div class="flex gap-3 p-4 bg-white/[0.03] rounded-2xl border border-white/5">
+                                                    <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-[9px] font-black text-ep-primary/60 uppercase tracking-widest italic mb-1">Descripción de la Tarea</p>
+                                                        <p class="text-sm text-indigo-100/80 font-medium leading-relaxed">{{ $assignment->description ?? '' }}</p>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            {{-- Observaciones de la Asignación --}}
+                                            @if($assignment->notes ?? null)
+                                                <div class="flex gap-3 p-4 bg-amber-500/5 rounded-2xl border border-amber-500/15">
+                                                    <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                                                    </div>
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-[9px] font-black text-amber-500/70 uppercase tracking-widest italic mb-1">Observaciones del Coordinador</p>
+                                                        <p class="text-sm text-amber-200/80 font-medium leading-relaxed">{{ $assignment->notes }}</p>
+                                                    </div>
+                                                </div>
+                                            @endif
+
+                                            {{-- Metadata grid --}}
+                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
+                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Código CID</p>
+                                                    <p class="text-xs font-black text-white font-mono">{{ $assignment->registry_code ?? 'N/A' }}</p>
+                                                </div>
+                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
+                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Categoría</p>
+                                                    <p class="text-xs font-black text-white uppercase italic">{{ $assignment->category ?? 'Inspección' }}</p>
+                                                </div>
+                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
+                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Fuente</p>
+                                                    <p class="text-xs font-black text-white uppercase italic">{{ ($assignment->source ?? 'manual') === 'contract' ? '🚢 Contrato' : '⚡ Solicitud' }}</p>
+                                                </div>
+                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
+                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Fecha Límite</p>
+                                                    <p class="text-xs font-black text-white uppercase italic">{{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'Sin fecha' }}</p>
+                                                </div>
+                                                @if($assignment->trainer_name ?? null)
+                                                    <div class="p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10 col-span-2">
+                                                        <p class="text-[9px] font-black text-indigo-400/70 uppercase tracking-widest italic mb-1">Instructor</p>
+                                                        <p class="text-xs font-black text-indigo-300 uppercase italic">{{ $assignment->trainer_name }}</p>
+                                                    </div>
+                                                @endif
+                                            </div>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
                             @empty
+                            <tbody class="divide-y divide-white/5">
                                 <tr>
                                     <td colspan="5" class="px-8 py-20 text-center">
                                         <div class="relative overflow-hidden inline-flex p-10 bg-white/5 rounded-[3rem] border border-white/5">
@@ -381,8 +554,8 @@
                                         </div>
                                     </td>
                                 </tr>
+                            </tbody>
                             @endforelse
-                        </tbody>
                     </table>
 
                     @if($assignments->hasPages())
@@ -394,7 +567,12 @@
             </div>
 
             {{-- Vista Mobile Premium Dark Cards --}}
-            <div class="md:hidden space-y-6 animate-fade-in" style="animation-delay: 0.3s">
+            <div
+                x-data="{ get isFuture() { return parseInt($wire.selectedMonth) !== {{ now()->month }} } }"
+                x-bind:style="isFuture ? 'filter: grayscale(1); opacity: 0.4; pointer-events: none; user-select: none; transition: all 0.4s ease;' : 'transition: all 0.4s ease;'"
+                class="md:hidden space-y-6 animate-fade-in"
+                style="animation-delay: 0.3s"
+            >
                 @forelse($assignments as $assignment)
                     <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-white/10 p-5 sm:p-6 relative overflow-hidden group">
                         <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
@@ -497,7 +675,6 @@
                                         default => 'Ejecutar Inspección'
                                     };
                                     
-                                    // Redirección condicional para Mobile
                                     $btnRoute = $category === 'Informe' 
                                         ? route('tecnico.master-reports.index')
                                         : route('tecnico.visits.index', [
@@ -506,8 +683,21 @@
                                             'type' => $category,
                                             'source' => $assignment->source ?? 'manual'
                                         ]);
+                                    $isFuture = $selectedMonth > now()->month;
                                 @endphp
-                                <a href="{{ $btnRoute }}" class="flex-1 h-12 flex items-center justify-center bg-ep-primary text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl shadow-xl shadow-ep-primary/20">{{ $btnText }}</a>
+
+                                @if($isFuture)
+                                    <div class="flex-1 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl text-white/20 text-[9px] font-black uppercase tracking-widest italic cursor-not-allowed gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                        Bloqueado
+                                    </div>
+                                @else
+                                    <a href="{{ $btnRoute }}" class="flex-1 h-12 flex items-center justify-center gap-2 bg-ep-primary text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl shadow-xl shadow-ep-primary/20 group/btnrel overflow-hidden relative">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btnrel:translate-x-full transition-transform duration-1000"></div>
+                                        <span class="relative">{{ $btnText }}</span>
+                                        <svg class="w-4 h-4 animate-pulse relative" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                                    </a>
+                                @endif
                             @endif
                         </div>
                     </div>

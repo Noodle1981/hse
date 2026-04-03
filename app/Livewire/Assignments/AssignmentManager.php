@@ -18,20 +18,15 @@ class AssignmentManager extends Component
     public ?int $selectedEmpresa = null;
     public ?int $selectedSede = null;
 
-    #[\Livewire\Attributes\Url]
-    public string $activeTab = 'inspections';
+    public string $search = '';
 
     protected $queryString = [
+        'search' => ['except' => ''],
         'selectedEmpresa' => ['except' => null],
         'selectedSede' => ['except' => null],
-        'activeTab' => ['except' => 'inspections'],
     ];
 
-    public function setActiveTab($tab)
-    {
-        $this->activeTab = $tab;
-        $this->resetPage();
-    }
+    public function updatingSearch() { $this->resetPage(); }
 
     // Formulario de nueva asignación
     public bool $showForm = false;
@@ -316,6 +311,12 @@ class AssignmentManager extends Component
 
         // 1. Manual Assignments (Solicitudes)
         $manualQuery = ChecklistAssignment::with(['checklist', 'user', 'sede', 'empresa', 'visitCompletion.visit', 'inspection'])
+            ->when($this->search, function ($q) {
+                $q->whereHas('checklist', function ($c) {
+                    $c->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhere('registry_code', 'like', '%' . $this->search . '%');
+                });
+            })
             ->when($this->selectedEmpresa, function ($q) {
                 $q->where('empresa_id', $this->selectedEmpresa);
             })
@@ -323,27 +324,6 @@ class AssignmentManager extends Component
                 $q->where('sede_id', $this->selectedSede);
             })
             ->orderBy('created_at', 'desc');
-        // 1.1 Manual Trainings (Solicitudes de Capacitación)
-        $trainingsQuery = \App\Models\Training::with(['sede', 'empresa', 'responsibleUser'])
-            ->where('status', '!=', 'completed')
-            ->when($this->selectedEmpresa, function ($q) {
-                $q->where('empresa_id', $this->selectedEmpresa);
-            })
-            ->when($this->selectedSede, function ($q) {
-                $q->where('sede_id', $this->selectedSede);
-            });
-
-        // 1.2 Manual Reports (Informes Maestros en Borrador)
-        $reportsQuery = \App\Models\MasterReport::with(['sede', 'sede.empresa', 'tecnico'])
-            ->where('estado', '!=', 'finalizado')
-            ->when($this->selectedEmpresa, function ($q) {
-                $q->whereHas('sede', function($sub) {
-                    $sub->where('empresa_id', $this->selectedEmpresa);
-                });
-            })
-            ->when($this->selectedSede, function ($q) {
-                $q->where('sede_id', $this->selectedSede);
-            });
 
         $manual = $manualQuery->get()->map(fn($a) => (object)[
             'id' => $a->id,
@@ -366,55 +346,17 @@ class AssignmentManager extends Component
             'status_badge_color' => method_exists($a, 'getStatusBadgeColor') ? $a->getStatusBadgeColor() : 'gray'
         ]);
 
-        $manualTrainings = $trainingsQuery->get()->map(fn($t) => (object)[
-            'id' => $t->id,
-            'dynamic_checklist_id' => $t->dynamic_checklist_id,
-            'checklist' => (object)['title' => $t->title, 'registry_code' => 'CAP-' . $t->id],
-            'user' => $t->responsibleUser,
-            'sede' => $t->sede,
-            'empresa' => $t->empresa,
-            'due_date' => $t->date,
-            'status' => $t->status,
-            'source' => 'manual',
-            'category' => 'Capacitación',
-            'is_overdue' => $t->date?->isPast() && $t->status !== 'completed',
-            'registry_code' => 'CAP-' . $t->id,
-            'created_at' => $t->created_at,
-            'inspection' => null,
-            'frequency_label' => 'Manual',
-            'can_be_edited' => false,
-            'can_be_deleted' => true,
-            'status_badge_color' => 'blue',
-            'duration' => $t->duration,
-            'type' => $t->type
-        ]);
-
-        $manualReports = $reportsQuery->get()->map(fn($r) => (object)[
-            'id' => $r->id,
-            'dynamic_checklist_id' => null,
-            'checklist' => (object)['title' => $r->titulo, 'registry_code' => 'REP-' . $r->id],
-            'user' => $r->tecnico,
-            'sede' => $r->sede,
-            'empresa' => $r->sede?->empresa,
-            'due_date' => $r->created_at->addDays(7),
-            'status' => $r->estado,
-            'source' => 'manual',
-            'category' => 'Informe',
-            'is_overdue' => false,
-            'registry_code' => 'REP-' . $r->id,
-            'created_at' => $r->created_at,
-            'inspection' => null,
-            'frequency_label' => 'Manual',
-            'can_be_edited' => true,
-            'can_be_deleted' => true,
-            'status_badge_color' => 'indigo',
-            'periodo' => $r->periodo
-        ]);
-
         // 2. Annual Plan Tasks (Contratos)
         $contractQuery = \App\Models\AnnualPlan::with(['checklist', 'sede', 'sede.empresa', 'sede.users'])
+            ->where('category', 'Inspección')
             ->where($month, true)
             ->where('year', now()->year)
+            ->when($this->search, function ($q) {
+                $q->whereHas('checklist', function ($c) {
+                    $c->where('title', 'like', '%' . $this->search . '%')
+                      ->orWhere('registry_code', 'like', '%' . $this->search . '%');
+                })->orWhere('activity_name', 'like', '%' . $this->search . '%');
+            })
             ->when($this->selectedEmpresa, function ($q) {
                 $q->whereHas('sede', function($sub) {
                     $sub->where('empresa_id', $this->selectedEmpresa);
@@ -453,23 +395,14 @@ class AssignmentManager extends Component
             'periodo' => ($p->category === 'Informe') ? now()->translatedFormat('F Y') : null
         ]);
 
-        // Merge all into categorized collections (con manejo defensivo de nulos)
-        $allInspections = $manual->concat($contract->where('category', 'Inspección'))->sortByDesc('created_at');
-        $allTrainings = $manualTrainings->concat($contract->where('category', 'Capacitación'))->sortByDesc('created_at');
-        $allReports = $manualReports->concat($contract->where('category', 'Informe'))->sortByDesc('created_at');
-
-        // Determinar qué colección paginar
-        $currentCollection = match($this->activeTab) {
-            'trainings' => $allTrainings,
-            'reports' => $allReports,
-            default => $allInspections
-        };
+        // Merge all
+        $allInspections = $manual->concat($contract)->sortByDesc('created_at');
         
         $currentPage = $this->getPage();
         $perPage = 15;
         $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
-            $currentCollection->forPage($currentPage, $perPage),
-            $currentCollection->count(),
+            $allInspections->forPage($currentPage, $perPage),
+            $allInspections->count(),
             $perPage,
             $currentPage,
             ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
@@ -477,9 +410,6 @@ class AssignmentManager extends Component
 
         return view('livewire.assignments.assignment-manager', [
             'assignments' => $paginated,
-            'inspectionsCount' => $allInspections->count(),
-            'trainingsCount' => $allTrainings->count(),
-            'reportsCount' => $allReports->count(),
         ])->layout('components.layouts.app');
     }
 }

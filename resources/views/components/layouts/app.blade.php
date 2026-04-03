@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Sistema XamaSafe' }}</title>
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
     @php
         $user = auth()->user();
         $empresa = null;
@@ -18,23 +18,11 @@
         $logoPath = $empresa->logo_path ?? null;
     @endphp
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'ep-primary': '{{ $primaryColor }}',
-                        'ep-primary-dark': '{{ $primaryColor }}', // Simplificado
-                        'ep-dark': '#1E1E2D',
-                        'ep-dark-light': '#2D2D3F',
-                        'ep-sidebar': '#1E1E2D',
-                        'ep-text': '#B5B5C3',
-                        'ep-text-hover': '#FFFFFF',
-                    }
-                }
-            }
+    <style>
+        :root {
+            --ep-primary-color: {{ $primaryColor }};
         }
-    </script>
+    </style>
     
     <style>
         /* Sidebar animations */
