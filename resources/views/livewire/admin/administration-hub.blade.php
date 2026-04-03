@@ -42,7 +42,7 @@
                 <div class="absolute -top-24 -right-24 w-96 h-96 bg-ep-primary/10 rounded-full blur-[100px] opacity-0 group-hover/hub:opacity-100 transition-opacity duration-1000"></div>
                 <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
-                        <h2 class="text-3xl font-black text-white italic tracking-tight mb-2">HUB DE MANDO <span class="text-ep-primary">XAMASAFE</span></h2>
+                        <h2 class="text-3xl font-black text-white italic tracking-tight mb-2">HUB DE MANDO <span class="text-ep-primary">{{ $consultoraName }}</span></h2>
                         <p class="text-sm text-white/40 max-w-xl font-medium tracking-wide">Acceso unificado a la gestión de activos, identidades y recursos corporativos. Seleccione un módulo para iniciar operaciones de alto nivel.</p>
                     </div>
                     <div class="flex items-center gap-3">

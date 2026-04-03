@@ -8,14 +8,17 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @php
+        /** @var \App\Models\User $user */
         $user = auth()->user();
-        $empresa = null;
-        if ($user) {
-            $sede = $user->sedes()->first();
-            $empresa = $sede ? $sede->empresa : null;
-        }
+        $consultora = $user?->consultora;
+        
+        $sede = $user?->sedes()->first();
+        $empresa = $sede ? $sede->empresa : null;
+        
         $primaryColor = $empresa->primary_color ?? '#F69239';
-        $logoPath = $empresa->logo_path ?? null;
+        $logoPath = $consultora?->logo_path ?? null;
+        $brandingLogo = $logoPath ? asset('storage/' . $logoPath) : asset('images/logo.png');
+        $brandingName = $consultora?->nombre ?? 'EP - EQUIPO PREVENTIVO';
     @endphp
 
     <style>
@@ -112,18 +115,20 @@
                ]">
             
             <!-- Brand/Logo -->
-            <div class="h-16 flex items-center justify-between px-4 border-b border-gray-700">
-                <a href="{{ route('dashboard') }}" class="flex items-center space-x-3">
-                    @if($logoPath)
-                        <img src="{{ asset('storage/' . $logoPath) }}" class="h-10 w-auto">
-                    @else
-                        <div class="w-10 h-10 bg-ep-primary rounded-lg flex items-center justify-center font-bold text-white text-lg flex-shrink-0">
-                            EP
-                        </div>
-                    @endif
-                    <span x-show="sidebarOpen || mobileMenuOpen" class="brand-text text-white font-semibold text-lg transition-opacity">
-                        XamaSafe
-                    </span>
+            <div class="h-16 flex items-center justify-between px-4 border-b border-gray-700 overflow-hidden">
+                <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 group">
+                    {{-- Logo dinámico con fallback --}}
+                    <div class="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg border border-white/10 group-hover:scale-105 transition-transform duration-300">
+                        <img src="{{ $brandingLogo }}?v={{ time() }}" alt="Logo" class="max-h-full w-auto object-contain">
+                    </div>
+                    
+                    {{-- Marca Dual: Plataforma + Consultora --}}
+                    <div x-show="sidebarOpen || mobileMenuOpen" class="flex flex-col transition-all duration-300">
+                        <span class="text-white font-black uppercase italic tracking-tighter text-lg leading-none">XamaSafe</span>
+                        <span class="text-yellow-400 font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]" title="{{ $brandingName }}">
+                            {{ $brandingName }}
+                        </span>
+                    </div>
                 </a>
                 <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-ep-primary hover:text-ep-primary-dark p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
