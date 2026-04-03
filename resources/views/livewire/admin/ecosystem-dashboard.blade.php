@@ -98,7 +98,6 @@
                         <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] text-center bg-red-500/[0.02]">Seguridad Crit.</th>
                         <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] text-center bg-blue-500/[0.02]">Auditoría</th>
                         <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] text-center bg-yellow-500/[0.02]">Estatus Comercial</th>
-                        <th class="px-10 py-6 text-right text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Comando</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
@@ -172,14 +171,6 @@
                                 </div>
                             </div>
                         </td>
-
-                        {{-- Comando --}}
-                        <td class="px-10 py-8 text-right whitespace-nowrap">
-                            <a href="{{ route('admin.consultants') }}" class="inline-flex items-center px-5 py-3 bg-white border border-white/10 text-black text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-ep-primary hover:text-white hover:border-ep-primary transition-all shadow-xl group/btn">
-                                Entrar Nodo
-                                <svg class="w-4 h-4 ml-2 group-hover/btn:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
-                            </a>
-                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -193,6 +184,56 @@
                 <span class="text-[8px] font-black text-white/20 uppercase tracking-[0.3em]">Cifrado: End-to-End</span>
             </div>
             <div class="text-[9px] font-bold text-white/10 uppercase tracking-widest italic">XamaSafe Command Terminal © 2026</div>
+        </div>
+    </div>
+
+    {{-- Tactical Audit Terminal (Log) --}}
+    <div class="mt-12">
+        <div class="mb-6 flex items-center justify-between px-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-2 h-6 bg-blue-500 rounded-full shadow-[0_0_10px_#3b82f6]"></div>
+                <h3 class="text-xl font-black text-white uppercase italic tracking-tighter">Terminal de Auditoría Táctica</h3>
+            </div>
+            <span class="text-[10px] font-black text-white/20 uppercase tracking-widest">Registros de Mantenimiento Operativo</span>
+        </div>
+
+        <div class="bg-black/60 backdrop-blur-2xl border border-white/5 rounded-[2rem] p-6 shadow-3xl font-mono relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4">
+                <div class="flex space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                    <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                    <div class="w-2 h-2 rounded-full bg-ep-primary animate-pulse"></div>
+                </div>
+            </div>
+            
+            <div class="space-y-3 max-h-[400px] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-white/10">
+                @forelse($recent_events as $event)
+                    <div class="flex items-start space-x-4 text-[11px] group">
+                        <span class="text-white/20 font-bold">[{{ $event['time']->format('H:i:s') }}]</span>
+                        <div class="flex-shrink-0 px-2 py-0.5 rounded border border-{{ $event['color'] }}-500/30 bg-{{ $event['color'] }}-500/10">
+                            <span class="text-{{ $event['color'] }}-500 font-black uppercase text-[9px]">{{ $event['label'] }}</span>
+                        </div>
+                        <span class="text-white/60 group-hover:text-white transition-colors tracking-tight">
+                            {{ $event['description'] }}
+                        </span>
+                        <span class="ml-auto text-white/10 group-hover:text-white/30 transition-colors italic text-[9px]">
+                            {{ $event['time']->diffForHumans() }}
+                        </span>
+                    </div>
+                @empty
+                    <div class="text-center py-10">
+                        <p class="text-white/10 uppercase font-black tracking-widest italic">No hay registros de auditoría recientes</p>
+                    </div>
+                @endforelse
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-white/5 text-[9px] text-white/10 flex items-center justify-between">
+                <span>Kernel v5.0.1-EP</span>
+                <span class="animate-pulse flex items-center capitalize">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-2"></span>
+                    Esperando nuevos eventos corporativos...
+                </span>
+            </div>
         </div>
     </div>
 </div>
