@@ -1,5 +1,10 @@
 <x-pdf.layout :title="$inspection->checklist->title ?? 'Reporte de Inspección'" :code="'INSP-' . str_pad($inspection->id, 6, '0', STR_PAD_LEFT)" :status="$inspection->status">
 
+    <style>
+        .text-placeholder { color: #d1d5db; font-weight: 500; }
+        .text-value { color: #111827; font-weight: 500; }
+    </style>
+
     {{-- 1. Cabecera (Grid de 3 columnas simulado con Tabla) --}}
     <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
         <table class="no-border">
@@ -116,7 +121,7 @@
                                         <span style="font-size: 8pt; color: #6b7280;">(Ver Anexo Fotos)</span>
                                     </div>
                                 @else
-                                    <div style="font-weight: 500; color: {{ empty($answer->value) ? '#d1d5db' : '#111827' }};">
+                                    <div class="{{ empty($answer->value) ? 'text-placeholder' : 'text-value' }}">
                                         {{ $answer->value ?: '-' }}
                                     </div>
                                 @endif

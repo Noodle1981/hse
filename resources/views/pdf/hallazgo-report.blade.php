@@ -31,9 +31,25 @@
         }
 
         .separator { height: 15px; }
+
+        /* Colores de estado dinamicos para evitar errores de IDE */
+        .status-pendiente { color: #dc2626; }
+        .status-en_proceso { color: #ca8a04; }
+        .status-resuelto { color: #0891b2; }
+        .status-cerrado { color: #16a34a; }
+        .status-default { color: #64748b; }
     </style>
 
-    {{-- Datos de Contexto (Ficha Técnica) --}}
+    @php
+        $statusClass = match($finding->estado) {
+            'pendiente' => 'status-pendiente',
+            'en_proceso' => 'status-en_proceso',
+            'resuelto' => 'status-resuelto',
+            'cerrado' => 'status-cerrado',
+            default => 'status-default'
+        };
+    @endphp
+
     <x-pdf.card title="Información General del Reporte">
         <table class="context-table">
             <tr>
@@ -71,15 +87,7 @@
                     
                     <div style="margin-top: 10px;">
                         <span class="label-sm">Estado Actual</span>
-                        <span style="text-transform: uppercase; font-size: 8pt; font-weight: bold; color: {{ 
-                            match($finding->estado) {
-                                'pendiente' => '#dc2626',
-                                'en_proceso' => '#ca8a04',
-                                'resuelto' => '#0891b2',
-                                'cerrado' => '#16a34a',
-                                default => '#64748b'
-                            }
-                        }}">
+                        <span class="{{ $statusClass }}" style="text-transform: uppercase; font-size: 8pt; font-weight: bold;">
                             ● {{ ucfirst(str_replace('_', ' ', $finding->estado)) }}
                         </span>
                     </div>

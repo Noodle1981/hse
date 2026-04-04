@@ -41,7 +41,7 @@ class AnnualContractReportController extends Controller
             ];
         }
 
-        $pdf = Pdf::loadView('reports.annual-plan', compact('sede', 'year', 'reportData', 'months'))
+        $pdf = Pdf::loadView('pdf.annual-plan', compact('sede', 'year', 'reportData', 'months'))
             ->setPaper('a4', 'landscape');
 
         return $pdf->stream("plan_anual_{$sede->nombre_sede}_{$year}.pdf");

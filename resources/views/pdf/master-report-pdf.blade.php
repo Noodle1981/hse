@@ -1,3 +1,6 @@
+@php
+    $primaryColor = $branding['primary'] ?? '#1e1e2d';
+@endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -37,13 +40,18 @@
         .logo { max-width: 250px; margin-bottom: 30px; }
         .cover h1 { 
             font-size: 36px; 
-            color: {{ $branding['primary'] }}; 
             text-transform: uppercase; 
             margin: 0; 
             letter-spacing: 2px; 
         }
         .cover h2 { font-size: 18px; color: #B5B5C3; margin: 10px 0; font-weight: normal; }
         
+        /* Clases de branding dinamicas - Usamos PHP echo para evitar errores de parseo de IDE con Blade */
+        .text-primary { color: <?php echo $primaryColor; ?>; }
+        .border-primary-bottom { border-bottom: 2px solid <?php echo $primaryColor; ?>; }
+        .border-primary-left { border-left: 4px solid <?php echo $primaryColor; ?>; }
+        .border-primary-top-thick { border-top: 10px solid <?php echo $primaryColor; ?>; }
+
         .cover-info-table { 
             margin: 80px auto 0; 
             width: 70%; 
@@ -65,7 +73,7 @@
         }
 
         /* Header y Footer */
-        .header { border-bottom: 2px solid {{ $branding['primary'] }}; margin-bottom: 20px; padding-bottom: 10px; width: 100%; }
+        .header { margin-bottom: 20px; padding-bottom: 10px; width: 100%; }
         .header-title { font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .header-meta { float: right; font-size: 9px; color: #7e8299; }
         
@@ -87,7 +95,6 @@
         .section-header { 
             background: #f4f4f7; 
             padding: 8px 12px; 
-            border-left: 4px solid {{ $branding['primary'] }}; 
             margin-bottom: 10px; 
         }
         .section-header h3 { margin: 0; font-size: 10px; text-transform: uppercase; color: #1e1e2d; }
@@ -102,7 +109,7 @@
             text-align: center; 
             width: 25%;
         }
-        .kpi-val { font-size: 20px; font-weight: bold; color: {{ $branding['primary'] }}; display: block; }
+        .kpi-val { font-size: 20px; font-weight: bold; display: block; }
         .kpi-label { font-size: 7px; text-transform: uppercase; color: #7e8299; font-weight: bold; }
 
         /* Tablas */
@@ -141,10 +148,10 @@
             @if(file_exists($branding['logo'] ?? ''))
                 <img src="{{ $branding['logo'] }}" class="logo">
             @else
-                <div style="font-size: 40px; font-weight: bold; color: {{ $branding['primary'] }}; margin-bottom: 40px;">{{ $branding['name'] ?? 'EP SALUD Y SEGURIDAD' }}</div>
+                <div class="text-primary" style="font-size: 40px; font-weight: bold; margin-bottom: 40px;">{{ $branding['name'] ?? 'EP SALUD Y SEGURIDAD' }}</div>
             @endif
             
-            <h1>INFORME DE GESTIÓN</h1>
+            <h1 class="text-primary">INFORME DE GESTIÓN</h1>
             <h2>{{ strtoupper(\Carbon\Carbon::parse($report->periodo)->locale('es')->translatedFormat('F Y')) }}</h2>
             
             <table class="cover-info-table">
@@ -168,22 +175,22 @@
 
     {{-- 2. RESUMEN Y VISITAS --}}
     <div class="content-wrapper">
-        <div class="header">
+        <div class="header border-primary-bottom">
             <span class="header-meta">REPORTE #{{ $report->id }} | {{ date('d/m/Y') }}</span>
             <span class="header-title">Resumen de Actividades</span>
         </div>
 
         <table class="kpi-table">
             <tr>
-                <td class="kpi-box"><span class="kpi-val">{{ count($data['visits']) }}</span><span class="kpi-label">Visitas</span></td>
-                <td class="kpi-box"><span class="kpi-val">{{ count($data['checklists']) }}</span><span class="kpi-label">Controles</span></td>
-                <td class="kpi-box"><span class="kpi-val">{{ count($data['trainings']) }}</span><span class="kpi-label">Formación</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['visits']) }}</span><span class="kpi-label">Visitas</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['checklists']) }}</span><span class="kpi-label">Controles</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['trainings']) }}</span><span class="kpi-label">Formación</span></td>
                 <td class="kpi-box"><span class="kpi-val" style="color:#f64e60;">{{ count($data['hallazgos']) }}</span><span class="kpi-label">Hallazgos</span></td>
             </tr>
         </table>
 
         <div class="section">
-            <div class="section-header"><h3>1. Cronograma de Visitas Técnicas</h3></div>
+            <div class="section-header border-primary-left"><h3>1. Cronograma de Visitas Técnicas</h3></div>
             <table>
                 <thead>
                     <tr>
@@ -209,7 +216,7 @@
         </div>
 
         <div class="section no-break">
-            <div class="section-header"><h3>2. Controles Operativos (Checklists)</h3></div>
+            <div class="section-header border-primary-left"><h3>2. Controles Operativos (Checklists)</h3></div>
             <table>
                 <thead>
                     <tr>
@@ -241,13 +248,13 @@
 
     {{-- 3. CAPACITACIÓN Y RIESGOS --}}
     <div class="content-wrapper">
-        <div class="header">
+        <div class="header border-primary-bottom">
             <span class="header-meta">{{ $report->sede->nombre_sede }}</span>
             <span class="header-title">Formación y Gestión de Riesgos</span>
         </div>
 
         <div class="section">
-            <div class="section-header"><h3>3. Capacitación del Personal</h3></div>
+            <div class="section-header border-primary-left"><h3>3. Capacitación del Personal</h3></div>
             <table>
                 <thead>
                     <tr>
@@ -275,7 +282,7 @@
         </div>
 
         <div class="section">
-            <div class="section-header"><h3>4. Análisis Operativo: Hallazgos e Incidentes</h3></div>
+            <div class="section-header border-primary-left"><h3>4. Análisis Operativo: Hallazgos e Incidentes</h3></div>
             <table>
                 <thead>
                     <tr>
@@ -348,8 +355,8 @@
 
         {{-- SECCIÓN 5: CONCLUSIÓN --}}
         <div class="section" style="margin-top: 50px;">
-            <div style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; border-top: 10px solid {{ $branding['primary'] }}; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <h3 style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; color: {{ $branding['primary'] }}; letter-spacing: 1px;">5. Resumen Ejecutivo Final</h3>
+            <div class="border-primary-top-thick" style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 class="text-primary" style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">5. Resumen Ejecutivo Final</h3>
                 <div style="font-size: 12px; line-height: 1.8; color: #e2e8f0;">
                     {{ $report->resumen_ejecutivo ?: 'No se registró una conclusión final detallada para este periodo.' }}
                 </div>
@@ -378,5 +385,8 @@
         <div style="float: right;" class="page-number"></div>
         <div class="clear"></div>
     </div>
+</body>
+</html>
+   </div>
 </body>
 </html>

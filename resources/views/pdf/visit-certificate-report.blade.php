@@ -110,6 +110,10 @@
             position: fixed; bottom: -10px; width: 100%; text-align: center; 
             font-size: 8px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 10px;
         }
+
+        /* Failure states */
+        .bg-failure { background-color: #fef2f2 !important; }
+        .text-failure { color: #b91c1c !important; font-weight: bold !important; }
     </style>
 </head>
 <body>
@@ -195,7 +199,7 @@
                                 $isSuccess = in_array($val, ['si', 'cumple', 'pasa']);
                             @endphp
                             <tr class="{{ $loop->even ? 'row-alt' : '' }}">
-                                <td style="padding: 10px; border-bottom: 1px solid #edf2f7; {{ $isFailure ? 'color: #b91c1c; font-weight: bold; background-color: #fef2f2;' : '' }}">
+                                <td @class(['bg-failure text-failure' => $isFailure]) style="padding: 10px; border-bottom: 1px solid #edf2f7;">
                                     <div style="font-size: 10px; margin-bottom: 2px; color: #1e293b;">
                                         {{ $resp['question_label'] ?? 'Punto de Control' }}
                                     </div>
@@ -205,7 +209,7 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td style="width: 80px; text-align: center; vertical-align: middle; border-bottom: 1px solid #edf2f7; {{ $isFailure ? 'background-color: #fef2f2;' : '' }}">
+                                <td @class(['bg-failure' => $isFailure]) style="width: 80px; text-align: center; vertical-align: middle; border-bottom: 1px solid #edf2f7;">
                                     <span class="pill {{ $isSuccess ? 'pill-success' : ($isFailure ? 'pill-danger' : 'pill-info') }}" style="display: inline-block; min-width: 60px;">
                                         {{ strtoupper($val) ?: 'PENDIENTE' }}
                                     </span>
