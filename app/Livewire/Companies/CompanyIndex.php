@@ -5,7 +5,10 @@ namespace App\Livewire\Companies;
 use App\Models\Empresa;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class CompanyIndex extends Component
 {
     use WithPagination;
@@ -24,7 +27,8 @@ class CompanyIndex extends Component
 
     public function render()
     {
-        $currentUser = auth()->user();
+        /** @var \App\Models\User $currentUser */
+        $currentUser = Auth::user();
         $query = Empresa::query();
 
         // Tenancy
@@ -46,8 +50,7 @@ class CompanyIndex extends Component
             ->orderBy('nombre')
             ->paginate(10);
 
-        return view('livewire.companies.company-index', compact('companies'))
-            ->layout('components.layouts.app');
+        return view('livewire.companies.company-index', compact('companies'));
     }
 
     public function confirmDelete($id, $name)

@@ -6,7 +6,10 @@ use App\Models\AnnualPlan;
 use App\Models\Sede;
 use App\Models\DynamicChecklist;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Auth;
 
+#[Layout('components.layouts.app')]
 class AnnualContractDashboard extends Component
 {
     public $sedeId;
@@ -25,7 +28,8 @@ class AnnualContractDashboard extends Component
     {
         $this->year = $year ?? date('Y');
         $this->filterCategory = $category;
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         
         // Default to first available sede
         $role = strtolower($user->rol);
@@ -67,7 +71,9 @@ class AnnualContractDashboard extends Component
 
     public function toggleMonth($planId, $month)
     {
-        if (!auth()->user()->isAdmin() || !$this->editMode) return;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAdmin() || !$this->editMode) return;
         
         $plan = AnnualPlan::findOrFail($planId);
         $plan->$month = !$plan->$month;
@@ -76,7 +82,9 @@ class AnnualContractDashboard extends Component
 
     public function addActivity()
     {
-        if (!auth()->user()->isAdmin()) return;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAdmin()) return;
         
         $this->validate([
             'activity_name' => 'required|string|max:255',
@@ -126,7 +134,9 @@ class AnnualContractDashboard extends Component
 
     public function deleteActivity($id)
     {
-        if (!auth()->user()->isAdmin()) return;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAdmin()) return;
         
         AnnualPlan::findOrFail($id)->delete();
     }
@@ -135,7 +145,9 @@ class AnnualContractDashboard extends Component
     {
         if (!$this->sedeId) return;
         
-        $routeName = auth()->user()->isAdmin() 
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $routeName = $user->isAdmin() 
             ? 'gestor.annual-contract.pdf' 
             : 'tecnico.annual-contract.pdf';
             
@@ -231,9 +243,11 @@ class AnnualContractDashboard extends Component
             ->orderBy('category')
             ->get();
 
-        $sedes = auth()->user()->isAdmin()
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $sedes = $user->isAdmin()
             ? Sede::with('empresa')->orderBy('nombre_sede')->get() 
-            : auth()->user()->sedes()->with('empresa')->orderBy('nombre_sede')->get();
+            : $user->sedes()->with('empresa')->orderBy('nombre_sede')->get();
 
         $activeSede = Sede::with('empresa')->find($this->sedeId);
         
@@ -253,7 +267,7 @@ class AnnualContractDashboard extends Component
                 'may' => 5, 'june' => 6, 'july' => 7, 'august' => 8,
                 'september' => 9, 'october' => 10, 'november' => 11, 'december' => 12
             ]
-        ])->layout('components.layouts.app');
+        ]);
     }
 
     private function calculateEfficiencyMetrics($complianceData)

@@ -5,7 +5,9 @@ namespace App\Livewire\Categories;
 use App\Models\Category;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class CategoryIndex extends Component
 {
     use WithPagination;
@@ -22,8 +24,7 @@ class CategoryIndex extends Component
             ->orderBy('order')
             ->paginate(10);
 
-        return view('livewire.categories.category-index', compact('categories'))
-            ->layout('components.layouts.app');
+        return view('livewire.categories.category-index', compact('categories'));
     }
 
     public function toggleStatus(Category $category)

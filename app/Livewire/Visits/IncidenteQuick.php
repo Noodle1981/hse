@@ -7,6 +7,7 @@ use App\Models\IncidenteFoto;
 use App\Models\VisitCertificate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
 
 class IncidenteQuick extends Component
 {
@@ -53,7 +54,7 @@ class IncidenteQuick extends Component
         $incidente = Incidente::create([
             'visit_certificate_id' => $this->visit->id,
             'sede_id' => $this->visit->sede_id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'titulo' => $this->titulo,
             'descripcion' => $this->descripcion,
             'ubicacion_especifica' => $this->ubicacion_especifica,

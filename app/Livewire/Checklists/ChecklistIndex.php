@@ -5,7 +5,9 @@ namespace App\Livewire\Checklists;
 use App\Models\DynamicChecklist;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class ChecklistIndex extends Component
 {
     use WithPagination;
@@ -91,6 +93,6 @@ class ChecklistIndex extends Component
         return view('livewire.checklists.checklist-index', [
             'checklists' => $checklists,
             'categories' => $categories,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

@@ -4,7 +4,9 @@ namespace App\Livewire\Checklists;
 
 use Livewire\Component;
 use App\Models\DynamicChecklist;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class ChecklistEmulator extends Component
 {
     public DynamicChecklist $checklist;
@@ -31,6 +33,6 @@ class ChecklistEmulator extends Component
         return view('livewire.checklists.checklist-emulator', [
             'groupedQuestions' => $groupedQuestions,
             'unsectionedQuestions' => $unsectionedQuestions,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

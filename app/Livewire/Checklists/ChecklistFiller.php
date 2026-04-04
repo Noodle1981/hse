@@ -7,7 +7,9 @@ use App\Models\DynamicInspection;
 use App\Models\DynamicAnswer;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class ChecklistFiller extends Component
 {
     public DynamicChecklist $checklist;
@@ -93,7 +95,6 @@ class ChecklistFiller extends Component
 
     public function render()
     {
-        return view('livewire.checklists.checklist-filler')
-            ->layout('components.layouts.app');
+        return view('livewire.checklists.checklist-filler');
     }
 }

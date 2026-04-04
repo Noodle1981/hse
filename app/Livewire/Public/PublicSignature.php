@@ -5,7 +5,9 @@ namespace App\Livewire\Public;
 
 use App\Models\GeneradorConstancia;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.guest')]
 class PublicSignature extends Component
 {
     public $token;
@@ -84,6 +86,6 @@ class PublicSignature extends Component
 
     public function render()
     {
-        return view('livewire.public.public-signature')->layout('components.layouts.guest'); // Assuming a guest layout exists or I will create one.
+        return view('livewire.public.public-signature');
     }
 }

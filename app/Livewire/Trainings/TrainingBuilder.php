@@ -8,7 +8,10 @@ use App\Models\Training;
 use App\Models\Empresa;
 use App\Models\Sede;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class TrainingBuilder extends Component
 {
     public $trainingId;
@@ -101,11 +104,15 @@ class TrainingBuilder extends Component
         }
 
         if ($this->visitId) {
-            $prefix = auth()->user()->hasRole('Administrador') ? 'gestor' : 'tecnico';
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $prefix = $user->hasRole('Administrador') ? 'gestor' : 'tecnico';
             return redirect()->route($prefix . '.visits.in-progress', $this->visitId);
         }
 
-        if (auth()->user()->isAdmin()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->isAdmin()) {
             return redirect()->route('gestor.trainings.index');
         }
 
@@ -131,6 +138,6 @@ class TrainingBuilder extends Component
             'sedes' => $sedes,
             'tecnicos' => $tecnicos,
             'checklists' => $checklists,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

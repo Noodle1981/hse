@@ -7,7 +7,9 @@ use App\Models\Sede;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class HallazgoManager extends Component
 {
     use WithPagination;
@@ -151,6 +153,6 @@ class HallazgoManager extends Component
             'kpis' => $kpis,
             'sedes' => $sedes,
             'tecnicos' => $tecnicos,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

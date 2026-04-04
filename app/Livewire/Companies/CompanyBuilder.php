@@ -5,7 +5,10 @@ namespace App\Livewire\Companies;
 use App\Models\Empresa;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class CompanyBuilder extends Component
 {
     public ?Empresa $empresa = null;
@@ -15,7 +18,9 @@ class CompanyBuilder extends Component
 
     protected function rules(): array
     {
-        $consultoraId = auth()->user()->consultora_id;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $consultoraId = $user->consultora_id;
 
         return [
             'nombre' => [
@@ -54,8 +59,10 @@ class CompanyBuilder extends Component
             $query = Empresa::query();
             
             // Tenancy isolation
-            if (!auth()->user()->isSuperAdmin()) {
-                $query->where('consultora_id', auth()->user()->consultora_id);
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            if (!$user->isSuperAdmin()) {
+                $query->where('consultora_id', $user->consultora_id);
             }
 
             $this->empresa = $query->find($id);
@@ -78,8 +85,10 @@ class CompanyBuilder extends Component
         ];
         
         // Tenancy: Assign consultora_id if not Super Admin
-        if (auth()->check() && !auth()->user()->isSuperAdmin()) {
-            $data['consultora_id'] = auth()->user()->consultora_id;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (Auth::check() && !$user->isSuperAdmin()) {
+            $data['consultora_id'] = $user->consultora_id;
         }
 
         if ($this->empresa) {
@@ -96,7 +105,6 @@ class CompanyBuilder extends Component
 
     public function render()
     {
-        return view('livewire.companies.company-builder')
-            ->layout('components.layouts.app');
+        return view('livewire.companies.company-builder');
     }
 }

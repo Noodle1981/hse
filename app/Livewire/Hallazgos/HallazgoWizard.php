@@ -8,7 +8,10 @@ use App\Models\DynamicInspection;
 use App\Models\GeneradorConstancia;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class HallazgoWizard extends Component
 {
     use WithFileUploads;
@@ -171,7 +174,7 @@ class HallazgoWizard extends Component
             'descripcion' => $this->descripcion,
             'ubicacion_especifica' => $this->ubicacion_especifica,
             'sede_id' => $this->sede_id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'criticidad' => $this->criticidad,
             'estado' => $this->estado,
             'plazo_correccion' => $this->plazo_correccion,
@@ -208,7 +211,9 @@ class HallazgoWizard extends Component
         }
 
         // Redirect back to visit if created from visit context
-        $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $prefix = $user->isAdmin() ? 'gestor' : 'tecnico';
         if ($this->visitId) {
             return redirect()->route($prefix . '.visits.in-progress', $this->visitId);
         }
@@ -218,7 +223,8 @@ class HallazgoWizard extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         
         // Si es técnico, solo ve sus sedes asignadas. Si es admin, ve todas.
         $sedes = $user->isTechnician() 
@@ -242,6 +248,6 @@ class HallazgoWizard extends Component
             'inspecciones' => $inspecciones,
             'constancias' => $constancias,
             'visitas' => $visitas,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

@@ -7,7 +7,10 @@ use App\Models\HallazgoSeguimiento;
 use App\Models\HallazgoFoto;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class HallazgoDetail extends Component
 {
     use WithFileUploads;
@@ -66,7 +69,7 @@ class HallazgoDetail extends Component
         $this->hallazgo->agregarSeguimiento(
             $this->nuevoEstado,
             $this->comentarioSeguimiento,
-            auth()->id()
+            Auth::id()
         );
 
         $this->reset(['comentarioSeguimiento', 'showSeguimientoForm']);
@@ -123,6 +126,6 @@ class HallazgoDetail extends Component
 
     public function render()
     {
-        return view('livewire.hallazgos.hallazgo-detail')->layout('components.layouts.app');
+        return view('livewire.hallazgos.hallazgo-detail');
     }
 }

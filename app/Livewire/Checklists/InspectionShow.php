@@ -4,7 +4,10 @@ namespace App\Livewire\Checklists;
 
 use App\Models\DynamicInspection;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class InspectionShow extends Component
 {
     public DynamicInspection $inspection;
@@ -19,7 +22,9 @@ class InspectionShow extends Component
         ])->findOrFail($id);
 
         // Seguridad: El técnico solo puede ver sus propias inspecciones
-        if (auth()->user()->rol === 'Técnico' && $inspection->user_id !== auth()->id()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->rol === 'Técnico' && $inspection->user_id !== Auth::id()) {
             abort(403, 'No tienes permiso para ver esta inspección');
         }
 
@@ -35,6 +40,6 @@ class InspectionShow extends Component
 
         return view('livewire.checklists.inspection-show', [
             'answers' => $answers,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

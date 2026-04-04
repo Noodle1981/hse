@@ -8,7 +8,10 @@ use App\Models\Training;
 use App\Models\Empresa;
 use App\Models\Sede;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class TrainingIndex extends Component
 {
     use WithPagination;
@@ -31,8 +34,10 @@ class TrainingIndex extends Component
 
     public function delete($id)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         // Validar que solo Admin puede eliminar
-        if (!auth()->user()->isAdmin()) {
+        if (!$user->isAdmin()) {
             session()->flash('error', 'No tienes permisos para eliminar capacitaciones.');
             return;
         }
@@ -170,6 +175,6 @@ class TrainingIndex extends Component
             'trainings' => $trainings,
             'empresas' => $empresas,
             'sedes' => $sedes,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

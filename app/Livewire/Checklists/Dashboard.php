@@ -5,6 +5,7 @@ namespace App\Livewire\Checklists;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -15,7 +16,8 @@ class Dashboard extends Component
 {
     public function render()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $isTech = $user->rol === 'Técnico';
 
         // KPIs principales

@@ -8,7 +8,9 @@ use App\Models\Sede;
 use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class VisitCertificateManager extends Component
 {
     use WithPagination;
@@ -99,6 +101,6 @@ class VisitCertificateManager extends Component
             'empresas' => $empresas,
             'sedes' => $sedes,
             'tiposVisita' => $tiposVisita,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

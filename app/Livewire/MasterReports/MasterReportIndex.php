@@ -2,6 +2,7 @@
 
 namespace App\Livewire\MasterReports;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class MasterReportIndex extends Component
@@ -48,8 +49,10 @@ class MasterReportIndex extends Component
         $query = \App\Models\MasterReport::with(['sede', 'tecnico', 'gestor'])
             ->latest();
 
-        if (auth()->user()->isTechnician()) {
-            $query->where('user_id', auth()->id());
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->isTechnician()) {
+            $query->where('user_id', Auth::id());
         }
 
         if ($this->status) {

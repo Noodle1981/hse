@@ -5,7 +5,9 @@ namespace App\Livewire\Categories;
 use App\Models\Category;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class CategoryBuilder extends Component
 {
     public ?Category $category = null;
@@ -101,7 +103,6 @@ class CategoryBuilder extends Component
 
     public function render()
     {
-        return view('livewire.categories.category-builder')
-            ->layout('components.layouts.app');
+        return view('livewire.categories.category-builder');
     }
 }

@@ -10,8 +10,11 @@ use App\Models\Training;
 use Livewire\Component;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use App\Mail\ConstanciaFirmaResponsable;
 
+#[Layout('components.layouts.app')]
 class VisitCertificateWizard extends Component
 {
     public $currentStep = 1;
@@ -128,7 +131,7 @@ class VisitCertificateWizard extends Component
 
         $this->certificate = GeneradorConstancia::create([
             'sede_id' => $this->sede_id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'fecha_visita' => $this->fecha_visita,
             'tipo_visita' => $this->tipo_visita,
             'observacion' => $this->observacion,
@@ -186,7 +189,7 @@ class VisitCertificateWizard extends Component
         $endDate = $visitDate->copy()->endOfDay();
         
         return [
-            'inspections' => DynamicInspection::where('user_id', auth()->id())
+            'inspections' => DynamicInspection::where('user_id', Auth::id())
                 ->where('sede_id', $this->sede_id)
                 ->whereBetween('completed_at', [$startDate, $endDate])
                 ->with('checklist:id,title')
@@ -197,7 +200,7 @@ class VisitCertificateWizard extends Component
                 ->get(),
             
 
-            'hallazgos' => \App\Models\Hallazgo::where('user_id', auth()->id())
+            'hallazgos' => \App\Models\Hallazgo::where('user_id', Auth::id())
                 ->where('sede_id', $this->sede_id)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->get(),
@@ -206,7 +209,8 @@ class VisitCertificateWizard extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         
         // Filtrar sedes según el rol
         if ($user->rol === 'Administrador') {
@@ -224,6 +228,6 @@ class VisitCertificateWizard extends Component
 
         return view('livewire.visits.visit-certificate-wizard', [
             'sedes' => $sedes,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

@@ -4,7 +4,10 @@ namespace App\Livewire\Incidentes;
 
 use App\Models\Incidente;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class IncidenteDetail extends Component
 {
     public $incidenteId;
@@ -46,7 +49,9 @@ class IncidenteDetail extends Component
 
     public function actualizarIncidente()
     {
-        if (!auth()->user()->isAdmin()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
             return;
         }
 
@@ -66,6 +71,6 @@ class IncidenteDetail extends Component
 
     public function render()
     {
-        return view('livewire.incidentes.incidente-detail')->layout('components.layouts.app');
+        return view('livewire.incidentes.incidente-detail');
     }
 }

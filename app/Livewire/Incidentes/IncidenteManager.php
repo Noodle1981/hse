@@ -7,7 +7,10 @@ use App\Models\Hallazgo;
 use App\Models\Sede;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class IncidenteManager extends Component
 {
     use WithPagination;
@@ -52,7 +55,7 @@ class IncidenteManager extends Component
         Incidente::create([
             'hallazgo_id' => $this->hallazgo_id ?: null,
             'sede_id' => $this->sede_id,
-            'user_id' => auth()->id(),
+            'user_id' => Auth::id(),
             'tipo' => $this->tipo,
             'gravedad' => $this->gravedad,
             'fecha_ocurrencia' => $this->fecha_ocurrencia,
@@ -115,6 +118,6 @@ class IncidenteManager extends Component
             'kpis' => $kpis,
             'sedes' => $sedes,
             'hallazgos' => $hallazgos,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

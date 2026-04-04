@@ -7,7 +7,11 @@ use App\Models\Empresa;
 use App\Models\Sede;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
+use Livewire\Attributes\Title;
 
+#[Layout('components.layouts.app')]
+#[Title('Gestión de Técnicos')]
 class TechnicianManager extends Component
 {
     use WithPagination;
@@ -138,6 +142,6 @@ class TechnicianManager extends Component
 
         return view('livewire.users.technician-manager', [
             'technicians' => $technicians
-        ])->layout('components.layouts.app', ['title' => 'Gestión de Técnicos']);
+        ]);
     }
 }

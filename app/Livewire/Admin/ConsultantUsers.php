@@ -5,9 +5,12 @@ namespace App\Livewire\Admin;
 use App\Models\Consultora;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.admin')]
 class ConsultantUsers extends Component
 {
     use WithPagination;
@@ -34,7 +37,7 @@ class ConsultantUsers extends Component
     {
         return view('livewire.admin.consultant-users', [
             'users' => $this->consultant->users()->paginate(10)
-        ])->layout('components.layouts.admin');
+        ]);
     }
 
     public function create()
@@ -104,8 +107,8 @@ class ConsultantUsers extends Component
     {
         $user = User::findOrFail($id);
         
-        // Prevent deleting self if somehow managed (though unlikely from admin panel)
-        if ($user->id === auth()->id()) {
+        // Prevent deleting self
+        if ($user->id === Auth::id()) {
             $this->dispatch('error', 'No puedes eliminar tu propio usuario');
             return;
         }

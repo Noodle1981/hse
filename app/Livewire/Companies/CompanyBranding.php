@@ -46,7 +46,6 @@ class CompanyBranding extends Component
 
     public function render()
     {
-        return view('livewire.companies.company-branding')
-            ->layout('components.layouts.app');
+        return view('livewire.companies.company-branding');
     }
 }

@@ -4,7 +4,9 @@ namespace App\Livewire\Admin;
 
 use App\Models\Empresa;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.admin')]
 class EcosystemDashboard extends Component
 {
     public function render()
@@ -45,7 +47,7 @@ class EcosystemDashboard extends Component
             'companies'     => $companies,
             'stats'         => $stats,
             'recent_events' => $this->getRecentEvents(),
-        ])->layout('components.layouts.admin');
+        ]);
     }
 
     /**

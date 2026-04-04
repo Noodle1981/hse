@@ -11,6 +11,7 @@ use App\Models\{
 };
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\{Layout, Title};
 
 #[Layout('components.layouts.app')]
@@ -23,7 +24,8 @@ class TechnicianDashboard extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         
         $this->misionActiva = $this->getActiveMission($user);
         $this->proximasMisiones = $this->getUpcomingMissions($user);

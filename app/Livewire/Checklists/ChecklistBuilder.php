@@ -8,7 +8,9 @@ use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\ChecklistSection;
 use Livewire\Component;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class ChecklistBuilder extends Component
 {
     public ?DynamicChecklist $checklist = null;
@@ -534,6 +536,6 @@ class ChecklistBuilder extends Component
         return view('livewire.checklists.checklist-builder', [
             'categories' => $this->categories,
             'subcategories' => $this->subcategories,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

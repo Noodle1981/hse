@@ -12,6 +12,7 @@ use App\Models\{
     GeneradorConstancia
 };
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\{Layout, Title};
 
@@ -746,7 +747,9 @@ class AdminDashboard extends Component
     private function setGreeting()
     {
         $hour = now()->hour;
-        $name = auth()->user()->nombres;
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $name = $user->nombres;
 
         if ($hour < 12) {
             $this->greeting = "¡Buenos días, $name!";

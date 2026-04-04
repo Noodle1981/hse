@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Configuration\Exception;
 use Illuminate\Support\Facades\Hash;
+use Throwable;
 
 class UserController extends Controller
 {

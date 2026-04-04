@@ -7,7 +7,10 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class UserManager extends Component
 {
     use WithPagination;
@@ -58,7 +61,8 @@ class UserManager extends Component
 
     private function ensureTenancy(User $user)
     {
-        $currentUser = auth()->user();
+        /** @var \App\Models\User $currentUser */
+        $currentUser = Auth::user();
         if (!$currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
             abort(403, 'Acceso no autorizado a este usuario.');
         }
@@ -117,8 +121,10 @@ class UserManager extends Component
         ];
 
         // Assign to current user's consultancy if not set (Tenancy)
-        if (!auth()->user()->isSuperAdmin()) {
-            $data['consultora_id'] = auth()->user()->consultora_id;
+        /** @var \App\Models\User $currentUser */
+        $currentUser = Auth::user();
+        if (!$currentUser->isSuperAdmin()) {
+            $data['consultora_id'] = $currentUser->consultora_id;
         }
 
         if ($this->password) {
@@ -141,7 +147,7 @@ class UserManager extends Component
     public function confirmDelete(int $id, string $name)
     {
         // No permitir eliminar al usuario actual
-        if ($id === auth()->id()) {
+        if ($id === Auth::id()) {
             session()->flash('error', 'No puedes eliminar tu propio usuario');
             return;
         }
@@ -191,7 +197,8 @@ class UserManager extends Component
 
     public function render()
     {
-        $currentUser = auth()->user();
+        /** @var \App\Models\User $currentUser */
+        $currentUser = Auth::user();
         $query = User::query();
 
         // 1. Tenancy: Filter by consultancy if not Super Admin
@@ -221,7 +228,7 @@ class UserManager extends Component
 
         return view('livewire.users.user-manager', [
             'users' => $users,
-        ])->layout('components.layouts.app');
+        ]);
     }
 
     public function restore(int $id)

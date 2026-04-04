@@ -8,8 +8,11 @@ use App\Models\Sede;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use App\Mail\ConstanciaFirmaResponsable;
 
+#[Layout('components.layouts.app')]
 class VisitCertificateHistory extends Component
 {
     use WithPagination;
@@ -44,7 +47,8 @@ class VisitCertificateHistory extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         $certificates = GeneradorConstancia::query()
             ->with(['sede.empresa'])
@@ -99,6 +103,6 @@ class VisitCertificateHistory extends Component
             'certificates' => $certificates,
             'empresas' => $empresas,
             'sedes' => $sedes,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

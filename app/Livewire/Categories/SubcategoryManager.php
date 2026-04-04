@@ -6,7 +6,9 @@ use App\Models\Category;
 use App\Models\Subcategory;
 use Livewire\Component;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class SubcategoryManager extends Component
 {
     public Category $category;
@@ -59,7 +61,7 @@ class SubcategoryManager extends Component
             'code' => $this->newCode,
             'name' => $this->newName,
             'description' => $this->newDescription ?: null,
-            'order' => $this->subcategories->count()
+            'order' => count($this->subcategories)
         ]);
 
         $this->loadSubcategories();
@@ -129,7 +131,6 @@ class SubcategoryManager extends Component
 
     public function render()
     {
-        return view('livewire.categories.subcategory-manager')
-            ->layout('components.layouts.app');
+        return view('livewire.categories.subcategory-manager');
     }
 }

@@ -5,7 +5,10 @@ namespace App\Livewire\Hallazgos;
 use App\Models\Hallazgo;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class MisHallazgos extends Component
 {
     use WithPagination;
@@ -20,7 +23,8 @@ class MisHallazgos extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $assignedSedeIds = $user->sedes()->pluck('sedes.id')->toArray();
 
         $query = Hallazgo::query()
@@ -66,6 +70,6 @@ class MisHallazgos extends Component
         return view('livewire.hallazgos.mis-hallazgos', [
             'hallazgos' => $hallazgos,
             'kpis' => $kpis,
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

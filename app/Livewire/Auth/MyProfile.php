@@ -4,8 +4,11 @@ namespace App\Livewire\Auth;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules\Password;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class MyProfile extends Component
 {
     public $nombres;
@@ -20,7 +23,8 @@ class MyProfile extends Component
 
     public function mount()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $this->nombres = $user->nombres;
         $this->apellidos = $user->apellidos;
         $this->email = $user->email;
@@ -30,7 +34,8 @@ class MyProfile extends Component
 
     public function updateProfile()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         
         $this->validate([
             'nombres' => 'required|string|max:255',
@@ -59,7 +64,9 @@ class MyProfile extends Component
             'new_password.min' => 'La nueva contraseña debe tener al menos 6 caracteres.',
         ]);
 
-        auth()->user()->update([
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $user->update([
             'password' => Hash::make($this->new_password)
         ]);
 
@@ -70,7 +77,6 @@ class MyProfile extends Component
 
     public function render()
     {
-        return view('livewire.auth.my-profile')
-            ->layout('components.layouts.app', ['title' => 'Mi Perfil']);
+        return view('livewire.auth.my-profile');
     }
 }

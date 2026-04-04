@@ -5,7 +5,10 @@ namespace App\Livewire\Checklists;
 use App\Models\DynamicInspection;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 
+#[Layout('components.layouts.app')]
 class InspectionHistory extends Component
 {
     use WithPagination;
@@ -39,7 +42,8 @@ class InspectionHistory extends Component
 
     public function render()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $isTech = $user->isTechnician();
 
         $inspections = DynamicInspection::query()
@@ -96,14 +100,17 @@ class InspectionHistory extends Component
                 : collect(),
             'checklists' => \App\Models\DynamicChecklist::whereHas('inspections')
                 ->orderBy('title')->get(),
-        ])->layout('components.layouts.app');
+        ]);
     }
     public function delete($id)
     {
         $inspection = DynamicInspection::findOrFail($id);
         
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
         // Solo permitir borrar borradores o si es admin (adaptar según política)
-        if ($inspection->status !== 'draft' && !auth()->user()->isAdmin()) {
+        if ($inspection->status !== 'draft' && !$user->isAdmin()) {
             return;
         }
 

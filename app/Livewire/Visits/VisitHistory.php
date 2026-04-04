@@ -6,8 +6,11 @@ use App\Models\VisitCertificate;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
 use App\Mail\ConstanciaFirmaResponsable;
 
+#[Layout('components.layouts.app')]
 class VisitHistory extends Component
 {
     use WithPagination;
@@ -41,8 +44,10 @@ class VisitHistory extends Component
 
     public function editVisit($id)
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         // Solo el administrador de la empresa (Gestor) puede editar
-        if (!auth()->user()->isAdmin()) {
+        if (!$user->isAdmin()) {
             return;
         }
 
@@ -57,7 +62,9 @@ class VisitHistory extends Component
 
     public function updateVisit()
     {
-        if (!auth()->user()->isAdmin()) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAdmin()) {
             return;
         }
 
@@ -115,6 +122,6 @@ class VisitHistory extends Component
 
         return view('livewire.visits.visit-history', [
             'visits' => $visits
-        ])->layout('components.layouts.app');
+        ]);
     }
 }

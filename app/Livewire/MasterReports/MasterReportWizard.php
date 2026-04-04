@@ -2,6 +2,7 @@
 
 namespace App\Livewire\MasterReports;
 
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class MasterReportWizard extends Component
@@ -123,7 +124,7 @@ class MasterReportWizard extends Component
             \App\Models\MasterReport::create([
                 'sede_id' => $this->sede_id,
                 'user_id' => $this->user_id,
-                'solicitado_por' => auth()->id(),
+                'solicitado_por' => Auth::id(),
                 'titulo' => $this->titulo,
                 'periodo' => $this->periodo,
                 'estado' => 'solicitado',

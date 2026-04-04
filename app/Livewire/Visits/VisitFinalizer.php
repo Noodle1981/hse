@@ -5,6 +5,7 @@ namespace App\Livewire\Visits;
 use App\Models\VisitCertificate;
 use App\Services\VisitService;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 
 class VisitFinalizer extends Component
 {
@@ -48,7 +49,9 @@ class VisitFinalizer extends Component
         );
 
         // Redirigir al manager o mostrar éxito
-        if (auth()->user()->hasRole('Administrador')) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if ($user->hasRole('Administrador')) {
             return redirect()->route('gestor.visits.history');
         }
         return redirect()->route('tecnico.visits.index');
