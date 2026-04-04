@@ -2,16 +2,21 @@
 
 namespace Database\Seeders\Traits;
 
-use App\Models\{
-    DynamicChecklist, ChecklistSection, DynamicQuestion,
-    DynamicInspection, DynamicAnswer,
-    Training, TrainingAttendance,
-    Employee, EppItem, EppDelivery,
-    RiskMatrix, Risk, RiskControl, RiskEvaluation,
-    AnnualPlan, Category,
-    VisitCertificate, VisitTraining, VisitChecklistCompletion,
-    Hallazgo, Incidente
-};
+use App\Models\DynamicChecklist;
+use App\Models\ChecklistSection;
+use App\Models\DynamicQuestion;
+use App\Models\DynamicInspection;
+use App\Models\DynamicAnswer;
+use App\Models\Training;
+use App\Models\TrainingAttendance;
+use App\Models\Employee as EmployeeModel;
+use App\Models\AnnualPlan;
+use App\Models\Category;
+use App\Models\VisitCertificate;
+use App\Models\VisitTraining;
+use App\Models\VisitChecklistCompletion;
+use App\Models\Hallazgo;
+use App\Models\Incidente;
 
 trait SeederHelpers
 {
@@ -48,7 +53,6 @@ trait SeederHelpers
                     'min_value' => $config['min_value'] ?? null,
                     'max_value' => $config['max_value'] ?? null,
                     'failure_values' => $config['failure_values'] ?? null,
-                    'risk_id' => $config['risk_id'] ?? null,
                     'is_required' => in_array($config['type'], ['radio', 'select', 'text', 'number']),
                     'order' => $questionOrder++,
                 ]);
@@ -83,7 +87,6 @@ trait SeederHelpers
                 'min_value' => $config['min_value'] ?? null,
                 'max_value' => $config['max_value'] ?? null,
                 'failure_values' => $config['failure_values'] ?? null,
-                'risk_id' => $config['risk_id'] ?? null,
                 'is_required' => in_array($config['type'], ['radio', 'select', 'text', 'number']),
                 'order' => $questionOrder++,
             ]);
@@ -181,7 +184,7 @@ trait SeederHelpers
         $employees = [];
         
         foreach ($employeesData as $data) {
-            $employees[] = Employee::create([
+            $employees[] = EmployeeModel::create([
                 'name' => $data[0],
                 'last_name' => $data[1],
                 'dni' => $data[2],
@@ -196,131 +199,7 @@ trait SeederHelpers
         return $employees;
     }
 
-    /**
-     * Crear items de EPP
-     */
-    protected function createEppItems(array $itemsData): array
-    {
-        $items = [];
-        
-        foreach ($itemsData as $data) {
-            $items[] = EppItem::firstOrCreate(
-                ['nombre' => $data[0]],
-                [
-                    'tipo' => $data[1],
-                    'codigo_norma' => $data[2],
-                    'vida_util_meses' => $data[3],
-                    'is_active' => true,
-                ]
-            );
-        }
-        
-        return $items;
-    }
 
-    /**
-     * Crear entregas de EPP
-     */
-    protected function createEppDeliveries($sede, array $employees, array $tecnicos, array $eppItems, int $count = 10): void
-    {
-        for ($i = 0; $i < $count; $i++) {
-            $employee = $employees[array_rand($employees)];
-            $tecnico = $tecnicos[array_rand($tecnicos)];
-            
-            $delivery = EppDelivery::create([
-                'employee_id' => $employee->id,
-                'user_id' => $tecnico->id,
-                'delivery_date' => now()->subDays(rand(1, 90)),
-                'observaciones' => $i % 2 == 0 ? 'Entrega de renovación' : 'Entrega por ingreso',
-                'signature' => $this->getDefaultSignature(),
-            ]);
-
-            // Agregar items a la entrega (2-4 items por entrega)
-            $itemCount = rand(2, 4);
-            $selectedItems = array_rand($eppItems, min($itemCount, count($eppItems)));
-            if (!is_array($selectedItems)) $selectedItems = [$selectedItems];
-            
-            foreach ($selectedItems as $itemIndex) {
-                $delivery->items()->attach($eppItems[$itemIndex]->id, [
-                    'cantidad' => rand(1, 3),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Crear matriz de riesgos
-     */
-    protected function createRiskMatrix($sede, $tecnico, string $title, string $description, string $area, string $process, array $risksData): void
-    {
-        $matrix = RiskMatrix::create([
-            'title' => $title,
-            'description' => $description,
-            'area' => $area,
-            'process' => $process,
-            'empresa_id' => $sede->empresa_id,
-            'sede_id' => $sede->id,
-            'user_id' => $tecnico->id,
-            'status' => 'active',
-        ]);
-
-        $order = 1;
-        foreach ($risksData as $riskData) {
-            $risk = $matrix->risks()->create([
-                'hazard' => $riskData['hazard'],
-                'type' => $riskData['type'],
-                'consequence' => $riskData['consequence'],
-                'order' => $order++,
-            ]);
-
-            // Crear controles
-            foreach ($riskData['controls'] as $controlData) {
-                $risk->controls()->create([
-                    'measure' => $controlData[0],
-                    'type' => $controlData[1],
-                ]);
-            }
-
-            // Crear evaluación
-            if (isset($riskData['probability']) && isset($riskData['severity'])) {
-                $probability = $riskData['probability'];
-                $severity = $riskData['severity'];
-                $score = $probability * $severity;
-                
-                // Determinar nivel según matriz 5x5
-                if ($score >= 15) {
-                    $level = 'Crítico';
-                } elseif ($score >= 10) {
-                    $level = 'Alto';
-                } elseif ($score >= 5) {
-                    $level = 'Medio';
-                } else {
-                    $level = 'Bajo';
-                }
-
-                // Determinar color según nivel
-                $color = match($level) {
-                    'Crítico' => '#dc2626', // red-600
-                    'Alto' => '#ea580c', // orange-600
-                    'Medio' => '#ca8a04', // yellow-600
-                    'Bajo' => '#16a34a', // green-600
-                    default => '#6b7280', // gray-500
-                };
-
-                RiskEvaluation::create([
-                    'risk_id' => $risk->id,
-                    'user_id' => $tecnico->id,
-                    'probability' => $probability,
-                    'severity' => $severity,
-                    'score' => $score,
-                    'level' => $level,
-                    'color' => $color,
-                    'justification' => 'Evaluación inicial',
-                    'evaluation_date' => now()->subDays(rand(1, 30)),
-                ]);
-            }
-        }
-    }
 
     /**
      * Crear contrato anual
@@ -578,48 +457,11 @@ trait SeederHelpers
         }
     }
 
-    /**
-     * Crear solicitudes de EPP pendientes
-     */
-    protected function createPendingEppRequests($tecnico, $sede, $date): void
-    {
-        // Solicitudes de EPP (Si existe el modelo EppDeliveryRequest o similar)
-        if (!class_exists(\App\Models\EppDeliveryRequest::class)) return;
-
-        // Necesitamos empleados para asignar la solicitud
-        $employees = \App\Models\Employee::where('sede_id', $sede->id)->inRandomOrder()->take(3)->get();
-        if ($employees->isEmpty()) return;
-        
-        // Crear 3 solicitudes (o tantas como empleados encontremos hasta 3)
-        foreach ($employees as $employee) {
-            // Items aleatorios para esta solicitud
-            $items = EppItem::inRandomOrder()->take(rand(1, 3))->get();
-            if ($items->isEmpty()) continue;
-
-            $itemsJson = $items->map(function($item) {
-                return [
-                    'item_id' => $item->id,
-                    'cantidad' => rand(1, 2),
-                    'tipo' => $item->tipo
-                ];
-            })->toArray();
-
-            \App\Models\EppDeliveryRequest::create([
-                 'empresa_id' => $sede->empresa_id,
-                 'sede_id' => $sede->id,
-                 'employee_id' => $employee->id,
-                 'requested_by_user_id' => $tecnico->id,
-                 'status' => 'pending',
-                 'items' => $itemsJson,
-                 'notes' => 'Solicitud urgente. Vencimiento requerido: ' . $date->format('d/m/Y'),
-             ]);
-        }
-    }
 
     /**
      * Crear una visita completa con integraciones
      */
-    protected function createCompleteVisit($sede, $tecnico, $date, array $checklists, array $employees, ?Risk $riskToFail = null): VisitCertificate
+    protected function createCompleteVisit($sede, $tecnico, $date, array $checklists, array $employees): VisitCertificate
     {
         $visit = VisitCertificate::create([
             'user_id' => $tecnico->id,
@@ -668,8 +510,7 @@ trait SeederHelpers
             // Generar respuestas (algunas pueden fallar si el riesgo es coincidente)
             $responsesForJson = [];
             foreach ($checklist->questions as $question) {
-                $isTargetRisk = ($riskToFail && $question->risk_id == $riskToFail->id);
-                $value = $isTargetRisk ? $this->generateFailureValue($question) : $this->generateAnswerValue($question);
+                $value = $this->generateAnswerValue($question);
 
                 DynamicAnswer::create([
                     'dynamic_inspection_id' => $inspection->id,
@@ -682,7 +523,7 @@ trait SeederHelpers
                 // Si falló, crear un Hallazgo vinculado
                 $tempAnswer = new DynamicAnswer(['dynamic_question_id' => $question->id, 'value' => $value]);
                 if ($tempAnswer->isFailure()) {
-                    $this->createHallazgo($visit, $tecnico, $question, $riskToFail);
+                    $this->createHallazgo($visit, $tecnico, $question);
                 }
             }
             
@@ -708,7 +549,7 @@ trait SeederHelpers
     /**
      * Crear un Hallazgo vinculado a un fallo
      */
-    protected function createHallazgo($visit, $tecnico, $question, ?Risk $risk = null): Hallazgo
+    protected function createHallazgo($visit, $tecnico, $question): Hallazgo
     {
         return Hallazgo::create([
             'sede_id' => $visit->sede_id,
@@ -718,7 +559,6 @@ trait SeederHelpers
             'criticidad' => 'alto',
             'estado' => 'pendiente',
             'fecha_deteccion' => $visit->visit_date,
-            'risk_id' => $risk ? $risk->id : $question->risk_id,
             'visit_certificate_id' => $visit->id,
             'question_id' => $question->id,
         ]);

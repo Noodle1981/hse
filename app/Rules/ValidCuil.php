@@ -2,37 +2,36 @@
 
 namespace App\Rules;
 
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class ValidCuil implements Rule
+class ValidCuil implements ValidationRule
 {
     /**
-     * Determine if the validation rule passes.
+     * Run the validation rule.
      *
      * @param  string  $attribute
      * @param  mixed  $value
-     * @return bool
+     * @param  \Closure(string): \Illuminate\Translation\PotentiallyTranslatedString  $fail
      */
-    private $error = 'El CUIL ingresado no es válido.';
-
-    public function passes($attribute, $value)
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (empty($value)) {
-            return true;
+            return;
         }
 
         // Formato: XX-XXXXXXXX-X
         if (!preg_match('/^\d{2}-\d{8}-\d$/', $value)) {
-            $this->error = 'El formato debe ser XX-XXXXXXXX-X (con guiones).';
-            return false;
+            $fail('El formato del CUIL debe ser XX-XXXXXXXX-X (con guiones).');
+            return;
         }
 
         // Validar dígito verificador
         $cuil = str_replace('-', '', $value);
         
         if (strlen($cuil) !== 11) {
-            $this->error = 'El CUIL debe tener 11 dígitos.';
-            return false;
+            $fail('El CUIL debe tener 11 dígitos.');
+            return;
         }
 
         // Algoritmo de validación
@@ -53,15 +52,8 @@ class ValidCuil implements Rule
         }
 
         if ((int)$cuil[10] !== $digitoVerificador) {
-            $this->error = "Dígito verificador incorrecto. Se esperaba $digitoVerificador.";
-            return false;
+            $fail("El CUIL ingresado no es válido. Dígito verificador incorrecto (se esperaba $digitoVerificador).");
+            return;
         }
-
-        return true;
-    }
-
-    public function message()
-    {
-        return $this->error;
     }
 }

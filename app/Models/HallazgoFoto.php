@@ -76,7 +76,9 @@ class HallazgoFoto extends Model
      */
     public function getUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->ruta_archivo);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storage */
+        $storage = Storage::disk('public');
+        return $storage->url($this->ruta_archivo);
     }
 
     /**

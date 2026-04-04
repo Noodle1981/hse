@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\Consultora;
+use Illuminate\Support\Facades\Auth;
 
 class BrandingService
 {
@@ -26,7 +27,7 @@ class BrandingService
      */
     public static function forUser(?User $user = null): array
     {
-        $user = $user ?? auth()->user();
+        $user = $user ?? Auth::user();
         $consultora = $user?->consultora;
 
         return self::fromConsultora($consultora);

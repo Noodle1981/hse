@@ -9,11 +9,11 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\SerializesModels;
 use App\Models\GeneradorConstancia;
 use App\Models\Sede;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Mail\Mailables\Attachment;
 
 class PruebasAttach extends Mailable
 {
@@ -55,16 +55,16 @@ class PruebasAttach extends Mailable
      */
     public function attachments(): array
     {
-        $constancia = GeneradorConstancia::where("id",3)->with('sede')->first();
-        $sede = Sede::where("id",$constancia['sede_id'])->with('empresa')->first();
-        $constancia['nombre_empresa']=$sede['empresa']->nombre;
-        $constancia['razon_social']=$sede['empresa']->razon_social;
-        $constancia['cuit']=$sede['empresa']->cuit;
-        $pdf = PDF::loadView('constanciaPDF', ['data' => $constancia]);
+        $constancia = GeneradorConstancia::where("id", 3)->with('sede')->first();
+        $sede = Sede::where("id", $constancia['sede_id'])->with('empresa')->first();
+        $constancia['nombre_empresa'] = $sede['empresa']->nombre;
+        $constancia['razon_social'] = $sede['empresa']->razon_social;
+        $constancia['cuit'] = $sede['empresa']->cuit;
+        $pdf = Pdf::loadView('constanciaPDF', ['data' => $constancia]);
         Storage::disk('local')->put('report.pdf', $pdf->stream());
         return [
 
-            Attachment::fromData(fn () => $pdf->render(), 'Report.pdf')
+            Attachment::fromData(fn() => $pdf->render(), 'Report.pdf')
 
                 ->withMime('application/pdf'),
 

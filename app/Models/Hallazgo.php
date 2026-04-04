@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Auth;
 
 class Hallazgo extends Model
 {
@@ -298,7 +299,7 @@ class Hallazgo extends Model
     public function agregarSeguimiento(string $estadoNuevo, string $comentario, ?int $userId = null): HallazgoSeguimiento
     {
         $seguimiento = $this->seguimientos()->create([
-            'user_id' => $userId ?? auth()->id(),
+            'user_id' => $userId ?? Auth::id(),
             'estado_anterior' => $this->estado,
             'estado_nuevo' => $estadoNuevo,
             'comentario' => $comentario,
