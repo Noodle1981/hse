@@ -96,7 +96,7 @@
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 overflow-hidden relative">
                                     <td class="px-8 py-7">
                                         <div class="flex flex-col">
-                                            <span class="text-sm font-black text-white italic leading-none mb-2 mb-1 tracking-tight">{{ $visit->visit_date->format('d/m/Y') }}</span>
+                                            <span class="text-sm font-black text-white italic leading-none mb-1 tracking-tight">{{ $visit->visit_date->format('d/m/Y') }}</span>
                                             <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest italic group-hover/row:translate-x-1 transition-transform">
                                                 {{ $visit->start_time?->format('H:i') }} • {{ $visit->end_time?->format('H:i') }}
                                             </span>
@@ -148,7 +148,7 @@
                                         @else
                                             <div class="inline-flex items-center px-3 py-1 bg-blue-500/10 border border-blue-500/20 rounded-lg text-blue-400">
                                                 <div class="w-2 h-2 bg-blue-500 rounded-full animate-ping mr-3 shadow-[0_0_8px_#3b82f6]"></div>
-                                                <span class="text-[10px] font-black uppercase italic tracking-widest italic leading-none">OPERATIVO VIVO</span>
+                                                <span class="text-[10px] font-black uppercase tracking-widest italic leading-none">OPERATIVO VIVO</span>
                                             </div>
                                         @endif
                                     </td>
@@ -164,7 +164,7 @@
                                         @endif
                                     </td>
                                     <td class="px-8 py-7 text-right">
-                                        <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
+                                        <div class="flex justify-end gap-3 transition-all duration-500">
                                             @if($visit->status === 'in_progress')
                                                 <a href="{{ route('gestor.visits.in-progress', $visit) }}" 
                                                    class="h-11 px-5 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic flex items-center shadow-lg hover:scale-105 transition-all">
@@ -249,9 +249,9 @@
                             </div>
                             
                             <div class="flex justify-between items-center">
-                                <span class="text-[9px] font-black text-white/20 uppercase tracking-widest italic uppercase leading-none">Estado</span>
+                                <span class="text-[9px] font-black text-white/20 uppercase tracking-widest italic leading-none">Estado</span>
                                 @if($visit->status === 'signed')
-                                    <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest italic italic leading-none">Firmada ✅</span>
+                                    <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest italic leading-none">Firmada ✅</span>
                                 @else
                                     <span class="text-[9px] font-black text-white/40 uppercase tracking-widest italic">Consolidada</span>
                                 @endif

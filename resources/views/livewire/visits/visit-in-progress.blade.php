@@ -314,9 +314,12 @@
                             <!-- Duración Principal -->
                             <div class="flex flex-col items-center justify-center p-6 bg-white/5 rounded-3xl border border-white/10 shadow-inner">
                                 <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-[0.4em] mb-2 italic">Tiempo de Operación</span>
-                                <span class="text-4xl font-black text-white italic tracking-tighter tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-                                    {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}m
-                                </span>
+                                <div class="flex items-center gap-4">
+                                    <span class="text-4xl font-black text-white italic tracking-tighter tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
+                                        {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}m
+                                    </span>
+                                    <div class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping shadow-[0_0_12px_rgba(16,185,129,0.5)]"></div>
+                                </div>
                                 <div class="mt-4 flex gap-2">
                                     <div class="h-1 w-8 rounded-full bg-emerald-500 shadow-[0_0_10px_#10b981]"></div>
                                     <div class="h-1 w-2 rounded-full bg-emerald-500/20"></div>
@@ -633,5 +636,14 @@
     </div>
     @endif
 
-    </style>
+    <!-- Modales de Hallazgos e Incidentes -->
+    @if($showHallazgoModal)
+        <livewire:visits.hallazgo-quick :visit="$visit" wire:key="modal-hallazgo-{{ $visit->id }}" />
+    @endif
+
+    @if($showIncidenteModal)
+        <livewire:visits.incidente-quick :visit="$visit" wire:key="modal-incidente-{{ $visit->id }}" />
+    @endif
+
+
 </div>

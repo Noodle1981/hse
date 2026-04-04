@@ -8,8 +8,12 @@ use App\Models\DynamicInspection;
 use App\Models\DynamicAnswer;
 use App\Models\VisitCertificate;
 use App\Services\VisitService;
+use App\Models\User;
+use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InspectionWizard extends Component
 {
@@ -36,12 +40,12 @@ class InspectionWizard extends Component
         }])->findOrFail($id);
 
         if ($assignment instanceof ChecklistAssignment) {
-            abort_if($assignment->user_id !== auth()->id(), 403);
+            abort_if($assignment->user_id !== Auth::id(), 403);
             $this->assignment = $assignment;
         } elseif ($assignment) {
             // Validar que la asignación pertenece al usuario autenticado
             $this->assignment = ChecklistAssignment::where('id', $assignment)
-                ->where('user_id', auth()->id())
+                ->where('user_id', Auth::id())
                 ->firstOrFail();
         }
 
@@ -105,6 +109,7 @@ class InspectionWizard extends Component
             $this->validateCurrentStep();
             $this->currentStep++;
             $this->saveProgress();
+            $this->dispatch('scroll-to-top');
         }
     }
 
@@ -112,6 +117,7 @@ class InspectionWizard extends Component
     {
         if ($this->currentStep > 0) {
             $this->currentStep--;
+            $this->dispatch('scroll-to-top');
         }
     }
 
@@ -132,7 +138,9 @@ class InspectionWizard extends Component
             }
             
             if (!empty($rules)) {
-                $this->validate($rules, [], ['answers.*' => 'Este campo']);
+                $this->validate($rules, [
+                    'answers.*.required' => 'Este campo es obligatorio.',
+                ], ['answers.*' => 'Este campo']);
             }
         }
     }
@@ -141,7 +149,7 @@ class InspectionWizard extends Component
     {
         try {
             // Guardar respuestas intermedias
-            \DB::transaction(function () {
+            DB::transaction(function () {
                 foreach ($this->answers as $questionId => $value) {
                     DynamicAnswer::updateOrCreate(
                         [
@@ -155,7 +163,7 @@ class InspectionWizard extends Component
                 $this->inspection->update(['notes' => $this->notes]);
             });
         } catch (\Exception $e) {
-            \Log::error('Error guardando progreso de inspección', [
+            Log::error('Error guardando progreso de inspección', [
                 'inspection_id' => $this->inspection->id,
                 'error' => $e->getMessage()
             ]);
@@ -170,6 +178,10 @@ class InspectionWizard extends Component
             'supervisorName' => 'required|string|max:255',
             'supervisorSignature' => 'required|string',
             'technicianSignature' => 'required|string',
+        ], [
+            'supervisorName.required' => 'El nombre del responsable es obligatorio.',
+            'supervisorSignature.required' => 'La firma del responsable es obligatoria.',
+            'technicianSignature.required' => 'Tu firma es obligatoria.',
         ]);
 
         $this->saveProgress();
@@ -211,7 +223,7 @@ class InspectionWizard extends Component
                             $formattedResponses
                         );
                     } catch (\Exception $e) {
-                        \Log::error('VisitService::completeChecklist falló', ['error' => $e->getMessage()]);
+                        Log::error('VisitService::completeChecklist falló', ['error' => $e->getMessage()]);
                         $this->assignment->update(['status' => 'completed']);
                     }
                 }
@@ -223,7 +235,8 @@ class InspectionWizard extends Component
         session()->flash('message', '¡Inspección completada exitosamente!');
 
         if ($this->visitId) {
-            $prefix = auth()->user()->isAdmin() ? 'gestor' : 'tecnico';
+            $user = Auth::user();
+            $prefix = ($user instanceof User && $user->isAdmin()) ? 'gestor' : 'tecnico';
             return redirect()->route($prefix . '.visits.in-progress', $this->visitId)
                 ->with('message', '¡Checklist completado! Puedes continuar con la visita.');
         }
@@ -231,9 +244,9 @@ class InspectionWizard extends Component
         return redirect()->route('tecnico.inspections.show', $this->inspection->id);
     }
 
+    #[Layout('components.layouts.app')]
     public function render()
     {
-        return view('livewire.technician.inspection-wizard')
-            ->layout('components.layouts.app');
+        return view('livewire.technician.inspection-wizard');
     }
 }

@@ -57,7 +57,7 @@
                     <span class="text-ep-primary glow-text-orange">{{ round((($currentStep + 1) / $totalSteps) * 100) }}%</span>
                 </div>
                 <div class="relative h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                    <div style="width:{{ (($currentStep + 1) / $totalSteps) * 100 }}%" 
+                    <div @style(['width' => (($currentStep + 1) / $totalSteps) * 100 . '%']) 
                          class="absolute inset-y-0 left-0 bg-gradient-to-r from-ep-primary to-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.5)] transition-all duration-700 ease-out rounded-full">
                         <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></div>
                     </div>
@@ -136,25 +136,38 @@
                                         @if($question->type === 'radio')
                                             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                                 @foreach($question->options as $option)
+                                                    @php
+                                                        $isFailure = in_array($option, $question->failure_values ?? []);
+                                                        $isSelected = ($answers[$question->id] ?? '') === $option;
+                                                        $isSuccess = in_array($option, ['Sí', 'CUMPLE', 'BUENO', 'APTO', 'CONFORME']);
+                                                    @endphp
                                                     <label class="relative flex flex-col items-center justify-center p-4 rounded-2xl border cursor-pointer group/opt transition-all duration-300
-                                                        {{ ($answers[$question->id] ?? '') === $option ? 'bg-ep-primary/20 border-ep-primary shadow-[0_0_15px_rgba(246,146,57,0.1)]' : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20' }}">
+                                                        {{ $isSelected 
+                                                            ? ($isFailure 
+                                                                ? 'bg-red-500/20 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' 
+                                                                : 'bg-ep-primary/20 border-ep-primary shadow-[0_0_15px_rgba(246,146,57,0.1)]') 
+                                                            : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/20' }}">
                                                         <input type="radio" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="sr-only">
                                                         
-                                                        @if($option === 'Sí' || $option === 'CUMPLE' || $option === 'BUENO')
-                                                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 mb-2 {{ ($answers[$question->id] ?? '') === $option ? 'animate-pulse scale-125 shadow-[0_0_8px_#10b981]' : 'opacity-40' }} transition-all"></div>
-                                                        @elseif($option === 'No' || $option === 'NO CUMPLE' || $option === 'MALO')
-                                                            <div class="w-2.5 h-2.5 rounded-full bg-red-500 mb-2 {{ ($answers[$question->id] ?? '') === $option ? 'animate-pulse scale-125 shadow-[0_0_8px_#ef4444]' : 'opacity-40' }} transition-all"></div>
+                                                        @if($isFailure)
+                                                            <div class="w-2.5 h-2.5 rounded-full bg-red-500 mb-2 {{ $isSelected ? 'animate-ping scale-125 shadow-[0_0_8px_#ef4444]' : 'opacity-40' }} transition-all"></div>
+                                                        @elseif($isSuccess)
+                                                            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 mb-2 {{ $isSelected ? 'animate-pulse scale-125 shadow-[0_0_8px_#10b981]' : 'opacity-40' }} transition-all"></div>
                                                         @else
-                                                            <div class="w-2.5 h-2.5 rounded-full bg-indigo-100/40 mb-2 {{ ($answers[$question->id] ?? '') === $option ? 'animate-pulse scale-125' : 'opacity-40' }} transition-all"></div>
+                                                            <div class="w-2.5 h-2.5 rounded-full bg-indigo-100/40 mb-2 {{ $isSelected ? 'animate-pulse scale-125' : 'opacity-40' }} transition-all"></div>
                                                         @endif
 
-                                                        <span class="text-[10px] font-black uppercase tracking-widest italic transition-colors {{ ($answers[$question->id] ?? '') === $option ? 'text-white' : 'text-indigo-100/40' }}">{{ $option }}</span>
+                                                        <span class="text-[10px] font-black uppercase tracking-widest italic transition-colors {{ $isSelected ? 'text-white' : 'text-indigo-100/40' }}">{{ $option }}</span>
                                                     </label>
                                                 @endforeach
                                             </div>
                                         @elseif($question->type === 'select')
+                                            @php
+                                                $isSelectedFailure = in_array($answers[$question->id] ?? '', $question->failure_values ?? []);
+                                            @endphp
                                             <select wire:model.live="answers.{{ $question->id }}" 
-                                                    class="block w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all [color-scheme:dark]">
+                                                    class="block w-full bg-white/5 border rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 transition-all [color-scheme:dark]
+                                                    {{ $isSelectedFailure ? 'border-red-500 ring-2 ring-red-500/20 bg-red-500/5' : 'border-white/10 focus:ring-ep-primary' }}">
                                                 <option value="">Seleccione una opción...</option>
                                                 @foreach($question->options as $option)
                                                     <option value="{{ $option }}">{{ $option }}</option>
@@ -213,7 +226,7 @@
                                 <label class="block text-[10px] font-black text-ep-primary uppercase tracking-[0.3em] italic mb-2">Comentarios del Especialista</label>
                                 <textarea wire:model.live="notes" rows="4" 
                                           class="block w-full bg-white/5 border border-white/10 rounded-3xl px-6 py-5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all placeholder-white/5 italic" 
-                                          placeholder="Aclaraciones técnicas o hallazgos no especificados en el checklist..."></textarea>
+                                          placeholder="Ej: CARTELERÍA cumple con la normativa vigente. Aclaraciones técnicas o hallazgos no especificados..."></textarea>
                             </div>
 
                             <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
@@ -260,7 +273,7 @@
                                                 <div class="p-4 bg-white/5 rounded-2xl border border-white/5 text-indigo-100/20 mb-3 mx-auto w-fit">
                                                     <svg class="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                                 </div>
-                                                <p class="text-[9px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic font-black">Panel de Firma Digital</p>
+                                                <p class="text-[9px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic">Panel de Firma Digital</p>
                                             </div>
                                         </template>
                                         <canvas x-ref="canvas" class="absolute inset-0 w-full h-full cursor-crosshair z-10"></canvas>
@@ -387,6 +400,15 @@
                     this.signature = null;
                 }
             }))
+
+            $wire.on('scroll-to-top', () => {
+                const mainContent = document.querySelector('main');
+                if (mainContent) {
+                    mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
         </script>
         @endscript
 

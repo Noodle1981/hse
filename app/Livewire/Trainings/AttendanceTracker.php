@@ -2,17 +2,19 @@
 
 namespace App\Livewire\Trainings;
 
-use Livewire\Component;
-
 use App\Models\Training;
 use App\Models\TrainingAttendance;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Layout;
+use Livewire\Component;
 
 class AttendanceTracker extends Component
 {
     public Training $training;
     public $attendees = [];
     public $observations = '';
-    public $visitId = null; // Para saber si vino desde una visita
+    public $visitId = null; 
     public $newAttendee = [
         'employee_name' => '',
         'dni' => '',
@@ -86,20 +88,22 @@ class AttendanceTracker extends Component
         
         // Si vino desde una visita, regresar a ella respetando el rol del usuario
         if ($this->visitId) {
-            $routeName = auth()->user()->hasRole('Administrador') ? 'gestor.visits.in-progress' : 'tecnico.visits.in-progress';
+            $user = Auth::user();
+            $routeName = ($user instanceof User && $user->isAdmin()) ? 'gestor.visits.in-progress' : 'tecnico.visits.in-progress';
             return redirect()->route($routeName, $this->visitId);
         }
         
         // Sino, redirigir según rol
-        if (auth()->user()->isAdmin()) {
+        $user = Auth::user();
+        if ($user instanceof User && $user->isAdmin()) {
             return redirect()->route('gestor.trainings.index');
         }
         return redirect()->route('tecnico.dashboard');
     }
 
+    #[Layout('components.layouts.app')]
     public function render()
     {
-        return view('livewire.trainings.attendance-tracker')
-            ->layout('components.layouts.app');
+        return view('livewire.trainings.attendance-tracker');
     }
 }
