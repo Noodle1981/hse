@@ -23,6 +23,9 @@ class VisitCertificatePDFController extends Controller
 
     public function preview($id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $visit    = $this->loadVisit($id);
         $branding = BrandingService::forUser($visit->user);
 
@@ -32,6 +35,9 @@ class VisitCertificatePDFController extends Controller
 
     public function download($id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $visit    = $this->loadVisit($id);
         $branding = BrandingService::forUser($visit->user);
 
@@ -41,6 +47,9 @@ class VisitCertificatePDFController extends Controller
 
     public function checklistPreview($id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $completion = \App\Models\VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections'
@@ -54,6 +63,9 @@ class VisitCertificatePDFController extends Controller
 
     public function checklistDownload($id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $completion = \App\Models\VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections'

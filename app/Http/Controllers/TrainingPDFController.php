@@ -10,6 +10,9 @@ class TrainingPDFController extends Controller
 {
     public function download(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $training = Training::with([
             'empresa',
             'sede',
@@ -31,6 +34,9 @@ class TrainingPDFController extends Controller
 
     public function preview(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $training = Training::with([
             'empresa',
             'sede',

@@ -276,18 +276,36 @@
                         </div>
                         <div class="p-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             @foreach($completedChecklists as $completion)
-                            <div class="flex items-center justify-between bg-emerald-500/[0.05] p-4 rounded-2xl border border-emerald-500/30 group shadow-[0_0_15px_rgba(16,185,129,0.05)]">
-                                <div class="flex items-center gap-4">
-                                    <div class="h-8 w-8 bg-emerald-500/20 rounded-lg text-emerald-400 flex items-center justify-center italic shadow-[0_0_10px_rgba(16,185,129,0.3)] group-hover:scale-110 transition-transform">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                            @php
+                                $analysis = $completion->failure_analysis;
+                            @endphp
+                            <div class="flex items-center justify-between {{ $analysis['is_failed'] ? 'bg-red-500/[0.08] border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.15)] animate-pulse-slow' : 'bg-emerald-500/[0.05] border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.05)]' }} p-5 rounded-[1.5rem] border group transition-all duration-500">
+                                <div class="flex items-center gap-4 flex-1">
+                                    <div class="h-10 w-10 {{ $analysis['is_failed'] ? 'bg-red-500/20 text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]' : 'bg-emerald-500/20 text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]' }} rounded-xl flex items-center justify-center italic group-hover:scale-110 transition-transform">
+                                        @if($analysis['is_failed'])
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        @else
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
                                         </svg>
+                                        @endif
                                     </div>
-                                    <span class="text-[11px] font-black text-emerald-400/90 italic uppercase tracking-tight">{{ $completion->assignment->checklist->title }}</span>
+                                    <div class="flex flex-col">
+                                        <span class="text-[11px] font-black {{ $analysis['is_failed'] ? 'text-red-400' : 'text-emerald-400/90' }} italic uppercase tracking-tight leading-none mb-1">{{ $completion->assignment->checklist->title }}</span>
+                                        @if($analysis['is_failed'])
+                                        <span class="text-[9px] font-black text-red-500/60 uppercase tracking-widest italic animate-pulse">ALERTA: {{ $analysis['failed'] }} {{ str()->plural('FALLO', $analysis['failed']) }} DE {{ $analysis['total'] }} PUNTOS</span>
+                                        @else
+                                        <span class="text-[9px] font-black text-emerald-500/40 uppercase tracking-widest italic">INTEGRIDAD: {{ $analysis['total'] }}/{{ $analysis['total'] }} PUNTOS</span>
+                                        @endif
+                                    </div>
                                 </div>
-                                <span class="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/40 italic shadow-[0_0_10px_rgba(16,185,129,0.1)]">
-                                    {{ $completion->completed_at->format('H:i') }} hs
-                                </span>
+                                <div class="flex flex-col items-end gap-1.5">
+                                    <span class="text-[9px] font-black {{ $analysis['is_failed'] ? 'text-red-500 border-red-500/40 bg-red-500/10' : 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10' }} uppercase tracking-widest px-3 py-1 rounded-lg border italic shadow-inner">
+                                        {{ $completion->completed_at->format('H:i') }} HS
+                                    </span>
+                                </div>
                             </div>
                             @endforeach
                         </div>

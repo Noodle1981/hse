@@ -221,7 +221,7 @@ class VisitInProgress extends Component
 
         // 2. Cargar checklists ya completados en ESTA visita
         $this->completedChecklists = $this->visit->checklistCompletions()
-            ->with(['assignment.checklist'])
+            ->with(['assignment.checklist.questions'])
             ->get();
             
         // 3. Cargar capacitaciones realizadas

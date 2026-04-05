@@ -74,15 +74,19 @@
                             </div>
                         </div>
 
-                        <!-- Criticidad Premium -->
                         <div>
                             <label class="block text-[10px] font-black text-ep-primary uppercase tracking-widest mb-3 italic px-1">Nivel de Criticidad *</label>
                             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                @foreach(['bajo' => ['color' => 'emerald', 'label' => 'Bajo'], 'medio' => ['color' => 'yellow', 'label' => 'Medio'], 'alto' => ['color' => 'orange', 'label' => 'Alto'], 'critico' => ['color' => 'red', 'label' => 'Crítico']] as $value => $info)
+                                @foreach([
+                                    'bajo' => ['bg' => 'bg-emerald-500', 'border' => 'peer-checked:border-emerald-500', 'light' => 'peer-checked:bg-emerald-500/10', 'label' => 'Bajo'],
+                                    'medio' => ['bg' => 'bg-yellow-500', 'border' => 'peer-checked:border-yellow-500', 'light' => 'peer-checked:bg-yellow-500/10', 'label' => 'Medio'],
+                                    'alto' => ['bg' => 'bg-orange-500', 'border' => 'peer-checked:border-orange-500', 'light' => 'peer-checked:bg-orange-500/10', 'label' => 'Alto'],
+                                    'critico' => ['bg' => 'bg-red-500', 'border' => 'peer-checked:border-red-500', 'light' => 'peer-checked:bg-red-500/10', 'label' => 'Crítico']
+                                ] as $value => $info)
                                     <label class="relative cursor-pointer group">
                                         <input type="radio" wire:model="criticidad" value="{{ $value }}" class="peer sr-only">
-                                        <div class="p-3 bg-white/5 border border-white/10 rounded-2xl text-center transition-all group-hover:bg-white/10 peer-checked:border-{{ $info['color'] }}-500 peer-checked:bg-{{ $info['color'] }}-500/10 peer-checked:shadow-[0_0_15px_rgba(var(--tw-color-{{ $info['color'] }}-500),0.1)]">
-                                            <div class="w-4 h-4 rounded-full bg-{{ $info['color'] }}-500 mx-auto mb-3 {{ $value === 'critico' ? 'animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]' : '' }} border border-white/10 shadow-inner"></div>
+                                        <div class="p-4 bg-white/5 border border-white/10 rounded-2xl text-center transition-all group-hover:bg-white/10 {{ $info['border'] }} {{ $info['light'] }}">
+                                            <div class="w-4 h-4 rounded-full {{ $info['bg'] }} mx-auto mb-3 border border-white/10 shadow-inner {{ $value === 'critico' ? 'animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]' : '' }}"></div>
                                             <div class="text-[9px] font-black uppercase tracking-widest text-indigo-100 group-hover:text-white transition-colors">{{ $info['label'] }}</div>
                                         </div>
                                     </label>

@@ -11,6 +11,9 @@ class HallazgoPDFController extends Controller
 {
     public function download(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $hallazgo = Hallazgo::with([
             'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen'
         ])->findOrFail($id);
@@ -30,6 +33,9 @@ class HallazgoPDFController extends Controller
 
     public function preview(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $hallazgo = Hallazgo::with([
             'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen'
         ])->findOrFail($id);

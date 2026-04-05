@@ -10,6 +10,9 @@ class InspectionPDFController extends Controller
 {
     public function download(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $inspection = DynamicInspection::with([
             'checklist.sections',
             'user',
@@ -33,6 +36,9 @@ class InspectionPDFController extends Controller
 
     public function preview(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $inspection = DynamicInspection::with([
             'checklist.sections',
             'user',

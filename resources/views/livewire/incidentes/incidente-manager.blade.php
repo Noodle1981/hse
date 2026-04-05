@@ -132,7 +132,7 @@
                                         <span class="px-2 sm:px-3 py-1 rounded-full text-[8px] sm:text-[9px] font-black uppercase tracking-widest italic border border-white/5 bg-white/5 text-indigo-100/40">
                                             {{ strtoupper(str_replace('_', ' ', $incidente->tipo)) }}
                                         </span>
-                                    </div>       </div>
+                                    </div>
                                 </div>
 
                                 <p class="text-indigo-100/60 mb-6 text-sm italic font-medium leading-relaxed max-w-4xl">

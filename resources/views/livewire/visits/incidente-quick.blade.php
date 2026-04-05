@@ -65,12 +65,39 @@
                             <div>
                                 <label class="block text-[10px] font-black text-red-500 uppercase tracking-widest mb-3 italic px-1">Clasificación del Evento *</label>
                                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                                    @foreach(['accidente' => ['icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 'label' => 'Accidente', 'color' => 'red'], 'casi_accidente' => ['icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', 'label' => 'Casi Accid.', 'color' => 'orange'], 'condicion_insegura' => ['icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 'label' => 'Condición', 'color' => 'yellow'], 'acto_inseguro' => ['icon' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636', 'label' => 'Acto Ins.', 'color' => 'purple']] as $value => $info)
+                                    @foreach([
+                                        'accidente' => [
+                                            'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z', 
+                                            'label' => 'Accidente', 
+                                            'classes' => 'peer-checked:border-red-500 peer-checked:bg-red-500/10',
+                                            'iconColor' => 'text-red-500'
+                                        ], 
+                                        'casi_accidente' => [
+                                            'icon' => 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z', 
+                                            'label' => 'Casi Accid.', 
+                                            'classes' => 'peer-checked:border-orange-500 peer-checked:bg-orange-500/10',
+                                            'iconColor' => 'text-orange-500'
+                                        ], 
+                                        'condicion_insegura' => [
+                                            'icon' => 'M13 10V3L4 14h7v7l9-11h-7z', 
+                                            'label' => 'Condición', 
+                                            'classes' => 'peer-checked:border-yellow-500 peer-checked:bg-yellow-500/10',
+                                            'iconColor' => 'text-yellow-500'
+                                        ], 
+                                        'acto_inseguro' => [
+                                            'icon' => 'M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636', 
+                                            'label' => 'Acto Ins.', 
+                                            'classes' => 'peer-checked:border-purple-500 peer-checked:bg-purple-500/10',
+                                            'iconColor' => 'text-purple-500'
+                                        ]
+                                    ] as $value => $info)
                                         <label class="relative cursor-pointer group">
                                             <input type="radio" wire:model="tipo_incidente" value="{{ $value }}" class="peer sr-only">
-                                            <div class="p-3 bg-white/5 border border-white/10 rounded-2xl text-center transition-all group-hover:bg-white/10 peer-checked:border-{{ $info['color'] }}-500 peer-checked:bg-{{ $info['color'] }}-500/10">
-                                                <svg class="w-5 h-5 mx-auto mb-2 text-{{ $info['color'] }}-500 transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $info['icon'] }}" /></svg>
-                                                <div class="text-[9px] font-black uppercase tracking-widest text-indigo-100 transition-colors">{{ $info['label'] }}</div>
+                                            <div class="p-3 bg-white/5 border border-white/10 rounded-2xl text-center transition-all group-hover:bg-white/10 {{ $info['classes'] }}">
+                                                <svg class="w-5 h-5 mx-auto mb-2 {{ $info['iconColor'] }} transition-transform group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $info['icon'] }}" />
+                                                </svg>
+                                                <div class="text-[9px] font-black uppercase tracking-widest text-indigo-100 transition-colors group-hover:text-white">{{ $info['label'] }}</div>
                                             </div>
                                         </label>
                                     @endforeach
@@ -125,11 +152,16 @@
                             <div>
                                 <label class="block text-[10px] font-black text-red-500 uppercase tracking-widest mb-3 italic px-1">Nivel de Gravedad *</label>
                                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                    @foreach(['leve' => ['color' => 'emerald', 'label' => 'Leve'], 'moderado' => ['color' => 'yellow', 'label' => 'Moderado'], 'grave' => ['color' => 'orange', 'label' => 'Grave'], 'muy_grave' => ['color' => 'red', 'label' => 'Crítico']] as $value => $info)
+                                    @foreach([
+                                        'leve' => ['color' => 'emerald', 'label' => 'Leve', 'classes' => 'peer-checked:border-emerald-500 peer-checked:bg-emerald-500/10', 'dot' => 'bg-emerald-500'], 
+                                        'moderado' => ['color' => 'yellow', 'label' => 'Moderado', 'classes' => 'peer-checked:border-yellow-500 peer-checked:bg-yellow-500/10', 'dot' => 'bg-yellow-500'], 
+                                        'grave' => ['color' => 'orange', 'label' => 'Grave', 'classes' => 'peer-checked:border-orange-500 peer-checked:bg-orange-500/10', 'dot' => 'bg-orange-500'], 
+                                        'muy_grave' => ['color' => 'red', 'label' => 'Crítico', 'classes' => 'peer-checked:border-red-500 peer-checked:bg-red-500/10', 'dot' => 'bg-red-500']
+                                    ] as $value => $info)
                                         <label class="relative cursor-pointer group">
                                             <input type="radio" wire:model="gravedad" value="{{ $value }}" class="peer sr-only">
-                                            <div class="p-3 bg-white/5 border border-white/10 rounded-2xl text-center transition-all group-hover:bg-white/10 peer-checked:border-{{ $info['color'] }}-500 peer-checked:bg-{{ $info['color'] }}-500/10">
-                                                <div class="w-4 h-4 rounded-full bg-{{ $info['color'] }}-500 mx-auto mb-3 {{ $value === 'muy_grave' ? 'animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]' : '' }} border border-white/10 shadow-inner"></div>
+                                            <div class="p-3 bg-white/5 border border-white/10 rounded-2xl text-center transition-all group-hover:bg-white/10 {{ $info['classes'] }}">
+                                                <div class="w-4 h-4 rounded-full {{ $info['dot'] }} mx-auto mb-3 {{ $value === 'muy_grave' ? 'animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.5)]' : '' }} border border-white/10 shadow-inner"></div>
                                                 <div class="text-[9px] font-black uppercase tracking-widest text-indigo-100 group-hover:text-white transition-colors">{{ $info['label'] }}</div>
                                             </div>
                                         </label>

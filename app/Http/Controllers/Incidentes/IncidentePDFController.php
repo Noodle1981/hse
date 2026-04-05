@@ -11,6 +11,9 @@ class IncidentePDFController extends Controller
 {
     public function download(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $incidente = Incidente::with([
             'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit'
         ])->findOrFail($id);
@@ -28,6 +31,9 @@ class IncidentePDFController extends Controller
 
     public function preview(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $incidente = Incidente::with([
             'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit'
         ])->findOrFail($id);
