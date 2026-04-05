@@ -1,6 +1,17 @@
 @php
-    $prefix = auth()->user()?->isAdmin() ? 'gestor' : 'tecnico';
+    $user = auth()->user();
+    $prefix = $user?->isAdmin() ? 'gestor' : 'tecnico';
     $indexRoute   = $prefix . '.inspections.index';
+    
+    // Si hay un visit_id activo, volver a la visita. Si no, a la lista correspondiente.
+    if (isset($visit_id) && $visit_id) {
+        $backUrl = route($prefix . '.visits.in-progress', $visit_id);
+    } else {
+        $backUrl = ($prefix === 'tecnico') 
+            ? route('tecnico.checklists.tasks.index') 
+            : route($sidebar_prefix ?? $prefix . '.inspections.index');
+    }
+
     $pdfPreview   = $prefix . '.inspections.pdf.preview';
     $pdfDownload  = $prefix . '.inspections.pdf.download';
 @endphp
@@ -11,7 +22,7 @@
         <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
             <div class="relative w-full px-4 sm:px-6 lg:px-8 flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                    <a href="{{ route($indexRoute) }}" class="p-2 bg-white/5 rounded-xl border border-white/10 text-indigo-100 hover:text-ep-primary transition-colors">
+                    <a href="{{ $backUrl }}" class="p-2 bg-white/5 rounded-xl border border-white/10 text-indigo-100 hover:text-ep-primary transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                     </a>
                     <div class="flex flex-col">
@@ -51,6 +62,11 @@
                 </div>
                 
                 <div class="flex flex-wrap gap-4">
+                    <a href="{{ $backUrl }}"
+                       class="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 bg-white/5 border border-white/10 text-[10px] font-black text-indigo-100 uppercase tracking-widest italic rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all group">
+                        <svg class="w-4 h-4 mr-2 text-indigo-300 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 15l-3-3m0 0l3-3m-3 3h8M3 12a9 9 0 1118 0 9 9 0 01-18 0z"/></svg>
+                        Volver
+                    </a>
                     <a href="{{ route($pdfPreview, $inspection) }}" target="_blank"
                        class="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 bg-white/5 border border-white/10 text-[10px] font-black text-indigo-100 uppercase tracking-widest italic rounded-2xl hover:bg-white/10 hover:border-white/20 transition-all group">
                         <svg class="w-4 h-4 mr-2 text-indigo-300 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -130,7 +146,7 @@
                     @endphp
 
                     @foreach($groupedAnswers as $sectionId => $sectionAnswers)
-                        <section class="animate-fade-in" style="animation-delay: {{ $loop->index * 0.1 }}s">
+                        <section class="animate-fade-in" <?php echo 'style="animation-delay: ' . ($loop->index * 0.1) . 's"'; ?>>
                             <div class="flex items-center gap-4 mb-8">
                                  <div class="h-1 w-8 bg-ep-primary rounded-full"></div>
                                  <h3 class="text-xl font-black text-white italic uppercase tracking-tight">
@@ -156,7 +172,7 @@
                                                             {{ $val }}
                                                         </span>
                                                     @empty
-                                                        <span class="text-indigo-100/10 text-[10px] font-black uppercase italic italic tracking-widest group-hover/row:text-indigo-100/20">Sin selección</span>
+                                                        <span class="text-indigo-100/10 text-[10px] font-black uppercase tracking-widest group-hover/row:text-indigo-100/20">Sin selección</span>
                                                     @endforelse
                                                 </div>
                                             @else
@@ -212,7 +228,7 @@
                                 @endif
                             </div>
                             <p class="text-sm font-black text-white uppercase italic tracking-tight">{{ $inspection->supervisor_name ?: 'Supervisor No Identificado' }}</p>
-                            <p class="text-[9px] font-black text-ep-primary/40 uppercase tracking-[0.3em] font-black mt-2 italic">Aceptación de Protocolo</p>
+                            <p class="text-[9px] font-black text-ep-primary/40 uppercase tracking-[0.3em] mt-2 italic">Aceptación de Protocolo</p>
                         </div>
 
                         <!-- Technician Signature -->
@@ -228,7 +244,7 @@
                                 @endif
                             </div>
                             <p class="text-sm font-black text-white uppercase italic tracking-tight">{{ $inspection->user->nombres ?? '' }} {{ $inspection->user->apellidos ?? '' }}</p>
-                            <p class="text-[9px] font-black text-ep-primary/40 uppercase tracking-[0.3em] font-black mt-2 italic">Responsable Técnico</p>
+                            <p class="text-[9px] font-black text-ep-primary/40 uppercase tracking-[0.3em] mt-2 italic">Responsable Técnico</p>
                         </div>
                     </div>
                 </div>

@@ -217,7 +217,8 @@
                     <div class="p-5 sm:p-12 animate-fade-in space-y-10">
                         <div class="text-center">
                             <h2 class="text-3xl font-black text-white italic uppercase tracking-tight mb-2">Protocolo de Cierre</h2>
-                            <p class="text-xs font-medium text-indigo-100/40 italic uppercase tracking-[0.2em]">Validación de Registro e Integración</p>
+                            <p class="text-xs font-black text-ep-primary/60 italic uppercase tracking-[0.2em]">{{ $checklist->title }}</p>
+                            <p class="text-[9px] font-medium text-indigo-100/30 italic uppercase tracking-[0.4em] mt-1">Validación de Registro e Integración</p>
                         </div>
                         
                         <div class="space-y-8">

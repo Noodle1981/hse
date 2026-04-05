@@ -329,6 +329,7 @@ class VisitInProgress extends Component
         return redirect()->route($prefix . '.checklists.fill', [
             'id'         => $assignment->dynamic_checklist_id,
             'assignment' => $assignment->id,
+            'visit_id'   => $this->visit->id,
         ]);
     }
 

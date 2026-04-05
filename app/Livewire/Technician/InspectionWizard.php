@@ -10,6 +10,7 @@ use App\Models\VisitCertificate;
 use App\Services\VisitService;
 use App\Models\User;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,8 @@ class InspectionWizard extends Component
     public DynamicChecklist $checklist;
     public ?ChecklistAssignment $assignment = null;
     public ?DynamicInspection $inspection = null;
-    public ?int $visitId = null;
+    #[Url]
+    public ?int $visit_id = null;
 
     public int $currentStep = 0;
     public array $answers = [];
@@ -49,9 +51,9 @@ class InspectionWizard extends Component
                 ->firstOrFail();
         }
 
-        // Leer visit_id desde la sesión (puesto al redirigir desde la visita)
-        if (session()->has('wizard_visit_id')) {
-            $this->visitId = session()->pull('wizard_visit_id');
+        // Leer visit_id desde la URL (#[Url]) o desde la sesión (fallback)
+        if (!$this->visit_id && session()->has('wizard_visit_id')) {
+            $this->visit_id = session()->pull('wizard_visit_id');
         }
 
         // Preparar secciones
@@ -196,8 +198,8 @@ class InspectionWizard extends Component
 
         if ($this->assignment) {
             // Si estamos en el contexto de una visita, registrar la completación via VisitService
-            if ($this->visitId) {
-                $visit = VisitCertificate::find($this->visitId);
+            if ($this->visit_id) {
+                $visit = VisitCertificate::find($this->visit_id);
                 if ($visit) {
                     // Recopilar TODAS las preguntas: las de secciones + las sin sección
                     $allQuestions = collect();
@@ -234,10 +236,10 @@ class InspectionWizard extends Component
 
         session()->flash('message', '¡Inspección completada exitosamente!');
 
-        if ($this->visitId) {
+        if ($this->visit_id) {
             $user = Auth::user();
             $prefix = ($user instanceof User && $user->isAdmin()) ? 'gestor' : 'tecnico';
-            return redirect()->route($prefix . '.visits.in-progress', $this->visitId)
+            return redirect()->route($prefix . '.visits.in-progress', $this->visit_id)
                 ->with('message', '¡Checklist completado! Puedes continuar con la visita.');
         }
 
