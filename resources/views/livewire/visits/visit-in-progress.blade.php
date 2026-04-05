@@ -77,11 +77,49 @@
                                 <p class="text-xs font-bold text-white uppercase italic">Protocolo sugerido para inicio inmediato</p>
                             </div>
                         </div>
-                        <button @click="document.getElementById('task-' + {{ $highlightTaskId }}).scrollIntoView({behavior: 'smooth'})" class="text-[10px] font-black text-white/40 hover:text-white uppercase tracking-widest italic">Ubicar</button>
+                        <button onclick="document.getElementById('task-{{ $highlightTaskId }}')?.scrollIntoView({behavior: 'smooth'})" class="text-[10px] font-black text-white/40 hover:text-white uppercase tracking-widest italic">Ubicar</button>
                     </div>
                     @endif
+
+                    <!-- Planificación Mensual Recomendada -->
+                    @if(count($suggestedPlanTasks) > 0)
+                    <div class="bg-indigo-500/5 border border-indigo-500/20 rounded-[2.5rem] p-8 relative overflow-hidden group animate-fade-in shadow-2xl">
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
+                        
+                        <div class="flex items-center gap-6 mb-8 relative z-10">
+                            <div class="h-12 w-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shadow-lg shadow-indigo-500/5 rotate-3 group-hover:rotate-0 transition-transform">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                    <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-black text-indigo-400 uppercase tracking-[0.3em] italic leading-none mb-2">Planificación <span class="text-white">Mensual</span></h3>
+                                <p class="text-[11px] font-bold text-indigo-100/40 uppercase italic tracking-widest leading-none">Tareas proyectadas para {{ date('F') }} en esta sede</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                            @foreach($suggestedPlanTasks as $plan)
+                            <div class="bg-[#1e1e2d]/60 backdrop-blur-xl border border-white/5 rounded-3xl p-5 hover:border-indigo-500/30 transition-all group/item">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex-1 pr-4">
+                                        <h4 class="text-[11px] font-black text-white uppercase italic tracking-tight group-hover/item:text-indigo-400 transition-colors leading-tight mb-1">{{ $plan->activity_name }}</h4>
+                                        <span class="text-[8px] font-black text-indigo-100/20 uppercase tracking-widest italic leading-none">{{ $plan->activity_code ?: 'PENDIENTE' }}</span>
+                                    </div>
+                                    <button wire:click="assignSuggestedTask({{ $plan->id }})"
+                                        class="h-9 px-4 bg-indigo-600/20 text-indigo-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-indigo-500/20 hover:bg-indigo-600 hover:text-white transition-all italic shadow-lg">
+                                        Asignar
+                                    </button>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Checklists Pendientes -->
                     <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
+
                         <div class="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none opacity-50"></div>
 
                         <div class="px-8 py-6 bg-black/20 border-b border-white/5 flex justify-between items-center relative z-10">

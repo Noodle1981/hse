@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Public;
 
-
-use App\Models\GeneradorConstancia;
+use App\Models\VisitCertificate;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -20,31 +19,14 @@ class PublicSignature extends Component
     public function mount($token)
     {
         $this->token = $token;
-        $this->certificate = GeneradorConstancia::where('token_responsable', $token)->first();
-
-        if (!$this->certificate) {
-            $this->certificate = \App\Models\VisitCertificate::where('token_responsable', $token)->first();
-        }
+        
+        // Priorizar VisitCertificate
+        $this->certificate = VisitCertificate::where('token_responsable', $token)->first();
 
         if (!$this->certificate) {
             $this->error_message = 'El enlace no es válido o ha expirado.';
         } else {
-            // Check for signature. Handle different column names if necessary 
-            // (Both use firma_responsable? No, VisitCertificate uses responsible_signature in original code but updated migration uses... 
-            // Wait, migration added signature_skip_reason etc but not responsible_signature because it already existed?
-            // Let's check VisitInProgress: $data['responsible_signature'] = ...; 
-            // And migration `2026_01_22_205642...` added responsible_signature.
-            // GeneradorConstancia uses `firma_responsable`.
-            // I need to normalize this or handle both.
-            
-            $hasSignature = false;
-            if ($this->certificate instanceof \App\Models\VisitCertificate) {
-                $hasSignature = !empty($this->certificate->responsible_signature);
-            } else {
-                $hasSignature = !empty($this->certificate->firma_responsable);
-            }
-
-            if ($hasSignature) {
+            if (!empty($this->certificate->responsible_signature)) {
                 $this->error_message = 'Esta constancia ya ha sido firmada.';
             }
         }
@@ -68,18 +50,11 @@ class PublicSignature extends Component
             'signature.required' => 'Por favor firme antes de confirmar.'
         ]);
 
-        if ($this->certificate instanceof \App\Models\VisitCertificate) {
-            $this->certificate->update([
-                'responsible_signature' => $this->signature,
-                'date_firma_responsable' => now(), // Migration added this to VisitCertificate too
-                'status' => 'signed', // Or completed? Let's use signed
-            ]);
-        } else {
-            $this->certificate->update([
-                'firma_responsable' => $this->signature,
-                'date_firma_responsable' => now(),
-            ]);
-        }
+        $this->certificate->update([
+            'responsible_signature' => $this->signature,
+            'date_firma_responsable' => now(),
+            'status' => 'signed',
+        ]);
 
         session()->flash('success', 'La constancia ha sido firmada exitosamente. Gracias.');
     }

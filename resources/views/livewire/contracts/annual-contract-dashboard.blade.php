@@ -226,16 +226,24 @@
                                             $data = $complianceData[$plan->id][$name] ?? ['status' => 'none', 'count' => 0];
                                             $status = $data['status'];
                                             $cnt = $data['count'];
+                                            $activeVisit = $this->getActiveVisit();
+                                            $isCurrentMonth = strtolower($name) === strtolower(date('F'));
+                                            $canComplete = !$editMode && ($status === 'pending' || $status === 'overdue') && $activeVisit && $isCurrentMonth;
                                         @endphp
                                         <td class="px-0 py-4 text-center border-r border-white/5 last:border-r-0 relative group/cell">
                                             <div 
-                                                @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $name }}')" @endif
-                                                class="relative mx-auto w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-500 overflow-visible cursor-default
+                                                @if($editMode) 
+                                                    wire:click="toggleMonth({{ $plan->id }}, '{{ $name }}')" 
+                                                @elseif($canComplete)
+                                                    wire:click="redirectToTask({{ $activeVisit->id }}, '{{ addslashes($plan->activity_name) }}', {{ $plan->checklist_id ?: 'null' }}, '{{ $plan->category }}')"
+                                                @endif
+                                                class="relative mx-auto w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-500 overflow-visible {{ $canComplete ? 'cursor-pointer hover:scale-110' : 'cursor-default' }}
                                                 {{ $status === 'completed' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-[inset_0_0_10px_rgba(16,185,129,0.1)] hover:bg-emerald-500/20' : '' }}
                                                 {{ $status === 'overdue' ? 'bg-red-500/10 border border-red-500/30 text-red-500 animate-pulse' : '' }}
                                                 {{ $status === 'pending' ? 'bg-yellow-400/10 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-400/20' : '' }}
                                                 {{ $status === 'none' ? 'opacity-10' : '' }}
                                                 {{ $editMode ? 'cursor-pointer hover:scale-110 border-dashed border-2' : '' }}">
+
                                                 
                                                 @if($status === 'completed')
                                                     <svg class="w-3.5 h-3.5 drop-shadow-[0_0_8px_#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path d="M5 13l4 4L19 7"/></svg>

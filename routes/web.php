@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\InspectionPDFController;
 use App\Livewire\Checklists\Dashboard;
 use App\Livewire\Admin\AdminDashboard;
-use App\Livewire\Technician\TechnicianDashboard;
 use App\Livewire\Checklists\ChecklistIndex;
 use App\Livewire\Checklists\ChecklistBuilder;
 use App\Livewire\Checklists\ChecklistFiller;
@@ -178,8 +177,6 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico,tecnico,gestor,Administrador,Socio'])->group(function() {
-        // Dashboard
-        Route::get('/dashboard', TechnicianDashboard::class)->name('dashboard');
 
         // Checklists (Asignaciones y Llenado)
         Route::prefix('checklists')->name('checklists.')->group(function () {

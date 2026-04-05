@@ -1,22 +1,36 @@
 ---
-description: Mejoras de textos de casos de usos
+description: Armar plan para la proxima sesion
 ---
 
-te voy algo bastante complejo, la idea principal es darle un contexto más serio a esto, en el sentido de que es un demo, los registros que tengo son  datos muy poco serio, quiero que cada registro y este bien seria y profesionalla informacion, digamos en todas las observaciones. ect. no se si empezar con hallazgos, incidentes, capacitaciones, luegos visitas, aclarando que no todos tienen el mismo tipo de checklist y no todos tienen hallazgos y demas, hacer todo serio concluyendo el informes, la fotos las voy a generar depende de lo que completes. ¿Debatamos por favor? hize una copia a la base de datos por las dudas
+Borrar todos los registros de los contratos anuales, y registors fuera del contrato
 
----
+es decir eleminar todo los registros de cheklist, capacitaciones, informes, hallazgos e incidentes, asignados a los tecnicos. NO BORRAR DATOS DE TECNICOS, CONSULTORA, SEDE, EMPRESA, CHECKLIST
 
-## 📅 TAREA PENDIENTE (Siguiente Sesión): Reparar Visualización del Contrato Anual
 
-**Problema:**
-El panel de "Contrato Anual" (`App\Livewire\Contracts\AnnualContractDashboard.php`) **no muestra las esferas en Verde (Cumplimiento)** para Capacitaciones e Informes, a pesar de que los registros existen en la base de datos (Ej: Capacitaciones en Marzo 2026).
+La finalidad es trabajar sobre Contrato Anual, revisar y mejorar la logica de los informes, si son mensuales, debe sacar informacions de mes que corresponde, si son trimestrales de los 3 meses que le corresponde, si son semestrales los 6 meses que le corresponde y el Anual todos los meses
 
-**Causa Detectada:**
-La query del panel filtra por `sede_id`. Es altamente probable que la Sede seleccionada en el selector del Dashboard no coincida exactamente con el `sede_id` de las capacitaciones cargadas, o que falte vincular la "Fila del Plan" con la actividad específica en la tabla `annual_plans`.
 
-**Pasos para el IA en la próxima sesión:**
-1. Leer `AnnualContractDashboard` y el método `calculateComplianceData`.
-2. Inspeccionar la tabla `annual_plans` corriendo:
-   `App\Models\AnnualPlan::where('sede_id', 1)->get()`
-3. Comparar contra `App\Models\Training::where('sede_id', 1)->get()`.
-4. Si las filas del Plan no tienen el `checklist_id` o el `activity_name` mapeado idéntico, corregir la inyección de datos para que el Dashboard pinte los checks verdes ✅ automáticamente. Explicar al usuario si falta crear "Planificaciones" para esa Sede.
+
+Si el contrato quiere armar trimestral, solo podra completarse el trimestral que se puedan implementar, es decir, si estamos en abril, no se puede armar el Q1 (TRIMESRE 1), porque los meses anteriores pasaron, hacer que se lleva la variable en el campo de la db asignado que es la frecuencia, si es semestral, solo periodos de 1 a 6 meses, de enero a junio y de julio a diciembre, siempre es con respecto al año en curso, y si se solicita mensual, podran se todos los meses o bimenstral, 
+
+
+Pero el sistema debe si o si Permitir solo una modalida de todas, pero si puede conbinar cualquieras de ellas junta a un semestral y anual
+
+Dependiendo lo que se eliga sera el nombre del  informe HSE, en la redacciones " como por ejemplo  
+
+REPORTE DE SEGURIDAD TRIMESTRAL - Q1
+TRIMESTRE 1 - 2026
+Obra Central
+X %
+CUMPLIMIENTO
+Estado de Plan Anual (Pactado)
+
+Armado eso podremos hacer pruebas de testin manual, ya que hay conflictos. Se hara pequeños contratos
+
+
+
+
+Tambien basado en eso se verá los indicadores de cumplimiento en http://127.0.0.1:8000/gestor/dashboard
+
+
+

@@ -72,9 +72,9 @@ class User extends Authenticatable
         return $this->belongsToMany(Sede::class, 'sede_users');
     }
     
-    public function generadorConstancias()
+    public function visitCertificates()
     {
-        return $this->hasMany(GeneradorConstancia::class);
+        return $this->hasMany(VisitCertificate::class);
     }
 
     public function checklists()
@@ -92,14 +92,9 @@ class User extends Authenticatable
         return $this->hasMany(CapacitacionVirual::class);
     }
     
-    public function informes()
+    public function masterReports()
     {
-        return $this->hasMany(Informe::class);
-    }
-
-    public function registros()
-    {
-        return $this->hasMany(Registro::class);
+        return $this->hasMany(MasterReport::class);
     }
 
 

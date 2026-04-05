@@ -75,6 +75,18 @@
                                        class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark]">
                                 @error('periodo') <span class="text-red-500 text-[10px] font-black uppercase italic tracking-widest px-2">{{ $message }}</span> @enderror
                             </div>
+
+                            <div class="space-y-3">
+                                <label class="block text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic px-2">Frecuencia de Informe</label>
+                                <select wire:model.live="frecuencia" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark]">
+                                    <option value="mensual">MENSUAL</option>
+                                    <option value="trimestral">TRIMESTRAL</option>
+                                    <option value="semestral">SEMESTRAL</option>
+                                    <option value="anual">ANUAL</option>
+                                </select>
+                                @error('frecuencia') <span class="text-red-500 text-[10px] font-black uppercase italic tracking-widest px-2">{{ $message }}</span> @enderror
+                                <p class="text-[9px] text-indigo-100/20 italic px-2 mt-1">Define el rango de meses que el sistema consultará para extraer datos.</p>
+                            </div>
                         </div>
 
                         <div class="flex justify-end pt-6">
@@ -105,6 +117,84 @@
 
                     {{-- Formulario de Redacción Táctico --}}
                     <form wire:submit.prevent="save" class="space-y-12">
+
+                        {{-- SECCIÓN 0: ESTADO DE PLAN ANUAL (PACTADO) --}}
+                        <div class="bg-ep-dark/40 backdrop-blur-md p-6 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/5 border-t-4 border-t-ep-primary shadow-2xl relative group/section overflow-hidden">
+                            <div class="flex flex-col md:flex-row gap-10 items-center">
+                                <div class="flex-shrink-0 relative">
+                                    <svg class="w-24 h-24 sm:w-32 sm:h-32 transform -rotate-90">
+                                        <circle cx="50%" cy="50%" r="45" class="stroke-white/5 fill-none" stroke-width="10"></circle>
+                                        <circle cx="50%" cy="50%" r="45" class="stroke-ep-primary fill-none transition-all duration-1000" 
+                                                stroke-width="10" stroke-dasharray="283" 
+                                                stroke-dashoffset="{{ 283 - (283 * ($monthlyData['annual_plan_status']['percentage'] ?? 0)) / 100 }}"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                        <span class="text-xl sm:text-2xl font-black text-white italic leading-none">{{ $monthlyData['annual_plan_status']['percentage'] ?? 0 }}%</span>
+                                        <span class="text-[8px] font-black text-indigo-100/20 uppercase tracking-widest italic">CUMPLIMIENTO</span>
+                                    </div>
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="text-lg sm:text-xl font-black text-white uppercase tracking-tight italic mb-2">Estado de Plan Anual (Pactado)</h4>
+                                    <p class="text-[10px] text-indigo-100/30 uppercase tracking-widest italic mb-6">Conciliación de actividades contractuales programadas y realizadas</p>
+                                    
+                                    @php
+                                        $categoryLabels = [
+                                            'Inspección' => 'Controles y Checklists Normativos',
+                                            'Capacitación' => 'Formación y Capacitación Técnica',
+                                            'Informe' => 'Informes y Gestión Administrativa'
+                                        ];
+                                        $programmedByCat = collect($monthlyData['annual_plan_status']['programmed'] ?? [])->groupBy('category');
+                                    @endphp
+
+                                    @foreach($categoryLabels as $catKey => $label)
+                                        @if($programmedByCat->has($catKey))
+                                            <div class="mb-10 last:mb-0">
+                                                <div class="flex items-center gap-3 mb-5 border-l-2 border-ep-primary/40 pl-4 py-0.5">
+                                                    <span class="text-[10px] font-black text-indigo-100/50 uppercase tracking-[0.25em] italic">{{ $label }}</span>
+                                                    <div class="flex-grow h-px bg-gradient-to-r from-white/5 to-transparent"></div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                    @foreach($programmedByCat->get($catKey) as $prog)
+                                                        <div class="px-5 py-4 rounded-2xl border {{ $prog['status'] === 'completed' ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-white/5 bg-black/40' }} flex items-start justify-between group/prog transition-all hover:bg-white/[0.02]">
+                                                            <div class="flex flex-col min-w-0 flex-grow">
+                                                                <div class="flex items-center gap-2 mb-1.5">
+                                                                    @if($prog['code'])
+                                                                        <span class="px-2 py-0.5 rounded-md text-[8px] font-black bg-white/10 text-indigo-100/50 uppercase tracking-widest border border-white/5">{{ $prog['code'] }}</span>
+                                                                    @endif
+                                                                    <span class="text-xs font-black {{ $prog['status'] === 'completed' ? 'text-emerald-400' : 'text-white' }} uppercase italic tracking-tight leading-tight">{{ $prog['activity'] }}</span>
+                                                                </div>
+                                                                @if($prog['description'])
+                                                                    <p class="text-[10px] text-indigo-100/40 mb-2 italic leading-relaxed group-hover/prog:text-indigo-100/60 transition-colors">{{ $prog['description'] }}</p>
+                                                                @endif
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="text-[9px] font-black text-indigo-100/20 uppercase tracking-[0.2em]">{{ $prog['month'] }}</span>
+                                                                    @if($prog['status'] === 'completed')
+                                                                        <span class="w-1 h-1 rounded-full bg-emerald-500"></span>
+                                                                        <span class="text-[8px] font-bold text-emerald-500/40 uppercase italic">Verificado</span>
+                                                                    @endif
+                                                                </div>
+                                                            </div>
+                                                            <div class="flex-shrink-0 ml-4 pt-1">
+                                                                @if($prog['status'] === 'completed')
+                                                                    <div class="w-6 h-6 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                                                                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                                                                    </div>
+                                                                @else
+                                                                    <div class="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 group-hover/prog:border-ep-primary/30 transition-colors">
+                                                                        <div class="w-1.5 h-1.5 rounded-full bg-white/10 group-hover/prog:bg-ep-primary animate-pulse"></div>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
                         
                         {{-- SECCIÓN 1: VISITAS TÉCNICAS --}}
                         <div class="bg-ep-dark/40 backdrop-blur-md p-6 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] border border-white/5 shadow-2xl relative group/section overflow-hidden">
@@ -129,10 +219,25 @@
                                         </thead>
                                         <tbody class="divide-y divide-white/[0.03] text-xs">
                                             @foreach($monthlyData['visits'] ?? [] as $visit)
-                                                <tr class="hover:bg-white/[0.02] transition-colors">
-                                                    <td class="px-6 py-5 font-black text-ep-primary italic">{{ $visit->visit_date->format('d/m/Y') }}</td>
-                                                    <td class="px-6 py-5 font-bold text-white/80 uppercase">{{ $visit->user->nombres }}</td>
-                                                    <td class="px-6 py-5 italic text-indigo-100/40">{{ Str::limit($visit->general_observations, 80) }}</td>
+                                                <tr class="hover:bg-white/[0.02] transition-colors group/row">
+                                                    <td class="px-6 py-5 font-black text-ep-primary italic align-top pt-8">{{ $visit->visit_date->format('d/m/Y') }}</td>
+                                                    <td class="px-6 py-5 font-bold text-white/80 uppercase align-top pt-8">{{ $visit->user->nombres }}</td>
+                                                    <td class="px-6 py-5 align-top pt-8">
+                                                        <div class="space-y-4">
+                                                            <p class="italic text-indigo-100/40 leading-relaxed">{{ $visit->general_observations }}</p>
+                                                            
+                                                            @if($visit->checklistCompletions->count() > 0)
+                                                                <div class="space-y-1.5">
+                                                                    <span class="text-[8px] font-black text-ep-primary uppercase tracking-widest italic opacity-50 block">Procedimientos Realizados:</span>
+                                                                    <div class="flex flex-wrap gap-2">
+                                                                        @foreach($visit->checklistCompletions as $comp)
+                                                                            <span class="px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-black uppercase italic">{{ $comp->assignment->checklist->title ?? 'Inspección técnica' }}</span>
+                                                                        @endforeach
+                                                                    </div>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                    </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
@@ -141,12 +246,20 @@
                                 {{-- Cards Móvil --}}
                                 <div class="md:hidden space-y-4 mb-8">
                                     @foreach($monthlyData['visits'] ?? [] as $visit)
-                                        <div class="p-4 rounded-xl border border-white/5 bg-black/40">
-                                            <div class="flex justify-between items-center mb-2">
+                                        <div class="p-4 rounded-xl border border-white/5 bg-black/40 space-y-4">
+                                            <div class="flex justify-between items-center">
                                                 <span class="text-[10px] font-black text-ep-primary uppercase italic">{{ $visit->visit_date->format('d/m/Y') }}</span>
                                                 <span class="text-[9px] font-bold text-white/80 uppercase tracking-widest">{{ $visit->user->nombres }}</span>
                                             </div>
                                             <p class="text-[11px] italic text-indigo-100/40 leading-relaxed">{{ $visit->general_observations }}</p>
+                                            
+                                            @if($visit->checklistCompletions->count() > 0)
+                                                <div class="flex flex-wrap gap-1.5 pt-2 border-t border-white/5">
+                                                    @foreach($visit->checklistCompletions as $comp)
+                                                        <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/5 border border-emerald-500/10 text-emerald-400 text-[8px] font-bold uppercase italic">{{ $comp->assignment->checklist->title ?? 'Inspección' }}</span>
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </div>
                                     @endforeach
                                 </div>
@@ -167,11 +280,11 @@
                             <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-500/20 to-transparent"></div>
                             <div class="flex items-center mb-8 pb-4 border-b border-white/5">
                                 <div class="w-10 h-10 sm:w-12 sm:h-12 bg-white/5 rounded-xl sm:rounded-2xl border border-white/10 flex items-center justify-center text-white font-black italic text-lg sm:text-xl group-hover/section:bg-emerald-500/20 transition-all shadow-inner">2</div>
-                                <h4 class="text-lg sm:text-xl font-black text-white uppercase tracking-tight italic ml-3 sm:ml-5 leading-tight">Protocolos e Inspecciones ({{ count($monthlyData['checklists'] ?? []) }})</h4>
+                                <h4 class="text-lg sm:text-xl font-black text-white uppercase tracking-tight italic ml-3 sm:ml-5 leading-tight">Protocolos e Inspecciones (Fuera de Contrato) ({{ count($monthlyData['checklists_adhoc'] ?? []) }})</h4>
                             </div>
                             
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                                @forelse($monthlyData['checklists'] ?? [] as $completion)
+                                @forelse($monthlyData['checklists_adhoc'] ?? [] as $completion)
                                     <div class="p-5 rounded-2xl border border-white/5 bg-black/40 hover:border-emerald-500/30 transition-all group/item">
                                         <div class="font-black text-white uppercase italic text-[11px] mb-2 leading-none group-hover/item:text-emerald-400 transition-colors">{{ $completion->assignment->checklist->title ?? 'Protocolo Ad-hoc' }}</div>
                                         <div class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest italic">
@@ -180,7 +293,7 @@
                                     </div>
                                 @empty
                                     <div class="col-span-full p-10 text-center bg-black/20 rounded-2xl border border-white/5">
-                                        <p class="text-[10px] font-black text-indigo-100/10 uppercase tracking-widest italic">Sin inspecciones técnicas realizadas</p>
+                                        <p class="text-[10px] font-black text-indigo-100/10 uppercase tracking-widest italic">Sin inspecciones fuera de contrato en este periodo</p>
                                     </div>
                                 @endforelse
                             </div>

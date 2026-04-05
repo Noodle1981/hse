@@ -49,15 +49,16 @@ class Sede extends Model
         return $this->belongsToMany(User::class, 'sede_users');
     }
 
-    public function generadorConstancias()
+    public function visitCertificates()
     {
-        return $this->hasMany(GeneradorConstancia::class);
+        return $this->hasMany(VisitCertificate::class);
     }
 
     public function constancias()
     {
-        return $this->hasMany(GeneradorConstancia::class);
+        return $this->hasMany(VisitCertificate::class);
     }
+
 
     public function checklists()
     {
@@ -84,9 +85,9 @@ class Sede extends Model
         return $this->hasMany(CapacitacionVirual::class);
     }
     
-    public function informes()
+    public function masterReports()
     {
-        return $this->hasMany(Informe::class);
+        return $this->hasMany(MasterReport::class);
     }
 
     public function inspections()
@@ -107,10 +108,6 @@ class Sede extends Model
     public function annualPlans()
     {
         return $this->hasMany(AnnualPlan::class);
-    }
-    public function visitCertificates()
-    {
-        return $this->hasMany(VisitCertificate::class);
     }
 
     public function hallazgos()

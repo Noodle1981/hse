@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Visits;
 
-use App\Models\GeneradorConstancia;
+use App\Models\VisitCertificate;
 use App\Models\Sede;
 use App\Models\DynamicInspection;
 use App\Models\Training;
@@ -18,7 +18,7 @@ use App\Mail\ConstanciaFirmaResponsable;
 class VisitCertificateWizard extends Component
 {
     public $currentStep = 1;
-    public $totalSteps = 4; // Aumentado a 4 pasos
+    public $totalSteps = 4;
 
     // Step 1: Sede, Tipo de Visita y Fecha
     public $sede_id = '';
@@ -33,14 +33,14 @@ class VisitCertificateWizard extends Component
     public $selectedTrainings = [];
     public $selectedHallazgos = [];
 
-    // Step 4: Firmas (antes era Step 3)
+    // Step 4: Firmas
     public $firma_instructor = '';
     public $email_responsable = '';
     public $aclaracion_responsable = '';
     public $firma_no_disponible = false;
     public $justificacion_firma = '';
 
-    public ?GeneradorConstancia $certificate = null;
+    public ?VisitCertificate $certificate = null;
 
     public function updatedFirmaNoDisponible($value)
     {
@@ -125,28 +125,26 @@ class VisitCertificateWizard extends Component
             'aclaracion_responsable' => 'nullable|string|max:255',
         ]);
 
-        // Generar token y código para firma del responsable
         $token = Str::random(60);
         $code = str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
 
-        $this->certificate = GeneradorConstancia::create([
+        $this->certificate = VisitCertificate::create([
             'sede_id' => $this->sede_id,
             'user_id' => Auth::id(),
-            'fecha_visita' => $this->fecha_visita,
-            'tipo_visita' => $this->tipo_visita,
-            'observacion' => $this->observacion,
-            'firma_instructor' => $this->firma_instructor,
-            'date_firma_instructor' => now(),
-            'status' => 'completed', // Wizard always creates completed certificates
-            'justificacion_firma' => $this->firma_no_disponible ? $this->justificacion_firma : null,
-            'signature_skip_reason' => $this->firma_no_disponible ? $this->justificacion_firma : null, // Support both models if migrating
+            'visit_date' => $this->fecha_visita,
+            'visit_type' => $this->tipo_visita,
+            'general_observations' => $this->observacion,
+            'instructor_signature' => $this->firma_instructor,
+            'instructor_signature_date' => now(),
+            'status' => 'completed',
+            'signature_skip_reason' => $this->firma_no_disponible ? $this->justificacion_firma : null,
             'email_responsable' => $this->email_responsable,
+            'responsible_name' => $this->aclaracion_responsable,
             'aclaracion_responsable' => $this->aclaracion_responsable,
             'token_responsable' => $token,
             'code' => $code,
         ]);
 
-        // Vincular actividades seleccionadas
         if (!empty($this->selectedInspections)) {
             $this->certificate->inspections()->attach($this->selectedInspections);
         }
@@ -157,12 +155,10 @@ class VisitCertificateWizard extends Component
             $this->certificate->hallazgosActividades()->attach($this->selectedHallazgos);
         }
 
-        // Enviar email al responsable si la firma no está disponible y hay email
         if ($this->firma_no_disponible && $this->email_responsable) {
             try {
                 Mail::to($this->email_responsable)->send(new ConstanciaFirmaResponsable($this->certificate));
             } catch (\Exception $e) {
-                // Log error but continue
                 \Illuminate\Support\Facades\Log::error('Error enviando email de firma: ' . $e->getMessage());
                 session()->flash('warning', 'Constancia creada pero hubo un error enviando el email: ' . $e->getMessage());
                 return redirect()->route('visit-certificates.history');
@@ -170,7 +166,6 @@ class VisitCertificateWizard extends Component
         }
 
         session()->flash('message', '¡Constancia de visita creada exitosamente!');
-        
         return redirect()->route('visit-certificates.history');
     }
 
@@ -199,7 +194,6 @@ class VisitCertificateWizard extends Component
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get(),
             
-
             'hallazgos' => \App\Models\Hallazgo::where('user_id', Auth::id())
                 ->where('sede_id', $this->sede_id)
                 ->whereBetween('created_at', [$startDate, $endDate])
@@ -212,14 +206,11 @@ class VisitCertificateWizard extends Component
         /** @var \App\Models\User $user */
         $user = Auth::user();
         
-        // Filtrar sedes según el rol
-        if ($user->rol === 'Administrador') {
-            // Admin ve todas las sedes
+        if ($user->rol === 'Administrador' || $user->isGestor()) {
             $sedes = Sede::with('empresa')
                 ->orderBy('nombre_sede')
                 ->get();
         } else {
-            // Técnico solo ve sus sedes asignadas
             $sedes = $user->sedes()
                 ->with('empresa')
                 ->orderBy('nombre_sede')

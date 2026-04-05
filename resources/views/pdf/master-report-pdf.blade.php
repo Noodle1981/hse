@@ -185,9 +185,74 @@
                 <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['visits']) }}</span><span class="kpi-label">Visitas</span></td>
                 <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['checklists']) }}</span><span class="kpi-label">Controles</span></td>
                 <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['trainings']) }}</span><span class="kpi-label">Formación</span></td>
-                <td class="kpi-box"><span class="kpi-val" style="color:#f64e60;">{{ count($data['hallazgos']) }}</span><span class="kpi-label">Hallazgos</span></td>
+                <td class="kpi-box">
+                    <span class="kpi-val" style="color:<?php echo $primaryColor; ?>;">{{ $data['annual_plan_status']['percentage'] ?? 0 }}%</span>
+                    <span class="kpi-label">Cumplimiento Plan</span>
+                </td>
             </tr>
         </table>
+
+        {{-- NUEVA SECCIÓN: PLAN ANUAL PACTADO --}}
+        <div class="section">
+            <div class="section-header border-primary-left"><h3>Cumplimiento del Plan Anual (Pactado)</h3></div>
+            <div style="background: #fcfcfd; padding: 15px; border: 1px solid #ebedf3; border-radius: 6px; margin-bottom: 15px;">
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 5px; color: #7e8299; text-transform: uppercase;">Estado de Ejecución Contractual:</div>
+                <div style="width: 100%; background: #ebedf3; height: 12px; border-radius: 6px; position: relative; overflow: hidden;">
+                    <div style="width: {{ $data['annual_plan_status']['percentage'] ?? 0 }}%; height: 100%; background: <?php echo $primaryColor; ?>;"></div>
+                </div>
+                <div style="margin-top: 5px; font-size: 8px; color: #1e1e2d;">
+                    <strong>{{ $data['annual_plan_status']['achieved'] }}</strong> actividades completadas de <strong>{{ $data['annual_plan_status']['total_targets'] }}</strong> programadas para este periodo.
+                </div>
+            </div>
+
+            @php
+                $categoryLabels = [
+                    'Inspección' => 'Controles y Checklists Normativos',
+                    'Capacitación' => 'Formación y Capacitación Técnica',
+                    'Informe' => 'Informes y Gestión Administrativa'
+                ];
+                $programmedByCat = collect($data['annual_plan_status']['programmed'] ?? [])->groupBy('category');
+            @endphp
+
+            @foreach($categoryLabels as $catKey => $label)
+                @if($programmedByCat->has($catKey))
+                    <div style="background: #fcfcfd; padding: 6px 10px; margin-top: 15px; margin-bottom: 8px; border-left: 3px solid <?php echo $primaryColor; ?>;">
+                        <span style="font-size: 8px; font-weight: bold; color: #1e1e2d; text-transform: uppercase; letter-spacing: 1px;">{{ $label }}</span>
+                    </div>
+                    <table style="font-size: 10px; margin-bottom: 15px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%; text-align: left;">Código</th>
+                                <th style="width: 50%; text-align: left;">Actividad Programada</th>
+                                <th style="width: 12%; text-align: left;">Mes</th>
+                                <th style="width: 26%; text-align: center;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($programmedByCat->get($catKey) as $prog)
+                                <tr>
+                                    <td style="color: #b5b5c3; font-weight: bold; border-bottom: 1px solid #f4f4f7;">{{ $prog['code'] ?? 'N/A' }}</td>
+                                    <td style="border-bottom: 1px solid #f4f4f7; padding-bottom: 5px; padding-top: 5px;">
+                                        <strong>{{ $prog['activity'] }}</strong>
+                                        @if($prog['description'])
+                                            <div style="font-size: 8px; color: #7e8299; font-style: italic; margin-top: 2px; line-height: 1.2;">{{ $prog['description'] }}</div>
+                                        @endif
+                                    </td>
+                                    <td style="text-transform: uppercase; border-bottom: 1px solid #f4f4f7;">{{ $prog['month'] }}</td>
+                                    <td style="text-align: center; border-bottom: 1px solid #f4f4f7;">
+                                        @if($prog['status'] === 'completed')
+                                            <span class="badge badge-success" style="font-size: 7px; padding: 2px 6px;">COMPLETADO</span>
+                                        @else
+                                            <span class="badge" style="background: #f4f4f7; color: #b5b5c3; font-size: 7px; padding: 2px 6px;">PENDIENTE</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            @endforeach
+        </div>
 
         <div class="section">
             <div class="section-header border-primary-left"><h3>1. Cronograma de Visitas Técnicas</h3></div>
@@ -201,8 +266,21 @@
                 <tbody>
                     @foreach($data['visits'] as $visit)
                         <tr>
-                            <td><strong>{{ $visit->visit_date->format('d/m/Y') }}</strong></td>
-                            <td>{{ $visit->general_observations ?: 'Sin observaciones' }}</td>
+                            <td style="vertical-align: top;">
+                                <strong>{{ $visit->visit_date->format('d/m/Y') }}</strong><br>
+                                <span style="font-size: 7px; color: #b5b5c3;">Técnico: {{ $visit->user->nombres }}</span>
+                            </td>
+                            <td>
+                                <div style="margin-bottom: 5px;">{{ $visit->general_observations ?: 'Sin observaciones' }}</div>
+                                @if($visit->checklistCompletions->count() > 0)
+                                    <div style="font-size: 7px; color: <?php echo $primaryColor; ?>; font-weight: bold; margin-top: 5px; text-transform: uppercase;">Procedimientos:</div>
+                                    <div style="font-size: 7px; color: #7e8299;">
+                                        @foreach($visit->checklistCompletions as $index => $comp)
+                                            • {{ $comp->assignment->checklist->title ?? 'Inspección técnica' }}{{ $index < $visit->checklistCompletions->count() - 1 ? '' : '' }}<br>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -216,25 +294,10 @@
         </div>
 
         <div class="section no-break">
-            <div class="section-header border-primary-left"><h3>2. Controles Operativos (Checklists)</h3></div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Auditoría / Inspección</th>
-                        <th style="width: 20%">Fecha</th>
-                        <th style="width: 15%; text-align: center;">Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data['checklists'] as $ch)
-                        <tr>
-                            <td>{{ $ch->assignment->checklist->title ?? 'Checklist Técnico' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($ch->completed_at)->format('d/m/Y H:i') }}</td>
-                            <td style="text-align: center;"><span class="badge badge-success">Finalizado</span></td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="section-header border-primary-left"><h3>2. Protocolos e Inspecciones (Trabajos Extra / Fuera de Contrato)</h3></div>
+                    No se registraron inspecciones fuera de contrato en este periodo.
+                </div>
+            @endif
             @if($report->observaciones_checklists)
                 <div class="obs-container">
                     <div class="observation-label">Análisis de Inspecciones:</div>

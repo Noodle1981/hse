@@ -146,23 +146,31 @@ class VisitInProgress extends Component
 
     private function handleAutoTaskTrigger()
     {
-        // En modo táctico avanzado, ya no redirigimos automáticamente a la pantalla de llenado.
-        // En su lugar, simplemente resaltamos la tarea para que el técnico elija cuándo iniciarla
-        // dentro del contexto de su visita.
         $this->highlightTaskId = $this->task_id;
 
-        // Si vienes de contrato, debemos asegurar que el checklist esté asignado a ti para esta sede
         if ($this->source === 'contract' && $this->type === 'Inspección' && $this->task_id) {
+            $checklistId = $this->task_id;
+
+            // Handle name-based matching if task_id starts with 'name:'
+            if (str_starts_with($this->task_id, 'name:')) {
+                $name = str_replace('name:', '', $this->task_id);
+                $checklist = DynamicChecklist::where('title', $name)->first();
+                if ($checklist) {
+                    $checklistId = $checklist->id;
+                } else {
+                    return; // No match found
+                }
+            }
+
             $exists = ChecklistAssignment::where('user_id', Auth::id())
                 ->where('sede_id', $this->visit->sede_id)
-                ->where('dynamic_checklist_id', $this->task_id)
+                ->where('dynamic_checklist_id', $checklistId)
                 ->whereIn('status', ['pending', 'in_progress'])
                 ->exists();
 
             if (!$exists) {
-                // Crear la asignación al vuelo para que aparezca en el dashboard
                 ChecklistAssignment::create([
-                    'dynamic_checklist_id' => $this->task_id,
+                    'dynamic_checklist_id' => $checklistId,
                     'user_id' => Auth::id(),
                     'empresa_id' => $this->visit->empresa_id,
                     'sede_id' => $this->visit->sede_id,
@@ -172,11 +180,39 @@ class VisitInProgress extends Component
                     'notes' => 'Vínculo automático desde Plan Anual'
                 ]);
                 
-                // Recargar las colecciones del componente para que el nuevo item sea visible
                 $this->loadChecklists();
             }
         }
     }
+
+    public $suggestedPlanTasks = [];
+
+    private function loadSuggestedTasks()
+    {
+        $currentMonth = strtolower(date('F'));
+        $currentYear = date('Y');
+
+        // Buscar tareas proyectadas para este mes en la sede
+        $this->suggestedPlanTasks = \App\Models\AnnualPlan::where('sede_id', $this->visit->sede_id)
+            ->where('year', $currentYear)
+            ->where($currentMonth, true)
+            ->where('category', 'Inspección')
+            ->get()
+            ->filter(function($plan) {
+                // Filtrar si ya está asignado o completado para esta sede este mes
+                // Simplificación: solo si no está en la lista de asignados actuales
+                foreach ($this->assignedChecklists as $assigned) {
+                    if ($plan->checklist_id && $assigned->dynamic_checklist_id == $plan->checklist_id) return false;
+                    if ($assigned->checklist->title == $plan->activity_name) return false;
+                }
+                foreach ($this->completedChecklists as $completed) {
+                    if ($plan->checklist_id && $completed->assignment->dynamic_checklist_id == $plan->checklist_id) return false;
+                    if ($completed->assignment->checklist->title == $plan->activity_name) return false;
+                }
+                return true;
+            });
+    }
+
 
     public function calculateDuration()
     {
@@ -208,6 +244,44 @@ class VisitInProgress extends Component
         
         $this->isVisitaExcedida = false;
     }
+
+    public function assignSuggestedTask($planId)
+    {
+        $plan = \App\Models\AnnualPlan::findOrFail($planId);
+        
+        $checklistId = $plan->checklist_id;
+        
+        // Si no hay ID, buscar por nombre exacto
+        if (!$checklistId) {
+            $checklist = DynamicChecklist::where('title', $plan->activity_name)->first();
+            if ($checklist) {
+                $checklistId = $checklist->id;
+            }
+        }
+
+        if (!$checklistId) {
+            session()->flash('warning', 'No se encontró el checklist asociado a esta actividad.');
+            return;
+        }
+
+        // Crear la asignación
+        $assignment = ChecklistAssignment::create([
+            'dynamic_checklist_id' => $checklistId,
+            'user_id' => Auth::id(),
+            'empresa_id' => $this->visit->empresa_id,
+            'sede_id' => $this->visit->sede_id,
+            'frequency' => 'once',
+            'status' => 'pending',
+            'due_date' => now(),
+            'notes' => 'Asignado desde Plan Mensual Recomendado'
+        ]);
+
+        $this->loadChecklists();
+        $this->highlightTaskId = $assignment->id;
+        
+        session()->flash('message', 'Tarea asignada exitosamente. Pulse "Iniciar" para comenzar.');
+    }
+
 
     public function loadChecklists()
     {
@@ -241,7 +315,11 @@ class VisitInProgress extends Component
 
         // 5. Cargar incidentes registrados en la visita
         $this->incidentes = $this->visit->incidentes()->latest()->get();
+
+        // 6. Cargar tareas sugeridas del Plan Anual (PROACTIVA)
+        $this->loadSuggestedTasks();
     }
+
 
     public function executeTraining($trainingId)
     {

@@ -12,6 +12,25 @@ use Illuminate\Support\Facades\Auth;
 #[Layout('components.layouts.app')]
 class AnnualContractDashboard extends Component
 {
+    public function getActiveVisit()
+    {
+        return \App\Models\VisitCertificate::where('user_id', Auth::id())
+            ->where('status', 'in_progress')
+            ->first();
+    }
+
+    public function redirectToTask($visitId, $activityName, $checklistId = null, $category = 'Inspección')
+    {
+        $taskId = $checklistId ?: 'name:' . $activityName;
+        return redirect()->route('tecnico.visits.in-progress', [
+            'visit' => $visitId,
+            'task_id' => $taskId,
+            'type' => $category,
+            'source' => 'contract'
+        ]);
+    }
+
+
     public $sedeId;
     public $year;
     public $editMode = false;

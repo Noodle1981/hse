@@ -38,7 +38,7 @@
             
             {{-- Toolbar & Filtros Glass --}}
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 animate-fade-in-down">
-                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-4 sm:p-6 shadow-2xl w-full md:w-auto flex flex-col sm:flex-row gap-4 flex-1 max-w-4xl border-l-4 border-ep-primary/40">
+                <div class="bg-ep-dark/40 backdrop-blur-md rounded-3xl sm:rounded-[2.5rem] border border-white/5 p-4 sm:p-6 shadow-2xl w-full md:w-auto flex flex-col sm:flex-row gap-4 flex-1 max-w-4xl border-l-4 border-l-ep-primary/40">
                     <div class="relative group flex-1">
                         <input wire:model.live="search" type="text" placeholder="Filtrar informes..." 
                                class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold text-white placeholder-white/10 focus:ring-2 focus:ring-ep-primary/50 transition-all">

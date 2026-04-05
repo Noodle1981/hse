@@ -104,4 +104,26 @@ class VisitCertificate extends Model
     {
         return $this->signature;
     }
+
+    // Legacy Aliases for GeneradorConstancia compatibility
+    public function getFechaVisitaAttribute()
+    {
+        return $this->visit_date;
+    }
+
+    public function getTipoVisitaAttribute()
+    {
+        return $this->status === 'signed' ? 'Certificada' : 'Técnica';
+    }
+
+    public function getFirmaResponsableAttribute()
+    {
+        return $this->signature;
+    }
+
+    public function getObservacionAttribute()
+    {
+        return $this->general_observations;
+    }
 }
+

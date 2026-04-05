@@ -9,7 +9,7 @@ use App\Models\{
     Training,
     TrainingAttendance,
     AnnualPlan,
-    GeneradorConstancia
+    VisitCertificate
 };
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -319,12 +319,12 @@ class AdminDashboard extends Component
                 'compliance_percentage' => $this->calculateAnnualCompliance(),
             ],
             'visit_certificates' => [
-                'total_period' => GeneradorConstancia::whereBetween('fecha_visita', [$from, $to])
+                'total_period' => VisitCertificate::whereBetween('visit_date', [$from, $to])
                     ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
                     ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
                     ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
                     ->count(),
-                'pending_signature' => GeneradorConstancia::whereNull('firma_responsable')
+                'pending_signature' => VisitCertificate::whereNull('signature')
                     ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
                     ->count(),
             ],
@@ -575,21 +575,21 @@ class AdminDashboard extends Component
     {
         $activities = collect();
 
-        // 1. Visitas (GeneradorConstancia)
-        $visitas = GeneradorConstancia::with(['sede.empresa', 'user'])
+        // 1. Visitas (VisitCertificate)
+        $visitas = VisitCertificate::with(['sede.empresa', 'user'])
             ->when($this->sedeId, fn($q) => $q->where('sede_id', $this->sedeId))
             ->when($this->empresaId, fn($q) => $q->whereHas('sede', fn($sq) => $sq->where('empresa_id', $this->empresaId)))
             ->when($this->tecnicoId, fn($q) => $q->where('user_id', $this->tecnicoId))
-            ->latest('fecha_visita')
+            ->latest('visit_date')
             ->limit(15)
             ->get()
             ->map(function ($visita) {
                 return (object)[
                     'type' => 'visita',
-                    'title' => 'Visita: ' . ($visita->tipo_visita ?? 'General'),
+                    'title' => 'Visita: ' . ($visita->status_label ?? 'General'),
                     'empresa' => $visita->sede && $visita->sede->empresa ? $visita->sede->empresa->nombre : 'N/A',
                     'user_name' => $visita->user ? ($visita->user->nombres . ' ' . $visita->user->apellidos) : 'N/A',
-                    'date' => $visita->fecha_visita,
+                    'date' => $visita->visit_date,
                 ];
             });
         $activities = $activities->concat($visitas);

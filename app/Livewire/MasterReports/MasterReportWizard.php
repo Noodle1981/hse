@@ -21,6 +21,7 @@ class MasterReportWizard extends Component
     public $observaciones_checklists;
     public $observaciones_capacitaciones;
     public $observaciones_hallazgos_incidentes;
+    public $frecuencia = 'mensual'; // mensual, trimestral, semestral, anual
     public $signature; // Base64 Drawn Signature
     
     public $currentStep = 1;
@@ -31,6 +32,7 @@ class MasterReportWizard extends Component
         'user_id' => 'required|exists:users,id',
         'titulo' => 'required|string|max:255',
         'periodo' => 'required|string|max:10', // Puede ser YYYY-MM o YYYY-QX
+        'frecuencia' => 'required|in:mensual,trimestral,semestral,anual',
     ];
 
     public function mount($mode = 'create', $reportId = null)
@@ -44,6 +46,7 @@ class MasterReportWizard extends Component
             $this->user_id = $this->report->user_id;
             $this->titulo = $this->report->titulo;
             $this->periodo = $this->report->periodo;
+            $this->frecuencia = $this->report->frecuencia ?? 'mensual';
             $this->resumen_ejecutivo = $this->report->resumen_ejecutivo;
             $this->observaciones_matriz = $this->report->observaciones_matriz;
             $this->observaciones_visitas = $this->report->observaciones_visitas;
@@ -58,18 +61,35 @@ class MasterReportWizard extends Component
         }
     }
 
+    public function updatedSedeId() { $this->loadMonthlyData(); }
+    public function updatedPeriodo() { $this->loadMonthlyData(); }
+    public function updatedFrecuencia() { $this->loadMonthlyData(); }
+
     public function loadMonthlyData()
     {
         if (!$this->sede_id || !$this->periodo) return;
 
         $period = $this->periodo;
-        if (str_contains($period, '-Q')) {
+        $freq = $this->frecuencia;
+
+        if ($freq === 'trimestral') {
             $q = (int)substr($period, -1);
             $y = (int)substr($period, 0, 4);
             $startMonth = ($q - 1) * 3 + 1;
             $startDate = \Carbon\Carbon::create($y, $startMonth, 1)->startOfMonth();
             $endDate = \Carbon\Carbon::create($y, $startMonth + 2, 1)->endOfMonth();
+        } elseif ($freq === 'semestral') {
+            $s = (int)substr($period, -1);
+            $y = (int)substr($period, 0, 4);
+            $startMonth = ($s - 1) * 6 + 1;
+            $startDate = \Carbon\Carbon::create($y, $startMonth, 1)->startOfMonth();
+            $endDate = \Carbon\Carbon::create($y, $startMonth + 5, 1)->endOfMonth();
+        } elseif ($freq === 'anual') {
+            $y = (int)substr($period, 0, 4);
+            $startDate = \Carbon\Carbon::create($y, 1, 1)->startOfMonth();
+            $endDate = \Carbon\Carbon::create($y, 12, 31)->endOfMonth();
         } else {
+            // Mensual
             try {
                 $startDate = \Carbon\Carbon::parse($period . '-01')->startOfMonth();
                 $endDate = \Carbon\Carbon::parse($period . '-01')->endOfMonth();
@@ -93,27 +113,149 @@ class MasterReportWizard extends Component
             ->whereIn('status', ['completed', 'signed'])
             ->get();
 
-        $this->monthlyData = [
+        $data = [
+            'startDate' => $startDate,
+            'endDate' => $endDate,
             'visits' => $visits,
             'checklists' => $visits->flatMap->checklistCompletions,
             'trainings' => $visits->flatMap->trainings,
             'hallazgos' => $visits->flatMap->hallazgos,
             'incidentes' => $visits->flatMap->incidentes,
-            'annual_plan_status' => $this->calculateAnnualPlanStatus($sede, $startDate->year),
         ];
+
+        $data['annual_plan_status'] = $this->calculateAnnualPlanStatus($sede, $startDate->year, $data);
+        
+        // Unificar Actividades Ad-Hoc (fuera de contrato)
+        $satisfiedCheckIds = $data['annual_plan_status']['satisfied_checklist_ids'] ?? collect();
+        $satisfiedTrainIds = $data['annual_plan_status']['satisfied_training_ids'] ?? collect();
+
+        $adhoc = collect();
+        
+        // 1. Checklists Ad-Hoc
+        $data['checklists']->reject(fn($c) => $satisfiedCheckIds->contains($c->id))
+            ->each(function($c) use ($adhoc) {
+                $adhoc->push([
+                    'activity' => $c->assignment->checklist->title,
+                    'category' => 'Inspección',
+                    'description' => $c->assignment->checklist->description,
+                    'date' => \Carbon\Carbon::parse($c->completed_at)->format('d/m/Y'),
+                    'technician' => $c->visitCertificate->technician_name ?? 'N/A'
+                ]);
+            });
+
+        // 2. Capacitaciones Ad-Hoc
+        $data['trainings']->reject(fn($t) => $satisfiedTrainIds->contains($t->id))
+            ->each(function($t) use ($adhoc) {
+                $adhoc->push([
+                    'activity' => $t->title,
+                    'category' => 'Capacitación',
+                    'description' => $t->description,
+                    'date' => \Carbon\Carbon::parse($t->date ?? $t->created_at)->format('d/m/Y'),
+                    'technician' => $t->trainer_name ?? 'N/A'
+                ]);
+            });
+
+        $data['adhoc_activities'] = $adhoc;
+        $this->monthlyData = $data;
     }
 
 
-    private function calculateAnnualPlanStatus($sede, $year)
+    private function calculateAnnualPlanStatus($sede, $year, $data)
     {
-        // Lógica simplificada de cumplimiento
-        $plans = $sede->annualPlans()->where('year', $year)->get();
-        if ($plans->isEmpty()) return 0;
+        $plans = $sede->annualPlans()->with('checklist')->where('year', $year)->get();
+        if ($plans->isEmpty()) return [
+            'percentage' => 0,
+            'programmed' => collect(),
+            'adhoc' => collect()
+        ];
 
-        $totalActivities = $plans->count() * 12;
-        $completed = 0; // Aquí iría la lógica real comparativa
+        // Definir meses a evaluar según frecuencia
+        $monthsToEval = [];
+        $start = \Carbon\Carbon::parse($data['startDate'] ?? now());
+        $end = \Carbon\Carbon::parse($data['endDate'] ?? now());
         
-        return 75; // Mock por ahora
+        $curr = $start->copy();
+        while ($curr->lte($end)) {
+            $monthsToEval[] = strtolower($curr->format('F'));
+            $curr->addMonth();
+        }
+
+        $programmed = collect();
+        $totalTargets = 0;
+        $achievedTargets = 0;
+        $satisfiedChecklistIds = collect();
+        $satisfiedTrainingIds = collect();
+
+        foreach ($plans as $plan) {
+            foreach ($monthsToEval as $m) {
+                if ($plan->$m) {
+                    $totalTargets++;
+                    // Buscar si se realizó en ese mes específico
+                    $monthNum = \Carbon\Carbon::parse("first day of $m $year")->month;
+                    $completion = $this->checkActivityCompletion($plan, $monthNum, $year, $data);
+                    
+                    if ($completion) {
+                        $achievedTargets++;
+                        if ($plan->category === 'Inspección' && isset($completion->id)) {
+                            $satisfiedChecklistIds->push($completion->id);
+                        }
+                        if ($plan->category === 'Capacitación' && isset($completion->id)) {
+                            $satisfiedTrainingIds->push($completion->id);
+                        }
+                    }
+                    
+                    $description = $plan->checklist->description ?? null;
+
+                    // Long-term Fallback: If ID is null, try matching by name
+                    if (!$description && $plan->category === 'Inspección') {
+                        $fallback = \App\Models\DynamicChecklist::where('title', $plan->activity_name)->first();
+                        $description = $fallback->description ?? null;
+                    }
+                    
+                    $programmed->push([
+                        'activity' => $plan->activity_name,
+                        'code' => $plan->activity_code,
+                        'category' => $plan->category,
+                        'description' => $description,
+                        'month' => ucfirst($m),
+                        'status' => $completion ? 'completed' : 'pending'
+                    ]);
+                }
+            }
+        }
+
+        return [
+            'percentage' => $totalTargets > 0 ? round(($achievedTargets / $totalTargets) * 100) : 100,
+            'programmed' => $programmed,
+            'total_targets' => $totalTargets,
+            'achieved' => $achievedTargets,
+            'satisfied_checklist_ids' => $satisfiedChecklistIds,
+            'satisfied_training_ids' => $satisfiedTrainingIds
+        ];
+    }
+
+    private function checkActivityCompletion($plan, $month, $year, $data)
+    {
+        if ($plan->category === 'Inspección' && $plan->checklist_id) {
+            return $data['checklists']->first(function($c) use ($plan, $month, $year) {
+                $date = \Carbon\Carbon::parse($c->completed_at);
+                return $c->assignment->dynamic_checklist_id == $plan->checklist_id 
+                    && $date->month == $month && $date->year == $year;
+            });
+        }
+        
+        if ($plan->category === 'Capacitación') {
+            return $data['trainings']->first(function($t) use ($plan, $month, $year) {
+                $date = \Carbon\Carbon::parse($t->date ?? $t->created_at);
+                return $t->title === $plan->activity_name && $date->month == $month && $date->year == $year;
+            });
+        }
+
+        if ($plan->category === 'Informe') {
+            return true;
+        }
+
+        return false;
     }
 
     public function save()
@@ -127,6 +269,7 @@ class MasterReportWizard extends Component
                 'solicitado_por' => Auth::id(),
                 'titulo' => $this->titulo,
                 'periodo' => $this->periodo,
+                'frecuencia' => $this->frecuencia,
                 'estado' => 'solicitado',
             ]);
             session()->flash('success', 'Informe solicitado exitosamente.');
