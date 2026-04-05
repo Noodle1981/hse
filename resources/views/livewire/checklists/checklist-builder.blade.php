@@ -273,7 +273,7 @@
                             <div x-show="showOptions" x-transition x-cloak class="mb-10 p-8 bg-white/5 border border-white/5 rounded-3xl animate-fade-in">
                                 <div class="flex justify-between items-center mb-8">
                                     <h4 class="text-[9px] font-black text-indigo-400 uppercase tracking-[0.3em] italic">Configuración de Atributos y Disparadores</h4>
-                                    <span class="text-[8px] font-bold text-white/20 uppercase tracking-widest italic italic">Marque las opciones que causen un fallo de auditoría</span>
+                                    <span class="text-[8px] font-bold text-white/20 uppercase tracking-widest italic">Marque las opciones que causen un fallo de auditoría</span>
                                 </div>
                                 
                                 <div class="flex gap-4 mb-10 group/opt">
@@ -329,7 +329,7 @@
                                         <button type="button" wire:click="cancelEdit" class="h-14 px-8 bg-white/5 text-white/40 rounded-2xl text-[10px] font-black uppercase tracking-widest italic border border-white/5 hover:text-white transition-all">Cancelar Refinado</button>
                                         <button type="button" wire:click="updateQuestion" class="h-14 px-10 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic shadow-xl shadow-indigo-600/20 active:scale-95 transition-all">Sincronizar Variable</button>
                                     @else
-                                        <button type="button" wire:click="addQuestion" class="h-14 px-10 bg-ep-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic shadow-xl shadow-ep-primary/20 active:scale-95 transition-all uppercase">+ Inyectar Punto de Control</button>
+                                        <button type="button" wire:click="addQuestion" class="h-14 px-10 bg-ep-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic shadow-xl shadow-ep-primary/20 active:scale-95 transition-all">+ Inyectar Punto de Control</button>
                                     @endif
                                 </div>
                             </div>
@@ -375,7 +375,7 @@
                             </div>
                             <div>
                                 <h3 class="text-xl font-black text-white italic uppercase tracking-tight leading-none mb-2">Nueva Subcategoría</h3>
-                                <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest italic italic">Especialización de Auditoría</p>
+                                <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest italic">Especialización de Auditoría</p>
                             </div>
                         </div>
 
@@ -430,7 +430,7 @@
                             </div>
                             <div>
                                 <h3 class="text-xl font-black text-white italic uppercase tracking-tight leading-none mb-2">Nueva Categoría Maestra</h3>
-                                <p class="text-[10px] font-bold text-ep-primary uppercase tracking-widest italic italic">Estructura Global de Procesos</p>
+                                <p class="text-[10px] font-bold text-ep-primary uppercase tracking-widest italic">Estructura Global de Procesos</p>
                             </div>
                         </div>
 

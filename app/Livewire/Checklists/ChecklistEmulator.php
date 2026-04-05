@@ -10,6 +10,7 @@ use Livewire\Attributes\Layout;
 class ChecklistEmulator extends Component
 {
     public DynamicChecklist $checklist;
+    public array $answers = [];
 
     public function mount(DynamicChecklist $checklist)
     {
@@ -18,17 +19,10 @@ class ChecklistEmulator extends Component
 
     public function render()
     {
-        // Agrupar preguntas por sección
-        $groupedQuestions = [];
-        $unsectionedQuestions = [];
-
-        foreach ($this->checklist->questions as $question) {
-            if ($question->section_id) {
-                $groupedQuestions[$question->section_id][] = $question;
-            } else {
-                $unsectionedQuestions[] = $question;
-            }
-        }
+        $questions = $this->checklist->questions;
+        
+        $groupedQuestions = $questions->whereNotNull('section_id')->groupBy('section_id');
+        $unsectionedQuestions = $questions->whereNull('section_id');
 
         return view('livewire.checklists.checklist-emulator', [
             'groupedQuestions' => $groupedQuestions,

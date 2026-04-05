@@ -21,8 +21,8 @@ class InspectionWizard extends Component
     public DynamicChecklist $checklist;
     public ?ChecklistAssignment $assignment = null;
     public ?DynamicInspection $inspection = null;
-    #[Url]
-    public ?int $visit_id = null;
+    #[Url(as: 'visit_id')]
+    public ?int $visitId = null;
 
     public int $currentStep = 0;
     public array $answers = [];
@@ -51,9 +51,9 @@ class InspectionWizard extends Component
                 ->firstOrFail();
         }
 
-        // Leer visit_id desde la URL (#[Url]) o desde la sesión (fallback)
-        if (!$this->visit_id && session()->has('wizard_visit_id')) {
-            $this->visit_id = session()->pull('wizard_visit_id');
+        // Leer visitId desde la URL (#[Url]) o desde la sesión (fallback)
+        if (!$this->visitId && session()->has('wizard_visit_id')) {
+            $this->visitId = session()->pull('wizard_visit_id');
         }
 
         // Preparar secciones
@@ -198,8 +198,8 @@ class InspectionWizard extends Component
 
         if ($this->assignment) {
             // Si estamos en el contexto de una visita, registrar la completación via VisitService
-            if ($this->visit_id) {
-                $visit = VisitCertificate::find($this->visit_id);
+            if ($this->visitId) {
+                $visit = VisitCertificate::find($this->visitId);
                 if ($visit) {
                     // Recopilar TODAS las preguntas: las de secciones + las sin sección
                     $allQuestions = collect();
@@ -236,10 +236,10 @@ class InspectionWizard extends Component
 
         session()->flash('message', '¡Inspección completada exitosamente!');
 
-        if ($this->visit_id) {
+        if ($this->visitId) {
             $user = Auth::user();
             $prefix = ($user instanceof User && $user->isAdmin()) ? 'gestor' : 'tecnico';
-            return redirect()->route($prefix . '.visits.in-progress', $this->visit_id)
+            return redirect()->route($prefix . '.visits.in-progress', $this->visitId)
                 ->with('message', '¡Checklist completado! Puedes continuar con la visita.');
         }
 
