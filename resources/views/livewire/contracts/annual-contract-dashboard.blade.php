@@ -139,7 +139,7 @@
             @endif
 
             {{-- THE MASTER COMPLIANCE MATRIX --}}
-            <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden mb-12">
+            <div class="bg-ep-dark/60 backdrop-blur-md rounded-t-3xl sm:rounded-t-[3.5rem] rounded-b-none border border-white/5 shadow-2xl relative overflow-hidden mb-12">
                 <div class="px-5 sm:px-10 py-6 sm:py-8 border-b border-white/5 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-10 bg-black/20">
                     <div class="flex items-center gap-4">
                         <div class="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center rounded-xl font-black italic">M</div>
@@ -161,19 +161,33 @@
                     </div>
                 </div>
 
-                <div class="hidden md:block overflow-x-auto custom-scrollbar">
-                    <table class="w-full border-collapse">
+                <div class="hidden md:block overflow-x-hidden">
+                    <table class="w-full border-collapse table-fixed">
                         <thead>
                             <tr class="bg-black/40">
-                                <th class="sticky left-0 z-30 bg-black/80 backdrop-blur-xl px-6 sm:px-12 py-6 sm:py-8 text-left border-r border-white/5">
-                                    <span class="text-[9px] sm:text-[10px] font-black text-ep-primary uppercase tracking-[0.4em] italic">ACTIVIDAD / CÓDIGO</span>
+                                <th class="sticky left-0 z-30 bg-black/80 backdrop-blur-xl px-4 py-6 text-left border-r border-white/5 w-[25%]">
+                                    <span class="text-[9px] font-black text-ep-primary uppercase tracking-[0.2em] italic">ACTIVIDAD / CÓDIGO</span>
                                 </th>
+                                
+                                @php
+                                    $monthTranslations = [
+                                        'january' => 'Ene', 'february' => 'Feb', 'march' => 'Mar', 'april' => 'Abr',
+                                        'may' => 'May', 'june' => 'Jun', 'july' => 'Jul', 'august' => 'Ago',
+                                        'september' => 'Sep', 'october' => 'Oct', 'november' => 'Nov', 'december' => 'Dic'
+                                    ];
+                                @endphp
+
                                 @foreach($months as $name => $num)
-                                    <th class="px-3 sm:px-4 py-6 sm:py-8 text-center min-w-[60px] sm:min-w-[80px]">
-                                        <span class="text-[8px] sm:text-[9px] font-black text-indigo-100/40 uppercase tracking-[0.5em] italic">{{ substr(strtoupper($name), 0, 3) }}</span>
+                                    <th class="px-0 py-6 text-center w-[5.8%] border-r border-white/5 last:border-r-0">
+                                        <span class="text-[11px] font-black text-white uppercase italic tracking-tight">
+                                            {{ $monthTranslations[strtolower($name)] }}
+                                        </span>
                                     </th>
                                 @endforeach
-                                @if($editMode) <th class="px-4 py-8 text-right bg-black/40"></th> @endif
+                                
+                                @if($editMode) 
+                                    <th class="w-[50px] bg-black/40"></th> 
+                                @endif
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/[0.03]">
@@ -181,10 +195,10 @@
                             @forelse($plans as $plan)
                                 @if($currentCategory !== $plan->category)
                                     <tr class="bg-indigo-600/5">
-                                        <td colspan="15" class="px-6 sm:px-12 py-3 sm:py-4 text-[8px] sm:text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] italic leading-none">
-                                            <div class="flex items-center gap-3 sm:gap-4">
-                                                <div class="w-3 h-3 sm:w-4 sm:h-4 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
-                                                    <span class="text-[7px] sm:text-[8px]">{{ substr($plan->category, 0, 1) }}</span>
+                                        <td colspan="{{ $editMode ? 14 : 13 }}" class="px-6 py-3 text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] italic leading-none">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-3 h-3 rounded-lg bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center">
+                                                    <span class="text-[7px]">{{ substr($plan->category, 0, 1) }}</span>
                                                 </div>
                                                 {{ strtoupper($plan->category) }}
                                             </div>
@@ -193,12 +207,16 @@
                                     @php $currentCategory = $plan->category; @endphp
                                 @endif
                                 <tr class="group/row hover:bg-white/[0.03] transition-all duration-700">
-                                    <td class="sticky left-0 z-20 bg-[#1e1e2d] group-hover/row:bg-[#252535] px-6 sm:px-12 py-6 sm:py-8 transition-colors border-r border-white/5">
-                                        <div class="flex items-center gap-4 sm:gap-6">
-                                            <div class="w-1 h-8 sm:w-1.5 sm:h-10 {{ $plan->category === 'Capacitación' ? 'bg-blue-500' : ($plan->category === 'Inspección' ? 'bg-orange-500' : 'bg-ep-primary') }} rounded-full shadow-lg group-hover/row:h-12 transition-all duration-700"></div>
-                                            <div>
-                                                <div class="text-sm sm:text-base font-black text-white italic uppercase tracking-tight leading-tight mb-2 group-hover/row:text-ep-primary transition-colors">{{ $plan->activity_name }}</div>
-                                                <div class="text-[8px] sm:text-[10px] text-indigo-100/20 font-bold uppercase tracking-widest italic group-hover/row:text-indigo-100/40 transition-colors leading-none truncate max-w-[150px] sm:max-w-none">{{ $plan->activity_code ?: 'SIN CÓDIGO' }}</div>
+                                    <td class="sticky left-0 z-20 bg-[#1e1e2d] group-hover/row:bg-[#252535] px-3 py-4 border-r border-white/5 overflow-hidden">
+                                        <div class="flex items-center gap-2">
+                                            <div class="shrink-0 w-1 h-6 {{ $plan->category === 'Capacitación' ? 'bg-blue-500' : ($plan->category === 'Inspección' ? 'bg-orange-500' : 'bg-ep-primary') }} rounded-full shadow-lg group-hover/row:h-8 transition-all duration-700"></div>
+                                            <div class="flex-1 min-w-0">
+                                                <div class="text-xs sm:text-sm font-black text-white italic uppercase truncate leading-tight group-hover/row:text-ep-primary transition-colors" title="{{ $plan->activity_name }}">
+                                                    {{ $plan->activity_name }}
+                                                </div>
+                                                <div class="text-[9px] sm:text-[10px] text-indigo-100/30 font-bold uppercase truncate leading-none mt-0.5 group-hover/row:text-indigo-100/50 transition-colors">
+                                                    {{ $plan->activity_code ?: 'S/C' }}
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
@@ -209,48 +227,83 @@
                                             $status = $data['status'];
                                             $cnt = $data['count'];
                                         @endphp
-                                        <td class="px-2 py-8 text-center align-middle">
+                                        <td class="px-0 py-4 text-center border-r border-white/5 last:border-r-0 relative group/cell">
                                             <div 
                                                 @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $name }}')" @endif
-                                                class="relative mx-auto w-12 h-12 rounded-[1.2rem] flex items-center justify-center transition-all duration-500 group/cell overflow-hidden
-                                                {{ $status === 'completed' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-[inset_0_0_15px_rgba(16,185,129,0.1)] scale-110' : '' }}
+                                                class="relative mx-auto w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-500 overflow-visible cursor-default
+                                                {{ $status === 'completed' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 shadow-[inset_0_0_10px_rgba(16,185,129,0.1)] hover:bg-emerald-500/20' : '' }}
                                                 {{ $status === 'overdue' ? 'bg-red-500/10 border border-red-500/30 text-red-500 animate-pulse' : '' }}
-                                                {{ $status === 'pending' ? 'bg-yellow-400/10 border border-yellow-500/30 text-yellow-400' : '' }}
-                                                {{ $status === 'none' ? 'opacity-10 grayscale' : '' }}
-                                                {{ $editMode ? 'cursor-pointer hover:scale-125 hover:border-white/40 border-dashed border-2 border-white/5' : 'cursor-default' }}">
+                                                {{ $status === 'pending' ? 'bg-yellow-400/10 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-400/20' : '' }}
+                                                {{ $status === 'none' ? 'opacity-10' : '' }}
+                                                {{ $editMode ? 'cursor-pointer hover:scale-110 border-dashed border-2' : '' }}">
                                                 
-                                                @if($status !== 'none')
-                                                    @if($status === 'completed')
-                                                        <svg class="w-6 h-6 drop-shadow-[0_0_8px_#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg>
-                                                        @if($cnt > 1)
-                                                            <span class="absolute top-1 right-1 bg-emerald-500 text-white text-[7px] font-black h-4 w-4 flex items-center justify-center rounded-lg shadow-lg">{{ $cnt }}</span>
-                                                        @endif
-                                                    @elseif($status === 'pending')
-                                                        <div class="flex flex-col items-center">
-                                                            <span class="text-[9px] font-black">PLAN</span>
-                                                            <span class="w-4 h-1 bg-yellow-400/40 rounded-full mt-0.5"></span>
-                                                        </div>
-                                                    @elseif($status === 'overdue')
-                                                        <span class="text-lg font-black drop-shadow-[0_0_8px_#ef4444]">!</span>
-                                                    @endif
+                                                @if($status === 'completed')
+                                                    <svg class="w-3.5 h-3.5 drop-shadow-[0_0_8px_#10b981]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path d="M5 13l4 4L19 7"/></svg>
+                                                @elseif($status === 'pending')
+                                                    <div class="w-1.5 h-1.5 bg-yellow-400 rounded-full shadow-[0_0_8px_#fbbf24]"></div>
+                                                @elseif($status === 'overdue')
+                                                    <span class="text-[10px] font-black drop-shadow-[0_0_8px_#ef4444]">!</span>
                                                 @else
-                                                     <div class="h-1 w-1 bg-white/20 rounded-full"></div>
+                                                    <div class="h-0.5 w-0.5 bg-white/20 rounded-full"></div>
                                                 @endif
 
-                                                {{-- GLOW EFFECT --}}
-                                                @if($status !== 'none')
-                                                    <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                                                {{-- SIMPLIFIED CONTRACTUAL HOVER CARD --}}
+                                                @if(!$editMode && $status !== 'none')
+                                                    <div class="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-52 opacity-0 invisible group-hover/cell:opacity-100 group-hover/cell:visible transition-all duration-300 z-[100] pointer-events-none">
+                                                        <div class="bg-[#1e1e2d]/98 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-[0_20px_60px_rgba(0,0,0,0.6)] relative overflow-hidden">
+                                                            <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+                                                            
+                                                            <div class="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                                                                <div class="text-[8px] font-black text-indigo-100/50 uppercase tracking-widest italic">{{ $name }}</div>
+                                                                <span class="text-[7px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-black uppercase italic">CUMPLIDO</span>
+                                                            </div>
+                                                            
+                                                            <div class="space-y-2.5">
+                                                                @if(($data['details']['type'] ?? '') === 'inspección')
+                                                                    <div class="flex items-center justify-between">
+                                                                        <span class="text-[9px] font-bold text-white/40 uppercase">Resultados</span>
+                                                                        <div class="flex gap-2">
+                                                                            <span class="text-[9px] font-black text-emerald-400 flex items-center gap-1 bg-emerald-500/5 px-1.5 py-0.5 rounded border border-emerald-500/10">
+                                                                                ✅ {{ $data['details']['passed'] }}
+                                                                            </span>
+                                                                            <span class="text-[9px] font-black text-red-400 flex items-center gap-1 bg-red-500/5 px-1.5 py-0.5 rounded border border-red-500/10">
+                                                                                 ❌ {{ $data['details']['failed'] }}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="flex items-center justify-between">
+                                                                        <span class="text-[9px] font-bold text-white/40 uppercase italic">Hallazgos</span>
+                                                                        <span class="text-[10px] font-black text-yellow-500">🚩 {{ $data['details']['findings'] }}</span>
+                                                                    </div>
+                                                                @elseif(($data['details']['type'] ?? '') === 'capacitación')
+                                                                    <div class="p-2 rounded-xl bg-blue-500/5 border border-blue-500/10 flex flex-col items-center gap-1">
+                                                                        <span class="text-[8px] font-black text-blue-400/60 uppercase tracking-tighter italic">Personas Capacitadas</span>
+                                                                        <span class="text-xl font-black text-blue-400 tracking-tighter italic">{{ $data['details']['attendees'] }}</span>
+                                                                    </div>
+                                                                @else
+                                                                    <div class="flex items-center justify-center p-2">
+                                                                        <span class="text-[9px] font-black text-emerald-400 italic">EJECUCIÓN CONFORME</span>
+                                                                    </div>
+                                                                @endif
+                                                            </div>
+
+                                                            {{-- Pointer arrow --}}
+                                                            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1e1e2d] border-r border-b border-white/10 rotate-45"></div>
+                                                        </div>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </td>
                                     @endforeach
-        
+
                                     @if($editMode)
-                                    <td class="px-10 py-8 text-right bg-black/10">
-                                        <button wire:click="deleteActivity({{ $plan->id }})" class="p-4 bg-red-500/10 text-red-500 rounded-2xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all shadow-lg active:scale-90">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                        </button>
-                                    </td>
+                                        <td class="px-2 text-center align-middle">
+                                            <button wire:confirm="¿Seguro que deseas eliminar esta actividad?"
+                                                    wire:click="deleteActivity({{ $plan->id }})"
+                                                    class="w-8 h-8 rounded-lg flex items-center justify-center text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all duration-300">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            </button>
+                                        </td>
                                     @endif
                                 </tr>
                             @empty
@@ -294,34 +347,52 @@
 
                             {{-- Micro-LED Grid (12 Months) --}}
                             <div class="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-2">
-                                @foreach($months as $name => $num)
-                                    @php 
-                                        $data = $complianceData[$plan->id][$name] ?? ['status' => 'none', 'count' => 0];
-                                        $status = $data['status'];
-                                        $cnt = $data['count'];
-                                    @endphp
-                                    <div 
-                                        @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $name }}')" @endif
-                                        class="aspect-square rounded-xl flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300
-                                        {{ $status === 'completed' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : '' }}
-                                        {{ $status === 'overdue' ? 'bg-red-500/10 border border-red-500/30 text-red-500' : '' }}
-                                        {{ $status === 'pending' ? 'bg-yellow-400/10 border border-yellow-500/30 text-yellow-400' : '' }}
-                                        {{ $status === 'none' ? 'bg-white/5 border border-white/5' : '' }}
-                                        {{ $editMode ? 'active:scale-90' : '' }}">
-                                        
-                                        <span class="text-[7px] font-black uppercase tracking-tighter opacity-40 mb-0.5">{{ substr(strtoupper($name), 0, 3) }}</span>
-                                        
-                                        @if($status === 'completed')
-                                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
-                                        @elseif($status === 'overdue')
-                                            <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]"></div>
-                                        @elseif($status === 'pending')
-                                            <div class="w-1.5 h-1.5 rounded-full bg-yellow-400/50"></div>
-                                        @else
-                                            <div class="w-1 h-1 rounded-full bg-white/10"></div>
-                                        @endif
-                                    </div>
-                                @endforeach
+                                        @foreach($months as $name => $num)
+                                            @php 
+                                                $data = $complianceData[$plan->id][$name] ?? ['status' => 'none', 'count' => 0];
+                                                $status = $data['status'];
+                                                $cnt = $data['count'];
+                                                $hasIncidents = ($data['details']['incidents'] ?? 0) > 0;
+                                                $hasFindings = ($data['details']['findings'] ?? 0) > 0;
+                                                $isFailed = ($data['details']['failed'] ?? 0) > 0;
+                                            @endphp
+                                            <div 
+                                                @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $name }}')" @endif
+                                                class="aspect-square rounded-xl flex flex-col items-center justify-center relative overflow-hidden transition-all duration-300
+                                                {{ $status === 'completed' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 active:bg-emerald-500/20' : '' }}
+                                                {{ $status === 'overdue' ? 'bg-red-500/10 border border-red-500/30 text-red-500 active:bg-red-500/20' : '' }}
+                                                {{ $status === 'pending' ? 'bg-yellow-400/10 border border-yellow-500/30 text-yellow-400 active:bg-yellow-400/20' : '' }}
+                                                {{ $status === 'none' ? 'bg-white/5 border border-white/5' : '' }}
+                                                {{ $editMode ? 'active:scale-90' : 'active:scale-110' }}">
+                                                
+                                                <span class="text-[7px] font-black uppercase tracking-tighter opacity-40 mb-0.5">{{ substr(strtoupper($name), 0, 3) }}</span>
+                                                
+                                                <div class="flex items-center gap-0.5">
+                                                    @if($status === 'completed')
+                                                        @if($isFailed)
+                                                            <svg class="w-2 h-2 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path d="M6 18L18 6M6 6l12 12"/></svg>
+                                                        @else
+                                                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981]"></div>
+                                                        @endif
+                                                    @elseif($status === 'overdue')
+                                                        <div class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]"></div>
+                                                    @elseif($status === 'pending')
+                                                        <div class="w-1.5 h-1.5 rounded-full bg-yellow-400/50"></div>
+                                                    @else
+                                                        <div class="w-1 h-1 rounded-full bg-white/10"></div>
+                                                    @endif
+
+                                                    @if($hasIncidents)
+                                                        <div class="w-1 h-1 rounded-full bg-red-500 animate-ping absolute top-1 right-1"></div>
+                                                        <div class="w-1 h-1 rounded-full bg-red-500 absolute top-1 right-1"></div>
+                                                    @endif
+                                                    
+                                                    @if($hasFindings && $status === 'completed')
+                                                        <div class="w-1 h-1 rounded-full bg-yellow-400 absolute bottom-1 right-1"></div>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
                             </div>
                         </div>
                     @empty
@@ -359,6 +430,15 @@
         @keyframes fade-in {
             from { opacity: 0; }
             to { opacity: 1; }
+        }
+
+        .group\/cell:hover svg, .group\/cell:hover span {
+            animation: pulse-tactical 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes pulse-tactical {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.95); }
         }
     </style>
 </div>

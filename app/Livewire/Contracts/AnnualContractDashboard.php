@@ -156,30 +156,45 @@ class AnnualContractDashboard extends Component
     }
 
     /**
-     * Precalcular datos de cumplimiento para evitar N+1 queries
+     * Precalcular datos de cumplimiento con detalles específicos por categoría
      */
     private function calculateComplianceData($plans)
     {
         $data = [];
         
-        // 1. Inspecciones
+        // 1. Inspecciones con Títulos, Resultados y Hallazgos
         $inspections = \App\Models\DynamicInspection::where('sede_id', $this->sedeId)
             ->whereYear('completed_at', $this->year)
             ->where('status', 'completed')
+            ->with(['checklist:id,title'])
+            ->withCount(['hallazgos' => function($q) {
+                $q->where('estado', '!=', 'cerrado');
+            }])
             ->get()
             ->groupBy(function($i) {
                 return $i->dynamic_checklist_id . '_' . $i->completed_at->month;
             });
             
-        // 2. Capacitaciones
+        // 2. Capacitaciones Estándar
         $trainings = \App\Models\Training::where('sede_id', $this->sedeId)
             ->whereYear('date', $this->year)
+            ->withCount('attendances')
             ->get()
             ->groupBy(function($t) {
                 return \Carbon\Carbon::parse($t->date ?? $t->created_at)->month;
             });
 
-        // 3. Informes Maestros
+        // 3. Capacitaciones Ad-hoc de Visitas (Auto-asignadas)
+        $visitTrainings = \App\Models\VisitTraining::whereHas('visit', function($q) {
+                $q->where('sede_id', $this->sedeId)
+                  ->whereYear('fecha_visita', $this->year);
+            })
+            ->get()
+            ->groupBy(function($vt) {
+                return $vt->created_at->month;
+            });
+
+        // 4. Informes Maestros
         $reports = \App\Models\MasterReport::where('sede_id', $this->sedeId)
             ->whereYear('created_at', $this->year)
             ->get()
@@ -195,6 +210,14 @@ class AnnualContractDashboard extends Component
                     return $r->created_at->month;
                 }
             });
+
+        // 5. Incidentes Mensuales de la Sede
+        $incidents = \App\Models\Incidente::where('sede_id', $this->sedeId)
+            ->whereYear('fecha_ocurrencia', $this->year)
+            ->get()
+            ->groupBy(function($inc) {
+                return $inc->fecha_ocurrencia->month;
+            });
         
         $currentMonth = (int)date('m');
         $months = [
@@ -207,27 +230,67 @@ class AnnualContractDashboard extends Component
             $data[$plan->id] = [];
             
             foreach ($months as $monthName => $monthNumber) {
+                $items = [];
+                $count = 0;
+                $findings = 0;
+                $passed = 0;
+                $failed = 0;
+                $attendees = 0;
+
                 if (!$plan->$monthName) {
-                    $data[$plan->id][$monthName] = ['status' => 'none', 'count' => 0];
+                    $data[$plan->id][$monthName] = [
+                        'status' => 'none', 
+                        'count' => 0, 
+                        'details' => ['items' => []]
+                    ];
                     continue;
                 }
 
-                $count = 0;
                 if ($plan->category === 'Inspección' && $plan->checklist_id) {
                     $key = $plan->checklist_id . '_' . $monthNumber;
-                    $count = isset($inspections[$key]) ? $inspections[$key]->count() : 0;
+                    $monthInps = $inspections[$key] ?? collect();
+                    
+                    foreach ($monthInps as $inp) {
+                        $count++;
+                        if ($inp->result === 'Pass') $passed++;
+                        else $failed++;
+                        $findings += $inp->hallazgos_count;
+                    }
                 } elseif ($plan->category === 'Capacitación') {
-                    $count = isset($trainings[$monthNumber]) ? $trainings[$monthNumber]->count() : 0;
+                    // Solo capacitaciones que coincidan con el nombre de la actividad pactada
+                    $monthCaps = $trainings[$monthNumber] ?? collect();
+                    $matchingCaps = $monthCaps->filter(fn($c) => $c->title === $plan->activity_name);
+                    foreach ($matchingCaps as $cap) {
+                        $attendees += $cap->attendances_count;
+                        $count++;
+                    }
+                    
+                    // Capacitaciones de Visita (Ad-hoc) que coincidan con el nombre
+                    $monthVisitCaps = $visitTrainings[$monthNumber] ?? collect();
+                    $matchingVisitCaps = $monthVisitCaps->filter(fn($vc) => $vc->title === $plan->activity_name);
+                    foreach ($matchingVisitCaps as $vcap) {
+                        $attendees += $vcap->attendees_count;
+                        $count++;
+                    }
                 } elseif ($plan->category === 'Informe') {
-                    $count = isset($reports[$monthNumber]) ? $reports[$monthNumber]->count() : 0;
+                    $monthReports = $reports[$monthNumber] ?? collect();
+                    $count = $monthReports->count();
                 }
                 
+                $details = [
+                    'passed' => $passed,
+                    'failed' => $failed,
+                    'findings' => $findings,
+                    'attendees' => $attendees,
+                    'type' => strtolower($plan->category)
+                ];
+
                 if ($count > 0) {
-                    $data[$plan->id][$monthName] = ['status' => 'completed', 'count' => $count];
+                    $data[$plan->id][$monthName] = ['status' => 'completed', 'count' => $count, 'details' => $details];
                 } elseif ($monthNumber < $currentMonth) {
-                    $data[$plan->id][$monthName] = ['status' => 'overdue', 'count' => 0];
+                    $data[$plan->id][$monthName] = ['status' => 'overdue', 'count' => 0, 'details' => $details];
                 } else {
-                    $data[$plan->id][$monthName] = ['status' => 'pending', 'count' => 0];
+                    $data[$plan->id][$monthName] = ['status' => 'pending', 'count' => 0, 'details' => $details];
                 }
             }
         }
