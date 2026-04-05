@@ -152,7 +152,7 @@
             @endif
             
             <h1 class="text-primary">INFORME DE GESTIÓN</h1>
-            <h2>{{ strtoupper(\Carbon\Carbon::parse($report->periodo)->locale('es')->translatedFormat('F Y')) }}</h2>
+            <h2>{{ strtoupper($report->formatted_period) }}</h2>
             
             <table class="cover-info-table">
                 <tr>
@@ -322,7 +322,7 @@
                                     <tr>
                                         <td style="border: none; border-bottom: 1px solid #ebedf3; padding: 10px;">
                                             <div style="font-weight: bold;">{{ $inc->tipo_evento }}</div>
-                                            <div style="color: #f64e60; font-size: 8px; margin-top: 2px;">FECHA: {{ \Carbon\Carbon::parse($inc->fecha_hora)->format('d/m/Y') }}</div>
+                                            <div style="color: #f64e60; font-size: 8px; margin-top: 2px;">FECHA: {{ \Carbon\Carbon::parse($inc->fecha_ocurrencia)->format('d/m/Y') }}</div>
                                             <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $inc->descripcion }}</div>
                                             @if(count($inc->fotos ?? []) > 0)
                                                 <div style="margin-top: 5px;">

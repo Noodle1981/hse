@@ -41,4 +41,20 @@ class MasterReport extends Model
     {
         return $this->belongsTo(User::class, 'solicitado_por');
     }
+
+    public function getFormattedPeriodAttribute()
+    {
+        $period = $this->periodo;
+        if (str_contains($period, '-Q')) {
+            $q = substr($period, -1);
+            $y = substr($period, 0, 4);
+            return "TRIMESTRE $q - $y";
+        }
+
+        try {
+            return \Carbon\Carbon::parse($period . '-01')->translatedFormat('F Y');
+        } catch (\Exception $e) {
+            return $period;
+        }
+    }
 }

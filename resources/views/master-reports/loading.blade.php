@@ -96,7 +96,7 @@
                     Compilando Reporte Maestro
                 </h1>
                 <h2 class="text-2xl font-black text-white uppercase italic tracking-tight mb-6">
-                    {{ \Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y') }}
+                    {{ $report->formatted_period }}
                 </h2>
 
                 <p class="text-[10px] font-bold text-indigo-100/40 uppercase tracking-[0.2em] italic mb-8 leading-relaxed px-4">
