@@ -173,13 +173,13 @@
                                             @endif
             
                                             @if($visit->status === 'completed' || $visit->status === 'signed')
-                                                <a href="{{ route('gestor.visits.certificate.preview', $visit->id) }}" 
+                                                <a href="{{ route('gestor.visits.certificate.loading', $visit->id) }}" 
                                                    target="_blank"
                                                    class="h-11 w-11 bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:text-ep-primary rounded-xl flex items-center justify-center transition-all group/pdf" 
                                                    title="Previsualizar">
                                                     <svg class="w-4 h-4 group-hover/pdf:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                                 </a>
-                                                <a href="{{ route('gestor.visits.certificate.download', $visit->id) }}" 
+                                                <a href="{{ route('gestor.visits.certificate.loading', ['id' => $visit->id, 'download' => 1]) }}" 
                                                    class="h-11 w-11 bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:text-emerald-500 rounded-xl flex items-center justify-center transition-all group/down" 
                                                    title="Descargar">
                                                     <svg class="w-4 h-4 group-hover/down:translate-y-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -260,8 +260,8 @@
 
                         <div class="grid grid-cols-2 gap-4 mt-8">
                             @if($visit->status === 'completed' || $visit->status === 'signed')
-                                <a href="{{ route('gestor.visits.certificate.preview', $visit->id) }}" target="_blank" class="h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-[9px] font-black uppercase tracking-widest italic text-white/60">PDF PREVIEW</a>
-                                <a href="{{ route('gestor.visits.certificate.download', $visit->id) }}" class="h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-[9px] font-black uppercase tracking-widest italic text-emerald-400">DESCARGAR</a>
+                                <a href="{{ route('gestor.visits.certificate.loading', $visit->id) }}" target="_blank" class="h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-[9px] font-black uppercase tracking-widest italic text-white/60">PDF PREVIEW</a>
+                                <a href="{{ route('gestor.visits.certificate.loading', ['id' => $visit->id, 'download' => 1]) }}" class="h-12 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-[9px] font-black uppercase tracking-widest italic text-emerald-400">DESCARGAR</a>
                             @endif
                         </div>
                     </div>

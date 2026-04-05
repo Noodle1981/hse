@@ -8,6 +8,21 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class VisitCertificatePDFController extends Controller
 {
+    public function loading($id)
+    {
+        $visit = VisitCertificate::with('sede')->findOrFail($id);
+        $prefix = request()->is('gestor/*') ? 'gestor' : 'tecnico';
+        
+        return view('pdf.loading', [
+            'title' => 'Generando Constancia',
+            'subtitle' => 'Expediente de Visita',
+            'description' => 'Sincronizando registros de ' . $visit->sede->nombre_sede . ' y compilando firmas digitales...',
+            'redirectUrl' => request()->has('download') 
+                ? route($prefix . '.visits.certificate.download', $id) 
+                : route($prefix . '.visits.certificate.preview', $id)
+        ]);
+    }
+
     private function loadVisit($id): VisitCertificate
     {
         return VisitCertificate::with([
@@ -43,6 +58,21 @@ class VisitCertificatePDFController extends Controller
 
         $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit', 'branding'));
         return $pdf->download('constancia-visita-' . $visit->id . '.pdf');
+    }
+
+    public function checklistLoading($id)
+    {
+        $completion = \App\Models\VisitChecklistCompletion::with(['visit.sede', 'assignment.checklist'])->findOrFail($id);
+        $prefix = request()->is('gestor/*') ? 'gestor' : 'tecnico';
+        
+        return view('pdf.loading', [
+            'title' => 'Procesando Inspección',
+            'subtitle' => 'Checklist Técnico',
+            'description' => 'Generando reporte detallado de ' . $completion->assignment->checklist->title . '...',
+            'redirectUrl' => request()->has('download') 
+                ? route($prefix . '.visits.checklist.download', $id) 
+                : route($prefix . '.visits.checklist.preview', $id)
+        ]);
     }
 
     public function checklistPreview($id)

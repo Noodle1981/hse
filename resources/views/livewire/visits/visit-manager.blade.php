@@ -152,13 +152,13 @@
                             <td class="px-6 py-4 whitespace-nowrap text-right">
                                 <div class="flex items-center justify-end gap-3 text-indigo-100/30">
                                     @if($visit->status === 'completed' || $visit->status === 'signed')
-                                        <a href="{{ route('tecnico.visits.certificate.preview', $visit->id) }}" 
+                                        <a href="{{ route('tecnico.visits.certificate.loading', $visit->id) }}" 
                                            target="_blank"
                                            class="hover:text-ep-primary transition-all p-2 bg-white/5 rounded-xl border border-white/5 hover:border-ep-primary/30 active:scale-95" 
                                            title="Ver Constancia PDF">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                         </a>
-                                        <a href="{{ route('tecnico.visits.certificate.download', $visit->id) }}" 
+                                        <a href="{{ route('tecnico.visits.certificate.loading', ['id' => $visit->id, 'download' => 1]) }}" 
                                            class="hover:text-emerald-500 transition-all p-2 bg-white/5 rounded-xl border border-white/5 hover:border-emerald-500/30 active:scale-95" 
                                            title="Descargar Constancia PDF">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
@@ -222,7 +222,7 @@
                         </div>
                         <div class="flex items-center gap-3">
                             @if($visit->status === 'completed' || $visit->status === 'signed')
-                                <a href="{{ route('tecnico.visits.certificate.download', $visit->id) }}" 
+                                <a href="{{ route('tecnico.visits.certificate.loading', ['id' => $visit->id, 'download' => 1]) }}" 
                                    class="bg-ep-primary/10 border border-ep-primary/20 text-ep-primary hover:bg-ep-primary hover:text-white font-black text-[9px] px-4 py-2 rounded-xl flex items-center gap-2 transition-all uppercase tracking-widest italic shadow-lg"
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>

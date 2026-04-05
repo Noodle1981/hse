@@ -65,8 +65,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/history', \App\Livewire\Visits\VisitHistory::class)->name('history');
             Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
             Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
             Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
             Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
             Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 
@@ -190,8 +192,10 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', \App\Livewire\Visits\VisitManager::class)->name('index'); // Mis Visitas
             Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
             Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
             Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
             Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
             Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 

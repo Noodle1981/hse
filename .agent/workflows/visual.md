@@ -77,6 +77,20 @@ Los indicadores numéricos deben ser disruptivos y claros:
 
 ---
 
+## 8. Estados de Procesamiento (Loading)
+Para evitar la incertidumbre durante procesos pesados (PDF, cálculos):
+- **Layout**: Fondo `bg-[#11111D]` con un único módulo central glass.
+- **Spinner Técnico**: No usar círculos simples. Usar un spinner con `border-t-ep-primary` y un punto central con `animate-ping`.
+- **Barra de Progreso HUD**: Una barra de 2px de alto con animación de "escaneo" infinita.
+- **Mensajería**: Usar verbos de acción técnica (e.g., "Sincronizando Nodos", "Renderizando Motor PDF").
+
+```html
+<!-- Estructura sugerida -->
+<div class="loader-hud ease-linear rounded-full border-2 border-t-2 border-white/5 border-t-ep-primary h-12 w-12 transition-all"></div>
+```
+
+---
+
 ## Reglas de Oro
 1. **Contraste Invertido en Firmas**: Imágenes de firmas oscuras deben tener filtro `brightness-0 invert opacity-90`.
 2. **Resplandores (Glow)**: Usar `glow-text-red` o `glow-text-orange` (con text-shadow en CSS) para estados críticos.
