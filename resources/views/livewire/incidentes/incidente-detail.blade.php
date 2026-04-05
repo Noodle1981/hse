@@ -216,7 +216,7 @@
                                 <span class="text-4xl font-black text-ep-primary italic glow-text-orange">{{ $incidente->personas_afectadas }}</span>
                             </div>
                             <div class="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                <div class="h-full bg-ep-primary shadow-[0_0_15px_rgba(255,107,0,0.5)]" style="width: {{ min(($incidente->personas_afectadas * 20), 100) }}%"></div>
+                                <div class="tactical-progress-orange" :style="{ width: '{{ min(($incidente->personas_afectadas * 20), 100) }}%' }"></div>
                             </div>
                         </div>
 
@@ -226,7 +226,7 @@
                                 <span class="text-4xl font-black italic glow-text-yellow">{{ $incidente->dias_perdidos ?? '0' }}</span>
                             </div>
                             <div class="h-1.5 bg-white/5 rounded-full overflow-hidden text-yellow-500">
-                                <div class="h-full bg-current shadow-[0_0_15px_rgba(234,179,8,0.5)]" style="width: {{ min(($incidente->dias_perdidos * 10), 100) }}%"></div>
+                                <div class="tactical-progress-yellow" :style="{ width: '{{ min(($incidente->dias_perdidos * 10), 100) }}%' }"></div>
                             </div>
                         </div>
                     </div>
@@ -373,6 +373,16 @@
     @endif
 
     <style>
+        .tactical-progress-orange {
+            height: 100%;
+            background-color: var(--color-ep-primary, #ff6b00);
+            box-shadow: 0 0 15px rgba(255, 107, 0, 0.5);
+        }
+        .tactical-progress-yellow {
+            height: 100%;
+            background-color: currentColor;
+            box-shadow: 0 0 15px rgba(234, 179, 8, 0.5);
+        }
         .glow-text-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
         .glow-text-orange { text-shadow: 0 0 15px rgba(255, 107, 0, 0.6); }
         .glow-text-yellow { text-shadow: 0 0 15px rgba(234, 179, 8, 0.6); }
@@ -405,7 +415,7 @@
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #ep-primary;
+            background: #ff6b00;
         }
     </style>
 </div>
