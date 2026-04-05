@@ -80,13 +80,40 @@ Los indicadores numéricos deben ser disruptivos y claros:
 ## 8. Estados de Procesamiento (Loading)
 Para evitar la incertidumbre durante procesos pesados (PDF, cálculos):
 - **Layout**: Fondo `bg-[#11111D]` con un único módulo central glass.
-- **Spinner Técnico**: No usar círculos simples. Usar un spinner con `border-t-ep-primary` y un punto central con `animate-ping`.
+- **Spinner Técnico**: Usar un spinner con `border-t-ep-primary` y un punto central con `animate-ping`.
 - **Barra de Progreso HUD**: Una barra de 2px de alto con animación de "escaneo" infinita.
 - **Mensajería**: Usar verbos de acción técnica (e.g., "Sincronizando Nodos", "Renderizando Motor PDF").
 
 ```html
-<!-- Estructura sugerida -->
-<div class="loader-hud ease-linear rounded-full border-2 border-t-2 border-white/5 border-t-ep-primary h-12 w-12 transition-all"></div>
+<!-- Estructura Premium HUD -->
+<div class="bg-white/5 backdrop-blur-2xl rounded-[2.5rem] border border-white/10 p-10 shadow-2xl relative overflow-hidden">
+    <div class="text-center relative z-20">
+        <!-- Icono HUD Animado -->
+        <div class="mb-8 flex justify-center">
+            <div class="relative h-20 w-20 flex items-center justify-center">
+                <div class="absolute inset-0 rounded-full border-2 border-white/5 border-t-ep-primary animate-spin"></div>
+                <div class="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-ep-primary shadow-inner rotate-3">
+                    <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div class="absolute -top-1 -right-1">
+                    <span class="flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-ep-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-ep-primary"></span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Verbos de Acción -->
+        <h1 class="text-xs font-black text-ep-primary uppercase tracking-[0.4em] italic mb-3 glow-text-orange">Compilando Módulo</h1>
+        <p class="text-[10px] font-bold text-indigo-100/40 uppercase tracking-[0.2em] italic mb-8">Sincronizando flujos de datos técnicos...</p>
+        <!-- Barra de Escaneo HUD -->
+        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden relative">
+            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-ep-primary/40 to-transparent w-1/2 animate-scan"></div>
+        </div>
+    </div>
+</div>
 ```
 
 ---

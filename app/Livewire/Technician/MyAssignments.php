@@ -290,9 +290,27 @@ class MyAssignments extends Component
                 }
             });
 
-        $contract = $contractQuery->get()->map(function($p) use ($now) {
-            $dueDate = \Carbon\Carbon::create(now()->year, $this->selectedMonth)->endOfMonth();
-            $daysRemaining = (int) $now->diffInDays($dueDate, false);
+        // Optimization: Fetch all completed inspections for this user/month to map statuses
+        $completedInspections = \App\Models\DynamicInspection::where('user_id', $user->id)
+            ->whereMonth('completed_at', $this->selectedMonth)
+            ->whereYear('completed_at', now()->year)
+            ->where('status', 'completed')
+            ->get()
+            ->groupBy(function($i) {
+                return $i->sede_id . '_' . $i->dynamic_checklist_id;
+            });
+
+        $contract = $contractQuery->get()->map(function($p) use ($now, $completedInspections) {
+            $monthEndDate = \Carbon\Carbon::create(now()->year, $this->selectedMonth)->endOfMonth();
+            
+            // Check if there is a completed inspection for this plan/checklist/sede
+            $key = $p->sede_id . '_' . $p->checklist_id;
+            $inspection = isset($completedInspections[$key]) ? $completedInspections[$key]->first() : null;
+            
+            $status = $inspection ? 'completed' : 'scheduled';
+            $dueDate = $inspection ? $inspection->completed_at : $monthEndDate;
+            $daysRemaining = (int) $now->diffInDays($monthEndDate, false);
+
             return (object)[
                 'id' => null,
                 'dynamic_checklist_id' => $p->checklist_id,
@@ -300,15 +318,15 @@ class MyAssignments extends Component
                 'sede' => $p->sede,
                 'empresa' => $p->sede?->empresa,
                 'due_date' => $dueDate,
-                'status' => 'scheduled',
+                'status' => $status,
                 'source' => 'contract',
                 'category' => $p->category,
-                'is_overdue' => $dueDate->isPast(),
+                'is_overdue' => !$inspection && $monthEndDate->isPast(),
                 'days_remaining' => $daysRemaining,
-                'is_warning' => $daysRemaining <= 7 && $daysRemaining >= 0 && $p->status !== 'completed',
+                'is_warning' => $daysRemaining <= 7 && $daysRemaining >= 0 && $status !== 'completed',
                 'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,
                 'created_at' => $p->created_at,
-                'inspection' => null,
+                'inspection' => $inspection,
                 'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
                 'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
                 'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,

@@ -318,7 +318,7 @@
                                     {{ match($activeTab) {
                                         'trainings' => 'Duración / Tipo',
                                         'reports' => 'Periodo / Alcance',
-                                        default => 'Ubicación de Sede'
+                                        default => 'Fecha Visita'
                                     } }}
                                 </th>
                                 <th class="px-8 py-6 text-center text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.3em] italic">Estado</th>
@@ -398,6 +398,9 @@
                                             @endif
                                         @else
                                             <div class="text-[11px] font-black {{ $assignment->is_overdue && $assignment->status !== 'completed' ? 'text-red-500 glow-text-red' : 'text-white/60' }}">
+                                                @if($assignment->status === 'completed')
+                                                    <span class="text-emerald-500/80 mr-1">Ejecutado</span>
+                                                @endif
                                                 {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}
                                             </div>
                                             @if($assignment->status !== 'completed' && $assignment->due_date)
@@ -685,8 +688,13 @@
                                         <p class="text-[10px] font-black text-indigo-100 uppercase italic">{{ $assignment->frequency_label }}</p>
                                     </div>
                                     <div>
-                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Límite</p>
-                                        <p class="text-[10px] font-black {{ $vencido ? 'text-red-500' : 'text-white' }} uppercase italic">{{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}</p>
+                                        <p class="text-[9px] font-black text-indigo-100/20 uppercase tracking-widest">Límite / Visita</p>
+                                        <p class="text-[10px] font-black {{ $vencido ? 'text-red-500' : 'text-white' }} uppercase italic">
+                                            @if($assignment->status === 'completed')
+                                                <span class="text-emerald-500/80 mr-1">Ejecutado</span>
+                                            @endif
+                                            {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}
+                                        </p>
                                         @if($assignment->status !== 'completed' && $assignment->due_date)
                                             <div class="mt-1">
                                                 @if($vencido)
