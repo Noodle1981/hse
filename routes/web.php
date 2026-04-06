@@ -39,7 +39,7 @@ Route::middleware(['auth'])->group(function () {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
         if ($user->isSuperAdmin()) {
-            return redirect()->route('admin.consultants');
+            return redirect()->route('admin.dashboard');
         }
         if ($user->isTechnician()) {
             return redirect()->route('tecnico.checklists.tasks.index');

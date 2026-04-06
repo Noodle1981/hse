@@ -34,7 +34,7 @@ class Login extends Component
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             session()->regenerate();
             
-            return redirect()->route('tecnico.checklists.tasks.index');
+            return redirect()->route('dashboard');
         }
 
         $this->addError('email', 'Las credenciales no son válidas.');

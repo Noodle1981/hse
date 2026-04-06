@@ -40,7 +40,7 @@ class EcosystemDashboard extends Component
             'total_active_users'=> \App\Models\User::where('estado', 'activo')->count(),
             'total_findings'    => \App\Models\Hallazgo::count(),
             'total_incidents'   => \App\Models\Incidente::count(),
-            'total_reports'     => \App\Models\Informe::count(),
+            'total_reports'     => \App\Models\MasterReport::count(),
         ];
 
         return view('livewire.admin.ecosystem-dashboard', [
@@ -84,7 +84,7 @@ class EcosystemDashboard extends Component
                 'color' => 'ep-primary'
             ]);
 
-        $reports = \App\Models\Informe::with(['sede.empresa'])->latest()->take($limit)->get()
+        $reports = \App\Models\MasterReport::with(['sede.empresa'])->latest()->take($limit)->get()
             ->map(fn($r) => [
                 'type' => 'report',
                 'label' => 'Informe',

@@ -62,7 +62,7 @@ class Empresa extends Model
 
     public function informes()
     {
-        return $this->hasManyThrough(Informe::class, Sede::class);
+        return $this->hasManyThrough(MasterReport::class, Sede::class);
     }
 
     public function visitCertificates()
