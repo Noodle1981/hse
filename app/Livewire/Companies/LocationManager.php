@@ -19,12 +19,27 @@ class LocationManager extends Component
     public string $newNombreSede = '';
     public string $newDireccion = '';
     public string $newTipoSede = '';
+    public string $newRubro = '';
     public string $newLocalidad = '';
     public ?int $newProvinciaId = null;
     public $newLatitud = '';
     public $newLongitud = '';
     public string $newTelefono = '';
     public string $newCorreo = '';
+
+    // Contactos Responsables
+    public string $responsable_1_nombre = '';
+    public string $responsable_1_cargo = '';
+    public string $responsable_1_email = '';
+    public string $responsable_2_nombre = '';
+    public string $responsable_2_cargo = '';
+    public string $responsable_2_email = '';
+    public string $responsable_3_nombre = '';
+    public string $responsable_3_cargo = '';
+    public string $responsable_3_email = '';
+    
+    public int $contactosVisibles = 1;
+
     public bool $showForm = false;
     public string $search = '';
 
@@ -37,13 +52,6 @@ class LocationManager extends Component
     
     // Edición
     public ?int $editingId = null;
-    public string $editNombreSede = '';
-    public string $editDireccion = '';
-    public string $editTipoSede = '';
-    public string $editLocalidad = '';
-    public ?int $editProvinciaId = null;
-    public $editLatitud = '';
-    public $editLongitud = '';
 
     // Listas para autocompletado
     public $existingTipos = [];
@@ -158,13 +166,8 @@ class LocationManager extends Component
     public function cancelEdit()
     {
         $this->editingId = null;
-        $this->editNombreSede = '';
-        $this->editDireccion = '';
-        $this->editTipoSede = '';
-        $this->editLocalidad = '';
-        $this->editProvinciaId = null;
-        $this->editLatitud = '';
-        $this->editLongitud = '';
+        $this->showForm = false;
+        $this->resetForm();
     }
 
     // Validación en tiempo real para nombre de sede
@@ -187,7 +190,7 @@ class LocationManager extends Component
     public function loadAvailableUsers()
     {
         // Cargar solo técnicos
-        $this->availableUsers = User::where('rol', 'Técnico')
+        $this->availableUsers = User::where('rol', 'tecnico')
             ->orderBy('apellidos')
             ->orderBy('nombres')
             ->get();
@@ -229,7 +232,15 @@ class LocationManager extends Component
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
+        $this->editingId = null;
         $this->resetForm();
+    }
+
+    public function addContacto()
+    {
+        if ($this->contactosVisibles < 3) {
+            $this->contactosVisibles++;
+        }
     }
 
     public function save()
@@ -245,12 +256,22 @@ class LocationManager extends Component
             ],
             'newDireccion' => 'nullable|string|max:255',
             'newTipoSede' => 'nullable|string|max:100',
+            'newRubro' => 'nullable|string|max:100',
             'newLocalidad' => 'nullable|string|max:100',
             'newProvinciaId' => 'nullable|exists:provincias,id',
             'newLatitud' => 'nullable|numeric|between:-90,90',
             'newLongitud' => 'nullable|numeric|between:-180,180',
             'newTelefono' => 'nullable|string|max:50',
             'newCorreo' => 'nullable|email|max:255',
+            'responsable_1_nombre' => 'nullable|string|max:255',
+            'responsable_1_cargo' => 'nullable|string|max:255',
+            'responsable_1_email' => 'nullable|email|max:255',
+            'responsable_2_nombre' => 'nullable|string|max:255',
+            'responsable_2_cargo' => 'nullable|string|max:255',
+            'responsable_2_email' => 'nullable|email|max:255',
+            'responsable_3_nombre' => 'nullable|string|max:255',
+            'responsable_3_cargo' => 'nullable|string|max:255',
+            'responsable_3_email' => 'nullable|email|max:255',
         ], [
             'newNombreSede.unique' => 'Ya existe una sede con este nombre en esta empresa.'
         ]);
@@ -260,12 +281,22 @@ class LocationManager extends Component
             'nombre_sede' => $this->newNombreSede,
             'direccion' => $this->newDireccion ?: null,
             'tipo_sede' => $this->newTipoSede ?: null,
+            'rubro' => $this->newRubro ?: null,
             'localidad' => $this->newLocalidad ?: null,
             'provincia_id' => $this->newProvinciaId,
             'latitud' => $this->newLatitud ?: null,
             'longitud' => $this->newLongitud ?: null,
             'telefono' => $this->newTelefono ?: null,
             'correo' => $this->newCorreo ?: null,
+            'responsable_1_nombre' => $this->responsable_1_nombre ?: null,
+            'responsable_1_cargo' => $this->responsable_1_cargo ?: null,
+            'responsable_1_email' => $this->responsable_1_email ?: null,
+            'responsable_2_nombre' => $this->responsable_2_nombre ?: null,
+            'responsable_2_cargo' => $this->responsable_2_cargo ?: null,
+            'responsable_2_email' => $this->responsable_2_email ?: null,
+            'responsable_3_nombre' => $this->responsable_3_nombre ?: null,
+            'responsable_3_cargo' => $this->responsable_3_cargo ?: null,
+            'responsable_3_email' => $this->responsable_3_email ?: null,
         ]);
 
         $this->loadSedes();
@@ -278,40 +309,100 @@ class LocationManager extends Component
     {
         $sede = $this->empresa->sedes()->findOrFail($id);
         $this->editingId = $id;
-        $this->editNombreSede = $sede->nombre_sede;
-        $this->editDireccion = $sede->direccion ?? '';
-        $this->editTipoSede = $sede->tipo_sede ?? '';
-        $this->editLocalidad = $sede->localidad ?? '';
-        $this->editProvinciaId = $sede->provincia_id;
-        $this->editLatitud = $sede->latitud;
-        $this->editLongitud = $sede->longitud;
+        $this->newNombreSede = $sede->nombre_sede;
+        $this->newDireccion = $sede->direccion ?? '';
+        $this->newTipoSede = $sede->tipo_sede ?? '';
+        $this->newRubro = $sede->rubro ?? '';
+        $this->newLocalidad = $sede->localidad ?? '';
+        $this->newProvinciaId = $sede->provincia_id;
+        $this->newLatitud = $sede->latitud;
+        $this->newLongitud = $sede->longitud;
+        
+        $this->newTelefono = $sede->telefono ?? '';
+        $this->newCorreo = $sede->correo ?? '';
+        $this->responsable_1_nombre = $sede->responsable_1_nombre ?? '';
+        $this->responsable_1_cargo = $sede->responsable_1_cargo ?? '';
+        $this->responsable_1_email = $sede->responsable_1_email ?? '';
+        $this->responsable_2_nombre = $sede->responsable_2_nombre ?? '';
+        $this->responsable_2_cargo = $sede->responsable_2_cargo ?? '';
+        $this->responsable_2_email = $sede->responsable_2_email ?? '';
+        $this->responsable_3_nombre = $sede->responsable_3_nombre ?? '';
+        $this->responsable_3_cargo = $sede->responsable_3_cargo ?? '';
+        $this->responsable_3_email = $sede->responsable_3_email ?? '';
+        
+        $c3 = ($this->responsable_3_nombre || $this->responsable_3_cargo || $this->responsable_3_email);
+        $c2 = ($this->responsable_2_nombre || $this->responsable_2_cargo || $this->responsable_2_email);
+        
+        if ($c3) {
+            $this->contactosVisibles = 3;
+        } elseif ($c2) {
+            $this->contactosVisibles = 2;
+        } else {
+            $this->contactosVisibles = 1;
+        }
+        
+        $this->showForm = true;
     }
 
     public function update()
     {
         $this->validate([
-            'editNombreSede' => 'required|string|max:255',
-            'editDireccion' => 'nullable|string|max:255',
-            'editTipoSede' => 'nullable|string|max:100',
-            'editLocalidad' => 'nullable|string|max:100',
-            'editProvinciaId' => 'nullable|exists:provincias,id',
-            'editLatitud' => 'nullable|numeric|between:-90,90',
-            'editLongitud' => 'nullable|numeric|between:-180,180',
+            'newNombreSede' => [
+                'required', 
+                'string', 
+                'max:255',
+                Rule::unique('sedes', 'nombre_sede')->where(function ($query) {
+                    return $query->where('empresa_id', $this->empresa->id);
+                })->ignore($this->editingId)
+            ],
+            'newDireccion' => 'nullable|string|max:255',
+            'newTipoSede' => 'nullable|string|max:100',
+            'newRubro' => 'nullable|string|max:100',
+            'newLocalidad' => 'nullable|string|max:100',
+            'newProvinciaId' => 'nullable|exists:provincias,id',
+            'newLatitud' => 'nullable|numeric|between:-90,90',
+            'newLongitud' => 'nullable|numeric|between:-180,180',
+            'newTelefono' => 'nullable|string|max:50',
+            'newCorreo' => 'nullable|email|max:255',
+            'responsable_1_nombre' => 'nullable|string|max:255',
+            'responsable_1_cargo' => 'nullable|string|max:255',
+            'responsable_1_email' => 'nullable|email|max:255',
+            'responsable_2_nombre' => 'nullable|string|max:255',
+            'responsable_2_cargo' => 'nullable|string|max:255',
+            'responsable_2_email' => 'nullable|email|max:255',
+            'responsable_3_nombre' => 'nullable|string|max:255',
+            'responsable_3_cargo' => 'nullable|string|max:255',
+            'responsable_3_email' => 'nullable|email|max:255',
+        ], [
+            'newNombreSede.unique' => 'Ya existe una sede con este nombre en esta empresa.'
         ]);
 
         $sede = $this->empresa->sedes()->findOrFail($this->editingId);
         $sede->update([
-            'nombre_sede' => $this->editNombreSede,
-            'direccion' => $this->editDireccion ?: null,
-            'tipo_sede' => $this->editTipoSede ?: null,
-            'localidad' => $this->editLocalidad ?: null,
-            'provincia_id' => $this->editProvinciaId,
-            'latitud' => $this->editLatitud ?: null,
-            'longitud' => $this->editLongitud ?: null,
+            'nombre_sede' => $this->newNombreSede,
+            'direccion' => $this->newDireccion ?: null,
+            'tipo_sede' => $this->newTipoSede ?: null,
+            'rubro' => $this->newRubro ?: null,
+            'localidad' => $this->newLocalidad ?: null,
+            'provincia_id' => $this->newProvinciaId,
+            'latitud' => $this->newLatitud ?: null,
+            'longitud' => $this->newLongitud ?: null,
+            'telefono' => $this->newTelefono ?: null,
+            'correo' => $this->newCorreo ?: null,
+            'responsable_1_nombre' => $this->responsable_1_nombre ?: null,
+            'responsable_1_cargo' => $this->responsable_1_cargo ?: null,
+            'responsable_1_email' => $this->responsable_1_email ?: null,
+            'responsable_2_nombre' => $this->responsable_2_nombre ?: null,
+            'responsable_2_cargo' => $this->responsable_2_cargo ?: null,
+            'responsable_2_email' => $this->responsable_2_email ?: null,
+            'responsable_3_nombre' => $this->responsable_3_nombre ?: null,
+            'responsable_3_cargo' => $this->responsable_3_cargo ?: null,
+            'responsable_3_email' => $this->responsable_3_email ?: null,
         ]);
 
         $this->loadSedes();
         $this->cancelEdit();
+        $this->showForm = false;
         session()->flash('message', 'Sede actualizada exitosamente');
     }
 
@@ -324,12 +415,23 @@ class LocationManager extends Component
         $this->newNombreSede = '';
         $this->newDireccion = '';
         $this->newTipoSede = '';
+        $this->newRubro = '';
         $this->newLocalidad = '';
         $this->newProvinciaId = null;
         $this->newLatitud = '';
         $this->newLongitud = '';
         $this->newTelefono = '';
         $this->newCorreo = '';
+        $this->responsable_1_nombre = '';
+        $this->responsable_1_cargo = '';
+        $this->responsable_1_email = '';
+        $this->responsable_2_nombre = '';
+        $this->responsable_2_cargo = '';
+        $this->responsable_2_email = '';
+        $this->responsable_3_nombre = '';
+        $this->responsable_3_cargo = '';
+        $this->responsable_3_email = '';
+        $this->contactosVisibles = 1;
     }
 
     #[Layout('components.layouts.app')]

@@ -18,12 +18,6 @@
                     </div>
                 </div>
 
-                <div class="flex items-center gap-4">
-                    <a href="{{ route('gestor.companies.index') }}" class="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black text-white/40 hover:text-white hover:bg-white/10 transition-all uppercase italic tracking-widest group">
-                        <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        Volver a Empresas
-                    </a>
-                </div>
             </div>
             <div class="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
         </header>
@@ -31,6 +25,12 @@
 
     <div class="px-2 sm:px-6 lg:px-8 py-8 text-white">
         <div class="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
+            <div class="flex items-center">
+                <a href="{{ route('gestor.companies.index') }}" class="flex items-center gap-2 px-4 py-2 bg-ep-dark/40 backdrop-blur-md border border-white/5 rounded-xl text-[10px] font-black text-white/40 hover:text-white hover:bg-white/10 transition-all uppercase italic tracking-widest group w-max shadow-lg mb-2">
+                    <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Volver a Empresas
+                </a>
+            </div>
 
             @if (session()->has('message'))
                 <div class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-6 py-4 rounded-2xl flex items-center gap-3 animate-fade-in-down shadow-[0_0_20px_rgba(16,185,129,0.1)]">
@@ -102,7 +102,7 @@
                         <div class="text-[10px] font-black text-white/20 uppercase tracking-widest italic">Protocolo de Registro de Localización</div>
                     </div>
 
-                    <form wire:submit.prevent="save" class="space-y-10">
+                    <form wire:submit.prevent="{{ $editingId ? 'update' : 'save' }}" class="space-y-10">
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             <div class="relative group">
                                 <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Nombre Identificador</span>
@@ -118,6 +118,22 @@
                             <div class="relative group">
                                 <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Tipo de Sede</span>
                                 <input type="text" wire:model="newTipoSede" list="tipos-list" placeholder="OFICINA / DEPÓSITO / PLANTA..." class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/5 italic uppercase">
+                            </div>
+
+                            <div class="relative group">
+                                <span class="absolute -top-2.5 left-4 bg-ep-dark px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Rubro del Negocio en la Sede</span>
+                                <select wire:model="newRubro" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] italic uppercase">
+                                    <option value="">-- SELECCIONE UN SECTOR --</option>
+                                    <option value="Construcción">Construcción y Obras</option>
+                                    <option value="Industria">Industria y Manufactura</option>
+                                    <option value="Minería">Minería y Extracción</option>
+                                    <option value="Petróleo/Gas">Petróleo, Gas y Energía</option>
+                                    <option value="Agropecuario">Agropecuario / Agroindustria</option>
+                                    <option value="Logística">Logística y Transporte</option>
+                                    <option value="Comercial">Sistemas Comerciales y Retail</option>
+                                    <option value="Servicios Generales">Servicios Generales corporativos</option>
+                                    <option value="Otro">Otro Rubro</option>
+                                </select>
                             </div>
 
                             <div class="relative group">
@@ -155,10 +171,57 @@
                             </div>
                         </div>
 
+                        {{-- CONTACTOS RESPONSABLES (Opcionales) --}}
+                        <div class="pt-8 border-t border-white/5 mt-8">
+                            <div class="flex items-center justify-between mb-6">
+                                <h4 class="text-[10px] font-black text-ep-primary uppercase tracking-[0.3em] italic flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    Directorio de Contactos en Sede
+                                </h4>
+                                
+                                @if($contactosVisibles < 3)
+                                <button type="button" wire:click="addContacto" class="flex items-center gap-2 px-4 py-2 bg-ep-primary/10 border border-ep-primary/20 text-ep-primary hover:bg-ep-primary hover:text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] italic transition-all group">
+                                    <svg class="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"/></svg>
+                                    Añadir Responsable
+                                </button>
+                                @endif
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <!-- RESPONSABLE 1 -->
+                                <div class="bg-black/20 border border-white/5 rounded-2xl p-4 space-y-4">
+                                    <div class="text-[9px] font-black text-white/20 uppercase tracking-widest italic border-b border-white/5 pb-2">Contacto Primario</div>
+                                    <input type="text" wire:model="responsable_1_nombre" placeholder="Nombre y Apellido" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all placeholder-white/10 italic">
+                                    <input type="text" wire:model="responsable_1_cargo" placeholder="Cargo / Rango" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all placeholder-white/10 italic">
+                                    <input type="email" wire:model="responsable_1_email" placeholder="Correo Directo" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-ep-primary/50 transition-all placeholder-white/10 italic">
+                                </div>
+
+                                <!-- RESPONSABLE 2 -->
+                                @if($contactosVisibles >= 2)
+                                <div class="bg-black/20 border border-white/5 rounded-2xl p-4 space-y-4 animate-fade-in-up">
+                                    <div class="text-[9px] font-black text-white/20 uppercase tracking-widest italic border-b border-white/5 pb-2">Contacto Secundario</div>
+                                    <input type="text" wire:model="responsable_2_nombre" placeholder="Nombre y Apellido" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/10 italic">
+                                    <input type="text" wire:model="responsable_2_cargo" placeholder="Cargo / Rango" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/10 italic">
+                                    <input type="email" wire:model="responsable_2_email" placeholder="Correo Directo" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/10 italic">
+                                </div>
+                                @endif
+
+                                <!-- RESPONSABLE 3 -->
+                                @if($contactosVisibles >= 3)
+                                <div class="bg-black/20 border border-white/5 rounded-2xl p-4 space-y-4 animate-fade-in-up" style="animation-delay: 100ms;">
+                                    <div class="text-[9px] font-black text-white/20 uppercase tracking-widest italic border-b border-white/5 pb-2">Contacto Alterno</div>
+                                    <input type="text" wire:model="responsable_3_nombre" placeholder="Nombre y Apellido" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/10 italic">
+                                    <input type="text" wire:model="responsable_3_cargo" placeholder="Cargo / Rango" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/10 italic">
+                                    <input type="email" wire:model="responsable_3_email" placeholder="Correo Directo" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-2 focus:ring-white/20 transition-all placeholder-white/10 italic">
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+
                         <div class="flex justify-end gap-6 pt-10 border-t border-white/5">
                             <button type="button" wire:click="toggleForm" class="px-8 h-12 bg-white/5 border border-white/10 text-white/40 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic transition-all">Descartar</button>
                             <button type="submit" wire:loading.attr="disabled" class="px-10 h-12 bg-ep-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-[0_0_20px_rgba(246,146,57,0.3)] hover:brightness-110 active:scale-95 transition-all">
-                                <span wire:loading.remove>Confirmar Registro</span>
+                                <span wire:loading.remove>{{ $editingId ? 'Actualizar Sede' : 'Confirmar Registro' }}</span>
                                 <span wire:loading class="flex items-center gap-2">
                                     <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                     Cargando...
@@ -179,7 +242,8 @@
                             <tr class="bg-black/20 text-left">
                                 <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Identificador / Sede</th>
                                 <th class="hidden md:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Tipo</th>
-                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Despliegue / Ubicación</th>
+                                <th class="hidden md:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Datos GPS</th>
+                                <th class="hidden md:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Despliegue / Ubicación</th>
                                 <th class="hidden lg:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Equipo Técnico</th>
                                 <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
                             </tr>
@@ -198,17 +262,45 @@
                                                     @if($sede->trashed()) <span class="bg-red-500 text-white text-[7px] px-1.5 py-0.5 rounded italic">DE BAJA</span> @endif
                                                 </div>
                                                 <div class="text-[8px] sm:text-[9px] font-black text-white/20 uppercase tracking-widest italic mt-1">{{ $sede->correo ?: 'SIN EMAIL' }}</div>
+                                                
+                                                <div class="md:hidden mt-2 pt-2 border-t border-white/5 w-full">
+                                                    <div class="text-[9px] font-black text-white/80 italic uppercase leading-none mb-1">{{ $sede->direccion ?: 'S/D' }}</div>
+                                                    <div class="text-[8px] font-bold text-white/20 italic uppercase tracking-widest">
+                                                        {{ $sede->localidad }}{{ $sede->provincia ? ' • ' . $sede->provincia->nombre : '' }}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
                                     
                                     <td class="hidden md:table-cell px-4 lg:px-8 py-6 text-center">
-                                        <span class="px-3 py-1.5 rounded-xl text-[9px] font-black bg-white/5 border border-white/10 text-white/40 uppercase tracking-[0.2em] italic">
-                                            {{ $sede->tipo_sede ?: 'GENERAL' }}
-                                        </span>
+                                        <div class="flex flex-col gap-1 items-center">
+                                            <span class="px-3 py-1.5 rounded-xl text-[9px] font-black bg-white/5 border border-white/10 text-white/40 uppercase tracking-[0.2em] italic w-max">
+                                                {{ $sede->tipo_sede ?: 'GENERAL' }}
+                                            </span>
+                                            @if($sede->rubro)
+                                            <span class="px-3 py-1.5 rounded-xl text-[8px] font-black bg-blue-500/10 border border-blue-500/20 text-blue-400 uppercase tracking-[0.2em] italic w-max">
+                                                {{ $sede->rubro }}
+                                            </span>
+                                            @endif
+                                        </div>
+                                    </td>
+                                    
+                                    <td class="hidden md:table-cell px-4 lg:px-8 py-6 text-center">
+                                        @if($sede->latitud && $sede->longitud)
+                                            <a href="https://maps.google.com/?q={{ $sede->latitud }},{{ $sede->longitud }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] italic transition-all" title="Ver en Google Maps">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                                Sí
+                                            </a>
+                                        @else
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] italic">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                                NO
+                                            </span>
+                                        @endif
                                     </td>
 
-                                    <td class="px-4 lg:px-8 py-6">
+                                    <td class="hidden md:table-cell px-4 lg:px-8 py-6">
                                         <div class="text-[10px] font-black text-white/80 italic uppercase leading-none mb-1">{{ $sede->direccion ?: 'S/D' }}</div>
                                         <div class="text-[9px] font-bold text-white/20 italic uppercase tracking-widest">
                                             {{ $sede->localidad }}{{ $sede->provincia ? ' • ' . $sede->provincia->nombre : '' }}
@@ -234,8 +326,8 @@
                                         @endif
                                     </td>
 
-                                    <td class="px-4 lg:px-8 py-6 text-right">
-                                        <div class="flex justify-end gap-2 sm:gap-3 lg:translate-x-4 lg:opacity-0 lg:group-hover/row:translate-x-0 lg:group-hover/row:opacity-100 transition-all duration-500">
+                                    <td class="px-2 sm:px-4 lg:px-8 py-6 text-right">
+                                        <div class="flex justify-end items-center flex-wrap gap-1.5 sm:gap-3 transition-opacity duration-500 group-hover/row:brightness-125">
                                             @if($sede->trashed())
                                                 <button wire:click="restore({{ $sede->id }})" class="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] transition-all">Restaurar</button>
                                             @else

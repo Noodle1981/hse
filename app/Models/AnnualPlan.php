@@ -16,24 +16,15 @@ class AnnualPlan extends Model
         'activity_name',
         'activity_code',
         'checklist_id',
-        'year',
-        'january', 'february', 'march', 'april', 'may', 'june',
-        'july', 'august', 'september', 'october', 'november', 'december',
+        'period_start',
+        'period_end',
+        'scheduled_months',
     ];
 
     protected $casts = [
-        'january' => 'boolean',
-        'february' => 'boolean',
-        'march' => 'boolean',
-        'april' => 'boolean',
-        'may' => 'boolean',
-        'june' => 'boolean',
-        'july' => 'boolean',
-        'august' => 'boolean',
-        'september' => 'boolean',
-        'october' => 'boolean',
-        'november' => 'boolean',
-        'december' => 'boolean',
+        'period_start' => 'date',
+        'period_end' => 'date',
+        'scheduled_months' => 'array',
     ];
 
     public function sede()

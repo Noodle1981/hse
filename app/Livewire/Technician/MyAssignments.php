@@ -70,23 +70,17 @@ class MyAssignments extends Component
         $this->resetPage();
     }
 
-    private function getStrategicKPIs($user)
+    private function getStrategicKPIs($user, $allInspections, $allTrainings, $allReports)
     {
-        $monthName = strtolower(\Carbon\Carbon::create()->month($this->selectedMonth)->format('F'));
         $year = now()->year;
 
-        // 1. Cumplimiento Mensual (Contrato Anual)
-        $totalPlan = \App\Models\AnnualPlan::whereIn('sede_id', $user->sedes->pluck('id'))
-            ->where($monthName, true)
-            ->where('year', $year)
-            ->count();
+        // 1. Cumplimiento Operativo (Total de tareas del periodo)
+        $totalTasks = $allInspections->count() + $allTrainings->count() + $allReports->count();
+        $completedTasks = $allInspections->where('status', 'completed')->count() +
+                          $allTrainings->where('status', 'completed')->count() +
+                          $allReports->filter(fn($r) => in_array($r->status, ['finalizado', 'completed']))->count();
             
-        $completedCount = \App\Models\DynamicInspection::where('user_id', $user->id)
-            ->whereMonth('completed_at', $this->selectedMonth)
-            ->whereYear('completed_at', $year)
-            ->count();
-            
-        $compliance = $totalPlan > 0 ? min(100, round(($completedCount / $totalPlan) * 100)) : 100;
+        $compliance = $totalTasks > 0 ? min(100, round(($completedTasks / $totalTasks) * 100)) : 0;
 
         // 2. Hallazgos Críticos
         $criticalCount = \App\Models\Hallazgo::where('inspector_id', $user->id)
@@ -94,7 +88,7 @@ class MyAssignments extends Component
             ->where('estado', '!=', 'resuelto')
             ->count();
 
-        // 3. Inspecciones del Mes
+        // 3. Total de Inspecciones Ejecutadas (Solo el número)
         $totalMonth = \App\Models\DynamicInspection::where('user_id', $user->id)
             ->whereMonth('completed_at', $this->selectedMonth)
             ->whereYear('completed_at', $year)
@@ -111,7 +105,6 @@ class MyAssignments extends Component
     {
         $user = Auth::user();
         $this->activeVisit = $visitService->getActiveVisit($user);
-        $this->strategicKPIs = $this->getStrategicKPIs($user);
         
         $monthName = strtolower(\Carbon\Carbon::create()->month($this->selectedMonth)->format('F'));
 
@@ -262,10 +255,11 @@ class MyAssignments extends Component
         });
 
         // 2. Annual Plan Tasks (Contratos)
+        $queryMonth = now()->year . '-' . str_pad($this->selectedMonth, 2, '0', STR_PAD_LEFT);
+        
         $contractQuery = \App\Models\AnnualPlan::with(['checklist', 'sede', 'sede.empresa'])
             ->whereIn('sede_id', $user->sedes->pluck('id'))
-            ->where($monthName, true)
-            ->where('year', now()->year)
+            ->where('scheduled_months', 'like', '%"' . $queryMonth . '"%')
             ->when($this->search, function ($q) {
                 $q->where(function($sub) {
                     $sub->whereHas('checklist', function ($c) {
@@ -341,6 +335,9 @@ class MyAssignments extends Component
         $allInspections = $manual->concat($contract->where('category', 'Inspección'))->sortByDesc('created_at');
         $allTrainings = $manualTrainings->concat($contract->where('category', 'Capacitación'))->sortByDesc('created_at');
         $allReports = $manualReports->concat($contract->where('category', 'Informe'))->sortByDesc('created_at');
+
+        // Recalcular KPIs con la data unificada
+        $this->strategicKPIs = $this->getStrategicKPIs($user, $allInspections, $allTrainings, $allReports);
 
         // Determinar qué colección paginar
         $currentCollection = match($this->activeTab) {

@@ -15,6 +15,8 @@ class CompanyBuilder extends Component
     public string $nombre = '';
     public string $razonSocial = '';
     public string $cuit = '';
+    public string $direccion = '';
+    public string $email = '';
 
     protected function rules(): array
     {
@@ -44,13 +46,17 @@ class CompanyBuilder extends Component
                     })
                     ->ignore($this->empresa->id ?? null)
             ],
+            'direccion' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
         ];
     }
 
     protected $validationAttributes = [
-        'nombre' => 'nombre',
+        'nombre' => 'nombre comercial',
         'razonSocial' => 'razón social',
         'cuit' => 'CUIT',
+        'direccion' => 'dirección fiscal',
+        'email' => 'correo corporativo',
     ];
 
     public function mount(?int $id = null)
@@ -71,6 +77,8 @@ class CompanyBuilder extends Component
             $this->nombre = $this->empresa->nombre;
             $this->razonSocial = $this->empresa->razon_social;
             $this->cuit = $this->empresa->cuit;
+            $this->direccion = $this->empresa->direccion ?? '';
+            $this->email = $this->empresa->email ?? '';
         }
     }
 
@@ -82,6 +90,8 @@ class CompanyBuilder extends Component
             'nombre' => $this->nombre,
             'razon_social' => $this->razonSocial,
             'cuit' => $this->cuit,
+            'direccion' => $this->direccion,
+            'email' => $this->email,
         ];
         
         // Tenancy: Assign consultora_id if not Super Admin
@@ -93,10 +103,10 @@ class CompanyBuilder extends Component
 
         if ($this->empresa) {
             $this->empresa->update($data);
-            $message = 'Empresa actualizada exitosamente';
+            $message = 'Registro actualizado exitosamente en base de datos';
         } else {
             Empresa::create($data);
-            $message = 'Empresa creada exitosamente';
+            $message = 'Entidad dada de alta exitosamente';
         }
 
         session()->flash('message', $message);

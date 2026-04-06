@@ -22,6 +22,7 @@ class Sede extends Model
         'provincia_id',
         'latitud',
         'longitud',
+        'rubro',
         'responsable_1_nombre',
         'responsable_1_cargo',
         'responsable_1_email',

@@ -21,13 +21,7 @@
                 </div>
 
                 <div class="flex items-center gap-4">
-                    <a href="{{ route('gestor.companies.create') }}" 
-                       class="hidden xs:flex bg-ep-primary text-white hover:brightness-110 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest italic border border-white/10 transition-all items-center gap-2 shadow-lg shadow-ep-primary/20 group/btn">
-                        <svg class="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                            <path d="M12 4v16m8-8H4"/>
-                        </svg>
-                        Nueva Empresa
-                    </a>
+
 
                     <a href="{{ route('profile') }}" class="flex items-center space-x-2 bg-white/5 backdrop-blur-sm p-1 pr-3 rounded-full border border-white/5 hover:bg-white/10 transition-all group">
                         <div class="w-7 h-7 bg-ep-primary rounded-full flex items-center justify-center text-white text-[10px] font-black shadow-lg">
@@ -58,12 +52,22 @@
                                class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-white/5 italic uppercase">
                     </div>
 
-                    <div class="flex items-center gap-6 bg-black/20 px-8 py-4 rounded-2xl border border-white/5">
-                        <label class="inline-flex items-center cursor-pointer group">
-                            <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
-                            <div class="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500/50"></div>
-                            <span class="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-red-400 transition-colors">Historial de Bajas</span>
-                        </label>
+                    <div class="flex flex-col sm:flex-row items-center gap-6">
+                        <div class="flex items-center gap-6 bg-black/20 px-6 py-4 rounded-2xl border border-white/5">
+                            <label class="inline-flex items-center cursor-pointer group">
+                                <input type="checkbox" wire:model.live="showDeleted" class="sr-only peer">
+                                <div class="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500/50"></div>
+                                <span class="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-red-400 transition-colors">Historial de Bajas</span>
+                            </label>
+                        </div>
+                        
+                        <a href="{{ route('gestor.companies.create') }}" 
+                           class="flex bg-ep-primary text-white hover:brightness-110 px-6 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest italic border border-white/10 transition-all items-center gap-2 shadow-lg shadow-ep-primary/20 group/btn">
+                            <svg class="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                                <path d="M12 4v16m8-8H4"/>
+                            </svg>
+                            Nueva Empresa
+                        </a>
                     </div>
                 </div>
             </div>
@@ -122,7 +126,7 @@
                                         </span>
                                     </td>
                                     <td class="px-8 py-6 text-right">
-                                        <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
+                                        <div class="flex justify-end gap-3 transition-opacity duration-500 group-hover/row:brightness-125">
                                             @if($company->trashed())
                                                 <button wire:click="restore({{ $company->id }})" class="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white rounded-xl flex items-center gap-2 text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3"/></svg>

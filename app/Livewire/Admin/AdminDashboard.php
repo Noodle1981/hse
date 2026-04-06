@@ -93,8 +93,6 @@ class AdminDashboard extends Component
             ]
         ];
 
-        $monthNames = ['january'=>1,'february'=>2,'march'=>3,'april'=>4,'may'=>5,'june'=>6,'july'=>7,'august'=>8,'september'=>9,'october'=>10,'november'=>11,'december'=>12];
-
         foreach ($complianceData as $planId => $months) {
             $plan = \App\Models\AnnualPlan::find($planId);
             if (!$plan) continue;
@@ -102,9 +100,8 @@ class AdminDashboard extends Component
             $cat = strtolower($plan->category);
             $catKey = ($cat === 'inspección') ? 'inspeccion' : (($cat === 'capacitación') ? 'capacitacion' : 'informe');
 
-            foreach ($months as $monthName => $data) {
+            foreach ($months as $monthNum => $data) {
                 if ($data['status'] === 'none') continue;
-                $monthNum = $monthNames[$monthName];
 
                 $stats['counts']['total']++;
                 if ($data['status'] === 'completed') $stats['counts']['completed']++;
@@ -157,12 +154,23 @@ class AdminDashboard extends Component
             ->groupBy(fn($r) => \Carbon\Carbon::now()->month); // Simplified for DB port
 
         $currentMonth = (int)date('m');
-        $months = ['january'=>1, 'february'=>2, 'march'=>3, 'april'=>4, 'may'=>5, 'june'=>6, 'july'=>7, 'august'=>8, 'september'=>9, 'october'=>10, 'november'=>11, 'december'=>12];
+        $months = [
+            '01' => 1, '02' => 2, '03' => 3, '04' => 4,
+            '05' => 5, '06' => 6, '07' => 7, '08' => 8,
+            '09' => 9, '10' => 10, '11' => 11, '12' => 12
+        ];
         
         foreach ($plans as $plan) {
             $data[$plan->id] = [];
-            foreach ($months as $monthName => $monthNumber) {
-                if (!$plan->$monthName) { $data[$plan->id][$monthName] = ['status' => 'none', 'count' => 0]; continue; }
+            $scheduledMonths = is_array($plan->scheduled_months) ? $plan->scheduled_months : json_decode($plan->scheduled_months ?? '[]', true) ?? [];
+            
+            foreach ($months as $monthStr => $monthNumber) {
+                $monthKey = $this->year . '-' . $monthStr;
+                
+                if (!in_array($monthKey, $scheduledMonths)) { 
+                    $data[$plan->id][$monthNumber] = ['status' => 'none', 'count' => 0]; 
+                    continue; 
+                }
                 $count = 0;
                 if ($plan->category === 'Inspección' && $plan->checklist_id) {
                     $key = $plan->checklist_id . '_' . $monthNumber;
@@ -170,9 +178,9 @@ class AdminDashboard extends Component
                 } elseif ($plan->category === 'Capacitación') { $count = isset($trainings[$monthNumber]) ? $trainings[$monthNumber]->count() : 0;
                 } elseif ($plan->category === 'Informe') { $count = isset($reports[$monthNumber]) ? $reports[$monthNumber]->count() : 0; }
                 
-                if ($count > 0) $data[$plan->id][$monthName] = ['status' => 'completed', 'count' => $count];
-                elseif ($monthNumber < $currentMonth) $data[$plan->id][$monthName] = ['status' => 'overdue', 'count' => 0];
-                else $data[$plan->id][$monthName] = ['status' => 'pending', 'count' => 0];
+                if ($count > 0) $data[$plan->id][$monthNumber] = ['status' => 'completed', 'count' => $count];
+                elseif ($this->year < date('Y') || ($this->year == date('Y') && $monthNumber < $currentMonth)) $data[$plan->id][$monthNumber] = ['status' => 'overdue', 'count' => 0];
+                else $data[$plan->id][$monthNumber] = ['status' => 'pending', 'count' => 0];
             }
         }
         return $data;
@@ -181,7 +189,9 @@ class AdminDashboard extends Component
     public function render()
     {
         // Calculate Strategic Multi-pillar Efficiency
-        $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)->where('year', $this->year)->get();
+        $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)
+            ->where('scheduled_months', 'like', '%"' . $this->year . '-%')
+            ->get();
         $complianceData = $this->calculateComplianceData($plans);
         $this->efficiency = $this->calculateEfficiencyMetrics($complianceData);
         $efficiency = $this->efficiency;
@@ -525,15 +535,17 @@ class AdminDashboard extends Component
         $completed = array_fill(0, 12, 0);
 
         // Optimization: Use a single query for planned counts
-        $plannedData = AnnualPlan::selectRaw("strftime('%m', created_at) as month, count(*) as total")
-            ->whereYear('created_at', now()->year)
-            ->groupBy('month')
-            ->pluck('total', 'month');
-
-        foreach ($plannedData as $month => $total) {
-            $monthIndex = (int)$month - 1;
-            if ($monthIndex >= 0 && $monthIndex < 12) {
-                $planned[$monthIndex] = $total;
+        // Because of JSON column we need to fetch all overlapping plans and manually count in PHP for SQLite
+        $overlappingPlans = AnnualPlan::where('scheduled_months', 'like', '%"' . now()->year . '-%')->get();
+        foreach ($overlappingPlans as $plan) {
+            $scheduledMonths = is_array($plan->scheduled_months) ? $plan->scheduled_months : json_decode($plan->scheduled_months ?? '[]', true) ?? [];
+            foreach ($scheduledMonths as $sm) {
+                if (str_starts_with($sm, now()->year . '-')) {
+                    $monthIndex = (int)substr($sm, -2) - 1;
+                    if ($monthIndex >= 0 && $monthIndex < 12) {
+                        $planned[$monthIndex]++;
+                    }
+                }
             }
         }
 
@@ -763,7 +775,9 @@ class AdminDashboard extends Component
     private function calculateAnnualCompliance()
     {
         // Use the same logic as render or just return the pre-calculated value
-        $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)->where('year', $this->year)->get();
+        $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)
+            ->where('scheduled_months', 'like', '%"' . $this->year . '-%')
+            ->get();
         $complianceData = $this->calculateComplianceData($plans);
         $efficiency = $this->calculateEfficiencyMetrics($complianceData);
         return $efficiency['global'];
