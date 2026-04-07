@@ -7,9 +7,9 @@ description: Contexto del proyecto XamaSafe
 ## 🎯 Visión General
 
 **Nombre:** XamaSafe
-**Versión Actual:** V2.0.0.0
+**Versión Actual:** V2.1.0.0 (Premium HUD)
 **Tipo:** Sistema SaaS integral de Higiene y Seguridad
-**Stack:** Laravel 11 + Livewire 3 + Tailwind CSS + SQLite (dev) / MySQL|PostgreSQL (prod)
+**Stack:** Laravel 12 + Livewire 3.7 + Tailwind CSS v4 + SQLite (dev)
 
 ### Propósito
 Sistema escalable de checklists que permite crear, gestionar y ejecutar formularios dinámicos para:
@@ -145,10 +145,12 @@ ep-back/
 | Componentes | kebab-case | `x-question-input` |
 | Layouts | kebab-case | `app-layout.blade.php` |
 
-### CSS/Tailwind
-- Usar clases utilitarias de Tailwind
-- Evitar CSS personalizado salvo casos justificados
-- Componentizar con `@apply` solo en casos de mucha repetición
+### CSS/Tailwind (Visual Premium Dark)
+- **Estética:** HUD Futurista / Dashboard Premium.
+- **Paleta:** Escala de grises profunda, acentos vibrantes (Cyan, Violet, Emerald).
+- **Efectos:** Glassmorphism, bordes con degradado, micro-animaciones HUD.
+- **Tipografía:** Inter / Outfit para legibilidad técnica.
+- **Componentes:** Basados en el sistema "Terminal Táctica".
 
 ---
 
@@ -156,9 +158,9 @@ ep-back/
 
 ### Ramas
 - `main` → Producción estable
-- `develop` → Desarrollo activo
+- `version-premium` → Desarrollo actual (Rama principal activa)
+- `version-minina` → Rama estable MVP
 - `feature/*` → Nuevas funcionalidades
-- `hotfix/*` → Correcciones urgentes
 
 ### Commits (Conventional)
 - `feat:` Nueva funcionalidad
@@ -251,8 +253,8 @@ DB_CONNECTION=sqlite
 **13 documentos** | 400+ páginas | 27 componentes | 38 tablas | 20+ casos de uso
 
 ### 🌐 Referencias
-- [Laravel 11](https://laravel.com/docs/11.x) | [Livewire 3](https://livewire.laravel.com/docs)
-- [Tailwind CSS](https://tailwindcss.com/docs) | [Alpine.js](https://alpinejs.dev)
+- [Laravel 12](https://laravel.com/docs/12.x) | [Livewire 3](https://livewire.laravel.com/docs)
+- [Tailwind CSS v4](https://tailwindcss.com/docs) | [Alpine.js](https://alpinejs.dev)
 
 ---
 
@@ -261,7 +263,8 @@ DB_CONNECTION=sqlite
 ### Historial
 | Versión | Fecha | Descripción |
 |---------|-------|-------------|
-| V1.0.0.0 | Marzo 2026 | Sistema MVP Ultra-minimizado - 8 módulos funcionales implementados |
+| V1.0.0.0 | Marzo 2026 | Sistema MVP Ultra-minimizado - 8 módulos iniciales |
+| V2.1.0.0 | Abril 2026 | **Versión Premium HUD** - Rediseño total, Control de Contratos y Hallazgos |
 
 ### Versionado Semántico
 ```
@@ -274,6 +277,6 @@ MAJOR.MINOR.PATCH.BUILD
 
 ---
 
-*Documento actualizado: 09 Marzo 2026*
-*Versión del Sistema: V1.0.0.0 MVP*
+*Documento actualizado: 06 Abril 2026*
+*Versión del Sistema: V2.1.0.0 Premium*
 *Documentación Completa: 13 Archivos Técnicos*
