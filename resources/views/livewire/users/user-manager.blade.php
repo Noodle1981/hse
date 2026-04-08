@@ -101,13 +101,13 @@
 
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Corporativo</label>
-                                <input type="email" wire:model="email" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase">
+                                <input type="email" wire:model="email" autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase">
                                 @error('email') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Contraseña {{ $editingId ? '(Opcional)' : '(Requerida)' }}</label>
-                                <input type="password" wire:model="password" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
+                                <input type="password" wire:model="password" autocomplete="new-password" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
                                 @error('password') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
 
@@ -125,6 +125,11 @@
                                 <input type="text" wire:model="matricula" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase" placeholder="MAT-000">
                                 @error('matricula') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
+                            <div class="space-y-2">
+                                <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Teléfono Enlace</label>
+                                <input type="text" wire:model="telefono" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase" placeholder="+54 9 11 ...">
+                                @error('telefono') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
+                            </div>
                         </div>
 
                         <div class="mt-10 flex justify-end gap-4">
@@ -133,7 +138,13 @@
                             </button>
                             <button type="submit" wire:loading.attr="disabled" class="px-10 py-4 bg-ep-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg shadow-ep-primary/20 hover:brightness-110">
                                 <span wire:loading.remove>{{ $editingId ? 'Confirmar Actualización' : 'Inyectar Usuario' }}</span>
-                                <span wire:loading class="animate-pulse">Procesando Identidad...</span>
+                                <span wire:loading class="flex items-center gap-2">
+                                    <svg class="animate-spin h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span class="animate-pulse">Procesando Identidad...</span>
+                                </span>
                             </button>
                         </div>
                     </form>
@@ -197,7 +208,7 @@
                                         </span>
                                     </td>
                                     <td class="px-8 py-6 text-right">
-                                        <div class="flex justify-end gap-3 translate-x-4 opacity-0 group-hover/row:translate-x-0 group-hover/row:opacity-100 transition-all duration-500">
+                                        <div class="flex justify-end gap-3 transition-all duration-500">
                                             @if($user->trashed())
                                                 <button wire:click="restore({{ $user->id }})" class="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white rounded-xl flex items-center gap-2 text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg">
                                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3"/></svg>

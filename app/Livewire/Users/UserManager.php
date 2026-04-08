@@ -54,7 +54,7 @@ class UserManager extends Component
     public function toggleForm()
     {
         $this->showForm = !$this->showForm;
-        if (!$this->showForm) {
+        if ($this->showForm) {
             $this->resetForm();
         }
     }
