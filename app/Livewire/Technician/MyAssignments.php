@@ -296,14 +296,22 @@ class MyAssignments extends Component
 
         $contract = $contractQuery->get()->map(function($p) use ($now, $completedInspections) {
             $monthEndDate = \Carbon\Carbon::create(now()->year, $this->selectedMonth)->endOfMonth();
-            
+
+            // Use specific execution date if the admin set one, otherwise default to end of month
+            $scheduledDates = $p->scheduled_dates ?? [];
+            $queryMonth     = now()->year . '-' . str_pad($this->selectedMonth, 2, '0', STR_PAD_LEFT);
+            $specificDate   = isset($scheduledDates[$queryMonth])
+                ? \Carbon\Carbon::parse($scheduledDates[$queryMonth])
+                : null;
+            $effectiveDueDate = $specificDate ?? $monthEndDate;
+
             // Check if there is a completed inspection for this plan/checklist/sede
             $key = $p->sede_id . '_' . $p->checklist_id;
             $inspection = isset($completedInspections[$key]) ? $completedInspections[$key]->first() : null;
-            
+
             $status = $inspection ? 'completed' : 'scheduled';
-            $dueDate = $inspection ? $inspection->completed_at : $monthEndDate;
-            $daysRemaining = (int) $now->diffInDays($monthEndDate, false);
+            $dueDate = $inspection ? $inspection->completed_at : $effectiveDueDate;
+            $daysRemaining = (int) $now->diffInDays($effectiveDueDate, false);
 
             return (object)[
                 'id' => null,
@@ -315,7 +323,7 @@ class MyAssignments extends Component
                 'status' => $status,
                 'source' => 'contract',
                 'category' => $p->category,
-                'is_overdue' => !$inspection && $monthEndDate->isPast(),
+                'is_overdue' => !$inspection && $effectiveDueDate->isPast(),
                 'days_remaining' => $daysRemaining,
                 'is_warning' => $daysRemaining <= 7 && $daysRemaining >= 0 && $status !== 'completed',
                 'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,

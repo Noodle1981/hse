@@ -19,12 +19,14 @@ class AnnualPlan extends Model
         'period_start',
         'period_end',
         'scheduled_months',
+        'scheduled_dates',
     ];
 
     protected $casts = [
         'period_start' => 'date',
         'period_end' => 'date',
         'scheduled_months' => 'array',
+        'scheduled_dates'  => 'array',
     ];
 
     public function sede()

@@ -284,24 +284,69 @@
                                 $status = $data['status'];
                                 @endphp
                                 <td class="px-0 py-4 text-center border-r border-white/[0.03] last:border-r-0">
-                                    <div
-                                        @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $monthValue }}')" @endif
-                                        class="relative mx-auto w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300
-                                                {{ $status === 'completed' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : '' }}
-                                                {{ $status === 'overdue' ? 'bg-red-500/10 border border-red-500/30 text-red-500 animate-pulse' : '' }}
-                                                {{ $status === 'pending' ? 'bg-yellow-400/10 border border-yellow-500/30 text-yellow-400' : '' }}
-                                                {{ $status === 'none' ? 'opacity-5' : '' }}
-                                                {{ $editMode ? 'cursor-pointer hover:scale-110 border-dashed border-2' : '' }}">
-                                        @if($status === 'completed')
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
-                                            <path d="M5 13l4 4L19 7" />
-                                        </svg>
-                                        @elseif($status === 'pending')
-                                        <div class="w-1 h-1 bg-yellow-400 rounded-full"></div>
-                                        @elseif($status === 'overdue')
-                                        <span class="text-[10px] font-black">!</span>
-                                        @else
-                                        <div class="h-px w-1 bg-white/20"></div>
+                                    @php
+                                        $scheduledDates = $plan->scheduled_dates ?? [];
+                                        $cellDate       = $scheduledDates[$monthValue] ?? null;
+                                        $cellKey        = "{$plan->id}_{$monthValue}";
+                                    @endphp
+                                    <div class="relative mx-auto w-7 flex flex-col items-center gap-0.5">
+                                        {{-- Main cell dot: click toggles activation --}}
+                                        <div
+                                            @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $monthValue }}')" @endif
+                                            class="w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300
+                                                    {{ $status === 'completed' ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-400' : '' }}
+                                                    {{ $status === 'overdue' ? 'bg-red-500/10 border border-red-500/30 text-red-500 animate-pulse' : '' }}
+                                                    {{ $status === 'pending' ? 'bg-yellow-400/10 border border-yellow-500/30 text-yellow-400' : '' }}
+                                                    {{ $status === 'none' ? 'opacity-5' : '' }}
+                                                    {{ $editMode ? 'cursor-pointer hover:scale-110 border-dashed border-2' : '' }}">
+                                            @if($status === 'completed')
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
+                                                <path d="M5 13l4 4L19 7" />
+                                            </svg>
+                                            @elseif($status === 'pending')
+                                            <div class="w-1 h-1 bg-yellow-400 rounded-full"></div>
+                                            @elseif($status === 'overdue')
+                                            <span class="text-[10px] font-black">!</span>
+                                            @else
+                                            <div class="h-px w-1 bg-white/20"></div>
+                                            @endif
+                                        </div>
+
+                                        {{-- Date badge below dot — visible on activated cells --}}
+                                        @if($status !== 'none')
+                                        <button
+                                            @if($editMode) wire:click.stop="openDatePicker({{ $plan->id }}, '{{ $monthValue }}')" @endif
+                                            title="{{ $cellDate ? 'Fecha: '.date('d/m', strtotime($cellDate)).' — Click para editar' : ($editMode ? 'Sin fecha — Click para asignar' : '') }}"
+                                            class="text-[9px] font-black leading-none px-1.5 py-0.5 rounded-md transition-all
+                                                   {{ $cellDate ? 'text-indigo-300 bg-indigo-500/10 hover:bg-indigo-500/20 hover:text-white cursor-pointer border border-indigo-500/20' : ($editMode ? 'text-white/25 hover:text-white/60 cursor-pointer' : 'text-transparent cursor-default') }}">
+                                            {{ $cellDate ? date('d/m', strtotime($cellDate)) : ($editMode ? '···' : '') }}
+                                        </button>
+                                        @endif
+
+                                        {{-- Inline date picker overlay --}}
+                                        @if($editingCell === $cellKey)
+                                        <div class="absolute z-50 bottom-full mb-1 left-1/2 -translate-x-1/2 w-48 bg-[#1e1e2d] border border-indigo-500/40 rounded-xl p-3 shadow-2xl"
+                                             wire:click.stop>
+                                            <span class="text-[8px] font-black text-indigo-400 uppercase italic block mb-2">Fecha de ejecución</span>
+                                            <input type="date"
+                                                   wire:model="editingDate"
+                                                   min="{{ \Carbon\Carbon::createFromFormat('Y-m', $monthValue)->startOfMonth()->format('Y-m-d') }}"
+                                                   max="{{ \Carbon\Carbon::createFromFormat('Y-m', $monthValue)->endOfMonth()->format('Y-m-d') }}"
+                                                   class="text-xs w-full bg-black/40 rounded-lg px-2 py-1.5 text-white border border-white/10 [color-scheme:dark] focus:outline-none focus:border-indigo-500/60">
+                                            @error('editingDate')
+                                            <p class="text-red-400 text-[7px] mt-1">{{ $message }}</p>
+                                            @enderror
+                                            <div class="flex gap-1 mt-2">
+                                                <button wire:click.stop="saveScheduledDate"
+                                                        class="flex-1 text-[8px] font-black uppercase italic bg-indigo-600 hover:bg-indigo-500 rounded-lg py-1 text-white transition-all">
+                                                    GUARDAR
+                                                </button>
+                                                <button wire:click.stop="$set('editingCell', null)"
+                                                        class="text-[8px] font-black uppercase italic bg-white/5 hover:bg-white/10 rounded-lg px-2 py-1 text-white/60 transition-all">
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        </div>
                                         @endif
                                     </div>
                                 </td>

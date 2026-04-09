@@ -33,8 +33,20 @@ class Login extends Component
 
         if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
             session()->regenerate();
-            
-            return redirect()->route('dashboard');
+
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            if ($user->isSuperAdmin()) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            if ($user->isTechnician()) {
+                return redirect()->route('tecnico.checklists.tasks.index');
+            }
+
+            // Gestor / Administrador → Vista operativa liviana (sin KPIs pesados)
+            return redirect()->route('gestor.visits.history');
         }
 
         $this->addError('email', 'Las credenciales no son válidas.');

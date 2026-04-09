@@ -36,6 +36,8 @@ class AnnualContractDashboard extends Component
     public $contractStart; // e.g., '2025-11'
     public $contractDuration = 12; // in months
     public $editMode = false;
+    public $editingCell = null;  // "{planId}_{monthValue}"
+    public $editingDate  = '';   // fecha específica siendo editada
     public $filterCategory = null;
     
     // Form fields for new activity
@@ -116,6 +118,10 @@ class AnnualContractDashboard extends Component
         
         if (in_array($monthValue, $scheduled)) {
             $scheduled = array_values(array_diff($scheduled, [$monthValue]));
+            // Remove specific date when deactivating month
+            $dates = $plan->scheduled_dates ?? [];
+            unset($dates[$monthValue]);
+            $plan->scheduled_dates = $dates;
         } else {
             $scheduled[] = $monthValue;
             sort($scheduled);
@@ -123,6 +129,50 @@ class AnnualContractDashboard extends Component
         
         $plan->scheduled_months = $scheduled;
         $plan->save();
+    }
+
+    public function openDatePicker($planId, $monthValue)
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (!$user->isAdmin() || !$this->editMode) return;
+
+        $plan = AnnualPlan::findOrFail($planId);
+        if (!in_array($monthValue, $plan->scheduled_months ?? [])) return;
+
+        $this->editingCell = "{$planId}_{$monthValue}";
+        $dates = $plan->scheduled_dates ?? [];
+        $this->editingDate = $dates[$monthValue] ?? '';
+    }
+
+    public function saveScheduledDate()
+    {
+        if (!$this->editingCell) return;
+
+        [$planId, $monthValue] = explode('_', $this->editingCell, 2);
+        $plan = AnnualPlan::findOrFail($planId);
+
+        $dates = $plan->scheduled_dates ?? [];
+
+        if ($this->editingDate) {
+            $date = \Carbon\Carbon::parse($this->editingDate);
+            $monthStart = \Carbon\Carbon::createFromFormat('Y-m', $monthValue)->startOfMonth();
+            $monthEnd   = $monthStart->copy()->endOfMonth();
+
+            if ($date->lt($monthStart) || $date->gt($monthEnd)) {
+                $this->addError('editingDate', 'La fecha debe pertenecer al mes seleccionado.');
+                return;
+            }
+            $dates[$monthValue] = $this->editingDate;
+        } else {
+            unset($dates[$monthValue]); // Sin fecha = vuelve al fin de mes
+        }
+
+        $plan->scheduled_dates = $dates;
+        $plan->save();
+
+        $this->editingCell = null;
+        $this->editingDate = '';
     }
 
     public function addActivity()
@@ -355,10 +405,19 @@ class AnnualContractDashboard extends Component
 
                 if ($count > 0) {
                     $data[$plan->id][$monthValue] = ['status' => 'completed', 'count' => $count, 'details' => $details];
-                } elseif ($monthValue < $currentDate) {
-                    $data[$plan->id][$monthValue] = ['status' => 'overdue', 'count' => 0, 'details' => $details];
                 } else {
-                    $data[$plan->id][$monthValue] = ['status' => 'pending', 'count' => 0, 'details' => $details];
+                    // Use specific date if set, otherwise compare by month
+                    $scheduledDates = $plan->scheduled_dates ?? [];
+                    $specificDate   = $scheduledDates[$monthValue] ?? null;
+                    $isOverdue = $specificDate
+                        ? \Carbon\Carbon::parse($specificDate)->isPast()
+                        : ($monthValue < $currentDate);
+
+                    if ($isOverdue) {
+                        $data[$plan->id][$monthValue] = ['status' => 'overdue', 'count' => 0, 'details' => $details];
+                    } else {
+                        $data[$plan->id][$monthValue] = ['status' => 'pending', 'count' => 0, 'details' => $details];
+                    }
                 }
             }
         }

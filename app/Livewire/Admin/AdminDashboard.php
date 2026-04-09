@@ -11,6 +11,8 @@ use App\Models\{
     AnnualPlan,
     VisitCertificate
 };
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -72,8 +74,8 @@ class AdminDashboard extends Component
         $this->dispatch('charts-updated', charts: $this->getCharts());
     }
 
-    // Logic for Strategic Compliance (Ported from AnnualContractDashboard)
-    private function calculateEfficiencyMetrics($complianceData)
+    // Fix: Accept pre-loaded plans collection to avoid N+1 queries
+    private function calculateEfficiencyMetrics($complianceData, ?Collection $plans = null): array
     {
         $stats = [
             'global' => 0,
@@ -93,10 +95,14 @@ class AdminDashboard extends Component
             ]
         ];
 
+        // Build a map from the passed collection to avoid N+1 queries
+        $plansMap = $plans ? $plans->keyBy('id') : collect();
+
         foreach ($complianceData as $planId => $months) {
-            $plan = \App\Models\AnnualPlan::find($planId);
+            // Use the map first, fall back to a single query only if not found
+            $plan = $plansMap->get($planId) ?? AnnualPlan::find($planId);
             if (!$plan) continue;
-            
+
             $cat = strtolower($plan->category);
             $catKey = ($cat === 'inspección') ? 'inspeccion' : (($cat === 'capacitación') ? 'capacitacion' : 'informe');
 
@@ -108,7 +114,6 @@ class AdminDashboard extends Component
                 if ($data['status'] === 'overdue') $stats['counts']['overdue']++;
                 if ($data['status'] === 'pending') $stats['counts']['pending']++;
 
-                // Aggregating for Pillar (category) counts
                 if ($catKey === 'inspeccion') {
                     $stats['counts']['insp_total']++;
                     if ($data['status'] === 'completed') $stats['counts']['insp_done']++;
@@ -120,7 +125,6 @@ class AdminDashboard extends Component
                     if ($data['status'] === 'completed') $stats['counts']['inf_done']++;
                 }
 
-                // Update Timeline for Pillar: Priority Overdue > Pending > Completed
                 $currentStatus = $stats['timelines'][$catKey][$monthNum];
                 if ($data['status'] === 'overdue') {
                     $stats['timelines'][$catKey][$monthNum] = 'overdue';
@@ -136,7 +140,7 @@ class AdminDashboard extends Component
         $stats['inspeccion'] = $stats['counts']['insp_total'] > 0 ? round(($stats['counts']['insp_done'] / $stats['counts']['insp_total']) * 100) : 0;
         $stats['capacitacion'] = $stats['counts']['cap_total'] > 0 ? round(($stats['counts']['cap_done'] / $stats['counts']['cap_total']) * 100) : 0;
         $stats['informe'] = $stats['counts']['inf_total'] > 0 ? round(($stats['counts']['inf_done'] / $stats['counts']['inf_total']) * 100) : 0;
-        
+
         return $stats;
     }
 
@@ -188,12 +192,14 @@ class AdminDashboard extends Component
 
     public function render()
     {
-        // Calculate Strategic Multi-pillar Efficiency
+        // 1. Cargar planes una sola vez
         $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)
             ->where('scheduled_months', 'like', '%"' . $this->year . '-%')
             ->get();
+
+        // 2. Calcular compliance y efficiency con la misma colección (sin queries duplicadas)
         $complianceData = $this->calculateComplianceData($plans);
-        $this->efficiency = $this->calculateEfficiencyMetrics($complianceData);
+        $this->efficiency = $this->calculateEfficiencyMetrics($complianceData, $plans);
         $efficiency = $this->efficiency;
 
         $kpis = $this->getKPIs();
@@ -204,11 +210,16 @@ class AdminDashboard extends Component
         $rankings = $this->getRankings();
         $overdueAssignments = $this->showOverdueModal ? $this->getOverdueAssignments() : collect();
 
-        $empresas = \App\Models\Empresa::orderBy('nombre')->get();
-        $sedes = $this->empresaId 
-            ? \App\Models\Sede::where('empresa_id', $this->empresaId)->orderBy('nombre_sede')->get() 
+        // 3. Cachear colecciones estáticas que no cambian entre renders
+        $empresas = Cache::remember('empresas_list_v1', 300, fn() =>
+            \App\Models\Empresa::orderBy('nombre')->get()
+        );
+        $sedes = $this->empresaId
+            ? \App\Models\Sede::where('empresa_id', $this->empresaId)->orderBy('nombre_sede')->get()
             : \App\Models\Sede::orderBy('nombre_sede')->get();
-        $tecnicos = \App\Models\User::where('rol', 'tecnico')->orderBy('nombres')->get();
+        $tecnicos = Cache::remember('tecnicos_list_v1', 300, fn() =>
+            \App\Models\User::where('rol', 'tecnico')->orderBy('nombres')->get()
+        );
         $activeSede = \App\Models\Sede::find($this->sedeId);
 
         return view('livewire.admin.admin-dashboard', compact(
@@ -772,14 +783,9 @@ class AdminDashboard extends Component
         }
     }
 
-    private function calculateAnnualCompliance()
+    private function calculateAnnualCompliance(): int
     {
-        // Use the same logic as render or just return the pre-calculated value
-        $plans = \App\Models\AnnualPlan::where('sede_id', $this->sedeId)
-            ->where('scheduled_months', 'like', '%"' . $this->year . '-%')
-            ->get();
-        $complianceData = $this->calculateComplianceData($plans);
-        $efficiency = $this->calculateEfficiencyMetrics($complianceData);
-        return $efficiency['global'];
+        // Reutiliza el valor ya calculado en render() para evitar queries duplicadas
+        return $this->efficiency['global'] ?? 0;
     }
 }
