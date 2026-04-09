@@ -56,7 +56,12 @@
                             <div class="relative group">
                                 <div class="flex justify-between items-center mb-4">
                                     <span class="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic">Categoría Maestra</span>
-                                    <button type="button" wire:click="openCategoryModal" class="text-[9px] font-black text-ep-primary hover:text-ep-primary/80 uppercase tracking-widest italic transition-colors">+ Crear Nueva</button>
+                                    <div class="flex gap-3">
+                                        @if($categoryId)
+                                            <button type="button" wire:click="editCategory" class="text-[9px] font-black text-white hover:text-ep-primary uppercase tracking-widest italic transition-colors">✎ Editar Seleccionada</button>
+                                        @endif
+                                        <button type="button" wire:click="openCategoryModal" class="text-[9px] font-black text-ep-primary hover:text-ep-primary/80 uppercase tracking-widest italic transition-colors">+ Crear Nueva</button>
+                                    </div>
                                 </div>
                                 <select wire:model.live="categoryId" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
                                     <option value="">SIN CATEGORÍA</option>
@@ -70,9 +75,14 @@
                                 <div class="relative group animate-fade-in-down">
                                     <div class="flex justify-between items-center mb-4">
                                         <span class="text-[8px] font-black text-emerald-400 uppercase tracking-[0.3em] italic">Subcategoría Específica</span>
-                                        <button type="button" wire:click="openSubcategoryModal" class="text-[9px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest italic transition-colors">+ Crear Nueva</button>
+                                        <div class="flex gap-3">
+                                            @if($subcategoryId)
+                                                <button type="button" wire:click="editSubcategory" class="text-[9px] font-black text-white hover:text-emerald-400 uppercase tracking-widest italic transition-colors">✎ Editar Seleccionada</button>
+                                            @endif
+                                            <button type="button" wire:click="openSubcategoryModal" class="text-[9px] font-black text-indigo-400 hover:text-indigo-300 uppercase tracking-widest italic transition-colors">+ Crear Nueva</button>
+                                        </div>
                                     </div>
-                                    <select wire:model="subcategoryId" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
+                                    <select wire:model.live="subcategoryId" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
                                         <option value="">SIN SUBCATEGORÍA</option>
                                         @foreach($subcategories as $sub)
                                             <option value="{{ $sub->id }}">{{ $sub->name }}</option>
@@ -374,8 +384,12 @@
                                 <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                             </div>
                             <div>
-                                <h3 class="text-xl font-black text-white italic uppercase tracking-tight leading-none mb-2">Nueva Subcategoría</h3>
-                                <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest italic">Especialización de Auditoría</p>
+                                <h3 class="text-xl font-black text-white italic uppercase tracking-tight leading-none mb-2">
+                                    {{ $editingSubcategoryId ? 'Editando Subcategoría' : 'Nueva Subcategoría' }}
+                                </h3>
+                                <p class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest italic">
+                                    {{ $editingSubcategoryId ? 'Refinando Especialización' : 'Especialización de Auditoría' }}
+                                </p>
                             </div>
                         </div>
 
@@ -388,16 +402,19 @@
                                         <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                                     @endforeach
                                 </select>
+                                @error('newSubcategory.category_id') <span class="text-red-500 text-[8px] font-black uppercase mt-2 block ml-2">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="relative group">
                                 <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-ep-primary uppercase tracking-[0.3em] italic z-10">Código Maestro (Slug)</span>
                                 <input type="text" wire:model="newSubcategory.code" class="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/40 transition-all placeholder-white/5 italic" placeholder="ej: elec-potencia">
+                                @error('newSubcategory.code') <span class="text-red-500 text-[8px] font-black uppercase mt-2 block ml-2">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="relative group">
                                 <span class="absolute -top-2.5 left-4 bg-[#1e1e2d] px-2 text-[8px] font-black text-white uppercase tracking-[0.3em] italic z-10">Nombre Comercial</span>
                                 <input type="text" wire:model="newSubcategory.name" class="w-full bg-black/60 border border-white/5 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500/40 transition-all placeholder-white/5 italic" placeholder="Ej: Electricidad de Gran Potencia">
+                                @error('newSubcategory.name') <span class="text-red-500 text-[8px] font-black uppercase mt-2 block ml-2">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="relative group">
@@ -406,7 +423,9 @@
                             </div>
 
                             <div class="flex gap-4 pt-4">
-                                <button type="submit" class="flex-1 h-14 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/20 active:scale-95">CONSOLIDAR</button>
+                                <button type="submit" class="flex-1 h-14 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-600/20 active:scale-95">
+                                    {{ $editingSubcategoryId ? 'GUARDAR CAMBIOS' : 'CONSOLIDAR' }}
+                                </button>
                                 <button type="button" wire:click="closeSubcategoryModal" class="h-14 px-8 bg-white/5 text-white/40 rounded-2xl text-[10px] font-black uppercase tracking-widest italic border border-white/5">Cancelar</button>
                             </div>
                         </form>
@@ -429,8 +448,12 @@
                                 <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                             </div>
                             <div>
-                                <h3 class="text-xl font-black text-white italic uppercase tracking-tight leading-none mb-2">Nueva Categoría Maestra</h3>
-                                <p class="text-[10px] font-bold text-ep-primary uppercase tracking-widest italic">Estructura Global de Procesos</p>
+                                <h3 class="text-xl font-black text-white italic uppercase tracking-tight leading-none mb-2">
+                                    {{ $editingCategoryId ? 'Editando Categoría Maestra' : 'Nueva Categoría Maestra' }}
+                                </h3>
+                                <p class="text-[10px] font-bold text-ep-primary uppercase tracking-widest italic">
+                                    {{ $editingCategoryId ? 'Refinando Estructura Global' : 'Estructura Global de Procesos' }}
+                                </p>
                             </div>
                         </div>
 
@@ -464,7 +487,9 @@
                             </div>
 
                             <div class="flex gap-4 pt-4">
-                                <button type="submit" class="flex-1 h-14 bg-ep-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:brightness-110 transition-all shadow-xl shadow-ep-primary/20 active:scale-95">CONSOLIDAR CATEGORÍA</button>
+                                <button type="submit" class="flex-1 h-14 bg-ep-primary text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:brightness-110 transition-all shadow-xl shadow-ep-primary/20 active:scale-95">
+                                    {{ $editingCategoryId ? 'GUARDAR CAMBIOS' : 'CONSOLIDAR CATEGORÍA' }}
+                                </button>
                                 <button type="button" wire:click="closeCategoryModal" class="h-14 px-8 bg-white/5 text-white/40 rounded-2xl text-[10px] font-black uppercase tracking-widest italic border border-white/5">Cancelar</button>
                             </div>
                         </form>

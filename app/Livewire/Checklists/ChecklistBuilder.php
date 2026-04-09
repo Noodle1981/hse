@@ -72,6 +72,9 @@ class ChecklistBuilder extends Component
         'icon' => 'tag',
     ];
 
+    public ?int $editingCategoryId = null;
+    public ?int $editingSubcategoryId = null;
+
 
 
     protected function rules()
@@ -322,10 +325,28 @@ class ChecklistBuilder extends Component
     public function openSubcategoryModal()
     {
         $this->showSubcategoryModal = true;
-        // Pre-seleccionar la categoría actual si existe
-        if ($this->categoryId) {
-            $this->newSubcategory['category_id'] = $this->categoryId;
-        }
+        $this->editingSubcategoryId = null;
+        $this->newSubcategory = [
+            'category_id' => $this->categoryId,
+            'code' => '',
+            'name' => '',
+            'description' => '',
+        ];
+    }
+
+    public function editSubcategory()
+    {
+        if (!$this->subcategoryId) return;
+        
+        $subcategory = Subcategory::findOrFail($this->subcategoryId);
+        $this->editingSubcategoryId = $subcategory->id;
+        $this->newSubcategory = [
+            'category_id' => $subcategory->category_id,
+            'code' => $subcategory->code,
+            'name' => $subcategory->name,
+            'description' => $subcategory->description ?? '',
+        ];
+        $this->showSubcategoryModal = true;
     }
 
     public function closeSubcategoryModal()
@@ -342,31 +363,45 @@ class ChecklistBuilder extends Component
 
     public function saveSubcategory()
     {
-        $this->validate([
+        $rules = [
             'newSubcategory.category_id' => 'required|exists:categories,id',
-            'newSubcategory.code' => 'required|string|max:50|unique:subcategories,code',
+            'newSubcategory.code' => 'required|string|max:50|unique:subcategories,code' . ($this->editingSubcategoryId ? ',' . $this->editingSubcategoryId : ''),
             'newSubcategory.name' => 'required|string|max:255',
             'newSubcategory.description' => 'nullable|string',
-        ], [
+        ];
+
+        $this->validate($rules, [
             'newSubcategory.category_id.required' => 'Debe seleccionar una categoría.',
             'newSubcategory.code.required' => 'El código es requerido.',
             'newSubcategory.code.unique' => 'Ya existe una subcategoría con este código.',
             'newSubcategory.name.required' => 'El nombre es requerido.',
         ]);
 
-        // Obtener el último order de subcategorías de esta categoría
-        $lastOrder = Subcategory::where('category_id', $this->newSubcategory['category_id'])
-            ->max('order') ?? 0;
+        if ($this->editingSubcategoryId) {
+            $subcategory = Subcategory::findOrFail($this->editingSubcategoryId);
+            $subcategory->update([
+                'category_id' => $this->newSubcategory['category_id'],
+                'code' => $this->newSubcategory['code'],
+                'name' => $this->newSubcategory['name'],
+                'description' => $this->newSubcategory['description'] ?: null,
+            ]);
+            $message = 'Subcategoría actualizada exitosamente.';
+        } else {
+            // Obtener el último order de subcategorías de esta categoría
+            $lastOrder = Subcategory::where('category_id', $this->newSubcategory['category_id'])
+                ->max('order') ?? 0;
 
-        // Crear la subcategoría
-        $subcategory = Subcategory::create([
-            'category_id' => $this->newSubcategory['category_id'],
-            'code' => $this->newSubcategory['code'],
-            'name' => $this->newSubcategory['name'],
-            'description' => $this->newSubcategory['description'] ?: null,
-            'is_active' => true,
-            'order' => $lastOrder + 1,
-        ]);
+            // Crear la subcategoría
+            $subcategory = Subcategory::create([
+                'category_id' => $this->newSubcategory['category_id'],
+                'code' => $this->newSubcategory['code'],
+                'name' => $this->newSubcategory['name'],
+                'description' => $this->newSubcategory['description'] ?: null,
+                'is_active' => true,
+                'order' => $lastOrder + 1,
+            ]);
+            $message = 'Subcategoría creada exitosamente.';
+        }
 
         // Actualizar la categoría seleccionada si es diferente
         if ($this->categoryId != $this->newSubcategory['category_id']) {
@@ -381,11 +416,36 @@ class ChecklistBuilder extends Component
 
         // Cerrar modal y mostrar mensaje
         $this->closeSubcategoryModal();
-        session()->flash('message', 'Subcategoría creada exitosamente.');
+        $this->editingSubcategoryId = null;
+        session()->flash('message', $message);
     }
 
     public function openCategoryModal()
     {
+        $this->showCategoryModal = true;
+        $this->editingCategoryId = null;
+        $this->newCategory = [
+            'code' => '',
+            'name' => '',
+            'description' => '',
+            'color' => '#f69239',
+            'icon' => 'tag',
+        ];
+    }
+
+    public function editCategory()
+    {
+        if (!$this->categoryId) return;
+        
+        $category = Category::findOrFail($this->categoryId);
+        $this->editingCategoryId = $category->id;
+        $this->newCategory = [
+            'code' => $category->code,
+            'name' => $category->name,
+            'description' => $category->description ?? '',
+            'color' => $category->color ?? '#f69239',
+            'icon' => $category->icon ?? 'tag',
+        ];
         $this->showCategoryModal = true;
     }
 
@@ -404,29 +464,44 @@ class ChecklistBuilder extends Component
 
     public function saveCategory()
     {
-        $this->validate([
-            'newCategory.code' => 'required|string|max:50|unique:categories,code',
+        $rules = [
+            'newCategory.code' => 'required|string|max:50|unique:categories,code' . ($this->editingCategoryId ? ',' . $this->editingCategoryId : ''),
             'newCategory.name' => 'required|string|max:255',
             'newCategory.description' => 'nullable|string',
-        ], [
+        ];
+
+        $this->validate($rules, [
             'newCategory.code.required' => 'El código es requerido.',
             'newCategory.code.unique' => 'Ya existe una categoría con este código.',
             'newCategory.name.required' => 'El nombre es requerido.',
         ]);
 
-        // Obtener el último order
-        $lastOrder = Category::max('order') ?? 0;
+        if ($this->editingCategoryId) {
+            $category = Category::findOrFail($this->editingCategoryId);
+            $category->update([
+                'code' => $this->newCategory['code'],
+                'name' => $this->newCategory['name'],
+                'description' => $this->newCategory['description'] ?: null,
+                'color' => $this->newCategory['color'],
+                'icon' => $this->newCategory['icon'],
+            ]);
+            $message = 'Categoría actualizada exitosamente.';
+        } else {
+            // Obtener el último order
+            $lastOrder = Category::max('order') ?? 0;
 
-        // Crear la categoría
-        $category = Category::create([
-            'code' => $this->newCategory['code'],
-            'name' => $this->newCategory['name'],
-            'description' => $this->newCategory['description'] ?: null,
-            'color' => $this->newCategory['color'],
-            'icon' => $this->newCategory['icon'],
-            'is_active' => true,
-            'order' => $lastOrder + 1,
-        ]);
+            // Crear la categoría
+            $category = Category::create([
+                'code' => $this->newCategory['code'],
+                'name' => $this->newCategory['name'],
+                'description' => $this->newCategory['description'] ?: null,
+                'color' => $this->newCategory['color'],
+                'icon' => $this->newCategory['icon'],
+                'is_active' => true,
+                'order' => $lastOrder + 1,
+            ]);
+            $message = 'Categoría creada exitosamente.';
+        }
 
         // Recargar categorías
         $this->loadCategories();
@@ -438,7 +513,8 @@ class ChecklistBuilder extends Component
 
         // Cerrar modal y mostrar mensaje
         $this->closeCategoryModal();
-        session()->flash('message', 'Categoría creada exitosamente.');
+        $this->editingCategoryId = null;
+        session()->flash('message', $message);
     }
 
     private function resetNewQuestion()

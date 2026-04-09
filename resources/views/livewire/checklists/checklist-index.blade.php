@@ -173,7 +173,7 @@
                                             @endif
                                         </td>
                                         <td class="px-4 lg:px-10 py-6 lg:py-8 text-right">
-                                            <div class="flex justify-end gap-2 sm:gap-3 lg:translate-x-4 lg:opacity-0 lg:group-hover/row:translate-x-0 lg:group-hover/row:opacity-100 transition-all duration-500">
+                                            <div class="flex justify-end gap-2 sm:gap-3 transition-all duration-500">
                                                 <a href="{{ route('gestor.checklists.edit', $checklist->id) }}" 
                                                    class="h-9 w-9 sm:h-11 sm:w-auto sm:px-6 bg-white/5 border border-white/10 text-white hover:bg-ep-primary hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic flex items-center justify-center sm:justify-start gap-3 transition-all shadow-lg active:scale-95"
                                                    title="Editar Protocolo">
