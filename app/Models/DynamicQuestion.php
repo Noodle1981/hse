@@ -20,10 +20,14 @@ class DynamicQuestion extends Model
         'min_value',
         'max_value',
         'failure_values',
+        'failure_logic',   // Nueva lógica de falla (fail_if_selected vs fail_if_missing)
         'order',
         'is_required',
         'help_text',
     ];
+
+    public const LOGIC_FAIL_IF_SELECTED = 'fail_if_selected';
+    public const LOGIC_FAIL_IF_MISSING = 'fail_if_missing';
 
     protected $casts = [
         'options' => 'array',

@@ -378,8 +378,8 @@ class AnnualContractDashboard extends Component
         $user = Auth::user();
         
         $availableSedes = $user->isAdmin()
-            ? Sede::with('empresa')->orderBy('nombre_sede')->get() 
-            : $user->sedes()->with('empresa')->orderBy('nombre_sede')->get();
+            ? Sede::with(['empresa', 'users'])->orderBy('nombre_sede')->get() 
+            : $user->sedes()->with(['empresa', 'users'])->orderBy('nombre_sede')->get();
 
         $companies = \App\Models\Empresa::whereIn('id', $availableSedes->pluck('empresa_id'))
             ->orderBy('nombre')

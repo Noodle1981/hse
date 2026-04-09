@@ -128,12 +128,24 @@ class VisitChecklistCompletion extends Model
 
         // 1. Disparadores de falla (failure_values)
         if (!empty($question->failure_values)) {
-            if (is_array($processedValue)) {
-                foreach ($processedValue as $val) {
-                    if (in_array($val, $question->failure_values)) return true;
+            $logic = $question->failure_logic ?? DynamicQuestion::LOGIC_FAIL_IF_SELECTED;
+
+            if ($logic === DynamicQuestion::LOGIC_FAIL_IF_MISSING) {
+                if (is_array($processedValue)) {
+                    foreach ($question->failure_values as $required) {
+                        if (!in_array($required, $processedValue)) return true;
+                    }
+                } else {
+                    if (!in_array($processedValue, $question->failure_values)) return true;
                 }
             } else {
-                if (in_array($processedValue, $question->failure_values)) return true;
+                if (is_array($processedValue)) {
+                    foreach ($processedValue as $val) {
+                        if (in_array($val, $question->failure_values)) return true;
+                    }
+                } else {
+                    if (in_array($processedValue, $question->failure_values)) return true;
+                }
             }
         }
 

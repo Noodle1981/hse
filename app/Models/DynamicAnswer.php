@@ -55,12 +55,27 @@ class DynamicAnswer extends Model
 
         // 1. Chequear disparadores de falla (failure_values)
         if (!empty($question->failure_values)) {
-            if (is_array($processedValue)) {
-                foreach ($processedValue as $val) {
-                    if (in_array($val, $question->failure_values)) return true;
+            $logic = $question->failure_logic ?? DynamicQuestion::LOGIC_FAIL_IF_SELECTED;
+
+            if ($logic === DynamicQuestion::LOGIC_FAIL_IF_MISSING) {
+                // Falla si alguno de los valores requeridos NO está en la respuesta
+                if (is_array($processedValue)) {
+                    foreach ($question->failure_values as $required) {
+                        if (!in_array($required, $processedValue)) return true;
+                    }
+                } else {
+                    // Si no es un array (checkbox), y hay valores requeridos, es un fallo a menos que coincida
+                    if (!in_array($processedValue, $question->failure_values)) return true;
                 }
             } else {
-                if (in_array($processedValue, $question->failure_values)) return true;
+                // Lógica estándar: Falla si alguno de los valores seleccionados está marcado como falla
+                if (is_array($processedValue)) {
+                    foreach ($processedValue as $val) {
+                        if (in_array($val, $question->failure_values)) return true;
+                    }
+                } else {
+                    if (in_array($processedValue, $question->failure_values)) return true;
+                }
             }
         }
 

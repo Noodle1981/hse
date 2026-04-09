@@ -123,7 +123,23 @@
 
                             <div class="space-y-12">
                                 @foreach($checklist->questions->where('section_id', $section['id'])->sortBy('order') as $question)
-                                    <div class="space-y-5 relative p-8 bg-white/5 rounded-3xl border border-white/5 hover:border-ep-primary/20 transition-all duration-300">
+                                    @php
+                                        $isInverseLogic = ($question->failure_logic ?? 'fail_if_selected') === 'fail_if_missing';
+                                        $currentAnswers = $answers[$question->id] ?? [];
+                                        $hasMissingRequired = false;
+                                        if ($isInverseLogic && !empty($question->failure_values)) {
+                                            foreach ($question->failure_values as $required) {
+                                                if (!in_array($required, (array)$currentAnswers)) {
+                                                    $hasMissingRequired = true;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                        $hasDirectFailure = !$isInverseLogic && !empty($question->failure_values) && count(array_intersect((array)$currentAnswers, $question->failure_values)) > 0;
+                                        $isFailing = $hasMissingRequired || $hasDirectFailure;
+                                    @endphp
+
+                                    <div class="space-y-5 relative p-8 bg-white/5 rounded-3xl border transition-all duration-300 {{ $isFailing ? 'border-red-500/50 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'border-white/5 hover:border-ep-primary/20' }}">
                                         <label class="block text-sm font-black text-indigo-100 uppercase italic tracking-wide leading-snug">
                                             {{ $question->label }}
                                             @if($question->is_required) <span class="text-ep-primary ml-1 font-black animate-pulse">*</span> @endif
@@ -173,15 +189,33 @@
                                                     <option value="{{ $option }}">{{ $option }}</option>
                                                 @endforeach
                                             </select>
-                                        @elseif($question->type === 'checkbox')
-                                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                @foreach($question->options as $option)
-                                                    <label class="flex items-center space-x-4 p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 cursor-pointer transition-all">
-                                                        <input type="checkbox" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="h-6 w-6 text-ep-primary focus:ring-ep-primary border-white/20 bg-black/40 rounded-xl">
-                                                        <span class="text-xs font-black uppercase tracking-[0.2em] italic text-indigo-100">{{ $option }}</span>
-                                                    </label>
-                                                @endforeach
-                                            </div>
+                                            @elseif($question->type === 'checkbox')
+                                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    @foreach($question->options as $option)
+                                                        @php
+                                                            $isRequired = $isInverseLogic && in_array($option, $question->failure_values ?? []);
+                                                            $isChecked = in_array($option, (array)($answers[$question->id] ?? []));
+                                                            $isMissing = $isRequired && !$isChecked;
+                                                        @endphp
+                                                        <label class="flex items-center space-x-4 p-5 rounded-2xl border transition-all
+                                                            {{ $isMissing 
+                                                                ? 'bg-red-500/10 border-red-500/40' 
+                                                                : 'bg-white/5 border-white/5' }}
+                                                            {{ $isChecked && !$isRequired ? 'bg-ep-primary/10 border-ep-primary/20' : '' }}
+                                                            {{ $isChecked && $isRequired ? 'bg-emerald-500/10 border-emerald-500/30 font-black' : '' }}
+                                                            hover:bg-white/10 cursor-pointer">
+                                                            <input type="checkbox" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="h-6 w-6 text-ep-primary focus:ring-ep-primary border-white/20 bg-black/40 rounded-xl">
+                                                            <div class="flex flex-col">
+                                                                <span class="text-xs font-black uppercase tracking-[0.2em] italic {{ $isChecked ? 'text-white' : 'text-indigo-100' }}">{{ $option }}</span>
+                                                                @if($isRequired)
+                                                                    <span class="text-[8px] font-black {{ $isChecked ? 'text-emerald-400' : 'text-red-400' }} uppercase tracking-widest italic mt-1">
+                                                                        {{ $isChecked ? '✓ REGISTRADO' : '⚠ REQUERIDO' }}
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
                                         @elseif($question->type === 'textarea')
                                             <textarea wire:model.live="answers.{{ $question->id }}" rows="3" 
                                                       class="block w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all placeholder-white/10 italic" 

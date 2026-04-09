@@ -307,6 +307,40 @@
                                             </div>
                                         @endforeach
                                     </div>
+
+                                    {{-- MODALIDAD DE FALLA: NUEVA LÓGICA --}}
+                                    @if($newQuestion['type'] === 'checkbox' || $newQuestion['type'] === 'radio' || $newQuestion['type'] === 'select')
+                                        <div class="mt-8 pt-8 border-t border-white/5">
+                                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                                                <div>
+                                                    <h5 class="text-[9px] font-black text-white/60 uppercase tracking-[0.2em] italic mb-1">Algoritmo de Detección de Falla</h5>
+                                                    <p class="text-[8px] font-bold text-white/20 uppercase tracking-widest italic">Define cómo el sistema interpreta una anomalía técnica</p>
+                                                </div>
+                                                <div class="flex bg-black/40 p-1.5 rounded-2xl border border-white/5">
+                                                    <button type="button" 
+                                                            wire:click="$set('newQuestion.failure_logic', 'fail_if_selected')"
+                                                            class="px-5 py-2.5 rounded-xl text-[8px] font-black uppercase tracking-widest italic transition-all {{ $newQuestion['failure_logic'] === 'fail_if_selected' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-white/30 hover:text-white' }}">
+                                                        SÍNTOMA: Alerta si se marca
+                                                    </button>
+                                                    <button type="button" 
+                                                            wire:click="$set('newQuestion.failure_logic', 'fail_if_missing')"
+                                                            class="px-5 py-2.5 rounded-xl text-[8px] font-black uppercase tracking-widest italic transition-all {{ $newQuestion['failure_logic'] === 'fail_if_missing' ? 'bg-red-600 text-white shadow-lg shadow-red-600/20' : 'text-white/30 hover:text-white' }}">
+                                                        KIT: Alerta si falta alguno
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-4 p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl">
+                                                <p class="text-[9px] font-bold text-indigo-100/40 italic leading-relaxed uppercase tracking-wider">
+                                                    @if($newQuestion['failure_logic'] === 'fail_if_selected')
+                                                        <span class="text-indigo-400">⚡ MODO SÍNTOMA:</span> Los elementos marcados en rojo en el panel superior dispararán un hallazgo si el técnico los selecciona. Ideal para "Defectos", "No Cumple", etc.
+                                                    @else
+                                                        <span class="text-red-400">⚡ MODO KIT / REQUERIDOS:</span> Los elementos marcados en rojo son **OBLIGATORIOS**. Si el técnico NO los marca todos, el sistema generará una alerta. Ideal para "EPP", "Herramental", etc.
+                                                    @endif
+                                                </p>
+                                            </div>
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
 
