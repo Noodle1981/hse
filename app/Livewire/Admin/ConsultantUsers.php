@@ -5,7 +5,6 @@ namespace App\Livewire\Admin;
 use App\Models\Consultora;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
@@ -89,31 +88,19 @@ class ConsultantUsers extends Component
 
         if ($this->password) {
             $data['password'] = Hash::make($this->password);
+            $data['must_change_password'] = true; // Obliga a cambiar contraseña en el próximo login
         }
 
         if ($this->editingId) {
             User::find($this->editingId)->update($data);
             $message = 'Usuario actualizado con éxito';
         } else {
+            $data['must_change_password'] = true; // Siempre el primer login
             User::create($data);
             $message = 'Usuario creado con éxito';
         }
 
         $this->showModal = false;
         $this->dispatch('notify', $message);
-    }
-
-    public function delete($id)
-    {
-        $user = User::findOrFail($id);
-        
-        // Prevent deleting self
-        if ($user->id === Auth::id()) {
-            $this->dispatch('error', 'No puedes eliminar tu propio usuario');
-            return;
-        }
-
-        $user->delete();
-        $this->dispatch('notify', 'Usuario eliminado');
     }
 }
