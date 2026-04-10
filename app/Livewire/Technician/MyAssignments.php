@@ -128,6 +128,15 @@ class MyAssignments extends Component
             })
             ->when($this->statusFilter, function ($q) {
                 $q->where('status', $this->statusFilter);
+            })
+            // EXCLUIR: Asignaciones creadas automáticamente por el sistema para respaldar tareas del plan anual/mensual
+            // Esto evita el duplicado "Contrato" vs "Solicitud" en la vista del técnico
+            ->where(function($q) {
+                $q->whereNull('notes')
+                  ->orWhere(function($sq) {
+                      $sq->where('notes', 'NOT LIKE', '%Vínculo automático desde Plan Anual%')
+                         ->where('notes', 'NOT LIKE', '%Plan Mensual Recomendado%');
+                  });
             });
 
         // 1.1 Manual Trainings (Solicitudes de Capacitación)
@@ -305,11 +314,28 @@ class MyAssignments extends Component
                 : null;
             $effectiveDueDate = $specificDate ?? $monthEndDate;
 
+            // BUSCAR ASIGNACIÓN ACTIVA: Ver si hay una ChecklistAssignment para este plan/checklist/sede
+            // Esto nos da el estado real (in_progress, etc) antes de que sea una inspección terminada
+            $activeAssignment = \App\Models\ChecklistAssignment::where('user_id', Auth::id())
+                ->where('sede_id', $p->sede_id)
+                ->where('dynamic_checklist_id', $p->checklist_id)
+                ->where(function($q) {
+                    $q->where('notes', 'LIKE', '%Vínculo automático desde Plan Anual%')
+                      ->orWhere('notes', 'LIKE', '%Plan Mensual Recomendado%');
+                })
+                ->latest()
+                ->first();
+
             // Check if there is a completed inspection for this plan/checklist/sede
             $key = $p->sede_id . '_' . $p->checklist_id;
             $inspection = isset($completedInspections[$key]) ? $completedInspections[$key]->first() : null;
 
-            $status = $inspection ? 'completed' : 'scheduled';
+            $status = 'scheduled';
+            if ($inspection) {
+                $status = 'completed';
+            } elseif ($activeAssignment) {
+                $status = $activeAssignment->status; // 'in_progress' o 'pending'
+            }
             $dueDate = $inspection ? $inspection->completed_at : $effectiveDueDate;
             $daysRemaining = (int) $now->diffInDays($effectiveDueDate, false);
 

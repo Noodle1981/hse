@@ -143,6 +143,13 @@ class InspectionWizard extends Component
                 if ($question->is_required) {
                     $rules["answers.{$question->id}"] = 'required';
                 }
+
+                if ($question->type === 'number') {
+                    $rules["answers.{$question->id}"] = array_merge(
+                        isset($rules["answers.{$question->id}"]) ? (array) $rules["answers.{$question->id}"] : [],
+                        ['nullable', 'numeric']
+                    );
+                }
             }
             
             if (!empty($rules)) {

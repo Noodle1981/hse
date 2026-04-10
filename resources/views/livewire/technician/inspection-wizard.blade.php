@@ -136,7 +136,24 @@
                                             }
                                         }
                                         $hasDirectFailure = !$isInverseLogic && !empty($question->failure_values) && count(array_intersect((array)$currentAnswers, $question->failure_values)) > 0;
-                                        $isFailing = $hasMissingRequired || $hasDirectFailure;
+                                        
+                                        $isOutOfRange = false;
+                                        $rangeError = '';
+                                        if ($question->type === 'number') {
+                                            $val = $answers[$question->id] ?? null;
+                                            if ($val !== null && $val !== '') {
+                                                if ($question->min_value !== null && $val < $question->min_value) {
+                                                    $isOutOfRange = true;
+                                                    $rangeError = 'Menor al mínimo permitido (' . $question->min_value . ')';
+                                                }
+                                                if ($question->max_value !== null && $val > $question->max_value) {
+                                                    $isOutOfRange = true;
+                                                    $rangeError = 'Se pasó del límite permitido (' . $question->max_value . ')';
+                                                }
+                                            }
+                                        }
+                                        
+                                        $isFailing = $hasMissingRequired || $hasDirectFailure || $isOutOfRange;
                                     @endphp
 
                                     <div class="space-y-5 relative p-8 bg-white/5 rounded-3xl border transition-all duration-300 {{ $isFailing ? 'border-red-500/50 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)]' : 'border-white/5 hover:border-ep-primary/20' }}">
@@ -196,20 +213,26 @@
                                                             $isRequired = $isInverseLogic && in_array($option, $question->failure_values ?? []);
                                                             $isChecked = in_array($option, (array)($answers[$question->id] ?? []));
                                                             $isMissing = $isRequired && !$isChecked;
+                                                            $isDirectFailure = !$isInverseLogic && $isChecked && in_array($option, $question->failure_values ?? []);
                                                         @endphp
                                                         <label wire:key="q{{ $question->id }}-check-{{ $loop->index }}" class="flex items-center space-x-4 p-5 rounded-2xl border transition-all
-                                                            {{ $isMissing 
-                                                                ? 'bg-red-500/10 border-red-500/40' 
+                                                            {{ $isMissing || $isDirectFailure 
+                                                                ? 'bg-red-500/10 border-red-500/40 ring-1 ring-red-500/20' 
                                                                 : 'bg-white/5 border-white/5' }}
-                                                            {{ $isChecked && !$isRequired ? 'bg-ep-primary/10 border-ep-primary/20' : '' }}
-                                                            {{ $isChecked && $isRequired ? 'bg-emerald-500/10 border-emerald-500/30 font-black' : '' }}
-                                                            hover:bg-white/10 cursor-pointer">
-                                                            <input type="checkbox" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" class="h-6 w-6 text-ep-primary focus:ring-ep-primary border-white/20 bg-black/40 rounded-xl">
+                                                            {{ $isChecked && !$isRequired && !$isDirectFailure ? 'bg-ep-primary/10 border-ep-primary/20' : '' }}
+                                                            {{ $isChecked && $isRequired ? 'bg-emerald-500/10 border-emerald-500/30' : '' }}
+                                                            hover:bg-white/10 cursor-pointer group/check">
+                                                            <input type="checkbox" wire:model.live="answers.{{ $question->id }}" value="{{ $option }}" 
+                                                                   class="h-6 w-6 text-ep-primary focus:ring-ep-primary border-white/20 bg-black/40 rounded-xl transition-transform group-hover/check:scale-110">
                                                             <div class="flex flex-col">
                                                                 <span class="text-xs font-black uppercase tracking-[0.2em] italic {{ $isChecked ? 'text-white' : 'text-indigo-100' }}">{{ $option }}</span>
                                                                 @if($isRequired)
                                                                     <span class="text-[8px] font-black {{ $isChecked ? 'text-emerald-400' : 'text-red-400' }} uppercase tracking-widest italic mt-1">
                                                                         {{ $isChecked ? '✓ REGISTRADO' : '⚠ REQUERIDO' }}
+                                                                    </span>
+                                                                @elseif($isDirectFailure)
+                                                                    <span class="text-[8px] font-black text-red-500 uppercase tracking-widest italic mt-1 animate-pulse">
+                                                                        ⚠ HALLAZGO CRÍTICO
                                                                     </span>
                                                                 @endif
                                                             </div>
@@ -221,9 +244,19 @@
                                                       class="block w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all placeholder-white/10 italic" 
                                                       placeholder="Registro técnico detallado..."></textarea>
                                         @elseif($question->type === 'number')
-                                            <input type="number" step="any" wire:model.live="answers.{{ $question->id }}" 
-                                                   class="block w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all" 
-                                                   placeholder="0.00">
+                                            <div class="relative group/num">
+                                                <input type="number" step="any" wire:model.live="answers.{{ $question->id }}" 
+                                                       class="block w-full bg-white/5 border rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 transition-all
+                                                       {{ $isOutOfRange ? 'border-red-500 ring-2 ring-red-500/20 bg-red-500/5' : 'border-white/10 focus:ring-ep-primary' }}" 
+                                                       placeholder="0.00">
+                                                
+                                                @if($isOutOfRange)
+                                                    <div class="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-2 px-3 py-1 bg-red-500 rounded-lg shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse">
+                                                        <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                        <span class="text-[9px] font-black text-white uppercase tracking-widest italic">{{ $rangeError }}</span>
+                                                    </div>
+                                                @endif
+                                            </div>
                                         @elseif($question->type === 'date')
                                             <input type="date" wire:model.live="answers.{{ $question->id }}" 
                                                    class="block w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all [color-scheme:dark]">
@@ -231,6 +264,18 @@
                                             <input type="text" wire:model.live="answers.{{ $question->id }}" 
                                                    class="block w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-white text-sm focus:outline-none focus:ring-2 focus:ring-ep-primary focus:border-transparent transition-all placeholder-white/10" 
                                                    placeholder="Escriba su respuesta...">
+                                        @endif
+
+                                        {{-- Banner de Alerta Crítica (Para todos los tipos) --}}
+                                        @if($isFailing && $question->type !== 'number')
+                                            <div class="mt-4 flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-2xl animate-fade-in shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                                                <div class="p-2 bg-red-500/20 rounded-xl text-red-500 h-8 w-8 flex items-center justify-center">
+                                                    <svg class="w-4 h-4 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                </div>
+                                                <div>
+                                                    <p class="text-[10px] font-black text-red-500 uppercase tracking-widest italic leading-none">Hallazgo Crítico Detectado</p>
+                                                </div>
+                                            </div>
                                         @endif
 
                                         @error("answers.{$question->id}")
