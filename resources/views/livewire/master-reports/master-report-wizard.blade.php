@@ -135,7 +135,15 @@
                                 </div>
                                 <div class="flex-grow">
                                     <h4 class="text-lg sm:text-xl font-black text-white uppercase tracking-tight italic mb-2">Estado de Plan Anual (Pactado)</h4>
-                                    <p class="text-[10px] text-indigo-100/30 uppercase tracking-widest italic mb-6">Conciliación de actividades contractuales programadas y realizadas</p>
+                                    <p class="text-[10px] text-indigo-100/30 uppercase tracking-widest italic mb-6">
+                                        @if(($monthlyData['annual_plan_status']['total_targets'] ?? 0) > 0)
+                                            <span class="text-ep-primary font-black">{{ $monthlyData['annual_plan_status']['achieved'] ?? 0 }}</span> de 
+                                            <span class="text-white font-black">{{ $monthlyData['annual_plan_status']['total_targets'] ?? 0 }}</span> 
+                                            actividades contractuales realizadas en el periodo de {{ $report->formatted_period }}
+                                        @else
+                                            No se han encontrado actividades programadas en el plan anual para este periodo.
+                                        @endif
+                                    </p>
                                     
                                     @php
                                         $categoryLabels = [
@@ -167,11 +175,14 @@
                                                                 @if($prog['description'])
                                                                     <p class="text-[10px] text-indigo-100/40 mb-2 italic leading-relaxed group-hover/prog:text-indigo-100/60 transition-colors">{{ $prog['description'] }}</p>
                                                                 @endif
-                                                                <div class="flex items-center gap-2">
+                                                                <div class="flex items-center gap-3">
                                                                     <span class="text-[9px] font-black text-indigo-100/20 uppercase tracking-[0.2em]">{{ $prog['month'] }}</span>
                                                                     @if($prog['status'] === 'completed')
-                                                                        <span class="w-1 h-1 rounded-full bg-emerald-500"></span>
-                                                                        <span class="text-[8px] font-bold text-emerald-500/40 uppercase italic">Verificado</span>
+                                                                        <div class="flex items-center gap-2 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                                                                            <span class="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                                            <span class="text-[8px] font-black text-emerald-400 uppercase italic">Realizado: {{ $prog['executed_at'] }}</span>
+                                                                            <span class="text-[8px] font-medium text-emerald-400/60 uppercase tracking-tighter">por {{ $prog['technician'] }}</span>
+                                                                        </div>
                                                                     @endif
                                                                 </div>
                                                             </div>

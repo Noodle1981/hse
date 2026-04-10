@@ -460,20 +460,32 @@
                                             @else
                                                 @php
                                                     $category = $assignment->category ?? 'Inspección';
-                                                    $btnText = match($category) {
-                                                        'Capacitación' => 'Ejecutar Capacitación',
-                                                        'Informe' => 'Redactar Informe',
-                                                        default => 'Ejecutar Inspección'
-                                                    };
                                                     
-                                                    $btnRoute = $category === 'Informe' 
-                                                        ? route('tecnico.master-reports.index')
-                                                        : route('tecnico.visits.index', [
+                                                    // Lógica específica para Informes Maestros
+                                                    if ($category === 'Informe') {
+                                                        $btnText = $assignment->report_id ? 'Continuar Redacción' : 'Redactar Informe';
+                                                        if ($assignment->report_id) {
+                                                            $btnRoute = route('tecnico.master-reports.edit', ['id' => $assignment->report_id]);
+                                                        } else {
+                                                            $btnRoute = route('tecnico.master-reports.create', [
+                                                                'sede_id' => $assignment->sede->id,
+                                                                'periodo' => $assignment->periodo,
+                                                                'task_id' => $assignment->task_id
+                                                            ]);
+                                                        }
+                                                    } else {
+                                                        $btnText = match($category) {
+                                                            'Capacitación' => 'Ejecutar Capacitación',
+                                                            default => 'Ejecutar Inspección'
+                                                        };
+                                                        $btnRoute = route('tecnico.visits.index', [
                                                             'sede_id' => $assignment->sede->id,
                                                             'task_id' => $assignment->id ?? $assignment->dynamic_checklist_id,
                                                             'type' => $category,
                                                             'source' => $assignment->source ?? 'manual'
                                                         ]);
+                                                    }
+                                                    
                                                     $isFuture = $selectedMonth > now()->month;
                                                 @endphp
 
@@ -720,20 +732,32 @@
                             @else
                                 @php
                                     $category = $assignment->category ?? 'Inspección';
-                                    $btnText = match($category) {
-                                        'Capacitación' => 'Registrar Capacitación',
-                                        'Informe' => 'Redactar Informe',
-                                        default => 'Ejecutar Inspección'
-                                    };
                                     
-                                    $btnRoute = $category === 'Informe' 
-                                        ? route('tecnico.master-reports.index')
-                                        : route('tecnico.visits.index', [
+                                    // Lógica específica para Informes Maestros
+                                    if ($category === 'Informe') {
+                                        $btnText = $assignment->report_id ? 'Continuar Redacción' : 'Redactar Informe';
+                                        if ($assignment->report_id) {
+                                            $btnRoute = route('tecnico.master-reports.edit', ['id' => $assignment->report_id]);
+                                        } else {
+                                            $btnRoute = route('tecnico.master-reports.create', [
+                                                'sede_id' => $assignment->sede->id,
+                                                'periodo' => $assignment->periodo,
+                                                'task_id' => $assignment->task_id
+                                            ]);
+                                        }
+                                    } else {
+                                        $btnText = match($category) {
+                                            'Capacitación' => 'Ejecutar Capacitación',
+                                            default => 'Ejecutar Inspección'
+                                        };
+                                        $btnRoute = route('tecnico.visits.index', [
                                             'sede_id' => $assignment->sede->id,
                                             'task_id' => $assignment->id ?? $assignment->dynamic_checklist_id,
                                             'type' => $category,
                                             'source' => $assignment->source ?? 'manual'
                                         ]);
+                                    }
+                                    
                                     $isFuture = $selectedMonth > now()->month;
                                 @endphp
 

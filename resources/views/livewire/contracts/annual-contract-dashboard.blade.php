@@ -273,7 +273,12 @@
                                     <div class="flex items-center gap-2 overflow-hidden">
                                         <div class="shrink-0 w-1 h-5 {{ $plan->category === 'Capacitación' ? 'bg-blue-500' : ($plan->category === 'Inspección' ? 'bg-orange-500' : 'bg-ep-primary') }} rounded-full"></div>
                                         <div class="min-w-0">
-                                            <div class="text-[11px] font-black text-white italic uppercase truncate" title="{{ $plan->activity_name }}">{{ $plan->activity_name }}</div>
+                                            <div class="flex items-center gap-2">
+                                                <div class="text-[11px] font-black text-white italic uppercase truncate" title="{{ $plan->activity_name }}">{{ $plan->activity_name }}</div>
+                                                @if($plan->frequency !== 'none')
+                                                <span class="px-1.5 py-0.5 bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 text-[7px] font-black rounded uppercase italic">{{ $plan->frequency }}</span>
+                                                @endif
+                                            </div>
                                             <div class="text-[8px] text-white/20 font-bold truncate tracking-widest">{{ $plan->activity_code ?: 'SIN CÓDIGO' }}</div>
                                         </div>
                                     </div>

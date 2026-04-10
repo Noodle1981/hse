@@ -336,6 +336,21 @@ class MyAssignments extends Component
             } elseif ($activeAssignment) {
                 $status = $activeAssignment->status; // 'in_progress' o 'pending'
             }
+            // Detección de Informes
+            $reportId = null;
+            $periodo = null;
+            if ($p->category === 'Informe') {
+                $periodo = now()->year . '-' . str_pad($this->selectedMonth, 2, '0', STR_PAD_LEFT);
+                $existingReport = \App\Models\MasterReport::where('sede_id', $p->sede_id)
+                    ->where('periodo', $periodo)
+                    ->first();
+                $reportId = $existingReport?->id;
+                
+                if ($existingReport) {
+                    $status = ($existingReport->estado === 'finalizado') ? 'completed' : 'in_progress';
+                }
+            }
+
             $dueDate = $inspection ? $inspection->completed_at : $effectiveDueDate;
             $daysRemaining = (int) $now->diffInDays($effectiveDueDate, false);
 
@@ -355,6 +370,9 @@ class MyAssignments extends Component
                 'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,
                 'created_at' => $p->created_at,
                 'inspection' => $inspection,
+                'report_id' => $reportId,
+                'task_id' => $p->id,
+                'periodo' => $periodo,
                 'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
                 'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
                 'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,

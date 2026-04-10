@@ -52,9 +52,9 @@ class MasterReportController extends Controller
         $data['checklists']->reject(fn($c) => $satisfiedCheckIds->contains($c->id))
             ->each(function($c) use ($adhoc) {
                 $adhoc->push([
-                    'activity' => $c->assignment->checklist->title,
+                    'activity' => $c->assignment?->checklist?->title ?? 'Punto de Control',
                     'category' => 'Inspección',
-                    'description' => $c->assignment->checklist->description,
+                    'description' => $c->assignment?->checklist?->description ?? null,
                     'date' => \Carbon\Carbon::parse($c->completed_at)->format('d/m/Y'),
                     'technician' => $c->visitCertificate->technician_name ?? 'N/A'
                 ]);
@@ -152,7 +152,7 @@ class MasterReportController extends Controller
                     if ($plan->category === 'Inspección' && $plan->checklist_id) {
                         $completion = $visits->flatMap->checklistCompletions->first(function($c) use ($plan, $monthNum, $startDate) {
                             $date = Carbon::parse($c->completed_at);
-                            return $c->assignment->dynamic_checklist_id == $plan->checklist_id 
+                            return ($c->assignment?->dynamic_checklist_id ?? null) == $plan->checklist_id 
                                 && $date->month == $monthNum && $date->year == $startDate->year;
                         });
                     } elseif ($plan->category === 'Capacitación') {
