@@ -187,14 +187,16 @@
                 <table class="detail-table">
                     <thead>
                         <tr>
-                            <th style="width: 85%">Punto de Control Evaluado</th>
-                            <th style="width: 15%; text-align: center;">Estado</th>
+                            <th style="width: 75%">Punto de Control Evaluado</th>
+                            <th style="width: 25%; text-align: center;">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($completion->formatted_responses as $resp)
                             @php 
-                                $val = strtolower((string)($resp['value'] ?? '')); 
+                                $rawVal = $resp['value'] ?? '';
+                                $valStr = is_array($rawVal) ? implode(', ', $rawVal) : (string)$rawVal;
+                                $val = strtolower($valStr); 
                                 $isFailure = in_array($val, ['no', 'no cumple']);
                                 $isSuccess = in_array($val, ['si', 'cumple', 'pasa']);
                             @endphp
@@ -204,8 +206,8 @@
                                         {{ $resp['question_label'] ?? 'Punto de Control' }}
                                     </div>
                                     @if(!empty($resp['observation']))
-                                        <div style="font-size: 8px; color: #64748b; font-style: italic; margin-top: 4px; padding-left: 5px; border-left: 2px solid #e2e8f0;">
-                                            Nota: {{ $resp['observation'] }}
+                                        <div style="font-size: 9px; color: #64748b; font-style: italic; margin-top: 4px; padding-left: 8px; border-left: 2px solid #e2e8f0; line-height: 1.3;">
+                                            Nota: {!! nl2br(e($resp['observation'])) !!}
                                         </div>
                                     @endif
                                 </td>
@@ -254,7 +256,7 @@
                                 </tr>
                             @else
                                 <tr>
-                                    <td colspan="2">{{ (string)$att }}</td>
+                                    <td colspan="2">{{ is_array($att) ? ($att['name'] ?? 'N/A') : (string)$att }}</td>
                                     <td style="text-align: center;"><span class="pill pill-success">Presente</span></td>
                                 </tr>
                             @endif

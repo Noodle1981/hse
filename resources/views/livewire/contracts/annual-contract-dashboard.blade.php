@@ -289,7 +289,7 @@
                                         $cellDate       = $scheduledDates[$monthValue] ?? null;
                                         $cellKey        = "{$plan->id}_{$monthValue}";
                                     @endphp
-                                    <div class="relative mx-auto w-7 flex flex-col items-center gap-0.5">
+                                    <div class="relative mx-auto w-7 flex flex-col items-center gap-0.5 group/cell">
                                         {{-- Main cell dot: click toggles activation --}}
                                         <div
                                             @if($editMode) wire:click="toggleMonth({{ $plan->id }}, '{{ $monthValue }}')" @endif
@@ -300,9 +300,9 @@
                                                     {{ $status === 'none' ? 'opacity-5' : '' }}
                                                     {{ $editMode ? 'cursor-pointer hover:scale-110 border-dashed border-2' : '' }}">
                                             @if($status === 'completed')
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
-                                                <path d="M5 13l4 4L19 7" />
-                                            </svg>
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4">
+                                                    <path d="M5 13l4 4L19 7" />
+                                                </svg>
                                             @elseif($status === 'pending')
                                             <div class="w-1 h-1 bg-yellow-400 rounded-full"></div>
                                             @elseif($status === 'overdue')
@@ -311,6 +311,53 @@
                                             <div class="h-px w-1 bg-white/20"></div>
                                             @endif
                                         </div>
+
+                                        {{-- Tooltip Informativo (Hover Card) --}}
+                                        @if($status === 'completed' && !$editMode)
+                                        <div class="absolute z-[60] bottom-full mb-3 left-1/2 -translate-x-1/2 w-48 bg-ep-dark/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] opacity-0 invisible group-hover/cell:opacity-100 group-hover/cell:visible transition-all duration-300 pointer-events-none translate-y-2 group-hover/cell:translate-y-0">
+                                            <div class="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                                                <span class="text-[8px] font-black text-ep-primary uppercase tracking-widest italic">{{ $info['short'] }} {{ $info['year'] }}</span>
+                                                <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[7px] font-black rounded-full border border-emerald-500/30 uppercase italic">Ejecutado</span>
+                                            </div>
+
+                                            <div class="space-y-3">
+                                                @if(($data['details']['type'] ?? '') === 'inspección')
+                                                    <div class="grid grid-cols-2 gap-2">
+                                                        <div class="bg-white/5 p-2 rounded-xl text-center">
+                                                            <div class="text-[10px] font-black text-white">{{ $data['details']['passed'] ?? 0 }}</div>
+                                                            <div class="text-[6px] font-bold text-emerald-400 uppercase italic">Aprobadas</div>
+                                                        </div>
+                                                        <div class="bg-white/5 p-2 rounded-xl text-center {{ ($data['details']['failed'] ?? 0) > 0 ? 'border border-red-500/30' : '' }}">
+                                                            <div class="text-[10px] font-black {{ ($data['details']['failed'] ?? 0) > 0 ? 'text-red-500' : 'text-white' }}">{{ $data['details']['failed'] ?? 0 }}</div>
+                                                            <div class="text-[6px] font-bold text-red-400 uppercase italic">Falladas</div>
+                                                        </div>
+                                                    </div>
+                                                    @if(($data['details']['findings'] ?? 0) > 0)
+                                                    <div class="flex items-center justify-between px-2 py-1 bg-orange-500/10 border border-orange-500/20 rounded-lg">
+                                                        <span class="text-[7px] font-black text-orange-400 uppercase italic">Hallazgos Activos</span>
+                                                        <span class="text-[9px] font-black text-orange-500">{{ $data['details']['findings'] }}</span>
+                                                    </div>
+                                                    @endif
+                                                @elseif(($data['details']['type'] ?? '') === 'capacitación')
+                                                    <div class="bg-blue-500/10 border border-blue-500/20 p-2 rounded-xl flex items-center justify-between">
+                                                        <div class="flex flex-col">
+                                                            <span class="text-[10px] font-black text-white">{{ $data['details']['attendees'] ?? 0 }}</span>
+                                                            <span class="text-[6px] font-bold text-blue-400 uppercase italic">Asistentes</span>
+                                                        </div>
+                                                        <svg class="w-4 h-4 text-blue-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2"/></svg>
+                                                    </div>
+                                                @else
+                                                    <div class="text-center py-1">
+                                                        <span class="text-[10px] font-black text-white">{{ $data['count'] ?? 0 }}</span>
+                                                        <span class="text-[7px] font-bold text-indigo-400 uppercase italic ml-1">Entregables</span>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                            
+                                            {{-- Flechita del Tooltip --}}
+                                            <div class="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-ep-dark/95"></div>
+                                        </div>
+                                        @endif
 
                                         {{-- Date badge below dot — visible on activated cells --}}
                                         @if($status !== 'none')

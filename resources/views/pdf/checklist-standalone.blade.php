@@ -128,7 +128,9 @@
             <tbody>
                 @foreach($responses as $resp)
                     @php
-                        $val = strtolower((string)($resp['value'] ?? ''));
+                        $rawVal = $resp['value'] ?? '';
+                        $valStr = is_array($rawVal) ? implode(', ', $rawVal) : (string)$rawVal;
+                        $val = strtolower($valStr);
                         $isFailure = in_array($val, ['no', 'no cumple']);
                     @endphp
                     <tr class="{{ $loop->even ? 'tr-even' : '' }}">
