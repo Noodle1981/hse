@@ -18,7 +18,7 @@
         </div>
 
         <!-- Security Portal Card (Glass-morphism) -->
-        <div class="bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/10 p-10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden group/card shadow-[0_0_30px_rgba(246,146,57,0.05)]">
+        <div class="bg-white/5 backdrop-blur-xl rounded-[2.5rem] border border-white/10 p-10 shadow-[0_0_50px_rgba(0,0,0,0.5),0_0_30px_rgba(246,146,57,0.05)] relative overflow-hidden group/card">
             <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-ep-primary/50 to-transparent"></div>
             
             <form wire:submit="login" class="space-y-8">
@@ -36,7 +36,7 @@
                         <input type="email" 
                                id="email"
                                wire:model="email" 
-                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary/50 transition-all placeholder-white/5 @error('email') border-red-500/50 @enderror"
+                               class="w-full bg-black/40 border {{ $errors->has('email') ? 'border-red-500/50' : 'border-white/10' }} rounded-2xl pl-12 pr-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary/50 transition-all placeholder-white/5"
                                placeholder="correo@xamasafe.com"
                                autofocus>
                     </div>
@@ -59,7 +59,7 @@
                         <input :type="show ? 'text' : 'password'" 
                                id="password"
                                wire:model="password" 
-                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-transparent transition-all placeholder-white/5 @error('password') border-red-500/50 @enderror"
+                               class="w-full bg-black/40 border {{ $errors->has('password') ? 'border-red-500/50' : 'border-white/10' }} rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-transparent transition-all placeholder-white/5"
                                placeholder="••••••••">
                         
                         <button type="button" 
@@ -117,6 +117,122 @@
 
         
     </div>
+
+    {{-- ═══════════════════════════════════════════════════════════════ --}}
+    {{-- MODAL: CAMBIO OBLIGATORIO DE CONTRASEÑA (PRIMER INGRESO)       --}}
+    {{-- ═══════════════════════════════════════════════════════════════ --}}
+    @if($needsPasswordChange)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+        {{-- Backdrop --}}
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
+
+        {{-- Modal Card --}}
+        <div class="bg-ep-dark border border-ep-primary/30 rounded-[3rem] p-10 max-w-md w-full relative z-10 overflow-hidden animate-fade-in-up shadow-[0_25px_50px_rgba(0,0,0,0.5),0_0_60px_rgba(246,146,57,0.1)]">
+            {{-- Top accent bar --}}
+            <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-ep-primary to-transparent"></div>
+
+            {{-- Icon + Header --}}
+            <div class="text-center mb-10">
+                <div class="w-20 h-20 bg-ep-primary/20 rounded-3xl flex items-center justify-center mx-auto mb-6 text-ep-primary border border-ep-primary/30 shadow-[0_0_30px_rgba(246,146,57,0.2)]">
+                    <svg class="w-10 h-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                    </svg>
+                </div>
+                <h2 class="text-xl font-black text-white italic uppercase tracking-widest mb-2">Configurar Contraseña</h2>
+                <p class="text-[10px] font-bold text-ep-primary/60 uppercase tracking-[0.2em] italic">Primer Acceso Detectado</p>
+                <p class="text-[10px] font-bold text-white/30 uppercase tracking-widest italic mt-3 leading-relaxed">
+                    Por seguridad, debés establecer<br>tu <span class="text-ep-primary">contraseña personal</span> para continuar.
+                </p>
+            </div>
+
+            {{-- Form --}}
+            <form wire:submit.prevent="updatePassword" class="space-y-6">
+
+                {{-- Nueva Contraseña --}}
+                <div class="space-y-2 relative group/input">
+                    <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4 italic group-focus-within/input:text-ep-primary transition-colors">
+                        Nueva Contraseña
+                    </label>
+                    <div class="relative" x-data="{ show: false }">
+                        <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-white/20 group-focus-within/input:text-ep-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zM10 11V7a2 2 0 114 0v4"/>
+                            </svg>
+                        </div>
+                        <input :type="show ? 'text' : 'password'"
+                               wire:model="new_password"
+                               id="new_password"
+                               class="w-full bg-black/40 border {{ $errors->has('new_password') ? 'border-red-500/50' : 'border-white/10' }} rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary/50 transition-all placeholder-white/5"
+                               placeholder="Mínimo 6 caracteres"
+                               autofocus>
+                        <button type="button" @click="show = !show" tabindex="-1"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-ep-primary transition-colors focus:outline-none">
+                            <svg x-show="!show" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <svg x-show="show" style="display:none" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.978 9.978 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                            </svg>
+                        </button>
+                    </div>
+                    @error('new_password')
+                        <p class="mt-1 text-[10px] font-black text-red-500 uppercase italic tracking-widest ml-4 animate-pulse">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                {{-- Confirmar Contraseña --}}
+                <div class="space-y-2 relative group/input">
+                    <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4 italic group-focus-within/input:text-ep-primary transition-colors">
+                        Repetir Contraseña
+                    </label>
+                    <div class="relative" x-data="{ show2: false }">
+                        <div class="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                            <svg class="h-4 w-4 text-white/20 group-focus-within/input:text-ep-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                        </div>
+                        <input :type="show2 ? 'text' : 'password'"
+                               wire:model="new_password_confirmation"
+                               id="new_password_confirmation"
+                               class="w-full bg-black/40 border border-white/10 rounded-2xl pl-12 pr-12 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary/50 focus:border-ep-primary/50 transition-all placeholder-white/5"
+                               placeholder="Repetí la contraseña">
+                        <button type="button" @click="show2 = !show2" tabindex="-1"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-ep-primary transition-colors focus:outline-none">
+                            <svg x-show="!show2" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                            </svg>
+                            <svg x-show="show2" style="display:none" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.978 9.978 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Submit --}}
+                <div class="pt-2">
+                    <button type="submit"
+                            class="w-full relative group/btn overflow-hidden rounded-2xl transition-all active:scale-95"
+                            wire:loading.attr="disabled">
+                        <div class="absolute inset-0 bg-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.3)] transition-all"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-1000"></div>
+                        <div class="relative py-5 flex items-center justify-center gap-3">
+                            <span wire:loading.remove class="text-[11px] font-black text-white uppercase tracking-[0.3em] italic">
+                                Establecer y Acceder
+                            </span>
+                            <span wire:loading class="flex items-center gap-2">
+                                <svg class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span class="text-[11px] font-black text-white uppercase tracking-[0.3em] italic animate-pulse">Procesando...</span>
+                            </span>
+                        </div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    @endif
 
     <!-- Security Recovery Terminal (Modal) -->
     <template x-if="showResetModal">

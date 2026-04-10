@@ -68,8 +68,14 @@ class InspectionWizard extends Component
         $this->totalSteps = count($this->sections) + 2;
 
         // Inicializar respuestas con valores por defecto
+        // Se inicializan tanto las preguntas sin sección como las de cada sección
         foreach ($this->checklist->questions as $question) {
             $this->answers[$question->id] = $question->type === 'checkbox' ? [] : '';
+        }
+        foreach ($this->checklist->sections as $section) {
+            foreach ($section->questions as $question) {
+                $this->answers[$question->id] = $question->type === 'checkbox' ? [] : '';
+            }
         }
 
         // Intentar reutilizar un borrador existente si hay asignación

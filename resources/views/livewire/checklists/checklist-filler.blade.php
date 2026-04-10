@@ -63,7 +63,7 @@
                         @case('radio')
                             <div class="space-y-2">
                                 @foreach($question->options ?? [] as $option)
-                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                    <label wire:key="fill-q{{ $question->id }}-radio-{{ $loop->index }}" class="flex items-center space-x-3 cursor-pointer">
                                         <input type="radio" 
                                                wire:model="answers.{{ $question->id }}"
                                                value="{{ $option }}"
@@ -77,7 +77,7 @@
                         @case('checkbox')
                             <div class="space-y-2">
                                 @foreach($question->options ?? [] as $option)
-                                    <label class="flex items-center space-x-3 cursor-pointer">
+                                    <label wire:key="fill-q{{ $question->id }}-check-{{ $loop->index }}" class="flex items-center space-x-3 cursor-pointer">
                                         <input type="checkbox" 
                                                wire:model="answers.{{ $question->id }}"
                                                value="{{ $option }}"

@@ -15,41 +15,94 @@ class Login extends Component
     public string $password = '';
     public bool $remember = false;
 
+    public bool $needsPasswordChange = false;
+    public ?int $pendingUserId = null;
+    public string $new_password = '';
+    public string $new_password_confirmation = '';
+
     protected $rules = [
         'email' => 'required|email',
-        'password' => 'required|min:6',
+        'password' => 'required',
     ];
 
     protected $messages = [
         'email.required' => 'El correo es requerido',
         'email.email' => 'Ingrese un correo válido',
         'password.required' => 'La contraseña es requerida',
-        'password.min' => 'La contraseña debe tener al menos 6 caracteres',
+        'new_password.required' => 'La nueva contraseña es requerida',
+        'new_password.min' => 'La nueva contraseña debe tener al menos 6 caracteres',
+        'new_password.confirmed' => 'Las contraseñas no coinciden',
     ];
 
     public function login()
     {
-        $this->validate();
+        $this->validate([
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
 
-        if (Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            session()->regenerate();
+        $credentials = ['email' => $this->email, 'password' => $this->password];
+        $user = \App\Models\User::where('email', $this->email)->first();
 
-            /** @var \App\Models\User $user */
-            $user = Auth::user();
+        // Si tenemos borrado lógico o estado inactivo, es buena práctica comprobarlo.
+        // Pero para no romper si no hay estado, solo checkeamos si estado existe
+        if ($user && $user->estado === 'inactivo') {
+            $this->addError('email', 'El usuario se encuentra inactivo.');
+            return;
+        }
 
-            if ($user->isSuperAdmin()) {
-                return redirect()->route('admin.dashboard');
+        if (Auth::validate($credentials)) {
+            // El super_admin nunca es forzado a cambiar contraseña (se gestiona fuera del panel)
+            $requiresChange = $user->must_change_password && !$user->isSuperAdmin();
+
+            if ($requiresChange) {
+                $this->pendingUserId = $user->id;
+                $this->needsPasswordChange = true;
+                return;
             }
 
-            if ($user->isTechnician()) {
-                return redirect()->route('tecnico.checklists.tasks.index');
-            }
-
-            // Gestor / Administrador → Vista operativa liviana (sin KPIs pesados)
-            return redirect()->route('gestor.visits.history');
+            Auth::login($user, $this->remember);
+            return $this->redirectUser($user);
         }
 
         $this->addError('email', 'Las credenciales no son válidas.');
+    }
+
+    public function updatePassword()
+    {
+        $this->validate([
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        if (!$this->pendingUserId) {
+            return;
+        }
+
+        $user = \App\Models\User::find($this->pendingUserId);
+        if ($user) {
+            $user->update([
+                'password' => \Illuminate\Support\Facades\Hash::make($this->new_password),
+                'must_change_password' => false,
+            ]);
+
+            Auth::login($user, $this->remember);
+            return $this->redirectUser($user);
+        }
+    }
+
+    private function redirectUser($user)
+    {
+        session()->regenerate();
+
+        if ($user->isSuperAdmin()) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($user->isTechnician()) {
+            return redirect()->route('tecnico.checklists.tasks.index');
+        }
+
+        return redirect()->route('gestor.visits.history');
     }
 
     public function render()

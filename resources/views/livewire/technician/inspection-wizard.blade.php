@@ -157,7 +157,7 @@
                                                         $isSelected = ($answers[$question->id] ?? '') === $option;
                                                         $isSuccess = in_array($option, ['Sí', 'CUMPLE', 'BUENO', 'APTO', 'CONFORME']);
                                                     @endphp
-                                                    <label class="relative flex flex-col items-center justify-center p-4 rounded-2xl border cursor-pointer group/opt transition-all duration-300
+                                                    <label wire:key="q{{ $question->id }}-radio-{{ $loop->index }}" class="relative flex flex-col items-center justify-center p-4 rounded-2xl border cursor-pointer group/opt transition-all duration-300
                                                         {{ $isSelected 
                                                             ? ($isFailure 
                                                                 ? 'bg-red-500/20 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' 
@@ -197,7 +197,7 @@
                                                             $isChecked = in_array($option, (array)($answers[$question->id] ?? []));
                                                             $isMissing = $isRequired && !$isChecked;
                                                         @endphp
-                                                        <label class="flex items-center space-x-4 p-5 rounded-2xl border transition-all
+                                                        <label wire:key="q{{ $question->id }}-check-{{ $loop->index }}" class="flex items-center space-x-4 p-5 rounded-2xl border transition-all
                                                             {{ $isMissing 
                                                                 ? 'bg-red-500/10 border-red-500/40' 
                                                                 : 'bg-white/5 border-white/5' }}

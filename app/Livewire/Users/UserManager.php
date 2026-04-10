@@ -100,7 +100,7 @@ class UserManager extends Component
         if (!$this->editingId) {
             $rules['password'] = 'required|string|min:6';
         } else {
-            $rules['password'] = 'nullable|string|min:6';
+            $rules['password'] = 'required|string|min:6';
         }
 
         $this->validate($rules);
@@ -129,6 +129,7 @@ class UserManager extends Component
 
         if ($this->password) {
             $data['password'] = Hash::make($this->password);
+            $data['must_change_password'] = true;
         }
 
         if ($this->editingId) {

@@ -89,25 +89,28 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nombres</label>
-                                <input type="text" wire:model="nombres" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
+                                <input type="text" wire:model="nombres" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
                                 @error('nombres') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Apellidos</label>
-                                <input type="text" wire:model="apellidos" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
+                                <input type="text" wire:model="apellidos" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
                                 @error('apellidos') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Corporativo</label>
-                                <input type="email" wire:model="email" autocomplete="off" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase">
+                                <input type="email" wire:model="email" autocomplete="off" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase">
                                 @error('email') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
 
                             <div class="space-y-2">
-                                <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Contraseña {{ $editingId ? '(Opcional)' : '(Requerida)' }}</label>
-                                <input type="password" wire:model="password" autocomplete="new-password" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
+                                <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Contraseña (Obligatorio)</label>
+                                <input type="password" wire:model="password" autocomplete="new-password" required minlength="6" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all">
+                                <p class="text-[8px] font-bold text-ep-primary/60 uppercase tracking-widest mt-2 ml-4 italic">
+                                    * En caso que el usuario se olvido la contraseña generar una nueva
+                                </p>
                                 @error('password') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
 
@@ -122,12 +125,12 @@
 
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Matrícula ID</label>
-                                <input type="text" wire:model="matricula" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase" placeholder="MAT-000">
+                                <input type="text" wire:model="matricula" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase" placeholder="MAT-000">
                                 @error('matricula') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
                             <div class="space-y-2">
                                 <label class="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Teléfono Enlace</label>
-                                <input type="text" wire:model="telefono" class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase" placeholder="+54 9 11 ...">
+                                <input type="text" wire:model="telefono" required class="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all uppercase" placeholder="+54 9 11 ...">
                                 @error('telefono') <span class="text-red-500 text-[10px] font-black italic ml-4">{{ $message }}</span> @enderror
                             </div>
                         </div>

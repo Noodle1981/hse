@@ -29,7 +29,7 @@
                         $isSelected = ($answers[$question->id] ?? '') === $option;
                         $isSuccess = in_array($option, ['Sí', 'CUMPLE', 'BUENO', 'APTO', 'CONFORME']);
                     @endphp
-                    <label class="relative flex flex-col items-center justify-center p-4 rounded-2xl border cursor-pointer group/opt transition-all duration-300
+                    <label wire:key="emu-q{{ $question->id }}-radio-{{ $loop->index }}" class="relative flex flex-col items-center justify-center p-4 rounded-2xl border cursor-pointer group/opt transition-all duration-300
                         {{ $isSelected 
                             ? ($isFailure 
                                 ? 'bg-red-500/20 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.2)]' 
@@ -57,7 +57,7 @@
                         {{ $isSelectedFailure ? 'border-red-500 ring-2 ring-red-500/20 bg-red-500/5' : 'border-white/10 focus:ring-ep-primary focus:border-transparent' }}">
                     <option value="" class="bg-ep-dark text-white/40">Sincronizar opción...</option>
                     @foreach($question->options as $option)
-                        <option value="{{ $option }}" class="bg-ep-dark text-white uppercase italic font-black">{{ $option }}</option>
+                        <option wire:key="emu-q{{ $question->id }}-opt-{{ $loop->index }}" value="{{ $option }}" class="bg-ep-dark text-white uppercase italic font-black">{{ $option }}</option>
                     @endforeach
                 </select>
                 @if($isSelectedFailure)
@@ -73,7 +73,7 @@
                         $isSelected = in_array($option, (array)($answers[$question->id] ?? []));
                         $isOptionFailure = in_array($option, $question->failure_values ?? []);
                     @endphp
-                    <label class="flex items-center space-x-4 p-5 rounded-2xl border transition-all cursor-pointer shadow-inner
+                    <label wire:key="emu-q{{ $question->id }}-check-{{ $loop->index }}" class="flex items-center space-x-4 p-5 rounded-2xl border transition-all cursor-pointer shadow-inner
                                 {{ $isSelected 
                                     ? ($isOptionFailure ? 'bg-red-500/20 border-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'bg-ep-primary/20 border-ep-primary/40') 
                                     : 'bg-white/5 border-white/5 hover:bg-white/10' }}">
