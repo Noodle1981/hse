@@ -182,7 +182,7 @@
         @foreach($visit->checklistCompletions as $completion)
             <div style="margin-bottom: 20px;">
                 <div style="background: #1e293b; color: white; padding: 5px 10px; font-size: 9px; font-weight: bold;">
-                    CONTROL: {{ $completion->assignment->checklist->title }}
+                    CONTROL: {{ $completion->assignment?->checklist?->title ?? 'Protocolo No Identificado' }}
                 </div>
                 <table class="detail-table">
                     <thead>

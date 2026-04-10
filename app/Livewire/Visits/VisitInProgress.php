@@ -148,40 +148,66 @@ class VisitInProgress extends Component
     {
         $this->highlightTaskId = $this->task_id;
 
-        if ($this->source === 'contract' && $this->type === 'Inspección' && $this->task_id) {
-            $checklistId = $this->task_id;
+        if ($this->source === 'contract' && $this->task_id) {
+            $plan = \App\Models\AnnualPlan::with('checklist')->find($this->task_id);
+            if (!$plan) return;
 
-            // Handle name-based matching if task_id starts with 'name:'
-            if (str_starts_with($this->task_id, 'name:')) {
-                $name = str_replace('name:', '', $this->task_id);
-                $checklist = DynamicChecklist::where('title', $name)->first();
-                if ($checklist) {
-                    $checklistId = $checklist->id;
-                } else {
-                    return; // No match found
+            if ($this->type === 'Inspección') {
+                $checklistId = $plan->checklist_id;
+                
+                // Si no hay ID en el plan, intentar por nombre
+                if (!$checklistId && $plan->activity_name) {
+                    $checklist = DynamicChecklist::where('title', $plan->activity_name)->first();
+                    if ($checklist) $checklistId = $checklist->id;
+                }
+
+                if ($checklistId) {
+                    $exists = ChecklistAssignment::where('user_id', Auth::id())
+                        ->where('sede_id', $this->visit->sede_id)
+                        ->where('dynamic_checklist_id', $checklistId)
+                        ->whereIn('status', ['pending', 'in_progress'])
+                        ->exists();
+
+                    if (!$exists) {
+                        ChecklistAssignment::create([
+                            'dynamic_checklist_id' => $checklistId,
+                            'user_id' => Auth::id(),
+                            'empresa_id' => $this->visit->empresa_id,
+                            'sede_id' => $this->visit->sede_id,
+                            'frequency' => 'once',
+                            'status' => 'pending',
+                            'due_date' => now(),
+                            'notes' => 'Vínculo automático desde Plan Anual'
+                        ]);
+                    }
+                }
+            } elseif ($this->type === 'Capacitación') {
+                $exists = \App\Models\Training::where('user_id', Auth::id())
+                    ->where('sede_id', $this->visit->sede_id)
+                    ->where('title', $plan->activity_name)
+                    ->where('status', 'scheduled')
+                    ->whereDate('date', now())
+                    ->exists();
+                
+                if (!$exists) {
+                    \App\Models\Training::create([
+                        'title' => $plan->activity_name,
+                        'description' => $plan->checklist?->description ?? 'Capacitación programada en Plan Anual',
+                        'user_id' => Auth::id(),
+                        'empresa_id' => $this->visit->empresa_id,
+                        'sede_id' => $this->visit->sede_id,
+                        'dynamic_checklist_id' => $plan->checklist_id,
+                        'date' => now(),
+                        'duration' => 60,
+                        'type' => 'Presencial',
+                        'status' => 'scheduled',
+                        'notes' => 'Vínculo automático desde Plan Anual'
+                    ]);
                 }
             }
 
-            $exists = ChecklistAssignment::where('user_id', Auth::id())
-                ->where('sede_id', $this->visit->sede_id)
-                ->where('dynamic_checklist_id', $checklistId)
-                ->whereIn('status', ['pending', 'in_progress'])
-                ->exists();
-
-            if (!$exists) {
-                ChecklistAssignment::create([
-                    'dynamic_checklist_id' => $checklistId,
-                    'user_id' => Auth::id(),
-                    'empresa_id' => $this->visit->empresa_id,
-                    'sede_id' => $this->visit->sede_id,
-                    'frequency' => 'once',
-                    'status' => 'pending',
-                    'due_date' => now(),
-                    'notes' => 'Vínculo automático desde Plan Anual'
-                ]);
-                
-                $this->loadChecklists();
-            }
+            // Recargar para mostrar los cambios
+            $this->loadChecklists();
         }
     }
 

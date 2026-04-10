@@ -48,7 +48,7 @@ class VisitChecklistCompletion extends Model
         $responses = $this->responses ?? [];
         if (empty($responses)) return [];
 
-        $checklist = $this->assignment->checklist ?? null;
+        $checklist = $this->assignment?->checklist ?? null;
         if (!$checklist) {
             return array_map(function($resp) {
                 return [
@@ -84,7 +84,7 @@ class VisitChecklistCompletion extends Model
     public function getFailureAnalysisAttribute()
     {
         $responses = $this->responses ?? [];
-        $checklist = $this->assignment->checklist ?? null;
+        $checklist = $this->assignment?->checklist ?? null;
         
         if (!$checklist) {
             return [

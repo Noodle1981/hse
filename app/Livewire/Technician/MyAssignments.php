@@ -340,7 +340,7 @@ class MyAssignments extends Component
             $daysRemaining = (int) $now->diffInDays($effectiveDueDate, false);
 
             return (object)[
-                'id' => null,
+                'id' => $p->id,
                 'dynamic_checklist_id' => $p->checklist_id,
                 'checklist' => $p->checklist ?? (object)['title' => $p->activity_name, 'registry_code' => $p->activity_code],
                 'sede' => $p->sede,
