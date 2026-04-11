@@ -14,7 +14,9 @@
         if (!this.search) return this.options;
         return this.options.filter(o => o.label.toLowerCase().includes(this.search.toLowerCase()));
     }
-}" @click.outside="open = false">
+}" 
+x-effect="options = @js($options)"
+@click.outside="open = false">
     @if($label)
         <label class="flex items-center gap-2 text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1">
             @if($icon)

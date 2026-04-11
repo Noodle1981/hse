@@ -60,7 +60,7 @@ class MyAssignments extends Component
         $this->resetPage();
     }
 
-    public function updatedSelectedSede()
+    public function updatedSelectedSede($value)
     {
         $this->resetPage();
     }
@@ -103,14 +103,22 @@ class MyAssignments extends Component
 
     public function render(\App\Services\VisitService $visitService)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
+        
+        // IDs de Sedes y Empresas ASIGNADAS al técnico (Fuente única de verdad)
+        $assignedSedes = $user->sedes()->select('sedes.id', 'sedes.empresa_id')->get();
+        $assignedSedeIds = $assignedSedes->pluck('id')->toArray();
+        $assignedEmpresaIds = $assignedSedes->pluck('empresa_id')->unique()->toArray();
+
         $this->activeVisit = $visitService->getActiveVisit($user);
         
         $monthName = strtolower(\Carbon\Carbon::create()->month($this->selectedMonth)->format('F'));
 
         // 1. Manual Assignments (Solicitudes)
-        $manualQuery = ChecklistAssignment::with(['checklist', 'sede', 'empresa', 'visitCompletion.visit'])
+        $manualQuery = ChecklistAssignment::with(['checklist.categoryRelation', 'checklist.questions', 'sede', 'empresa', 'visitCompletion.visit'])
             ->where('user_id', $user->id)
+            ->whereIn('sede_id', $assignedSedeIds)
             ->when($this->selectedMonth, function($q) {
                 $q->whereMonth('due_date', $this->selectedMonth);
             })
@@ -126,9 +134,6 @@ class MyAssignments extends Component
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
             })
-            ->when($this->statusFilter, function ($q) {
-                $q->where('status', $this->statusFilter);
-            })
             // EXCLUIR: Asignaciones creadas automáticamente por el sistema para respaldar tareas del plan anual/mensual
             // Esto evita el duplicado "Contrato" vs "Solicitud" en la vista del técnico
             ->where(function($q) {
@@ -140,8 +145,9 @@ class MyAssignments extends Component
             });
 
         // 1.1 Manual Trainings (Solicitudes de Capacitación)
-        $trainingsQuery = \App\Models\Training::with(['sede', 'empresa'])
+        $trainingsQuery = \App\Models\Training::with(['sede', 'empresa', 'dynamicChecklist.categoryRelation', 'dynamicChecklist.questions'])
             ->where('user_id', $user->id)
+            ->whereIn('sede_id', $assignedSedeIds)
             ->where('status', '!=', 'completed')
             ->when($this->selectedMonth, function($q) {
                 $q->whereMonth('date', $this->selectedMonth);
@@ -155,14 +161,12 @@ class MyAssignments extends Component
             })
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
-            })
-            ->when($this->statusFilter, function ($q) {
-                $q->where('status', $this->statusFilter);
             });
 
         // 1.2 Manual Reports (Informes Maestros en Borrador)
         $reportsQuery = \App\Models\MasterReport::with(['sede', 'sede.empresa'])
             ->where('user_id', $user->id)
+            ->whereIn('sede_id', $assignedSedeIds)
             ->where('estado', '!=', 'finalizado')
             ->when($this->selectedMonth, function($q) {
                 $q->whereMonth('created_at', $this->selectedMonth);
@@ -185,6 +189,11 @@ class MyAssignments extends Component
         $manual = $manualQuery->get()->map(function($a) use ($now) {
             $dueDate = $a->due_date ? \Carbon\Carbon::parse($a->due_date) : null;
             $daysRemaining = $dueDate ? (int) $now->diffInDays($dueDate, false) : null;
+            
+            // Cálculos dinámicos para el técnico
+            $totalPoints = $a->checklist?->questions->count() ?? 0;
+            $criticalPoints = $a->checklist?->questions->filter(fn($q) => !empty($q->failure_values))->count() ?? 0;
+
             return (object)[
                 'id' => $a->id,
                 'dynamic_checklist_id' => $a->dynamic_checklist_id,
@@ -204,6 +213,11 @@ class MyAssignments extends Component
                 'frequency_label' => method_exists($a, 'getFrequencyLabel') ? $a->getFrequencyLabel() : 'Manual',
                 'notes' => $a->notes,
                 'description' => $a->checklist?->description,
+                'category_name' => $a->checklist?->categoryRelation?->name,
+                'category_description' => $a->checklist?->categoryRelation?->description,
+                'total_points' => $totalPoints,
+                'critical_points' => $criticalPoints,
+                'trained_checklist' => null,
                 'trainer_name' => null,
             ];
         });
@@ -226,11 +240,16 @@ class MyAssignments extends Component
                 'is_warning' => $daysRemaining <= 7 && $daysRemaining >= 0 && $r->estado !== 'finalizado',
                 'registry_code' => 'REP-' . $r->id,
                 'created_at' => $r->created_at,
-                'inspection' => null,
                 'frequency_label' => 'Manual',
                 'periodo' => $r->periodo,
+                'periodo_label' => $r->formatted_period,
                 'notes' => null,
                 'description' => null,
+                'category_name' => 'Informe Maestro',
+                'category_description' => 'Redacción de informe técnico consolidado del periodo.',
+                'total_points' => 0,
+                'critical_points' => 0,
+                'trained_checklist' => null,
                 'trainer_name' => null,
             ];
         });
@@ -238,6 +257,11 @@ class MyAssignments extends Component
         $manualTrainings = $trainingsQuery->get()->map(function($t) use ($now) {
             $dueDate = $t->date ? \Carbon\Carbon::parse($t->date) : null;
             $daysRemaining = $dueDate ? (int) $now->diffInDays($dueDate, false) : null;
+
+            // Info del checklist a capacitar
+            $trainedChecklistTitle = $t->dynamicChecklist?->title;
+            $totalPoints = $t->dynamicChecklist?->questions->count() ?? 0;
+
             return (object)[
                 'id' => $t->id,
                 'dynamic_checklist_id' => $t->dynamic_checklist_id,
@@ -259,6 +283,10 @@ class MyAssignments extends Component
                 'type' => $t->type,
                 'notes' => $t->notes,
                 'description' => $t->description,
+                'category_name' => $t->dynamicChecklist?->categoryRelation?->name ?? 'Capacitación',
+                'category_description' => $t->dynamicChecklist?->categoryRelation?->description,
+                'trained_checklist' => $trainedChecklistTitle,
+                'total_points' => $totalPoints,
                 'trainer_name' => $t->trainer_name,
             ];
         });
@@ -266,8 +294,8 @@ class MyAssignments extends Component
         // 2. Annual Plan Tasks (Contratos)
         $queryMonth = now()->year . '-' . str_pad($this->selectedMonth, 2, '0', STR_PAD_LEFT);
         
-        $contractQuery = \App\Models\AnnualPlan::with(['checklist', 'sede', 'sede.empresa'])
-            ->whereIn('sede_id', $user->sedes->pluck('id'))
+        $contractQuery = \App\Models\AnnualPlan::with(['checklist.categoryRelation', 'checklist.questions', 'sede', 'sede.empresa'])
+            ->whereIn('sede_id', $assignedSedeIds)
             ->where('scheduled_months', 'like', '%"' . $queryMonth . '"%')
             ->when($this->search, function ($q) {
                 $q->where(function($sub) {
@@ -283,14 +311,6 @@ class MyAssignments extends Component
             })
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
-            })
-            ->when($this->statusFilter, function ($q) {
-                // Si filtra por 'pending', incluimos 'scheduled' (programadas)
-                if ($this->statusFilter === 'pending') {
-                    $q->whereIn('status', ['pending', 'scheduled']);
-                } else {
-                    $q->where('status', $this->statusFilter);
-                }
             });
 
         // Optimization: Fetch all completed inspections for this user/month to map statuses
@@ -303,7 +323,17 @@ class MyAssignments extends Component
                 return $i->sede_id . '_' . $i->dynamic_checklist_id;
             });
 
-        $contract = $contractQuery->get()->map(function($p) use ($now, $completedInspections) {
+        // Fetch completed trainings for this user/month to map contract training statuses
+        $completedTrainings = \App\Models\Training::where('user_id', $user->id)
+            ->whereMonth('updated_at', $this->selectedMonth)
+            ->whereYear('updated_at', now()->year)
+            ->where('status', 'completed')
+            ->get()
+            ->groupBy(function($t) {
+                return $t->sede_id . '_' . strtolower(trim($t->title));
+            });
+
+        $contract = $contractQuery->get()->map(function($p) use ($now, $completedInspections, $completedTrainings) {
             $monthEndDate = \Carbon\Carbon::create(now()->year, $this->selectedMonth)->endOfMonth();
 
             // Use specific execution date if the admin set one, otherwise default to end of month
@@ -330,8 +360,14 @@ class MyAssignments extends Component
             $key = $p->sede_id . '_' . $p->checklist_id;
             $inspection = isset($completedInspections[$key]) ? $completedInspections[$key]->first() : null;
 
+            // Check if there is a completed training for this plan task
+            $trainingKey = $p->sede_id . '_' . strtolower(trim($p->activity_name));
+            $completedTraining = ($p->category === 'Capacitación') 
+                ? (isset($completedTrainings[$trainingKey]) ? $completedTrainings[$trainingKey]->first() : null)
+                : null;
+
             $status = 'scheduled';
-            if ($inspection) {
+            if ($inspection || $completedTraining) {
                 $status = 'completed';
             } elseif ($activeAssignment) {
                 $status = $activeAssignment->status; // 'in_progress' o 'pending'
@@ -354,6 +390,10 @@ class MyAssignments extends Component
             $dueDate = $inspection ? $inspection->completed_at : $effectiveDueDate;
             $daysRemaining = (int) $now->diffInDays($effectiveDueDate, false);
 
+            // Cálculos dinámicos para el técnico
+            $totalPoints = $p->checklist?->questions->count() ?? 0;
+            $criticalPoints = $p->checklist?->questions->filter(fn($q) => !empty($q->failure_values))->count() ?? 0;
+
             return (object)[
                 'id' => $p->id,
                 'dynamic_checklist_id' => $p->checklist_id,
@@ -369,16 +409,21 @@ class MyAssignments extends Component
                 'is_warning' => $daysRemaining <= 7 && $daysRemaining >= 0 && $status !== 'completed',
                 'registry_code' => $p->checklist?->registry_code ?? $p->activity_code,
                 'created_at' => $p->created_at,
-                'inspection' => $inspection,
+                'inspection' => $inspection ?? $completedTraining,
                 'report_id' => $reportId,
                 'task_id' => $p->id,
                 'periodo' => $periodo,
+                'periodo_label' => \Carbon\Carbon::create(now()->year, $this->selectedMonth)->translatedFormat('F Y'),
                 'frequency_label' => $p->frequency === 'none' ? 'Mensual' : ucfirst($p->frequency),
                 'duration' => ($p->category === 'Capacitación') ? '60 min' : null,
                 'type' => ($p->category === 'Capacitación') ? 'Presencial' : null,
-                'periodo' => ($p->category === 'Informe') ? \Carbon\Carbon::create(now()->year, $this->selectedMonth)->translatedFormat('F Y') : null,
                 'notes' => null,
                 'description' => $p->checklist?->description,
+                'category_name' => $p->checklist?->categoryRelation?->name ?? $p->category,
+                'category_description' => $p->checklist?->categoryRelation?->description,
+                'total_points' => $totalPoints,
+                'critical_points' => $criticalPoints,
+                'trained_checklist' => ($p->category === 'Capacitación') ? ($p->checklist?->title ?? $p->activity_name) : null,
                 'trainer_name' => null,
             ];
         });
@@ -387,6 +432,22 @@ class MyAssignments extends Component
         $allInspections = $manual->concat($contract->where('category', 'Inspección'))->sortByDesc('created_at');
         $allTrainings = $manualTrainings->concat($contract->where('category', 'Capacitación'))->sortByDesc('created_at');
         $allReports = $manualReports->concat($contract->where('category', 'Informe'))->sortByDesc('created_at');
+
+        // Filtrado Post-Procesado por Estado (CRÍTICO para contratos dinámicos)
+        if ($this->statusFilter) {
+            $filter = function($item) {
+                return match($this->statusFilter) {
+                    'programada' => $item->status === 'scheduled',
+                    'solicitada' => $item->status === 'pending',
+                    'in_progress' => $item->status === 'in_progress',
+                    'finalizada' => in_array($item->status, ['completed', 'finalizado']),
+                    default => $item->status === $this->statusFilter
+                };
+            };
+            $allInspections = $allInspections->filter($filter);
+            $allTrainings = $allTrainings->filter($filter);
+            $allReports = $allReports->filter($filter);
+        }
 
         // Recalcular KPIs con la data unificada
         $this->strategicKPIs = $this->getStrategicKPIs($user, $allInspections, $allTrainings, $allReports);
@@ -408,15 +469,11 @@ class MyAssignments extends Component
             ['path' => \Illuminate\Pagination\Paginator::resolveCurrentPath()]
         );
 
-        // Fetch filter data
-        $empresas = Empresa::whereHas('checklistAssignments', function ($q) use ($user) {
-            $q->where('user_id', $user->id);
-        })->orWhereIn('id', $user->sedes->pluck('empresa_id'))->orderBy('nombre')->get();
+        // Fetch filter data - RESTRINGIDO A DATOS DEL TÉCNICO
+        $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->orderBy('nombre')->get();
 
         $sedes = $this->selectedEmpresa
-            ? Sede::where('empresa_id', $this->selectedEmpresa)
-                ->whereIn('id', $user->sedes->pluck('id'))
-                ->orderBy('nombre_sede')->get()
+            ? Sede::whereIn('id', $assignedSedeIds)->where('empresa_id', $this->selectedEmpresa)->orderBy('nombre_sede')->get()
             : collect();
 
         return view('livewire.technician.my-assignments', [

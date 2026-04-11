@@ -295,9 +295,9 @@
 
         <div class="section no-break">
             <div class="section-header border-primary-left"><h3>2. Protocolos e Inspecciones (Trabajos Extra / Fuera de Contrato)</h3></div>
-                    No se registraron inspecciones fuera de contrato en este periodo.
-                </div>
-            @endif
+            <div style="font-size: 8px; color: #7e8299; font-style: italic;">
+                No se registraron inspecciones fuera de contrato en este periodo.
+            </div>
             @if($report->observaciones_checklists)
                 <div class="obs-container">
                     <div class="observation-label">Análisis de Inspecciones:</div>
@@ -448,8 +448,6 @@
         <div style="float: right;" class="page-number"></div>
         <div class="clear"></div>
     </div>
-</body>
-</html>
-   </div>
+    </div>
 </body>
 </html>

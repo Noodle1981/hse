@@ -325,37 +325,37 @@
                                                 <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[7px] font-black rounded-full border border-emerald-500/30 uppercase italic">Ejecutado</span>
                                             </div>
 
-                                            <div class="space-y-3">
-                                                @if(($data['details']['type'] ?? '') === 'inspección')
-                                                    <div class="grid grid-cols-2 gap-2">
-                                                        <div class="bg-white/5 p-2 rounded-xl text-center">
-                                                            <div class="text-[10px] font-black text-white">{{ $data['details']['passed'] ?? 0 }}</div>
-                                                            <div class="text-[6px] font-bold text-emerald-400 uppercase italic">Aprobadas</div>
-                                                        </div>
-                                                        <div class="bg-white/5 p-2 rounded-xl text-center {{ ($data['details']['failed'] ?? 0) > 0 ? 'border border-red-500/30' : '' }}">
-                                                            <div class="text-[10px] font-black {{ ($data['details']['failed'] ?? 0) > 0 ? 'text-red-500' : 'text-white' }}">{{ $data['details']['failed'] ?? 0 }}</div>
-                                                            <div class="text-[6px] font-bold text-red-400 uppercase italic">Falladas</div>
-                                                        </div>
+                                            <div class="space-y-2">
+                                                {{-- 1. Fecha de Ejecución --}}
+                                                <div class="flex items-center justify-between px-3 py-2 bg-white/5 rounded-xl border border-white/5">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-[6px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Ejecución</span>
+                                                        <span class="text-[9px] font-black text-white italic tracking-tight leading-none">{{ $data['details']['execution_date'] ?? 'Pendiente' }}</span>
                                                     </div>
-                                                    @if(($data['details']['findings'] ?? 0) > 0)
-                                                    <div class="flex items-center justify-between px-2 py-1 bg-orange-500/10 border border-orange-500/20 rounded-lg">
-                                                        <span class="text-[7px] font-black text-orange-400 uppercase italic">Hallazgos Activos</span>
-                                                        <span class="text-[9px] font-black text-orange-500">{{ $data['details']['findings'] }}</span>
+                                                    <svg class="w-3.5 h-3.5 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2.5"/></svg>
+                                                </div>
+
+                                                {{-- 2. Tiempo de Demora --}}
+                                                <div class="flex items-center justify-between px-3 py-2 bg-white/5 rounded-xl border border-white/5">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-[6px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Duración</span>
+                                                        <span class="text-[9px] font-black text-indigo-400 italic tracking-tight leading-none">
+                                                            @if(($data['details']['duration'] ?? 0) > 0)
+                                                                {{ $data['details']['duration'] }} <span class="text-[7px] font-bold">MIN</span>
+                                                            @else
+                                                                S/D
+                                                            @endif
+                                                        </span>
                                                     </div>
-                                                    @endif
-                                                @elseif(($data['details']['type'] ?? '') === 'capacitación')
-                                                    <div class="bg-blue-500/10 border border-blue-500/20 p-2 rounded-xl flex items-center justify-between">
-                                                        <div class="flex flex-col">
-                                                            <span class="text-[10px] font-black text-white">{{ $data['details']['attendees'] ?? 0 }}</span>
-                                                            <span class="text-[6px] font-bold text-blue-400 uppercase italic">Asistentes</span>
-                                                        </div>
-                                                        <svg class="w-4 h-4 text-blue-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" stroke-width="2"/></svg>
-                                                    </div>
-                                                @else
-                                                    <div class="text-center py-1">
-                                                        <span class="text-[10px] font-black text-white">{{ $data['count'] ?? 0 }}</span>
-                                                        <span class="text-[7px] font-bold text-indigo-400 uppercase italic ml-1">Entregables</span>
-                                                    </div>
+                                                    <svg class="w-3.5 h-3.5 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2.5"/></svg>
+                                                </div>
+
+                                                {{-- 3. Asistentes (Solo Capacitación) --}}
+                                                @if(($data['details']['type'] ?? '') === 'capacitación' && ($data['details']['attendees'] ?? 0) > 0)
+                                                <div class="flex items-center justify-between px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                                                    <span class="text-[7px] font-black text-blue-400 uppercase italic">Asistentes Registrados</span>
+                                                    <span class="text-[9px] font-black text-white">{{ $data['details']['attendees'] }}</span>
+                                                </div>
                                                 @endif
                                             </div>
                                             

@@ -66,6 +66,34 @@ class AnnualContractDashboard extends Component
 
         if ($this->sedeId) {
             $this->selectedCompanyId = Sede::find($this->sedeId)?->empresa_id;
+            $this->detectContractSettings();
+        }
+    }
+
+    /**
+     * Detecta la duración e inicio del contrato basándose en planes existentes
+     */
+    private function detectContractSettings()
+    {
+        if (!$this->sedeId) return;
+
+        $latestPlan = AnnualPlan::where('sede_id', $this->sedeId)
+            ->latest('id')
+            ->first();
+
+        if ($latestPlan && $latestPlan->period_start && $latestPlan->period_end) {
+            $this->contractStart = $latestPlan->period_start->format('Y-m');
+            
+            // Calcular diferencia en meses
+            $months = (int) $latestPlan->period_start->diffInMonths($latestPlan->period_end) + 1;
+            
+            // Solo asignar si es una opción válida en el select (3, 6, 12, 24)
+            if (in_array($months, [3, 6, 12, 24])) {
+                $this->contractDuration = $months;
+            } else {
+                // Fallback inteligente si no es exacto
+                $this->contractDuration = $months > 12 ? 24 : ($months > 6 ? 12 : ($months > 3 ? 6 : 3));
+            }
         }
     }
 
@@ -78,6 +106,12 @@ class AnnualContractDashboard extends Component
         } else {
             $this->sedeId = $user->sedes()->where('empresa_id', $value)->first()?->id;
         }
+        $this->detectContractSettings();
+    }
+
+    public function updatedSedeId($value)
+    {
+        $this->detectContractSettings();
     }
 
     public function updatedCategory($value)
@@ -290,7 +324,7 @@ class AnnualContractDashboard extends Component
         $inspections = \App\Models\DynamicInspection::where('sede_id', $this->sedeId)
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->where('status', 'completed')
-            ->with(['checklist:id,title'])
+            ->with(['checklist:id,title', 'assignment.visitCompletion.visit'])
             ->withCount(['hallazgos' => function($q) {
                 $q->where('estado', '!=', 'cerrado');
             }])
@@ -302,6 +336,7 @@ class AnnualContractDashboard extends Component
         // 2. Capacitaciones Estándar
         $trainings = \App\Models\Training::where('sede_id', $this->sedeId)
             ->whereBetween('date', [$startDate, $endDate])
+            ->with(['visitTrainings.visit'])
             ->withCount('attendances')
             ->get()
             ->groupBy(function($t) {
@@ -354,6 +389,8 @@ class AnnualContractDashboard extends Component
                 $passed = 0;
                 $failed = 0;
                 $attendees = 0;
+                $executionDate = null;
+                $duration = 0;
 
                 if (!in_array($monthValue, $scheduledMonths)) {
                     $data[$plan->id][$monthValue] = [
@@ -373,6 +410,16 @@ class AnnualContractDashboard extends Component
                         if ($inp->result === 'Pass') $passed++;
                         else $failed++;
                         $findings += $inp->hallazgos_count;
+                        
+                        $executionDate = $inp->completed_at?->format('d/m/Y');
+                        
+                        // Intentar obtener duración de la visita
+                        if ($inp->assignment?->visitCompletion?->visit) {
+                            $visit = $inp->assignment->visitCompletion->visit;
+                            if ($visit->start_time && $visit->end_time) {
+                                $duration = (int) $visit->start_time->diffInMinutes($visit->end_time);
+                            }
+                        }
                     }
                 } elseif ($plan->category === 'Capacitación') {
                     // Solo capacitaciones que coincidan con el nombre de la actividad pactada
@@ -381,6 +428,14 @@ class AnnualContractDashboard extends Component
                     foreach ($matchingCaps as $cap) {
                         $attendees += $cap->attendances_count;
                         $count++;
+                        $executionDate = $cap->date?->format('d/m/Y');
+                        $duration = (int) $cap->duration;
+                        
+                        // Si no hay duración explícita, buscar en visitTrainings
+                        if (!$duration && $cap->visitTrainings->isNotEmpty()) {
+                            $vTrain = $cap->visitTrainings->first();
+                            $duration = (int) $vTrain->duration_minutes;
+                        }
                     }
                     
                     // Capacitaciones de Visita (Ad-hoc) que coincidan con el nombre
@@ -389,10 +444,15 @@ class AnnualContractDashboard extends Component
                     foreach ($matchingVisitCaps as $vcap) {
                         $attendees += $vcap->attendees_count;
                         $count++;
+                        $executionDate = $vcap->created_at?->format('d/m/Y');
+                        $duration = (int) $vcap->duration_minutes;
                     }
                 } elseif ($plan->category === 'Informe') {
                     $monthReports = $reports[$monthValue] ?? collect();
                     $count = $monthReports->count();
+                    if ($count > 0) {
+                        $executionDate = $monthReports->first()->created_at?->format('d/m/Y');
+                    }
                 }
                 
                 $details = [
@@ -400,6 +460,8 @@ class AnnualContractDashboard extends Component
                     'failed' => $failed,
                     'findings' => $findings,
                     'attendees' => $attendees,
+                    'execution_date' => $executionDate,
+                    'duration' => $duration,
                     'type' => strtolower($plan->category)
                 ];
 

@@ -142,9 +142,10 @@
                             ['value' => 11, 'label' => 'Noviembre'], ['value' => 12, 'label' => 'Diciembre']
                         ];
                         $statusOptions = [
-                            ['value' => 'pending', 'label' => '🟡 Pendientes'],
+                            ['value' => 'programada', 'label' => '🕒 Programadas'],
+                            ['value' => 'solicitada', 'label' => '📩 Solicitadas'],
                             ['value' => 'in_progress', 'label' => '🔵 En Curso'],
-                            ['value' => 'completed', 'label' => '🟢 Finalizadas'],
+                            ['value' => 'finalizada', 'label' => '🟢 Finalizadas'],
                         ];
                         $empresaOptions = $empresas->map(fn($e) => ['value' => $e->id, 'label' => $e->nombre])->toArray();
                         $sedeOptions = $sedes->map(fn($s) => ['value' => $s->id, 'label' => $s->nombre_sede])->toArray();
@@ -181,6 +182,7 @@
                         />
 
                         <x-custom-select 
+                            wire:key="select-empresa-{{ count($empresaOptions) }}"
                             label="Entidad" 
                             model="selectedEmpresa" 
                             :options="$empresaOptions" 
@@ -189,6 +191,7 @@
                         />
 
                         <x-custom-select 
+                            wire:key="select-sede-{{ $selectedEmpresa }}-{{ count($sedeOptions) }}"
                             label="Sede" 
                             model="selectedSede" 
                             :options="$sedeOptions" 
@@ -361,7 +364,8 @@
                                     </td>
                                     <td class="px-8 py-6">
                                         <div class="text-[11px] font-black text-ep-primary/80 uppercase italic tracking-wide">{{ $assignment->empresa?->nombre ?? 'N/A' }}</div>
-                                        <div class="text-[10px] text-indigo-100/40 font-bold uppercase mt-1">{{ $assignment->sede?->nombre_sede ?? 'N/A' }}</div>
+                                        <div class="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-1">{{ $assignment->periodo_label }}</div>
+                                        <div class="text-[10px] text-indigo-100/40 font-bold uppercase">{{ $assignment->sede?->nombre_sede ?? 'N/A' }}</div>
                                     </td>
                                     <td class="px-8 py-6">
                                         @if($activeTab === 'trainings')
@@ -381,7 +385,7 @@
                                                 </div>
                                             @endif
                                         @elseif($activeTab === 'reports')
-                                            <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">Periodo: {{ $assignment->periodo ?? 'S/P' }}</div>
+                                            <div class="text-[10px] font-black text-indigo-100 uppercase italic tracking-widest mb-1">Periodo: {{ $assignment->periodo_label }}</div>
                                             <div class="text-[11px] font-black text-white/60">
                                                 Vence: {{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'S/F' }}
                                             </div>
@@ -434,9 +438,11 @@
                                             @else 
                                                 {{ match($assignment->status) {
                                                     'scheduled' => 'PROGRAMADA',
-                                                    'pending' => 'PENDIENTE',
+                                                    'pending' => 'SOLICITADA',
                                                     'in_progress' => 'EN CURSO',
                                                     'completed' => 'FINALIZADA',
+                                                    'finalizado' => 'FINALIZADA',
+                                                    'borrador' => 'EN CURSO',
                                                     default => strtoupper($assignment->status)
                                                 } }} 
                                             @endif
@@ -449,7 +455,7 @@
                                                     <a href="{{ route('tecnico.inspections.show', $assignment->inspection->id) }}" 
                                                        class="h-10 w-10 flex items-center justify-center bg-white/5 border border-white/10 rounded-xl text-indigo-100 hover:bg-ep-primary hover:text-white hover:scale-110 transition-all shadow-inner group/btn"
                                                        title="Consultar Registro">
-                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542 7z"/></svg>
                                                     </a>
                                                     <a href="{{ route('tecnico.inspections.pdf.download', $assignment->inspection->id) }}" 
                                                        class="h-10 w-10 flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-500 hover:bg-emerald-500 hover:text-white hover:scale-110 transition-all shadow-inner group/btn"
@@ -519,74 +525,144 @@
                                             @endif
                                         </div>
                                     </td>
-                                    {{-- Chevron Accordion --}}
+                                    {{-- Chevron Accordion - Solo para Inspecciones --}}
                                     <td class="pr-4 py-6">
-                                        <button @click="expanded = !expanded" title="Ver detalles"
-                                                class="h-8 w-8 flex items-center justify-center rounded-xl border border-white/10 text-white/20 hover:border-ep-primary/40 hover:text-ep-primary transition-all">
-                                            <svg class="w-4 h-4 transition-transform duration-300" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                                        </button>
+                                        @if($activeTab === 'inspections')
+                                            <button @click="expanded = !expanded" title="Ver detalles"
+                                                    class="h-8 w-8 flex items-center justify-center rounded-xl border border-white/10 text-white/20 hover:border-ep-primary/40 hover:text-ep-primary transition-all">
+                                                <svg class="w-4 h-4 transition-transform duration-300" :class="expanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
+                                            </button>
+                                        @endif
                                     </td>
                                 </tr>
-                                {{-- Fila expandida (Accordion) --}}
-                                <tr x-show="expanded" x-collapse style="display:none">
-                                    <td colspan="7" class="bg-black/30 border-t border-ep-primary/10">
-                                        <div class="px-8 py-6 space-y-4">
+                                {{-- Fila expandida (Accordion) - Solo para Inspecciones --}}
+                                @if($activeTab === 'inspections')
+                                    <tr x-show="expanded" x-collapse style="display:none">
+                                    <td colspan="7" class="bg-black/40 border-t border-ep-primary/10 relative overflow-hidden">
+                                        {{-- Sutil gradiente de fondo para profundidad --}}
+                                        <div class="absolute inset-0 bg-gradient-to-br from-ep-primary/5 via-transparent to-indigo-500/5 pointer-events-none"></div>
+                                        
+                                        <div class="px-8 py-8 space-y-8 relative z-10">
+                                            
+                                            {{-- 1. Fila de Encabezado de Detalles --}}
+                                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/5 pb-4">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="h-10 w-10 rounded-xl bg-ep-primary/10 border border-ep-primary/20 flex items-center justify-center text-ep-primary">
+                                                        @if($assignment->category === 'Capacitación')
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+                                                        @elseif($assignment->category === 'Informe')
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                        @else
+                                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                        @endif
+                                                    </div>
+                                                    <div>
+                                                        <h4 class="text-xs font-black text-ep-primary uppercase tracking-[0.2em] italic leading-none mb-1">Detalles de la Misión</h4>
+                                                        <p class="text-base font-black text-white italic tracking-tight">{{ $assignment->checklist?->title ?? 'Tarea Técnica' }}</p>
+                                                    </div>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic">Fuente de Origen:</span>
+                                                    @if(($assignment->source ?? 'manual') === 'contract')
+                                                        <span class="flex items-center gap-1.5 px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[9px] font-black text-indigo-400 uppercase italic">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                                            Vínculo por Contrato
+                                                        </span>
+                                                    @else
+                                                        <span class="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-[9px] font-black text-emerald-400 uppercase italic">
+                                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                                            Solicitud Ad-Hoc
+                                                        </span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                                {{-- Columna Izquierda: Información de Contexto --}}
+                                                <div class="lg:col-span-12 xl:col-span-7 space-y-6">
+                                                    {{-- Descripción y Observaciones --}}
+                                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                        <div class="space-y-3">
+                                                            <div class="flex items-center gap-2">
+                                                                <div class="h-1 w-3 bg-ep-primary rounded-full"></div>
+                                                                <h5 class="text-[10px] font-black text-ep-primary uppercase tracking-widest italic">Alcance de la Tarea</h5>
+                                                            </div>
+                                                            <p class="text-sm text-indigo-100/70 leading-relaxed font-medium italic">
+                                                                {{ $assignment->description ?: ($assignment->category_description ?: 'No se proporcionó una descripción técnica para esta asignación.') }}
+                                                            </p>
+                                                        </div>
+                                                        @if($assignment->notes)
+                                                            <div class="p-5 bg-amber-500/5 border border-amber-500/10 rounded-2xl italic">
+                                                                <h5 class="text-[10px] font-black text-amber-500/60 uppercase tracking-widest leading-none mb-3">Notas Especiales del Coordinador</h5>
+                                                                <p class="text-sm text-amber-200/60 leading-relaxed">"{{ $assignment->notes }}"</p>
+                                                            </div>
+                                                        @elseif($assignment->category_name)
+                                                            <div class="p-5 bg-white/[0.03] border border-white/5 rounded-2xl">
+                                                                <h5 class="text-[10px] font-black text-indigo-100/20 uppercase tracking-widest leading-none mb-3">Marco Operativo</h5>
+                                                                <p class="text-xs font-black text-white uppercase italic tracking-tight mb-1">{{ $assignment->category_name }}</p>
+                                                                <p class="text-[10px] text-indigo-100/30 font-bold uppercase">Categoría vinculada al checklist</p>
+                                                            </div>
+                                                        @endif
+                                                    </div>
+                                                </div>
 
-                                            {{-- Descripción del Checklist --}}
-                                            @if($assignment->description ?? null)
-                                                <div class="flex gap-3 p-4 bg-white/[0.03] rounded-2xl border border-white/5">
-                                                    <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-ep-primary/10 border border-ep-primary/20 text-ep-primary">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                                    </div>
-                                                    <div class="flex-1 min-w-0">
-                                                        <p class="text-[9px] font-black text-ep-primary/60 uppercase tracking-widest italic mb-1">Descripción de la Tarea</p>
-                                                        <p class="text-sm text-indigo-100/80 font-medium leading-relaxed">{{ $assignment->description ?? '' }}</p>
-                                                    </div>
-                                                </div>
-                                            @endif
+                                                {{-- Columna Derecha: Métricas y KPI Pre-ejecución --}}
+                                                <div class="lg:col-span-12 xl:col-span-5 space-y-4">
+                                                    <div class="bg-black/20 rounded-[2rem] border border-white/5 p-6 relative group overflow-hidden">
+                                                        <div class="absolute top-0 right-0 -mt-2 -mr-2 h-16 w-16 bg-ep-primary/10 blur-2xl rounded-full"></div>
+                                                        <h5 class="text-[10px] font-black text-indigo-100/30 uppercase tracking-[0.3em] italic mb-6">Métricas Proyectadas</h5>
+                                                        
+                                                        <div class="grid grid-cols-2 gap-4">
+                                                            {{-- Métrica 1: Puntos --}}
+                                                            <div class="p-4 bg-white/[0.03] border border-white/5 rounded-2xl flex flex-col items-center justify-center text-center">
+                                                                <span class="text-[9px] font-black text-ep-primary uppercase tracking-widest mb-1 leading-none">Puntos Totales</span>
+                                                                <span class="text-2xl font-black text-white italic leading-none">{{ $assignment->total_points ?? 0 }}</span>
+                                                                <span class="text-[8px] font-bold text-indigo-100/20 uppercase tracking-tighter mt-1">Requisitos</span>
+                                                            </div>
+                                                            
+                                                            {{-- Métrica 2: Críticos o Específicos --}}
+                                                            @if($assignment->category === 'Capacitación')
+                                                                <div class="p-4 bg-indigo-500/5 border border-indigo-500/10 rounded-2xl flex flex-col items-center justify-center text-center">
+                                                                    <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest mb-1 leading-none">Duración Est.</span>
+                                                                    <span class="text-2xl font-black text-white italic leading-none">{{ $assignment->duration ?? 'S/D' }}</span>
+                                                                    <span class="text-[8px] font-bold text-indigo-100/20 uppercase tracking-tighter mt-1">Minutos</span>
+                                                                </div>
+                                                            @else
+                                                                <div class="p-4 {{ ($assignment->critical_points ?? 0) > 0 ? 'bg-red-500/5 border-red-500/10' : 'bg-white/[0.03] border-white/5' }} rounded-2xl flex flex-col items-center justify-center text-center">
+                                                                    <span class="text-[9px] font-black {{ ($assignment->critical_points ?? 0) > 0 ? 'text-red-500' : 'text-indigo-100/40' }} uppercase tracking-widest mb-1 leading-none">Puntos Críticos</span>
+                                                                    <span class="text-2xl font-black {{ ($assignment->critical_points ?? 0) > 0 ? 'text-red-500 glow-text-red' : 'text-white' }} italic leading-none">{{ $assignment->critical_points ?? 0 }}</span>
+                                                                    <span class="text-[8px] font-bold text-white/10 uppercase tracking-tighter mt-1">Alta Prioridad</span>
+                                                                </div>
+                                                            @endif
+                                                        </div>
 
-                                            {{-- Observaciones de la Asignación --}}
-                                            @if($assignment->notes ?? null)
-                                                <div class="flex gap-3 p-4 bg-amber-500/5 rounded-2xl border border-amber-500/15">
-                                                    <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
-                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-                                                    </div>
-                                                    <div class="flex-1 min-w-0">
-                                                        <p class="text-[9px] font-black text-amber-500/70 uppercase tracking-widest italic mb-1">Observaciones del Coordinador</p>
-                                                        <p class="text-sm text-amber-200/80 font-medium leading-relaxed">{{ $assignment->notes }}</p>
-                                                    </div>
-                                                </div>
-                                            @endif
+                                                        {{-- Información Adicional (Checklist base para Capacitación) --}}
+                                                        @if(($assignment->category ?? '') === 'Capacitación' && ($assignment->trained_checklist ?? null))
+                                                            <div class="mt-4 p-3 bg-white/[0.02] border border-white/5 rounded-xl">
+                                                                <p class="text-[8px] font-black text-indigo-100/20 uppercase tracking-widest mb-1 italic">Temario / Checklist Base:</p>
+                                                                <p class="text-[11px] font-black text-indigo-300 uppercase italic truncate">{{ $assignment->trained_checklist }}</p>
+                                                            </div>
+                                                        @endif
 
-                                            {{-- Metadata grid --}}
-                                            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
-                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Código CID</p>
-                                                    <p class="text-xs font-black text-white font-mono">{{ $assignment->registry_code ?? 'N/A' }}</p>
-                                                </div>
-                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
-                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Categoría</p>
-                                                    <p class="text-xs font-black text-white uppercase italic">{{ $assignment->category ?? 'Inspección' }}</p>
-                                                </div>
-                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
-                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Fuente</p>
-                                                    <p class="text-xs font-black text-white uppercase italic">{{ ($assignment->source ?? 'manual') === 'contract' ? 'Contrato' : 'SOLICITUD' }}</p>
-                                                </div>
-                                                <div class="p-3 bg-white/[0.03] rounded-xl border border-white/5">
-                                                    <p class="text-[9px] font-black text-ep-primary/50 uppercase tracking-widest italic mb-1">Fecha Límite</p>
-                                                    <p class="text-xs font-black text-white uppercase italic">{{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'Sin fecha' }}</p>
-                                                </div>
-                                                @if($assignment->trainer_name ?? null)
-                                                    <div class="p-3 bg-indigo-500/5 rounded-xl border border-indigo-500/10 col-span-2">
-                                                        <p class="text-[9px] font-black text-indigo-400/70 uppercase tracking-widest italic mb-1">Instructor</p>
-                                                        <p class="text-xs font-black text-indigo-300 uppercase italic">{{ $assignment->trainer_name }}</p>
+                                                        {{-- Footer Información Rápida --}}
+                                                        <div class="mt-6 flex items-center justify-between px-2">
+                                                            <div class="flex flex-col">
+                                                                <span class="text-[8px] font-black text-indigo-100/20 uppercase">Identificador</span>
+                                                                <span class="text-[10px] font-black text-white font-mono">{{ $assignment->registry_code ?? 'N/A' }}</span>
+                                                            </div>
+                                                            <div class="flex flex-col text-right">
+                                                                <span class="text-[8px] font-black text-indigo-100/20 uppercase">Fecha Límite</span>
+                                                                <span class="text-[10px] font-black text-white uppercase italic">{{ $assignment->due_date ? (is_string($assignment->due_date) ? $assignment->due_date : $assignment->due_date->format('d/m/Y')) : 'Sin fecha' }}</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                @endif
+                                                </div>
                                             </div>
 
                                         </div>
                                     </td>
                                 </tr>
+                                @endif
                             </tbody>
                             @empty
                             <tbody class="divide-y divide-white/5">
