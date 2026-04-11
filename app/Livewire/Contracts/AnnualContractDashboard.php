@@ -520,12 +520,32 @@ class AnnualContractDashboard extends Component
         $complianceData = $this->calculateComplianceData($plans, $dynamicMonths);
         $efficiency = $this->calculateEfficiencyMetrics($complianceData);
 
+        // Formatear opciones para custom-select
+        $companyOptions = $companies->map(fn($c) => ['value' => $c->id, 'label' => $c->nombre])->toArray();
+        $sedeOptions = $sedes->map(fn($s) => ['value' => $s->id, 'label' => $s->nombre_sede])->toArray();
+        $checklistOptions = DynamicChecklist::all()->map(fn($c) => ['value' => $c->id, 'label' => $c->title])->toArray();
+        
+        $durationOptions = [
+            ['value' => 3, 'label' => '3 Meses'],
+            ['value' => 6, 'label' => '6 Meses'],
+            ['value' => 12, 'label' => 'Anual (12)'],
+            ['value' => 24, 'label' => 'Bianual (24)'],
+        ];
+
+        $categoryOptions = [
+            ['value' => 'Capacitación', 'label' => 'Capacitación'],
+            ['value' => 'Inspección', 'label' => 'Inspección'],
+            ['value' => 'Informe', 'label' => 'Informe Técnico'],
+        ];
+
         return view('livewire.contracts.annual-contract-dashboard', [
             'plans' => $plans,
-            'sedes' => $sedes,
-            'companies' => $companies,
+            'sedeOptions' => $sedeOptions,
+            'companyOptions' => $companyOptions,
+            'durationOptions' => $durationOptions,
+            'categoryOptions' => $categoryOptions,
+            'checklistOptions' => $checklistOptions,
             'activeSede' => $activeSede,
-            'checklists' => DynamicChecklist::all(),
             'complianceData' => $complianceData,
             'efficiency' => $efficiency,
             'dynamicMonths' => $dynamicMonths

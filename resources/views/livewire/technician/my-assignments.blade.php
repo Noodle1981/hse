@@ -144,7 +144,7 @@
                         $statusOptions = [
                             ['value' => 'programada', 'label' => '🕒 Programadas'],
                             ['value' => 'solicitada', 'label' => '📩 Solicitadas'],
-                            ['value' => 'in_progress', 'label' => '🔵 En Curso'],
+                            ['value' => 'en_curso', 'label' => '🔵 En Curso'],
                             ['value' => 'finalizada', 'label' => '🟢 Finalizadas'],
                         ];
                         $empresaOptions = $empresas->map(fn($e) => ['value' => $e->id, 'label' => $e->nombre])->toArray();
@@ -196,7 +196,6 @@
                             model="selectedSede" 
                             :options="$sedeOptions" 
                             placeholder="Todas"
-                            :disabled="!$selectedEmpresa"
                             icon='<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' 
                         />
 
@@ -331,7 +330,7 @@
                         </thead>
                         @forelse($assignments as $assignment)
                             {{-- Nuevo tbody por fila: Alpine scope compartido entre la fila y el accordion --}}
-                            <tbody x-data="{ expanded: false }" class="divide-y divide-white/5 group relative transition-all duration-300">
+                            <tbody wire:key="assignment-desktop-{{ $assignment->source ?? 'manual' }}-{{ $assignment->id }}" x-data="{ expanded: false }" class="divide-y divide-white/5 group relative transition-all duration-300">
                                 {{-- Fila Principal --}}
                                 <tr class="group hover:bg-white/[0.03] transition-all duration-300">
                                     <td class="px-8 py-6">
@@ -697,7 +696,7 @@
                 style="animation-delay: 0.3s"
             >
                 @forelse($assignments as $assignment)
-                    <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-white/10 p-5 sm:p-6 relative overflow-hidden group">
+                    <div wire:key="assignment-mobile-{{ $assignment->source ?? 'manual' }}-{{ $assignment->id }}" class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[2rem] border border-white/10 p-5 sm:p-6 relative overflow-hidden group">
                         <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
                         
                         <div class="flex justify-between items-start mb-6">
@@ -736,7 +735,7 @@
                                     CRÍTICO 
                                 @else 
                                     {{ match($assignment->status) {
-                                        'pending' => 'PENDIENTE',
+                                        'pending' => 'SOLICITADA',
                                         'in_progress' => 'EN CURSO',
                                         'completed' => 'FINALIZADA',
                                         default => strtoupper($assignment->status)

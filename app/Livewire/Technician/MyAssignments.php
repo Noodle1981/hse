@@ -129,7 +129,9 @@ class MyAssignments extends Component
                 });
             })
             ->when($this->selectedEmpresa, function ($q) {
-                $q->where('empresa_id', $this->selectedEmpresa);
+                $q->whereHas('sede', function($sub) {
+                    $sub->where('empresa_id', $this->selectedEmpresa);
+                });
             })
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
@@ -157,7 +159,9 @@ class MyAssignments extends Component
                 $q->where('title', 'like', '%' . $this->search . '%');
             })
             ->when($this->selectedEmpresa, function ($q) {
-                $q->where('empresa_id', $this->selectedEmpresa);
+                $q->whereHas('sede', function($sub) {
+                    $sub->where('empresa_id', $this->selectedEmpresa);
+                });
             })
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
@@ -439,8 +443,8 @@ class MyAssignments extends Component
                 return match($this->statusFilter) {
                     'programada' => $item->status === 'scheduled',
                     'solicitada' => $item->status === 'pending',
-                    'in_progress' => $item->status === 'in_progress',
-                    'finalizada' => in_array($item->status, ['completed', 'finalizado']),
+                    'en_curso' => in_array($item->status, ['in_progress', 'borrador', 'editable']),
+                    'finalizada' => in_array($item->status, ['completed', 'finalizado', 'finalizada']),
                     default => $item->status === $this->statusFilter
                 };
             };
@@ -472,9 +476,10 @@ class MyAssignments extends Component
         // Fetch filter data - RESTRINGIDO A DATOS DEL TÉCNICO
         $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->orderBy('nombre')->get();
 
-        $sedes = $this->selectedEmpresa
-            ? Sede::whereIn('id', $assignedSedeIds)->where('empresa_id', $this->selectedEmpresa)->orderBy('nombre_sede')->get()
-            : collect();
+        $sedes = Sede::whereIn('id', $assignedSedeIds)
+            ->when($this->selectedEmpresa, fn($q) => $q->where('empresa_id', $this->selectedEmpresa))
+            ->orderBy('nombre_sede')
+            ->get();
 
         return view('livewire.technician.my-assignments', [
             'assignments' => $paginated,

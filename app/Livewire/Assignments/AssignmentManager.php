@@ -10,6 +10,7 @@ use App\Models\DynamicChecklist;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\Attributes\Layout;
+use Illuminate\Support\Facades\Auth;
 
 class AssignmentManager extends Component
 {
@@ -25,7 +26,10 @@ class AssignmentManager extends Component
         'search' => ['except' => ''],
         'selectedEmpresa' => ['except' => null],
         'selectedSede' => ['except' => null],
+        'statusFilter' => ['except' => ''],
     ];
+
+    public string $statusFilter = '';
 
     public function updatingSearch() { $this->resetPage(); }
 
@@ -62,8 +66,19 @@ class AssignmentManager extends Component
 
     public function mount()
     {
-        $this->empresas = Empresa::orderBy('nombre')->get();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if ($user->isSuperAdmin()) {
+            $this->empresas = Empresa::orderBy('nombre')->get();
+        } else {
+            // Scope empresas to those where the user has at least one assigned sede
+            $assignedEmpresaIds = $user->sedes()->pluck('empresa_id')->unique();
+            $this->empresas = Empresa::whereIn('id', $assignedEmpresaIds)->orderBy('nombre')->get();
+        }
+
         $this->categories = \App\Models\Category::where('is_active', true)->orderBy('order')->get();
+        $this->loadSedes();
     }
 
     public function updatedSelectedEmpresa()
@@ -81,13 +96,22 @@ class AssignmentManager extends Component
 
     public function loadSedes()
     {
-        if ($this->selectedEmpresa) {
-            $this->sedes = Sede::where('empresa_id', $this->selectedEmpresa)
-                ->orderBy('nombre_sede')
-                ->get();
-        } else {
-            $this->sedes = [];
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        
+        $query = Sede::query();
+
+        // Security scoping: only show sedes assigned to the user unless Super Admin
+        if (!$user->isSuperAdmin()) {
+            $assignedSedeIds = $user->sedes()->pluck('sedes.id');
+            $query->whereIn('id', $assignedSedeIds);
         }
+
+        if ($this->selectedEmpresa) {
+            $query->where('empresa_id', $this->selectedEmpresa);
+        }
+
+        $this->sedes = $query->orderBy('nombre_sede')->get();
     }
 
     public function loadTecnicos()
@@ -309,8 +333,15 @@ class AssignmentManager extends Component
     #[Layout('components.layouts.app')]
     public function render()
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $assignedSedeIds = $user->isSuperAdmin() ? null : $user->sedes()->pluck('sedes.id');
+
         // 1. Manual Assignments (Solicitudes)
         $manualQuery = ChecklistAssignment::with(['checklist', 'user', 'sede', 'empresa', 'inspection'])
+            ->when($assignedSedeIds, function ($q) use ($assignedSedeIds) {
+                $q->whereIn('sede_id', $assignedSedeIds);
+            })
             ->when($this->search, function ($q) {
                 $q->whereHas('checklist', function ($c) {
                     $c->where('title', 'like', '%' . $this->search . '%')
@@ -318,10 +349,21 @@ class AssignmentManager extends Component
                 });
             })
             ->when($this->selectedEmpresa, function ($q) {
-                $q->where('empresa_id', $this->selectedEmpresa);
+                $q->whereHas('sede', function($sub) {
+                    $sub->where('empresa_id', $this->selectedEmpresa);
+                });
             })
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
+            })
+            ->when($this->statusFilter, function ($q) {
+                $status = match($this->statusFilter) {
+                    'solicitada' => 'pending',
+                    'en_curso' => 'in_progress',
+                    'finalizada' => 'completed',
+                    default => $this->statusFilter
+                };
+                $q->where('status', $status);
             })
             ->orderBy('created_at', 'desc');
 
@@ -353,7 +395,9 @@ class AssignmentManager extends Component
 
         // 2. Annual Plan Tasks (Contratos)
         $contractQuery = \App\Models\AnnualPlan::with(['sede.empresa', 'checklist'])
-            ->whereHas('sede', fn($q) => $q->whereIn('empresa_id', $this->empresas->pluck('id')))
+            ->when($assignedSedeIds, function ($q) use ($assignedSedeIds) {
+                $q->whereIn('sede_id', $assignedSedeIds);
+            })
             ->where('category', 'Inspección')
             ->when($this->search, function ($q) {
                 $q->whereHas('checklist', function ($c) {
@@ -367,6 +411,11 @@ class AssignmentManager extends Component
             })
             ->when($this->selectedSede, function ($q) {
                 $q->where('sede_id', $this->selectedSede);
+            })
+            ->when($this->statusFilter, function ($q) {
+                // El Annual Plan es virtual, 'pending' es lo usual para 'solicitada' o 'scheduled' para 'programada'
+                if ($this->statusFilter === 'programada') { $q->whereRaw('1=1'); } // Siempre se muestran si no son 'completed'
+                else { $q->whereRaw('0=1'); } // Otros estados no aplican directamente a AnnualPlan base
             });
 
         $contract = $contractQuery->get()->map(fn($p) => (object)[

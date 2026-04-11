@@ -56,7 +56,7 @@
                     </div>
 
                     {{-- FILTROS DE INTELIGENCIA --}}
-                    <div class="md:col-span-4 grid grid-cols-2 gap-4">
+                    <div class="md:col-span-4 grid grid-cols-3 gap-3 sm:gap-4">
                         <div class="relative group">
                             <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Empresa</span>
                             <select wire:model.live="selectedEmpresa" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer">
@@ -68,11 +68,21 @@
                         </div>
                         <div class="relative group">
                             <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Sede</span>
-                            <select wire:model.live="selectedSede" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer {{ !$selectedEmpresa ? 'opacity-20 cursor-not-allowed' : '' }}" {{ !$selectedEmpresa ? 'disabled' : '' }}>
+                            <select wire:model.live="selectedSede" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer">
                                 <option value="">TODAS</option>
                                 @foreach($sedes as $sede)
                                     <option value="{{ $sede->id }}">{{ $sede->nombre_sede }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                        <div class="relative group">
+                            <span class="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Estado</span>
+                            <select wire:model.live="statusFilter" class="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-ep-primary/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer">
+                                <option value="">TODOS</option>
+                                <option value="programada">🕒 PROGRAMADAS</option>
+                                <option value="solicitada">📩 SOLICITADAS</option>
+                                <option value="en_curso">🔵 EN CURSO</option>
+                                <option value="finalizada">🟢 FINALIZADAS</option>
                             </select>
                         </div>
                     </div>
@@ -227,7 +237,7 @@
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($assignments as $assignment)
-                                <tr class="group/row hover:bg-white/5 transition-all duration-500 relative">
+                                <tr wire:key="assignment-{{ $assignment->source ?? 'manual' }}-{{ $assignment->id }}" class="group/row hover:bg-white/5 transition-all duration-500 relative">
                                     <td class="px-4 lg:px-8 py-6">
                                         <div class="flex items-center gap-3 sm:gap-4">
                                             <div class="relative group/icon hidden xs:block">
@@ -295,7 +305,7 @@
                                                 default => 'text-white/20 border-white/5 bg-white/5'
                                             };
                                             $statusLabel = match($assignment->status) {
-                                                'pending' => 'PENDIENTE',
+                                                'pending' => 'SOLICITADA',
                                                 'in_progress' => 'EN CURSO',
                                                 'completed' => 'FINALIZADA',
                                                 default => strtoupper($assignment->status)

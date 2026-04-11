@@ -35,43 +35,41 @@
         <div class="max-w-[98rem] mx-auto">
 
             {{-- CONTROLES MAESTROS REDISEÑADOS --}}
-            <div class="bg-ep-dark/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-4 sm:p-6 shadow-2xl mb-8">
+            <div class="relative z-50 bg-ep-dark/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-4 sm:p-6 shadow-2xl mb-8">
                 <div class="flex flex-col xl:flex-row gap-6 items-stretch xl:items-center">
 
                     {{-- Bloque Izquierdo: Selección de Activo --}}
-                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-3 shadow-inner group transition-all">
-                            <div class="h-10 w-10 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-ep-primary shadow-inner rotate-3 group-hover:rotate-0 transition-all duration-500">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex items-center gap-5 group transition-all">
+                            <div class="h-12 w-12 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-ep-primary shadow-inner rotate-3 group-hover:rotate-0 transition-all duration-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <span class="text-[8px] font-black text-ep-primary/60 uppercase tracking-widest italic mb-0.5 block">Empresa Mandante</span>
-                                <select wire:model.live="selectedCompanyId" class="w-full bg-transparent border-none text-[13px] font-black text-white italic uppercase focus:ring-0 p-0 [color-scheme:dark] cursor-pointer">
-                                    @foreach($companies as $c)
-                                    <option value="{{ $c->id }}">{{ $c->nombre }}</option>
-                                    @endforeach
-                                </select>
+                                <x-custom-select 
+                                    label="Empresa Mandante" 
+                                    model="selectedCompanyId" 
+                                    :options="$companyOptions" 
+                                    placeholder="Seleccione Empresa"
+                                />
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-2xl p-3 shadow-inner group transition-all">
-                            <div class="h-10 w-10 shrink-0 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-ep-primary shadow-inner rotate-3 group-hover:rotate-0 transition-all duration-500">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <div class="flex items-center gap-5 group transition-all">
+                            <div class="h-12 w-12 shrink-0 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-ep-primary shadow-inner rotate-3 group-hover:rotate-0 transition-all duration-500">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                                     <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                     <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                             </div>
                             <div class="flex-1">
-                                <span class="text-[8px] font-black text-ep-primary uppercase tracking-widest italic mb-0.5 block">Activo / Sede Operativa</span>
-                                <select wire:model.live="sedeId" class="w-full bg-transparent border-none text-[13px] font-black text-white italic uppercase focus:ring-0 p-0 [color-scheme:dark] cursor-pointer">
-                                    @forelse($sedes as $s)
-                                    <option value="{{ $s->id }}">{{ $s->nombre_sede }}</option>
-                                    @empty
-                                    <option value="">Seleccione empresa</option>
-                                    @endforelse
-                                </select>
+                                <x-custom-select 
+                                    label="Activo / Sede Operativa" 
+                                    model="sedeId" 
+                                    :options="$sedeOptions" 
+                                    placeholder="Seleccione Sede"
+                                />
                             </div>
                         </div>
                     </div>
@@ -79,18 +77,21 @@
                     {{-- Bloque Central: Ventana y Frecuencia --}}
                     <div class="flex flex-row items-center gap-4 bg-indigo-600/10 p-3 rounded-2xl border border-indigo-500/20">
                         <div class="flex-1">
-                            <span class="text-[8px] font-black text-indigo-400 uppercase tracking-widest italic mb-1 block">Inicio Plan</span>
-                            <input type="month" wire:model.live="contractStart" class="bg-transparent border-none text-xs font-black text-white focus:ring-0 p-0 w-full [color-scheme:dark]">
+                            <label class="flex items-center gap-2 text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1 mb-3">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                Inicio Plan
+                            </label>
+                            <div class="relative">
+                                <input type="month" wire:model.live="contractStart" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-ep-primary/50 transition-all backdrop-blur-md [color-scheme:dark] cursor-pointer">
+                            </div>
                         </div>
                         <div class="w-px h-8 bg-indigo-500/20"></div>
                         <div class="flex-1">
-                            <span class="text-[8px] font-black text-indigo-400 uppercase tracking-widest italic mb-1 block">Periodo</span>
-                            <select wire:model.live="contractDuration" class="bg-transparent border-none text-xs font-black text-white focus:ring-0 p-0 w-full [color-scheme:dark]">
-                                <option value="3">3 Meses</option>
-                                <option value="6">6 Meses</option>
-                                <option value="12">Anual (12)</option>
-                                <option value="24">Bianual (24)</option>
-                            </select>
+                            <x-custom-select 
+                                label="Periodo" 
+                                model="contractDuration" 
+                                :options="$durationOptions" 
+                            />
                         </div>
                     </div>
 
@@ -184,42 +185,42 @@
 
             {{-- FORMULARIO DE PLANIFICACIÓN (SIN CAMBIOS ESTRUCTURALES, SOLO PADDINGS) --}}
             @if($editMode && auth()->user()->isAdmin())
-            <div class="bg-indigo-600/5 border border-indigo-500/20 rounded-[2.5rem] p-6 mb-8 animate-fade-in">
+            <div class="relative z-40 bg-indigo-600/5 border border-indigo-500/20 rounded-[2.5rem] p-6 mb-8 animate-fade-in">
                 <div class="grid grid-cols-1 md:grid-cols-6 gap-4 items-end">
                     <div class="md:col-span-1">
-                        <label class="block text-[8px] font-black text-indigo-400 mb-2 uppercase italic">Pilar</label>
-                        <select wire:model.live="category" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white font-black [color-scheme:dark]">
-                            <option value="Capacitación">Capacitación</option>
-                            <option value="Inspección">Inspección</option>
-                            <option value="Informe">Informe Técnico</option>
-                        </select>
+                        <x-custom-select 
+                            label="Pilar" 
+                            model="category" 
+                            :options="$categoryOptions" 
+                        />
                     </div>
                     <div class="md:col-span-1">
-                        <label class="block text-[8px] font-black text-indigo-400 mb-2 uppercase italic">Vínculo</label>
-                        <select wire:model.live="checklist_id" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white font-black [color-scheme:dark]">
-                            <option value="">— Ninguno —</option>
-                            @foreach($checklists as $c)
-                            <option value="{{ $c->id }}">{{ $c->title }}</option>
-                            @endforeach
-                        </select>
+                        <x-custom-select 
+                            label="Vínculo" 
+                            model="checklist_id" 
+                            :options="$checklistOptions" 
+                            placeholder="Ninguno"
+                        />
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-[8px] font-black text-indigo-400 mb-2 uppercase italic">Actividad</label>
-                        <input type="text" wire:model="activity_name" placeholder="Ej: Control de Plagas" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white font-black uppercase italic">
+                        <label class="block text-[10px] font-black text-indigo-100/40 mb-2 uppercase italic tracking-[0.2em] ml-1">Actividad</label>
+                        <input type="text" wire:model="activity_name" placeholder="Ej: Control de Plagas" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-xs text-white font-black uppercase italic focus:ring-2 focus:ring-ep-primary/50 transition-all outline-none">
                     </div>
-                    <div class="md:col-span-2 flex gap-2">
+                    <div class="md:col-span-2 flex gap-3">
                         <div class="flex-1">
-                            <label class="block text-[8px] font-black text-indigo-400 mb-2 uppercase italic">Código</label>
-                            <input type="text" wire:model="activity_code" placeholder="EP-HSE-01" class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white font-black uppercase italic">
+                            <label class="block text-[10px] font-black text-indigo-100/40 mb-2 uppercase italic tracking-[0.2em] ml-1">Código</label>
+                            <input type="text" wire:model="activity_code" placeholder="EP-HSE-01" class="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3.5 text-xs text-white font-black uppercase italic focus:ring-2 focus:ring-ep-primary/50 transition-all outline-none">
                         </div>
-                        <button wire:click="addActivity" class="h-[46px] px-6 bg-indigo-600 text-white rounded-xl font-black text-[10px] uppercase italic self-end hover:bg-indigo-500 transition-all">REGISTRAR</button>
+                        <button wire:click="addActivity" class="h-[52px] px-8 bg-ep-primary text-white text-[10px] font-black uppercase italic tracking-widest rounded-2xl hover:brightness-110 active:scale-95 transition-all shadow-lg shadow-ep-primary/20 self-end">
+                            REGISTRAR
+                        </button>
                     </div>
                 </div>
             </div>
             @endif
 
             {{-- MATRIZ OPERATIVA (CON table-fixed PARA EVITAR DESBORDE) --}}
-            <div class="bg-ep-dark/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden mb-12">
+            <div class="relative z-30 bg-ep-dark/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-2xl mb-12">
                 <div class="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-black/20">
                     <div class="flex items-center gap-3">
                         <div class="w-2 h-6 bg-ep-primary rounded-full"></div>
@@ -242,19 +243,19 @@
                 <div class="hidden md:block overflow-x-hidden">
                     <table class="w-full border-collapse table-fixed">
                         <thead>
-                            <tr class="bg-black/40">
-                                <th class="sticky left-0 z-30 bg-[#151521] px-4 py-5 text-left border-r border-white/5 w-[25%]">
-                                    <span class="text-[9px] font-black text-ep-primary uppercase tracking-widest italic">ACTIVIDAD / REGISTRO</span>
+                            <tr class="bg-black/20">
+                                <th class="sticky left-0 z-30 bg-[#11111D] px-6 py-6 text-left border-r border-white/5 w-[25%] shadow-[5px_0_15px_rgba(0,0,0,0.3)]">
+                                    <span class="text-[10px] font-black text-ep-primary uppercase tracking-[0.2em] italic">ACTIVIDAD / REGISTRO</span>
                                 </th>
                                 @foreach($dynamicMonths as $monthValue => $info)
-                                <th class="px-0 py-5 text-center w-[5.8%] border-r border-white/5 last:border-r-0">
+                                <th class="px-0 py-6 text-center w-[5.8%] border-r border-white/5 last:border-r-0">
                                     <div class="flex flex-col">
-                                        <span class="text-[10px] font-black text-white italic leading-none">{{ $info['short'] }}</span>
-                                        <span class="text-[7px] font-bold text-white/20 uppercase tracking-tighter mt-1">'{{ substr($info['year'], 2) }}</span>
+                                        <span class="text-[11px] font-black text-white italic uppercase tracking-tight leading-none">{{ $info['short'] }}</span>
+                                        <span class="text-[8px] font-black text-indigo-100/20 uppercase tracking-[0.2em] mt-1.5 font-mono italic">/ {{ substr($info['year'], 2) }}</span>
                                     </div>
                                 </th>
                                 @endforeach
-                                @if($editMode) <th class="w-[50px] bg-black/40"></th> @endif
+                                @if($editMode) <th class="w-[50px] bg-black/20"></th> @endif
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/[0.03]">
