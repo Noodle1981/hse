@@ -247,8 +247,8 @@
                     </div>
                 </div>
 
-                <div class="hidden md:block overflow-x-hidden">
-                    <table class="w-full border-collapse table-fixed">
+                <div class="hidden md:block overflow-x-auto custom-scrollbar-horizontal">
+                    <table class="w-full border-collapse table-fixed min-w-[1200px]">
                         <thead>
                             <tr class="bg-black/20">
                                 <th class="sticky left-0 z-30 bg-[#11111D] px-6 py-6 text-left border-r border-white/5 w-[25%] shadow-[5px_0_15px_rgba(0,0,0,0.3)]">
@@ -279,7 +279,7 @@
                                 @endif
 
                                 <tr wire:key="plan-row-{{ $plan->id }}" class="group/row hover:bg-white/[0.02] transition-colors">
-                                <td class="sticky left-0 z-20 bg-[#1e1e2d] px-4 py-4 border-r border-white/5">
+                                <td class="sticky left-0 z-20 bg-[#11111D] px-4 py-4 border-r border-white/5 shadow-[5px_0_15px_rgba(0,0,0,0.3)]">
                                     <div class="flex items-center gap-2 overflow-hidden">
                                         <div class="shrink-0 w-1 h-5 {{ $plan->category === 'Capacitación' ? 'bg-blue-500' : ($plan->category === 'Inspección' ? 'bg-orange-500' : 'bg-ep-primary') }} rounded-full"></div>
                                         <div class="min-w-0">

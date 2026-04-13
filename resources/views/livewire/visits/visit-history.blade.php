@@ -79,22 +79,22 @@
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
                 
                 {{-- DESKTOP VIEW --}}
-                <div class="hidden lg:block overflow-x-auto">
-                    <table class="w-full border-collapse">
+                <div class="hidden lg:block overflow-x-auto custom-scrollbar-horizontal">
+                    <table class="w-full border-collapse min-w-[1100px]">
                         <thead>
                             <tr class="bg-black/20">
-                                <th class="px-8 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Cronología</span></th>
-                                <th class="px-8 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Técnico Asignado</span></th>
-                                <th class="px-8 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Sede / Protocolo</span></th>
-                                <th class="px-8 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Rendimiento Temporal</span></th>
-                                <th class="px-8 py-6 text-center whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Estado</span></th>
-                                <th class="px-8 py-6 text-right whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Acción</span></th>
+                                <th class="px-4 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Cronología</span></th>
+                                <th class="px-4 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Técnico Asignado</span></th>
+                                <th class="px-4 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Sede / Protocolo</span></th>
+                                <th class="px-4 py-6 text-left whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Rendimiento Temporal</span></th>
+                                <th class="px-4 py-6 text-center whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Estado</span></th>
+                                <th class="px-4 py-6 text-right whitespace-nowrap"><span class="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic leading-none">Acción</span></th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5 animate-fade-in">
                             @forelse ($visits as $visit)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 overflow-hidden relative">
-                                    <td class="px-8 py-7">
+                                    <td class="px-4 py-7">
                                         <div class="flex flex-col">
                                             <span class="text-sm font-black text-white italic leading-none mb-1 tracking-tight">{{ $visit->visit_date->format('d/m/Y') }}</span>
                                             <span class="text-[9px] font-black text-indigo-400 uppercase tracking-widest italic group-hover/row:translate-x-1 transition-transform">
@@ -102,7 +102,7 @@
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="px-8 py-7">
+                                    <td class="px-4 py-7">
                                         <div class="flex items-center gap-4">
                                             <div class="w-10 h-10 rounded-2xl bg-ep-primary/10 border border-ep-primary/20 flex items-center justify-center text-ep-primary text-xs font-black shadow-inner shadow-black/50 rotate-3 group-hover/row:rotate-0 transition-all duration-700">
                                                 {{ substr($visit->user->name, 0, 1) }}
@@ -113,7 +113,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-8 py-7">
+                                    <td class="px-4 py-7">
                                         <div>
                                             <div class="text-sm font-black text-ep-primary italic uppercase tracking-tight leading-none mb-1 group-hover/row:glow-text-orange transition-all">{{ $visit->sede->nombre_sede }}</div>
                                             <div class="text-[9px] text-white/50 font-black uppercase tracking-widest italic leading-none flex items-center gap-2">
@@ -122,7 +122,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-8 py-7">
+                                    <td class="px-4 py-7">
                                         @if($visit->end_time && $visit->start_time)
                                             @php
                                                 $mins = $visit->start_time->diffInMinutes($visit->end_time);
@@ -152,7 +152,7 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td class="px-8 py-7 text-center">
+                                    <td class="px-4 py-7 text-center">
                                         @if($visit->status === 'in_progress')
                                             <span class="px-4 py-2 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] font-black uppercase tracking-[0.2em] italic rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.1)]">En Progreso</span>
                                         @elseif($visit->status === 'completed' && !$visit->responsible_signature && $visit->signature_skip_reason)
@@ -163,7 +163,7 @@
                                             <span class="px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black uppercase tracking-[0.2em] italic rounded-xl shadow-[0_0_15px_rgba(99,102,241,0.1)] group-hover/row:shadow-indigo-500/30 transition-all">Auditada ✅</span>
                                         @endif
                                     </td>
-                                    <td class="px-8 py-7 text-right">
+                                    <td class="px-4 py-7 text-right">
                                         <div class="flex justify-end gap-3 transition-all duration-500">
                                             @if($visit->status === 'in_progress')
                                                 <a href="{{ route('gestor.visits.in-progress', $visit) }}" 

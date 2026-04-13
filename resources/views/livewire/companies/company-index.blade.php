@@ -84,21 +84,21 @@
             <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/20 to-transparent"></div>
                 
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full border-collapse">
+                <div class="overflow-x-auto custom-scrollbar-horizontal">
+                    <table class="w-full border-collapse min-w-[1000px]">
                         <thead>
                             <tr class="bg-black/20 text-left">
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Entidad / Marca</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Razón Operativa</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Registro Fiscal (CUIT)</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Activos (Sedes)</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Entidad / Marca</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Razón Operativa</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Registro Fiscal (CUIT)</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Activos (Sedes)</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($companies as $company)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 relative {{ $company->trashed() ? 'bg-red-500/5 opacity-50' : '' }}">
-                                    <td class="px-8 py-6">
+                                    <td class="px-4 py-6">
                                         <div class="flex items-center gap-4">
                                             <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 text-xs font-black group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(59,130,246,0.1)]">
                                                 {{ substr($company->nombre, 0, 2) }}
@@ -111,21 +111,21 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-8 py-6">
+                                    <td class="px-4 py-6">
                                         <div class="text-[11px] font-bold text-white/40 italic uppercase tracking-widest leading-none">{{ $company->razon_social }}</div>
                                     </td>
-                                    <td class="px-8 py-6 text-center">
+                                    <td class="px-4 py-6 text-center">
                                         <span class="inline-flex px-4 py-2 rounded-xl text-[10px] font-black text-indigo-400/60 uppercase tracking-widest italic bg-black/40 border border-white/5">
                                             {{ $company->cuit }}
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-center">
+                                    <td class="px-4 py-6 text-center">
                                         <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest italic border {{ $company->sedes_count > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-white/10 border-white/5 bg-white/5' }}">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                             {{ $company->sedes_count }} Sedes
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-right">
+                                    <td class="px-4 py-6 text-right">
                                         <div class="flex justify-end gap-3 transition-opacity duration-500 group-hover/row:brightness-125">
                                             @if($company->trashed())
                                                 <button wire:click="restore({{ $company->id }})" class="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white rounded-xl flex items-center gap-2 text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg">
@@ -214,9 +214,6 @@
             background: rgba(59,130,246,0.1) !important;
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.3); }
+
     </style>
 </div>

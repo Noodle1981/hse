@@ -158,22 +158,22 @@
             <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse">
+                <div class="overflow-x-auto custom-scrollbar-horizontal">
+                    <table class="w-full border-collapse min-w-[1000px]">
                         <thead>
                             <tr class="bg-black/20 text-left">
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Operativo / Perfil</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Canal de Enlace</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Rol HUD</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Matrícula</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Status</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Operativo / Perfil</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Canal de Enlace</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Rol HUD</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Matrícula</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Status</th>
+                                <th class="px-4 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($users as $user)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 relative {{ $user->trashed() ? 'bg-red-500/5' : '' }}">
-                                    <td class="px-8 py-6">
+                                    <td class="px-4 py-6">
                                         <div class="flex items-center gap-4">
                                             <div class="w-10 h-10 rounded-xl bg-ep-primary/10 flex items-center justify-center text-ep-primary text-xs font-black border border-ep-primary/20 group-hover/row:scale-110 transition-transform">
                                                 {{ substr($user->nombres, 0, 1) }}{{ substr($user->apellidos, 0, 1) }}
@@ -186,10 +186,10 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-8 py-6">
+                                    <td class="px-4 py-6">
                                         <div class="text-[11px] font-bold text-white/40 italic group-hover/row:text-white/60 transition-colors">{{ $user->email }}</div>
                                     </td>
-                                    <td class="px-8 py-6 text-center">
+                                    <td class="px-4 py-6 text-center">
                                         @php
                                             $roleColor = match(strtolower($user->rol)) {
                                                 'gestor' => 'text-purple-400 border-purple-500/30 bg-purple-500/10 shadow-[0_0_10px_rgba(168,85,247,0.2)]',
@@ -201,16 +201,16 @@
                                             {{ strtoupper($user->rol) }}
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-center text-[11px] font-black text-white/60 italic uppercase tracking-widest">
+                                    <td class="px-4 py-6 text-center text-[11px] font-black text-white/60 italic uppercase tracking-widest">
                                         {{ $user->matricula ?: '---' }}
                                     </td>
-                                    <td class="px-8 py-6 text-center">
+                                    <td class="px-4 py-6 text-center">
                                         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest italic border {{ ($user->estado === 'activo' && !$user->trashed()) ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10' : 'text-white/20 border-white/5 bg-white/5' }}">
                                             <span class="w-1 h-1 rounded-full {{ ($user->estado === 'activo' && !$user->trashed()) ? 'bg-emerald-500 animate-pulse' : 'bg-white/20' }}"></span>
                                             {{ $user->trashed() ? 'INACTIVO' : ucfirst($user->estado) }}
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-right">
+                                    <td class="px-4 py-6 text-right">
                                         <div class="flex justify-end gap-3 transition-all duration-500">
                                             @if($user->trashed())
                                                 <button wire:click="restore({{ $user->id }})" class="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white rounded-xl flex items-center gap-2 text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg">

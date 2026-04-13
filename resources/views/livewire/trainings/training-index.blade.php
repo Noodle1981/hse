@@ -95,23 +95,23 @@
             <div class="bg-ep-dark/60 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse">
+                <div class="overflow-x-auto custom-scrollbar-horizontal">
+                    <table class="w-full border-collapse min-w-[1100px]">
                         <thead>
                             <tr class="bg-black/20 text-left">
-                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Capacitación</th>
-                                <th class="hidden xl:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Responsable</th>
-                                <th class="hidden md:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Punto de Despliegue</th>
-                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Cronograma</th>
-                                <th class="hidden sm:table-cell px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Asistencia</th>
-                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">HUD</th>
-                                <th class="px-4 lg:px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Capacitación</th>
+                                <th class="hidden xl:table-cell px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Responsable</th>
+                                <th class="hidden md:table-cell px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Punto de Despliegue</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Cronograma</th>
+                                <th class="hidden sm:table-cell px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Asistencia</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">HUD</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($trainings as $training)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 relative">
-                                    <td class="px-4 lg:px-8 py-6">
+                                    <td class="px-4 lg:px-6 py-6">
                                         <div class="flex items-center gap-3 sm:gap-4">
                                             <div class="relative group/icon hidden xs:block">
                                                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl {{ ($training->source ?? 'manual') === 'contract' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-ep-primary/10 border-ep-primary/20 text-ep-primary' }} border flex items-center justify-center text-xs font-black group-hover:scale-110 transition-transform">
@@ -133,7 +133,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="hidden xl:table-cell px-4 lg:px-8 py-6">
+                                    <td class="hidden xl:table-cell px-4 lg:px-6 py-6">
                                         <div class="flex items-center gap-3">
                                             @if($training->responsibleUser)
                                                 <div class="w-8 h-8 rounded-xl border {{ ($training->source ?? 'manual') === 'contract' ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400' : 'bg-ep-primary/10 border-ep-primary/20 text-ep-primary' }} flex items-center justify-center text-[10px] font-black">
@@ -146,11 +146,11 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="hidden md:table-cell px-4 lg:px-8 py-6">
+                                    <td class="hidden md:table-cell px-4 lg:px-6 py-6">
                                         <div class="text-[10px] font-black text-white italic uppercase tracking-tight leading-none mb-1 lg:group-hover/row:text-ep-primary transition-colors">{{ $training->empresa->nombre ?? 'N/A' }}</div>
                                         <div class="text-[8px] font-bold text-white/20 italic tracking-widest uppercase">{{ $training->sede->nombre_sede ?? 'N/A' }}</div>
                                     </td>
-                                    <td class="px-4 lg:px-8 py-6">
+                                    <td class="px-4 lg:px-6 py-6">
                                         <div class="flex flex-col gap-1">
                                             <div class="flex items-center gap-2 text-[10px] font-black text-white/60 italic">
                                                 <svg class="w-3 h-3 text-indigo-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -161,14 +161,14 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="hidden sm:table-cell px-4 lg:px-8 py-6 text-center">
+                                    <td class="hidden sm:table-cell px-4 lg:px-6 py-6 text-center">
                                         @if(isset($training->attendances_count) || isset($training->view_attendances_count))
                                             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
                                                 {{ $training->attendances_count ?? 0 }}
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-4 lg:px-8 py-6 text-center">
+                                    <td class="px-4 lg:px-6 py-6 text-center">
                                         @php
                                             $statusBadge = match($training->status) {
                                                 'scheduled' => 'text-amber-400 border-amber-500/30 bg-amber-500/10 shadow-[0_0_10px_rgba(245,158,11,0.1)]',
@@ -187,8 +187,8 @@
                                             {{ $statusText }}
                                         </span>
                                     </td>
-                                    <td class="px-4 lg:px-8 py-6 text-right">
-                                        <div class="flex justify-end gap-2 sm:gap-3 lg:translate-x-4 lg:opacity-0 lg:group-hover/row:translate-x-0 lg:group-hover/row:opacity-100 transition-all duration-500">
+                                    <td class="px-4 lg:px-6 py-6 text-right">
+                                        <div class="flex justify-end gap-2 sm:gap-3 transition-all duration-500">
                                             @if(($training->source ?? 'manual') === 'contract')
                                                 <a href="{{ route('gestor.annual-contract.index') }}" class="h-9 w-9 sm:h-10 sm:w-auto sm:px-4 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg text-[9px] font-black uppercase italic tracking-widest">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>

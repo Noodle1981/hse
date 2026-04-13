@@ -133,7 +133,7 @@
                                 </div>
                             </div>
                             
-                            <div class="w-full lg:w-auto mt-4 lg:mt-0 flex flex-wrap lg:flex-col gap-3 sm:gap-4">
+                            <div class="w-full lg:w-auto mt-6 lg:mt-0 flex flex-row items-center justify-end gap-3 sm:gap-4">
                                 @if($report->estado === 'finalizado')
                                     <a href="{{ route(auth()->user()->isAdmin() ? 'gestor.master-reports.pdf.loading' : 'tecnico.master-reports.pdf.loading', $report->id) }}"
                                        target="_blank"

@@ -101,6 +101,23 @@
             scrollbar-width: thin;
             scrollbar-color: #F69239 #11111D;
         }
+
+        /* Tactical Horizontal Scrollbar */
+        .custom-scrollbar-horizontal::-webkit-scrollbar {
+            height: 6px;
+        }
+        .custom-scrollbar-horizontal::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 10px;
+        }
+        .custom-scrollbar-horizontal::-webkit-scrollbar-thumb {
+            background: rgba(246, 146, 57, 0.2);
+            border-radius: 10px;
+        }
+        .custom-scrollbar-horizontal::-webkit-scrollbar-thumb:hover {
+            background: rgba(246, 146, 57, 0.5);
+        }
+
     </style>
     
     @livewireStyles
@@ -139,7 +156,7 @@
             </div>
             
             <!-- Menu -->
-            <nav class="flex-1 overflow-y-auto sidebar-scroll py-4">
+            <nav class="flex-1 overflow-y-auto sidebar-scroll py-2">
                 <ul class="space-y-1 px-3">
 
                     <!-- Visitas (diferente para cada rol) -->
@@ -147,7 +164,7 @@
                     @if(auth()->user()->isTechnician())
                     <li>
                         <a href="{{ route('tecnico.checklists.tasks.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('tecnico.checklists.tasks.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +177,7 @@
                     
                     <li>
                         <a href="{{ route('tecnico.visits.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('tecnico.visits.index') || request()->routeIs('tecnico.visits.in-progress') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,7 +191,7 @@
 
                     <li>
                         <a href="{{ route('tecnico.hallazgos.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('tecnico.hallazgos.index') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,7 +204,7 @@
 
                     <li>
                         <a href="{{ route('tecnico.incidentes.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('tecnico.incidentes.index') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +218,7 @@
                     @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.visits.history') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.visits.history') || request()->routeIs('gestor.visits.in-progress') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +236,7 @@
                     @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.checklists.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.checklists.*') || request()->routeIs('gestor.categories.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,7 +252,7 @@
                     @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.trainings.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.trainings.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +270,7 @@
                     @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.assignments.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.assignments.*') || request()->routeIs('gestor.inspections.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,7 +286,7 @@
                     <!-- Hallazgos (Solo Admin) -->
                     <li>
                         <a href="{{ route('gestor.hallazgos.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.hallazgos.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -283,7 +300,7 @@
                     <!-- Incidentes (Solo Admin) -->
                     <li>
                         <a href="{{ route('gestor.incidentes.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.incidentes.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -298,11 +315,11 @@
                     <li>
                         @if(auth()->user()->isAdmin())
                             <a href="{{ route('gestor.master-reports.index') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                               class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                       {{ request()->routeIs('gestor.master-reports.*') ? 'menu-item-active text-white' : '' }}">
                         @else
                             <a href="{{ route('tecnico.master-reports.index') }}" 
-                               class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                               class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                       {{ request()->routeIs('tecnico.master-reports.*') ? 'menu-item-active text-white' : '' }}">
                         @endif
                             <span class="menu-icon mr-3 flex-shrink-0">
@@ -321,7 +338,7 @@
                     @if(auth()->user()->isAdmin())
                     <li>
                         <a href="{{ route('gestor.annual-contract.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,7 +352,7 @@
                     @if(auth()->user()->isTechnician())
                     <li>
                         <a href="{{ route('tecnico.annual-contract.index') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('tecnico.annual-contract.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -352,7 +369,7 @@
                     <!-- Administración Hub (Solo Admin) -->
                     <li>
                         <a href="{{ route('gestor.administration.hub') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('gestor.administration.hub') || request()->routeIs('gestor.users.*') || request()->routeIs('gestor.technicians.*') || request()->routeIs('gestor.companies.*') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -379,7 +396,7 @@
                     @if(!auth()->user()->isTechnician())
                     <li>
                         <a href="{{ route('dashboard') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('dashboard') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,7 +411,7 @@
                     <!-- Mi Perfil -->
                     <li>
                         <a href="{{ route('profile') }}" 
-                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                           class="menu-item flex items-center px-3 py-2 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
                                   {{ request()->routeIs('profile') ? 'menu-item-active text-white' : '' }}">
                             <span class="menu-icon mr-3 flex-shrink-0">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

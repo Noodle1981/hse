@@ -61,21 +61,21 @@
             <div class="bg-ep-dark/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
                 <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/20 to-transparent"></div>
                 
-                <div class="overflow-x-auto">
-                    <table class="w-full border-collapse">
+                <div class="overflow-x-auto custom-scrollbar-horizontal">
+                    <table class="w-full border-collapse min-w-[1000px]">
                         <thead>
                             <tr class="bg-black/20 text-left">
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Unidad Táctica / Perfil</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Canal de Enlace</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Identificación de Campo</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Carga de Sedes</th>
-                                <th class="px-8 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Unidad Táctica / Perfil</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Canal de Enlace</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none">Identificación de Campo</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-center">Carga de Sedes</th>
+                                <th class="px-4 lg:px-6 py-6 text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic leading-none text-right">Comandos</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-white/5">
                             @forelse($technicians as $tech)
                                 <tr class="group/row hover:bg-white/5 transition-all duration-500 relative">
-                                    <td class="px-8 py-6">
+                                    <td class="px-4 lg:px-6 py-6">
                                         <div class="flex items-center gap-4">
                                             <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-xs font-black group-hover:scale-110 transition-transform shadow-[0_0_15px_rgba(99,102,241,0.1)]">
                                                 {{ substr($tech->nombres, 0, 1) }}{{ substr($tech->apellidos, 0, 1) }}
@@ -90,22 +90,22 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-8 py-6">
+                                    <td class="px-4 lg:px-6 py-6">
                                         <div class="text-[11px] font-bold text-white/40 italic mb-1 group-hover/row:text-white/60 transition-colors uppercase leading-none">{{ $tech->email }}</div>
                                         <div class="text-[10px] font-black text-indigo-400/40 italic leading-none">{{ $tech->telefono }}</div>
                                     </td>
-                                    <td class="px-8 py-6">
+                                    <td class="px-4 lg:px-6 py-6">
                                         <div class="text-[11px] font-black text-white/80 italic uppercase tracking-widest mb-1">{{ $tech->matricula ?: 'SIN MATRÍCULA' }}</div>
                                         <div class="text-[9px] font-bold text-white/20 italic tracking-widest uppercase">DOC: {{ $tech->n_doc ?: '---' }}</div>
                                     </td>
-                                    <td class="px-8 py-6 text-center">
+                                    <td class="px-4 lg:px-6 py-6 text-center">
                                         @php $sedeCount = $tech->sedes()->count(); @endphp
                                         <span class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest italic border {{ $sedeCount > 0 ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'text-white/10 border-white/5 bg-white/5' }}">
                                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                                             {{ $sedeCount }} Sedes
                                         </span>
                                     </td>
-                                    <td class="px-8 py-6 text-right">
+                                    <td class="px-4 lg:px-6 py-6 text-right">
                                         <button wire:click="openAssignModal({{ $tech->id }})" 
                                                 class="h-10 px-5 bg-indigo-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic flex items-center gap-2 ml-auto shadow-lg shadow-indigo-500/20 hover:brightness-110 active:scale-95 transition-all group/btn relative overflow-hidden">
                                             <div class="absolute inset-0 bg-white/20 -translate-x-12 group-hover/btn:translate-x-0 transition-transform"></div>
