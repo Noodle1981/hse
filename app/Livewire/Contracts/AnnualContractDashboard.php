@@ -39,7 +39,7 @@ class AnnualContractDashboard extends Component
     public $editingCell = null;  // "{planId}_{monthValue}"
     public $editingDate  = '';   // fecha específica siendo editada
     public $filterCategory = null;
-    
+
     // Form fields for new activity
     public $category = 'Capacitación';
     public $frequency = 'none';
@@ -53,7 +53,7 @@ class AnnualContractDashboard extends Component
         $this->filterCategory = $category;
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         // Default to first available sede
         $role = strtolower($user->rol);
         if ($sede_id) {
@@ -83,10 +83,10 @@ class AnnualContractDashboard extends Component
 
         if ($latestPlan && $latestPlan->period_start && $latestPlan->period_end) {
             $this->contractStart = $latestPlan->period_start->format('Y-m');
-            
+
             // Calcular diferencia en meses
             $months = (int) $latestPlan->period_start->diffInMonths($latestPlan->period_end) + 1;
-            
+
             // Solo asignar si es una opción válida en el select (3, 6, 12, 24)
             if (in_array($months, [3, 6, 12, 24])) {
                 $this->contractDuration = $months;
@@ -146,10 +146,10 @@ class AnnualContractDashboard extends Component
         /** @var \App\Models\User $user */
         $user = Auth::user();
         if (!$user->isAdmin() || !$this->editMode) return;
-        
+
         $plan = AnnualPlan::findOrFail($planId);
         $scheduled = $plan->scheduled_months ?? [];
-        
+
         if (in_array($monthValue, $scheduled)) {
             $scheduled = array_values(array_diff($scheduled, [$monthValue]));
             // Remove specific date when deactivating month
@@ -160,7 +160,7 @@ class AnnualContractDashboard extends Component
             $scheduled[] = $monthValue;
             sort($scheduled);
         }
-        
+
         $plan->scheduled_months = $scheduled;
         $plan->save();
     }
@@ -214,7 +214,7 @@ class AnnualContractDashboard extends Component
         /** @var \App\Models\User $user */
         $user = Auth::user();
         if (!$user->isAdmin()) return;
-        
+
         $this->validate([
             'activity_name' => 'required|string|max:255',
             'category' => 'required|in:Capacitación,Inspección,Informe',
@@ -243,7 +243,7 @@ class AnnualContractDashboard extends Component
             for ($i = 0; $i < $this->contractDuration; $i++) {
                 $monthNum = $i + 1;
                 $shouldCheck = false;
-                
+
                 if ($this->frequency === 'mensual') {
                     $shouldCheck = true;
                 } elseif ($this->frequency === 'bimestral' && $monthNum % 2 === 0) {
@@ -251,7 +251,7 @@ class AnnualContractDashboard extends Component
                 } elseif ($this->frequency === 'trimestral' && $monthNum % 3 === 0) {
                     $shouldCheck = true;
                 }
-                
+
                 if ($shouldCheck) {
                     $mDate = $startDate->copy()->addMonths($i);
                     $scheduled[] = $mDate->format('Y-m');
@@ -271,20 +271,20 @@ class AnnualContractDashboard extends Component
         /** @var \App\Models\User $user */
         $user = Auth::user();
         if (!$user->isAdmin()) return;
-        
+
         AnnualPlan::findOrFail($id)->delete();
     }
 
     public function downloadPdf()
     {
         if (!$this->sedeId) return;
-        
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        $routeName = $user->isAdmin() 
-            ? 'gestor.annual-contract.pdf' 
+        $routeName = $user->isAdmin()
+            ? 'gestor.annual-contract.pdf'
             : 'tecnico.annual-contract.pdf';
-            
+
         // Pass period_start implicitly OR let them download the whole year? No, we pass the current start
         $url = route($routeName, ['sede_id' => $this->sedeId, 'year' => substr($this->contractStart, 0, 4)]);
         $this->dispatch('open-url', url: $url);
@@ -297,7 +297,7 @@ class AnnualContractDashboard extends Component
     {
         $months = [];
         $start = \Carbon\Carbon::createFromFormat('Y-m', $this->contractStart)->startOfMonth();
-        
+
         for ($i = 0; $i < $this->contractDuration; $i++) {
             $current = $start->copy()->addMonths($i);
             $months[$current->format('Y-m')] = [
@@ -316,72 +316,77 @@ class AnnualContractDashboard extends Component
     private function calculateComplianceData($plans, $dynamicMonths)
     {
         $data = [];
-        
+
+        if (!$this->sedeId) return [];
+
         $startDate = \Carbon\Carbon::createFromFormat('Y-m', $this->contractStart)->startOfMonth();
         $endDate = $startDate->copy()->addMonths($this->contractDuration - 1)->endOfMonth();
 
-        // 1. Inspecciones con Títulos, Resultados y Hallazgos
-        $inspections = \App\Models\DynamicInspection::where('sede_id', $this->sedeId)
+        // 1. Inspecciones con Títulos, Resultados y Hallazgos (Optimizado select)
+        $inspections = \App\Models\DynamicInspection::select('id', 'dynamic_checklist_id', 'sede_id', 'completed_at', 'result', 'user_id')
+            ->where('sede_id', $this->sedeId)
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->where('status', 'completed')
-            ->with(['checklist:id,title', 'assignment.visitCompletion.visit'])
-            ->withCount(['hallazgos' => function($q) {
+            ->with(['checklist:id,title', 'assignment:id,inspection_id', 'assignment.visitCompletion:id,checklist_assignment_id,visit_id', 'assignment.visitCompletion.visit:id,start_time,end_time'])
+            ->withCount(['hallazgos' => function ($q) {
                 $q->where('estado', '!=', 'cerrado');
             }])
             ->get()
-            ->groupBy(function($i) {
+            ->groupBy(function ($i) {
                 return $i->dynamic_checklist_id . '_' . $i->completed_at->format('Y-m');
             });
-            
-        // 2. Capacitaciones Estándar
-        $trainings = \App\Models\Training::where('sede_id', $this->sedeId)
+
+        // 2. Capacitaciones Estándar (Optimizado select)
+        $trainings = \App\Models\Training::select('id', 'sede_id', 'date', 'title', 'duration', 'status')
+            ->where('sede_id', $this->sedeId)
             ->whereBetween('date', [$startDate, $endDate])
-            ->with(['visitTrainings.visit'])
+            ->where('status', 'completed')
+            ->with(['visitTrainings:id,training_id,visit_id,duration_minutes'])
             ->withCount('attendances')
             ->get()
-            ->groupBy(function($t) {
-                return \Carbon\Carbon::parse($t->date ?? $t->created_at)->format('Y-m');
+            ->groupBy(function ($t) {
+                return \Carbon\Carbon::parse($t->date)->format('Y-m');
             });
 
         // 3. Capacitaciones Ad-hoc de Visitas (Auto-asignadas)
-        $visitTrainings = \App\Models\VisitTraining::whereHas('visit', function($q) use ($startDate, $endDate) {
+        $visitTrainings = \App\Models\VisitTraining::select('id', 'visit_id', 'title', 'attendees_count', 'duration_minutes', 'created_at')
+            ->whereHas('visit', function ($q) use ($startDate, $endDate) {
                 $q->where('sede_id', $this->sedeId)
-                  ->whereBetween('fecha_visita', [$startDate, $endDate]);
+                    ->whereBetween('fecha_visita', [$startDate, $endDate]);
             })
             ->get()
-            ->groupBy(function($vt) {
+            ->groupBy(function ($vt) {
                 return $vt->created_at->format('Y-m');
             });
 
         // 4. Informes Maestros
-        $reports = \App\Models\MasterReport::where('sede_id', $this->sedeId)
+        $reports = \App\Models\MasterReport::select('id', 'sede_id', 'periodo', 'created_at', 'estado')
+            ->where('sede_id', $this->sedeId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
-            ->groupBy(function($r) {
-                $period = $r->periodo;
-                // If it's a Q-period, fallback to created_at for exact Y-m matching in UI for simplicity, 
-                // or parse properly if structured correctly
+            ->groupBy(function ($r) {
                 try {
-                    return \Carbon\Carbon::parse($period . '-01')->format('Y-m');
+                    return \Carbon\Carbon::parse($r->periodo . '-01')->format('Y-m');
                 } catch (\Exception $e) {
                     return $r->created_at->format('Y-m');
                 }
             });
 
         // 5. Incidentes Mensuales de la Sede
-        $incidents = \App\Models\Incidente::where('sede_id', $this->sedeId)
+        $incidents = \App\Models\Incidente::select('id', 'sede_id', 'fecha_ocurrencia')
+            ->where('sede_id', $this->sedeId)
             ->whereBetween('fecha_ocurrencia', [$startDate, $endDate])
             ->get()
-            ->groupBy(function($inc) {
+            ->groupBy(function ($inc) {
                 return $inc->fecha_ocurrencia->format('Y-m');
             });
-        
+
         $currentDate = now()->format('Y-m');
-        
+
         foreach ($plans as $plan) {
             $data[$plan->id] = [];
             $scheduledMonths = is_array($plan->scheduled_months) ? $plan->scheduled_months : json_decode($plan->scheduled_months ?? '[]', true) ?? [];
-            
+
             foreach ($dynamicMonths as $monthValue => $monthInfo) {
                 $items = [];
                 $count = 0;
@@ -394,8 +399,8 @@ class AnnualContractDashboard extends Component
 
                 if (!in_array($monthValue, $scheduledMonths)) {
                     $data[$plan->id][$monthValue] = [
-                        'status' => 'none', 
-                        'count' => 0, 
+                        'status' => 'none',
+                        'count' => 0,
                         'details' => ['items' => []]
                     ];
                     continue;
@@ -404,15 +409,15 @@ class AnnualContractDashboard extends Component
                 if ($plan->category === 'Inspección' && $plan->checklist_id) {
                     $key = $plan->checklist_id . '_' . $monthValue;
                     $monthInps = $inspections[$key] ?? collect();
-                    
+
                     foreach ($monthInps as $inp) {
                         $count++;
                         if ($inp->result === 'Pass') $passed++;
                         else $failed++;
                         $findings += $inp->hallazgos_count;
-                        
+
                         $executionDate = $inp->completed_at?->format('d/m/Y');
-                        
+
                         // Intentar obtener duración de la visita
                         if ($inp->assignment?->visitCompletion?->visit) {
                             $visit = $inp->assignment->visitCompletion->visit;
@@ -430,14 +435,14 @@ class AnnualContractDashboard extends Component
                         $count++;
                         $executionDate = $cap->date?->format('d/m/Y');
                         $duration = (int) $cap->duration;
-                        
+
                         // Si no hay duración explícita, buscar en visitTrainings
                         if (!$duration && $cap->visitTrainings->isNotEmpty()) {
                             $vTrain = $cap->visitTrainings->first();
                             $duration = (int) $vTrain->duration_minutes;
                         }
                     }
-                    
+
                     // Capacitaciones de Visita (Ad-hoc) que coincidan con el nombre
                     $monthVisitCaps = $visitTrainings[$monthValue] ?? collect();
                     $matchingVisitCaps = $monthVisitCaps->filter(fn($vc) => $vc->title === $plan->activity_name);
@@ -454,7 +459,7 @@ class AnnualContractDashboard extends Component
                         $executionDate = $monthReports->first()->created_at?->format('d/m/Y');
                     }
                 }
-                
+
                 $details = [
                     'passed' => $passed,
                     'failed' => $failed,
@@ -483,7 +488,7 @@ class AnnualContractDashboard extends Component
                 }
             }
         }
-        
+
         return $data;
     }
 
@@ -497,12 +502,13 @@ class AnnualContractDashboard extends Component
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
-        $availableSedes = $user->isAdmin()
-            ? Sede::with(['empresa', 'users'])->orderBy('nombre_sede')->get() 
-            : $user->sedes()->with(['empresa', 'users'])->orderBy('nombre_sede')->get();
 
-        $companies = \App\Models\Empresa::whereIn('id', $availableSedes->pluck('empresa_id'))
+        $availableSedes = $user->isAdmin()
+            ? Sede::select('id', 'nombre_sede', 'empresa_id')->orderBy('nombre_sede')->get()
+            : $user->sedes()->select('sedes.id', 'sedes.nombre_sede', 'sedes.empresa_id')->orderBy('nombre_sede')->get();
+
+        $companies = \App\Models\Empresa::select('id', 'nombre')
+            ->whereIn('id', $availableSedes->pluck('empresa_id'))
             ->orderBy('nombre')
             ->get();
 
@@ -510,21 +516,22 @@ class AnnualContractDashboard extends Component
 
         if (!$this->selectedCompanyId && $companies->isNotEmpty()) {
             $this->selectedCompanyId = $companies->first()->id;
-            $this->updatedSelectedCompanyId($this->selectedCompanyId);
         }
 
-        $activeSede = Sede::with('empresa')->find($this->sedeId);
+        $activeSede = Sede::with(['empresa', 'users' => function ($q) {
+            $q->where('rol', 'tecnico');
+        }])->find($this->sedeId);
         $dynamicMonths = $this->getDynamicMonthsProperty();
-        
+
         // Precalcular datos de cumplimiento
         $complianceData = $this->calculateComplianceData($plans, $dynamicMonths);
-        $efficiency = $this->calculateEfficiencyMetrics($complianceData);
+        $efficiency = $this->calculateEfficiencyMetrics($complianceData, $plans);
 
         // Formatear opciones para custom-select
         $companyOptions = $companies->map(fn($c) => ['value' => $c->id, 'label' => $c->nombre])->toArray();
         $sedeOptions = $sedes->map(fn($s) => ['value' => $s->id, 'label' => $s->nombre_sede])->toArray();
-        $checklistOptions = DynamicChecklist::all()->map(fn($c) => ['value' => $c->id, 'label' => $c->title])->toArray();
-        
+        $checklistOptions = DynamicChecklist::select('id', 'title')->get()->map(fn($c) => ['value' => $c->id, 'label' => $c->title])->toArray();
+
         $durationOptions = [
             ['value' => 3, 'label' => '3 Meses'],
             ['value' => 6, 'label' => '6 Meses'],
@@ -552,7 +559,7 @@ class AnnualContractDashboard extends Component
         ]);
     }
 
-    private function calculateEfficiencyMetrics($complianceData)
+    private function calculateEfficiencyMetrics($complianceData, $plans)
     {
         $stats = [
             'global' => 0,
@@ -560,15 +567,22 @@ class AnnualContractDashboard extends Component
             'capacitacion' => 0,
             'informe' => 0,
             'counts' => [
-                'total' => 0, 'completed' => 0, 'overdue' => 0, 'pending' => 0,
-                'insp_total' => 0, 'insp_done' => 0,
-                'cap_total' => 0, 'cap_done' => 0,
-                'inf_total' => 0, 'inf_done' => 0,
+                'total' => 0,
+                'completed' => 0,
+                'overdue' => 0,
+                'pending' => 0,
+                'insp_total' => 0,
+                'insp_done' => 0,
+                'cap_total' => 0,
+                'cap_done' => 0,
+                'inf_total' => 0,
+                'inf_done' => 0,
             ]
         ];
 
         foreach ($complianceData as $planId => $months) {
-            $plan = AnnualPlan::find($planId);
+            $plan = $plans->firstWhere('id', $planId);
+            if (!$plan) continue;
             foreach ($months as $month => $data) {
                 if ($data['status'] === 'none') continue;
 

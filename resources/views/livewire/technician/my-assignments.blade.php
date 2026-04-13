@@ -800,10 +800,12 @@
 
                         <div class="flex items-center gap-3">
                             @if($assignment->status === 'completed')
-                                <a href="{{ route('tecnico.inspections.show', $assignment->inspection->id) }}" class="flex-1 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest italic">Ver Registro</a>
-                                <a href="{{ route('tecnico.inspections.pdf.download', $assignment->inspection->id) }}" class="h-12 w-12 flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                </a>
+                                @if($assignment->inspection)
+                                    <a href="{{ route('tecnico.inspections.show', $assignment->inspection->id) }}" class="flex-1 h-12 flex items-center justify-center bg-white/5 border border-white/10 rounded-2xl text-[9px] font-black uppercase tracking-widest italic">Ver Registro</a>
+                                    <a href="{{ route('tecnico.inspections.pdf.download', $assignment->inspection->id) }}" class="h-12 w-12 flex items-center justify-center bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-emerald-500">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    </a>
+                                @endif
                             @else
                                 @php
                                     $category = $assignment->category ?? 'Inspección';

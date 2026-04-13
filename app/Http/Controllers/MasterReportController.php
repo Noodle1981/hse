@@ -8,9 +8,12 @@ use App\Services\BrandingService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class MasterReportController extends Controller
 {
+    use AuthorizesRequests;
+
     public function index()
     {
         return view('master-reports.index');
@@ -23,12 +26,17 @@ class MasterReportController extends Controller
 
     public function edit($id)
     {
+        $report = MasterReport::findOrFail($id);
+        $this->authorize('view', $report);
+        
         return view('master-reports.edit', compact('id'));
     }
 
     public function loading($id)
     {
         $report = MasterReport::with('sede')->findOrFail($id);
+        $this->authorize('view', $report);
+
         return view('master-reports.loading', compact('report'));
     }
 
@@ -39,6 +47,8 @@ class MasterReportController extends Controller
         ini_set('max_execution_time', 300);
 
         $report   = MasterReport::with(['sede.empresa', 'tecnico', 'gestor'])->findOrFail($id);
+        $this->authorize('view', $report);
+
         $data     = $this->aggregatePeriodData($report);
         $branding = BrandingService::forUser($report->tecnico ?? $report->gestor);
         

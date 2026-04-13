@@ -2,9 +2,10 @@
 
 <div class="space-y-3" x-data="{ 
     open: false, 
-    value: @entangle($model),
+    value: @entangle($model).live,
     get label() {
         if (!this.value) return '{{ $placeholder }}';
+        // Buscamos la opción tanto en el estado actual como en las opciones originales
         const option = this.options.find(o => o.value == this.value);
         return option ? option.label : '{{ $placeholder }}';
     },
@@ -15,7 +16,7 @@
         return this.options.filter(o => o.label.toLowerCase().includes(this.search.toLowerCase()));
     }
 }" 
-x-effect="options = @js($options)"
+x-effect="options = @js($options); if(value && !options.find(o => o.value == value)) { /* valor ya no vlido para nuevas opciones */ }"
 @click.outside="open = false">
     @if($label)
         <label class="flex items-center gap-2 text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1">

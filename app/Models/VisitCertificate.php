@@ -25,6 +25,8 @@ class VisitCertificate extends Model
         'code',
         'responsible_name',
         'date_firma_responsable',
+        'token_expires_at',
+        'token_used',
     ];
 
     protected $casts = [
@@ -32,6 +34,8 @@ class VisitCertificate extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'date_firma_responsable' => 'datetime',
+        'token_expires_at' => 'datetime',
+        'token_used' => 'boolean',
     ];
 
     // Relaciones principales

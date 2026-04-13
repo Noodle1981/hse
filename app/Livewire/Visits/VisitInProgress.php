@@ -136,7 +136,6 @@ class VisitInProgress extends Component
         
         $this->dismissedAlertsCount = session()->get('dismissed_visit_alerts_' . $this->visit->id, 0);
         $this->loadChecklists();
-        $this->calculateDuration();
 
         // Activación Contextual
         if ($this->task_id && $this->type) {
@@ -240,34 +239,19 @@ class VisitInProgress extends Component
     }
 
 
-    public function calculateDuration()
-    {
-        if ($this->visit && $this->visit->start_time) {
-            $this->durationMinutes = (int) $this->visit->start_time->diffInMinutes(now());
-            
-            // Determinar en qué bloque de 30 minutos estamos
-            $currentBlock = (int) floor($this->durationMinutes / self::ALERT_THRESHOLD);
-            
-            // Cargar desde sesión por si acaso (aunque ya se hace en mount)
-            $this->dismissedAlertsCount = session()->get('dismissed_visit_alerts_' . $this->visit->id, 0);
-            
-            // Mostrar alerta si estamos en un bloque > 0 y no ha sido descartado para este bloque
-            if ($currentBlock > 0 && $currentBlock > $this->dismissedAlertsCount) {
-                $this->isVisitaExcedida = true;
-            } else {
-                $this->isVisitaExcedida = false;
-            }
-        }
-    }
-
     public function dismissAlert()
     {
-        // Marcar el bloque actual como descartado
-        $this->dismissedAlertsCount = (int) floor($this->durationMinutes / self::ALERT_THRESHOLD);
+        // Calcular en qué bloque estamos basándose en el tiempo actual
+        $durationMinutes = (int) $this->visit->start_time->diffInMinutes(now());
+        $currentBlock = (int) floor($durationMinutes / self::ALERT_THRESHOLD);
+        
+        $this->dismissedAlertsCount = $currentBlock;
         
         // Guardar en sesión para persistir entre navegaciones
         session()->put('dismissed_visit_alerts_' . $this->visit->id, $this->dismissedAlertsCount);
         
+        // El frontend ocultará la alerta inmediatamente gracias a la reactividad de Alpine
+        // o podemos emitir un evento si fuera necesario, pero Alpine lo manejará localmente.
         $this->isVisitaExcedida = false;
     }
 

@@ -1,4 +1,21 @@
-<div class="w-full mx-auto" wire:poll.60s="calculateDuration">
+<div class="w-full mx-auto" 
+    x-data="{
+        startTime: {{ $visit->start_time->timestamp }},
+        threshold: 30,
+        dismissedCount: @entangle('dismissedAlertsCount'),
+        minutes: 0,
+        isExceeded: false,
+        updateTimer() {
+            const now = Math.floor(Date.now() / 1000);
+            this.minutes = Math.floor((now - this.startTime) / 60);
+            const currentBlock = Math.floor(this.minutes / this.threshold);
+            this.isExceeded = currentBlock > 0 && currentBlock > this.dismissedCount;
+        },
+        init() {
+            this.updateTimer();
+            setInterval(() => this.updateTimer(), 30000); // Actualizar cada 30s
+        }
+    }">
     {{-- Header de Visita Premium --}}
     @section('header_custom')
     <header class="h-16 relative overflow-hidden bg-ep-dark flex items-center z-20 shadow-lg">
@@ -33,7 +50,7 @@
         <div class="max-w-7xl mx-auto">
 
             <!-- Alerta de Duración Excedida Premium -->
-            @if($isVisitaExcedida)
+            <template x-if="isExceeded">
             <div class="mb-10 flex items-center justify-between bg-red-500/10 border border-red-500/20 p-6 rounded-[2rem] shadow-2xl overflow-hidden relative group animate-fade-in-down">
                 <div class="absolute -right-10 -top-10 w-32 h-32 bg-red-500/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
                 <div class="relative flex items-center gap-5">
@@ -47,16 +64,16 @@
                             Alerta de <span class="text-red-500">Tiempo Límite</span>
                         </p>
                         <p class="text-indigo-100/60 text-[11px] font-bold italic uppercase tracking-wider">
-                            Jornada excedida: {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}min
+                            Jornada excedida: <span x-text="Math.floor(minutes / 60)"></span>h <span x-text="minutes % 60"></span>min
                         </p>
                     </div>
                 </div>
-                <button wire:click="dismissAlert"
+                <button wire:click="dismissAlert" @click="isExceeded = false"
                     class="relative px-5 py-2 bg-white/5 hover:bg-white/10 text-indigo-100/40 hover:text-white text-[10px] font-black rounded-xl border border-white/5 transition-all uppercase tracking-widest italic">
                     Ignorar
                 </button>
             </div>
-            @endif
+            </template>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
 
@@ -372,7 +389,7 @@
                                 <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-[0.4em] mb-2 italic">Tiempo de Operación</span>
                                 <div class="flex items-center gap-4">
                                     <span class="text-4xl font-black text-white italic tracking-tighter tabular-nums drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-                                        {{ floor($durationMinutes / 60) }}h {{ $durationMinutes % 60 }}m
+                                        <span x-text="Math.floor(minutes / 60)"></span>h <span x-text="minutes % 60"></span>m
                                     </span>
                                     <div class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-ping shadow-[0_0_12px_rgba(16,185,129,0.5)]"></div>
                                 </div>

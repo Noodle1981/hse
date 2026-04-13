@@ -26,7 +26,12 @@ class PublicSignature extends Component
         if (!$this->certificate) {
             $this->error_message = 'El enlace no es válido o ha expirado.';
         } else {
-            if (!empty($this->certificate->responsible_signature)) {
+            // Validar Expiración y Uso Único
+            if ($this->certificate->token_used) {
+                $this->error_message = 'Este enlace ya ha sido utilizado para firmar.';
+            } elseif ($this->certificate->token_expires_at && $this->certificate->token_expires_at->isPast()) {
+                $this->error_message = 'El enlace de firma ha expirado (validez de 24hs).';
+            } elseif (!empty($this->certificate->responsible_signature)) {
                 $this->error_message = 'Esta constancia ya ha sido firmada.';
             }
         }
@@ -54,6 +59,7 @@ class PublicSignature extends Component
             'responsible_signature' => $this->signature,
             'date_firma_responsable' => now(),
             'status' => 'signed',
+            'token_used' => true,
         ]);
 
         session()->flash('success', 'La constancia ha sido firmada exitosamente. Gracias.');

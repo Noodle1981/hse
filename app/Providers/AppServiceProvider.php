@@ -23,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(DynamicInspection::class, InspectionPolicy::class);
+        Gate::policy(\App\Models\DynamicInspection::class, \App\Policies\InspectionPolicy::class);
+        Gate::policy(\App\Models\MasterReport::class, \App\Policies\MasterReportPolicy::class);
     }
 }

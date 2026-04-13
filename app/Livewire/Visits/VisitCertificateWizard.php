@@ -143,6 +143,8 @@ class VisitCertificateWizard extends Component
             'aclaracion_responsable' => $this->aclaracion_responsable,
             'token_responsable' => $token,
             'code' => $code,
+            'token_expires_at' => now()->addHours(24),
+            'token_used' => false,
         ]);
 
         if (!empty($this->selectedInspections)) {

@@ -35,7 +35,7 @@
         <div class="max-w-[98rem] mx-auto">
 
             {{-- CONTROLES MAESTROS REDISEÑADOS --}}
-            <div class="relative z-50 bg-ep-dark/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-4 sm:p-6 shadow-2xl mb-8">
+            <div wire:loading.class="opacity-70 pointer-events-none" class="relative z-50 bg-ep-dark/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-4 sm:p-6 shadow-2xl mb-8 transition-all duration-300">
                 <div class="flex flex-col xl:flex-row gap-6 items-stretch xl:items-center">
 
                     {{-- Bloque Izquierdo: Selección de Activo --}}
@@ -220,7 +220,14 @@
             @endif
 
             {{-- MATRIZ OPERATIVA (CON table-fixed PARA EVITAR DESBORDE) --}}
-            <div class="relative z-30 bg-ep-dark/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-2xl mb-12">
+            <div wire:loading.class="opacity-50" class="relative z-30 bg-ep-dark/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-2xl mb-12 transition-all duration-500">
+                {{-- Overlay de carga sutil --}}
+                <div wire:loading class="absolute inset-0 z-[100] flex items-center justify-center bg-ep-dark/20 backdrop-blur-[2px] rounded-[2.5rem]">
+                    <div class="flex flex-col items-center gap-3">
+                        <div class="w-10 h-10 border-4 border-ep-primary border-t-transparent rounded-full animate-spin"></div>
+                        <span class="text-[10px] font-black text-white uppercase tracking-[0.3em] italic animate-pulse">Sincronizando...</span>
+                    </div>
+                </div>
                 <div class="px-6 py-5 border-b border-white/5 flex items-center justify-between bg-black/20">
                     <div class="flex items-center gap-3">
                         <div class="w-2 h-6 bg-ep-primary rounded-full"></div>
@@ -261,15 +268,17 @@
                         <tbody class="divide-y divide-white/[0.03]">
                             @php $currentCategory = ''; @endphp
                             @forelse($plans as $plan)
-                            @if($currentCategory !== $plan->category)
-                            <tr class="bg-indigo-600/5">
-                                <td colspan="{{ $editMode ? 14 : 13 }}" class="px-6 py-2 text-[9px] font-black text-indigo-400 uppercase italic tracking-[0.3em]">
-                                    {{ strtoupper($plan->category) }}
-                                </td>
-                            </tr>
-                            @php $currentCategory = $plan->category; @endphp
-                            @endif
-                            <tr class="group/row hover:bg-white/[0.02] transition-colors">
+                                {{-- Grupo de Categoría --}}
+                                @if($currentCategory !== $plan->category)
+                                <tr wire:key="category-header-{{ $plan->category }}" class="bg-indigo-600/5">
+                                    <td colspan="{{ $editMode ? 14 : 13 }}" class="px-6 py-2 text-[9px] font-black text-indigo-400 uppercase italic tracking-[0.3em]">
+                                        {{ strtoupper($plan->category) }}
+                                    </td>
+                                </tr>
+                                @php $currentCategory = $plan->category; @endphp
+                                @endif
+
+                                <tr wire:key="plan-row-{{ $plan->id }}" class="group/row hover:bg-white/[0.02] transition-colors">
                                 <td class="sticky left-0 z-20 bg-[#1e1e2d] px-4 py-4 border-r border-white/5">
                                     <div class="flex items-center gap-2 overflow-hidden">
                                         <div class="shrink-0 w-1 h-5 {{ $plan->category === 'Capacitación' ? 'bg-blue-500' : ($plan->category === 'Inspección' ? 'bg-orange-500' : 'bg-ep-primary') }} rounded-full"></div>
@@ -289,7 +298,7 @@
                                 $data = $complianceData[$plan->id][$monthValue] ?? ['status' => 'none', 'count' => 0];
                                 $status = $data['status'];
                                 @endphp
-                                <td class="px-0 py-4 text-center border-r border-white/[0.03] last:border-r-0">
+                                <td wire:key="plan-{{ $plan->id }}-month-{{ $monthValue }}" class="px-0 py-4 text-center border-r border-white/[0.03] last:border-r-0">
                                     @php
                                         $scheduledDates = $plan->scheduled_dates ?? [];
                                         $cellDate       = $scheduledDates[$monthValue] ?? null;
