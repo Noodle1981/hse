@@ -11,7 +11,7 @@ use App\Livewire\Checklists\ChecklistBuilder;
 use App\Livewire\Checklists\ChecklistFiller;
 use App\Livewire\Checklists\InspectionHistory;
 use App\Livewire\Checklists\InspectionShow;
-use App\Livewire\Auth\Login;
+use App\Http\Controllers\Auth\LoginController;
 use App\Livewire\Categories\CategoryIndex;
 use App\Livewire\Categories\CategoryBuilder as CategoryBuilderComponent;
 use App\Livewire\Categories\SubcategoryManager;
@@ -25,7 +25,8 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('/login', Login::class)->name('login');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
 Route::get('/constancia/firmar/{token}', \App\Livewire\Public\PublicSignature::class)->name('constancia.firmar');
 
 /*
@@ -267,10 +268,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/switch-role/{role}', [\App\Http\Controllers\SwitchRoleController::class, 'switch'])->name('switch-role');
 
     // Logout
-    Route::match(['get', 'post'], '/logout', function () {
-        Auth::logout();
-        session()->invalidate();
-        session()->regenerateToken();
-        return redirect('/login');
-    })->name('logout');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
