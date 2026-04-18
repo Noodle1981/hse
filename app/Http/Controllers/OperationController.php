@@ -11,6 +11,7 @@ use App\Services\VisitService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class OperationController extends Controller
@@ -473,9 +474,9 @@ class OperationController extends Controller
      */
     public function finalize(Request $request, VisitCertificate $visit)
     {
-        \Log::info('Finalizando visita', [
+        Log::info('Finalizando visita', [
             'visit_id' => $visit->id,
-            'user_id' => \Auth::id(),
+            'user_id' => Auth::id(),
             'has_signature' => !empty($request->signature),
             'signature_unavailable' => $request->signature_unavailable
         ]);
