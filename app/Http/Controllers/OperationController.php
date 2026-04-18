@@ -473,6 +473,13 @@ class OperationController extends Controller
      */
     public function finalize(Request $request, VisitCertificate $visit)
     {
+        \Log::info('Finalizando visita', [
+            'visit_id' => $visit->id,
+            'user_id' => \Auth::id(),
+            'has_signature' => !empty($request->signature),
+            'signature_unavailable' => $request->signature_unavailable
+        ]);
+
         $request->validate([
             'notes' => 'nullable|string',
             'responsible_name' => 'required|string',

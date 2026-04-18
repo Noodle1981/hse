@@ -65,14 +65,16 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
 
     const handleFinalize = (e) => {
         e.preventDefault();
-        if (!finalizeForm.data.signature_unavailable && signaturePad.current) {
-            if (signaturePad.current.isEmpty()) {
-                alert('SE REQUIERE CERTIFICACIÓN: Por favor, capture la firma del responsable.');
-                return;
-            }
-            finalizeForm.setData('signature', signaturePad.current.toDataURL());
-        }
-        finalizeForm.post(route('tecnico.visits.finalize', visit.id));
+        
+        finalizeForm.transform((data) => ({
+            ...data,
+            signature: !data.signature_unavailable && signaturePad.current 
+                ? signaturePad.current.toDataURL() 
+                : '',
+        })).post(route('tecnico.visits.finalize', visit.id), {
+            onSuccess: () => setShowFinalizeModal(false),
+            preserveScroll: true
+        });
     };
 
     // ASIGNACIÓN DE TAREAS SUGERIDAS (CLON LEGACY)
