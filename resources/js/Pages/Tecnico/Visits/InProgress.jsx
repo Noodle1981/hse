@@ -350,7 +350,6 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                             </div>
                                             {finalizeForm.errors.signature && <p className="text-[9px] font-black text-red-500 mt-1 text-center uppercase italic">{finalizeForm.errors.signature}</p>}
                                         </div>
-                                        </div>
                                     )}
 
                                     <div className="flex items-center gap-4 px-2">
