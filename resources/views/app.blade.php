@@ -7,6 +7,7 @@
     <title inertia>{{ config('app.name', 'XamaSafe') }}</title>
     @viteReactRefresh
     @vite(['resources/css/app.css', 'resources/js/app.jsx'])
+    @routes
     @inertiaHead
 </head>
 <body class="bg-[#11111d] antialiased">

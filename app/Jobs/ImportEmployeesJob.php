@@ -11,6 +11,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Shuchkin\SimpleXLSX;
 
 class ImportEmployeesJob implements ShouldQueue
@@ -51,7 +53,7 @@ class ImportEmployeesJob implements ShouldQueue
                 
                 // Procesar en chunks de 50
                 foreach (array_chunk($rows, 50) as $chunk) {
-                    \DB::transaction(function () use ($chunk, $colMap, &$count, &$errors, &$errorLog) {
+                    DB::transaction(function () use ($chunk, $colMap, &$count, &$errors, &$errorLog) {
                         foreach ($chunk as $index => $row) {
                             try {
                                 $nombre = $row[$colMap['nombre']] ?? null;
@@ -67,10 +69,15 @@ class ImportEmployeesJob implements ShouldQueue
                                 }
 
                                 // Validar CUIL si está presente
-                                if ($cuil && !(new \App\Rules\ValidCuil())->passes('cuil', $cuil)) {
-                                    $errorLog[] = "Fila " . ($index + 2) . ": CUIL inválido ($cuil).";
-                                    $errors++;
-                                    continue;
+                                if ($cuil) {
+                                    $validator = Validator::make(['cuil' => $cuil], [
+                                        'cuil' => [new \App\Rules\ValidCuil()]
+                                    ]);
+                                    if ($validator->fails()) {
+                                        $errorLog[] = "Fila " . ($index + 2) . ": CUIL inválido ($cuil).";
+                                        $errors++;
+                                        continue;
+                                    }
                                 }
 
                                 Employee::updateOrCreate(

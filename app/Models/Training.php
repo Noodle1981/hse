@@ -25,10 +25,21 @@ class Training extends Model
         'dynamic_checklist_id',
     ];
 
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_COMPLETED = 'completed';
+
     protected $casts = [
         'date' => 'datetime',
         'is_template' => 'boolean',
     ];
+
+    /**
+     * Scope para capacitaciones completadas
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', self::STATUS_COMPLETED);
+    }
 
     public function dynamicChecklist()
     {

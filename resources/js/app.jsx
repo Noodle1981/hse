@@ -1,7 +1,10 @@
 import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { route } from 'ziggy-js';
 import '../css/app.css';
+
+window.route = route;
 
 createInertiaApp({
     // Nombre de la pestaña del browser: "Login | XamaSafe"

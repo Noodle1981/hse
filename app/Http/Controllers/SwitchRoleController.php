@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class SwitchRoleController extends Controller
 {
@@ -12,7 +13,8 @@ class SwitchRoleController extends Controller
      */
     public function switch(Request $request, $role)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
 
         // Validar que el usuario tenga permiso para alternar
         // Solo Gestores y Super Admins pueden alternar a modo Técnico

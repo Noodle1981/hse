@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { usePage, Link, router } from '@inertiajs/react';
 
 export default function AuthenticatedLayout({ children, title }) {
+    // Cache-breaker: v2.0.1 - Ensuring shared routes are loaded
     const { auth, branding, flash } = usePage().props;
     const user = auth.user;
 
@@ -86,10 +87,9 @@ export default function AuthenticatedLayout({ children, title }) {
                         {/* ── ADMIN / GESTOR ── */}
                         {user.is_admin && (
                             <>
-                                <NavItem href={route('gestor.visits.history')} active={isActive('gestor.visits.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconClock />} label="Historial de Visitas" />
+                                <NavItem href={route('gestor.inspections.index')} active={isActive('gestor.inspections.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconClock />} label="Historial de Visitas" />
                                 <NavItem href={route('gestor.checklists.index')} active={isActive('gestor.checklists.*', 'gestor.categories.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconDoc />} label="Plantillas de Checklist" />
                                 <NavItem href={route('gestor.trainings.index')} active={isActive('gestor.trainings.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconTraining />} label="Capacitaciones" />
-                                <NavItem href={route('gestor.assignments.index')} active={isActive('gestor.assignments.*', 'gestor.inspections.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconTasks />} label="Inspecciones" />
                                 <NavItem href={route('gestor.hallazgos.index')} active={isActive('gestor.hallazgos.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconWarning />} label="Hallazgos" />
                                 <NavItem href={route('gestor.incidentes.index')} active={isActive('gestor.incidentes.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconAlert />} label="Incidentes" />
                             </>
@@ -97,8 +97,8 @@ export default function AuthenticatedLayout({ children, title }) {
 
                         {/* Informe Maestro */}
                         <NavItem
-                            href={user.is_admin ? route('gestor.master-reports.index') : route('tecnico.master-reports.index')}
-                            active={isActive('gestor.master-reports.*', 'tecnico.master-reports.*')}
+                            href={route('master-reports.index')}
+                            active={isActive('master-reports.*')}
                             open={sidebarOpen || mobileMenuOpen}
                             icon={<IconDoc />}
                             label="Informe Maestro"
@@ -106,8 +106,8 @@ export default function AuthenticatedLayout({ children, title }) {
 
                         {/* Contrato Anual */}
                         <NavItem
-                            href={user.is_admin ? route('gestor.annual-contract.index') : route('tecnico.annual-contract.index')}
-                            active={isActive('gestor.annual-contract.*', 'tecnico.annual-contract.*')}
+                            href={route('annual-contract.index')}
+                            active={isActive('annual-contract.*')}
                             open={sidebarOpen || mobileMenuOpen}
                             icon={<IconContract />}
                             label="Contrato Anual"
