@@ -10,6 +10,11 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
     const sections = checklist.sections || [];
     const totalSteps = sections.length + 2; // Intro + Secciones + Finalización
 
+    // Detectar por URL si estamos en el contexto de técnico (más confiable que comparar strings de rol)
+    const isTecnico = typeof window !== 'undefined' && window.location.pathname.startsWith('/tecnico');
+    const saveRoute = isTecnico ? 'tecnico.checklists.wizard.save' : 'gestor.checklists.wizard.save';
+    const completeRoute = isTecnico ? 'tecnico.checklists.wizard.complete' : 'gestor.checklists.wizard.complete';
+
     const form = useForm({
         answers: initialAnswers || {},
         notes: inspection.notes || '',
@@ -51,14 +56,6 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
 
     const nextStep = () => {
         if (currentStep < totalSteps - 1) {
-            // Solo guardar si NO es emulación
-            if (!isEmulation && inspection?.id) {
-                router.post(route('gestor.checklists.wizard.save', [checklist.id, inspection.id]), {
-                    answers: form.data.answers,
-                    notes: form.data.notes
-                }, { preserveScroll: true, preserveState: true });
-            }
-            
             setCurrentStep(currentStep + 1);
             window.scrollTo(0, 0);
         }
@@ -80,21 +77,28 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
             return;
         }
 
+        if (!inspection?.id) {
+            alert('Error: no se pudo identificar la inspección. Recargá la página.');
+            return;
+        }
+
         if (supervisorPad.current && technicianPad.current) {
             if (supervisorPad.current.isEmpty() || technicianPad.current.isEmpty()) {
                 alert('Ambas firmas son obligatorias para certificar la inspección.');
                 return;
             }
             
-            form.post(route('gestor.checklists.wizard.complete', [checklist.id, inspection.id]), {
-                onBefore: () => {
-                    form.setData({
-                        ...form.data,
-                        supervisor_signature: supervisorPad.current.toDataURL(),
-                        technician_signature: technicianPad.current.toDataURL(),
-                    });
-                }
-            });
+            const sigData = {
+                ...form.data,
+                supervisor_signature: supervisorPad.current.toDataURL(),
+                technician_signature: technicianPad.current.toDataURL(),
+            };
+
+            router.post(
+                route(completeRoute, { id: checklist.id, inspection: inspection.id }),
+                sigData,
+                { preserveScroll: false }
+            );
         }
     };
 
@@ -177,18 +181,126 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             )}
 
                                             {(q.type === 'radio' || q.type === 'select') && (
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                    {q.options?.map((opt, oi) => (
-                                                        <button 
-                                                            key={oi} 
-                                                            type="button" 
-                                                            onClick={() => handleAnswerChange(q.id, opt)}
-                                                            className={`p-4 rounded-2xl border text-xs font-black uppercase italic transition-all text-left flex items-center justify-between ${form.data.answers[q.id] === opt ? 'bg-orange-500/20 border-orange-500 text-orange-400' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
-                                                        >
-                                                            {opt}
-                                                            {form.data.answers[q.id] === opt && <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>}
-                                                        </button>
-                                                    ))}
+                                                <div className="space-y-3">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                        {q.options?.map((opt, oi) => {
+                                                            const isSelected = form.data.answers[q.id] === opt;
+                                                            const isCritical = isSelected 
+                                                                && q.failure_logic === 'fail_if_selected' 
+                                                                && Array.isArray(q.failure_values) 
+                                                                && q.failure_values.includes(opt);
+                                                            return (
+                                                                <button 
+                                                                    key={oi}
+                                                                    type="button" 
+                                                                    onClick={() => handleAnswerChange(q.id, opt)}
+                                                                    className={`p-4 rounded-2xl border text-xs font-black uppercase italic transition-all text-left flex items-center justify-between
+                                                                        ${isCritical ? 'bg-red-500/20 border-red-500 text-red-400 shadow-lg shadow-red-900/20' :
+                                                                          isSelected ? 'bg-orange-500/20 border-orange-500 text-orange-400' : 
+                                                                          'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
+                                                                >
+                                                                    {opt}
+                                                                    {isSelected && <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    {/* Alerta crítica */}
+                                                    {q.failure_logic === 'fail_if_selected' && Array.isArray(q.failure_values) && q.failure_values.includes(form.data.answers[q.id]) && (
+                                                        <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 animate-fade-in">
+                                                            <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                            <p className="text-[10px] font-black text-red-400 uppercase tracking-widest italic">⚠ Condición Crítica Detectada — Requiere Acción Correctiva</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {q.type === 'date' && (
+                                                <div className="flex items-center gap-4">
+                                                    <input 
+                                                        type="date" 
+                                                        value={form.data.answers[q.id] || ''} 
+                                                        onChange={e => handleAnswerChange(q.id, e.target.value)} 
+                                                        className="bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 px-4 text-lg font-black transition-all rounded-xl [color-scheme:dark]"
+                                                    />
+                                                </div>
+                                            )}
+
+                                            {q.type === 'textarea' && (
+                                                <textarea 
+                                                    value={form.data.answers[q.id] || ''} 
+                                                    onChange={e => handleAnswerChange(q.id, e.target.value)} 
+                                                    rows="3"
+                                                    className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:outline-none focus:ring-1 focus:ring-orange-500 transition-all uppercase"
+                                                    placeholder="Ingrese observaciones..."
+                                                />
+                                            )}
+
+                                            {q.type === 'checkbox' && (
+                                                <div className="space-y-3">
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                        {q.options?.map((opt, oi) => {
+                                                            const selected = Array.isArray(form.data.answers[q.id]) 
+                                                                ? form.data.answers[q.id] 
+                                                                : (form.data.answers[q.id] ? [form.data.answers[q.id]] : []);
+                                                            const isChecked = selected.includes(opt);
+                                                            const isCriticalVal = Array.isArray(q.failure_values) && q.failure_values.includes(opt);
+                                                            // fail_if_selected: rojo si lo marcás (faltante)
+                                                            // fail_if_missing: rojo si NO lo marcás (elemento obligatorio ausente)
+                                                            const isCritical = isCriticalVal && (
+                                                                (q.failure_logic === 'fail_if_selected' && isChecked) ||
+                                                                (q.failure_logic === 'fail_if_missing' && !isChecked)
+                                                            );
+                                                            const toggle = () => {
+                                                                const next = isChecked 
+                                                                    ? selected.filter(v => v !== opt) 
+                                                                    : [...selected, opt];
+                                                                handleAnswerChange(q.id, next);
+                                                            };
+                                                            return (
+                                                                <button 
+                                                                    key={oi} 
+                                                                    type="button"
+                                                                    onClick={toggle}
+                                                                    className={`p-4 rounded-2xl border text-xs font-black uppercase italic transition-all text-left flex items-center gap-3
+                                                                        ${isCritical ? 'bg-red-500/20 border-red-500 text-red-400 shadow-lg shadow-red-900/20' :
+                                                                          isChecked ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 
+                                                                          'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
+                                                                >
+                                                                    <span className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-all ${isCritical ? 'bg-red-500 border-red-500' : isChecked ? 'bg-emerald-500 border-emerald-500' : 'border-white/20'}`}>
+                                                                        {isChecked && <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/></svg>}
+                                                                    </span>
+                                                                    {opt}
+                                                                    {q.failure_logic === 'fail_if_missing' && isCriticalVal && !isChecked && (
+                                                                        <span className="ml-auto text-[8px] font-black text-red-400 uppercase tracking-widest">FALTANTE</span>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    {/* Alerta elementos faltantes */}
+                                                    {(() => {
+                                                        if (!Array.isArray(q.failure_values) || q.failure_values.length === 0) return null;
+                                                        const selected = Array.isArray(form.data.answers[q.id]) ? form.data.answers[q.id] : [];
+                                                        let criticalCount = 0;
+                                                        if (q.failure_logic === 'fail_if_selected') {
+                                                            criticalCount = selected.filter(v => q.failure_values.includes(v)).length;
+                                                        } else if (q.failure_logic === 'fail_if_missing') {
+                                                            criticalCount = q.failure_values.filter(v => !selected.includes(v)).length;
+                                                        }
+                                                        if (criticalCount === 0) return null;
+                                                        return (
+                                                            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 animate-fade-in">
+                                                                <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                                <p className="text-[10px] font-black text-red-400 uppercase tracking-widest italic">
+                                                                    {q.failure_logic === 'fail_if_missing' 
+                                                                        ? `⚠ ${criticalCount} elemento${criticalCount > 1 ? 's' : ''} faltante${criticalCount > 1 ? 's' : ''} — Condición Crítica de Seguridad`
+                                                                        : `⚠ ${criticalCount} condición${criticalCount > 1 ? 'es' : ''} crítica${criticalCount > 1 ? 's' : ''} — Requiere Acción Correctiva`
+                                                                    }
+                                                                </p>
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </div>
                                             )}
 
@@ -215,7 +327,13 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                                 <input type="text" value={form.data.supervisor_name} onChange={e => form.setData('supervisor_name', e.target.value)} required className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"/>
                                             </div>
                                             <div className="space-y-4">
-                                                <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic ml-4">Firma Responsable</span>
+                                                <div className="flex items-center justify-between ml-4 mr-2">
+                                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic">Firma Responsable</span>
+                                                    <button type="button" onClick={() => supervisorPad.current?.clear()} className="flex items-center gap-1.5 text-[8px] font-black text-white/20 hover:text-red-400 uppercase tracking-widest italic transition-colors">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        Limpiar
+                                                    </button>
+                                                </div>
                                                 <div className="bg-white/5 border border-white/10 rounded-[2rem] h-48 relative overflow-hidden">
                                                     <canvas ref={supervisorSigRef} className="w-full h-full cursor-crosshair"></canvas>
                                                 </div>
@@ -224,10 +342,18 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                         <div className="space-y-6">
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Técnico Certificante</span>
-                                                <div className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-white/60 uppercase">{user.name}</div>
+                                                <div className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-white uppercase">
+                                                    {user.name || [user.nombres, user.apellidos].filter(Boolean).join(' ') || 'Sin nombre'}
+                                                </div>
                                             </div>
                                             <div className="space-y-4">
-                                                <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic ml-4">Tu Firma Táctica</span>
+                                                <div className="flex items-center justify-between ml-4 mr-2">
+                                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic">Tu Firma Táctica</span>
+                                                    <button type="button" onClick={() => technicianPad.current?.clear()} className="flex items-center gap-1.5 text-[8px] font-black text-white/20 hover:text-red-400 uppercase tracking-widest italic transition-colors">
+                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                                        Limpiar
+                                                    </button>
+                                                </div>
                                                 <div className="bg-white/5 border border-white/10 rounded-[2rem] h-48 relative overflow-hidden">
                                                     <canvas ref={technicianSigRef} className="w-full h-full cursor-crosshair"></canvas>
                                                 </div>

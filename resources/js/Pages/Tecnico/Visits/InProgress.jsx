@@ -3,7 +3,7 @@ import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
 import { useState, useEffect, useRef } from 'react';
 import SignaturePad from 'signature_pad';
 
-export default function InProgress({ visit, user, suggestedPlanTasks = [], templates = [] }) {
+export default function InProgress({ visit, user, suggestedPlanTasks = [], pendingAssignments = [], pendingTrainings = [], templates = [] }) {
     const { auth, flash } = usePage().props;
     
     // ESTADOS TÁCTICOS
@@ -56,6 +56,12 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], templ
             });
         }
     }, [showFinalizeModal, finalizeForm.data.signature_unavailable]);
+
+    const clearSignature = () => {
+        if (signaturePad.current) {
+            signaturePad.current.clear();
+        }
+    };
 
     const handleFinalize = (e) => {
         e.preventDefault();
@@ -177,13 +183,52 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], templ
                                     </div>
 
                                     <div className="p-8 space-y-5 relative z-10">
-                                        {visit.checklist_completions?.length === 0 && (
+                                        {visit.checklist_completions?.length === 0 && pendingAssignments.length === 0 && (
                                             <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-[2rem]">
                                                 <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em] italic leading-relaxed">No hay checklists vinculados actualmente</p>
                                             </div>
                                         )}
-                                        {/* Aquí se listarían las asignaciones vinculadas a la visita */}
-                                        {/* Implementar loop de visit.checklist_completions */}
+                                        
+                                        {/* Listar Asignaciones Pendientes */}
+                                        {pendingAssignments.map(assignment => (
+                                            <div key={assignment.id} className="bg-black/40 border border-white/5 rounded-3xl p-6 flex justify-between items-center group/task hover:border-orange-500/30 transition-all">
+                                                <div className="flex items-center gap-5">
+                                                    <div className="h-10 w-10 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center group-hover/task:scale-110 transition-transform">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-black text-white uppercase italic tracking-tight mb-1">{assignment.checklist?.title}</h4>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest italic">{assignment.status === 'in_progress' ? 'EN CURSO' : 'PENDIENTE'}</span>
+                                                            <span className="h-1 w-1 rounded-full bg-white/20"></span>
+                                                            <span className="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic">REF: #{assignment.id}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <Link 
+                                                    href={route('tecnico.checklists.fill', { id: assignment.dynamic_checklist_id, assignment: assignment.id, visit_id: visit.id })}
+                                                    className="h-10 px-6 bg-orange-500 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] italic shadow-lg shadow-orange-900/20 hover:brightness-110 transition-all flex items-center"
+                                                >
+                                                    {assignment.status === 'in_progress' ? 'REANUDAR' : 'EMPEZAR'}
+                                                </Link>
+                                            </div>
+                                        ))}
+
+                                        {/* Checklist Completados en esta visita si los hubiera */}
+                                        {visit.checklist_completions?.map(completion => (
+                                            <div key={completion.id} className="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-6 flex justify-between items-center group/done">
+                                                <div className="flex items-center gap-5">
+                                                    <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center">
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="text-sm font-black text-white/50 uppercase italic tracking-tight mb-1">{completion.assignment?.checklist?.title}</h4>
+                                                        <span className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest italic leading-none">EJECUTADO</span>
+                                                    </div>
+                                                </div>
+                                                <div className="text-[10px] font-black text-emerald-500/40 uppercase italic">CERTIFICADO</div>
+                                            </div>
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -262,44 +307,49 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], templ
                         <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl transition-opacity animate-fade-in" onClick={() => setShowFinalizeModal(false)}></div>
                         
                         <div className="relative bg-[#11111d] w-full max-w-2xl rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden animate-fade-in-down">
-                            <form onSubmit={handleFinalize} className="px-8 pt-12 pb-10 sm:px-12">
-                                <div className="flex flex-col items-center mb-12">
-                                    <div className="h-16 w-16 bg-emerald-500/10 rounded-3xl border border-emerald-500/20 text-emerald-500 mb-6 flex items-center justify-center shadow-inner">
-                                        <svg className="h-10 w-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <form onSubmit={handleFinalize} className="px-8 pt-10 pb-8 sm:px-10">
+                                <div className="flex flex-col items-center mb-6">
+                                    <div className="h-12 w-12 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-500 mb-4 flex items-center justify-center shadow-inner">
+                                        <svg className="h-8 w-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                     </div>
-                                    <h3 className="text-3xl font-black text-white tracking-widest uppercase italic text-center leading-none mb-3">Sello <span className="text-emerald-500">Operativo</span></h3>
-                                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] italic text-center">Protocolo de Cierre Tactico</p>
+                                    <h3 className="text-xl font-black text-white uppercase italic tracking-widest text-center leading-none mb-2">Sello <span className="text-emerald-500">Operativo</span></h3>
+                                    <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] italic text-center">Protocolo de Cierre Tactico</p>
                                 </div>
 
-                                <div className="space-y-8">
+                                <div className="space-y-4">
                                     <div>
-                                        <label className="block text-[11px] font-black text-white/20 uppercase tracking-[0.2em] mb-4 italic px-2">Comandos de Cierre (Observaciones)*</label>
-                                        <textarea value={finalizeForm.data.notes} onChange={e => finalizeForm.setData('notes', e.target.value)} rows="3" className="block w-full bg-black/40 border border-white/10 rounded-3xl px-6 py-5 text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder-white/5 uppercase italic" placeholder="Resumen técnico del despliegue..."></textarea>
+                                        <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Comandos de Cierre (Observaciones)*</label>
+                                        <textarea value={finalizeForm.data.notes} onChange={e => finalizeForm.setData('notes', e.target.value)} rows="3" className={`block w-full bg-black/40 border ${finalizeForm.errors.notes ? 'border-red-500' : 'border-white/10'} rounded-2xl px-6 py-4 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder-white/5 uppercase italic`} placeholder="Resumen técnico del despliegue..."></textarea>
+                                        {finalizeForm.errors.notes && <p className="text-[9px] font-black text-red-500 mt-2 ml-2 uppercase italic">{finalizeForm.errors.notes}</p>}
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-[11px] font-black text-white/20 uppercase tracking-[0.2em] mb-4 italic px-2">Responsable en Sede</label>
-                                            <input type="text" value={finalizeForm.data.responsible_name} onChange={e => finalizeForm.setData('responsible_name', e.target.value)} className="block w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all uppercase italic" />
+                                            <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Responsable en Sede</label>
+                                            <input type="text" value={finalizeForm.data.responsible_name} onChange={e => finalizeForm.setData('responsible_name', e.target.value)} className={`block w-full bg-black/40 border ${finalizeForm.errors.responsible_name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all uppercase italic`} />
+                                            {finalizeForm.errors.responsible_name && <p className="text-[9px] font-black text-red-500 mt-2 ml-2 uppercase italic">{finalizeForm.errors.responsible_name}</p>}
                                         </div>
                                         <div>
-                                            <label className="block text-[11px] font-black text-white/20 uppercase tracking-[0.2em] mb-4 italic px-2">Notificación Electrónica</label>
-                                            <input type="email" value={finalizeForm.data.email_responsable} onChange={e => finalizeForm.setData('email_responsable', e.target.value)} placeholder="email@responsable.com" className="block w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all italic" />
+                                            <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Notificación Electrónica</label>
+                                            <input type="email" value={finalizeForm.data.email_responsable} onChange={e => finalizeForm.setData('email_responsable', e.target.value)} placeholder="email@responsable.com" className={`block w-full bg-black/40 border ${finalizeForm.errors.email_responsable ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all italic`} />
+                                            {finalizeForm.errors.email_responsable && <p className="text-[9px] font-black text-red-500 mt-2 ml-2 uppercase italic">{finalizeForm.errors.email_responsable}</p>}
                                         </div>
                                     </div>
 
                                     {!finalizeForm.data.signature_unavailable && (
-                                        <div className="space-y-4 animate-fade-in">
+                                        <div className="space-y-2 animate-fade-in">
                                             <div className="flex items-center justify-between px-2">
-                                                <label className="text-[11px] font-black text-emerald-500 uppercase tracking-[0.2em] italic">Panel de Certificación Digital*</label>
-                                                <button type="button" onClick={clearSignature} className="text-[9px] font-black text-white/20 hover:text-red-500 uppercase tracking-widest italic transition-colors">Limpiar Sello</button>
+                                                <label className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em] italic">Panel de Certificación Digital*</label>
+                                                <button type="button" onClick={clearSignature} className="text-[8px] font-black text-white/20 hover:text-red-500 uppercase tracking-widest italic transition-colors">Limpiar Sello</button>
                                             </div>
-                                            <div className="relative h-64 bg-black/60 border-2 border-dashed border-white/10 rounded-[2.5rem] overflow-hidden group shadow-inner">
+                                            <div className={`relative h-32 bg-black/60 border-2 border-dashed ${finalizeForm.errors.signature ? 'border-red-500' : 'border-white/10'} rounded-[2rem] overflow-hidden group shadow-inner`}>
                                                 <canvas ref={signatureRef} className="w-full h-full cursor-crosshair"></canvas>
                                                 <div className="absolute bottom-6 inset-x-0 text-center pointer-events-none opacity-10 group-hover:opacity-100 transition-opacity">
                                                     <p className="text-[9px] font-black text-white uppercase tracking-[0.3em] italic">Firma Requerida para Validación de Campo</p>
                                                 </div>
                                             </div>
+                                            {finalizeForm.errors.signature && <p className="text-[9px] font-black text-red-500 mt-1 text-center uppercase italic">{finalizeForm.errors.signature}</p>}
+                                        </div>
                                         </div>
                                     )}
 
@@ -316,12 +366,18 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], templ
                                     )}
                                 </div>
 
-                                <div className="mt-12 flex flex-col sm:flex-row-reverse gap-4">
-                                    <button type="submit" disabled={finalizeForm.processing} className="w-full sm:w-auto h-16 px-12 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl shadow-2xl shadow-emerald-900/40 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-3">
-                                        <span>Sellar Operación</span>
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                <div className="mt-8 flex flex-col sm:flex-row-reverse gap-3">
+                                    <button type="submit" disabled={finalizeForm.processing} className={`w-full sm:w-auto h-12 px-10 ${finalizeForm.processing ? 'bg-emerald-900 cursor-not-allowed' : 'bg-emerald-600 hover:brightness-110 shadow-emerald-900/40'} text-white text-[9px] font-black uppercase tracking-widest italic rounded-xl shadow-2xl active:scale-95 transition-all flex items-center justify-center gap-2`}>
+                                        <span>{finalizeForm.processing ? 'Sincronizando...' : 'Sellar Operación'}</span>
+                                        <svg className={`w-4 h-4 ${finalizeForm.processing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                                            {finalizeForm.processing ? (
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            ) : (
+                                                <path d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                            )}
+                                        </svg>
                                     </button>
-                                    <button type="button" onClick={() => setShowFinalizeModal(false)} className="w-full sm:w-auto h-16 px-12 bg-white/5 text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 hover:bg-white/10 transition-all text-center">Abortar</button>
+                                    <button type="button" onClick={() => setShowFinalizeModal(false)} className="w-full sm:w-auto h-12 px-10 bg-white/5 text-white text-[9px] font-black uppercase tracking-widest italic rounded-xl border border-white/10 hover:bg-white/10 transition-all text-center">Abortar</button>
                                 </div>
                             </form>
                         </div>

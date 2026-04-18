@@ -374,21 +374,29 @@ export default function MyAssignments({
 
                                                 <td className="px-8 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-2">
-                                                        {(item?.status !== 'completed' && item?.status !== 'finalizado') ? (
-                                                            (item?.checklist_id || activeTab === 'reports') ? (
-                                                                <Link 
-                                                                    href={
-                                                                        activeTab === 'reports' 
-                                                                        ? safeRoute('master-reports.create', { 
-                                                                            sede_id: item.sede_id, 
-                                                                            periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
-                                                                          })
-                                                                        : safeRoute('tecnico.checklists.fill', item.checklist_id)
-                                                                    } 
+                                                        {item.status !== 'completed' && item.status !== 'finalizado' ? (
+                                                            activeTab === 'reports' ? (
+                                                                <Link
+                                                                    href={safeRoute('master-reports.create', { 
+                                                                        sede_id: item.sede_id, 
+                                                                        periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
+                                                                    })}
+                                                                    className={`px-6 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme?.bg || 'bg-ep-primary'} ${theme?.shadow || ''} outline-none`}
+                                                                >
+                                                                    {item?.status === 'borrador' ? 'Continuar Redacción' : 'Ejecutar'}
+                                                                </Link>
+                                                            ) : item?.checklist_id ? (
+                                                                <button
+                                                                    onClick={() => router.post(safeRoute('tecnico.checklists.execute'), {
+                                                                        type: item.type,
+                                                                        id: item.id,
+                                                                        source: item.source,
+                                                                        sede_id: item.sede_id
+                                                                    })}
                                                                     className={`px-6 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme?.bg || 'bg-ep-primary'} ${theme?.shadow || ''} outline-none`}
                                                                 >
                                                                     {item?.status === 'in_progress' ? 'Reanudar' : 'Ejecutar'}
-                                                                </Link>
+                                                                </button>
                                                             ) : (
                                                                 <button disabled className="px-6 py-2.5 bg-white/5 text-white/20 rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] cursor-not-allowed">
                                                                     Ver

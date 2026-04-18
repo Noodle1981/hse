@@ -263,12 +263,16 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('checklists')->name('checklists.')->group(function () {
              Route::get('/my-assignments', [OperationController::class, 'myAssignments'])->name('tasks.index'); // Mis Tareas / Inspecciones
              Route::get('/{id}/fill/{assignment?}', [InspectionController::class, 'wizard'])->name('fill');
+             Route::post('/execute', [OperationController::class, 'startQuickExecution'])->name('execute');
+             Route::post('/{id}/wizard/save/{inspection}', [InspectionController::class, 'saveProgress'])->name('wizard.save');
+             Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
         });
 
         // Visitas (React)
         Route::prefix('visits')->name('visits.')->group(function () {
             Route::get('/', [OperationController::class, 'myVisits'])->name('index'); // Mis Visitas (Same as Assignments for now or specialized)
             Route::get('/in-progress/{visit}', [OperationController::class, 'show'])->name('in-progress');
+            Route::post('/in-progress/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
             Route::post('/in-progress/{visit}/assign-suggested', [OperationController::class, 'assignSuggestedTask'])->name('assign-suggested');
             Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
             Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');

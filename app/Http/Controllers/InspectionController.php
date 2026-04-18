@@ -25,13 +25,13 @@ class InspectionController extends Controller
     /**
      * Start/Resume an inspection wizard.
      */
-    public function wizard(Request $request, $checklist_id)
+    public function wizard(Request $request, $checklist_id, $assignmentId = null)
     {
         $checklist = DynamicChecklist::with(['sections.questions', 'questions' => function($q) {
             $q->whereNull('section_id');
         }])->findOrFail($checklist_id);
 
-        $assignmentId = $request->query('assignment');
+        $assignmentId = $assignmentId ?: $request->query('assignment');
         $visitId = $request->query('visit_id');
 
         $assignment = null;
@@ -42,13 +42,18 @@ class InspectionController extends Controller
             $assignment->update(['status' => 'in_progress']);
         }
 
-        // Buscar o crear borrador de inspección
-        $inspection = DynamicInspection::where('dynamic_checklist_id', $checklist->id)
+        // Buscar o crear borrador de inspección específico para esta asignación
+        $query = DynamicInspection::where('dynamic_checklist_id', $checklist->id)
             ->where('user_id', Auth::id())
-            ->where('status', 'draft')
-            ->when($assignmentId, fn($q) => $q->where('checklist_assignment_id', $assignmentId))
-            ->latest()
-            ->first();
+            ->where('status', 'draft');
+
+        if ($assignmentId) {
+            $query->where('checklist_assignment_id', $assignmentId);
+        } else {
+            $query->whereNull('checklist_assignment_id');
+        }
+
+        $inspection = $query->latest()->first();
 
         if (!$inspection) {
             $inspection = DynamicInspection::create([
@@ -75,16 +80,35 @@ class InspectionController extends Controller
     /**
      * Save partial progress.
      */
-    public function saveProgress(Request $request, DynamicInspection $inspection)
+    public function saveProgress(Request $request, $id, $inspection)
+    {
+        $inspection = DynamicInspection::findOrFail($inspection);
+        return $this->doSaveProgress($request, $inspection);
+    }
+
+    protected function doSaveProgress(Request $request, DynamicInspection $inspection)
     {
         DB::transaction(function () use ($request, $inspection) {
             $answers = $request->input('answers', []);
-            foreach ($answers as $questionId => $value) {
-                DynamicAnswer::updateOrCreate(
-                    ['dynamic_inspection_id' => $inspection->id, 'dynamic_question_id' => $questionId],
-                    ['value' => is_array($value) ? json_encode($value) : $value]
-                );
+            
+            // Optimización: Eliminar respuestas previas y reinsertar en lote (o updateOrCreate optimizado)
+            // Por simplicidad y asegurar unicidad sin depender de constraints únicas de BD, limpiamos y reinsertamos
+            $inspection->answers()->delete();
+            
+            if (!empty($answers)) {
+                $batchData = [];
+                foreach ($answers as $questionId => $value) {
+                    $batchData[] = [
+                        'dynamic_inspection_id' => $inspection->id,
+                        'dynamic_question_id' => $questionId,
+                        'value' => is_array($value) ? json_encode($value) : $value,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                DynamicAnswer::insert($batchData);
             }
+
             $inspection->update(['notes' => $request->input('notes')]);
         });
 
@@ -94,8 +118,9 @@ class InspectionController extends Controller
     /**
      * Complete and close the inspection.
      */
-    public function complete(Request $request, DynamicInspection $inspection)
+    public function complete(Request $request, $id, $inspection)
     {
+        $inspection = DynamicInspection::findOrFail($inspection);
         $request->validate([
             'supervisor_name' => 'required|string',
             'supervisor_signature' => 'required|string',
@@ -103,9 +128,13 @@ class InspectionController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $inspection) {
+            // Reutilizar lógica optimizada de guardado de respuestas
+            $this->doSaveProgress($request, $inspection);
+
             $inspection->update([
                 'status' => 'completed',
                 'completed_at' => now(),
+                'notes' => $request->notes,
                 'supervisor_name' => $request->supervisor_name,
                 'supervisor_signature' => $request->supervisor_signature,
                 'technician_signature' => $request->technician_signature,
@@ -114,22 +143,29 @@ class InspectionController extends Controller
             if ($inspection->checklist_assignment_id) {
                 $assignment = ChecklistAssignment::find($inspection->checklist_assignment_id);
                 
-                // Si hay visita vincular
-                if ($request->visit_id) {
-                    $visit = VisitCertificate::find($request->visit_id);
-                    if ($visit) {
-                        // Preparar para VisitService (simplificado para MVP)
-                        $this->visitService->completeChecklist($visit, $assignment, []);
+                if ($assignment) {
+                    // Si hay visita vincular
+                    if ($request->visit_id) {
+                        $visit = VisitCertificate::find($request->visit_id);
+                        if ($visit) {
+                            $this->visitService->completeChecklist($visit, $assignment, []);
+                        } else {
+                            // Si se pasó visit_id pero no se encontró la visita (caso raro but robust)
+                            $assignment->update(['status' => 'completed']);
+                        }
+                    } else {
+                        $assignment->update(['status' => 'completed']);
                     }
-                } else {
-                    $assignment->update(['status' => 'completed']);
                 }
             }
         });
 
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
         $redirect = $request->visit_id 
-            ? route('gestor.operations.visits.show', $request->visit_id)
-            : route('tecnico.inspections.index');
+            ? route('tecnico.visits.in-progress', $request->visit_id)
+            : ($user->isTechnician() ? route('tecnico.checklists.tasks.index') : route('gestor.inspections.index'));
 
         return redirect($redirect)->with('message', 'Inspección finalizada correctamente.');
     }

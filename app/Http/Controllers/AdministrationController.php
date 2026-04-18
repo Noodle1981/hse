@@ -366,8 +366,8 @@ class AdministrationController extends Controller
                 'time' => $i->completed_at,
                 'label' => 'INSPECCIÓN',
                 'color' => 'emerald',
-                'description' => "{$i->user->full_name} finalizó '{$i->checklist->title}' en {$i->sede->empresa->nombre}",
-                'diffText' => $i->completed_at->diffForHumans()
+                'description' => "{$i->user?->full_name} finalizó '{$i->checklist?->title}' en " . ($i->sede?->empresa?->nombre ?? 'Sede desconocida'),
+                'diffText' => $i->completed_at?->diffForHumans()
             ]);
 
         // 2. Hallazgos
@@ -380,8 +380,8 @@ class AdministrationController extends Controller
                 'time' => $h->created_at,
                 'label' => 'HALLAZGO',
                 'color' => 'yellow',
-                'description' => "Nuevo hallazgo '{$h->titulo}' detectado en {$h->sede->empresa->nombre} (Nivel: {$h->criticidad})",
-                'diffText' => $h->created_at->diffForHumans()
+                'description' => "Nuevo hallazgo '{$h->titulo}' detectado en " . ($h->sede?->empresa?->nombre ?? 'Sede desconocida') . " (Nivel: {$h->criticidad})",
+                'diffText' => $h->created_at?->diffForHumans()
             ]);
 
         // 3. Incidentes
@@ -394,8 +394,8 @@ class AdministrationController extends Controller
                 'time' => $inc->created_at,
                 'label' => 'SINIESTRO',
                 'color' => 'red',
-                'description' => "Siniestro reportado en {$inc->sede->empresa->nombre}: {$inc->tipo}",
-                'diffText' => $inc->created_at->diffForHumans()
+                'description' => "Siniestro reportado en " . ($inc->sede?->empresa?->nombre ?? 'Sede desconocida') . ": {$inc->tipo}",
+                'diffText' => $inc->created_at?->diffForHumans()
             ]);
 
         // 4. Reportes
@@ -409,8 +409,8 @@ class AdministrationController extends Controller
                 'time' => $r->updated_at,
                 'label' => 'REPORTE',
                 'color' => 'blue',
-                'description' => "Informe Maestro consolidado para {$r->sede->empresa->nombre} ({$r->periodo})",
-                'diffText' => $r->updated_at->diffForHumans()
+                'description' => "Informe Maestro consolidado para " . ($r->sede?->empresa?->nombre ?? 'Sede desconocida') . " ({$r->periodo})",
+                'diffText' => $r->updated_at?->diffForHumans()
             ]);
 
         return collect([])

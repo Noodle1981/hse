@@ -86,12 +86,18 @@ class VisitService
     public function finalizeVisit(
         VisitCertificate $visit,
         ?string $observations,
-        ?string $signature
+        ?string $signature,
+        ?string $responsibleName = null,
+        ?string $emailResponsable = null,
+        ?string $signatureSkipReason = null
     ): VisitCertificate {
         $visit->update([
             'end_time' => now(),
             'general_observations' => $observations,
             'signature' => $signature,
+            'responsible_name' => $responsibleName,
+            'email_responsable' => $emailResponsable,
+            'signature_skip_reason' => $signatureSkipReason,
             'status' => 'signed',
         ]);
 

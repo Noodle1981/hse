@@ -54,7 +54,7 @@ class OperationController extends Controller
      */
     public function myAssignments(Request $request)
     {
-        /** @var User $user */
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $now = Carbon::now();
         $selectedMonth = $request->month ?? $now->month;
@@ -232,11 +232,88 @@ class OperationController extends Controller
     }
 
     /**
+     * Smart execution of a technical task.
+     * Starts a visit if not active and redirects to the appropriate workflow.
+     */
+    public function startQuickExecution(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:inspection,training',
+            'id' => 'required',
+            'source' => 'required|in:manual,contract',
+            'sede_id' => 'required|exists:sedes,id',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        $activeVisit = $this->visitService->getActiveVisit($user);
+
+        // Security: Check if user is assigned to this sede
+        if (!$user->isAdmin() && !$user->sedes()->where('sedes.id', $request->sede_id)->exists()) {
+            abort(403, 'No tienes permiso para operar en esta sede.');
+        }
+
+        // Handle Active Visit Conflicts
+        if ($activeVisit && $activeVisit->sede_id != $request->sede_id) {
+            return back()->with('error', 'Ya tienes una visita activa en ' . $activeVisit->sede->nombre_sede . '. Finalízala antes de iniciar otra en ' . \App\Models\Sede::find($request->sede_id)->nombre_sede . '.');
+        }
+
+        // Start Visit if none active
+        if (!$activeVisit) {
+            $sede = \App\Models\Sede::findOrFail($request->sede_id);
+            $activeVisit = $this->visitService->startVisit($user, $sede);
+        }
+
+        // Link/Create Task Context
+        $assignmentId = null;
+        $checklistId = null;
+
+        if ($request->source === 'contract') {
+            $plan = \App\Models\AnnualPlan::findOrFail($request->id);
+            $checklistId = $plan->checklist_id;
+            
+            // Logic to find or create the assignment for this plan in this visit
+            $assignment = \App\Models\ChecklistAssignment::where('user_id', $user->id)
+                ->where('sede_id', $request->sede_id)
+                ->where('notes', 'LIKE', '%desde Plan Anual #' . $plan->id . '%')
+                ->first();
+
+            if (!$assignment) {
+                $sede = \App\Models\Sede::findOrFail($request->sede_id);
+                $assignment = \App\Models\ChecklistAssignment::create([
+                    'user_id' => $user->id,
+                    'sede_id' => $request->sede_id,
+                    'empresa_id' => $sede->empresa_id,
+                    'dynamic_checklist_id' => $checklistId,
+                    'due_date' => now(),
+                    'status' => 'pending',
+                    'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+                ]);
+            }
+            $assignmentId = $assignment->id;
+        } else {
+            // Manual Task
+            if ($request->type === 'inspection') {
+                $assignment = \App\Models\ChecklistAssignment::findOrFail($request->id);
+                $assignmentId = $assignment->id;
+                $checklistId = $assignment->dynamic_checklist_id;
+            } else {
+                // Training with checklist
+                $training = \App\Models\Training::findOrFail($request->id);
+                $checklistId = $training->dynamic_checklist_id;
+            }
+        }
+
+        return redirect()->route('tecnico.visits.in-progress', $activeVisit->id)
+            ->with('message', 'Visita iniciada. Sincronizando unidad de despliegue...');
+    }
+
+    /**
      * Show modal/page to start a new visit.
      */
     public function create()
     {
-        /** @var User $user */
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         
         $sedes = $user->isAdmin() 
@@ -271,7 +348,7 @@ class OperationController extends Controller
      */
     public function show(VisitCertificate $visit)
     {
-        /** @var User $user */
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
         // Seguridad: Solo el técnico asignado o un admin
@@ -302,10 +379,25 @@ class OperationController extends Controller
             ->where('scheduled_months', 'like', '%"' . $queryMonth . '"%')
             ->get();
 
+        // Misiones Pendientes para esta Sede (que no estťn finalizadas)
+        $pendingAssignments = \App\Models\ChecklistAssignment::with(['checklist.categoryRelation'])
+            ->where('sede_id', $visit->sede_id)
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->get();
+
+        // Capacitaciones Pendientes para esta Sede
+        $pendingTrainings = \App\Models\Training::with(['dynamicChecklist.categoryRelation'])
+            ->where('sede_id', $visit->sede_id)
+            ->where('user_id', $user->id)
+            ->where('status', '!=', 'completed')
+            ->get();
+
         return Inertia::render('Tecnico/Visits/InProgress', [
             'visit' => $visit,
             'user' => $user,
             'suggestedPlanTasks' => $suggestedPlanTasks,
+            'pendingAssignments' => $pendingAssignments,
+            'pendingTrainings' => $pendingTrainings,
             'templates' => \App\Models\Training::where('is_template', true)->get(),
         ]);
     }
@@ -382,23 +474,27 @@ class OperationController extends Controller
     public function finalize(Request $request, VisitCertificate $visit)
     {
         $request->validate([
-            'notes' => 'required|string|min:10',
-            'responsible_name' => 'required|string|min:3',
+            'notes' => 'nullable|string',
+            'responsible_name' => 'required|string',
             'signature' => 'required_without:signature_skip_reason|string',
             'signature_skip_reason' => 'required_if:signature_unavailable,true|string',
         ]);
 
-        $visit->update([
-            'status' => 'completed',
-            'end_time' => now(),
-            'general_observations' => $request->notes,
-            'responsible_name' => $request->responsible_name,
-            'signature' => $request->signature,
-            'signature_skip_reason' => $request->signature_skip_reason,
-            'email_responsable' => $request->email_responsable,
-        ]);
+        $this->visitService->finalizeVisit(
+            $visit,
+            $request->notes,
+            $request->signature,
+            $request->responsible_name,
+            $request->email_responsable,
+            $request->signature_skip_reason
+        );
 
-        return redirect()->route('gestor.operations.visits.index')
+        // Redirigir según el contexto (Técnico o Gestor/Admin)
+        $redirectRoute = str_contains($request->route()->getName(), 'tecnico') 
+            ? 'tecnico.visits.index' 
+            : 'gestor.operations.visits.index';
+
+        return redirect()->route($redirectRoute)
             ->with('message', '¡Visita finalizada y certificada exitosamente!');
     }
 
