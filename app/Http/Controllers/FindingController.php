@@ -23,11 +23,17 @@ class FindingController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        // 1. DATA PARA FILTROS
+        $sedes = Sede::orderBy('nombre_sede')->get();
+        $tecnicos = User::whereIn('rol', ['tecnico', 'Técnico'])->orderBy('nombres')->get();
+
+        // 2. QUERY BASE
         $query = Hallazgo::query()
             ->with(['sede.empresa', 'user'])
+            ->withCount(['fotos', 'seguimientos'])
             ->latest();
 
-        // Si es técnico, solo sus hallazgos o hallazgos en sus sedes
+        // 3. SEGURIDAD DE ACCESO
         if ($user->isTechnician()) {
             $query->where(function($q) use ($user) {
                 $q->where('user_id', $user->id)
@@ -35,13 +41,12 @@ class FindingController extends Controller
             });
         }
 
-        // Filtros
+        // 4. FILTROS TÁCTICOS
         if ($request->search) {
             $query->where(function($q) use ($request) {
                 $q->where('titulo', 'like', "%{$request->search}%")
-                  ->orWhereHas('sede', function($sq) use ($request) {
-                      $sq->where('nombre_sede', 'like', "%{$request->search}%");
-                  });
+                  ->orWhere('descripcion', 'like', "%{$request->search}%")
+                  ->orWhere('ubicacion_especifica', 'like', "%{$request->search}%");
             });
         }
 
@@ -53,14 +58,40 @@ class FindingController extends Controller
             $query->where('criticidad', $request->criticidad);
         }
 
+        if ($request->sede_id && $request->sede_id !== 'all') {
+            $query->where('sede_id', $request->sede_id);
+        }
+
+        if ($request->user_id && $request->user_id !== 'all') {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->vencidos === 'si') {
+            $query->vencidos();
+        } elseif ($request->vencidos === 'no') {
+            $query->where(function($q) {
+                $q->where('plazo_correccion', '>=', now())
+                  ->orWhereIn('estado', ['resuelto', 'cerrado']);
+            });
+        }
+
+        // 5. INTELIGENCIA DE RIESGO (KPIs)
+        $kpis = [
+            'total' => (clone $query)->count(),
+            'pendientes' => Hallazgo::pendientes()->count(),
+            'criticos' => Hallazgo::criticos()->abiertos()->count(),
+            'vencidos' => Hallazgo::vencidos()->count(),
+            'resueltos_mes' => Hallazgo::whereIn('estado', ['resuelto', 'cerrado'])
+                ->where('updated_at', '>=', now()->startOfMonth())
+                ->count(),
+        ];
+
         return Inertia::render('Gestor/Findings/Index', [
             'findings' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search', 'status', 'criticidad']),
-            'stats' => [
-                'total' => $query->count(),
-                'pendientes' => (clone $query)->where('estado', 'pendiente')->count(),
-                'criticos' => (clone $query)->where('criticidad', 'critico')->count(),
-            ]
+            'filters' => $request->only(['search', 'status', 'criticidad', 'sede_id', 'user_id', 'vencidos']),
+            'kpis' => $kpis,
+            'sedes' => $sedes,
+            'tecnicos' => $tecnicos,
         ]);
     }
 
@@ -126,7 +157,9 @@ class FindingController extends Controller
                 'fecha_seguimiento' => now(),
             ]);
 
-            $routePrefix = Auth::user()->isTechnician() ? 'tecnico.hallazgos' : 'gestor.hallazgos';
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            $routePrefix = $user->isTechnician() ? 'tecnico.hallazgos' : 'gestor.hallazgos';
             return redirect()->route($routePrefix . '.show', $hallazgo->id)
                 ->with('message', 'Hallazgo registrado y certificado táctocamente.');
         });
@@ -168,6 +201,7 @@ class FindingController extends Controller
      */
     public function myFindings(Request $request)
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         $query = Hallazgo::query()
             ->with(['sede.empresa', 'user'])
@@ -184,11 +218,17 @@ class FindingController extends Controller
         return Inertia::render('Gestor/Findings/Index', [
             'findings' => $query->paginate(15)->withQueryString(),
             'filters' => $request->only(['search']),
-            'stats' => [
-                'total' => $query->count(),
+            'kpis' => [
+                'total' => (clone $query)->count(),
                 'pendientes' => (clone $query)->where('estado', 'pendiente')->count(),
                 'criticos' => (clone $query)->where('criticidad', 'critico')->count(),
+                'vencidos' => (clone $query)->vencidos()->count(),
+                'resueltos_mes' => (clone $query)->whereIn('estado', ['resuelto', 'cerrado'])
+                    ->where('updated_at', '>=', now()->startOfMonth())
+                    ->count(),
             ],
+            'sedes' => $user->sedes()->with('empresa')->get(),
+            'tecnicos' => [$user], // Para el técnico solo él mismo o su equipo
             'isTecnico' => true,
         ]);
     }

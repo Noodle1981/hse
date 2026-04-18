@@ -23,6 +23,8 @@ class VisitChecklistCompletion extends Model
         'responses' => 'array',
     ];
 
+    protected $appends = ['failure_analysis', 'formatted_responses'];
+
     public function visit()
     {
         return $this->belongsTo(VisitCertificate::class, 'visit_certificate_id');

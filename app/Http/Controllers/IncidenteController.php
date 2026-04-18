@@ -21,6 +21,10 @@ class IncidenteController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
+        // 1. DATA PARA FILTROS
+        $sedes = Sede::orderBy('nombre_sede')->get();
+
+        // 2. QUERY BASE
         $query = Incidente::query()
             ->with(['sede.empresa', 'user'])
             ->latest('fecha_ocurrencia');
@@ -32,7 +36,7 @@ class IncidenteController extends Controller
             });
         }
 
-        // Filters
+        // 4. FILTROS TÁCTICOS
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('titulo', 'like', "%{$request->search}%")
@@ -51,17 +55,24 @@ class IncidenteController extends Controller
             $query->where('gravedad', $request->gravedad);
         }
 
+        if ($request->sede_id && $request->sede_id !== 'all') {
+            $query->where('sede_id', $request->sede_id);
+        }
+
+        // 5. INTELIGENCIA DE SEGURIDAD (KPIs)
         $kpis = [
             'total' => (clone $query)->count(),
             'accidentes' => (clone $query)->where('tipo', 'accidente')->count(),
             'graves' => (clone $query)->whereIn('gravedad', ['grave', 'fatal'])->count(),
-            'dias_perdidos' => (clone $query)->sum('dias_perdidos'),
+            'dias_perdidos' => (clone $query)->sum('dias_perdidos') ?: 0,
+            'afectados' => (clone $query)->sum('personas_afectadas') ?: 0,
         ];
 
         return Inertia::render('Gestor/Incidents/Index', [
             'incidents' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search', 'tipo', 'gravedad']),
+            'filters' => $request->only(['search', 'tipo', 'gravedad', 'sede_id']),
             'kpis' => $kpis,
+            'sedes' => $sedes,
         ]);
     }
 

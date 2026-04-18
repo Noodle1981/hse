@@ -4,6 +4,7 @@ import { router } from '@inertiajs/react';
 export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData, editMode }) {
     const [editingCell, setEditingCell] = useState(null);
     const [editingDate, setEditingDate] = useState('');
+    const [planToDelete, setPlanToDelete] = useState(null);
 
     const toggleMonth = (planId, month) => {
         if (!editMode) return;
@@ -14,11 +15,15 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
     };
 
     const deletePlan = (id) => {
-        if (confirm('¿Eliminar actividad del plan?')) {
-            router.delete(route('annual-contract.destroy', id), {
-                preserveScroll: true
-            });
-        }
+        setPlanToDelete(id);
+    };
+
+    const confirmDelete = () => {
+        if (!planToDelete) return;
+        router.delete(route('annual-contract.destroy', planToDelete), {
+            preserveScroll: true,
+            onSuccess: () => setPlanToDelete(null)
+        });
     };
 
     const openDatePicker = (planId, month, currentDate) => {
@@ -60,7 +65,10 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                         <tr key={plan.id} className="group/row hover:bg-white/[0.02] transition-colors">
                             <td className="sticky left-0 z-10 bg-[#141421] px-8 py-6 border-r border-white/5 shadow-[10px_0_20px_rgba(0,0,0,0.4)]">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-1 h-6 rounded-full shrink-0 ${plan.category === 'Inspección' ? 'bg-orange-500' : 'bg-blue-500'}`}></div>
+                                    <div className={`w-1 h-6 rounded-full shrink-0 
+                                        ${plan.category === 'Inspección' ? 'bg-orange-500' : 
+                                          plan.category === 'Informe' ? 'bg-emerald-500' : 'bg-blue-500'}`}>
+                                    </div>
                                     <div className="min-w-0">
                                         <div className="text-xs font-black text-white uppercase italic truncate" title={plan.activity_name}>
                                             {plan.activity_name}
@@ -88,17 +96,29 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                         <div className="flex flex-col items-center justify-center h-full py-4 gap-1">
                                             <div 
                                                 onClick={() => toggleMonth(plan.id, monthValue)}
-                                                className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center transition-all duration-300
-                                                    ${status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : ''}
-                                                    ${status === 'overdue' ? 'bg-red-500/20 border-red-500/40 text-red-500 animate-pulse' : ''}
-                                                    ${status === 'pending' ? 'bg-yellow-400/10 border-yellow-500/30 text-yellow-500' : ''}
-                                                    ${status === 'none' ? 'border-transparent opacity-5' : ''}
-                                                    ${editMode ? 'cursor-pointer hover:scale-110 border-dashed' : 'border-transparent'}
+                                                className={`w-10 h-10 rounded-2xl border-2 flex items-center justify-center transition-all duration-300 relative group/status
+                                                    ${status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : ''}
+                                                    ${status === 'overdue' ? 'bg-red-500/20 border-red-500/40 text-red-500 shadow-[0_0_25px_rgba(239,68,68,0.2)]' : ''}
+                                                    ${status === 'pending' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : ''}
+                                                    ${status === 'none' ? 'border-dashed border-white/5 opacity-40 hover:opacity-100 hover:border-ep-primary/50' : ''}
+                                                    ${editMode ? 'cursor-pointer hover:scale-110' : 'cursor-default transition-none'}
                                                 `}
                                             >
-                                                {status === 'completed' && <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M5 13l4 4L19 7"/></svg>}
-                                                {status === 'pending' && <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>}
-                                                {status === 'overdue' && <span className="text-[10px] font-black">!</span>}
+                                                {status === 'completed' && (
+                                                    <svg className="w-5 h-5 drop-shadow-[0_0_10px_rgba(52,211,153,0.5)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3.5">
+                                                        <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/>
+                                                    </svg>
+                                                )}
+                                                {status === 'pending' && <div className="w-2 h-2 bg-indigo-400 rounded-full shadow-[0_0_12px_rgba(129,140,248,0.8)]"></div>}
+                                                {status === 'overdue' && (
+                                                    <div className="flex flex-col items-center animate-pulse">
+                                                        <span className="text-[12px] font-black leading-none">!</span>
+                                                        <div className="w-1 h-3 bg-red-500 rounded-full mt-0.5 shadow-[0_0_10px_rgba(239,68,68,0.8)]"></div>
+                                                    </div>
+                                                )}
+                                                {status === 'none' && editMode && (
+                                                    <svg className="w-4 h-4 text-white/10 group-hover/status:text-ep-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeWidth="3"/></svg>
+                                                )}
                                             </div>
 
                                             {status !== 'none' && (
@@ -110,32 +130,43 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                                 </button>
                                             )}
 
-                                            {/* Tooltip Detalle (Hover) */}
+                                            {/* Tooltip Detalle Táctico (Hover) */}
                                             {status === 'completed' && !editMode && (
-                                                <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 w-48 bg-ep-dark/95 backdrop-blur-2xl border border-white/10 p-5 rounded-3xl shadow-2xl opacity-0 invisible group-hover/cell:opacity-100 group-hover/cell:visible transition-all duration-300 z-50 pointer-events-none translate-y-2 group-hover/cell:translate-y-0 text-left">
-                                                    <div className="flex justify-between items-center mb-4 border-b border-white/5 pb-2">
-                                                        <span className="text-[8px] font-black text-ep-primary uppercase tracking-widest italic">{info.short} {info.year}</span>
-                                                        <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-[6px] font-black rounded uppercase italic">OK</span>
+                                                <div className="absolute bottom-full mb-6 left-1/2 -translate-x-1/2 w-64 bg-[#141421]/95 backdrop-blur-3xl border border-white/10 p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.8)] opacity-0 invisible group-hover/cell:opacity-100 group-hover/cell:visible transition-all duration-500 z-50 pointer-events-none translate-y-4 group-hover/cell:translate-y-0 text-left">
+                                                    <div className="flex justify-between items-start mb-6 border-b border-white/5 pb-4">
+                                                        <div>
+                                                            <span className="block text-[10px] font-black text-ep-primary uppercase tracking-[0.2em] italic leading-none">{info.name}</span>
+                                                            <span className="text-[8px] font-bold text-indigo-100/20 uppercase tracking-widest mt-1">Auditado OK</span>
+                                                        </div>
+                                                        <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
+                                                            <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="4"/></svg>
+                                                        </div>
                                                     </div>
-                                                    <div className="space-y-3">
-                                                        <div className="flex flex-col">
-                                                            <span className="text-[6px] font-black text-indigo-100/20 uppercase tracking-widest mb-1">Ejecutado</span>
-                                                            <span className="text-[10px] font-black text-white italic">{data.details?.execution_date}</span>
+                                                    
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="p-3 bg-white/5 rounded-2xl border border-white/5">
+                                                            <span className="block text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5 leading-none">Ejecución</span>
+                                                            <span className="text-[10px] font-black text-white italic truncate block">{data.details?.execution_date || 'N/A'}</span>
+                                                        </div>
+                                                        <div className="p-3 bg-white/5 rounded-2xl border border-white/5">
+                                                            <span className="block text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5 leading-none">Registros</span>
+                                                            <span className="text-[10px] font-black text-ep-primary italic">{data.count} DETECTADO</span>
                                                         </div>
                                                         {data.details?.attendees > 0 && (
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[6px] font-black text-indigo-100/20 uppercase tracking-widest mb-1">Asistencia</span>
-                                                                <span className="text-[10px] font-black text-blue-400 italic">{data.details.attendees} PAX</span>
+                                                            <div className="col-span-2 p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                                                                <span className="block text-[7px] font-black text-blue-300 uppercase tracking-widest mb-1.5 leading-none">Capacitados</span>
+                                                                <span className="text-[11px] font-black text-white italic">{data.details.attendees} COLABORADORES ACTIVOS</span>
                                                             </div>
                                                         )}
                                                         {data.details?.findings > 0 && (
-                                                            <div className="flex flex-col">
-                                                                <span className="text-[6px] font-black text-indigo-100/20 uppercase tracking-widest mb-1">Hallazgos</span>
-                                                                <span className="text-[10px] font-black text-red-400 italic">{data.details.findings} DESVÍOS</span>
+                                                            <div className="col-span-2 p-3 bg-red-500/10 rounded-2xl border border-red-500/20">
+                                                                <span className="block text-[7px] font-black text-red-300 uppercase tracking-widest mb-1.5 leading-none">Desvíos Operativos</span>
+                                                                <span className="text-[11px] font-black text-white italic">{data.details.findings} ALERTAS POR CERRAR</span>
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-ep-dark/95"></div>
+
+                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-4 h-4 bg-[#141421] rotate-45 border-r border-b border-white/10 -translate-y-2"></div>
                                                 </div>
                                             )}
 
@@ -170,12 +201,70 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                     )}
                 </tbody>
             </table>
+
+            {/* MODAL TÁCTICO DE CONFIRMACIÓN DE ELIMINACIÓN */}
+            {planToDelete && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-md animate-fade-in"
+                        onClick={() => setPlanToDelete(null)}
+                    ></div>
+                    
+                    {/* Card Modal */}
+                    <div className="relative w-full max-w-lg bg-[#141421] border border-red-500/20 rounded-[2.5rem] shadow-[0_25px_70px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-up">
+                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
+                        
+                        <div className="p-10 text-center">
+                            {/* Icono de Alerta */}
+                            <div className="mx-auto w-24 h-24 bg-red-500/10 rounded-full flex items-center justify-center border border-red-500/20 mb-8 relative">
+                                <div className="absolute inset-0 bg-red-500/20 rounded-full blur-2xl animate-pulse"></div>
+                                <svg className="w-10 h-10 text-red-500 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeWidth="2"/></svg>
+                            </div>
+
+                            <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter mb-4">
+                                Autorización de <span className="text-red-500">Eliminación</span>
+                            </h3>
+
+                            <p className="text-xs font-medium text-white/40 uppercase tracking-widest leading-relaxed mb-10 max-w-sm mx-auto italic">
+                                Esta acción purgará los registros de planificación de forma <span className="text-white">permanente</span>. ¿Desea proceder con la desestructuración?
+                            </p>
+
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <button 
+                                    onClick={() => setPlanToDelete(null)}
+                                    className="flex-1 h-14 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-white uppercase tracking-widest italic hover:bg-white/10 transition-all"
+                                >
+                                    Abortar Misión
+                                </button>
+                                <button 
+                                    onClick={confirmDelete}
+                                    className="flex-1 h-14 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic hover:bg-red-500 active:scale-95 transition-all shadow-[0_10px_30px_rgba(220,38,38,0.3)]"
+                                >
+                                    Confirmar Purga
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Footer / Info */}
+                        <div className="bg-black/40 px-10 py-4 border-t border-white/5">
+                            <span className="text-[8px] font-black text-white/10 uppercase tracking-[0.4em] italic leading-none">
+                                Tactical Unit Data Destroyer v4.0 • Secret Matrix
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
             
             <style dangerouslySetInnerHTML={{ __html: `
                 .custom-scrollbar::-webkit-scrollbar { height: 6px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
+                .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+                .animate-scale-up { animation: scale-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+                @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+                @keyframes scale-up { from { opacity: 0; transform: scale(0.9) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
             `}} />
         </div>
     );

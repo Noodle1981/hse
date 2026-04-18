@@ -161,10 +161,10 @@ Route::middleware(['auth'])->group(function () {
         // Operaciones (Visitas e Inspecciones)
         Route::prefix('operations')->name('operations.')->group(function () {
             Route::prefix('visits')->name('visits.')->group(function () {
-                Route::get('/', [OperationController::class, 'index'])->name('index');
-                Route::get('/create', [OperationController::class, 'create'])->name('create');
-                Route::post('/store', [OperationController::class, 'store'])->name('store');
-                Route::get('/{visit}', [OperationController::class, 'show'])->name('show');
+                Route::get('/', [OperationController::class, 'index'])->middleware(['role:Administrador'])->name('index');
+                Route::get('/create', [OperationController::class, 'create'])->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->name('create');
+                Route::post('/store', [OperationController::class, 'store'])->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->name('store');
+                Route::get('/{visit}', [OperationController::class, 'show'])->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->name('show');
                 Route::post('/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
             });
 
@@ -269,6 +269,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('visits')->name('visits.')->group(function () {
             Route::get('/', [OperationController::class, 'myVisits'])->name('index'); // Mis Visitas (Same as Assignments for now or specialized)
             Route::get('/in-progress/{visit}', [OperationController::class, 'show'])->name('in-progress');
+            Route::post('/in-progress/{visit}/assign-suggested', [OperationController::class, 'assignSuggestedTask'])->name('assign-suggested');
             Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
             Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
             Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');

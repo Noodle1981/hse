@@ -41,7 +41,19 @@ export default function Show() {
     const isTecnicoActive = user.active_role === 'tecnico';
 
     return (
-        <AuthenticatedLayout title="Consola de Identidad">
+        <AuthenticatedLayout 
+            title="Consola de Identidad"
+            header={
+                <div className="flex flex-col">
+                    <h1 className="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                        Consola de <span className="text-white">Identidad</span>
+                    </h1>
+                    <h2 className="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                        Parametrización de Usuario
+                    </h2>
+                </div>
+            }
+        >
             <Head title="Mi Perfil" />
 
             <div className="px-2 sm:px-6 lg:px-8 py-8 text-white selection:bg-[#F69239]/30">

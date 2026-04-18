@@ -78,7 +78,7 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                         <select 
                             value={data.checklist_id}
                             onChange={e => handleChecklistChange(e.target.value)}
-                            disabled={data.category !== 'Inspección'}
+                            disabled={!['Inspección', 'Capacitación'].includes(data.category)}
                             className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic disabled:opacity-20 transition-all"
                         >
                             <option value="">MANUAL / NINGUNO</option>

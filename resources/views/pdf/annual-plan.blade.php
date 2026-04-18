@@ -70,7 +70,7 @@
             position: relative;
         }
         .bg-completed { background-color: #10b981; }
-        .bg-pending { background-color: #fbbf24; }
+        .bg-pending { background-color: #4f46e5; }
         .bg-overdue { background-color: #ef4444; }
         .bg-none { background-color: #f3f4f6; border: 1px solid #e5e7eb; }
         
@@ -150,7 +150,9 @@
                 @endif
                 <tr>
                     <td><strong>{{ $item['plan']->activity_name }}</strong></td>
-                    <td align="center">{{ $item['plan']->activity_code ?: '-' }}</td>
+                    <td align="center">
+                        {{ $item['plan']->checklist?->registry_code ?: ($item['plan']->activity_code ?: '-') }}
+                    </td>
                     @foreach($months as $name => $num)
                         @php 
                             $status = $item['months'][$name]['status'];
@@ -180,7 +182,7 @@
 
     <div style="margin-top: 20px; font-size: 7px; color: #6b7280;">
         <strong>Referencias:</strong> 
-        <span style="color: #fbbf24; font-weight: bold;">[X] Amarillo:</span> Planificado (Pendiente) | 
+        <span style="color: #4f46e5; font-weight: bold;">[X] Azul:</span> Planificado (Pendiente) | 
         <span style="color: #10b981; font-weight: bold;">[✓] Verde:</span> Cumplido | 
         <span style="color: #ef4444; font-weight: bold;">[X] Rojo:</span> Incumplimiento (Vencido)
     </div>

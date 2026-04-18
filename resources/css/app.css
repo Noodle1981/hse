@@ -9,12 +9,12 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
     
-    /* Variables de UI personalizadas inyectadas dinámicamente */
-    --color-ep-primary: var(--ep-primary-color);
-    --color-ep-primary-dark: var(--ep-primary-color);
-    --color-ep-dark: var(--ep-dark-color, #1E1E2D);
-    --color-ep-dark-light: var(--ep-dark-light-color, #2D2D3F);
-    --color-ep-sidebar: var(--ep-sidebar-color, #1E1E2D);
+    /* Variables de UI personalizadas inyectadas dinámicamente con fallbacks seguros */
+    --color-ep-primary: var(--ep-primary-color, #F69239);
+    --color-ep-primary-dark: var(--ep-primary-color, #E17D2D);
+    --color-ep-dark: var(--ep-dark-color, #11111d);
+    --color-ep-dark-light: var(--ep-dark-light-color, #1a1a2e);
+    --color-ep-sidebar: var(--ep-sidebar-color, #16162a);
     --color-ep-text: var(--ep-text-color, #B5B5C3);
     --color-ep-text-hover: var(--ep-text-hover-color, #FFFFFF);
 }

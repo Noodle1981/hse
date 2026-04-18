@@ -15,6 +15,7 @@ use App\Models\ChecklistAssignment;
 use App\Models\Training;
 use App\Models\Hallazgo;
 use App\Models\Incidente;
+use App\Models\MasterReport;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -300,52 +301,126 @@ class AdministrationController extends Controller
         $from = $request->query('from', now()->startOfMonth()->format('Y-m-d'));
         $to = $request->query('to', now()->endOfMonth()->format('Y-m-d'));
 
-        // KPIs (Filtered by consultora)
+        // global KPIs (Filtered by consultora)
         $kpis = [
-            'inspections' => DynamicInspection::whereBetween('completed_at', [$from, $to])
+            'total_companies' => Empresa::where('consultora_id', $consultoraId)->count(),
+            'total_inspections' => DynamicInspection::whereBetween('completed_at', [$from, $to])
                 ->whereHas('user', fn($q) => $q->where('consultora_id', $consultoraId))
                 ->completed()
                 ->count(),
-            'findings' => Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
+            'total_findings' => Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
                 ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
                 ->count(),
-            'incidents' => Incidente::whereBetween('fecha_ocurrencia', [$from, $to])
+            'total_incidents' => Incidente::whereBetween('fecha_ocurrencia', [$from, $to])
                 ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
                 ->count(),
-            'trainings' => Training::whereBetween('date', [$from, $to])
-                ->whereHas('responsibleUser', fn($q) => $q->where('consultora_id', $consultoraId))
-                ->completed()
-                ->count(),
-            'alerts_count' => Hallazgo::where('criticidad', 'critico')
-                ->where('estado', '!=', 'cerrado')
+            'total_reports' => MasterReport::whereBetween('updated_at', [$from, $to])
                 ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+                ->where('estado', 'finalizado')
                 ->count(),
         ];
+
+        // Intelligence Matrix: Companies with metrics
+        $companies = Empresa::where('consultora_id', $consultoraId)
+            ->withCount([
+                'inspecciones' => fn($q) => $q->whereBetween('completed_at', [$from, $to])->completed(),
+                'hallazgos' => fn($q) => $q->whereBetween('fecha_deteccion', [$from, $to]),
+                'incidentes' => fn($q) => $q->whereBetween('fecha_ocurrencia', [$from, $to]),
+                'informes' => fn($q) => $q->where('estado', 'finalizado'),
+                'checklistAssignments as active_assignments_count',
+                'sedes as sedes_con_plan_count' => fn($q) => $q->whereHas('annualPlans', fn($p) => $p->where('year', now()->year))
+            ])
+            ->orderBy('nombre')
+            ->get();
 
         // Efficiency (Plan vs Done)
         $efficiency = $this->calculateConsultoraEfficiency($consultoraId);
 
-        // Recent Activity
-        $recentActivity = $this->getConsultoraActivity($consultoraId);
-
-        // Top Technicians
-        $topTechnicians = User::where('rol', 'tecnico')
-            ->where('consultora_id', $consultoraId)
-            ->withCount(['checklists' => fn($q) => $q->where('status', 'completed')])
-            ->orderByDesc('checklists_count')
-            ->take(5)
-            ->get();
+        // Tactical Terminal (Unified Activity Log)
+        $recentEvents = $this->getTacticalTerminalEvents($consultoraId);
 
         return Inertia::render('Gestor/Dashboard', [
             'kpis' => $kpis,
+            'companies' => $companies,
             'efficiency' => $efficiency,
-            'recentActivity' => $recentActivity,
-            'topTechnicians' => $topTechnicians,
+            'recentEvents' => $recentEvents,
             'filters' => [
                 'from' => $from,
                 'to' => $to,
             ]
         ]);
+    }
+
+    private function getTacticalTerminalEvents($consultoraId)
+    {
+        $limit = 15;
+
+        // 1. Inspections
+        $inspections = DynamicInspection::with(['checklist', 'user', 'sede.empresa'])
+            ->whereHas('user', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->completed()
+            ->latest('completed_at')
+            ->limit($limit)
+            ->get()
+            ->map(fn($i) => [
+                'time' => $i->completed_at,
+                'label' => 'INSPECCIÓN',
+                'color' => 'emerald',
+                'description' => "{$i->user->full_name} finalizó '{$i->checklist->title}' en {$i->sede->empresa->nombre}",
+                'diffText' => $i->completed_at->diffForHumans()
+            ]);
+
+        // 2. Hallazgos
+        $findings = Hallazgo::with(['sede.empresa'])
+            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->latest('fecha_deteccion')
+            ->limit($limit)
+            ->get()
+            ->map(fn($h) => [
+                'time' => $h->created_at,
+                'label' => 'HALLAZGO',
+                'color' => 'yellow',
+                'description' => "Nuevo hallazgo '{$h->titulo}' detectado en {$h->sede->empresa->nombre} (Nivel: {$h->criticidad})",
+                'diffText' => $h->created_at->diffForHumans()
+            ]);
+
+        // 3. Incidentes
+        $incidents = Incidente::with(['sede.empresa'])
+            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->latest('fecha_ocurrencia')
+            ->limit($limit)
+            ->get()
+            ->map(fn($inc) => [
+                'time' => $inc->created_at,
+                'label' => 'SINIESTRO',
+                'color' => 'red',
+                'description' => "Siniestro reportado en {$inc->sede->empresa->nombre}: {$inc->tipo}",
+                'diffText' => $inc->created_at->diffForHumans()
+            ]);
+
+        // 4. Reportes
+        $reports = MasterReport::with(['sede.empresa'])
+            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->where('estado', 'finalizado')
+            ->latest('updated_at')
+            ->limit($limit)
+            ->get()
+            ->map(fn($r) => [
+                'time' => $r->updated_at,
+                'label' => 'REPORTE',
+                'color' => 'blue',
+                'description' => "Informe Maestro consolidado para {$r->sede->empresa->nombre} ({$r->periodo})",
+                'diffText' => $r->updated_at->diffForHumans()
+            ]);
+
+        return collect([])
+            ->concat($inspections)
+            ->concat($findings)
+            ->concat($incidents)
+            ->concat($reports)
+            ->sortByDesc('time')
+            ->take(20)
+            ->values();
     }
 
     private function calculateConsultoraEfficiency($consultoraId)

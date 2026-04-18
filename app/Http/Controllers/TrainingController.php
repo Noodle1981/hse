@@ -24,14 +24,32 @@ class TrainingController extends Controller
             ->latest()
             ->get();
 
-        $history = VisitTraining::with(['visit.sede', 'training'])
+        $history = VisitTraining::query()
+            ->with(['visit.sede.empresa', 'visit.user', 'training.responsibleUser', 'training.creator'])
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('title', 'like', '%' . $request->search . '%')
+                      ->orWhere('description', 'like', '%' . $request->search . '%');
+            })
+            ->when($request->empresaFilter, function ($query) use ($request) {
+                $query->whereHas('visit.sede', function($q) use ($request) {
+                    $q->where('empresa_id', $request->empresaFilter);
+                });
+            })
+            ->when($request->sedeFilter, function ($query) use ($request) {
+                $query->whereHas('visit', function($q) use ($request) {
+                    $q->where('sede_id', $request->sedeFilter);
+                });
+            })
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return Inertia::render('Gestor/Trainings/Index', [
             'templates' => $templates,
             'history' => $history,
-            'filters' => $request->only(['search']),
+            'empresas' => \App\Models\Empresa::get(),
+            'sedes' => $request->empresaFilter ? Sede::where('empresa_id', $request->empresaFilter)->get() : [],
+            'filters' => $request->only(['search', 'empresaFilter', 'sedeFilter']),
         ]);
     }
 
@@ -42,6 +60,9 @@ class TrainingController extends Controller
     {
         return Inertia::render('Gestor/Trainings/Builder', [
             'sedes' => Sede::with('empresa')->get(),
+            'empresas' => \App\Models\Empresa::get(),
+            'tecnicos' => \App\Models\User::where('rol', 'tecnico')->get(),
+            'checklists' => \App\Models\DynamicChecklist::active()->get(),
         ]);
     }
 
@@ -50,22 +71,27 @@ class TrainingController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'duration' => 'nullable|integer',
             'type' => 'required|string',
+            'empresa_id' => 'required|exists:empresas,id',
+            'sede_id' => 'required|exists:sedes,id',
+            'user_id' => 'required|exists:users,id',
+            'trainer_name' => 'nullable|string|max:255',
+            'date' => 'required|date',
+            'status' => 'required|string',
+            'dynamic_checklist_id' => 'nullable|exists:dynamic_checklists,id',
+            'is_template' => 'boolean',
         ]);
 
-        Training::create([
-            ...$request->all(),
-            'is_template' => true,
+        $training = Training::create(array_merge($validated, [
             'created_by_user_id' => Auth::id(),
-            'status' => 'active',
-        ]);
+            'is_template' => $request->input('is_template', false),
+        ]));
 
-        return redirect()->route('gestor.trainings.index')
-            ->with('message', 'Plantilla de capacitación creada exitosamente.');
+        return redirect()->route('gestor.trainings.index')->with('message', 'Capacitación inyectada correctamente.');
     }
 
     /**

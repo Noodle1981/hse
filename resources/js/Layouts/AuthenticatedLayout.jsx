@@ -1,14 +1,25 @@
 import { useState, useEffect } from 'react';
 import { usePage, Link, router } from '@inertiajs/react';
+import { route } from 'ziggy-js';
 
-export default function AuthenticatedLayout({ children, title }) {
-    // Cache-breaker: v2.0.1 - Ensuring shared routes are loaded
-    const { auth, branding, flash } = usePage().props;
-    const user = auth.user;
+export default function AuthenticatedLayout({ children, title, header }) {
+    // Cache-breaker: v2.0.2 - Extreme hardening
+    const { auth = {}, branding = {}, flash = {} } = usePage().props;
+    const user = auth?.user || {};
 
     const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [flashMsg, setFlashMsg] = useState(null);
+
+    // Helper para rutas seguras (Evita que el layout colapse si Ziggy no encuentra una ruta)
+    const safeRoute = (name, params = null) => {
+        try {
+            return route(name, params);
+        } catch (e) {
+            console.warn(`[Ziggy] Route "${name}" not found.`);
+            return '#';
+        }
+    };
 
     // Manejar flash messages
     useEffect(() => {
@@ -21,21 +32,23 @@ export default function AuthenticatedLayout({ children, title }) {
 
     const logout = (e) => {
         e.preventDefault();
-        router.post(route('logout'));
+        router.post(safeRoute('logout'));
     };
 
-    const isActive = (...routeNames) =>
-        routeNames.some((name) => route().current(name));
-
-    const menuItemClass = (active) =>
-        `flex items-center px-3 py-2 rounded-lg transition-colors cursor-pointer ${
-            active
-                ? 'bg-gradient-to-r from-[#F69239]/30 to-[#F69239]/10 border-l-[3px] border-[#F69239] text-white'
-                : 'text-gray-400 hover:text-white hover:bg-white/5'
-        }`;
+    const isActive = (...routeNames) => {
+        try {
+            return routeNames.some((name) => route().current(name));
+        } catch (e) { return false; }
+    };
 
     return (
-        <div className="flex min-h-screen bg-[#11111d]">
+        <div 
+            className="flex min-h-screen bg-[#11111d] text-white selection:bg-ep-primary/30"
+            style={{ 
+                '--ep-primary-color': branding?.primary_color || '#F69239',
+                '--ep-dark-color': branding?.dark_color || '#1E1E2D',
+            }}
+        >
             {/* ── SIDEBAR ── */}
             <aside
                 className={`fixed left-0 top-0 h-screen bg-[#16162a] z-40 flex flex-col
@@ -46,15 +59,19 @@ export default function AuthenticatedLayout({ children, title }) {
             >
                 {/* Marca / Logo */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 overflow-hidden flex-shrink-0">
-                    <Link href={route('dashboard')} className="flex items-center space-x-3 group">
+                    <Link href={safeRoute('dashboard')} className="flex items-center space-x-3 group">
                         <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg border border-white/10 group-hover:scale-105 transition-transform duration-300">
-                            <img src={branding.logo} alt="Logo" className="max-h-full w-auto object-contain" />
+                            {branding?.logo ? (
+                                <img src={branding.logo} alt="Logo" className="max-h-full w-auto object-contain" />
+                            ) : (
+                                <div className="w-6 h-6 bg-ep-primary rounded-sm shadow-inner" />
+                            )}
                         </div>
                         {(sidebarOpen || mobileMenuOpen) && (
                             <div className="flex flex-col">
                                 <span className="text-white font-black uppercase italic tracking-tighter text-lg leading-none">XamaSafe</span>
-                                <span className="text-yellow-400 font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]" title={branding.name}>
-                                    {branding.name}
+                                <span className="text-yellow-400 font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]" title={branding?.name || 'EP'}>
+                                    {branding?.name || 'EQUIPO PREVENTIVO'}
                                 </span>
                             </div>
                         )}
@@ -75,29 +92,29 @@ export default function AuthenticatedLayout({ children, title }) {
                     <ul className="space-y-1 px-3">
 
                         {/* ── TÉCNICO ── */}
-                        {user.is_technician && (
+                        {user?.is_technician && (
                             <>
-                                <NavItem href={route('tecnico.checklists.tasks.index')} active={isActive('tecnico.checklists.tasks.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconTasks />} label="Mis Tareas" />
-                                <NavItem href={route('tecnico.visits.index')} active={isActive('tecnico.visits.index', 'tecnico.visits.in-progress')} open={sidebarOpen || mobileMenuOpen} icon={<IconLocation />} label="Mis Visitas" />
-                                <NavItem href={route('tecnico.hallazgos.index')} active={isActive('tecnico.hallazgos.index')} open={sidebarOpen || mobileMenuOpen} icon={<IconDoc />} label="Mis Hallazgos" />
-                                <NavItem href={route('tecnico.incidentes.index')} active={isActive('tecnico.incidentes.index')} open={sidebarOpen || mobileMenuOpen} icon={<IconAlert />} label="Mis Incidentes" />
+                                <NavItem href={safeRoute('tecnico.checklists.tasks.index')} active={isActive('tecnico.checklists.tasks.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconTasks />} label="Mis Tareas" />
+                                <NavItem href={safeRoute('tecnico.visits.index')} active={isActive('tecnico.visits.index', 'tecnico.visits.in-progress')} open={sidebarOpen || mobileMenuOpen} icon={<IconLocation />} label="Mis Visitas" />
+                                <NavItem href={safeRoute('tecnico.hallazgos.index')} active={isActive('tecnico.hallazgos.index')} open={sidebarOpen || mobileMenuOpen} icon={<IconDoc />} label="Mis Hallazgos" />
+                                <NavItem href={safeRoute('tecnico.incidentes.index')} active={isActive('tecnico.incidentes.index')} open={sidebarOpen || mobileMenuOpen} icon={<IconAlert />} label="Mis Incidentes" />
                             </>
                         )}
 
                         {/* ── ADMIN / GESTOR ── */}
-                        {user.is_admin && (
+                        {user?.is_admin && (
                             <>
-                                <NavItem href={route('gestor.inspections.index')} active={isActive('gestor.inspections.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconClock />} label="Historial de Visitas" />
-                                <NavItem href={route('gestor.checklists.index')} active={isActive('gestor.checklists.*', 'gestor.categories.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconDoc />} label="Plantillas de Checklist" />
-                                <NavItem href={route('gestor.trainings.index')} active={isActive('gestor.trainings.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconTraining />} label="Capacitaciones" />
-                                <NavItem href={route('gestor.hallazgos.index')} active={isActive('gestor.hallazgos.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconWarning />} label="Hallazgos" />
-                                <NavItem href={route('gestor.incidentes.index')} active={isActive('gestor.incidentes.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconAlert />} label="Incidentes" />
+                                <NavItem href={safeRoute('gestor.inspections.index')} active={isActive('gestor.inspections.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconClock />} label="Historial de Visitas" />
+                                <NavItem href={safeRoute('gestor.checklists.index')} active={isActive('gestor.checklists.*', 'gestor.categories.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconDoc />} label="Plantillas de Checklist" />
+                                <NavItem href={safeRoute('gestor.trainings.index')} active={isActive('gestor.trainings.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconTraining />} label="Capacitaciones" />
+                                <NavItem href={safeRoute('gestor.hallazgos.index')} active={isActive('gestor.hallazgos.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconWarning />} label="Hallazgos" />
+                                <NavItem href={safeRoute('gestor.incidentes.index')} active={isActive('gestor.incidentes.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconAlert />} label="Incidentes" />
                             </>
                         )}
 
                         {/* Informe Maestro */}
                         <NavItem
-                            href={route('master-reports.index')}
+                            href={safeRoute('master-reports.index')}
                             active={isActive('master-reports.*')}
                             open={sidebarOpen || mobileMenuOpen}
                             icon={<IconDoc />}
@@ -106,23 +123,23 @@ export default function AuthenticatedLayout({ children, title }) {
 
                         {/* Contrato Anual */}
                         <NavItem
-                            href={route('annual-contract.index')}
+                            href={safeRoute('annual-contract.index')}
                             active={isActive('annual-contract.*')}
                             open={sidebarOpen || mobileMenuOpen}
                             icon={<IconContract />}
                             label="Contrato Anual"
                         />
 
-                        {user.is_admin && (
-                            <NavItem href={route('gestor.administration.hub')} active={isActive('gestor.administration.hub', 'gestor.users.*', 'gestor.technicians.*', 'gestor.companies.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconSettings />} label="Administración" />
+                        {user?.is_admin && (
+                            <NavItem href={safeRoute('gestor.administration.hub')} active={isActive('gestor.administration.hub', 'gestor.users.*', 'gestor.technicians.*', 'gestor.companies.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconSettings />} label="Administración" />
                         )}
 
                         {/* Dashboard (solo no técnicos) */}
-                        {!user.is_technician && (
-                            <NavItem href={route('dashboard')} active={isActive('dashboard')} open={sidebarOpen || mobileMenuOpen} icon={<IconDashboard />} label="Dashboard" />
+                        {!user?.is_technician && (
+                            <NavItem href={safeRoute('dashboard')} active={isActive('dashboard')} open={sidebarOpen || mobileMenuOpen} icon={<IconDashboard />} label="Dashboard" />
                         )}
 
-                        <NavItem href={route('profile')} active={isActive('profile')} open={sidebarOpen || mobileMenuOpen} icon={<IconUser />} label="Mi Perfil" />
+                        <NavItem href={safeRoute('profile')} active={isActive('profile')} open={sidebarOpen || mobileMenuOpen} icon={<IconUser />} label="Mi Perfil" />
                     </ul>
                 </nav>
 
@@ -166,17 +183,23 @@ export default function AuthenticatedLayout({ children, title }) {
                     </button>
 
                     {/* Título de la página */}
-                    <h1 className="text-sm sm:text-xl font-black text-white tracking-tight uppercase italic truncate max-w-[150px] sm:max-w-none">
-                        {title ?? 'XamaSafe'}
-                    </h1>
+                    <div className="flex-1 overflow-hidden min-w-0">
+                        {header ? (
+                            header
+                        ) : (
+                            <h1 className="text-sm sm:text-xl font-black text-ep-primary tracking-tight uppercase italic truncate max-w-[150px] sm:max-w-none">
+                                {title ?? 'XamaSafe'}
+                            </h1>
+                        )}
+                    </div>
 
                     {/* Lado derecho: role switcher + usuario */}
                     <div className="flex items-center space-x-3 md:space-x-6">
                         {/* Role Switcher */}
-                        {(user.rol === 'gestor' || user.rol === 'super_admin') && (
-                            user.active_role === 'tecnico' ? (
+                        {(user?.rol === 'gestor' || user?.rol === 'super_admin') && (
+                            user?.active_role === 'tecnico' ? (
                                 <Link
-                                    href={route('switch-role', 'gestor')}
+                                    href={safeRoute('switch-role', 'gestor')}
                                     className="bg-[#F69239] text-white px-3 py-1.5 rounded-full text-xs font-bold shadow-md hover:brightness-110 transition-all flex items-center gap-1"
                                 >
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,7 +209,7 @@ export default function AuthenticatedLayout({ children, title }) {
                                 </Link>
                             ) : (
                                 <Link
-                                    href={route('switch-role', 'tecnico')}
+                                    href={safeRoute('switch-role', 'tecnico')}
                                     className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm hover:bg-gray-300 transition-all flex items-center gap-1 border border-gray-300"
                                 >
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -198,15 +221,15 @@ export default function AuthenticatedLayout({ children, title }) {
                         )}
 
                         {/* Info usuario */}
-                        <Link href={route('profile')} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                        <Link href={safeRoute('profile')} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                             <div className="hidden sm:flex flex-col items-end mr-1">
-                                <span className="text-xs font-black text-white uppercase italic tracking-wide">{user.nombres}</span>
+                                <span className="text-xs font-black text-white uppercase italic tracking-wide">{user?.nombres || 'Usuario'}</span>
                                 <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                    {user.active_role === 'tecnico' ? 'Modo Técnico' : 'Gestor'}
+                                    {user?.active_role === 'tecnico' ? 'Modo Técnico' : 'Gestor'}
                                 </span>
                             </div>
                             <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#F69239] rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-black shadow-sm ring-2 ring-white/10">
-                                {user.nombres?.charAt(0) ?? 'U'}
+                                {user?.nombres?.charAt(0) ?? 'U'}
                             </div>
                         </Link>
                     </div>
@@ -235,6 +258,7 @@ export default function AuthenticatedLayout({ children, title }) {
 
 /* ── NavItem Component ── */
 function NavItem({ href, active, open, icon, label }) {
+    if (!href || href === '#') return null; // No renderizar si la ruta no existe
     return (
         <li>
             <Link

@@ -112,7 +112,7 @@ class User extends Authenticatable
     {
         $role = strtolower(trim($role));
         
-        if (in_array($role, ['administrador', 'admin', 'gestor', 'administradores'])) {
+        if (in_array($role, ['administrador', 'admin', 'gestor', 'administradores', 'socio'])) {
             return self::ROLE_GESTOR;
         }
         
@@ -153,6 +153,11 @@ class User extends Authenticatable
     public function isGestor(): bool
     {
         return $this->hasRole(self::ROLE_GESTOR);
+    }
+
+    public function isSocio(): bool
+    {
+        return $this->hasRole('socio');
     }
 
     public function isAdmin(): bool

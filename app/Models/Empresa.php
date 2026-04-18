@@ -65,6 +65,11 @@ class Empresa extends Model
         return $this->hasManyThrough(MasterReport::class, Sede::class);
     }
 
+    public function inspecciones()
+    {
+        return $this->hasManyThrough(DynamicInspection::class, Sede::class);
+    }
+
     public function visitCertificates()
     {
         return $this->hasMany(VisitCertificate::class);

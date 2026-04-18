@@ -22,7 +22,19 @@ export default function Index({ inspections, filters }) {
     }, [search]);
 
     return (
-        <AuthenticatedLayout title="Bóveda de Inspecciones">
+        <AuthenticatedLayout 
+            title="Bóveda de Inspecciones"
+            header={
+                <div className="flex flex-col">
+                    <h1 className="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                        Planificador de <span className="text-white">Inspecciones</span>
+                    </h1>
+                    <h2 className="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                        Gestión de Misiones Programadas
+                    </h2>
+                </div>
+            }
+        >
             <Head title="Historial de Inspecciones" />
 
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-orange-500/30">

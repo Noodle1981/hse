@@ -5,7 +5,19 @@ export default function Hub({ consultoraName }) {
     const { branding } = usePage().props;
 
     return (
-        <AuthenticatedLayout title="Control Central">
+        <AuthenticatedLayout 
+            title="Control Central"
+            header={
+                <div className="flex flex-col">
+                    <h1 className="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                        Control de <span className="text-white">Administración</span>
+                    </h1>
+                    <h2 className="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
+                        Gestión de Entidades y Sedes
+                    </h2>
+                </div>
+            }
+        >
             <Head title="HUB de Administración" />
 
             <div className="px-4 sm:px-6 lg:px-8 py-12 text-white selection:bg-[#F69239]/30">
@@ -16,8 +28,8 @@ export default function Hub({ consultoraName }) {
                         <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#F69239]/10 rounded-full blur-[100px] opacity-0 group-hover/hub:opacity-100 transition-opacity duration-1000"></div>
                         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div>
-                                <h2 className="text-3xl font-black text-white italic tracking-tight mb-2 uppercase">
-                                    HUB DE MANDO <span className="text-[#F69239]">{consultoraName}</span>
+                                <h2 className="text-xl font-black text-white italic tracking-tight mb-2 uppercase">
+                                    HUB OPERATIVO <span className="text-ep-primary">{consultoraName}</span>
                                 </h2>
                                 <p className="text-sm text-white/40 max-w-xl font-medium tracking-wide">
                                     Acceso unificado a la gestión de activos, identidades y recursos corporativos. Seleccione un módulo para iniciar operaciones de alto nivel.

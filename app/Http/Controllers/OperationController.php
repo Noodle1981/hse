@@ -123,6 +123,8 @@ class OperationController extends Controller
             $reportsQuery->where('titulo', 'like', "%{$search}%");
             $contractQuery->where('activity_name', 'like', "%{$search}%");
         }
+        
+        $contractTasks = $contractQuery->get();
 
         // Processing results for unified view (simplified version of legacy logic)
         $inspections = $manualQuery->get()->map(fn($a) => [
@@ -130,45 +132,84 @@ class OperationController extends Controller
             'type' => 'inspection',
             'title' => $a->checklist?->title,
             'sede' => $a->sede?->nombre_sede,
+            'sede_id' => $a->sede_id,
             'empresa' => $a->sede?->empresa?->nombre,
             'due_date' => $a->due_date,
             'status' => $a->status,
             'checklist_id' => $a->dynamic_checklist_id,
-        ])->concat($contractQuery->where('category', 'Inspección')->get()->map(fn($p) => [
+            'source' => 'manual',
+            'registry_code' => 'TX-' . $a->id,
+        ])->concat($contractTasks->where('category', 'Inspección')->map(fn($p) => [
             'id' => $p->id,
             'type' => 'inspection',
             'title' => $p->checklist?->title ?? $p->activity_name,
             'sede' => $p->sede?->nombre_sede,
+            'sede_id' => $p->sede_id,
             'empresa' => $p->sede?->empresa?->nombre,
-            'due_date' => Carbon::parse($queryMonth . '-01')->endOfMonth(),
-            'status' => 'scheduled', // Simplified status mapping
+            'due_date' => Carbon::now()->endOfMonth(),
+            'status' => 'scheduled',
             'checklist_id' => $p->checklist_id,
-        ]));
+            'source' => 'contract',
+            'registry_code' => 'AN-' . $p->id,
+        ]))->values();
 
         $trainings = $trainingsQuery->get()->map(fn($t) => [
             'id' => $t->id,
             'type' => 'training',
             'title' => $t->title,
             'sede' => $t->sede?->nombre_sede,
+            'sede_id' => $t->sede_id,
             'empresa' => $t->sede?->empresa?->nombre,
             'due_date' => $t->date,
             'status' => $t->status,
-        ]);
+            'source' => 'manual',
+            'registry_code' => 'EDU-' . $t->id,
+        ])->concat($contractTasks->where('category', 'Capacitación')->map(fn($p) => [
+            'id' => $p->id,
+            'type' => 'training',
+            'title' => $p->activity_name,
+            'sede' => $p->sede?->nombre_sede,
+            'sede_id' => $p->sede_id,
+            'empresa' => $p->sede?->empresa?->nombre,
+            'due_date' => Carbon::now()->endOfMonth(),
+            'status' => 'scheduled',
+            'checklist_id' => $p->checklist_id,
+            'source' => 'contract',
+            'registry_code' => 'AN-' . $p->id,
+        ]))->values();
 
         $reports = $reportsQuery->get()->map(fn($r) => [
             'id' => $r->id,
             'type' => 'report',
             'title' => $r->titulo,
             'sede' => $r->sede?->nombre_sede,
+            'sede_id' => $r->sede_id,
             'empresa' => $r->sede?->empresa?->nombre,
             'due_date' => $r->created_at->addDays(7),
             'status' => $r->estado,
-        ]);
+            'source' => 'manual',
+            'registry_code' => 'MET-' . $r->id,
+        ])->concat($contractTasks->where('category', 'Informe')->map(fn($p) => [
+            'id' => $p->id,
+            'type' => 'report',
+            'title' => $p->activity_name,
+            'sede' => $p->sede?->nombre_sede,
+            'sede_id' => $p->sede_id,
+            'empresa' => $p->sede?->empresa?->nombre,
+            'due_date' => Carbon::now()->endOfMonth(),
+            'status' => 'scheduled',
+            'source' => 'contract',
+            'registry_code' => 'AN-' . $p->id,
+        ]))->values();
 
         // KPIs
+        $totalTasks = $inspections->count() + $trainings->count() + $reports->count();
+        $completedTasks = $inspections->where('status', 'completed')->count() + $trainings->where('status', 'completed')->count();
+        
         $kpis = [
-            'total_tasks' => $inspections->count() + $trainings->count() + $reports->count(),
-            'completed' => $inspections->where('status', 'completed')->count() + $trainings->where('status', 'completed')->count(),
+            'total_tasks' => $totalTasks,
+            'completed' => $completedTasks,
+            'percentage' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0,
             'critical_findings' => \App\Models\Hallazgo::where('inspector_id', $user->id)->where('criticidad', 'alta')->where('estado', '!=', 'resuelto')->count(),
         ];
 
@@ -195,7 +236,12 @@ class OperationController extends Controller
      */
     public function create()
     {
-        $sedes = Sede::with('empresa')->orderBy('nombre_sede')->get();
+        /** @var User $user */
+        $user = Auth::user();
+        
+        $sedes = $user->isAdmin() 
+            ? Sede::with('empresa')->orderBy('nombre_sede')->get()
+            : $user->sedes()->with('empresa')->orderBy('nombre_sede')->get();
         
         return Inertia::render('Gestor/Visits/Start', [
             'sedes' => $sedes,
@@ -247,9 +293,19 @@ class OperationController extends Controller
             'incidentes'
         ]);
 
+        // Misiones sugeridas del Plan Anual para este mes
+        $now = \Carbon\Carbon::now();
+        $queryMonth = $now->year . '-' . str_pad($now->month, 2, '0', STR_PAD_LEFT);
+        
+        $suggestedPlanTasks = \App\Models\AnnualPlan::with(['checklist.categoryRelation'])
+            ->where('sede_id', $visit->sede_id)
+            ->where('scheduled_months', 'like', '%"' . $queryMonth . '"%')
+            ->get();
+
         return Inertia::render('Tecnico/Visits/InProgress', [
             'visit' => $visit,
             'user' => $user,
+            'suggestedPlanTasks' => $suggestedPlanTasks,
             'templates' => \App\Models\Training::where('is_template', true)->get(),
         ]);
     }
@@ -299,10 +355,10 @@ class OperationController extends Controller
         $user = Auth::user();
 
         $query = VisitCertificate::query()
-            ->with(['sede.empresa'])
+            ->with(['sede.empresa', 'user'])
             ->where('user_id', $user->id)
-            ->whereIn('status', ['completed', 'signed'])
-            ->latest('visit_date');
+            ->latest('visit_date')
+            ->latest('id');
 
         if ($request->search) {
             $query->whereHas('sede', function ($q) use ($request) {
@@ -310,9 +366,13 @@ class OperationController extends Controller
             });
         }
 
+        if ($request->status && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
         return Inertia::render('Tecnico/Visits/History', [
             'visits' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search']),
+            'filters' => $request->only(['search', 'status']),
         ]);
     }
 
@@ -340,5 +400,29 @@ class OperationController extends Controller
 
         return redirect()->route('gestor.operations.visits.index')
             ->with('message', '¡Visita finalizada y certificada exitosamente!');
+    }
+
+    /**
+     * Assign a suggested task from the Annual Plan to the current visit context.
+     */
+    public function assignSuggestedTask(Request $request, VisitCertificate $visit)
+    {
+        $request->validate([
+            'plan_id' => 'required|exists:annual_plans,id',
+        ]);
+
+        $plan = \App\Models\AnnualPlan::findOrFail($request->plan_id);
+
+        /** @var \App\Models\ChecklistAssignment $assignment */
+        $assignment = \App\Models\ChecklistAssignment::create([
+            'user_id' => $visit->user_id,
+            'sede_id' => $visit->sede_id,
+            'dynamic_checklist_id' => $plan->checklist_id,
+            'due_date' => now(),
+            'status' => 'pending',
+            'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+        ]);
+
+        return back()->with('message', 'Tarea "' . $plan->activity_name . '" asignada correctamente.');
     }
 }

@@ -87,7 +87,7 @@ class MasterReportController extends Controller
             'estado' => $user->isTechnician() ? 'en_redaccion' : 'solicitado',
         ]);
 
-        return redirect()->route('gestor.master-reports.edit', $report->id)
+        return redirect()->route('master-reports.edit', $report->id)
             ->with('message', 'Informe iniciado correctamente.');
     }
 
@@ -120,7 +120,7 @@ class MasterReportController extends Controller
 
         if ($request->finalize) {
             $report->update(['estado' => 'finalizado']);
-            return redirect()->route('gestor.master-reports.index')->with('message', 'Informe finalizado exitosamente.');
+            return redirect()->route('master-reports.index')->with('message', 'Informe finalizado exitosamente.');
         }
 
         return back()->with('message', 'Borrador guardado.');

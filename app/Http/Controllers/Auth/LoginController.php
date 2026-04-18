@@ -27,6 +27,14 @@ class LoginController extends Controller
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
+            
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            
+            if ($user->isGestor() || $user->isSocio()) {
+                return redirect()->intended(route('gestor.dashboard'));
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 
