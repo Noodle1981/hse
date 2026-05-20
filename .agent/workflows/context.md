@@ -1,15 +1,15 @@
 ---
-description: Contexto del proyecto XamaSafe
+description: Contexto del proyecto XamaSafe (Stack React + Inertia.js)
 ---
 
-# 📖 Contexto del XamaSafe
+# 📖 Contexto de XamaSafe
 
 ## 🎯 Visión General
 
 **Nombre:** XamaSafe
 **Versión Actual:** V2.1.0.0 (Premium HUD)
 **Tipo:** Sistema SaaS integral de Higiene y Seguridad
-**Stack:** Laravel 12 + Livewire 3.7 + Tailwind CSS v4 + SQLite (dev)
+**Stack:** Laravel 12 + Inertia.js (React 19) + Tailwind CSS v4 + SQLite (dev) + Ziggy JS
 
 ### Propósito
 Sistema escalable de checklists que permite crear, gestionar y ejecutar formularios dinámicos para:
@@ -27,16 +27,16 @@ Sistema escalable de checklists que permite crear, gestionar y ejecutar formular
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    PRESENTATION LAYER                        │
-│  Livewire Components + Blade Views + Tailwind CSS           │
+│   React 19 + Inertia.js (React) + Tailwind CSS v4           │
 ├─────────────────────────────────────────────────────────────┤
 │                    APPLICATION LAYER                         │
-│  Services + Form Requests + Policies                        │
+│   Laravel 12 Controllers + Form Requests + Policies        │
 ├─────────────────────────────────────────────────────────────┤
 │                    DOMAIN LAYER                              │
-│  Eloquent Models + Relationships + Scopes                   │
+│   Eloquent Models + Relationships + Scopes                   │
 ├─────────────────────────────────────────────────────────────┤
 │                    INFRASTRUCTURE LAYER                      │
-│  Migrations + Seeders + Factories + SQLite/MySQL            │
+│   Migrations + Seeders + Factories + SQLite/MySQL            │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -45,10 +45,8 @@ Sistema escalable de checklists que permite crear, gestionar y ejecutar formular
 ep-back/
 ├── app/
 │   ├── Http/
-│   │   ├── Controllers/       # Controladores MVC
+│   │   ├── Controllers/       # Controladores (devuelven Inertia::render)
 │   │   └── Requests/          # Form Requests (validación)
-│   ├── Livewire/
-│   │   └── Checklists/        # Componentes del módulo
 │   ├── Models/                # Modelos Eloquent
 │   ├── Policies/              # Políticas de autorización
 │   └── Services/              # Lógica de negocio
@@ -57,16 +55,25 @@ ep-back/
 │   ├── factories/             # Factories para testing
 │   └── seeders/               # Datos de prueba
 ├── resources/
+│   ├── js/
+│   │   ├── Layouts/           # Layouts de React (e.g. AuthenticatedLayout.jsx)
+│   │   ├── Pages/             # Páginas React resueltas por Inertia.js
+│   │   │   ├── Gestor/        # Consola de mando, Usuarios, Técnicos, Corporativo
+│   │   │   ├── Tecnico/       # Herramientas de campo, Misiones e Inspecciones
+│   │   │   ├── Auth/          # Login, Registro y Recuperación de clave
+│   │   │   ├── Profile/       # Gestión de perfiles y firmas
+│   │   │   └── Admin/         # Módulos de administración
+│   │   ├── app.jsx            # Inicializador principal de Inertia con React
+│   │   └── bootstrap.js       # Inicializador de Axios
+│   ├── css/
+│   │   └── app.css            # Configuración de Tailwind CSS v4 y variables CSS custom
 │   └── views/
-│       ├── livewire/          # Vistas de componentes
-│       ├── components/        # Componentes Blade reutilizables
-│       └── layouts/           # Layouts principales
+│       └── app.blade.php      # Layout raíz de HTML para Inertia
 ├── routes/
-│   └── web.php                # Rutas principales
-├── tests/
-│   ├── Feature/               # Tests de integración
-│   └── Unit/                  # Tests unitarios
-└── doc/                       # Documentación del proyecto
+│   └── web.php                # Rutas web registradas con Ziggy y mapeadas a controladores
+└── tests/
+    ├── Feature/               # Tests de integración
+    └── Unit/                  # Tests unitarios
 ```
 
 ---
@@ -85,7 +92,7 @@ ep-back/
        │   │                │
        ▼   ▼                ▼
 ┌─────────────┐      ┌─────────────┐
-│ Inspection  │──1:N─│   Answer    │
+│  Inspection │──1:N─│   Answer    │
 │ (Ejecución) │      │ (Respuesta) │
 └─────────────┘      └─────────────┘
 ```
@@ -103,32 +110,27 @@ ep-back/
 
 ## ✅ Buenas Prácticas
 
-### Código
-- ✅ Usar Type Hints y Return Types
-- ✅ Form Requests para validación
-- ✅ Eager Loading para prevenir N+1
-- ❌ Evitar código sin tipado
+### Backend (Laravel 12)
+- ✅ Usar Type Hints y Return Types estrictos.
+- ✅ Form Requests independientes para la validación de peticiones.
+- ✅ Eager Loading (`with()`) en Eloquent para evitar consultas N+1.
+- ✅ Retornar respuestas nativas de Inertia: `return Inertia::render('Componente', [...]);`.
 
-### Componentes Livewire
-- ✅ Componentes pequeños y enfocados
-- ✅ Validación por propiedades
-- ❌ Evitar componentes >500 líneas
+### Frontend (React 19 & Inertia)
+- ✅ Componentes modulares, pequeños y altamente enfocados.
+- ✅ Control de estado mediante hooks nativos de React (`useState`, `useEffect`, `useMemo`).
+- ✅ Enlace con backend y envío de formularios usando el hook `useForm` de Inertia.
+- ✅ Cero código remanente o muerto de Livewire (totalmente purgado).
 
 ### Base de Datos
-- ✅ Migraciones con índices y constraints
-- ✅ foreignId()->constrained()->cascadeOnDelete()
-- ✅ Índices en columnas frecuentemente consultadas
-
-### Testing
-- ✅ Patrón Arrange-Act-Assert
-- ✅ Factories para datos de prueba
-- ✅ Tests descriptivos (test_user_can_...)
+- ✅ Migraciones con índices, claves foráneas estructuradas y constraints de borrado cascada.
+- ✅ Optimización de consultas complejas.
 
 ---
 
 ## 📌 Convenciones de Nombrado
 
-### PHP/Laravel
+### Laravel/PHP
 | Elemento | Convención | Ejemplo |
 |----------|------------|---------|
 | Modelos | PascalCase singular | `Checklist`, `Question` |
@@ -138,36 +140,29 @@ ep-back/
 | Variables | camelCase | `$checklistId` |
 | Constantes | UPPER_SNAKE | `STATUS_ACTIVE` |
 
-### Blade/Views
+### React & Frontend
 | Elemento | Convención | Ejemplo |
 |----------|------------|---------|
-| Vistas | kebab-case | `checklist-form.blade.php` |
-| Componentes | kebab-case | `x-question-input` |
-| Layouts | kebab-case | `app-layout.blade.php` |
-
-### CSS/Tailwind (Visual Premium Dark)
-- **Estética:** HUD Futurista / Dashboard Premium.
-- **Paleta:** Escala de grises profunda, acentos vibrantes (Cyan, Violet, Emerald).
-- **Efectos:** Glassmorphism, bordes con degradado, micro-animaciones HUD.
-- **Tipografía:** Inter / Outfit para legibilidad técnica.
-- **Componentes:** Basados en el sistema "Terminal Táctica".
+| Componentes / Páginas | PascalCase | `AuthenticatedLayout.jsx`, `Dashboard.jsx` |
+| Hooks Personalizados | camelCase prefijada por `use` | `useCustomValidation` |
+| CSS Variables (Tema HUD) | kebab-case con prefijo `--color-ep-` | `--color-ep-primary` |
 
 ---
 
 ## 🔄 Git Workflow
 
 ### Ramas
-- `main` → Producción estable
-- `version-premium` → Desarrollo actual (Rama principal activa)
-- `version-minina` → Rama estable MVP
-- `feature/*` → Nuevas funcionalidades
+- `feature-inertia-react` → Rama activa de desarrollo (React 19 + Inertia + Laravel 12).
+- `version-premium` → Desarrollo premium legacy (Livewire).
+- `version-minina` → Rama estable MVP.
+- `main` → Producción estable/base.
 
 ### Commits (Conventional)
 - `feat:` Nueva funcionalidad
 - `fix:` Corrección de bug
 - `docs:` Documentación
 - `test:` Tests
-- `refactor:` Refactorización
+- `refactor:` Refactorización o limpieza de código
 
 ---
 
@@ -177,11 +172,7 @@ ep-back/
 ```bash
 php artisan test                    # Todos los tests
 php artisan test --filter=Name      # Tests específicos
-php artisan test --coverage         # Con coverage
 ```
-
-### Coverage Esperado
-- Modelos: 80% | Livewire: 70% | Controllers: 60% | **Global: >60%**
 
 ---
 
@@ -191,9 +182,9 @@ php artisan test --coverage         # Con coverage
 - PHP 8.2+
 - Composer 2.x
 - Node.js 18+
-- npm/yarn
+- npm o pnpm
 
-### Pasos (proyecto existente)
+### Pasos
 ```bash
 # 1. Instalar dependencias PHP
 composer install
@@ -208,75 +199,18 @@ touch database/database.sqlite
 # 4. Ejecutar migraciones
 php artisan migrate
 
-# 5. (Opcional) Cargar datos de prueba
+# 5. Cargar datos de prueba / Seeders
 php artisan db:seed
 
 # 6. Instalar dependencias JS
 npm install
 
-# 7. Compilar assets
+# 7. Compilar assets & Iniciar entorno de desarrollo
 npm run dev
-
-# 8. Iniciar servidor
-php artisan serve
-```
-
-### Variables de Entorno Clave
-```env
-APP_ENV=local
-APP_DEBUG=true
-DB_CONNECTION=sqlite
 ```
 
 ---
 
-## 📚 Documentación Completa del Sistema
-
-### 📖 Procedimientos (9)
-- `/doc/Lógica_del_diseño/ARQUITECTURA.md` - Arquitectura V2.0
-- `/doc/Procedimientos/TAREAS.MD` - Estado y roadmap
-- `/doc/Procedimientos/CHECKLISTS_DINAMICOS.md`
-- `/doc/Procedimientos/CAPACITACIONES.MD`
-- `/doc/Procedimientos/CONTANCIAS_DE_VISITAS.MD`
-- `/doc/Procedimientos/EMPRESAS_SEDE_EMPLEADOS.MD`
-- `/doc/Procedimientos/HALLAZGOS.md`
-- `/doc/Procedimientos/CONTRATO_ANUAL.MD`
-- `/doc/Procedimientos/ROLES Y SUS ALCANCES.MD`
-
-### 🎨 Lógica del Diseño (4)
-- `/doc/Lógica_del_diseño/COMPONENTES_LIVEWARE.MD` - 27 componentes
-- `/doc/Lógica_del_diseño/TABLAS.MD` - 38 tablas
-- `/doc/Lógica_del_diseño/ESCALABILIDAD.MD`
-- `/doc/Lógica_del_diseño/VISUAL.MD`
-
-### 📊 Estadísticas
-**13 documentos** | 400+ páginas | 27 componentes | 38 tablas | 20+ casos de uso
-
-### 🌐 Referencias
-- [Laravel 12](https://laravel.com/docs/12.x) | [Livewire 3](https://livewire.laravel.com/docs)
-- [Tailwind CSS v4](https://tailwindcss.com/docs) | [Alpine.js](https://alpinejs.dev)
-
----
-
-## 📊 Versiones
-
-### Historial
-| Versión | Fecha | Descripción |
-|---------|-------|-------------|
-| V1.0.0.0 | Marzo 2026 | Sistema MVP Ultra-minimizado - 8 módulos iniciales |
-| V2.1.0.0 | Abril 2026 | **Versión Premium HUD** - Rediseño total, Control de Contratos y Hallazgos |
-
-### Versionado Semántico
-```
-MAJOR.MINOR.PATCH.BUILD
-  │     │     │     └─ Build interno (incrementa por commit)
-  │     │     └─────── Correcciones de bugs
-  │     └───────────── Nuevas funcionalidades compatibles
-  └─────────────────── Cambios incompatibles con versiones anteriores
-```
-
----
-
-*Documento actualizado: 06 Abril 2026*
-*Versión del Sistema: V2.1.0.0 Premium*
-*Documentación Completa: 13 Archivos Técnicos*
+*Documento actualizado: 20 Mayo 2026*  
+*Versión del Sistema: V2.1.0.0 Premium (Inertia + React)*  
+*Especialidad: Monolito Laravel con UI React táctica y moderna (Tactical Premium Dark)*  
