@@ -242,6 +242,7 @@ export default function Index({
                             dynamicMonths={dynamicMonths} 
                             complianceData={complianceData} 
                             editMode={editMode}
+                            checklistOptions={checklistOptions}
                         />
                     </div>
 

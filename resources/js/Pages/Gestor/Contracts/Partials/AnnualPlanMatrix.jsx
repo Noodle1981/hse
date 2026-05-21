@@ -1,10 +1,63 @@
 import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, useForm } from '@inertiajs/react';
 
-export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData, editMode }) {
+export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData, editMode, checklistOptions = [] }) {
     const [editingCell, setEditingCell] = useState(null);
     const [editingDate, setEditingDate] = useState('');
     const [planToDelete, setPlanToDelete] = useState(null);
+    const [planToEdit, setPlanToEdit] = useState(null);
+
+    const editForm = useForm({
+        category: '',
+        activity_name: '',
+        activity_code: '',
+        checklist_id: ''
+    });
+
+    const openEditModal = (plan) => {
+        setPlanToEdit(plan);
+        editForm.setData({
+            category: plan.category,
+            activity_name: plan.activity_name,
+            activity_code: plan.activity_code || '',
+            checklist_id: plan.checklist_id || ''
+        });
+    };
+
+    const closeEditModal = () => {
+        setPlanToEdit(null);
+        editForm.reset();
+        editForm.clearErrors();
+    };
+
+    const submitEdit = (e) => {
+        e.preventDefault();
+        if (!planToEdit) return;
+        editForm.put(route('annual-contract.update', planToEdit.id), {
+            preserveScroll: true,
+            onSuccess: () => closeEditModal()
+        });
+    };
+
+    const handleCategoryChange = (val) => {
+        editForm.setData(d => ({
+            ...d,
+            category: val,
+            activity_name: val === 'Informe' ? 'Informe HSE' : '',
+            activity_code: val === 'Informe' ? 'EP-INF-01' : '',
+            checklist_id: ''
+        }));
+    };
+
+    const handleChecklistChange = (val) => {
+        const checklist = checklistOptions.find(c => c.id == val);
+        editForm.setData(d => ({
+            ...d,
+            checklist_id: val,
+            activity_name: checklist ? checklist.title : d.activity_name,
+            activity_code: checklist ? (checklist.registry_code || '') : d.activity_code
+        }));
+    };
 
     const toggleMonth = (planId, month) => {
         if (!editMode) return;
@@ -78,9 +131,14 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                         </div>
                                     </div>
                                     {editMode && (
-                                        <button onClick={() => deletePlan(plan.id)} className="ml-auto opacity-0 group-hover/row:opacity-100 text-red-500 hover:scale-110 transition-all">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2"/></svg>
-                                        </button>
+                                        <div className="ml-auto opacity-0 group-hover/row:opacity-100 flex items-center gap-3 pr-2">
+                                            <button onClick={() => openEditModal(plan)} className="text-indigo-400 hover:scale-110 hover:text-indigo-300 transition-all">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeWidth="2"/></svg>
+                                            </button>
+                                            <button onClick={() => deletePlan(plan.id)} className="text-red-500 hover:scale-110 hover:text-red-400 transition-all">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2"/></svg>
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </td>
@@ -255,7 +313,78 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                     </div>
                 </div>
             )}
-            
+
+            {/* MODAL DE EDICIÓN */}
+            {planToEdit && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-[#0a0a0f]/80 backdrop-blur-md animate-fade-in" onClick={closeEditModal}></div>
+                    <div className="relative w-full max-w-2xl bg-[#141421] border border-ep-primary/20 rounded-[2.5rem] shadow-[0_25px_70px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-up">
+                        <div className="p-8">
+                            <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-6 flex items-center gap-3">
+                                <div className="w-10 h-10 bg-ep-primary rounded-xl flex items-center justify-center text-white">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeWidth="2"/></svg>
+                                </div>
+                                Editar Actividad
+                            </h3>
+                            <form onSubmit={submitEdit} className="space-y-6 relative z-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Pilar Operativo</label>
+                                        <select 
+                                            value={editForm.data.category}
+                                            onChange={e => handleCategoryChange(e.target.value)}
+                                            className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white focus:ring-ep-primary/50 transition-all italic"
+                                        >
+                                            <option value="Capacitación">CAPACITACIÓN</option>
+                                            <option value="Inspección">INSPECCIÓN</option>
+                                            <option value="Informe">INFORME TÉCNICO</option>
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Referencia</label>
+                                        <select 
+                                            value={editForm.data.checklist_id}
+                                            onChange={e => handleChecklistChange(e.target.value)}
+                                            disabled={!['Inspección', 'Capacitación'].includes(editForm.data.category)}
+                                            className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic disabled:opacity-20 transition-all"
+                                        >
+                                            <option value="">MANUAL / NINGUNO</option>
+                                            {checklistOptions.map(c => (
+                                                <option key={c.id} value={c.id}>{c.title}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Descripción de la Actividad</label>
+                                        <input 
+                                            type="text"
+                                            value={editForm.data.activity_name}
+                                            onChange={e => editForm.setData('activity_name', e.target.value)}
+                                            className="w-full bg-black/40 border-white/10 rounded-2xl px-6 py-4 text-xs font-black text-white italic placeholder-white/5 focus:ring-ep-primary transition-all"
+                                        />
+                                        {editForm.errors.activity_name && <span className="text-red-500 text-[8px] font-black uppercase italic tracking-widest">{editForm.errors.activity_name}</span>}
+                                    </div>
+                                    <div className="space-y-2 md:col-span-2">
+                                        <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Código Registro</label>
+                                        <input 
+                                            type="text"
+                                            value={editForm.data.activity_code}
+                                            onChange={e => editForm.setData('activity_code', e.target.value)}
+                                            className="w-full bg-black/40 border-white/10 rounded-2xl px-6 py-4 text-xs font-black text-white italic focus:ring-ep-primary transition-all uppercase"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex justify-end gap-4 pt-4 border-t border-white/5 mt-8">
+                                    <button type="button" onClick={closeEditModal} className="px-6 py-3 bg-white/5 text-white/50 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic transition-all">Cancelar</button>
+                                    <button type="submit" disabled={editForm.processing} className="px-8 py-3 bg-ep-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic hover:brightness-110 shadow-[0_10px_30px_rgba(246,146,57,0.3)] transition-all">
+                                        {editForm.processing ? 'Guardando...' : 'Guardar Cambios'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            )}
             <style dangerouslySetInnerHTML={{ __html: `
                 .custom-scrollbar::-webkit-scrollbar { height: 6px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }

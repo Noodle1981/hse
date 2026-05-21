@@ -103,7 +103,7 @@ class ContractController extends Controller
                 'duration' => $contractDuration,
                 'category' => $request->category,
             ],
-            'checklistOptions' => DynamicChecklist::select('id', 'title')->get(),
+            'checklistOptions' => DynamicChecklist::select('id', 'title', 'registry_code')->get(),
         ]);
     }
 
@@ -193,6 +193,25 @@ class ContractController extends Controller
         $plan->save();
 
         return back();
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'activity_name' => 'required|string|max:255',
+            'category' => 'required|in:Capacitación,Inspección,Informe',
+            'activity_code' => 'nullable|string|max:255',
+        ]);
+
+        $plan = AnnualPlan::findOrFail($id);
+        $plan->update([
+            'category' => $request->category,
+            'activity_name' => $request->activity_name,
+            'activity_code' => $request->activity_code,
+            'checklist_id' => in_array($request->category, ['Inspección', 'Capacitación']) ? $request->checklist_id : null,
+        ]);
+
+        return back()->with('message', 'Actividad actualizada.');
     }
 
     public function destroy($id)

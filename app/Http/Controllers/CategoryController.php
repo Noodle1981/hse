@@ -82,6 +82,9 @@ class CategoryController extends Controller
             $message = 'Categoría creada correctamente.';
         }
 
+        if ($request->has('redirect_back')) {
+            return back()->with('message', $message);
+        }
         return redirect()->route('gestor.categories.index')->with('message', $message);
     }
 

@@ -74,7 +74,7 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
 
                     {/* Vínculo (Solo si es Inspección) */}
                     <div className="space-y-2">
-                        <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Referencia Matriz</label>
+                        <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Referencia</label>
                         <select id="field_4" name="field_4" 
                             value={data.checklist_id}
                             onChange={e => handleChecklistChange(e.target.value)}

@@ -205,11 +205,13 @@ export default function Index({ users, filters }) {
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Matrícula ID</label>
                                             <input id="matricula" name="matricula" type="text" value={form.data.matricula} onChange={e => form.setData('matricula', e.target.value)} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
+                                            {form.errors.matricula && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.matricula}</span>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Teléfono Enlace</label>
                                             <input id="telefono" name="telefono" type="text" value={form.data.telefono} onChange={e => form.setData('telefono', e.target.value)} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
+                                            {form.errors.telefono && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.telefono}</span>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Estado</label>

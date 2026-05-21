@@ -45,11 +45,11 @@ export default function Index({ checklists, categories, filters }) {
 
     return (
         <AuthenticatedLayout 
-            title="Laboratorio de Protocolos"
+            title="Gestión de Checklists"
             header={
                 <div className="flex flex-col">
                     <h1 className="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
-                        Laboratorio de <span className="text-white">Protocolos</span>
+                        Gestión de <span className="text-white">Checklists</span>
                     </h1>
                     <h2 className="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
                         Diseño y Gestión de Guías de Inspección
@@ -57,7 +57,7 @@ export default function Index({ checklists, categories, filters }) {
                 </div>
             }
         >
-            <Head title="Matriz de Checklists" />
+            <Head title="Listado de Checklists" />
 
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-orange-500/30">
                 <div className="max-w-[100rem] mx-auto space-y-8 animate-fade-in">
@@ -70,7 +70,7 @@ export default function Index({ checklists, categories, filters }) {
                             
                             {/* Buscador */}
                             <div className="md:col-span-5 relative group">
-                                <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-500 uppercase tracking-[0.3em] italic z-10">Buscador de Protocolos</span>
+                                <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-500 uppercase tracking-[0.3em] italic z-10">Buscador de Checklists</span>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-white/20 group-focus-within:text-orange-500">
                                         <svg className="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -79,7 +79,7 @@ export default function Index({ checklists, categories, filters }) {
                                         type="text" 
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
-                                        class="w-full bg-black/40 border border-white/10 rounded-2xl pl-14 pr-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all placeholder-white/5 italic"
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl pl-14 pr-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all placeholder-white/5 italic"
                                         placeholder="Filtrar por Título o Código..."
                                     />
                                 </div>
@@ -133,7 +133,7 @@ export default function Index({ checklists, categories, filters }) {
                             <table className="table-auto w-full border-collapse">
                                 <thead>
                                     <tr className="bg-black/40 text-left">
-                                        <th className="px-10 py-8"><span className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] italic leading-none">Diseño de Protocolo</span></th>
+                                        <th className="px-10 py-8"><span className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] italic leading-none">Diseño de Checklist</span></th>
                                         <th className="hidden md:table-cell px-10 py-8"><span className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] italic leading-none">Categorización</span></th>
                                         <th className="hidden lg:table-cell px-10 py-8 text-center"><span className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] italic leading-none">Variables</span></th>
                                         <th className="px-10 py-8 text-center"><span className="text-[11px] font-black text-white/40 uppercase tracking-[0.4em] italic leading-none">Estado</span></th>
@@ -216,7 +216,7 @@ export default function Index({ checklists, categories, filters }) {
                                                         className="h-11 px-6 bg-white/5 border border-white/10 text-white hover:bg-orange-500 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic flex items-center gap-3 transition-all shadow-lg"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                        <span>Calibrar</span>
+                                                        <span>Editar</span>
                                                     </Link>
                                                 </div>
                                             </td>
@@ -229,7 +229,7 @@ export default function Index({ checklists, categories, filters }) {
                         {/* PAGINACIÓN TÁCTICA */}
                         <div className="px-10 py-8 border-t border-white/5 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-6 font-black italic">
                             <div className="text-[10px] text-white/10 uppercase tracking-[0.5em]">
-                                Laboratory Protocol Engine v4.2 • Secure Matrix
+                                Dynamic Checklists Engine v4.2 • Secure System
                             </div>
                             <div className="flex gap-2">
                                 {checklists.links.map((link, i) => (

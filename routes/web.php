@@ -237,6 +237,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/activity', [ContractController::class, 'store'])->name('store');
             Route::post('/activity/{id}/toggle', [ContractController::class, 'toggleMonth'])->name('toggle');
             Route::post('/activity/{id}/date', [ContractController::class, 'updateDate'])->name('date');
+            Route::put('/activity/{id}', [ContractController::class, 'update'])->name('update');
             Route::delete('/activity/{id}', [ContractController::class, 'destroy'])->name('destroy');
             Route::get('/pdf', [\App\Http\Controllers\Contracts\AnnualContractReportController::class, 'export'])->name('pdf');
         });
