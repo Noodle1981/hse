@@ -71,7 +71,7 @@ class OperationController extends Controller
 
         $activeVisit = $this->visitService->getActiveVisit($user);
 
-        // 1. Manual Assignments (Checklists)
+        // 1️⃣ Manual Assignments (Checklists)
         $manualQuery = ChecklistAssignment::with(['checklist.categoryRelation', 'checklist.questions', 'sede.empresa'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
@@ -83,27 +83,30 @@ class OperationController extends Controller
                       $sq->where('notes', 'NOT LIKE', '%Vínculo automático desde Plan Anual%')
                          ->where('notes', 'NOT LIKE', '%Plan Mensual Recomendado%');
                   });
-            });
+            })
+            ->orderBy('due_date', 'asc');
 
-        // 2. Trainings
+        // 2️⃣ Trainings
         $trainingsQuery = \App\Models\Training::with(['sede.empresa', 'dynamicChecklist.categoryRelation'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('date', $selectedMonth)
-            ->whereYear('date', $now->year);
+            ->whereYear('date', $now->year)
+            ->orderBy('date', 'asc');
 
-        // 3. Reports
+        // 3️⃣ Reports
         $reportsQuery = \App\Models\MasterReport::with(['sede.empresa'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('created_at', $selectedMonth)
-            ->whereYear('created_at', $now->year);
+            ->whereYear('created_at', $now->year)
+            ->orderBy('created_at', 'asc');
 
-        // 4. Annual Plan Tasks
+        // 4️⃣ Annual Plan Tasks
         $queryMonth = $now->year . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT);
         $contractQuery = \App\Models\AnnualPlan::with(['checklist.categoryRelation', 'sede.empresa'])
             ->whereIn('sede_id', $assignedSedeIds)
-            ->where('scheduled_months', 'like', '%"' . $queryMonth . '"%');
+            ->whereJsonContains('scheduled_months', $queryMonth);
 
         // Apply filters (Empresa/Sede/Search)
         if ($selectedEmpresa) {
@@ -127,83 +130,26 @@ class OperationController extends Controller
         
         $contractTasks = $contractQuery->get();
 
-        // Processing results for unified view (simplified version of legacy logic)
-        $inspections = $manualQuery->get()->map(fn($a) => [
-            'id' => $a->id,
-            'type' => 'inspection',
-            'title' => $a->checklist?->title,
-            'sede' => $a->sede?->nombre_sede,
-            'sede_id' => $a->sede_id,
-            'empresa' => $a->sede?->empresa?->nombre,
-            'due_date' => $a->due_date,
-            'status' => $a->status,
-            'checklist_id' => $a->dynamic_checklist_id,
-            'source' => 'manual',
-            'registry_code' => 'TX-' . $a->id,
-        ])->concat($contractTasks->where('category', 'Inspección')->map(fn($p) => [
-            'id' => $p->id,
-            'type' => 'inspection',
-            'title' => $p->checklist?->title ?? $p->activity_name,
-            'sede' => $p->sede?->nombre_sede,
-            'sede_id' => $p->sede_id,
-            'empresa' => $p->sede?->empresa?->nombre,
-            'due_date' => Carbon::now()->endOfMonth(),
-            'status' => 'scheduled',
-            'checklist_id' => $p->checklist_id,
-            'source' => 'contract',
-            'registry_code' => 'AN-' . $p->id,
-        ]))->values();
+        // 5️⃣ Procesamiento de resultados para vista unificada
+        $inspections = $manualQuery->get()
+            ->map(fn($a) => $this->mapInspection($a))
+            ->concat(
+                $contractTasks->where('category', 'Inspección')->map(fn($p) => $this->mapContractToTask($p, 'inspection'))
+            )->values();
 
-        $trainings = $trainingsQuery->get()->map(fn($t) => [
-            'id' => $t->id,
-            'type' => 'training',
-            'title' => $t->title,
-            'sede' => $t->sede?->nombre_sede,
-            'sede_id' => $t->sede_id,
-            'empresa' => $t->sede?->empresa?->nombre,
-            'due_date' => $t->date,
-            'status' => $t->status,
-            'source' => 'manual',
-            'registry_code' => 'EDU-' . $t->id,
-        ])->concat($contractTasks->where('category', 'Capacitación')->map(fn($p) => [
-            'id' => $p->id,
-            'type' => 'training',
-            'title' => $p->activity_name,
-            'sede' => $p->sede?->nombre_sede,
-            'sede_id' => $p->sede_id,
-            'empresa' => $p->sede?->empresa?->nombre,
-            'due_date' => Carbon::now()->endOfMonth(),
-            'status' => 'scheduled',
-            'checklist_id' => $p->checklist_id,
-            'source' => 'contract',
-            'registry_code' => 'AN-' . $p->id,
-        ]))->values();
+        $trainings = $trainingsQuery->get()
+            ->map(fn($t) => $this->mapTraining($t))
+            ->concat(
+                $contractTasks->where('category', 'Capacitación')->map(fn($p) => $this->mapContractToTask($p, 'training'))
+            )->values();
 
-        $reports = $reportsQuery->get()->map(fn($r) => [
-            'id' => $r->id,
-            'type' => 'report',
-            'title' => $r->titulo,
-            'sede' => $r->sede?->nombre_sede,
-            'sede_id' => $r->sede_id,
-            'empresa' => $r->sede?->empresa?->nombre,
-            'due_date' => $r->created_at->addDays(7),
-            'status' => $r->estado,
-            'source' => 'manual',
-            'registry_code' => 'MET-' . $r->id,
-        ])->concat($contractTasks->where('category', 'Informe')->map(fn($p) => [
-            'id' => $p->id,
-            'type' => 'report',
-            'title' => $p->activity_name,
-            'sede' => $p->sede?->nombre_sede,
-            'sede_id' => $p->sede_id,
-            'empresa' => $p->sede?->empresa?->nombre,
-            'due_date' => Carbon::now()->endOfMonth(),
-            'status' => 'scheduled',
-            'source' => 'contract',
-            'registry_code' => 'AN-' . $p->id,
-        ]))->values();
+        $reports = $reportsQuery->get()
+            ->map(fn($r) => $this->mapReport($r))
+            ->concat(
+                $contractTasks->where('category', 'Informe')->map(fn($p) => $this->mapContractToTask($p, 'report'))
+            )->values();
 
-        // KPIs
+        // 6️⃣ KPIs
         $totalTasks = $inspections->count() + $trainings->count() + $reports->count();
         $completedTasks = $inspections->where('status', 'completed')->count() + $trainings->where('status', 'completed')->count();
         
@@ -371,35 +317,47 @@ class OperationController extends Controller
             'incidentes'
         ]);
 
-        // Misiones sugeridas del Plan Anual para este mes
+        // Tareas del Plan Anual para este mes (excluir Informes — son trabajo personal)
         $now = \Carbon\Carbon::now();
         $queryMonth = $now->year . '-' . str_pad($now->month, 2, '0', STR_PAD_LEFT);
-        
-        $suggestedPlanTasks = \App\Models\AnnualPlan::with(['checklist.categoryRelation'])
-            ->where('sede_id', $visit->sede_id)
-            ->where('scheduled_months', 'like', '%"' . $queryMonth . '"%')
-            ->get();
+        $endOfMonth = $now->copy()->endOfMonth()->toDateString();
 
-        // Misiones Pendientes para esta Sede (que no estťn finalizadas)
-        $pendingAssignments = \App\Models\ChecklistAssignment::with(['checklist.categoryRelation'])
+        $suggestedPlanTasks = \App\Models\AnnualPlan::with(['checklist'])
+            ->where('sede_id', $visit->sede_id)
+            ->whereJsonContains('scheduled_months', $queryMonth)
+            ->where('category', '!=', 'Informe') // Informes: trabajo personal, no de visita
+            ->get()
+            ->map(function ($plan) use ($endOfMonth) {
+                return [
+                    'id'            => $plan->id,
+                    'activity_name' => $plan->activity_name,
+                    'activity_code' => $plan->activity_code,
+                    'category'      => $plan->category,
+                    'checklist_id'  => $plan->checklist_id,
+                    'due_date'      => $endOfMonth, // vence al final del mes corriente
+                ];
+            });
+
+        // Misiones Pendientes para esta Sede (inspecciones ya asignadas, no finalizadas)
+        $pendingAssignments = \App\Models\ChecklistAssignment::with(['checklist'])
             ->where('sede_id', $visit->sede_id)
             ->whereIn('status', ['pending', 'in_progress'])
             ->get();
 
-        // Capacitaciones Pendientes para esta Sede
-        $pendingTrainings = \App\Models\Training::with(['dynamicChecklist.categoryRelation'])
+        // Capacitaciones Pendientes para esta Sede (del técnico, no completadas)
+        $pendingTrainings = \App\Models\Training::with(['dynamicChecklist'])
             ->where('sede_id', $visit->sede_id)
             ->where('user_id', $user->id)
             ->where('status', '!=', 'completed')
             ->get();
 
         return Inertia::render('Tecnico/Visits/InProgress', [
-            'visit' => $visit,
-            'user' => $user,
+            'visit'              => $visit,
+            'user'               => $user,
             'suggestedPlanTasks' => $suggestedPlanTasks,
             'pendingAssignments' => $pendingAssignments,
-            'pendingTrainings' => $pendingTrainings,
-            'templates' => \App\Models\Training::where('is_template', true)->get(),
+            'pendingTrainings'   => $pendingTrainings,
+            'templates'          => \App\Models\Training::where('is_template', true)->get(),
         ]);
     }
 
@@ -474,19 +432,27 @@ class OperationController extends Controller
      */
     public function finalize(Request $request, VisitCertificate $visit)
     {
-        Log::info('Finalizando visita', [
+        \Illuminate\Support\Facades\Log::info('Finalizando visita', [
             'visit_id' => $visit->id,
-            'user_id' => Auth::id(),
+            'user_id' => \Illuminate\Support\Facades\Auth::id(),
             'has_signature' => !empty($request->signature),
-            'signature_unavailable' => $request->signature_unavailable
+            'signature_unavailable' => $request->signature_unavailable,
+            'payload' => $request->except(['signature']),
         ]);
 
-        $request->validate([
-            'notes' => 'nullable|string',
-            'responsible_name' => 'required|string',
-            'signature' => 'required_without:signature_skip_reason|string',
-            'signature_skip_reason' => 'required_if:signature_unavailable,true|string',
-        ]);
+        try {
+            $request->validate([
+                'notes' => 'nullable|string',
+                'responsible_name' => 'required|string',
+                'signature' => 'required_without:signature_skip_reason|nullable|string',
+                'signature_skip_reason' => 'required_if:signature_unavailable,true|nullable|string',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Illuminate\Support\Facades\Log::warning('Fallo de validación al finalizar visita', [
+                'errors' => $e->errors()
+            ]);
+            throw $e;
+        }
 
         $this->visitService->finalizeVisit(
             $visit,
@@ -517,16 +483,111 @@ class OperationController extends Controller
 
         $plan = \App\Models\AnnualPlan::findOrFail($request->plan_id);
 
-        /** @var \App\Models\ChecklistAssignment $assignment */
-        $assignment = \App\Models\ChecklistAssignment::create([
-            'user_id' => $visit->user_id,
-            'sede_id' => $visit->sede_id,
-            'dynamic_checklist_id' => $plan->checklist_id,
-            'due_date' => now(),
-            'status' => 'pending',
-            'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
-        ]);
+        if ($plan->category === 'Capacitación') {
+            \App\Models\Training::create([
+                'empresa_id' => $visit->sede->empresa_id,
+                'sede_id' => $visit->sede_id,
+                'user_id' => $visit->user_id,
+                'created_by_user_id' => $visit->user_id,
+                'is_template' => false,
+                'title' => $plan->activity_name,
+                'type' => 'ad-hoc',
+                'date' => now(),
+                'status' => 'pending',
+                'dynamic_checklist_id' => $plan->checklist_id,
+                'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+            ]);
+        } else {
+            /** @var \App\Models\ChecklistAssignment $assignment */
+            $assignment = \App\Models\ChecklistAssignment::create([
+                'user_id' => $visit->user_id,
+                'sede_id' => $visit->sede_id,
+                'empresa_id' => $visit->sede->empresa_id, // Agregado para cumplir restricción NOT NULL
+                'dynamic_checklist_id' => $plan->checklist_id,
+                'due_date' => now(),
+                'status' => 'pending',
+                'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+            ]);
+        }
 
         return back()->with('message', 'Tarea "' . $plan->activity_name . '" asignada correctamente.');
+    }
+
+    /**
+     * Mapea una asignación manual (Inspección).
+     */
+    private function mapInspection($a)
+    {
+        return [
+            'id' => $a->id,
+            'type' => 'inspection',
+            'title' => $a->checklist?->title,
+            'sede' => $a->sede?->nombre_sede,
+            'sede_id' => $a->sede_id,
+            'empresa' => $a->sede?->empresa?->nombre,
+            'due_date' => $a->due_date,
+            'status' => $a->status,
+            'checklist_id' => $a->dynamic_checklist_id,
+            'source' => 'manual',
+            'registry_code' => $a->checklist?->registry_code ?? ('TX-' . $a->id),
+        ];
+    }
+
+    /**
+     * Mapea una capacitación manual.
+     */
+    private function mapTraining($t)
+    {
+        return [
+            'id' => $t->id,
+            'type' => 'training',
+            'title' => $t->title,
+            'sede' => $t->sede?->nombre_sede,
+            'sede_id' => $t->sede_id,
+            'empresa' => $t->sede?->empresa?->nombre,
+            'due_date' => $t->date,
+            'status' => $t->status,
+            'source' => 'manual',
+            'registry_code' => $t->dynamicChecklist?->registry_code ?? ('EDU-' . $t->id),
+        ];
+    }
+
+    /**
+     * Mapea un reporte manual.
+     */
+    private function mapReport($r)
+    {
+        return [
+            'id' => $r->id,
+            'type' => 'report',
+            'title' => $r->titulo,
+            'sede' => $r->sede?->nombre_sede,
+            'sede_id' => $r->sede_id,
+            'empresa' => $r->sede?->empresa?->nombre,
+            'due_date' => $r->created_at->addDays(7),
+            'status' => $r->estado,
+            'source' => 'manual',
+            'registry_code' => 'MET-' . $r->id,
+        ];
+    }
+
+    /**
+     * Mapea una tarea del Plan Anual.
+     */
+    private function mapContractToTask($p, $type)
+    {
+        return [
+            'id' => $p->id,
+            'type' => $type,
+            'title' => $p->checklist?->title ?? $p->activity_name,
+            'sede' => $p->sede?->nombre_sede,
+            'sede_id' => $p->sede_id,
+            'empresa' => $p->sede?->empresa?->nombre,
+            'due_date' => Carbon::now()->endOfMonth(),
+            'status' => 'scheduled',
+            'checklist_id' => $p->checklist_id ?? null,
+            'source' => 'contract',
+            'registry_code' => $p->checklist?->registry_code ?? $p->activity_code ?? ('AN-' . $p->id),
+        ];
     }
 }

@@ -25,22 +25,28 @@ export default function History({ auth = {}, visits = { data: [] }, filters = {}
         }, { preserveState: true, preserveScroll: true });
     };
 
+    const formatTime = (dateStr) => {
+        if (!dateStr) return '--:--';
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '--:--';
+        return d.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+    };
+
     const calculateDuration = (start, end) => {
         if (!start || !end) return null;
         try {
-            // Asumiendo formato HH:mm:ss o HH:mm
-            const [sh, sm] = start.split(':').map(Number);
-            const [eh, em] = end.split(':').map(Number);
+            const startDate = new Date(start);
+            const endDate = new Date(end);
             
-            const startMins = sh * 60 + sm;
-            const endMins = eh * 60 + em;
+            if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
             
-            let diff = endMins - startMins;
-            if (diff < 0) diff += 1440; // Manejo de cambio de día si aplica
-
-            const hrs = Math.floor(diff / 60);
-            const mins = diff % 60;
-            return { hrs, mins, totalMins: diff, isExcessive: hrs >= 8 };
+            const diffMs = endDate.getTime() - startDate.getTime();
+            if (diffMs < 0) return null;
+            
+            const totalMins = Math.floor(diffMs / 1000 / 60);
+            const hrs = Math.floor(totalMins / 60);
+            const mins = totalMins % 60;
+            return { hrs, mins, totalMins, isExcessive: hrs >= 8 };
         } catch (e) { return null; }
     };
 
@@ -130,7 +136,7 @@ export default function History({ auth = {}, visits = { data: [] }, filters = {}
                                                             <span className="text-sm font-black text-white italic leading-none mb-1 tracking-tight">{new Date(visit.visit_date).toLocaleDateString()}</span>
                                                             <span className="text-[9px] font-black text-ep-primary uppercase tracking-widest italic flex items-center gap-2">
                                                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3" strokeWidth="2.5"/></svg>
-                                                                {visit.start_time?.substring(0, 5) || '--:--'} • {visit.end_time?.substring(0, 5) || '--:--'}
+                                                                {formatTime(visit.start_time)} • {formatTime(visit.end_time)}
                                                             </span>
                                                         </div>
                                                     </td>

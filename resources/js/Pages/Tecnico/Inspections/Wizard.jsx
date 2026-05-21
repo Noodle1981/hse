@@ -3,6 +3,18 @@ import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
 import { useState, useEffect, useRef } from 'react';
 import SignaturePad from 'signature_pad';
 
+/**
+ * Safely coerce a value to an array.
+ * Handles: real arrays, JSON-encoded strings (including double-encoded), null/undefined.
+ */
+function toArray(val) {
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+        try { const parsed = JSON.parse(val); return Array.isArray(parsed) ? parsed : []; } catch { return []; }
+    }
+    return [];
+}
+
 export default function Wizard({ checklist, assignment = {}, inspection = {}, visitId = null, initialAnswers = {}, isEmulation = false }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
@@ -183,12 +195,11 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             {(q.type === 'radio' || q.type === 'select') && (
                                                 <div className="space-y-3">
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                        {q.options?.map((opt, oi) => {
+                                                        {toArray(q.options).map((opt, oi) => {
                                                             const isSelected = form.data.answers[q.id] === opt;
                                                             const isCritical = isSelected 
                                                                 && q.failure_logic === 'fail_if_selected' 
-                                                                && Array.isArray(q.failure_values) 
-                                                                && q.failure_values.includes(opt);
+                                                                && toArray(q.failure_values).includes(opt);
                                                             return (
                                                                 <button 
                                                                     key={oi}
@@ -206,7 +217,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                                         })}
                                                     </div>
                                                     {/* Alerta crítica */}
-                                                    {q.failure_logic === 'fail_if_selected' && Array.isArray(q.failure_values) && q.failure_values.includes(form.data.answers[q.id]) && (
+                                                    {q.failure_logic === 'fail_if_selected' && toArray(q.failure_values).includes(form.data.answers[q.id]) && (
                                                         <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 animate-fade-in">
                                                             <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                                                             <p className="text-[10px] font-black text-red-400 uppercase tracking-widest italic">⚠ Condición Crítica Detectada — Requiere Acción Correctiva</p>
@@ -239,12 +250,12 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             {q.type === 'checkbox' && (
                                                 <div className="space-y-3">
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                        {q.options?.map((opt, oi) => {
+                                                        {toArray(q.options).map((opt, oi) => {
                                                             const selected = Array.isArray(form.data.answers[q.id]) 
                                                                 ? form.data.answers[q.id] 
                                                                 : (form.data.answers[q.id] ? [form.data.answers[q.id]] : []);
                                                             const isChecked = selected.includes(opt);
-                                                            const isCriticalVal = Array.isArray(q.failure_values) && q.failure_values.includes(opt);
+                                                            const isCriticalVal = toArray(q.failure_values).includes(opt);
                                                             // fail_if_selected: rojo si lo marcás (faltante)
                                                             // fail_if_missing: rojo si NO lo marcás (elemento obligatorio ausente)
                                                             const isCritical = isCriticalVal && (
@@ -280,13 +291,14 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                                     </div>
                                                     {/* Alerta elementos faltantes */}
                                                     {(() => {
-                                                        if (!Array.isArray(q.failure_values) || q.failure_values.length === 0) return null;
+                                                        const fv = toArray(q.failure_values);
+                                                        if (fv.length === 0) return null;
                                                         const selected = Array.isArray(form.data.answers[q.id]) ? form.data.answers[q.id] : [];
                                                         let criticalCount = 0;
                                                         if (q.failure_logic === 'fail_if_selected') {
-                                                            criticalCount = selected.filter(v => q.failure_values.includes(v)).length;
+                                                            criticalCount = selected.filter(v => fv.includes(v)).length;
                                                         } else if (q.failure_logic === 'fail_if_missing') {
-                                                            criticalCount = q.failure_values.filter(v => !selected.includes(v)).length;
+                                                            criticalCount = fv.filter(v => !selected.includes(v)).length;
                                                         }
                                                         if (criticalCount === 0) return null;
                                                         return (
@@ -316,20 +328,20 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                             <form onSubmit={submit} className="p-12 space-y-12 animate-fade-in">
                                 <div className="border-b border-white/5 pb-8">
                                     <h2 className="text-2xl font-black italic uppercase tracking-tighter">Certificación de Inspección</h2>
-                                    <p className="text-xs font-bold text-white/20 uppercase mt-2 italic tracking-widest">Capture las firmas para concluir el protocolo.</p>
+                                    <p className="text-xs font-bold text-white/80 uppercase mt-2 italic tracking-widest">Capture las firmas para concluir el protocolo.</p>
                                 </div>
 
                                 <div className="space-y-10">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                         <div className="space-y-6">
-                                            <div className="relative group">
-                                                <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Responsable en Sede</span>
+                                            <div className="group">
+                                                <label htmlFor="supervisor_name" className="block text-[10px] font-black text-orange-400 uppercase tracking-[0.3em] italic mb-3 ml-2">Responsable en Sede</label>
                                                 <input id="supervisor_name" name="supervisor_name" type="text" value={form.data.supervisor_name} onChange={e => form.setData('supervisor_name', e.target.value)} required className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"/>
                                             </div>
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between ml-4 mr-2">
-                                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic">Firma Responsable</span>
-                                                    <button type="button" onClick={() => supervisorPad.current?.clear()} className="flex items-center gap-1.5 text-[8px] font-black text-white/20 hover:text-red-400 uppercase tracking-widest italic transition-colors">
+                                                    <span className="text-[10px] font-black text-white/80 uppercase tracking-[0.3em] italic">Firma Responsable</span>
+                                                    <button type="button" onClick={() => supervisorPad.current?.clear()} className="flex items-center gap-1.5 text-[10px] font-black text-white/80 hover:text-red-400 uppercase tracking-widest italic transition-colors">
                                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                         Limpiar
                                                     </button>
@@ -340,16 +352,16 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             </div>
                                         </div>
                                         <div className="space-y-6">
-                                            <div className="relative group">
-                                                <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Técnico Certificante</span>
+                                            <div className="group">
+                                                <label className="block text-[10px] font-black text-blue-400 uppercase tracking-[0.3em] italic mb-3 ml-2">Técnico Certificante</label>
                                                 <div className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-white uppercase">
                                                     {user.name || [user.nombres, user.apellidos].filter(Boolean).join(' ') || 'Sin nombre'}
                                                 </div>
                                             </div>
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between ml-4 mr-2">
-                                                    <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic">Tu Firma Táctica</span>
-                                                    <button type="button" onClick={() => technicianPad.current?.clear()} className="flex items-center gap-1.5 text-[8px] font-black text-white/20 hover:text-red-400 uppercase tracking-widest italic transition-colors">
+                                                    <span className="text-[10px] font-black text-white/80 uppercase tracking-[0.3em] italic">Tu Firma Táctica</span>
+                                                    <button type="button" onClick={() => technicianPad.current?.clear()} className="flex items-center gap-1.5 text-[10px] font-black text-white/80 hover:text-red-400 uppercase tracking-widest italic transition-colors">
                                                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                                         Limpiar
                                                     </button>
@@ -361,8 +373,8 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                         </div>
                                     </div>
 
-                                    <div className="relative group">
-                                        <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Notas Finales del Servicio</span>
+                                    <div className="group">
+                                        <label htmlFor="notes" className="block text-[10px] font-black text-white/80 uppercase tracking-[0.3em] italic mb-3 ml-2">Notas Finales del Servicio</label>
                                         <textarea id="notes" name="notes" value={form.data.notes} onChange={e => form.setData('notes', e.target.value)} rows="3" className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"></textarea>
                                     </div>
                                 </div>

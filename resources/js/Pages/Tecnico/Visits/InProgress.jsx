@@ -71,7 +71,9 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
             signature: !data.signature_unavailable && signaturePad.current 
                 ? signaturePad.current.toDataURL() 
                 : '',
-        })).post(route('tecnico.visits.finalize', visit.id), {
+        }));
+
+        finalizeForm.post(route('tecnico.visits.finalize', visit.id), {
             onSuccess: () => setShowFinalizeModal(false),
             preserveScroll: true
         });
@@ -155,17 +157,43 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
-                                            {suggestedPlanTasks.map(plan => (
-                                                <div key={plan.id} className="bg-black/40 border border-white/5 rounded-3xl p-5 hover:border-indigo-500/30 transition-all flex justify-between items-center group/item">
-                                                    <div className="flex-1 pr-4">
-                                                        <h4 className="text-[11px] font-black text-white uppercase italic tracking-tight group-hover/item:text-indigo-400 transition-colors leading-tight mb-1">{plan.activity_name}</h4>
-                                                        <span className="text-[8px] font-black text-indigo-100/20 uppercase tracking-widest italic">{plan.category} • {plan.activity_code || 'S/N'}</span>
+                                        {/* Separar por categoría */}
+                                        {['Inspección', 'Capacitación'].map(cat => {
+                                            const items = suggestedPlanTasks.filter(p => p.category === cat);
+                                            if (items.length === 0) return null;
+                                            const catColor = cat === 'Inspección' ? 'orange' : 'blue';
+                                            const catIcon = cat === 'Inspección'
+                                                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>;
+                                            return (
+                                                <div key={cat} className="mb-6 relative z-10">
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <svg className={`w-4 h-4 text-${catColor}-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24">{catIcon}</svg>
+                                                        <span className={`text-[9px] font-black text-${catColor}-400 uppercase tracking-[0.3em] italic`}>{cat}es del mes</span>
                                                     </div>
-                                                    <button onClick={() => assignSuggested(plan.id)} className="h-9 px-4 bg-indigo-500/10 text-indigo-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-indigo-500/20 hover:bg-indigo-500 hover:text-white transition-all italic">Vincular</button>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                        {items.map(plan => (
+                                                            <div key={plan.id} className={`bg-black/40 border border-white/5 rounded-3xl p-5 hover:border-${catColor}-500/30 transition-all flex justify-between items-center group/item`}>
+                                                                <div className="flex-1 pr-4 min-w-0">
+                                                                    <h4 className={`text-[11px] font-black text-white uppercase italic tracking-tight group-hover/item:text-${catColor}-400 transition-colors leading-tight mb-1 truncate`}>{plan.activity_name}</h4>
+                                                                    <span className="text-[8px] font-black text-indigo-100/20 uppercase tracking-widest italic block">{plan.activity_code}</span>
+                                                                    <span className={`text-[8px] font-black text-${catColor}-500/40 uppercase tracking-widest italic mt-1 flex items-center gap-1`}>
+                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                                        Vence {new Date(plan.due_date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
+                                                                    </span>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => assignSuggested(plan.id)}
+                                                                    className={`h-9 px-4 bg-${catColor}-500/10 text-${catColor}-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-${catColor}-500/20 hover:bg-${catColor}-500 hover:text-white transition-all italic flex-shrink-0`}
+                                                                >
+                                                                    Vincular
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            ))}
-                                        </div>
+                                            );
+                                        })}
                                     </div>
                                 )}
 
@@ -318,6 +346,21 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                     <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em] italic text-center">Protocolo de Cierre Tactico</p>
                                 </div>
 
+                                {Object.keys(finalizeForm.errors).length > 0 && (
+                                    <div className="mb-6 p-5 bg-red-500/10 border border-red-500/20 rounded-[1.5rem] animate-fade-in">
+                                        <p className="text-[10px] font-black text-red-500 uppercase tracking-[0.2em] italic mb-2 flex items-center gap-2">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                            Campos Requeridos Faltantes
+                                        </p>
+                                        <ul className="list-disc pl-5 text-[9px] font-black text-indigo-200/50 uppercase tracking-widest italic space-y-1">
+                                            {finalizeForm.errors.responsible_name && <li>Ingrese el nombre del Responsable en Sede</li>}
+                                            {finalizeForm.errors.signature && <li>Firme digitalmente la constancia o justifique su omisión</li>}
+                                            {finalizeForm.errors.signature_skip_reason && <li>Justifique por qué omitió la firma</li>}
+                                            {finalizeForm.errors.notes && <li>{finalizeForm.errors.notes}</li>}
+                                        </ul>
+                                    </div>
+                                )}
+
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Comandos de Cierre (Observaciones)*</label>
@@ -327,7 +370,7 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Responsable en Sede</label>
+                                            <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Responsable en Sede*</label>
                                             <input id="responsible_name" name="responsible_name" type="text" value={finalizeForm.data.responsible_name} onChange={e => finalizeForm.setData('responsible_name', e.target.value)} className={`block w-full bg-black/40 border ${finalizeForm.errors.responsible_name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all uppercase italic`} />
                                             {finalizeForm.errors.responsible_name && <p className="text-[9px] font-black text-red-500 mt-2 ml-2 uppercase italic">{finalizeForm.errors.responsible_name}</p>}
                                         </div>
