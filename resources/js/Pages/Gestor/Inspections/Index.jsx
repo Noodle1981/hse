@@ -47,7 +47,7 @@ export default function Index({ inspections, filters }) {
                         <div className="flex flex-col lg:flex-row gap-6 justify-between items-center relative z-10">
                             <div className="w-full lg:w-1/3 relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Filtro de Historial</span>
-                                <input 
+                                <input id="search" name="search" 
                                     type="text" 
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}

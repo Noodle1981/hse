@@ -105,7 +105,7 @@ export default function Index({ incidents, filters, kpis, sedes }) {
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10 group-focus-within:text-red-500 transition-colors">Buscar incidente...</span>
                                 <div className="flex items-center bg-black/40 border border-white/10 rounded-2xl px-5 transition-all focus-within:ring-2 focus-within:ring-red-500/50">
                                     <svg className="w-4 h-4 text-white/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                    <input 
+                                    <input id="search" name="search" 
                                         type="text" 
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
@@ -298,7 +298,7 @@ function FilterSelect({ label, value, onChange, options }) {
     return (
         <div className="relative group">
             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10 transition-colors group-hover:text-white">{label}</span>
-            <select 
+            <select id="value" name="value" 
                 value={value} 
                 onChange={e => onChange(e.target.value)} 
                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-500 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase tracking-widest"

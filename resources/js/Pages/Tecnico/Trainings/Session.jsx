@@ -144,7 +144,7 @@ export default function Session({ session }) {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#16162a] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Nombre Completo del Alumno</span>
-                                            <input 
+                                            <input id="name" name="name" 
                                                 type="text" 
                                                 value={form.data.name}
                                                 onChange={e => form.setData('name', e.target.value)}
@@ -156,7 +156,7 @@ export default function Session({ session }) {
                                         </div>
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#16162a] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Puesto / Sector</span>
-                                            <input 
+                                            <input id="position" name="position" 
                                                 type="text" 
                                                 value={form.data.position}
                                                 onChange={e => form.setData('position', e.target.value)}

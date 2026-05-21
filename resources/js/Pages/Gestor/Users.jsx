@@ -117,7 +117,7 @@ export default function Index({ users, filters }) {
                         <div className="flex flex-col lg:flex-row gap-6 justify-between items-center relative z-10">
                             <div className="w-full lg:w-1/3 relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-[#F69239] uppercase tracking-[0.3em] italic z-10">Terminal de Búsqueda</span>
-                                <input 
+                                <input id="search" name="search" 
                                     type="text" 
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
@@ -129,13 +129,13 @@ export default function Index({ users, filters }) {
                             <div className="flex flex-wrap items-center gap-6 w-full lg:w-auto justify-end">
                                 <div className="flex items-center gap-4 bg-black/20 px-6 py-3 rounded-2xl border border-white/5">
                                     <label className="inline-flex items-center cursor-pointer group">
-                                        <input type="checkbox" checked={showDeleted} onChange={e => setShowDeleted(e.target.checked)} className="sr-only peer" />
+                                        <input id="showDeleted" name="showDeleted" type="checkbox" checked={showDeleted} onChange={e => setShowDeleted(e.target.checked)} className="sr-only peer" />
                                         <div className="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500/50"></div>
                                         <span className="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-red-400 transition-colors">Bajas Sistema</span>
                                     </label>
                                 </div>
 
-                                <select 
+                                <select id="roleFilter" name="roleFilter" 
                                     value={roleFilter} 
                                     onChange={e => setRoleFilter(e.target.value)}
                                     className="bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[10px] font-black text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer"
@@ -172,48 +172,48 @@ export default function Index({ users, filters }) {
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nombres</label>
-                                            <input type="text" value={form.data.nombres} onChange={e => form.setData('nombres', e.target.value)} required 
+                                            <input id="nombres" name="nombres" type="text" value={form.data.nombres} onChange={e => form.setData('nombres', e.target.value)} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all"/>
                                             {form.errors.nombres && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.nombres}</span>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Apellidos</label>
-                                            <input type="text" value={form.data.apellidos} onChange={e => form.setData('apellidos', e.target.value)} required 
+                                            <input id="apellidos" name="apellidos" type="text" value={form.data.apellidos} onChange={e => form.setData('apellidos', e.target.value)} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all"/>
                                             {form.errors.apellidos && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.apellidos}</span>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Corporativo</label>
-                                            <input type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value)} required 
+                                            <input id="email" name="email" type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value)} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
                                             {form.errors.email && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.email}</span>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Contraseña</label>
-                                            <input type="password" value={form.data.password} onChange={e => form.setData('password', e.target.value)} required={!editingId} 
+                                            <input id="password" name="password" type="password" value={form.data.password} onChange={e => form.setData('password', e.target.value)} required={!editingId} 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all"/>
                                             {form.errors.password && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.password}</span>}
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Rol Sistema</label>
-                                            <select value={form.data.rol} onChange={e => form.setData('rol', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
+                                            <select id="rol" name="rol" value={form.data.rol} onChange={e => form.setData('rol', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
                                                 <option value="tecnico">TÉCNICO OPERATIVO</option>
                                                 <option value="gestor">GESTOR ADMINISTRATIVO</option>
                                             </select>
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Matrícula ID</label>
-                                            <input type="text" value={form.data.matricula} onChange={e => form.setData('matricula', e.target.value)} required 
+                                            <input id="matricula" name="matricula" type="text" value={form.data.matricula} onChange={e => form.setData('matricula', e.target.value)} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Teléfono Enlace</label>
-                                            <input type="text" value={form.data.telefono} onChange={e => form.setData('telefono', e.target.value)} required 
+                                            <input id="telefono" name="telefono" type="text" value={form.data.telefono} onChange={e => form.setData('telefono', e.target.value)} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Estado</label>
-                                            <select value={form.data.estado} onChange={e => form.setData('estado', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
+                                            <select id="estado" name="estado" value={form.data.estado} onChange={e => form.setData('estado', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
                                                 <option value="activo">ACTIVO</option>
                                                 <option value="inactivo">INACTIVO</option>
                                             </select>

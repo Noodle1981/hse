@@ -155,19 +155,19 @@ export default function Builder({ checklist, categories }) {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Título de Matriz</span>
-                                        <input type="text" value={form.data.title} onChange={e => form.setData('title', e.target.value)} required 
+                                        <input id="title" name="title" type="text" value={form.data.title} onChange={e => form.setData('title', e.target.value)} required 
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all uppercase"/>
                                     </div>
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Código Registral</span>
-                                        <input type="text" value={form.data.registry_code} onChange={e => form.setData('registry_code', e.target.value)} 
+                                        <input id="registry_code" name="registry_code" type="text" value={form.data.registry_code} onChange={e => form.setData('registry_code', e.target.value)} 
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all uppercase"/>
                                     </div>
                                 </div>
 
                                 <div className="relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Alcance / Descripción</span>
-                                    <textarea value={form.data.description} onChange={e => form.setData('description', e.target.value)} rows="2"
+                                    <textarea id="description" name="description" value={form.data.description} onChange={e => form.setData('description', e.target.value)} rows="2"
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all uppercase"></textarea>
                                 </div>
                             </div>
@@ -176,7 +176,7 @@ export default function Builder({ checklist, categories }) {
                                 <div className="bg-white/5 rounded-[2.5rem] p-8 border border-white/5 space-y-6">
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#16162a] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Clasificación Principal</span>
-                                        <select value={form.data.category_id} onChange={e => form.setData('category_id', e.target.value)} 
+                                        <select id="category_id" name="category_id" value={form.data.category_id} onChange={e => form.setData('category_id', e.target.value)} 
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all [color-scheme:dark] italic uppercase">
                                             <option value="">SELECCIONE CATEGORÍA...</option>
                                             {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
@@ -184,7 +184,7 @@ export default function Builder({ checklist, categories }) {
                                     </div>
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#16162a] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Sub-Estrategia</span>
-                                        <select value={form.data.subcategory_id} onChange={e => form.setData('subcategory_id', e.target.value)} 
+                                        <select id="subcategory_id" name="subcategory_id" value={form.data.subcategory_id} onChange={e => form.setData('subcategory_id', e.target.value)} 
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all [color-scheme:dark] italic uppercase">
                                             <option value="">SELECCIONE SUBCATEGORÍA...</option>
                                             {availableSubcategories.map(sub => <option key={sub.id} value={sub.id}>{sub.name}</option>)}
@@ -193,7 +193,7 @@ export default function Builder({ checklist, categories }) {
 
                                     <div className="flex items-center gap-4 bg-black/20 px-6 py-4 rounded-2xl border border-white/5">
                                         <label className="inline-flex items-center cursor-pointer group">
-                                            <input type="checkbox" checked={form.data.is_active} onChange={e => form.setData('is_active', e.target.checked)} className="sr-only peer" />
+                                            <input id="is_active" name="is_active" type="checkbox" checked={form.data.is_active} onChange={e => form.setData('is_active', e.target.checked)} className="sr-only peer" />
                                             <div className="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500/50"></div>
                                             <span className="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-emerald-400 transition-colors">Estado Matrix</span>
                                         </label>
@@ -242,7 +242,7 @@ export default function Builder({ checklist, categories }) {
                                     <div className="bg-white/5 px-8 py-6 flex items-center justify-between">
                                         <div className="flex-1 flex gap-6 items-center">
                                             <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center text-[11px] font-black text-orange-400 italic border border-orange-500/20">{sectionIndex + 1}</div>
-                                            <input 
+                                            <input id="field_7" name="field_7" 
                                                 type="text" 
                                                 value={section.title} 
                                                 onChange={e => updateSection(sectionIndex, 'title', e.target.value)}
@@ -333,14 +333,14 @@ function QuestionItem({ index, question, update, remove, move }) {
                         <div className="w-8 h-8 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[10px] font-black text-orange-400 italic">#{index + 1}</div>
                         <div className="flex-1 relative group">
                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[7px] font-black text-orange-400/40 uppercase tracking-[0.3em] italic z-10">Enunciado / Reactivo</span>
-                            <input type="text" value={question.label} onChange={e => update(index, 'label', e.target.value)} placeholder="¿QUÉ SE DEBE VERIFICAR?" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:ring-1 focus:ring-orange-500 transition-all uppercase placeholder-white/5"/>
+                            <input id="field_6" name="field_6" type="text" value={question.label} onChange={e => update(index, 'label', e.target.value)} placeholder="¿QUÉ SE DEBE VERIFICAR?" className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:ring-1 focus:ring-orange-500 transition-all uppercase placeholder-white/5"/>
                         </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="relative group">
                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[7px] font-black text-orange-400/40 uppercase tracking-[0.3em] italic z-10">Tipo de Respuesta</span>
-                            <select value={question.type} onChange={e => update(index, 'type', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-1 focus:ring-orange-500 transition-all [color-scheme:dark] italic uppercase">
+                            <select id="field_5" name="field_5" value={question.type} onChange={e => update(index, 'type', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-1 focus:ring-orange-500 transition-all [color-scheme:dark] italic uppercase">
                                 <option value="text">Texto Corto</option>
                                 <option value="textarea">Texto Extendido</option>
                                 <option value="select">Lista Desplegable</option>
@@ -352,11 +352,11 @@ function QuestionItem({ index, question, update, remove, move }) {
                         </div>
                         <div className="relative group">
                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[7px] font-black text-orange-400/40 uppercase tracking-[0.3em] italic z-10">Ayuda al Operador</span>
-                            <input type="text" value={question.help_text} onChange={e => update(index, 'help_text', e.target.value)} placeholder="GUÍA RÁPIDA..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[10px] font-bold text-white/60 focus:ring-1 focus:ring-orange-500 transition-all uppercase placeholder-white/5"/>
+                            <input id="field_4" name="field_4" type="text" value={question.help_text} onChange={e => update(index, 'help_text', e.target.value)} placeholder="GUÍA RÁPIDA..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[10px] font-bold text-white/60 focus:ring-1 focus:ring-orange-500 transition-all uppercase placeholder-white/5"/>
                         </div>
                         <div className="flex items-center gap-4 bg-black/20 px-6 py-2 rounded-xl border border-white/5">
                             <label className="inline-flex items-center cursor-pointer group">
-                                <input type="checkbox" checked={question.is_required} onChange={e => update(index, 'is_required', e.target.checked)} className="sr-only peer" />
+                                <input id="field_3" name="field_3" type="checkbox" checked={question.is_required} onChange={e => update(index, 'is_required', e.target.checked)} className="sr-only peer" />
                                 <div className="relative w-8 h-4 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[1px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-orange-500/50"></div>
                                 <span className="ms-3 text-[8px] font-black text-white/20 uppercase tracking-widest italic group-hover:text-orange-400 transition-colors">Obligatorio</span>
                             </label>
@@ -370,7 +370,7 @@ function QuestionItem({ index, question, update, remove, move }) {
                         <div className="relative group">
                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[7px] font-black text-emerald-400 uppercase tracking-[0.3em] italic z-10">Inyectar Opción</span>
                             <div className="flex gap-2">
-                                <input type="text" value={optionInput} onChange={e => setOptionInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addOption())} className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-1 focus:ring-emerald-500 transition-all uppercase outline-none"/>
+                                <input id="optionInput" name="optionInput" type="text" value={optionInput} onChange={e => setOptionInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addOption())} className="flex-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-1 focus:ring-emerald-500 transition-all uppercase outline-none"/>
                                 <button type="button" onClick={addOption} className="w-10 h-10 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-xl flex items-center justify-center hover:bg-emerald-500 hover:text-white transition-all">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeWidth="3"/></svg>
                                 </button>
@@ -395,11 +395,11 @@ function QuestionItem({ index, question, update, remove, move }) {
                     <div className="lg:w-80 grid grid-cols-2 gap-4 pt-2">
                          <div className="relative group">
                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[7px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Mínimo</span>
-                            <input type="number" value={question.min_value || ''} onChange={e => update(index, 'min_value', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none"/>
+                            <input id="field_2" name="field_2" type="number" value={question.min_value || ''} onChange={e => update(index, 'min_value', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none"/>
                         </div>
                         <div className="relative group">
                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[7px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Máximo</span>
-                            <input type="number" value={question.max_value || ''} onChange={e => update(index, 'max_value', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none"/>
+                            <input id="field_1" name="field_1" type="number" value={question.max_value || ''} onChange={e => update(index, 'max_value', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none"/>
                         </div>
                     </div>
                 )}

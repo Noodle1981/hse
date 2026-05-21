@@ -71,7 +71,7 @@ export default function Index({
                             <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1 mb-1 block">Empresa Mandante</label>
-                                    <select 
+                                    <select id="field_4" name="field_4" 
                                         value={filters.company_id}
                                         onChange={e => updateFilter({ company_id: e.target.value, sede_id: '' })}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all"
@@ -81,7 +81,7 @@ export default function Index({
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1 mb-1 block">Activo / Sede Operativa</label>
-                                    <select 
+                                    <select id="field_3" name="field_3" 
                                         value={filters.sede_id}
                                         onChange={e => updateFilter({ sede_id: e.target.value })}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all"
@@ -97,7 +97,7 @@ export default function Index({
                                 <div className="flex items-center gap-4 bg-indigo-600/10 p-3 rounded-2xl border border-indigo-500/20">
                                     <div>
                                         <label className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic block mb-1">Inicio</label>
-                                        <input 
+                                        <input id="field_2" name="field_2" 
                                             type="month" 
                                             value={filters.contract_start}
                                             onChange={e => updateFilter({ contract_start: e.target.value })}
@@ -107,7 +107,7 @@ export default function Index({
                                     <div className="w-px h-8 bg-indigo-500/20"></div>
                                     <div>
                                         <label className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic block mb-1">Duración</label>
-                                        <select 
+                                        <select id="field_1" name="field_1" 
                                             value={filters.duration}
                                             onChange={e => updateFilter({ duration: e.target.value })}
                                             className="bg-black/40 border-none rounded-xl px-4 py-2 text-xs font-bold text-white"

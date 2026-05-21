@@ -62,7 +62,7 @@ export default function Index({ templates, history, empresas = [], sedes = [], f
                                     <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-white/20 group-focus-within:text-indigo-400">
                                         <svg className="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                     </div>
-                                    <input 
+                                    <input id="search" name="search" 
                                         type="text" 
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
@@ -76,7 +76,7 @@ export default function Index({ templates, history, empresas = [], sedes = [], f
                             <div className="md:col-span-4 grid grid-cols-2 gap-4">
                                 <div className="relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Empresa</span>
-                                    <select 
+                                    <select id="empresaFilter" name="empresaFilter" 
                                         value={empresaFilter}
                                         onChange={e => { setEmpresaFilter(e.target.value); setSedeFilter(''); }}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-[10px] font-black text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase"
@@ -87,7 +87,7 @@ export default function Index({ templates, history, empresas = [], sedes = [], f
                                 </div>
                                 <div className="relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Sede</span>
-                                    <select 
+                                    <select id="sedeFilter" name="sedeFilter" 
                                         value={sedeFilter}
                                         onChange={e => setSedeFilter(e.target.value)}
                                         disabled={!empresaFilter}

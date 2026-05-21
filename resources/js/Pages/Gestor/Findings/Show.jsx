@@ -175,7 +175,7 @@ export default function Show({ finding }) {
                         <form onSubmit={submitUpdate} className="space-y-8">
                             <div className="relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-400 uppercase tracking-[0.3em] italic z-10">Nuevo Estado Operativo</span>
-                                <select 
+                                <select id="field_2" name="field_2" 
                                     value={data.estado_nuevo}
                                     onChange={e => setData('estado_nuevo', e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500 transition-all [color-scheme:dark] italic uppercase"
@@ -189,7 +189,7 @@ export default function Show({ finding }) {
 
                             <div className="relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-400 uppercase tracking-[0.3em] italic z-10">Comentario de Acción</span>
-                                <textarea 
+                                <textarea id="field_1" name="field_1" 
                                     value={data.comentario}
                                     onChange={e => setData('comentario', e.target.value)}
                                     rows="4"

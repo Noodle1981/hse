@@ -68,7 +68,7 @@ export default function Create({ sedes, visit_id }) {
                                 <div className="space-y-8">
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Sede o Instalación</span>
-                                        <select 
+                                        <select id="field_8" name="field_8" 
                                             value={data.sede_id}
                                             onChange={e => setData('sede_id', e.target.value)}
                                             disabled={!!visit_id}
@@ -84,7 +84,7 @@ export default function Create({ sedes, visit_id }) {
 
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Título de la Desviación</span>
-                                        <input 
+                                        <input id="field_7" name="field_7" 
                                             type="text" 
                                             value={data.titulo}
                                             onChange={e => setData('titulo', e.target.value)}
@@ -97,7 +97,7 @@ export default function Create({ sedes, visit_id }) {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Ubicación Específica (Tag)</span>
-                                            <input 
+                                            <input id="field_6" name="field_6" 
                                                 type="text" 
                                                 value={data.ubicacion_especifica}
                                                 onChange={e => setData('ubicacion_especifica', e.target.value)}
@@ -107,7 +107,7 @@ export default function Create({ sedes, visit_id }) {
                                         </div>
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Fecha de Detección</span>
-                                            <input 
+                                            <input id="field_5" name="field_5" 
                                                 type="date" 
                                                 defaultValue={new Date().toISOString().split('T')[0]}
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark]"
@@ -135,7 +135,7 @@ export default function Create({ sedes, visit_id }) {
                                 <div className="space-y-8">
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Descripción Técnica del Hallazgo</span>
-                                        <textarea 
+                                        <textarea id="field_4" name="field_4" 
                                             value={data.descripcion}
                                             onChange={e => setData('descripcion', e.target.value)}
                                             rows="5"
@@ -148,7 +148,7 @@ export default function Create({ sedes, visit_id }) {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Nivel de Criticidad</span>
-                                            <select 
+                                            <select id="field_3" name="field_3" 
                                                 value={data.criticidad}
                                                 onChange={e => setData('criticidad', e.target.value)}
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-sm font-black text-white focus:ring-2 focus:ring-red-500 transition-all [color-scheme:dark] italic uppercase"
@@ -161,7 +161,7 @@ export default function Create({ sedes, visit_id }) {
                                         </div>
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Plazo Límite de Corrección</span>
-                                            <input 
+                                            <input id="field_2" name="field_2" 
                                                 type="date" 
                                                 value={data.plazo_correccion}
                                                 onChange={e => setData('plazo_correccion', e.target.value)}
@@ -191,7 +191,7 @@ export default function Create({ sedes, visit_id }) {
                             <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[3rem] border border-white/5 p-10 shadow-2xl space-y-10 animate-fade-in">
                                 <div className="space-y-8">
                                     <div className="text-center p-12 border-2 border-dashed border-white/5 rounded-[3rem] bg-black/20 hover:border-red-500/30 transition-all group relative cursor-pointer">
-                                        <input 
+                                        <input id="field_1" name="field_1" 
                                             type="file" 
                                             multiple 
                                             onChange={handleFileChange}

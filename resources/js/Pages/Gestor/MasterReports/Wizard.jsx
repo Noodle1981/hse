@@ -221,7 +221,7 @@ export default function Wizard({ auth, report, periodData }) {
 
                         <div className="space-y-4">
                             <label className="block text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.4em] italic mb-3 px-8">Observaciones Técnicas de Gestión de Campo</label>
-                            <textarea 
+                            <textarea id="field_4" name="field_4" 
                                 value={data.observaciones_visitas}
                                 onChange={e => setData('observaciones_visitas', e.target.value)}
                                 rows={5}
@@ -260,7 +260,7 @@ export default function Wizard({ auth, report, periodData }) {
 
                         <div className="space-y-4">
                             <label className="block text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.4em] italic mb-3 px-8">Conclusiones sobre Inspecciones Realizadas</label>
-                            <textarea 
+                            <textarea id="field_3" name="field_3" 
                                 value={data.observaciones_checklists}
                                 onChange={e => setData('observaciones_checklists', e.target.value)}
                                 rows={4}
@@ -315,7 +315,7 @@ export default function Wizard({ auth, report, periodData }) {
 
                         <div className="space-y-4">
                             <label className="block text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.4em] italic mb-3 px-8">Comentarios de Seguridad y Salud Ocupacional</label>
-                            <textarea 
+                            <textarea id="field_2" name="field_2" 
                                 value={data.observaciones_hallazgos_incidentes}
                                 onChange={e => setData('observaciones_hallazgos_incidentes', e.target.value)}
                                 rows={4}
@@ -335,7 +335,7 @@ export default function Wizard({ auth, report, periodData }) {
                                 <p className="text-[10px] font-black text-ep-primary uppercase tracking-[0.5em] mt-2 italic">Resumen Ejecutivo de Auditoría</p>
                             </div>
                         </div>
-                        <textarea 
+                        <textarea id="field_1" name="field_1" 
                             value={data.resumen_ejecutivo}
                             onChange={e => setData('resumen_ejecutivo', e.target.value)}
                             rows={10}

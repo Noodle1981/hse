@@ -174,7 +174,7 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                             {editingCell === cellKey && (
                                                 <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 w-48 bg-ep-dark border border-ep-primary/30 p-4 rounded-2xl shadow-2xl z-[100] animate-fade-in">
                                                     <label className="block text-[8px] font-black text-white/40 uppercase italic mb-2 tracking-widest">Programar Fecha</label>
-                                                    <input 
+                                                    <input id="editingDate" name="editingDate" 
                                                         type="date" 
                                                         value={editingDate}
                                                         onChange={e => setEditingDate(e.target.value)}

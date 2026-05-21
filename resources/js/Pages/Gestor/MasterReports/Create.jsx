@@ -46,7 +46,7 @@ export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial
                                 {/* Sede */}
                                 <div className="space-y-3">
                                     <label className="block text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic px-2">Sede / Cliente Operativo</label>
-                                    <select 
+                                    <select id="field_5" name="field_5" 
                                         value={data.sede_id}
                                         onChange={e => setData('sede_id', e.target.value)}
                                         className="w-full bg-black/40 border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all"
@@ -62,7 +62,7 @@ export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial
                                 {/* Técnico */}
                                 <div className="space-y-3">
                                     <label className="block text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic px-2">Especialista Asignado</label>
-                                    <select 
+                                    <select id="field_4" name="field_4" 
                                         value={data.user_id}
                                         onChange={e => setData('user_id', e.target.value)}
                                         className="w-full bg-black/40 border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all"
@@ -78,7 +78,7 @@ export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial
                                 {/* Título */}
                                 <div className="space-y-3 md:col-span-2">
                                     <label className="block text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic px-2">Título de Identificación</label>
-                                    <input 
+                                    <input id="field_3" name="field_3" 
                                         type="text"
                                         value={data.titulo}
                                         onChange={e => setData('titulo', e.target.value)}
@@ -91,7 +91,7 @@ export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial
                                 {/* Periodo */}
                                 <div className="space-y-3">
                                     <label className="block text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic px-2">Periodo de Auditoría</label>
-                                    <input 
+                                    <input id="field_2" name="field_2" 
                                         type="month"
                                         value={data.periodo}
                                         onChange={e => setData('periodo', e.target.value)}
@@ -103,7 +103,7 @@ export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial
                                 {/* Frecuencia */}
                                 <div className="space-y-3">
                                     <label className="block text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic px-2">Frecuencia de Informe</label>
-                                    <select 
+                                    <select id="field_1" name="field_1" 
                                         value={data.frecuencia}
                                         onChange={e => setData('frecuencia', e.target.value)}
                                         className="w-full bg-black/40 border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all"

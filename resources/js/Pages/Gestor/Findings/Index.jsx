@@ -128,7 +128,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
                                 <div className="md:col-span-6 relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10 transition-colors group-focus-within:text-white">Buscador Forense</span>
-                                    <input type="text" 
+                                    <input id="search" name="search" type="text" 
                                            value={search}
                                            onChange={e => setSearch(e.target.value)}
                                            placeholder="TITULO, DESCRIPCIÓN O UBICACIÓN..."
@@ -137,7 +137,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
 
                                 <div className="md:col-span-3 relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10">Estado Operativo</span>
-                                    <select value={status} onChange={e => setStatus(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
+                                    <select id="status" name="status" value={status} onChange={e => setStatus(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
                                         <option value="all">TODOS LOS ESTADOS</option>
                                         <option value="pendiente">PENDIENTE</option>
                                         <option value="en_proceso">EN PROCESO</option>
@@ -149,7 +149,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
 
                                 <div className="md:col-span-3 relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Filtro Criticidad</span>
-                                    <select value={criticidad} onChange={e => setCriticidad(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
+                                    <select id="criticidad" name="criticidad" value={criticidad} onChange={e => setCriticidad(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase">
                                         <option value="all">TODAS LAS CRITICIDADES</option>
                                         <option value="bajo">BAJO RIESGO</option>
                                         <option value="medio">RIESGO MEDIO</option>
@@ -162,7 +162,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                                 <div className="relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Sede Operativa</span>
-                                    <select value={sedeId} onChange={e => setSedeId(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase tracking-widest cursor-pointer">
+                                    <select id="sedeId" name="sedeId" value={sedeId} onChange={e => setSedeId(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase tracking-widest cursor-pointer">
                                         <option value="all">TODAS LAS SEDES</option>
                                         {sedes.map(sede => (
                                             <option key={sede.id} value={sede.id}>{sede.nombre_sede}</option>
@@ -171,7 +171,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                                 </div>
                                 <div className="relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Técnico Auditor</span>
-                                    <select value={userId} onChange={e => setUserId(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase tracking-widest cursor-pointer">
+                                    <select id="userId" name="userId" value={userId} onChange={e => setUserId(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase tracking-widest cursor-pointer">
                                         <option value="all">TODOS LOS TÉCNICOS</option>
                                         {tecnicos.map(tec => (
                                             <option key={tec.id} value={tec.id}>{tec.nombres}</option>
@@ -180,7 +180,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                                 </div>
                                 <div className="relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Rango Temporal</span>
-                                    <select value={vencidos} onChange={e => setVencidos(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase tracking-widest cursor-pointer">
+                                    <select id="vencidos" name="vencidos" value={vencidos} onChange={e => setVencidos(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[11px] font-black text-white/60 focus:ring-2 focus:ring-white/20 transition-all [color-scheme:dark] italic uppercase tracking-widest cursor-pointer">
                                         <option value="all">VENCIMIENTO (TODOS)</option>
                                         <option value="si">SOLO VENCIDOS</option>
                                         <option value="no">DENTRO DE PLAZO</option>

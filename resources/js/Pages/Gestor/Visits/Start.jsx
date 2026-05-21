@@ -43,7 +43,7 @@ export default function Start({ sedes }) {
                             <div className="space-y-6">
                                 <div className="relative group">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Buscador de Objetivo</span>
-                                    <input 
+                                    <input id="searchTerm" name="searchTerm" 
                                         type="text" 
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}

@@ -58,7 +58,7 @@ export default function Index({ visits, filters, activeVisit }) {
                             <div className="flex-1 flex flex-col lg:flex-row gap-4 w-full text-white">
                                 <div className="relative group flex-1">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Explorador de Sedes</span>
-                                    <input 
+                                    <input id="search" name="search" 
                                         type="text" 
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
@@ -68,7 +68,7 @@ export default function Index({ visits, filters, activeVisit }) {
                                 </div>
                                 <div className="relative group lg:w-48">
                                     <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Filtro de Estado</span>
-                                    <select value={status} onChange={e => setStatus(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all [color-scheme:dark] italic uppercase">
+                                    <select id="status" name="status" value={status} onChange={e => setStatus(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all [color-scheme:dark] italic uppercase">
                                         <option value="all">Ver Todas</option>
                                         <option value="completed">Completadas</option>
                                         <option value="signed">Certificadas</option>

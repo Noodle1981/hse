@@ -137,7 +137,7 @@ export default function Locations({ empresa, locations, provincias, availableUse
 
                             <div className="w-full lg:w-1/3 relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-emerald-400 uppercase tracking-[0.3em] italic z-10">Escaneo de Sedes</span>
-                                <input 
+                                <input id="search" name="search" 
                                     type="text" 
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
@@ -148,7 +148,7 @@ export default function Locations({ empresa, locations, provincias, availableUse
 
                             <div className="flex items-center gap-6">
                                 <label className="inline-flex items-center cursor-pointer group">
-                                    <input type="checkbox" checked={showDeleted} onChange={e => setShowDeleted(e.target.checked)} className="sr-only peer" />
+                                    <input id="showDeleted" name="showDeleted" type="checkbox" checked={showDeleted} onChange={e => setShowDeleted(e.target.checked)} className="sr-only peer" />
                                     <div className="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500/50"></div>
                                     <span className="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-red-400 transition-colors">Bajas Históricas</span>
                                 </label>
@@ -246,34 +246,34 @@ export default function Locations({ empresa, locations, provincias, availableUse
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nombre de Sede</label>
-                                    <input type="text" value={form.data.nombre_sede} onChange={e => form.setData('nombre_sede', e.target.value)} required 
+                                    <input id="nombre_sede" name="nombre_sede" type="text" value={form.data.nombre_sede} onChange={e => form.setData('nombre_sede', e.target.value)} required 
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Dirección</label>
-                                    <input type="text" value={form.data.direccion} onChange={e => form.setData('direccion', e.target.value)}
+                                    <input id="direccion" name="direccion" type="text" value={form.data.direccion} onChange={e => form.setData('direccion', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Localidad</label>
-                                    <input type="text" value={form.data.localidad} onChange={e => form.setData('localidad', e.target.value)}
+                                    <input id="localidad" name="localidad" type="text" value={form.data.localidad} onChange={e => form.setData('localidad', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Provincia</label>
-                                    <select value={form.data.provincia_id} onChange={e => form.setData('provincia_id', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark] italic uppercase">
+                                    <select id="provincia_id" name="provincia_id" value={form.data.provincia_id} onChange={e => form.setData('provincia_id', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark] italic uppercase">
                                         <option value="">SELECCIONE PROVINCIA...</option>
                                         {provincias.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Teléfono Sede</label>
-                                    <input type="text" value={form.data.telefono} onChange={e => form.setData('telefono', e.target.value)}
+                                    <input id="telefono" name="telefono" type="text" value={form.data.telefono} onChange={e => form.setData('telefono', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Sede</label>
-                                    <input type="email" value={form.data.correo} onChange={e => form.setData('correo', e.target.value)}
+                                    <input id="correo" name="correo" type="email" value={form.data.correo} onChange={e => form.setData('correo', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                             </div>
@@ -284,20 +284,20 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                     {/* Responsable 1 */}
                                     <div className="space-y-4">
                                         <label className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 italic">Primer Responsable</label>
-                                        <input type="text" value={form.data.responsable_1_nombre} onChange={e => form.setData('responsable_1_nombre', e.target.value)} placeholder="NOMBRE COMPLETO" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
-                                        <input type="text" value={form.data.responsable_1_cargo} onChange={e => form.setData('responsable_1_cargo', e.target.value)} placeholder="CARGO / FUNCIÓN" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
+                                        <input id="responsable_1_nombre" name="responsable_1_nombre" type="text" value={form.data.responsable_1_nombre} onChange={e => form.setData('responsable_1_nombre', e.target.value)} placeholder="NOMBRE COMPLETO" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
+                                        <input id="responsable_1_cargo" name="responsable_1_cargo" type="text" value={form.data.responsable_1_cargo} onChange={e => form.setData('responsable_1_cargo', e.target.value)} placeholder="CARGO / FUNCIÓN" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
                                     </div>
                                     {/* Responsable 2 */}
                                     <div className="space-y-4">
                                         <label className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 italic">Segundo Responsable</label>
-                                        <input type="text" value={form.data.responsable_2_nombre} onChange={e => form.setData('responsable_2_nombre', e.target.value)} placeholder="NOMBRE COMPLETO" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
-                                        <input type="text" value={form.data.responsable_2_cargo} onChange={e => form.setData('responsable_2_cargo', e.target.value)} placeholder="CARGO / FUNCIÓN" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
+                                        <input id="responsable_2_nombre" name="responsable_2_nombre" type="text" value={form.data.responsable_2_nombre} onChange={e => form.setData('responsable_2_nombre', e.target.value)} placeholder="NOMBRE COMPLETO" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
+                                        <input id="responsable_2_cargo" name="responsable_2_cargo" type="text" value={form.data.responsable_2_cargo} onChange={e => form.setData('responsable_2_cargo', e.target.value)} placeholder="CARGO / FUNCIÓN" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
                                     </div>
                                     {/* Responsable 3 */}
                                     <div className="space-y-4">
                                         <label className="text-[8px] font-black text-white/20 uppercase tracking-[0.3em] ml-2 italic">Tercer Responsable</label>
-                                        <input type="text" value={form.data.responsable_3_nombre} onChange={e => form.setData('responsable_3_nombre', e.target.value)} placeholder="NOMBRE COMPLETO" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
-                                        <input type="text" value={form.data.responsable_3_cargo} onChange={e => form.setData('responsable_3_cargo', e.target.value)} placeholder="CARGO / FUNCIÓN" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
+                                        <input id="responsable_3_nombre" name="responsable_3_nombre" type="text" value={form.data.responsable_3_nombre} onChange={e => form.setData('responsable_3_nombre', e.target.value)} placeholder="NOMBRE COMPLETO" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
+                                        <input id="responsable_3_cargo" name="responsable_3_cargo" type="text" value={form.data.responsable_3_cargo} onChange={e => form.setData('responsable_3_cargo', e.target.value)} placeholder="CARGO / FUNCIÓN" className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-xs text-white"/>
                                     </div>
                                 </div>
                             </div>

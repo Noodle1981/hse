@@ -73,7 +73,7 @@ export default function History({ auth = {}, visits = { data: [] }, filters = {}
                                     <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-white/10 group-focus-within:text-ep-primary transition-colors">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="2.5"/></svg>
                                     </div>
-                                    <input 
+                                    <input id="search" name="search" 
                                         type="text" 
                                         placeholder="BUSCAR POR SEDE, EMPRESA O CÓDIGO..."
                                         value={search}
@@ -86,7 +86,7 @@ export default function History({ auth = {}, visits = { data: [] }, filters = {}
 
                             <div className="w-full xl:w-64 space-y-3">
                                 <label className="text-[9px] font-black text-indigo-400 uppercase italic tracking-[0.4em] ml-1 block opacity-60">Estado Operativo</label>
-                                <select 
+                                <select id="status" name="status" 
                                     value={status}
                                     onChange={e => { setStatus(e.target.value); updateFilters({ status: e.target.value }); }}
                                     className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white italic focus:ring-ep-primary/50 transition-all uppercase [color-scheme:dark]"

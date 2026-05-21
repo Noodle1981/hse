@@ -132,25 +132,25 @@ export default function Subcategories({ category, subcategories }) {
                             <div className="grid grid-cols-2 gap-6">
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Código</label>
-                                    <input type="text" value={form.data.code} onChange={e => form.setData('code', e.target.value)} required 
+                                    <input id="code" name="code" type="text" value={form.data.code} onChange={e => form.setData('code', e.target.value)} required 
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nombre</label>
-                                    <input type="text" value={form.data.name} onChange={e => form.setData('name', e.target.value)} required 
+                                    <input id="name" name="name" type="text" value={form.data.name} onChange={e => form.setData('name', e.target.value)} required 
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"/>
                                 </div>
                             </div>
                             
                             <div className="space-y-2">
                                 <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Descripción / Función</label>
-                                <textarea value={form.data.description} onChange={e => form.setData('description', e.target.value)} rows="4"
+                                <textarea id="description" name="description" value={form.data.description} onChange={e => form.setData('description', e.target.value)} rows="4"
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"></textarea>
                             </div>
 
                             <div className="flex items-center gap-4 bg-black/20 px-6 py-4 rounded-2xl border border-white/5">
                                 <label className="inline-flex items-center cursor-pointer group">
-                                    <input type="checkbox" checked={form.data.is_active} onChange={e => form.setData('is_active', e.target.checked)} className="sr-only peer" />
+                                    <input id="is_active" name="is_active" type="checkbox" checked={form.data.is_active} onChange={e => form.setData('is_active', e.target.checked)} className="sr-only peer" />
                                     <div className="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500/50"></div>
                                     <span className="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-emerald-400 transition-colors">Estado Operativo</span>
                                 </label>

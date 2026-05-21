@@ -28,14 +28,14 @@ export default function Dashboard({ auth, kpis, recentActivity, rankings, filter
                         </div>
 
                         <div className="flex items-center gap-4 bg-white/5 p-2 rounded-2xl border border-white/5 backdrop-blur-md">
-                            <input 
+                            <input id="field_2" name="field_2" 
                                 type="date" 
                                 value={filters.from}
                                 onChange={e => updateDateFilter(e.target.value, filters.to)}
                                 className="bg-transparent border-none text-xs font-black text-white italic focus:ring-0 [color-scheme:dark]"
                             />
                             <span className="text-white/10">|</span>
-                            <input 
+                            <input id="field_1" name="field_1" 
                                 type="date" 
                                 value={filters.to}
                                 onChange={e => updateDateFilter(filters.from, e.target.value)}

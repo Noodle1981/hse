@@ -35,14 +35,14 @@ export default function Dashboard({ auth, kpis, efficiency, recentEvents, compan
                                 <span className="text-[10px] font-black text-white/60 uppercase tracking-widest italic leading-none">Global Link Active</span>
                             </div>
                             <div className="flex items-center gap-4">
-                                <input 
+                                <input id="field_2" name="field_2" 
                                     type="date" 
                                     value={filters.from}
                                     onChange={e => updateDateFilter(e.target.value, filters.to)}
                                     className="bg-black/40 border-none rounded-xl text-[10px] font-black text-white italic focus:ring-ep-primary/50 transition-all [color-scheme:dark] px-4 py-2"
                                 />
                                 <span className="text-white/10">/</span>
-                                <input 
+                                <input id="field_1" name="field_1" 
                                     type="date" 
                                     value={filters.to}
                                     onChange={e => updateDateFilter(filters.from, e.target.value)}

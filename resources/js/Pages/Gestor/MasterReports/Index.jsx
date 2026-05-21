@@ -63,7 +63,7 @@ export default function Index({ auth, reports, filters }) {
                                 <div className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-ep-primary transition-colors">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeWidth="3"/></svg>
                                 </div>
-                                <input
+                                <input id="field_2" name="field_2"
                                     type="text"
                                     placeholder="FILTRAR POR CLIENTE, TITULO O REFERENCIA..."
                                     className="w-full bg-black/40 border-white/10 rounded-2xl text-white text-[11px] font-black uppercase italic tracking-widest focus:ring-ep-primary focus:border-ep-primary transition-all px-16 py-5"
@@ -74,7 +74,7 @@ export default function Index({ auth, reports, filters }) {
                             
                             <div className="flex items-center gap-4 bg-black/20 p-2 rounded-2xl border border-white/5">
                                 <span className="text-[9px] font-black text-white/20 uppercase tracking-widest pl-4 pr-2">ESTADOS</span>
-                                <select
+                                <select id="field_1" name="field_1"
                                     className="bg-ep-dark border-none rounded-xl text-white text-[10px] font-black uppercase italic tracking-widest focus:ring-0 px-6 py-3 cursor-pointer"
                                     value={data.status}
                                     onChange={e => {

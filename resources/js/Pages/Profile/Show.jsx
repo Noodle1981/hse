@@ -162,7 +162,7 @@ export default function Show() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-[#F69239] uppercase tracking-[0.3em] italic z-10">Nombres</span>
-                                                <input 
+                                                <input id="field_6" name="field_6" 
                                                     type="text" 
                                                     value={profileForm.data.nombres}
                                                     onChange={e => profileForm.setData('nombres', e.target.value)}
@@ -172,7 +172,7 @@ export default function Show() {
                                             </div>
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-[#F69239] uppercase tracking-[0.3em] italic z-10">Apellidos</span>
-                                                <input 
+                                                <input id="field_5" name="field_5" 
                                                     type="text" 
                                                     value={profileForm.data.apellidos}
                                                     onChange={e => profileForm.setData('apellidos', e.target.value)}
@@ -183,7 +183,7 @@ export default function Show() {
                                         </div>
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-[#F69239] uppercase tracking-[0.3em] italic z-10">Línea de Contacto (Teléfono)</span>
-                                            <input 
+                                            <input id="field_4" name="field_4" 
                                                 type="text" 
                                                 value={profileForm.data.telefono}
                                                 onChange={e => profileForm.setData('telefono', e.target.value)}
@@ -225,7 +225,7 @@ export default function Show() {
                                     <form onSubmit={updatePassword} className="space-y-8">
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Contraseña Actual</span>
-                                            <input 
+                                            <input id="field_3" name="field_3" 
                                                 type="password" 
                                                 value={passwordForm.data.current_password}
                                                 onChange={e => passwordForm.setData('current_password', e.target.value)}
@@ -236,7 +236,7 @@ export default function Show() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Nueva Clave</span>
-                                                <input 
+                                                <input id="field_2" name="field_2" 
                                                     type="password" 
                                                     value={passwordForm.data.new_password}
                                                     onChange={e => passwordForm.setData('new_password', e.target.value)}
@@ -246,7 +246,7 @@ export default function Show() {
                                             </div>
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/40 uppercase tracking-[0.3em] italic z-10">Confirmación</span>
-                                                <input 
+                                                <input id="field_1" name="field_1" 
                                                     type="password" 
                                                     value={passwordForm.data.new_password_confirmation}
                                                     onChange={e => passwordForm.setData('new_password_confirmation', e.target.value)}

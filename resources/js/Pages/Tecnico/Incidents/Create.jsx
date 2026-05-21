@@ -76,7 +76,7 @@ export default function Create({ sedes, visit_id }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="md:col-span-2 space-y-2">
                                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Título del Incidente</label>
-                                    <input 
+                                    <input id="field_8" name="field_8" 
                                         type="text" 
                                         value={data.titulo}
                                         onChange={e => setData('titulo', e.target.value)}
@@ -89,7 +89,7 @@ export default function Create({ sedes, visit_id }) {
 
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Sede / Ubicación</label>
-                                    <select 
+                                    <select id="field_7" name="field_7" 
                                         value={data.sede_id}
                                         onChange={e => setData('sede_id', e.target.value)}
                                         className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-600 transition-all uppercase italic [color-scheme:dark]"
@@ -105,7 +105,7 @@ export default function Create({ sedes, visit_id }) {
 
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Fecha del Evento</label>
-                                    <input 
+                                    <input id="field_6" name="field_6" 
                                         type="date" 
                                         value={data.fecha_ocurrencia}
                                         onChange={e => setData('fecha_ocurrencia', e.target.value)}
@@ -167,7 +167,7 @@ export default function Create({ sedes, visit_id }) {
                         <div className="bg-[#16162a]/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 lg:p-10 space-y-8 shadow-2xl">
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Descripción Detallada</label>
-                                <textarea 
+                                <textarea id="field_5" name="field_5" 
                                     rows="4"
                                     value={data.descripcion}
                                     onChange={e => setData('descripcion', e.target.value)}
@@ -179,7 +179,7 @@ export default function Create({ sedes, visit_id }) {
 
                             <div className="space-y-2">
                                 <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2 text-emerald-500">Medidas Preventivas Tomadas</label>
-                                <textarea 
+                                <textarea id="field_4" name="field_4" 
                                     rows="3"
                                     value={data.medidas_tomadas}
                                     onChange={e => setData('medidas_tomadas', e.target.value)}
@@ -192,7 +192,7 @@ export default function Create({ sedes, visit_id }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Personas Afectadas</label>
-                                    <input 
+                                    <input id="field_3" name="field_3" 
                                         type="number" 
                                         min="0"
                                         value={data.personas_afectadas}
@@ -203,7 +203,7 @@ export default function Create({ sedes, visit_id }) {
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2 text-red-500">Días Perdidos Estimados</label>
-                                    <input 
+                                    <input id="field_2" name="field_2" 
                                         type="number" 
                                         min="0"
                                         value={data.dias_perdidos}
@@ -225,7 +225,7 @@ export default function Create({ sedes, visit_id }) {
                                 >
                                     + AÑADIR FOTOS
                                 </button>
-                                <input 
+                                <input id="field_1" name="field_1" 
                                     type="file" 
                                     multiple 
                                     accept="image/*"

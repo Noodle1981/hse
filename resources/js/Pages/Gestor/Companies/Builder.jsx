@@ -51,21 +51,21 @@ export default function Builder({ empresa }) {
                                     <div className="space-y-6">
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Nombre Comercial</span>
-                                            <input type="text" value={form.data.nombre} onChange={e => form.setData('nombre', e.target.value)} required
+                                            <input id="nombre" name="nombre" type="text" value={form.data.nombre} onChange={e => form.setData('nombre', e.target.value)} required
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase"/>
                                             {form.errors.nombre && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.nombre}</span>}
                                         </div>
 
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Razón Social</span>
-                                            <input type="text" value={form.data.razon_social} onChange={e => form.setData('razon_social', e.target.value)} required
+                                            <input id="razon_social" name="razon_social" type="text" value={form.data.razon_social} onChange={e => form.setData('razon_social', e.target.value)} required
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase"/>
                                             {form.errors.razon_social && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.razon_social}</span>}
                                         </div>
 
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">CUIT Fiscal</span>
-                                            <input type="text" value={form.data.cuit} onChange={e => form.setData('cuit', e.target.value)} required
+                                            <input id="cuit" name="cuit" type="text" value={form.data.cuit} onChange={e => form.setData('cuit', e.target.value)} required
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all placeholder-white/5" placeholder="00-00000000-0"/>
                                             {form.errors.cuit && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.cuit}</span>}
                                         </div>
@@ -75,13 +75,13 @@ export default function Builder({ empresa }) {
                                     <div className="space-y-6">
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Dirección Fiscal</span>
-                                            <input type="text" value={form.data.direccion} onChange={e => form.setData('direccion', e.target.value)}
+                                            <input id="direccion" name="direccion" type="text" value={form.data.direccion} onChange={e => form.setData('direccion', e.target.value)}
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase"/>
                                         </div>
 
                                         <div className="relative group">
                                             <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Email de Enlace Corporativo</span>
-                                            <input type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value)}
+                                            <input id="email" name="email" type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value)}
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase"/>
                                             {form.errors.email && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.email}</span>}
                                         </div>
@@ -90,14 +90,14 @@ export default function Builder({ empresa }) {
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Color Primario</span>
                                                 <div className="flex items-center gap-3 bg-black/40 border border-white/10 rounded-2xl px-4 py-3">
-                                                    <input type="color" value={form.data.primary_color} onChange={e => form.setData('primary_color', e.target.value)}
+                                                    <input id="primary_color" name="primary_color" type="color" value={form.data.primary_color} onChange={e => form.setData('primary_color', e.target.value)}
                                                         className="w-10 h-10 bg-transparent border-none cursor-pointer p-0"/>
                                                     <span className="text-sm font-bold text-white/60 uppercase">{form.data.primary_color}</span>
                                                 </div>
                                             </div>
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-blue-400 uppercase tracking-[0.3em] italic z-10">Logo Corporativo</span>
-                                                <input type="file" onChange={e => form.setData('logo', e.target.files[0])}
+                                                <input id="field_1" name="field_1" type="file" onChange={e => form.setData('logo', e.target.files[0])}
                                                     className="w-full h-full opacity-0 absolute inset-0 cursor-pointer z-20"/>
                                                 <div className="bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-[10px] font-black text-white/20 uppercase tracking-widest italic flex items-center justify-center h-full">
                                                     {form.data.logo ? form.data.logo.name : 'Subir Archivo'}

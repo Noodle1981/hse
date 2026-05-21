@@ -109,7 +109,7 @@ export default function Index({ technicians, companies, filters }) {
                         <div className="relative z-10">
                             <div className="relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic z-10">Frecuencia de Escaneo</span>
-                                <input 
+                                <input id="search" name="search" 
                                     type="text" 
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
@@ -237,7 +237,7 @@ export default function Index({ technicians, companies, filters }) {
                                     <div className="space-y-8 mt-4">
                                         <div>
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2 mb-2 block italic">Sector Corporativo</label>
-                                            <select 
+                                            <select id="selectedCompanyId" name="selectedCompanyId" 
                                                 value={selectedCompanyId} 
                                                 onChange={e => setSelectedCompanyId(e.target.value)}
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer"
@@ -249,7 +249,7 @@ export default function Index({ technicians, companies, filters }) {
 
                                         <div>
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2 mb-2 block italic">Punto de Despliegue (Sede)</label>
-                                            <select 
+                                            <select id="selectedSedeId" name="selectedSedeId" 
                                                 value={selectedSedeId} 
                                                 onChange={e => setSelectedSedeId(e.target.value)}
                                                 disabled={sedes.length === 0}

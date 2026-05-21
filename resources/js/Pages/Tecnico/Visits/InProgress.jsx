@@ -321,19 +321,19 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Comandos de Cierre (Observaciones)*</label>
-                                        <textarea value={finalizeForm.data.notes} onChange={e => finalizeForm.setData('notes', e.target.value)} rows="3" className={`block w-full bg-black/40 border ${finalizeForm.errors.notes ? 'border-red-500' : 'border-white/10'} rounded-2xl px-6 py-4 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder-white/5 uppercase italic`} placeholder="Resumen técnico del despliegue..."></textarea>
+                                        <textarea id="notes" name="notes" value={finalizeForm.data.notes} onChange={e => finalizeForm.setData('notes', e.target.value)} rows="3" className={`block w-full bg-black/40 border ${finalizeForm.errors.notes ? 'border-red-500' : 'border-white/10'} rounded-2xl px-6 py-4 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder-white/5 uppercase italic`} placeholder="Resumen técnico del despliegue..."></textarea>
                                         {finalizeForm.errors.notes && <p className="text-[9px] font-black text-red-500 mt-2 ml-2 uppercase italic">{finalizeForm.errors.notes}</p>}
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Responsable en Sede</label>
-                                            <input type="text" value={finalizeForm.data.responsible_name} onChange={e => finalizeForm.setData('responsible_name', e.target.value)} className={`block w-full bg-black/40 border ${finalizeForm.errors.responsible_name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all uppercase italic`} />
+                                            <input id="responsible_name" name="responsible_name" type="text" value={finalizeForm.data.responsible_name} onChange={e => finalizeForm.setData('responsible_name', e.target.value)} className={`block w-full bg-black/40 border ${finalizeForm.errors.responsible_name ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all uppercase italic`} />
                                             {finalizeForm.errors.responsible_name && <p className="text-[9px] font-black text-red-500 mt-2 ml-2 uppercase italic">{finalizeForm.errors.responsible_name}</p>}
                                         </div>
                                         <div>
                                             <label className="block text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 italic px-2">Notificación Electrónica</label>
-                                            <input type="email" value={finalizeForm.data.email_responsable} onChange={e => finalizeForm.setData('email_responsable', e.target.value)} placeholder="email@responsable.com" className={`block w-full bg-black/40 border ${finalizeForm.errors.email_responsable ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all italic`} />
+                                            <input id="email_responsable" name="email_responsable" type="email" value={finalizeForm.data.email_responsable} onChange={e => finalizeForm.setData('email_responsable', e.target.value)} placeholder="email@responsable.com" className={`block w-full bg-black/40 border ${finalizeForm.errors.email_responsable ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all italic`} />
                                             {finalizeForm.errors.email_responsable && <p className="text-[9px] font-black text-red-500 mt-2 ml-2 uppercase italic">{finalizeForm.errors.email_responsable}</p>}
                                         </div>
                                     </div>
@@ -362,7 +362,7 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                     {finalizeForm.data.signature_unavailable && (
                                         <div className="animate-fade-in">
                                             <label className="block text-[11px] font-black text-white/20 uppercase tracking-[0.2em] mb-4 italic px-2">Razón de Omisión*</label>
-                                            <textarea value={finalizeForm.data.signature_skip_reason} onChange={e => finalizeForm.setData('signature_skip_reason', e.target.value)} rows="2" className="block w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:outline-none focus:ring-1 focus:ring-red-500 transition-all uppercase italic" placeholder="Justifique la falta de firma..."></textarea>
+                                            <textarea id="signature_skip_reason" name="signature_skip_reason" value={finalizeForm.data.signature_skip_reason} onChange={e => finalizeForm.setData('signature_skip_reason', e.target.value)} rows="2" className="block w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:outline-none focus:ring-1 focus:ring-red-500 transition-all uppercase italic" placeholder="Justifique la falta de firma..."></textarea>
                                         </div>
                                     )}
                                 </div>

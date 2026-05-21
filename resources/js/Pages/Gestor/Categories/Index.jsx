@@ -46,7 +46,7 @@ export default function Index({ categories, filters }) {
                         <div className="flex flex-col lg:flex-row gap-6 justify-between items-center relative z-10">
                             <div className="w-full lg:w-1/3 relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Filtro de Matriz</span>
-                                <input 
+                                <input id="search" name="search" 
                                     type="text" 
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
@@ -57,7 +57,7 @@ export default function Index({ categories, filters }) {
 
                             <div className="flex items-center gap-6">
                                 <label className="inline-flex items-center cursor-pointer group">
-                                    <input type="checkbox" checked={showInactive} onChange={e => setShowInactive(e.target.checked)} className="sr-only peer" />
+                                    <input id="showInactive" name="showInactive" type="checkbox" checked={showInactive} onChange={e => setShowInactive(e.target.checked)} className="sr-only peer" />
                                     <div className="relative w-11 h-6 bg-white/5 border border-white/10 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white/20 after:border-white/10 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500/50"></div>
                                     <span className="ms-3 text-[10px] font-black text-white/40 uppercase tracking-widest italic group-hover:text-orange-400 transition-colors">Ver Inactivas</span>
                                 </label>

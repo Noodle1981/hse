@@ -170,12 +170,12 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             
                                             {/* Renderizado de tipos de pregunta */}
                                             {q.type === 'text' && (
-                                                <input type="text" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-full bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-lg font-black uppercase transition-all"/>
+                                                <input id={`answer_\${q.id}`} name={`answer_\${q.id}`} type="text" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-full bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-lg font-black uppercase transition-all"/>
                                             )}
 
                                             {q.type === 'number' && (
                                                 <div className="flex items-center gap-4">
-                                                    <input type="number" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-48 bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-2xl font-black transition-all"/>
+                                                    <input id={`answer_\${q.id}`} name={`answer_\${q.id}`} type="number" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-48 bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-2xl font-black transition-all"/>
                                                     <span className="text-[10px] font-black text-white/20 uppercase italic">Unidades / Valor</span>
                                                 </div>
                                             )}
@@ -217,7 +217,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
 
                                             {q.type === 'date' && (
                                                 <div className="flex items-center gap-4">
-                                                    <input 
+                                                    <input id={`answer_\${q.id}`} name={`answer_\${q.id}`} 
                                                         type="date" 
                                                         value={form.data.answers[q.id] || ''} 
                                                         onChange={e => handleAnswerChange(q.id, e.target.value)} 
@@ -227,7 +227,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             )}
 
                                             {q.type === 'textarea' && (
-                                                <textarea 
+                                                <textarea id={`answer_\${q.id}`} name={`answer_\${q.id}`} 
                                                     value={form.data.answers[q.id] || ''} 
                                                     onChange={e => handleAnswerChange(q.id, e.target.value)} 
                                                     rows="3"
@@ -324,7 +324,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                         <div className="space-y-6">
                                             <div className="relative group">
                                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic z-10">Responsable en Sede</span>
-                                                <input type="text" value={form.data.supervisor_name} onChange={e => form.setData('supervisor_name', e.target.value)} required className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"/>
+                                                <input id="supervisor_name" name="supervisor_name" type="text" value={form.data.supervisor_name} onChange={e => form.setData('supervisor_name', e.target.value)} required className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"/>
                                             </div>
                                             <div className="space-y-4">
                                                 <div className="flex items-center justify-between ml-4 mr-2">
@@ -363,7 +363,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
 
                                     <div className="relative group">
                                         <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-white/20 uppercase tracking-[0.3em] italic z-10">Notas Finales del Servicio</span>
-                                        <textarea value={form.data.notes} onChange={e => form.setData('notes', e.target.value)} rows="3" className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"></textarea>
+                                        <textarea id="notes" name="notes" value={form.data.notes} onChange={e => form.setData('notes', e.target.value)} rows="3" className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"></textarea>
                                     </div>
                                 </div>
 

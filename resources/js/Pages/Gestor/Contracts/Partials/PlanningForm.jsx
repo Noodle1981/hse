@@ -61,7 +61,7 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                     {/* Pilar */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Pilar Operativo</label>
-                        <select 
+                        <select id="field_5" name="field_5" 
                             value={data.category}
                             onChange={e => handleCategoryChange(e.target.value)}
                             className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white focus:ring-ep-primary/50 transition-all italic"
@@ -75,7 +75,7 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                     {/* Vínculo (Solo si es Inspección) */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Referencia Matriz</label>
-                        <select 
+                        <select id="field_4" name="field_4" 
                             value={data.checklist_id}
                             onChange={e => handleChecklistChange(e.target.value)}
                             disabled={!['Inspección', 'Capacitación'].includes(data.category)}
@@ -91,7 +91,7 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                     {/* Actividad */}
                     <div className="space-y-2 lg:col-span-2">
                         <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Descripción de la Actividad</label>
-                        <input 
+                        <input id="field_3" name="field_3" 
                             type="text"
                             value={data.activity_name}
                             onChange={e => setData('activity_name', e.target.value)}
@@ -104,7 +104,7 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                     {/* Código y Frecuencia */}
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Código Registro</label>
-                        <input 
+                        <input id="field_2" name="field_2" 
                             type="text"
                             value={data.activity_code}
                             onChange={e => setData('activity_code', e.target.value)}
@@ -115,7 +115,7 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
 
                     <div className="space-y-2">
                         <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Frecuencia Automática</label>
-                        <select 
+                        <select id="field_1" name="field_1" 
                             value={data.frequency}
                             onChange={e => setData('frequency', e.target.value)}
                             className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic focus:ring-ep-primary transition-all"

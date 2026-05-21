@@ -216,7 +216,7 @@ export default function MyAssignments({
                             {showFilters && (
                                 <div className="bg-[#1a1a2e] rounded-[1.5rem] border border-white/5 p-6 flex flex-col xl:flex-row gap-4 items-end shadow-2xl animate-in slide-in-from-top-2 duration-300">
                                     <FilterItem label="Búsqueda" flex="flex-1">
-                                        <input 
+                                        <input id="search" name="search" 
                                             type="text" 
                                             placeholder="Checklist..."
                                             value={search}
@@ -227,7 +227,7 @@ export default function MyAssignments({
                                     </FilterItem>
 
                                     <FilterItem label="Mes" width="w-full xl:w-36">
-                                        <select 
+                                        <select id="selectedMonth" name="selectedMonth" 
                                             value={selectedMonth}
                                             onChange={e => { setSelectedMonth(e.target.value); updateFilters({ month: e.target.value }); }}
                                             className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-bold text-white italic focus:ring-ep-primary/50 transition-all uppercase [color-scheme:dark]"
@@ -237,7 +237,7 @@ export default function MyAssignments({
                                     </FilterItem>
 
                                     <FilterItem label="Entidad" width="w-full xl:w-44">
-                                        <select 
+                                        <select id="empresaId" name="empresaId" 
                                             value={empresaId}
                                             onChange={e => { setEmpresaId(e.target.value); setSedeId(''); updateFilters({ empresa_id: e.target.value, sede_id: '' }); }}
                                             className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-bold text-white italic focus:ring-ep-primary/50 transition-all uppercase [color-scheme:dark]"
@@ -248,7 +248,7 @@ export default function MyAssignments({
                                     </FilterItem>
 
                                     <FilterItem label="Sede" width="w-full xl:w-44">
-                                        <select 
+                                        <select id="sedeId" name="sedeId" 
                                             value={sedeId}
                                             onChange={e => { setSedeId(e.target.value); updateFilters({ sede_id: e.target.value }); }}
                                             disabled={!empresaId}
@@ -260,7 +260,7 @@ export default function MyAssignments({
                                     </FilterItem>
 
                                     <FilterItem label="Estado" width="w-full xl:w-36">
-                                        <select 
+                                        <select id="selectedStatus" name="selectedStatus" 
                                             value={selectedStatus}
                                             onChange={e => { setSelectedStatus(e.target.value); updateFilters({ status: e.target.value }); }}
                                             className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-3 text-[10px] font-bold text-white italic focus:ring-ep-primary/50 transition-all uppercase [color-scheme:dark]"

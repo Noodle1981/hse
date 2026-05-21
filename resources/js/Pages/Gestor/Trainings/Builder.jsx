@@ -52,7 +52,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
                             <div className="grid grid-cols-1 md:grid-cols-6 gap-8 relative z-10">
                                 <div className="md:col-span-6 space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-indigo-400 uppercase tracking-[0.4em] italic z-10">Protocolo Técnico Asociado</span>
-                                    <select 
+                                    <select id="dynamic_checklist_id" name="dynamic_checklist_id" 
                                         value={form.data.dynamic_checklist_id}
                                         onChange={e => form.setData('dynamic_checklist_id', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-8 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] italic uppercase"
@@ -66,7 +66,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="md:col-span-6 space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-white/30 uppercase tracking-[0.4em] italic z-10">Título Operativo</span>
-                                    <input 
+                                    <input id="title" name="title" 
                                         type="text" 
                                         value={form.data.title}
                                         onChange={e => form.setData('title', e.target.value)}
@@ -79,7 +79,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="md:col-span-6 space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-white/30 uppercase tracking-[0.4em] italic z-10">Objetivos Estratégicos</span>
-                                    <textarea 
+                                    <textarea id="description" name="description" 
                                         value={form.data.description}
                                         onChange={e => form.setData('description', e.target.value)}
                                         rows="3"
@@ -101,7 +101,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-orange-400 uppercase tracking-[0.4em] italic z-10">Empresa</span>
-                                    <select 
+                                    <select id="empresa_id" name="empresa_id" 
                                         value={form.data.empresa_id}
                                         onChange={e => form.setData('empresa_id', e.target.value)}
                                         required
@@ -116,7 +116,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-orange-400 uppercase tracking-[0.4em] italic z-10">Sede de Despliegue</span>
-                                    <select 
+                                    <select id="sede_id" name="sede_id" 
                                         value={form.data.sede_id}
                                         onChange={e => form.setData('sede_id', e.target.value)}
                                         disabled={!form.data.empresa_id}
@@ -132,7 +132,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-orange-400 uppercase tracking-[0.4em] italic z-10">Responsable Técnico</span>
-                                    <select 
+                                    <select id="user_id" name="user_id" 
                                         value={form.data.user_id}
                                         onChange={e => form.setData('user_id', e.target.value)}
                                         required
@@ -147,7 +147,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-white/30 uppercase tracking-[0.4em] italic z-10">Instructor Externo</span>
-                                    <input 
+                                    <input id="trainer_name" name="trainer_name" 
                                         type="text" 
                                         value={form.data.trainer_name}
                                         onChange={e => form.setData('trainer_name', e.target.value)}
@@ -169,7 +169,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative z-10">
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-amber-500 uppercase tracking-[0.4em] italic z-10">Modalidad</span>
-                                    <select 
+                                    <select id="type" name="type" 
                                         value={form.data.type}
                                         onChange={e => form.setData('type', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-8 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-amber-500/50 transition-all [color-scheme:dark] italic uppercase"
@@ -181,7 +181,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-amber-500 uppercase tracking-[0.4em] italic z-10">Fecha / Hora</span>
-                                    <input 
+                                    <input id="date" name="date" 
                                         type="datetime-local" 
                                         value={form.data.date}
                                         onChange={e => form.setData('date', e.target.value)}
@@ -192,7 +192,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-amber-500 uppercase tracking-[0.4em] italic z-10">Duración (MIN)</span>
-                                    <input 
+                                    <input id="duration" name="duration" 
                                         type="number" 
                                         value={form.data.duration}
                                         onChange={e => form.setData('duration', e.target.value)}
@@ -202,7 +202,7 @@ export default function Builder({ sedes = [], empresas = [], tecnicos = [], chec
 
                                 <div className="space-y-3 relative group">
                                     <span className="absolute -top-2.5 left-6 bg-[#11111d] px-2 text-[9px] font-black text-amber-500 uppercase tracking-[0.4em] italic z-10">Estado</span>
-                                    <select 
+                                    <select id="status" name="status" 
                                         value={form.data.status}
                                         onChange={e => form.setData('status', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-8 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-amber-500/50 transition-all [color-scheme:dark] italic uppercase"
