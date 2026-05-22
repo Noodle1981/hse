@@ -153,7 +153,7 @@
                 <td style="width: 50%; padding: 0 20px; text-align: center;">
                     <div style="border-bottom: 2px solid #d1d5db; height: 80px; margin-bottom: 10px; display: flex; align-items: flex-end; justify-content: center;">
                          @if($inspection->supervisor_signature)
-                            <img src="{{ $inspection->supervisor_signature }}" style="max-height: 75px; margin: 0 auto;">
+                            <img src="{{ str_starts_with($inspection->supervisor_signature, 'data:image') ? $inspection->supervisor_signature : storage_path('app/public/' . $inspection->supervisor_signature) }}" style="max-height: 75px; margin: 0 auto;">
                         @else
                             <span style="color: #e5e7eb; font-size: 9pt; font-style: italic; line-height: 80px;">(Firma vacía)</span>
                         @endif
@@ -170,11 +170,11 @@
                 <td style="width: 50%; padding: 0 20px; text-align: center;">
                     <div style="border-bottom: 2px solid #d1d5db; height: 80px; margin-bottom: 10px; display: flex; align-items: flex-end; justify-content: center;">
                          @if($inspection->technician_signature)
-                            <img src="{{ $inspection->technician_signature }}" style="max-height: 75px; margin: 0 auto;">
+                            <img src="{{ str_starts_with($inspection->technician_signature, 'data:image') ? $inspection->technician_signature : storage_path('app/public/' . $inspection->technician_signature) }}" style="max-height: 75px; margin: 0 auto;">
                         @else
                             {{-- Intentar usar firma del usuario si no está guardada explícitamente en technical_signature --}}
                             @if($inspection->user->firma)
-                                <img src="{{ $inspection->user->firma }}" style="max-height: 75px; margin: 0 auto;">
+                                <img src="{{ str_starts_with($inspection->user->firma, 'data:image') ? $inspection->user->firma : storage_path('app/public/' . $inspection->user->firma) }}" style="max-height: 75px; margin: 0 auto;">
                             @else
                                 <span style="color: #e5e7eb; font-size: 9pt; font-style: italic; line-height: 80px;">(Firma vacía)</span>
                             @endif

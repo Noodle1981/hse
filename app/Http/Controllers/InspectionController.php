@@ -8,6 +8,7 @@ use App\Models\DynamicInspection;
 use App\Models\DynamicAnswer;
 use App\Models\VisitCertificate;
 use App\Services\VisitService;
+use App\Models\Empresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -115,9 +116,6 @@ class InspectionController extends Controller
         return back()->with('message', 'Progreso sincronizado.');
     }
 
-    /**
-     * Complete and close the inspection.
-     */
     public function complete(Request $request, $id, $inspection)
     {
         $inspection = DynamicInspection::findOrFail($inspection);
@@ -131,13 +129,46 @@ class InspectionController extends Controller
             // Reutilizar lógica optimizada de guardado de respuestas
             $this->doSaveProgress($request, $inspection);
 
+            $supervisorSignaturePath = $inspection->supervisor_signature;
+            $technicianSignaturePath = $inspection->technician_signature;
+
+            // Handle supervisor_signature
+            if ($request->hasFile('supervisor_signature')) {
+                $supervisorSignaturePath = $request->file('supervisor_signature')->store('signatures', 'public');
+            } elseif ($request->filled('supervisor_signature')) {
+                $data = $request->input('supervisor_signature');
+                if (\Illuminate\Support\Str::startsWith($data, 'data:image')) {
+                    $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
+                    $fileName = 'signatures/' . \Illuminate\Support\Str::random(40) . '.png';
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
+                    $supervisorSignaturePath = $fileName;
+                } else {
+                    $supervisorSignaturePath = $data;
+                }
+            }
+
+            // Handle technician_signature
+            if ($request->hasFile('technician_signature')) {
+                $technicianSignaturePath = $request->file('technician_signature')->store('signatures', 'public');
+            } elseif ($request->filled('technician_signature')) {
+                $data = $request->input('technician_signature');
+                if (\Illuminate\Support\Str::startsWith($data, 'data:image')) {
+                    $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
+                    $fileName = 'signatures/' . \Illuminate\Support\Str::random(40) . '.png';
+                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
+                    $technicianSignaturePath = $fileName;
+                } else {
+                    $technicianSignaturePath = $data;
+                }
+            }
+
             $inspection->update([
                 'status' => 'completed',
                 'completed_at' => now(),
                 'notes' => $request->notes,
                 'supervisor_name' => $request->supervisor_name,
-                'supervisor_signature' => $request->supervisor_signature,
-                'technician_signature' => $request->technician_signature,
+                'supervisor_signature' => $supervisorSignaturePath,
+                'technician_signature' => $technicianSignaturePath,
             ]);
 
             if ($inspection->checklist_assignment_id) {
@@ -179,18 +210,35 @@ class InspectionController extends Controller
             ->completed()
             ->latest('completed_at');
 
-        if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->whereHas('sede', fn($sq) => $sq->where('nombre_sede', 'like', "%{$request->search}%"))
-                  ->orWhereHas('checklist', fn($sq) => $sq->where('title', 'like', "%{$request->search}%"));
-            });
+        if ($request->empresa) {
+            $query->whereHas('sede', fn($q) => $q->where('empresa_id', $request->empresa));
+        }
+        if ($request->sede) {
+            $query->where('sede_id', $request->sede);
+        }
+        if ($request->fecha_inicio) {
+            $query->whereDate('completed_at', '>=', $request->fecha_inicio);
+        }
+        if ($request->fecha_fin) {
+            $query->whereDate('completed_at', '<=', $request->fecha_fin);
         }
 
         $inspections = $query->paginate(15)->withQueryString();
 
+        $user = Auth::user();
+        $empresasQuery = Empresa::with(['sedes' => function ($q) {
+            $q->orderBy('nombre_sede');
+        }])->orderBy('nombre');
+
+        if ($user->consultora_id) {
+            $empresasQuery->where('consultora_id', $user->consultora_id);
+        }
+        $empresas = $empresasQuery->get();
+
         return Inertia::render('Gestor/Inspections/Index', [
             'inspections' => $inspections,
-            'filters' => $request->only(['search']),
+            'empresas' => $empresas,
+            'filters' => $request->only(['empresa', 'sede', 'fecha_inicio', 'fecha_fin']),
         ]);
     }
 
@@ -204,18 +252,35 @@ class InspectionController extends Controller
             ->completed()
             ->latest('completed_at');
 
-        if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->whereHas('sede', fn($sq) => $sq->where('nombre_sede', 'like', "%{$request->search}%"))
-                  ->orWhereHas('checklist', fn($sq) => $sq->where('title', 'like', "%{$request->search}%"));
-            });
+        if ($request->empresa) {
+            $query->whereHas('sede', fn($q) => $q->where('empresa_id', $request->empresa));
+        }
+        if ($request->sede) {
+            $query->where('sede_id', $request->sede);
+        }
+        if ($request->fecha_inicio) {
+            $query->whereDate('completed_at', '>=', $request->fecha_inicio);
+        }
+        if ($request->fecha_fin) {
+            $query->whereDate('completed_at', '<=', $request->fecha_fin);
         }
 
         $inspections = $query->paginate(15)->withQueryString();
 
+        $user = Auth::user();
+        $empresasQuery = Empresa::with(['sedes' => function ($q) {
+            $q->orderBy('nombre_sede');
+        }])->orderBy('nombre');
+
+        if ($user->consultora_id) {
+            $empresasQuery->where('consultora_id', $user->consultora_id);
+        }
+        $empresas = $empresasQuery->get();
+
         return Inertia::render('Tecnico/Inspections/History', [
             'inspections' => $inspections,
-            'filters' => $request->only(['search']),
+            'empresas' => $empresas,
+            'filters' => $request->only(['empresa', 'sede', 'fecha_inicio', 'fecha_fin']),
         ]);
     }
 

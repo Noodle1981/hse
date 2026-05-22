@@ -24,7 +24,7 @@ class InspectionPDFController extends Controller
 
         $branding = BrandingService::forUser($inspection->user);
 
-        $pdf = Pdf::loadView('pdf.inspection', [
+        $pdf = Pdf::setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])->loadView('pdf.inspection', [
             'inspection' => $inspection,
             'answers'    => $inspection->answers,
             'sections'   => $inspection->checklist->sections->sortBy('order'),
@@ -50,7 +50,7 @@ class InspectionPDFController extends Controller
 
         $branding = BrandingService::forUser($inspection->user);
 
-        $pdf = Pdf::loadView('pdf.inspection', [
+        $pdf = Pdf::setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])->loadView('pdf.inspection', [
             'inspection' => $inspection,
             'answers'    => $inspection->answers,
             'sections'   => $inspection->checklist->sections->sortBy('order'),

@@ -219,7 +219,7 @@ export default function Index({ templates, history, empresas = [], sedes = [], f
                                                     ) : (
                                                         <>
                                                             <a 
-                                                                href={route('gestor.trainings.pdf.preview', session.id)}
+                                                                href={route('gestor.trainings.pdf.preview', { id: session.id })}
                                                                 target="_blank"
                                                                 className="h-10 w-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg"
                                                                 title="Reporte PDF"
