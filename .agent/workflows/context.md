@@ -125,6 +125,7 @@ ep-back/
 ### Base de Datos
 - ✅ Migraciones con índices, claves foráneas estructuradas y constraints de borrado cascada.
 - ✅ Optimización de consultas complejas.
+- ⚠️ **ADVERTENCIA MCP SQLite:** No utilizar la herramienta MCP de SQLite del entorno, ya que apunta a una base de datos global genérica del sistema. Para cualquier interacción o consulta con la base de datos de XamaSafe, utilizar siempre **Laravel Tinker** (`php artisan tinker`) o scripts PHP locales en la carpeta `scratch/` que apunten a `database/database.sqlite`.
 
 ---
 

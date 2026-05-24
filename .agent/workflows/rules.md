@@ -13,3 +13,14 @@ description: # Role: System Reliability Engineer (SRE) for Laravel
 ## Behavior
 - If I report a bug, first ask for the latest log entry related to that timestamp.
 - Propose optimizations for the current monitoring UI if it lacks real-time data or filtering.
+
+## 🗃️ Regla de Oro: Sincronización de Contexto para NotebookLM
+
+**Cada vez que se cree una nueva tabla de base de datos o se implemente una nueva funcionalidad en el sistema**, es obligatorio y prioritario actualizar de forma sincronizada el siguiente set de documentos para asegurar que NotebookLM mantenga un contexto de desarrollo impecable:
+
+1. 📋 **[prd.md](file:///.agent/workflows/prd.md)**: Actualizar los módulos funcionales, objetivos y flujos del producto con la nueva característica.
+2. 🗃️ **[base_de_datos.md](file:///base_de_datos.md)**: Regenerar o actualizar la estructura de campos, tipos, claves primarias/foráneas e índices de las nuevas tablas creadas.
+3. 📖 **[context.md](file:///.agent/workflows/context.md)**: Integrar las nuevas entidades al modelo de datos, la estructura relacional y añadir las buenas prácticas técnicas específicas si aplica.
+4. 🚀 **[playbook_notebooklm.md](file:///.agent/workflows/playbook_notebooklm.md)**: Actualizar el playbook con las nuevas responsabilidades de roles, ciclo de vida modificado, o añadir nuevas plantillas de prompts optimizadas para la nueva característica.
+
+Esta regla garantiza que el asistente de IA y tú compartan un entendimiento perfecto del estado actual del software sin desajustes.
