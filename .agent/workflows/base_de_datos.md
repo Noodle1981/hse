@@ -683,6 +683,18 @@ El sistema cuenta con las siguientes entidades principales:
 
 ---
 
+## Tabla: `sede_users`
+
+| Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
+|---|---|---|---|---|
+| `id` | `INTEGER` | Sí ✅ | *ninguno* | 🔑 PK |
+| `sede_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `user_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `created_at` | `DATETIME` | Sí ✅ | *ninguno* |  |
+| `updated_at` | `DATETIME` | Sí ✅ | *ninguno* |  |
+
+---
+
 ## Tabla: `sedes`
 
 | Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
@@ -711,6 +723,11 @@ El sistema cuenta con las siguientes entidades principales:
 | `longitud` | `numeric` | Sí ✅ | *ninguno* |  |
 | `deleted_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `rubro` | `varchar` | Sí ✅ | *ninguno* |  |
+| `dias_operativos` | `TEXT` | Sí ✅ | *ninguno* |  |
+| `hora_apertura` | `time` | Sí ✅ | *ninguno* |  |
+| `hora_cierre` | `time` | Sí ✅ | *ninguno* |  |
+| `es_roster_24_7` | `tinyint(1)` | No ❌ | `'0'` |  |
+| `radio_tolerancia_metros` | `INTEGER` | No ❌ | `'500'` |  |
 
 ### 🔗 Relaciones (Foreign Keys)
 - `provincia_id` → vincula con `provincias`(`id`)
@@ -852,6 +869,14 @@ El sistema cuenta con las siguientes entidades principales:
 | `instructor_signature` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `instructor_signature_date` | `datetime` | Sí ✅ | *ninguno* |  |
 | `aclaracion_responsable` | `varchar` | Sí ✅ | *ninguno* |  |
+| `token_expires_at` | `datetime` | Sí ✅ | *ninguno* |  |
+| `token_used` | `tinyint(1)` | No ❌ | `'0'` |  |
+| `horas_gabinete_estimadas` | `numeric` | Sí ✅ | *ninguno* |  |
+| `checkin_lat` | `numeric` | Sí ✅ | *ninguno* |  |
+| `checkin_lng` | `numeric` | Sí ✅ | *ninguno* |  |
+| `checkout_lat` | `numeric` | Sí ✅ | *ninguno* |  |
+| `checkout_lng` | `numeric` | Sí ✅ | *ninguno* |  |
+| `gps_verified` | `tinyint(1)` | No ❌ | `'0'` |  |
 
 ### 🔗 Relaciones (Foreign Keys)
 - `empresa_id` → vincula con `empresas`(`id`)

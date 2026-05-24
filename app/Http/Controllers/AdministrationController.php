@@ -339,11 +339,53 @@ class AdministrationController extends Controller
         // Tactical Terminal (Unified Activity Log)
         $recentEvents = $this->getTacticalTerminalEvents($consultoraId);
 
+        // Audit de horas (Campo vs Gabinete y alertas de sobrejornada)
+        $timeService = new \App\Services\TimeTrackingService();
+        $visits = \App\Models\VisitCertificate::with('sede')
+            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->whereBetween('visit_date', [$from, $to])
+            ->whereIn('status', ['completed', 'signed'])
+            ->get();
+
+        $totalFieldHours = 0.0;
+        $totalOfficeHours = 0.0;
+        $exceededWarningsCount = 0;
+
+        foreach ($visits as $visit) {
+            $fieldHours = $timeService->calculateFieldHours($visit);
+            $totalFieldHours += $fieldHours;
+            $totalOfficeHours += (float)$visit->horas_gabinete_estimadas;
+
+            // Alerta si el checkin ocurrió fuera del horario de la sede (siempre que no sea roster 24/7)
+            if ($visit->start_time && !$timeService->verifyWorkingHours($visit->sede, $visit->start_time)) {
+                $exceededWarningsCount++;
+            } else {
+                // Cálculo dinámico inteligente de sobrejornada:
+                // Si las horas de campo exceden la duración de la jornada operativa de la sede
+                $sede = $visit->sede;
+                if ($sede && !$sede->es_roster_24_7 && $sede->hora_apertura && $sede->hora_cierre) {
+                    $apertura = \Carbon\Carbon::createFromFormat('H:i:s', $sede->hora_apertura);
+                    $cierre = \Carbon\Carbon::createFromFormat('H:i:s', $sede->hora_cierre);
+                    $maxHours = $cierre->diffInSeconds($apertura) / 3600.0;
+                    if ($fieldHours > $maxHours) {
+                        $exceededWarningsCount++;
+                    }
+                }
+            }
+        }
+
+        $hoursTracking = [
+            'field_hours' => round($totalFieldHours, 2),
+            'office_hours' => round($totalOfficeHours, 2),
+            'exceeded_warnings_count' => $exceededWarningsCount,
+        ];
+
         return Inertia::render('Gestor/Dashboard', [
             'kpis' => $kpis,
             'companies' => $companies,
             'efficiency' => $efficiency,
             'recentEvents' => $recentEvents,
+            'hoursTracking' => $hoursTracking,
             'filters' => [
                 'from' => $from,
                 'to' => $to,

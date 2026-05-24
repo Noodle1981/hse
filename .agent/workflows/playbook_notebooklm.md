@@ -126,6 +126,17 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   * `scheduled_months`: Array JSON con los períodos planificados en formato Año-Mes (ej: `["2026-01", "2026-02", "2026-07"]`).
 * **Sincronización:** Cuando un técnico inicia una visita presencial en el mes de Enero, el dashboard le sugiere automáticamente realizar las tareas planificadas en el Plan Anual para `2026-01`. Si la ejecuta, el motor del Reporte Maestro la mapea como completada exitosamente, sumándola al porcentaje de eficiencia del contrato.
 
+### 3.3. Cómo se Audita la Jornada Laboral y el Roster Minero 24/7
+* **Finalidad:** Controlar el tiempo presencial (Horas de Campo) vs. de oficina (Horas de Gabinete) y auditar desvíos horarios para cumplir con la ERL.
+* **Operación Roster 24/7 (Rubro Minero):**
+  * Para operaciones continuas de alta montaña o faenas mineras, se habilita `es_roster_24_7 = true`.
+  * La lógica de validación del `TimeTrackingService` aprueba automáticamente cualquier check-in sin importar días o rangos de horas, ya que se trabaja bajo modalidad continua incluyendo feriados y domingos.
+* **Operación Ordinaria Standard:**
+  * Si `es_roster_24_7 = false`, el sistema cruza la marca del check-in (`start_time`) verificando que el día de la semana pertenezca a `dias_operativos` (almacenado como array JSON) y que el horario se encuentre entre `hora_apertura` y `hora_cierre`.
+  * **Cálculo de Sobrejornada:** El Dashboard calcula dinámicamente si las horas efectivas de campo superan la duración parametrizada para la Sede en ese día, disparando alertas tácticas interactivas parpadeantes ante sobretiempos.
+* **Preparación Proof of Presence (GPS):**
+  * La base relacional de `visit_certificates` y `sedes` incluye campos de geolocalización (`checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng` y `radio_tolerancia_metros`) listos para cruzarse en el backend aplicando la **Fórmula matemática de Haversine** para calcular distancias terrestres exactas en metros.
+
 ---
 
 ## 4. 💡 PLAYBOOK DE PROMPTS: Optimización para Desarrollar con IA (NotebookLM)

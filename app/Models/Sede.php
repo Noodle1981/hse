@@ -32,7 +32,18 @@ class Sede extends Model
         'responsable_3_nombre',
         'responsable_3_cargo',
         'responsable_3_email',
-        'empresa_id'
+        'empresa_id',
+        'dias_operativos',
+        'hora_apertura',
+        'hora_cierre',
+        'es_roster_24_7',
+        'radio_tolerancia_metros'
+    ];
+
+    protected $casts = [
+        'dias_operativos' => 'array',
+        'es_roster_24_7' => 'boolean',
+        'radio_tolerancia_metros' => 'integer'
     ];
 
     public function empresa()

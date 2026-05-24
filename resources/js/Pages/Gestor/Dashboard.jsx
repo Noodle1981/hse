@@ -2,7 +2,7 @@ import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, router } from '@inertiajs/react';
 
-export default function Dashboard({ auth, kpis, efficiency, recentEvents, companies, filters }) {
+export default function Dashboard({ auth, kpis, efficiency, recentEvents, companies, hoursTracking, filters }) {
     
     const updateDateFilter = (from, to) => {
         router.get(route('gestor.dashboard'), { from, to }, { preserveScroll: true });
@@ -82,6 +82,98 @@ export default function Dashboard({ auth, kpis, efficiency, recentEvents, compan
                             color="blue" 
                             icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="2"/></svg>}
                         />
+                    </div>
+
+                    {/* AUDITORÍA DE TIEMPOS HUD */}
+                    <div className="bg-ep-dark/40 backdrop-blur-2xl rounded-[3rem] border border-white/5 p-12 shadow-2xl relative overflow-hidden group animate-fade-in-up">
+                        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-ep-primary/30 to-transparent"></div>
+                        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8 relative z-10">
+                            <div>
+                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter flex items-center gap-3 leading-none">
+                                    <span className="w-1.5 h-6 bg-ep-primary rounded-full shadow-[0_0_8px_rgba(246,146,57,0.5)] shrink-0"></span>
+                                    Auditoría Horaria y Control de Tiempos
+                                </h3>
+                                <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.3em] mt-2 italic ml-4 leading-none">
+                                    Módulo de rendimiento mensual: Gabinete vs Campo
+                                </p>
+                            </div>
+
+                            {/* Alerta de Sobrejornada (Dynamic Alert Badge) */}
+                            {hoursTracking?.exceeded_warnings_count > 0 && (
+                                <div className="flex items-center gap-3 bg-red-600/10 border border-red-500/20 px-6 py-2.5 rounded-2xl animate-pulse shadow-[0_0_15px_rgba(239,68,68,0.15)] leading-none shrink-0">
+                                    <span className="flex h-2 w-2 relative">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                    </span>
+                                    <span className="text-[9px] font-black text-red-400 tracking-widest uppercase italic">
+                                        ⚠️ {hoursTracking.exceeded_warnings_count} desvíos de jornada detectados
+                                    </span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center relative z-10">
+                            {/* Horas de Campo */}
+                            <div className="bg-black/30 p-6 rounded-2xl border border-white/5 flex flex-col justify-center">
+                                <span className="text-[9px] font-black text-ep-primary uppercase tracking-[0.2em] italic mb-2 leading-none">Horas Efectivas de Campo (Terreno)</span>
+                                <div className="flex items-baseline gap-2 mt-1">
+                                    <span className="text-4xl font-black text-white italic tracking-tighter">{hoursTracking?.field_hours ?? '0.00'}</span>
+                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest italic">HRS</span>
+                                </div>
+                                <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-3 italic leading-none">Auditoría física vía Proof of Presence GPS</span>
+                            </div>
+
+                            {/* Barra HUD de Proporción Dual (Horizontal Split) */}
+                            <div className="bg-black/50 p-6 rounded-[2rem] border border-white/5 flex flex-col justify-center gap-4">
+                                <div className="flex justify-between text-[9px] font-black uppercase tracking-widest italic text-white/30 leading-none">
+                                    <span className="text-ep-primary">CAMPO</span>
+                                    <span className="text-blue-400">GABINETE</span>
+                                </div>
+                                
+                                {/* Barra Dual */}
+                                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden flex shadow-inner border border-white/5">
+                                    {((hoursTracking?.field_hours || 0) + (hoursTracking?.office_hours || 0)) > 0 ? (
+                                        <>
+                                            <div 
+                                                style={{ width: `${((hoursTracking?.field_hours || 0) / ((hoursTracking?.field_hours || 0) + (hoursTracking?.office_hours || 0))) * 100}%` }}
+                                                className="bg-ep-primary h-full shadow-[0_0_10px_rgba(246,142,57,0.5)] transition-all duration-1000"
+                                            ></div>
+                                            <div 
+                                                style={{ width: `${((hoursTracking?.office_hours || 0) / ((hoursTracking?.field_hours || 0) + (hoursTracking?.office_hours || 0))) * 100}%` }}
+                                                className="bg-blue-500 h-full shadow-[0_0_10px_rgba(59,130,246,0.5)] transition-all duration-1000"
+                                            ></div>
+                                        </>
+                                    ) : (
+                                        <div className="bg-white/10 w-full h-full"></div>
+                                    )}
+                                </div>
+
+                                <div className="flex justify-between text-[8px] font-black uppercase tracking-wider italic text-white/20 leading-none">
+                                    <span>
+                                        {((hoursTracking?.field_hours || 0) + (hoursTracking?.office_hours || 0)) > 0 
+                                            ? `${Math.round(((hoursTracking?.field_hours || 0) / ((hoursTracking?.field_hours || 0) + (hoursTracking?.office_hours || 0))) * 100)}%`
+                                            : '0%'
+                                        }
+                                    </span>
+                                    <span>
+                                        {((hoursTracking?.field_hours || 0) + (hoursTracking?.office_hours || 0)) > 0 
+                                            ? `${Math.round(((hoursTracking?.office_hours || 0) / ((hoursTracking?.field_hours || 0) + (hoursTracking?.office_hours || 0))) * 100)}%`
+                                            : '0%'
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Horas de Gabinete */}
+                            <div className="bg-black/30 p-6 rounded-2xl border border-white/5 flex flex-col justify-center">
+                                <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] italic mb-2 leading-none">Horas Estimadas de Gabinete (Oficina)</span>
+                                <div className="flex items-baseline gap-2 mt-1">
+                                    <span className="text-4xl font-black text-white italic tracking-tighter">{hoursTracking?.office_hours ?? '0.00'}</span>
+                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest italic">HRS</span>
+                                </div>
+                                <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-3 italic leading-none">Estimaciones de oficina por informe técnico</span>
+                            </div>
+                        </div>
                     </div>
 
                     {/* MATRIZ DE INTELIGENCIA DE NODOS */}

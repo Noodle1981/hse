@@ -27,6 +27,12 @@ class VisitCertificate extends Model
         'date_firma_responsable',
         'token_expires_at',
         'token_used',
+        'horas_gabinete_estimadas',
+        'checkin_lat',
+        'checkin_lng',
+        'checkout_lat',
+        'checkout_lng',
+        'gps_verified',
     ];
 
     protected $casts = [
@@ -36,6 +42,12 @@ class VisitCertificate extends Model
         'date_firma_responsable' => 'datetime',
         'token_expires_at' => 'datetime',
         'token_used' => 'boolean',
+        'horas_gabinete_estimadas' => 'float',
+        'checkin_lat' => 'float',
+        'checkin_lng' => 'float',
+        'checkout_lat' => 'float',
+        'checkout_lng' => 'float',
+        'gps_verified' => 'boolean',
     ];
 
     // Relaciones principales

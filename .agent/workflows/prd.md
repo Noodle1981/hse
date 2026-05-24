@@ -37,14 +37,16 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Generación de Plantillas:** Permite a los Gestores definir plantillas de checklists con categorías y tipos de preguntas variados (texto, numérico, opción múltiple, booleano, adjunto de fotos).
 * **Ejecución y Registro:** Los técnicos inician inspecciones basadas en estas plantillas. Cada respuesta queda vinculada de manera íntegra a una inspección específica (`answers` vinculadas a `inspections` y `questions`).
 
-### 4.2. Módulo de Campo: Visitas con Validación GPS (Proof of Presence)
+### 4.2. Módulo de Campo: Visitas con Validación GPS (Proof of Presence) y Auditoría Horaria
 * **Geolocalización Inmediata:** Captura obligatoria de latitud/longitud del dispositivo móvil del técnico mediante la API nativa de geolocalización al realizar:
-  1. **Check-in (Entrada):** Apertura de la visita.
-  2. **Check-out (Salida):** Finalización de la visita.
-* **Cálculo de Distancia (Fórmula de Haversine):** Compara el pin del técnico con las coordenadas registradas de la Sede en la base de datos.
-  * Si la distancia cae dentro del `radio_tolerancia_metros` (ej. 500m), la visita es marcada como **Verificada por GPS** (sello verde brillante).
-  * Si está fuera de rango, exige al técnico una justificación textual que queda registrada en la auditoría.
-* **Auditoría de Tiempos:** Mide de forma exacta el tiempo en tránsito vs. el tiempo efectivo de trabajo físico dentro de la sede del cliente.
+  1. **Check-in (Entrada):** Apertura de la visita, registrando `checkin_lat` y `checkin_lng`.
+  2. **Check-out (Salida):** Finalización de la visita, registrando `checkout_lat`, `checkout_lng` y el indicador `gps_verified`.
+* **Cálculo de Distancia (Fórmula de Haversine):** Compara el pin del técnico con las coordenadas registradas de la Sede en la base de datos aplicando la fórmula matemática de Haversine contra el `radio_tolerancia_metros` (default 500m) configurado por sede.
+* **Auditoría de Tiempos (Campo vs Gabinete):**
+  * **Horas de Campo:** Calculadas automáticamente a partir de la diferencia entre el inicio (`start_time`) y fin (`end_time`) de la visita presencial.
+  * **Horas de Gabinete:** Permite la carga estimativa de horas de oficina dedicadas a la confección y análisis técnico del informe (`horas_gabinete_estimadas`).
+* **Modalidad Roster Minero 24/7:** Configuración especial para sedes en zonas de operación minera continua. Al activarse, se omiten las alertas ordinarias de días y horarios no laborales, validando de forma automática cualquier ingreso del técnico (incluyendo domingos y feriados).
+* **Control Inteligente de Jornada:** En sedes estándar, el sistema audita en tiempo real que los ingresos ocurran en los días (`dias_operativos`) y horarios (`hora_apertura` / `hora_cierre`) parametrizados, disparando advertencias visuales de sobrejornada en el dashboard táctico ante excesos.
 
 ### 4.3. Módulo de Hallazgos e Incidentes
 * **Reporte Rápido:** Durante una inspección, el técnico puede levantar un "Hallazgo" adjuntando una descripción del incidente, criticidad (Baja, Media, Alta, Crítica) y evidencia fotográfica.

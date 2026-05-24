@@ -32,6 +32,11 @@ export default function Locations({ empresa, locations, provincias, availableUse
         responsable_3_nombre: '',
         responsable_3_cargo: '',
         responsable_3_email: '',
+        dias_operativos: [],
+        hora_apertura: '',
+        hora_cierre: '',
+        es_roster_24_7: false,
+        radio_tolerancia_metros: 500,
     });
 
     const updateFilters = () => {
@@ -81,6 +86,11 @@ export default function Locations({ empresa, locations, provincias, availableUse
             responsable_3_nombre: location.responsable_3_nombre || '',
             responsable_3_cargo: location.responsable_3_cargo || '',
             responsable_3_email: location.responsable_3_email || '',
+            dias_operativos: location.dias_operativos || [],
+            hora_apertura: location.hora_apertura || '',
+            hora_cierre: location.hora_cierre || '',
+            es_roster_24_7: !!location.es_roster_24_7,
+            radio_tolerancia_metros: location.radio_tolerancia_metros ?? 500,
         });
         setShowForm(true);
     };
@@ -275,6 +285,129 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                     <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Sede</label>
                                     <input id="correo" name="correo" type="email" value={form.data.correo} onChange={e => form.setData('correo', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
+                                </div>
+                            </div>
+
+                            {/* Auditoría de Jornada y Roster 24/7 */}
+                            <div className="pt-6 border-t border-white/5">
+                                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-6">
+                                    <div>
+                                        <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-[0.4em] italic ml-4">Auditoría de Jornada y GPS</h4>
+                                        <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] ml-4 mt-1">Parametrización horaria y tolerancia de presencia</p>
+                                    </div>
+
+                                    {/* Toggle Switch Roster 24/7 (Tactical Pill) */}
+                                    <div className="flex items-center gap-4 bg-black/40 px-6 py-3 rounded-2xl border border-white/5">
+                                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest italic">Roster Minero 24/7</span>
+                                        <button 
+                                            type="button"
+                                            onClick={() => {
+                                                const newVal = !form.data.es_roster_24_7;
+                                                form.setData(data => ({
+                                                    ...data,
+                                                    es_roster_24_7: newVal,
+                                                    // Si se activa, vaciamos dias y horas
+                                                    dias_operativos: newVal ? [] : data.dias_operativos,
+                                                    hora_apertura: newVal ? '' : data.hora_apertura,
+                                                    hora_cierre: newVal ? '' : data.hora_cierre
+                                                }));
+                                            }}
+                                            className={`px-6 py-2.5 rounded-xl text-[9px] font-black uppercase italic tracking-widest transition-all duration-300 border ${
+                                                form.data.es_roster_24_7 
+                                                    ? 'bg-[#F69239]/20 border-[#F69239] text-[#F69239] shadow-lg shadow-[#F69239]/20 scale-105' 
+                                                    : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:border-white/20'
+                                            }`}
+                                        >
+                                            {form.data.es_roster_24_7 ? 'ACTIVO 24/7' : 'DESACTIVADO'}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white/5 p-6 rounded-[2.5rem] border border-white/5 space-y-6">
+                                    {form.data.es_roster_24_7 ? (
+                                        /* Roster 24/7 Activo - Mostrar Badge Informativo HUD */
+                                        <div className="flex flex-col items-center justify-center py-6 border border-[#F69239]/10 rounded-2xl bg-[#F69239]/5 shadow-inner">
+                                            <span className="text-xl font-black text-[#F69239] tracking-[0.4em] uppercase italic animate-pulse">
+                                                ★ OPERACIÓN CONTINUA 24/7 ★
+                                            </span>
+                                            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest italic mt-2">
+                                                MODALIDAD ROSTER MINERO HABILITADA. AUDITORÍA DE JORNADA Y CONTROL DOMINICAL OMITIDOS.
+                                            </p>
+                                        </div>
+                                    ) : (
+                                        /* Jornada Ordinaria - Mostrar selectores de días y horas */
+                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                            {/* Selector de Días Operativos (Píldoras Tácticas) */}
+                                            <div className="space-y-3">
+                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Días de Operación Ordinaria</label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(day => {
+                                                        const isSelected = form.data.dias_operativos.includes(day);
+                                                        return (
+                                                            <button
+                                                                key={day}
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    const currentDays = [...form.data.dias_operativos];
+                                                                    if (isSelected) {
+                                                                        form.setData('dias_operativos', currentDays.filter(d => d !== day));
+                                                                    } else {
+                                                                        form.setData('dias_operativos', [...currentDays, day]);
+                                                                    }
+                                                                }}
+                                                                className={`h-11 px-4 rounded-xl text-[10px] font-black uppercase italic tracking-wider transition-all border duration-300 ${
+                                                                    isSelected
+                                                                        ? 'bg-[#F69239] border-[#F69239] text-white shadow-md shadow-[#F69239]/20'
+                                                                        : 'bg-black/40 border-white/10 text-white/40 hover:text-white hover:border-white/20'
+                                                                }`}
+                                                            >
+                                                                {day.substring(0, 3)}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+
+                                            {/* Horas de apertura y cierre */}
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Apertura</label>
+                                                    <input 
+                                                        type="time" 
+                                                        value={form.data.hora_apertura || ''} 
+                                                        onChange={e => form.setData('hora_apertura', e.target.value)} 
+                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark] italic"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Cierre</label>
+                                                    <input 
+                                                        type="time" 
+                                                        value={form.data.hora_cierre || ''} 
+                                                        onChange={e => form.setData('hora_cierre', e.target.value)} 
+                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark] italic"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Tolerancia GPS - Siempre visible para el módulo Proof of Presence */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Radio Tolerancia GPS (Metros)</label>
+                                            <input 
+                                                type="number" 
+                                                min="0"
+                                                value={form.data.radio_tolerancia_metros} 
+                                                onChange={e => form.setData('radio_tolerancia_metros', parseInt(e.target.value) || 0)} 
+                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"
+                                            />
+                                        </div>
+                                        <div className="flex items-center text-[9px] font-bold text-white/20 uppercase tracking-widest italic pt-6 pl-4">
+                                            💡 Módulo Proof of Presence: Rango espacial de tolerancia configurado para verificar check-in y checkout de campo.
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

@@ -201,6 +201,11 @@ class CompanyController extends Controller
             'correo' => 'nullable|email|max:255',
             'tipo_sede' => 'nullable|string|max:100',
             'rubro' => 'nullable|string|max:100',
+            'dias_operativos' => 'nullable|array',
+            'hora_apertura' => 'nullable|string|max:10',
+            'hora_cierre' => 'nullable|string|max:10',
+            'es_roster_24_7' => 'boolean',
+            'radio_tolerancia_metros' => 'integer|min:0',
         ]);
 
         $data = $request->only([
@@ -209,6 +214,7 @@ class CompanyController extends Controller
             'responsable_1_nombre', 'responsable_1_cargo', 'responsable_1_email',
             'responsable_2_nombre', 'responsable_2_cargo', 'responsable_2_email',
             'responsable_3_nombre', 'responsable_3_cargo', 'responsable_3_email',
+            'dias_operativos', 'hora_apertura', 'hora_cierre', 'es_roster_24_7', 'radio_tolerancia_metros'
         ]);
 
         if ($id) {
