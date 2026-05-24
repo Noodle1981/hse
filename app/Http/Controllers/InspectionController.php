@@ -35,6 +35,23 @@ class InspectionController extends Controller
         $assignmentId = $assignmentId ?: $request->query('assignment');
         $visitId = $request->query('visit_id');
 
+        // Autogenerar asignación al vuelo si estamos dentro de una visita y es ad-hoc (sin asignación previa)
+        if (!$assignmentId && $visitId) {
+            $visit = \App\Models\VisitCertificate::find($visitId);
+            if ($visit) {
+                $assignment = \App\Models\ChecklistAssignment::create([
+                    'user_id' => Auth::id(),
+                    'sede_id' => $visit->sede_id,
+                    'empresa_id' => $visit->empresa_id,
+                    'dynamic_checklist_id' => $checklist->id,
+                    'due_date' => now(),
+                    'status' => 'in_progress',
+                    'notes' => 'Vínculo automático al vuelo para visita #' . $visit->id,
+                ]);
+                $assignmentId = $assignment->id;
+            }
+        }
+
         $assignment = null;
         if ($assignmentId) {
             $assignment = ChecklistAssignment::where('id', $assignmentId)
@@ -169,6 +186,7 @@ class InspectionController extends Controller
                 'supervisor_name' => $request->supervisor_name,
                 'supervisor_signature' => $supervisorSignaturePath,
                 'technician_signature' => $technicianSignaturePath,
+                'result' => $inspection->evaluateResult(),
             ]);
 
             if ($inspection->checklist_assignment_id) {
@@ -264,6 +282,9 @@ class InspectionController extends Controller
         if ($request->fecha_fin) {
             $query->whereDate('completed_at', '<=', $request->fecha_fin);
         }
+        if ($request->checklist_id) {
+            $query->where('dynamic_checklist_id', $request->checklist_id);
+        }
 
         $inspections = $query->paginate(15)->withQueryString();
 
@@ -280,7 +301,7 @@ class InspectionController extends Controller
         return Inertia::render('Tecnico/Inspections/History', [
             'inspections' => $inspections,
             'empresas' => $empresas,
-            'filters' => $request->only(['empresa', 'sede', 'fecha_inicio', 'fecha_fin']),
+            'filters' => $request->only(['empresa', 'sede', 'fecha_inicio', 'fecha_fin', 'checklist_id']),
         ]);
     }
 

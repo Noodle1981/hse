@@ -224,7 +224,7 @@ export default function Index({
                     )}
 
                     {/* MATRIZ DE CUMPLIMIENTO */}
-                    <div className="bg-ep-dark/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-2xl relative overflow-hidden group">
+                    <div className="bg-[#141421] rounded-[2.5rem] border border-white/5 shadow-2xl relative group">
                         <div className="px-8 py-6 border-b border-white/5 flex items-center justify-between bg-black/20">
                              <div className="flex items-center gap-3">
                                 <div className="w-2 h-6 bg-ep-primary rounded-full"></div>

@@ -85,6 +85,38 @@ class VisitChecklistCompletion extends Model
      */
     public function getFailureAnalysisAttribute()
     {
+        // 1. Si hay una inspección (DynamicInspection) vinculada a través del assignment,
+        // usamos sus respuestas reales como única fuente de verdad.
+        $assignment = $this->assignment;
+        if ($assignment) {
+            $inspection = $assignment->inspection;
+            if ($inspection && $inspection->status !== 'completed') {
+                $completed = \App\Models\DynamicInspection::where('checklist_assignment_id', $assignment->id)
+                    ->where('status', 'completed')
+                    ->latest('id')
+                    ->first();
+                if ($completed) {
+                    $inspection = $completed;
+                }
+            }
+            if ($inspection) {
+                $inspection->loadMissing('answers.question');
+                $failedCount = 0;
+                $totalCount = $inspection->answers->count();
+                foreach ($inspection->answers as $answer) {
+                    if ($answer->isFailure()) {
+                        $failedCount++;
+                    }
+                }
+                return [
+                    'total' => $totalCount,
+                    'failed' => $failedCount,
+                    'is_failed' => $failedCount > 0
+                ];
+            }
+        }
+
+        // 2. Lógica fallback sobre el campo responses de la completación (ej. migraciones legacy)
         $responses = $this->responses ?? [];
         $checklist = $this->assignment?->checklist ?? null;
         

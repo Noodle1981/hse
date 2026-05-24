@@ -85,7 +85,8 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
         
         if (isEmulation) {
             alert('Modo Emulación: El protocolo ha finalizado correctamente (No se guardaron datos).');
-            router.get(route('gestor.checklists.index'));
+            const fallbackRoute = isTecnico ? 'tecnico.checklists.tasks.index' : 'gestor.checklists.index';
+            router.get(route(fallbackRoute));
             return;
         }
 

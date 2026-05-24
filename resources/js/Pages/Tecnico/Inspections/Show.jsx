@@ -30,9 +30,12 @@ export default function Show({ inspection }) {
                         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
                         
                         <div className="flex items-center gap-6">
-                            <Link href={route('tecnico.inspections.history')} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all shadow-lg">
+                            <button 
+                                onClick={() => window.history.back()} 
+                                className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all shadow-lg cursor-pointer"
+                            >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
-                            </Link>
+                            </button>
                             <div>
                                 <h1 className="text-2xl font-black uppercase italic tracking-tighter leading-none">{checklist?.title}</h1>
                                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic mt-2">Certificado por {auth.user.name} el {new Date(inspection.completed_at).toLocaleDateString()}</p>
@@ -40,7 +43,9 @@ export default function Show({ inspection }) {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <a href={route('gestor.inspections.pdf.preview', { id: inspection.id })} target="_blank" className="px-10 py-5 bg-blue-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-blue-600/20 hover:brightness-110 active:scale-95">Ver Certificado PDF</a>
+                            {inspection?.id && (
+                                <a href={route('tecnico.inspections.pdf.preview', { id: inspection.id })} target="_blank" className="px-10 py-5 bg-blue-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-blue-600/20 hover:brightness-110 active:scale-95">Ver Certificado PDF</a>
+                            )}
                         </div>
                     </div>
 

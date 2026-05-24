@@ -137,6 +137,31 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
 * **Preparación Proof of Presence (GPS):**
   * La base relacional de `visit_certificates` y `sedes` incluye campos de geolocalización (`checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng` y `radio_tolerancia_metros`) listos para cruzarse en el backend aplicando la **Fórmula matemática de Haversine** para calcular distancias terrestres exactas en metros.
 
+### 3.4. El HUD Táctico del Técnico & Nueva Inspección
+* **Propósito:** Ofrecer un panel de comandos de pantalla completa e inmersivo en el terreno que permita al técnico iniciar misiones planificadas u auto-asignarse checklists.
+* **Operación:**
+  * **Asignaciones como Compromisos:** El listado de asignaciones del técnico ya no contiene disparadores de ejecución directa. En su lugar, es un tablero de compromisos anuales con un botón **"Ver Historial"** que carga los PDFs completados para ese checklist.
+  * **Nueva Inspección (Visita Activa):** Al pulsar "Nueva Inspección", se inicia una sesión activa en `InProgress.jsx` y se abre el **HUD ActionSelector**.
+  * **HUD ActionSelector:**
+    - Panel Izquierdo: Tareas programadas contractualmente para el mes.
+    - Panel Derecho: Acciones espontáneas o de emergencia (Checklist Ad-Hoc categorizados en acordeón, Capacitación Express rápida en línea, reporte de incidentes y hallazgos).
+  * **Counter Badges Acumulativos:** Si el técnico ejecuta múltiples pasadas del mismo checklist en la misma inspección, la tarjeta de progreso en `InProgress.jsx` muestra un **Counter Badge** en la esquina (`absolute -top-3 -right-3`, `rounded-2xl`, `font-black`) indicando la cantidad de ejecuciones completadas.
+
+### 3.5. Sistema de Roles Ultra-Robusto (Fix Definitivo)
+* **Propósito:** Prevenir errores recurrentes de autorización (403 Acceso Denegado) provocados por disparidades en la especificación de nombres de roles (plurales, acentos, separadores por coma o barra) entre rutas, políticas y vistas.
+* **Funcionamiento Unificado:**
+  * Toda la lógica de parseo reside en `User::parseRoles(string|array $roles)` de forma recursiva.
+  * Resuelve automáticamente strings planos (`'Técnico'`), delimitados por comas (`'tecnico,gestor'`), delimitados por pipes (`'tecnico|gestor'`), arrays y arrays anidados (`['gestor', 'tecnico,Socio']`).
+  * Normaliza de forma bidireccional los nombres legados (`Administrador`, `socio`, `Técnico`, `tecnicos`) a sus equivalentes lógicos internos (`gestor` o `tecnico`), haciendo que el motor sea a prueba de fallos en producción.
+  * El middleware `CheckRole` se simplifica delegando toda la matriz de variádicos directamente al modelo `User::hasRole()`.
+
+### 3.6. Enlace de Modelos en Rutas (Route Model Binding)
+* **Propósito:** Evitar la inyección accidental de instancias de modelo vacías (con `id: null`) al frontend, lo que causa fallas críticas en los generadores de rutas de Javascript (como Ziggy JS).
+* **Operación:**
+  * Laravel realiza la inyección automática cruzando el nombre del comodín de la ruta con la variable tipada en el controlador.
+  * **Regla Estricta:** Si el método en el controlador tipa un modelo (ej. `public function show(DynamicInspection $inspection)`), el comodín de la ruta en `routes/web.php` **debe llamarse exactamente `{inspection}`** y no `{id}`.
+  * Cambiar de `{id}` a `{inspection}` o `{finding}` garantiza que la base de datos se consulte en tiempo de resolución de la ruta, retornando datos 100% consistentes y previniendo crashes en la renderización React.
+
 ---
 
 ## 4. 💡 PLAYBOOK DE PROMPTS: Optimización para Desarrollar con IA (NotebookLM)

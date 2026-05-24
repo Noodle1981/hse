@@ -130,6 +130,7 @@ class TrainingController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'position' => 'nullable|string|max:255',
+            'dni' => 'nullable|string|max:255',
             'signature' => 'required|string',
         ]);
 
@@ -137,6 +138,7 @@ class TrainingController extends Controller
         $attendees[] = [
             'name' => $request->name,
             'position' => $request->position,
+            'dni' => $request->dni,
             'signature' => $request->signature,
             'timestamp' => now()->toDateTimeString(),
         ];
@@ -170,6 +172,39 @@ class TrainingController extends Controller
         }
 
         return back()->with('message', 'Asistente eliminado.');
+    }
+
+    /**
+     * Update training session details (description and notes/observations).
+     */
+    public function updateDetails(Request $request, VisitTraining $visitTraining)
+    {
+        $request->validate([
+            'description' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        $visitTraining->update([
+            'description' => $request->description,
+            'notes' => $request->notes,
+        ]);
+
+        return back()->with('message', 'Detalles de la capacitación actualizados.');
+    }
+
+    /**
+     * Finalize the training session.
+     */
+    public function finalize(Request $request, VisitTraining $visitTraining)
+    {
+        if ($visitTraining->training) {
+            $visitTraining->training->update([
+                'status' => 'completed',
+            ]);
+        }
+
+        return redirect()->route('tecnico.visits.in-progress', $visitTraining->visit_certificate_id)
+            ->with('message', 'Capacitación finalizada y registrada correctamente.');
     }
 
     /**

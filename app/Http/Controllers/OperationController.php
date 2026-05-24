@@ -321,7 +321,8 @@ class OperationController extends Controller
         $visit->load([
             'sede.empresa',
             'checklistCompletions.assignment.checklist',
-            'trainings.training',
+            'checklistCompletions.assignment.inspection',
+            'trainings.training.attendances',
             'hallazgos',
             'incidentes'
         ]);
@@ -367,6 +368,7 @@ class OperationController extends Controller
             'pendingAssignments' => $pendingAssignments,
             'pendingTrainings'   => $pendingTrainings,
             'templates'          => \App\Models\Training::where('is_template', true)->get(),
+            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->get(),
         ]);
     }
 
@@ -493,7 +495,7 @@ class OperationController extends Controller
         $plan = \App\Models\AnnualPlan::findOrFail($request->plan_id);
 
         if ($plan->category === 'Capacitación') {
-            \App\Models\Training::create([
+            $training = \App\Models\Training::create([
                 'empresa_id' => $visit->sede->empresa_id,
                 'sede_id' => $visit->sede_id,
                 'user_id' => $visit->user_id,
@@ -506,6 +508,20 @@ class OperationController extends Controller
                 'dynamic_checklist_id' => $plan->checklist_id,
                 'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
             ]);
+
+            // Crear el registro de sesión de capacitación en la visita de forma automática
+            $visitTraining = \App\Models\VisitTraining::create([
+                'visit_certificate_id' => $visit->id,
+                'training_id' => $training->id,
+                'is_adhoc' => false,
+                'title' => $training->title,
+                'description' => $training->description ?? 'Capacitación programada de plan anual',
+                'duration_minutes' => $training->duration ?? 15,
+                'attendees' => [],
+            ]);
+
+            return redirect()->route('tecnico.trainings.session', $visitTraining->id)
+                ->with('message', 'Capacitación iniciada e incorporada a la visita.');
         } else {
             /** @var \App\Models\ChecklistAssignment $assignment */
             $assignment = \App\Models\ChecklistAssignment::create([
@@ -517,9 +533,13 @@ class OperationController extends Controller
                 'status' => 'pending',
                 'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
             ]);
-        }
 
-        return back()->with('message', 'Tarea "' . $plan->activity_name . '" asignada correctamente.');
+            return redirect()->route('tecnico.checklists.fill', [
+                'id' => $assignment->dynamic_checklist_id,
+                'assignment' => $assignment->id,
+                'visit_id' => $visit->id
+            ])->with('message', 'Inspección asignada e iniciada.');
+        }
     }
 
     /**

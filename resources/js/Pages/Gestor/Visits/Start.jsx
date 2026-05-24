@@ -13,7 +13,7 @@ export default function Start({ sedes }) {
 
     const filteredSedes = sedes.filter(sede => 
         sede.nombre_sede.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        sede.empresa.nombre_fantasia.toLowerCase().includes(searchTerm.toLowerCase())
+        (sede.empresa?.nombre_fantasia || sede.empresa?.nombre || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const submit = (e) => {
@@ -61,11 +61,11 @@ export default function Start({ sedes }) {
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black italic shadow-lg ${form.data.sede_id == sede.id ? 'bg-orange-500 text-white' : 'bg-white/5 text-white/40'}`}>
-                                                    {sede.empresa.nombre_fantasia.substring(0, 1)}
+                                                    {(sede.empresa?.nombre_fantasia || sede.empresa?.nombre || 'E').substring(0, 1)}
                                                 </div>
                                                 <div>
                                                     <div className={`text-sm font-black italic uppercase transition-colors ${form.data.sede_id == sede.id ? 'text-white' : 'text-white/60'}`}>{sede.nombre_sede}</div>
-                                                    <div className="text-[9px] font-black text-white/20 uppercase tracking-widest italic">{sede.empresa.nombre_fantasia}</div>
+                                                    <div className="text-[9px] font-black text-white/20 uppercase tracking-widest italic">{sede.empresa?.nombre_fantasia || sede.empresa?.nombre || 'Empresa'}</div>
                                                 </div>
                                             </div>
                                             <input 

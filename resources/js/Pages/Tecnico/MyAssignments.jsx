@@ -185,11 +185,11 @@ export default function MyAssignments({
                                 <div className="relative z-10 flex-shrink-0 w-full md:w-auto mt-2 md:mt-0">
                                     {activeVisit ? (
                                         <Link href={safeRoute('tecnico.visits.in-progress', activeVisit?.id)} className="w-full md:w-auto text-center px-6 py-3.5 bg-ep-primary text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.3em] shadow-2xl shadow-ep-primary/20 hover:brightness-110 hover:scale-[1.03] active:scale-95 transition-all whitespace-nowrap inline-block">
-                                            Reanudar Misión
+                                            Reanudar Inspección
                                         </Link>
                                     ) : (
                                         <Link href={safeRoute('gestor.operations.visits.create')} className="w-full md:w-auto text-center px-6 py-3.5 bg-ep-primary text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.3em] shadow-2xl shadow-ep-primary/20 hover:brightness-110 hover:scale-[1.03] active:scale-95 transition-all outline-none whitespace-nowrap inline-block">
-                                            Nueva Visita
+                                            Nueva Inspección
                                         </Link>
                                     )}
                                 </div>
@@ -386,17 +386,12 @@ export default function MyAssignments({
                                                                     {item?.status === 'borrador' ? 'Continuar Redacción' : 'Ejecutar'}
                                                                 </Link>
                                                             ) : item?.checklist_id ? (
-                                                                <button
-                                                                    onClick={() => router.post(safeRoute('tecnico.checklists.execute'), {
-                                                                        type: item.type,
-                                                                        id: item.id,
-                                                                        source: item.source,
-                                                                        sede_id: item.sede_id
-                                                                    })}
+                                                                <Link
+                                                                    href={safeRoute('tecnico.inspections.index', { checklist_id: item.checklist_id })}
                                                                     className={`px-6 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme?.bg || 'bg-ep-primary'} ${theme?.shadow || ''} outline-none`}
                                                                 >
-                                                                    {item?.status === 'in_progress' ? 'Reanudar' : 'Ejecutar'}
-                                                                </button>
+                                                                    Ver Historial
+                                                                </Link>
                                                             ) : (
                                                                 <button disabled className="px-6 py-2.5 bg-white/5 text-white/20 rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] cursor-not-allowed">
                                                                     Ver

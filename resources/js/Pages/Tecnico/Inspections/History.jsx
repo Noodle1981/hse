@@ -11,7 +11,7 @@ export default function History({ inspections, filters, empresas = [] }) {
     const [fechaFin, setFechaFin] = useState(filters.fecha_fin || '');
 
     const updateFilters = () => {
-        router.get(route('tecnico.inspections.history'), { 
+        router.get(route('tecnico.inspections.index'), { 
             empresa, 
             sede, 
             fecha_inicio: fechaInicio, 
@@ -189,7 +189,7 @@ export default function History({ inspections, filters, empresas = [] }) {
                                             <td className="px-10 py-6 text-right">
                                                 <div className="flex items-center justify-end gap-3 transition-all duration-300">
                                                     {ins?.id && (
-                                                        <a href={route('gestor.inspections.pdf.preview', { id: ins.id })} target="_blank" className="h-10 w-10 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
+                                                        <a href={route('tecnico.inspections.pdf.preview', { id: ins.id })} target="_blank" className="h-10 w-10 bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
                                                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" strokeWidth="2"/></svg>
                                                         </a>
                                                     )}

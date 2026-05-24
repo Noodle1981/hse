@@ -33,7 +33,8 @@ export default function Create({ sedes, visit_id }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(route('gestor.operations.findings.store'));
+        const isTecnico = auth?.user?.is_technician;
+        post(route(isTecnico ? 'tecnico.hallazgos.store' : 'gestor.hallazgos.store'));
     };
 
     return (

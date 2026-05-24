@@ -143,7 +143,7 @@ class ContractController extends Controller
                 'period_end' => $endDate,
                 'year' => $startDate->year, // Sincronización explícita del año
                 'category' => $request->category,
-                'frequency' => $request->category === 'Informe' ? $request->frequency : 'none',
+                'frequency' => $request->frequency,
                 'activity_name' => $request->activity_name,
                 'activity_code' => $request->activity_code,
                 'checklist_id' => in_array($request->category, ['Inspección', 'Capacitación']) ? $request->checklist_id : null,
@@ -201,14 +201,40 @@ class ContractController extends Controller
             'activity_name' => 'required|string|max:255',
             'category' => 'required|in:Capacitación,Inspección,Informe',
             'activity_code' => 'nullable|string|max:255',
+            'frequency' => 'required|in:none,mensual,bimestral,trimestral',
         ]);
 
         $plan = AnnualPlan::findOrFail($id);
+        
+        $scheduled = $plan->scheduled_months ?? [];
+        if ($request->frequency !== $plan->frequency) {
+            $startDate = Carbon::parse($plan->period_start)->startOfMonth();
+            $endDate = Carbon::parse($plan->period_end)->endOfMonth();
+            $duration = (int) $startDate->diffInMonths($endDate) + 1;
+            
+            $scheduled = [];
+            if ($request->frequency !== 'none') {
+                for ($i = 0; $i < $duration; $i++) {
+                    $monthNum = $i + 1;
+                    $shouldCheck = false;
+                    if ($request->frequency === 'mensual') $shouldCheck = true;
+                    elseif ($request->frequency === 'bimestral' && $monthNum % 2 === 0) $shouldCheck = true;
+                    elseif ($request->frequency === 'trimestral' && $monthNum % 3 === 0) $shouldCheck = true;
+
+                    if ($shouldCheck) {
+                        $scheduled[] = $startDate->copy()->addMonths($i)->format('Y-m');
+                    }
+                }
+            }
+        }
+
         $plan->update([
             'category' => $request->category,
             'activity_name' => $request->activity_name,
             'activity_code' => $request->activity_code,
             'checklist_id' => in_array($request->category, ['Inspección', 'Capacitación']) ? $request->checklist_id : null,
+            'frequency' => $request->frequency,
+            'scheduled_months' => $scheduled,
         ]);
 
         return back()->with('message', 'Actividad actualizada.');

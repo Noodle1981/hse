@@ -136,8 +136,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [FindingController::class, 'index'])->name('index');
             Route::get('/reportar', [FindingController::class, 'create'])->name('create');
             Route::post('/', [FindingController::class, 'store'])->name('store');
-            Route::get('/{id}', [FindingController::class, 'show'])->name('show');
-            Route::post('/{id}/update', [FindingController::class, 'addUpdate'])->name('update');
+            Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
+            Route::post('/{finding}/update', [FindingController::class, 'addUpdate'])->name('update');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });
@@ -153,7 +153,7 @@ Route::middleware(['auth'])->group(function () {
         // Historial Inspecciones (React)
         Route::prefix('inspections')->name('inspections.')->group(function () {
             Route::get('/', [InspectionController::class, 'historyGestor'])->name('index');
-            Route::get('/{id}', [InspectionController::class, 'show'])->name('show');
+            Route::get('/{inspection}', [InspectionController::class, 'show'])->name('show');
             Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('pdf.preview');
         });
@@ -162,10 +162,6 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('operations')->name('operations.')->group(function () {
             Route::prefix('visits')->name('visits.')->group(function () {
                 Route::get('/', [OperationController::class, 'index'])->middleware(['role:Administrador'])->name('index');
-                Route::get('/create', [OperationController::class, 'create'])->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->name('create');
-                Route::post('/store', [OperationController::class, 'store'])->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->name('store');
-                Route::get('/{visit}', [OperationController::class, 'show'])->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->name('show');
-                Route::post('/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
             });
 
             Route::prefix('trainings')->name('trainings.')->group(function () {
@@ -176,6 +172,8 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/start-in-visit/{visit}', [TrainingController::class, 'startInVisit'])->name('start-in-visit');
                 Route::post('/add-attendee/{visitTraining}', [TrainingController::class, 'addAttendee'])->name('add-attendee');
                 Route::post('/remove-attendee/{visitTraining}/{index}', [TrainingController::class, 'removeAttendee'])->name('remove-attendee');
+                Route::post('/session/{visitTraining}/update-details', [TrainingController::class, 'updateDetails'])->name('update-details');
+                Route::post('/session/{visitTraining}/finalize', [TrainingController::class, 'finalize'])->name('finalize');
             });
 
         });
@@ -222,6 +220,22 @@ Route::middleware(['auth'])->group(function () {
         // Personalización de Empresa (TODO: Migrar a React)
         // Route::get('/administration/branding/{id}', ...)->name('administration.branding');
 
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas GESTOR Compartidas con Técnico (Prefijo: /gestor)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->group(function() {
+        Route::prefix('operations')->name('operations.')->group(function () {
+            Route::prefix('visits')->name('visits.')->group(function () {
+                Route::get('/create', [OperationController::class, 'create'])->name('create');
+                Route::post('/store', [OperationController::class, 'store'])->name('store');
+                Route::get('/{visit}', [OperationController::class, 'show'])->name('show');
+                Route::post('/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
+            });
+        });
     });
 
     /*
@@ -290,6 +304,12 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}/attendance', [TrainingController::class, 'attendance'])->name('attendance');
             Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/session/{visitTraining}', [TrainingController::class, 'session'])->name('session');
+            Route::post('/add-attendee/{visitTraining}', [TrainingController::class, 'addAttendee'])->name('add-attendee');
+            Route::post('/remove-attendee/{visitTraining}/{index}', [TrainingController::class, 'removeAttendee'])->name('remove-attendee');
+            Route::post('/start-in-visit/{visit}', [TrainingController::class, 'startInVisit'])->name('start-in-visit');
+            Route::post('/session/{visitTraining}/update-details', [TrainingController::class, 'updateDetails'])->name('update-details');
+            Route::post('/session/{visitTraining}/finalize', [TrainingController::class, 'finalize'])->name('finalize');
         });
 
 
@@ -300,7 +320,7 @@ Route::middleware(['auth'])->group(function () {
              Route::get('/', [FindingController::class, 'myFindings'])->name('index'); // Redundante con mis-hallazgos mas arriba pero seguro
              Route::get('/reportar', [FindingController::class, 'create'])->name('create');
              Route::post('/', [FindingController::class, 'store'])->name('store');
-             Route::get('/{id}', [FindingController::class, 'show'])->name('show');
+             Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
              Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
              Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });
@@ -308,7 +328,7 @@ Route::middleware(['auth'])->group(function () {
         // Historial Inspecciones (Técnico - React)
         Route::prefix('inspections')->name('inspections.')->group(function () {
             Route::get('/', [InspectionController::class, 'historyTecnico'])->name('index');
-            Route::get('/{id}', [InspectionController::class, 'show'])->name('show');
+            Route::get('/{inspection}', [InspectionController::class, 'show'])->name('show');
             Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('pdf.preview');
         });

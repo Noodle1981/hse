@@ -126,6 +126,32 @@ class User extends Authenticatable
     }
 
     /**
+     * Parsea recursivamente y aplana cualquier representación de roles a un array plano de strings.
+     * Soporta strings simples, separados por comas, pipes (|), y arrays (incluso anidados).
+     */
+    private function parseRoles(string|array $roles): array
+    {
+        $parsed = [];
+        $items = is_array($roles) ? $roles : [$roles];
+
+        foreach ($items as $item) {
+            if (is_string($item)) {
+                $parts = preg_split('/[,|]/', $item);
+                foreach ($parts as $part) {
+                    $trimmed = trim($part);
+                    if ($trimmed !== '') {
+                        $parsed[] = $trimmed;
+                    }
+                }
+            } elseif (is_array($item)) {
+                $parsed = array_merge($parsed, $this->parseRoles($item));
+            }
+        }
+
+        return $parsed;
+    }
+
+    /**
      * Verifica si el usuario tiene uno o más roles (soporta nombres viejos y nuevos).
      * Toma en cuenta el rol activo en la sesión si existe.
      */
@@ -135,16 +161,17 @@ class User extends Authenticatable
         $sessionRole = session('active_role');
         $userRoleNormalized = $sessionRole ? $this->normalizeRole($sessionRole) : $this->normalizeRole($this->rol ?? '');
 
-        if (is_array($roles)) {
-            foreach ($roles as $role) {
-                if ($userRoleNormalized === $this->normalizeRole($role)) {
-                    return true;
-                }
+        \Log::info('hasRole called', ['user' => $this->email, 'roles' => $roles, 'user_role' => $userRoleNormalized]);
+
+        $flatRoles = $this->parseRoles($roles);
+
+        foreach ($flatRoles as $role) {
+            if ($userRoleNormalized === $this->normalizeRole($role)) {
+                return true;
             }
-            return false;
         }
         
-        return $userRoleNormalized === $this->normalizeRole($roles);
+        return false;
     }
 
     public function isSuperAdmin(): bool

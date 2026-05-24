@@ -1,9 +1,10 @@
 import { router, Head, useForm, usePage, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import SignaturePad from 'signature_pad';
+import ActionSelector from './ActionSelector';
 
-export default function InProgress({ visit, user, suggestedPlanTasks = [], pendingAssignments = [], pendingTrainings = [], templates = [] }) {
+export default function InProgress({ visit, user, suggestedPlanTasks = [], pendingAssignments = [], pendingTrainings = [], templates = [], checklistTemplates = [] }) {
     const { auth, flash } = usePage().props;
     
     // ESTADOS TÁCTICOS
@@ -12,6 +13,36 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
     const [showAutoAssignModal, setShowAutoAssignModal] = useState(false);
     const [isExceeded, setIsExceeded] = useState(false);
     const [dismissedAlert, setDismissedAlert] = useState(false);
+    const [showActionSelector, setShowActionSelector] = useState(false);
+
+    const completedTasks = useMemo(() => {
+        const list = [];
+        
+        visit.checklist_completions?.forEach(completion => {
+            list.push({
+                id: `completion-${completion.id}`,
+                title: completion.assignment?.checklist?.title || 'Checklist',
+                type: 'inspection',
+                date: completion.completed_at ? new Date(completion.completed_at) : (completion.created_at ? new Date(completion.created_at) : new Date()),
+                failures: completion.failure_analysis || { failed: 0 },
+                detail: completion
+            });
+        });
+
+        visit.trainings?.forEach(vt => {
+            if (vt.training?.status === 'completed' || vt.training?.status === 'finalizado' || vt.is_adhoc || vt.training_id === null) {
+                list.push({
+                    id: `training-${vt.id}`,
+                    title: vt.title || vt.training?.title || 'Capacitación',
+                    type: 'training',
+                    date: vt.created_at ? new Date(vt.created_at) : new Date(),
+                    detail: vt
+                });
+            }
+        });
+
+        return list.sort((a, b) => b.date - a.date);
+    }, [visit]);
 
     // CRONÓMETRO DE OPERACIÓN
     useEffect(() => {
@@ -79,15 +110,7 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
         });
     };
 
-    // ASIGNACIÓN DE TAREAS SUGERIDAS (CLON LEGACY)
-    const assignSuggested = (planId) => {
-        router.post(route('tecnico.visits.assign-suggested', visit.id), { plan_id: planId }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                // Notificación táctica? (opcional)
-            }
-        });
-    };
+
 
     return (
         <AuthenticatedLayout title="Bóveda Operativa (MODO ACCIÓN)">
@@ -108,6 +131,9 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                         </div>
                     </div>
                     <div className="flex items-center gap-6">
+                        <button onClick={() => setShowActionSelector(true)} className="px-4 py-2 bg-ep-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-lg shadow-ep-primary/20 hover:brightness-110 active:scale-95 transition-all">
+                            Nueva Tarea
+                        </button>
                         <div className="hidden sm:flex flex-col items-end">
                             <span className="text-[9px] font-black text-white/20 uppercase tracking-widest italic leading-none mb-1">Efector Asignado</span>
                             <span className="text-[11px] font-black text-indigo-100 uppercase italic leading-none">{user.name}</span>
@@ -142,123 +168,163 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                             {/* COLUMNA IZQUIERDA: MISIONES Y TAREAS (7 COLS) */}
                             <div className="lg:col-span-7 space-y-10">
                                 
-                                {/* PLANIFICACIÓN MENSUAL (MISIONES SUGERIDAS) */}
-                                {suggestedPlanTasks.length > 0 && (
-                                    <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-2xl">
-                                        <div className="absolute -right-20 -top-20 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl group-hover:scale-125 transition-transform duration-1000"></div>
-                                        
-                                        <div className="flex items-center gap-6 mb-8 relative z-10">
-                                            <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center shadow-lg rotate-3 group-hover:rotate-0 transition-transform">
-                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                                            </div>
-                                            <div>
-                                                <h3 className="text-xs font-black text-indigo-400 uppercase tracking-[0.3em] italic mb-1">Planificación <span className="text-white">Mensual</span></h3>
-                                                <p className="text-[10px] font-bold text-indigo-100/40 uppercase italic tracking-widest">Tareas proyectadas por auditoría para esta sede</p>
-                                            </div>
+                                {/* NUEVA TAREA TRIGGER CARD */}
+                                <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
+                                    <div className="p-10 flex flex-col items-center justify-center text-center relative z-10 space-y-8">
+                                        <div className="h-16 w-16 rounded-2xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center rotate-3 shadow-inner hover:rotate-0 transition-all duration-500">
+                                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                                            </svg>
                                         </div>
-
-                                        {/* Separar por categoría */}
-                                        {['Inspección', 'Capacitación'].map(cat => {
-                                            const items = suggestedPlanTasks.filter(p => p.category === cat);
-                                            if (items.length === 0) return null;
-                                            const catColor = cat === 'Inspección' ? 'orange' : 'blue';
-                                            const catIcon = cat === 'Inspección'
-                                                ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                                                : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>;
-                                            return (
-                                                <div key={cat} className="mb-6 relative z-10">
-                                                    <div className="flex items-center gap-2 mb-3">
-                                                        <svg className={`w-4 h-4 text-${catColor}-400`} fill="none" stroke="currentColor" viewBox="0 0 24 24">{catIcon}</svg>
-                                                        <span className={`text-[9px] font-black text-${catColor}-400 uppercase tracking-[0.3em] italic`}>{cat}es del mes</span>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                                        {items.map(plan => (
-                                                            <div key={plan.id} className={`bg-black/40 border border-white/5 rounded-3xl p-5 hover:border-${catColor}-500/30 transition-all flex justify-between items-center group/item`}>
-                                                                <div className="flex-1 pr-4 min-w-0">
-                                                                    <h4 className={`text-[11px] font-black text-white uppercase italic tracking-tight group-hover/item:text-${catColor}-400 transition-colors leading-tight mb-1 truncate`}>{plan.activity_name}</h4>
-                                                                    <span className="text-[8px] font-black text-indigo-100/20 uppercase tracking-widest italic block">{plan.activity_code}</span>
-                                                                    <span className={`text-[8px] font-black text-${catColor}-500/40 uppercase tracking-widest italic mt-1 flex items-center gap-1`}>
-                                                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                                        Vence {new Date(plan.due_date).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' })}
-                                                                    </span>
-                                                                </div>
-                                                                <button
-                                                                    onClick={() => assignSuggested(plan.id)}
-                                                                    className={`h-9 px-4 bg-${catColor}-500/10 text-${catColor}-400 rounded-xl text-[9px] font-black uppercase tracking-widest border border-${catColor}-500/20 hover:bg-${catColor}-500 hover:text-white transition-all italic flex-shrink-0`}
-                                                                >
-                                                                    Vincular
-                                                                </button>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                        
+                                        <div className="space-y-3">
+                                            <span className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic">Consola de Operaciones</span>
+                                            <h2 className="text-2xl font-black text-white uppercase italic tracking-tight leading-none">Nueva Tarea en Campo</h2>
+                                            <p className="text-xs text-indigo-100/60 max-w-sm italic">Inicia una inspección de control, capacitación express o registra novedades en esta sede.</p>
+                                        </div>
+                                        
+                                        <button 
+                                            onClick={() => setShowActionSelector(true)}
+                                            className="px-10 py-4 bg-orange-500 text-white rounded-2xl text-xs font-black uppercase italic tracking-widest hover:brightness-110 active:scale-95 transition-all shadow-[0_0_25px_rgba(246,146,57,0.35)] border border-orange-400/20 relative overflow-hidden group"
+                                        >
+                                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                            NUEVA TAREA
+                                        </button>
                                     </div>
-                                )}
+                                </div>
 
-                                {/* CHECKLISTS PENDIENTES */}
+                                {/* PROTOCOLOS HECHOS / HISTORIAL */}
                                 <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
                                     <div className="px-8 py-6 bg-black/20 border-b border-white/5 flex justify-between items-center relative z-10">
                                         <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center rotate-3">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center rotate-3 shadow-inner">
+                                                <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             </div>
-                                            <h2 className="font-black text-white uppercase tracking-[0.2em] text-[11px] italic">Protocolos <span className="text-orange-500">Pendientes</span></h2>
+                                            <h2 className="font-black text-white uppercase tracking-[0.2em] text-[11px] italic">Protocolos <span className="text-emerald-500">Hechos</span></h2>
                                         </div>
-                                        <button onClick={() => setShowAutoAssignModal(true)} className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-orange-500 flex items-center gap-2 transition-all italic">
-                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                                            Auto-Afectar
-                                        </button>
+                                        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 italic">
+                                            Historial: {completedTasks.length} {completedTasks.length === 1 ? 'tarea' : 'tareas'}
+                                        </span>
                                     </div>
 
                                     <div className="p-8 space-y-5 relative z-10">
-                                        {visit.checklist_completions?.length === 0 && pendingAssignments.length === 0 && (
-                                            <div className="text-center py-12 border-2 border-dashed border-white/5 rounded-[2rem]">
-                                                <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.4em] italic leading-relaxed">No hay checklists vinculados actualmente</p>
+                                        {completedTasks.length === 0 ? (
+                                            <div className="text-center py-16 border-2 border-dashed border-white/5 rounded-[2rem] bg-black/10">
+                                                <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] italic leading-relaxed max-w-xs mx-auto">
+                                                    Aún no se han registrado tareas en esta visita. Presiona "Nueva Tarea" arriba para iniciar.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-4">
+                                                {completedTasks.map((task) => {
+                                                    const timeStr = task.date ? task.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) : '';
+                                                    return (
+                                                        <div 
+                                                            key={task.id} 
+                                                            className={`relative border rounded-3xl p-6 flex flex-col sm:flex-row gap-4 justify-between sm:items-center group/done transition-all duration-300 ${
+                                                                task.type === 'inspection' 
+                                                                    ? (task.failures.failed > 0 
+                                                                        ? 'bg-rose-500/[0.02] border-rose-500/10 hover:border-rose-500/30' 
+                                                                        : 'bg-orange-500/[0.02] border-orange-500/10 hover:border-orange-500/30')
+                                                                    : 'bg-indigo-500/[0.02] border-indigo-500/10 hover:border-indigo-500/30'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-5">
+                                                                {/* Icono de Estado Dinámico Conforme al Color */}
+                                                                <div className={`h-12 w-12 rounded-2xl border flex items-center justify-center shrink-0 shadow-inner transition-transform duration-500 group-hover/done:scale-110 ${
+                                                                    task.type === 'inspection' 
+                                                                        ? (task.failures.failed > 0 
+                                                                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-400' 
+                                                                            : 'bg-orange-500/10 border-orange-500/20 text-orange-400')
+                                                                        : 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400'
+                                                                }`}>
+                                                                    {task.type === 'inspection' ? (
+                                                                        task.failures.failed > 0 ? (
+                                                                            // X icon for failure (blink/pulse)
+                                                                            <svg className="w-5.5 h-5.5 animate-pulse text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                                                                        ) : (
+                                                                            // Check/Tilde icon for pass
+                                                                            <svg className="w-5.5 h-5.5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                                                        )
+                                                                    ) : (
+                                                                        // Book icon for training
+                                                                        <svg className="w-5.5 h-5.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                                                    )}
+                                                                </div>
+                                                                
+                                                                <div className="space-y-1">
+                                                                    <div className="flex flex-wrap items-center gap-2">
+                                                                        <h4 className="text-sm font-black text-white uppercase italic tracking-tight leading-none">{task.title}</h4>
+                                                                        <span className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic">{timeStr} HS</span>
+                                                                    </div>
+                                                                    
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`text-[9px] font-black uppercase tracking-widest italic ${
+                                                                            task.type === 'inspection' 
+                                                                                ? (task.failures.failed > 0 ? 'text-rose-500/60' : 'text-orange-500/60') 
+                                                                                : 'text-indigo-500/60'
+                                                                        }`}>
+                                                                            {task.type === 'inspection' ? 'INSPECCIÓN COMPLETADA' : 'CAPACITACIÓN COMPLETADA'}
+                                                                        </span>
+                                                                        
+                                                                        {task.type === 'inspection' && task.failures && (
+                                                                            <>
+                                                                                <span className="h-1 w-1 rounded-full bg-white/20"></span>
+                                                                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest italic ${
+                                                                                    task.failures.failed > 0 
+                                                                                        ? 'bg-rose-500/10 border border-rose-500/20 text-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.1)]' 
+                                                                                        : 'bg-orange-500/10 border border-orange-500/20 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.1)]'
+                                                                                }`}>
+                                                                                    {task.failures.failed > 0 ? `${task.failures.failed} Fallas` : 'Sin Fallas'}
+                                                                                </span>
+                                                                            </>
+                                                                        )}
+                                                                    </div>
+
+                                                                    {/* Nombre del Firmante / Participantes */}
+                                                                    <div className="text-[10px] font-bold text-white/40 uppercase tracking-widest italic flex items-center gap-1.5 pt-0.5">
+                                                                        <svg className="w-3.5 h-3.5 opacity-40 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                                                        {task.type === 'inspection' ? (
+                                                                            <span>
+                                                                                Firmado por: <span className="text-white font-black">{task.detail.assignment?.inspection?.supervisor_name || 'Responsable de Sede'}</span>
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span>
+                                                                                Firmado por: <span className="text-white font-black">
+                                                                                    {(() => {
+                                                                                        const adhocAttendees = task.detail.attendees;
+                                                                                        const plannedAttendances = task.detail.training?.attendances;
+                                                                                        let namesList = [];
+                                                                                        if (Array.isArray(adhocAttendees) && adhocAttendees.length > 0) {
+                                                                                            namesList = adhocAttendees.map(a => a.name);
+                                                                                        } else if (Array.isArray(plannedAttendances) && plannedAttendances.length > 0) {
+                                                                                            namesList = plannedAttendances.map(a => a.employee_name);
+                                                                                        }
+                                                                                        if (namesList.length === 0) return 'Participantes';
+                                                                                        if (namesList.length <= 2) return namesList.join(', ');
+                                                                                        return `${namesList[0]}, ${namesList[1]} y ${namesList.length - 2} más`;
+                                                                                    })()}
+                                                                                </span>
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            
+                                                            {task.type === 'inspection' && task.detail?.assignment?.inspection?.id && (
+                                                                <Link 
+                                                                    href={route('tecnico.inspections.show', task.detail.assignment.inspection.id)}
+                                                                    className={`sm:self-center shrink-0 h-9 px-4 bg-white/5 hover:bg-white/10 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic border border-white/5 hover:border-white/10 transition-all flex items-center justify-center
+                                                                        ${task.failures.failed > 0 ? 'hover:text-rose-400 hover:border-rose-500/20' : 'hover:text-orange-400 hover:border-orange-500/20'}`}
+                                                                >
+                                                                    Ver Detalle
+                                                                </Link>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                         )}
-                                        
-                                        {/* Listar Asignaciones Pendientes */}
-                                        {pendingAssignments.map(assignment => (
-                                            <div key={assignment.id} className="bg-black/40 border border-white/5 rounded-3xl p-6 flex justify-between items-center group/task hover:border-orange-500/30 transition-all">
-                                                <div className="flex items-center gap-5">
-                                                    <div className="h-10 w-10 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center group-hover/task:scale-110 transition-transform">
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-sm font-black text-white uppercase italic tracking-tight mb-1">{assignment.checklist?.title}</h4>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[9px] font-black text-orange-500 uppercase tracking-widest italic">{assignment.status === 'in_progress' ? 'EN CURSO' : 'PENDIENTE'}</span>
-                                                            <span className="h-1 w-1 rounded-full bg-white/20"></span>
-                                                            <span className="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest italic">REF: #{assignment.id}</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <Link 
-                                                    href={route('tecnico.checklists.fill', { id: assignment.dynamic_checklist_id, assignment: assignment.id, visit_id: visit.id })}
-                                                    className="h-10 px-6 bg-orange-500 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em] italic shadow-lg shadow-orange-900/20 hover:brightness-110 transition-all flex items-center"
-                                                >
-                                                    {assignment.status === 'in_progress' ? 'REANUDAR' : 'EMPEZAR'}
-                                                </Link>
-                                            </div>
-                                        ))}
-
-                                        {/* Checklist Completados en esta visita si los hubiera */}
-                                        {visit.checklist_completions?.map(completion => (
-                                            <div key={completion.id} className="bg-emerald-500/5 border border-emerald-500/20 rounded-3xl p-6 flex justify-between items-center group/done">
-                                                <div className="flex items-center gap-5">
-                                                    <div className="h-10 w-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 flex items-center justify-center">
-                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"/></svg>
-                                                    </div>
-                                                    <div>
-                                                        <h4 className="text-sm font-black text-white/50 uppercase italic tracking-tight mb-1">{completion.assignment?.checklist?.title}</h4>
-                                                        <span className="text-[9px] font-black text-emerald-500/60 uppercase tracking-widest italic leading-none">EJECUTADO</span>
-                                                    </div>
-                                                </div>
-                                                <div className="text-[10px] font-black text-emerald-500/40 uppercase italic">CERTIFICADO</div>
-                                            </div>
-                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -331,7 +397,6 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                     </div>
                 </div>
 
-                {/* MODAL DE CIERRE Y CERTIFICACIÓN MASTER */}
                 {showFinalizeModal && (
                     <div className="fixed inset-0 z-[100] overflow-y-auto flex items-center justify-center p-4 sm:p-6">
                         <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl transition-opacity animate-fade-in" onClick={() => setShowFinalizeModal(false)}></div>
@@ -427,6 +492,16 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                         </div>
                     </div>
                 )}
+                
+                <ActionSelector 
+                    isOpen={showActionSelector} 
+                    onClose={() => setShowActionSelector(false)} 
+                    visit={visit} 
+                    suggestedTasks={suggestedPlanTasks} 
+                    pendingAssignments={pendingAssignments} 
+                    pendingTrainings={pendingTrainings}
+                    checklistTemplates={checklistTemplates}
+                />
             </div>
 
             <style>{`

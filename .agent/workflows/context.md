@@ -107,18 +107,23 @@ ep-back/
 | `answers` | Respuestas específicas | `id`, `inspection_id`, `question_id`, `value` |
 | `sedes` | Plantas físicas y control de jornada | `id`, `empresa_id`, `nombre_sede`, `dias_operativos` (JSON), `hora_apertura`, `hora_cierre`, `es_roster_24_7`, `radio_tolerancia_metros` |
 | `visit_certificates` | Constancias de visita, geolocalización y auditoría horaria | `id`, `sede_id`, `user_id`, `start_time`, `end_time`, `horas_gabinete_estimadas`, `checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng`, `gps_verified` |
+| `visit_trainings` | Bitácora y firmas de capacitación en vivo en la visita | `id`, `visit_certificate_id`, `training_id`, `title`, `description`, `notes`, `duration_minutes`, `status`, `attendees` (JSON con DNI y Firmas) |
 
 ---
 
 ## ✅ Buenas Prácticas
 
 ### Backend (Laravel 12)
+- ✅ **Manejo de Roles Robusto:** Toda validación de roles en la plataforma (rutas, plantillas, policies) debe apoyarse en la lógica unificada del modelo `User::hasRole()`. Evitar splitting manual ad-hoc en controladores o middleware.
+- ✅ **Nombres de Parámetros de Ruta Coincidentes:** Para que la vinculación implícita de modelos (Route Model Binding) de Laravel funcione de forma transparente, el comodín de la ruta (ej. `{inspection}`) debe coincidir exactamente con el nombre de la variable inyectada en el controlador (ej. `DynamicInspection $inspection`). Evitar usar `{id}` genérico si se tipa el modelo, para prevenir inyecciones de modelos vacíos en el frontend.
 - ✅ Usar Type Hints y Return Types estrictos.
 - ✅ Form Requests independientes para la validación de peticiones.
 - ✅ Eager Loading (`with()`) en Eloquent para evitar consultas N+1.
 - ✅ Retornar respuestas nativas de Inertia: `return Inertia::render('Componente', [...]);`.
 
 ### Frontend (React 19 & Inertia)
+- ✅ **Diseño HUD Táctico y Modular:** Componentes HUD oscuros premium, modularizados y reutilizables. El modal `ActionSelector` es el estándar para paneles de comandos y acciones spontaneous.
+- ✅ **Counter Badges HUD:** Uso de insignias flotantes absolutas (`absolute -top-3 -right-3`, `rounded-2xl`, `font-black`) para indicar múltiples ejecuciones continuas en flujos activos de inspección.
 - ✅ Componentes modulares, pequeños y altamente enfocados.
 - ✅ Control de estado mediante hooks nativos de React (`useState`, `useEffect`, `useMemo`).
 - ✅ Enlace con backend y envío de formularios usando el hook `useForm` de Inertia.
