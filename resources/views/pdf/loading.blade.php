@@ -4,20 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Procesando Datos' }} - XamaSafe</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css'])
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'ep-primary': '#F69239',
-                        'ep-dark': '#1E1E2D',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body { 
             font-family: 'Inter', sans-serif; 

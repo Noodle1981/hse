@@ -5,24 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Super Admin - XamaSafe' }}</title>
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'ep-primary': '#4338ca',
-                        'ep-primary-dark': '#3730a3',
-                        'ep-dark': '#111827',
-                        'ep-sidebar': '#111827',
-                        'ep-text': '#9ca3af',
-                        'ep-text-hover': '#FFFFFF',
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css'])
     
     <style>
         .sidebar-transition { transition: width 0.3s ease-in-out; }

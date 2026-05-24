@@ -149,14 +149,23 @@ class OperationController extends Controller
                 $contractTasks->where('category', 'Informe')->map(fn($p) => $this->mapContractToTask($p, 'report'))
             )->values();
 
-        // 6️⃣ KPIs
+        // 6️⃣ KPIs (Rendimiento Global del Técnico, no atado al filtro mensual)
         $totalTasks = $inspections->count() + $trainings->count() + $reports->count();
         $completedTasks = $inspections->where('status', 'completed')->count() + $trainings->where('status', 'completed')->count();
-        
+
+        $globalManualTasks = ChecklistAssignment::where('user_id', $user->id)->count();
+        $globalManualCompleted = ChecklistAssignment::where('user_id', $user->id)->whereIn('status', ['completed', 'finalizado'])->count();
+
+        $globalTrainings = \App\Models\Training::where('user_id', $user->id)->count();
+        $globalTrainingsCompleted = \App\Models\Training::where('user_id', $user->id)->whereIn('status', ['completed', 'finalizado'])->count();
+
+        $globalTotal = $globalManualTasks + $globalTrainings;
+        $globalCompleted = $globalManualCompleted + $globalTrainingsCompleted;
+
         $kpis = [
-            'total_tasks' => $totalTasks,
-            'completed' => $completedTasks,
-            'percentage' => $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0,
+            'total_tasks' => $totalTasks, // Se mantiene local para la vista
+            'completed' => $completedTasks, // Se mantiene local para la vista
+            'percentage' => $globalTotal > 0 ? round(($globalCompleted / $globalTotal) * 100) : 0,
             'critical_findings' => \App\Models\Hallazgo::where('inspector_id', $user->id)->where('criticidad', 'alta')->where('estado', '!=', 'resuelto')->count(),
         ];
 

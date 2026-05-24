@@ -4,21 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XamaSafe | Inteligencia en Higiene y Seguridad Laboral</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css'])
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
-                    colors: {
-                        'ep-primary': '#F69239',
-                        'ep-dark': '#11111d',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         .glass-card { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.5s ease; }
         .glass-card:hover { border-color: rgba(246, 146, 57, 0.3); background: rgba(255, 255, 255, 0.05); transform: translateY(-5px); }
