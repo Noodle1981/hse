@@ -7,10 +7,18 @@ export default function Session({ session }) {
     const { auth } = usePage().props;
     const [isAdding, setIsAdding] = useState(false);
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+    const [signatureError, setSignatureError] = useState(null);
     
     // Detect active role using shared backend prop
     const isTecnico = auth?.user?.is_technician;
     const prefix = isTecnico ? 'tecnico' : 'gestor.operations';
+    const isTrainingVisit = session.visit?.visit_type === 'training';
+    
+    const backUrl = (isTecnico && isTrainingVisit)
+        ? route('tecnico.checklists.tasks.index', { tab: 'trainings' })
+        : (isTecnico
+            ? route('tecnico.visits.in-progress', session.visit_certificate_id)
+            : route('gestor.operations.visits.show', session.visit_certificate_id));
 
     const form = useForm({
         name: '',
@@ -24,6 +32,13 @@ export default function Session({ session }) {
         notes: session.notes || '',
     });
 
+    const finalizeForm = useForm({
+        duration_minutes: session.duration_minutes ? Math.round(session.duration_minutes) : '',
+        is_external_instructor: false,
+        trainer_name: '',
+        instructor_signature: '',
+    });
+
     const handleSaveDetails = (e) => {
         e.preventDefault();
         detailsForm.post(route(`${prefix}.trainings.update-details`, session.id), {
@@ -31,17 +46,95 @@ export default function Session({ session }) {
         });
     };
 
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+    useEffect(() => {
+        const start = new Date(session.created_at || new Date());
+        const updateTimer = () => {
+            const now = new Date();
+            const diffSeconds = Math.max(0, Math.floor((now - start) / 1000));
+            setElapsedSeconds(diffSeconds);
+        };
+        updateTimer();
+        const interval = setInterval(updateTimer, 1000);
+        return () => clearInterval(interval);
+    }, [session.created_at]);
+
+    const formatElapsed = (totalSecs) => {
+        const hrs = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        const pad = (num) => String(num).padStart(2, '0');
+        if (hrs > 0) {
+            return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+        }
+        return `${pad(mins)}:${pad(secs)}`;
+    };
+
     const handleFinalizeSession = () => {
+        const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
+        finalizeForm.setData('duration_minutes', elapsedMinutes);
         setShowFinalizeModal(true);
     };
 
-    const confirmFinalizeSession = () => {
-        setShowFinalizeModal(false);
-        router.post(route(`${prefix}.trainings.finalize`, session.id));
+    const handleFinalize = (e) => {
+        e.preventDefault();
+
+        if (finalizeForm.data.is_external_instructor) {
+            if (!instructorSigPad.current || instructorSigPad.current.isEmpty()) {
+                setInstructorSigError('La firma digital del instructor especialista es obligatoria.');
+                return;
+            }
+            setInstructorSigError(null);
+        }
+
+        finalizeForm.transform((data) => ({
+            ...data,
+            instructor_signature: data.is_external_instructor && instructorSigPad.current 
+                ? instructorSigPad.current.toDataURL() 
+                : '',
+        })).post(route(`${prefix}.trainings.finalize`, session.id), {
+            onSuccess: () => {
+                setShowFinalizeModal(false);
+                finalizeForm.reset();
+            },
+            preserveScroll: true
+        });
     };
 
     const canvasRef = useRef(null);
     const signaturePad = useRef(null);
+    const instructorCanvasRef = useRef(null);
+    const instructorSigPad = useRef(null);
+    const [instructorSigError, setInstructorSigError] = useState(null);
+
+    // Inicializar firma del Instructor Externo de forma reactiva al montarse en el DOM condicional
+    useEffect(() => {
+        if (showFinalizeModal && finalizeForm.data.is_external_instructor && instructorCanvasRef.current) {
+            instructorSigPad.current = new SignaturePad(instructorCanvasRef.current, {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                penColor: '#F69239', // Naranja Técnico
+            });
+
+            instructorSigPad.current.onBegin = () => {
+                setInstructorSigError(null);
+            };
+
+            const resizeInstructorCanvas = () => {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                if (instructorCanvasRef.current) {
+                    instructorCanvasRef.current.width = instructorCanvasRef.current.offsetWidth * ratio;
+                    instructorCanvasRef.current.height = instructorCanvasRef.current.offsetHeight * ratio;
+                    instructorCanvasRef.current.getContext("2d").scale(ratio, ratio);
+                    instructorSigPad.current.clear();
+                }
+            };
+
+            window.addEventListener("resize", resizeInstructorCanvas);
+            resizeInstructorCanvas();
+            return () => window.removeEventListener("resize", resizeInstructorCanvas);
+        }
+    }, [showFinalizeModal, finalizeForm.data.is_external_instructor]);
 
     useEffect(() => {
         if (isAdding && canvasRef.current) {
@@ -50,6 +143,10 @@ export default function Session({ session }) {
                 penColor: 'rgb(59, 130, 246)'
             });
             
+            signaturePad.current.onBegin = () => {
+                setSignatureError(null);
+            };
+
             const resizeCanvas = () => {
                 const ratio = Math.max(window.devicePixelRatio || 1, 1);
                 canvasRef.current.width = canvasRef.current.offsetWidth * ratio;
@@ -66,14 +163,17 @@ export default function Session({ session }) {
 
     const handleAddAttendee = (e) => {
         e.preventDefault();
-        if (signaturePad.current.isEmpty()) {
-            alert('Por favor, capture la firma del alumno.');
+        if (!signaturePad.current || signaturePad.current.isEmpty()) {
+            setSignatureError('La firma digital del alumno es obligatoria para certificar la asistencia.');
             return;
         }
 
-        form.setData('signature', signaturePad.current.toDataURL());
-        
-        form.post(route(`${prefix}.trainings.add-attendee`, session.id), {
+        setSignatureError(null);
+
+        form.transform((data) => ({
+            ...data,
+            signature: signaturePad.current.toDataURL(),
+        })).post(route(`${prefix}.trainings.add-attendee`, session.id), {
             onSuccess: () => {
                 setIsAdding(false);
                 form.reset();
@@ -98,7 +198,7 @@ export default function Session({ session }) {
                     {/* CABECERA TÁCTICA */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 animate-fade-in-down">
                         <div className="flex items-center gap-6">
-                            <Link href={isTecnico ? route('tecnico.visits.in-progress', session.visit_certificate_id) : route('gestor.operations.visits.show', session.visit_certificate_id)} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
+                            <Link href={backUrl} className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all">
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
                             </Link>
                             <div>
@@ -107,9 +207,28 @@ export default function Session({ session }) {
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
+                            {/* TIEMPO PLANIFICADO */}
                             <div className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[120px]">
-                                <div className="text-[8px] font-black text-white/20 uppercase italic">Asistentes</div>
-                                <div className="text-xl font-black text-blue-500 italic">{session.attendees?.length || 0}</div>
+                                <div className="text-[8px] font-black text-white/20 uppercase italic leading-none mb-1.5">Tiempo Estimado</div>
+                                <div className="text-xl font-black text-indigo-400 italic leading-none">
+                                    {session.duration_minutes ? Math.round(session.duration_minutes) : 15} min
+                               </div>
+                            </div>
+
+                            {/* CRONÓMETRO DE CHARLA EN VIVO */}
+                            <div className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[140px]">
+                                <div className="text-[8px] font-black text-indigo-400 uppercase tracking-widest italic flex items-center justify-center gap-1 leading-none mb-1.5">
+                                    <svg className="w-3.5 h-3.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth="2.5" /></svg>
+                                    Cronómetro
+                                </div>
+                                <div className="text-xl font-black text-white italic tracking-tighter tabular-nums drop-shadow-[0_0_10px_rgba(59,130,246,0.3)]">
+                                    {formatElapsed(elapsedSeconds)}
+                                </div>
+                            </div>
+
+                            <div className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[120px]">
+                                <div className="text-[8px] font-black text-white/20 uppercase italic leading-none mb-1.5">Asistentes</div>
+                                <div className="text-xl font-black text-blue-500 italic leading-none">{session.attendees?.length || 0}</div>
                             </div>
                             <button 
                                 type="button"
@@ -258,6 +377,12 @@ export default function Session({ session }) {
                                     </div>
 
                                     <div className="space-y-6">
+                                        {signatureError && (
+                                            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 animate-fade-in mx-4">
+                                                <svg className="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                <span className="text-[10px] font-black text-red-500 uppercase tracking-widest italic leading-none">{signatureError}</span>
+                                            </div>
+                                        )}
                                         <div className="flex justify-between items-center ml-4">
                                             <span className="text-[10px] font-black text-blue-400/40 uppercase tracking-[0.3em] italic">Capture su firma en el recuadro inferior</span>
                                             <button type="button" onClick={() => signaturePad.current?.clear()} className="text-[9px] font-black text-red-500 uppercase italic hover:underline">Limpiar Panel</button>
@@ -293,7 +418,7 @@ export default function Session({ session }) {
                     <div className="relative bg-[#11111d] w-full max-w-lg rounded-[3rem] border border-white/10 shadow-3xl overflow-hidden animate-fade-in-down z-10">
                         <div className="absolute inset-x-0 top-0 h-1.5 bg-emerald-500"></div>
                         
-                        <div className="p-8 sm:p-10 flex flex-col items-center text-center space-y-6">
+                        <form onSubmit={handleFinalize} className="p-8 sm:p-10 flex flex-col items-center text-center space-y-6">
                             <div className="h-16 w-16 bg-emerald-500/10 rounded-2xl border border-emerald-500/20 text-emerald-500 flex items-center justify-center rotate-3 shadow-inner hover:rotate-0 transition-all duration-500">
                                 <svg className="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                             </div>
@@ -305,6 +430,101 @@ export default function Session({ session }) {
                                     Se guardará esta charla y su listado de asistencia de forma permanente en la bitácora de la visita actual.
                                 </p>
                             </div>
+
+                            {/* Información Comparativa de Tiempo */}
+                            <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-left space-y-2 px-6 py-4">
+                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest italic text-white/40 leading-none">
+                                    <span>Tiempo Estimado:</span>
+                                    <span className="text-indigo-400 font-black">{session.duration_minutes ? Math.round(session.duration_minutes) : 15} minutos</span>
+                                </div>
+                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest italic text-white/40 leading-none">
+                                    <span>Tiempo Demorado (Cronómetro):</span>
+                                    <span className="text-blue-400 font-black">{Math.max(1, Math.round(elapsedSeconds / 60))} minutos</span>
+                                </div>
+                            </div>
+
+                            {/* Campo de Duración Requerido */}
+                            <div className="w-full text-left space-y-2 px-2">
+                                <label htmlFor="duration_minutes" className="block text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic">
+                                    Tiempo Real Dictado (Minutos)*
+                                </label>
+                                <input 
+                                    id="duration_minutes"
+                                    name="duration_minutes"
+                                    type="number"
+                                    min="1"
+                                    required
+                                    value={finalizeForm.data.duration_minutes}
+                                    onChange={e => finalizeForm.setData('duration_minutes', e.target.value)}
+                                    placeholder="Ej. 15, 30, 45..."
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white placeholder-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 hover:ring-2 hover:ring-indigo-500/50 transition-all uppercase"
+                                />
+                                {finalizeForm.errors.duration_minutes && (
+                                    <p className="text-[9px] font-black text-red-500 mt-1 uppercase italic">{finalizeForm.errors.duration_minutes}</p>
+                                )}
+                            </div>
+
+                            {/* Toggle Switch para Instructor Externo */}
+                            <div className="w-full flex items-center justify-between px-2 pt-2">
+                                <span className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic">
+                                    ¿Instructor Externo / Especialista?
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => finalizeForm.setData('is_external_instructor', !finalizeForm.data.is_external_instructor)}
+                                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                                        finalizeForm.data.is_external_instructor
+                                            ? 'bg-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.3)]'
+                                            : 'bg-white/10'
+                                    }`}
+                                >
+                                    <span
+                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                                            finalizeForm.data.is_external_instructor ? 'translate-x-5' : 'translate-x-0'
+                                        }`}
+                                    />
+                                </button>
+                            </div>
+
+                            {/* Panel Condicional Glassmorphic */}
+                            {finalizeForm.data.is_external_instructor && (
+                                <div className="w-full bg-white/5 border border-white/5 backdrop-blur-xl rounded-2xl p-5 text-left space-y-4 animate-fade-in-up">
+                                    <div className="space-y-1">
+                                        <label htmlFor="trainer_name" className="block text-[9px] font-black text-orange-400 uppercase tracking-[0.2em] italic">
+                                            Nombre del Instructor Especialista*
+                                        </label>
+                                        <input
+                                            id="trainer_name"
+                                            name="trainer_name"
+                                            type="text"
+                                            required={finalizeForm.data.is_external_instructor}
+                                            value={finalizeForm.data.trainer_name}
+                                            onChange={e => finalizeForm.setData('trainer_name', e.target.value)}
+                                            placeholder="..."
+                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white placeholder-white/10 focus:outline-none focus:ring-2 focus:ring-orange-500/50 hover:ring-2 hover:ring-orange-500/50 transition-all uppercase italic"
+                                        />
+                                        {finalizeForm.errors.trainer_name && (
+                                            <p className="text-[9px] font-black text-red-500 mt-1 uppercase italic">{finalizeForm.errors.trainer_name}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {instructorSigError && (
+                                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 animate-fade-in">
+                                                <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                <span className="text-[9px] font-black text-red-500 uppercase tracking-widest italic leading-none">{instructorSigError}</span>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[9px] font-black text-orange-400/40 uppercase tracking-[0.2em] italic">Firma del Instructor Especialista*</span>
+                                            <button type="button" onClick={() => instructorSigPad.current?.clear()} className="text-[8px] font-black text-red-500 uppercase italic hover:underline">Limpiar Firma</button>
+                                        </div>
+                                        <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden h-32 touch-none cursor-crosshair relative brightness-0 invert opacity-90">
+                                            <canvas ref={instructorCanvasRef} className="w-full h-full"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             
                             <div className="grid grid-cols-2 gap-4 w-full pt-4">
                                 <button 
@@ -315,15 +535,19 @@ export default function Session({ session }) {
                                     Cancelar
                                 </button>
                                 <button 
-                                    type="button"
-                                    onClick={confirmFinalizeSession}
-                                    className="h-12 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-lg shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+                                    type="submit"
+                                    disabled={finalizeForm.processing}
+                                    className="h-12 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-lg shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
                                 >
-                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
-                                    Confirmar Cierre
+                                    {finalizeForm.processing ? (
+                                        <svg className="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                                    ) : (
+                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    )}
+                                    <span>{finalizeForm.processing ? 'Guardando...' : 'Confirmar Cierre'}</span>
                                 </button>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
             )}

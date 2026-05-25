@@ -18,7 +18,7 @@ class VisitService
     /**
      * Iniciar una nueva visita
      */
-    public function startVisit(User $user, Sede $sede): VisitCertificate
+    public function startVisit(User $user, Sede $sede, ?string $visitType = null): VisitCertificate
     {
         return VisitCertificate::create([
             'user_id' => $user->id,
@@ -27,6 +27,7 @@ class VisitService
             'visit_date' => now()->toDateString(),
             'start_time' => now(),
             'status' => 'in_progress',
+            'visit_type' => $visitType,
         ]);
     }
 

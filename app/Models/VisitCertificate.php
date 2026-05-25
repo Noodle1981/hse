@@ -33,6 +33,7 @@ class VisitCertificate extends Model
         'checkout_lat',
         'checkout_lng',
         'gps_verified',
+        'visit_type',
     ];
 
     protected $casts = [

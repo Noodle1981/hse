@@ -242,5 +242,32 @@ ep-back/
 ```
 
 ---
-*Última actualización de la arquitectura: 24 Mayo 2026*  
+---
+## 7. ✍️ Firma Digital de Instructores Especialistas y Almacenamiento Optimizado (Base64 a PNG)
+
+Para evitar el "bloat" o crecimiento exponencial de la base de datos por el almacenamiento de cadenas largas Base64 en campos de texto (especialmente en bases de datos relacionales como SQLite o MySQL con cientos de visitas), XamaSafe implementa una pipeline de decodificación y persistencia física de firmas digitales.
+
+### 7.1. Flujo Técnico de Firma y Persistencia
+
+1. **Captura y Transmisión**:
+   - En el frontend, el componente React (`Session.jsx`) integra un lienzo interactivo `SignaturePad` para el Instructor Especialista (activado mediante un toggle táctil y condicional).
+   - Al finalizar la charla, el canvas genera un DataURL Base64 (`data:image/png;base64,...`) representando los trazos.
+   - Inertia.js transmite este string en el payload JSON POST hacia el backend.
+
+2. **Decodificación y Almacenamiento en Disco**:
+   - En el controlador `TrainingController@finalize`, la petición se valida garantizando que el nombre del instructor especialista (`trainer_name`) y su firma (`instructor_signature`) se provean de forma obligatoria si el toggle `is_external_instructor` es verdadero.
+   - El backend utiliza expresiones regulares (`preg_match`) para sanitizar y extraer el payload codificado de la cabecera del DataURL.
+   - La cadena base64 se convierte a binario mediante `base64_decode` y se escribe de manera segura en el sistema de archivos local utilizando el helper de Laravel:
+     `Storage::disk('public')->put('signatures/instructor_' . uniqid() . '.png', $data)`
+
+3. **Mapeo de Datos Ligero**:
+   - En lugar de guardar el string largo base64 (que consume varios megabytes por registro en memoria de base de datos), la base de datos solo almacena el path relativo (ej. `signatures/instructor_abc123.png`) en el campo `visit_certificates.instructor_signature`.
+   - Se registra la fecha y hora de la firma en `visit_certificates.instructor_signature_date`.
+   - Si se trata de una capacitación planificada, se actualiza el nombre del capacitador directamente en `trainings.trainer_name`.
+
+4. **Integración con Reportes en PDF**:
+   - Al generarse el PDF de asistencia de capacitaciones con DomPDF, la plantilla lee el path físico directamente desde el storage público, cargando la imagen optimizada PNG sin impacto en memoria y aplicando el CSS inverso correspondiente (`brightness-0 invert opacity-90`) para su perfecta legibilidad en fondo blanco de impresión.
+
+---
+*Última actualización de la arquitectura: 25 Mayo 2026*  
 *Preparado para el análisis conceptual estructurado de NotebookLM.*  

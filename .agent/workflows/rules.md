@@ -32,3 +32,11 @@ Todo elemento interactivo, formulario, pestaña, selector o badge relacionado a 
 4. 🚀 **[playbook_notebooklm.md](file:///.agent/workflows/playbook_notebooklm.md)**: Actualizar el playbook con las nuevas responsabilidades de roles, ciclo de vida modificado, o añadir nuevas plantillas de prompts optimizadas para la nueva característica.
 
 Esta regla garantiza que el asistente de IA y tú compartan un entendimiento perfecto del estado actual del software sin desajustes.
+
+## ✍️ Regla de Optimización de Firmas (Storage vs Base64)
+
+Para evitar la saturación y el "bloat" de la base de datos, se debe aplicar la siguiente optimización al procesar firmas digitales permanentes o de alta jerarquía (como la del Instructor Especialista):
+1. **Captura en Frontend**: El frontend (React canvas) transmite la firma de forma temporal como una cadena de datos Base64 URL (`data:image/png;base64,...`).
+2. **Decodificación en Backend**: El controlador (`TrainingController`) intercepta el string, extrae la cabecera de datos, lo decodifica de forma segura y lo guarda como un archivo físico `.png` en el disco público de la aplicación (`Storage::disk('public')->put('signatures/filename.png', $data)`).
+3. **Persistencia Ligera**: En la base de datos (`visit_certificates.instructor_signature`), solo se almacena la ruta relativa (ej. `signatures/instructor_xxxx.png`). Esto previene el crecimiento desmedido de las filas de texto largo (`TEXT`/`LONGTEXT`) y mantiene las consultas optimizadas.
+

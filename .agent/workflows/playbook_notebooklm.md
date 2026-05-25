@@ -144,6 +144,7 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   * Dispone de botones de acción contextuales unificados (`[+] Inspeccionar`, `[+] Iniciar Capacitación`, `[+] Ejecutar Informe`) ubicados estratégicamente antes de la grilla de tareas para abrir de inmediato modales inteligentes de inicio de sesión planificada y libre (ad-hoc).
   * Reemplaza el campo de "Estado" lineal por la celda avanzada **"Checklists"** (en la pestaña de Misiones) que detalla de forma interactiva el ratio de éxitos (`Exitosos: X/Y` con advertencias visuales `⚠️` y color de alerta roja si hay no-conformidades en los controles) y el porcentaje de cumplimiento normativo resaltado con sombras de neón (`glow-text`).
   * Incorpora un buscador por texto escalable y filtros de Categoría y Subcategoría en cascada para checklists libres.
+  * **Capacitaciones Ad-hoc Unificadas (`MyAssignments.jsx`):** En el modal de inicio rápido, la pestaña de Capacitaciones Ad-hoc cuenta con un buscador reactivo de texto y filtros avanzados de Categoría y Subcategoría (idénticos a los de Inspecciones pero con la paleta de color Índigo Técnico). Al presionar "Iniciar", la tarjeta del checklist se despliega de forma interactiva inline (Inline Accordion) permitiendo configurar la modalidad ("In situ (Presencial)" vs. "Online (Virtual)") mediante botones segmentados con neón índigo, duración estimada y descripción de objetivos. Al presionar "Confirmar & Iniciar", se inyecta la capacitación con ese título y la modalidad seleccionada se guarda directamente en la columna `type` de la tabla `trainings` para consistencia.
 
 * **Bóveda de Certificados Agrupada por Fecha y Sede (`History.jsx`):**
   * **Agrupación Inteligente:** En lugar de mostrar un listado plano de cada checklist individual (que satura el historial ante múltiples inspecciones), el servidor agrupa las inspecciones completadas (`DynamicInspection::completed()`) por **Fecha (`completed_date`)** y **Sede (`sede_id`)**.
@@ -169,6 +170,16 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   * Laravel realiza la inyección automática cruzando el nombre del comodín de la ruta con la variable tipada en el controlador.
   * **Regla Estricta:** Si el método en el controlador tipa un modelo (ej. `public function show(DynamicInspection $inspection)`), el comodín de la ruta en `routes/web.php` **debe llamarse exactamente `{inspection}`** y no `{id}`.
   * Cambiar de `{id}` a `{inspection}` o `{finding}` garantiza que la base de datos se consulte en tiempo de resolución de la ruta, retornando datos 100% consistentes y previniendo crashes en la renderización React.
+
+### 3.7. Firma Digital de Instructores Especialistas y Almacenamiento Optimizado (Base64 a PNG)
+* **Propósito:** Optimizar el almacenamiento de firmas electrónicas y habilitar el rol de Instructor Externo / Especialista en las capacitaciones.
+* **Mecanismo Operativo (Frontend):**
+  * La finalización de la charla en `Session.jsx` expone un switch táctil glowing (`bg-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.3)]`) para "¿Instructor Externo / Especialista?".
+  * Al activarse, se despliega un panel translúcido de Glassmorphism con un input obligatorio para el nombre (`trainer_name`) y un lienzo de `SignaturePad` con trazos color naranja técnico inyectados mediante React, con filtro inverso `brightness-0 invert opacity-90` para legibilidad.
+* **Mecanismo de Guardado Físico (Backend):**
+  * La firma no se persiste en formato Base64 en la base de datos para evitar "bloat". El controlador `TrainingController` decodifica la cadena, genera un archivo físico `.png` y lo almacena en `Storage::disk('public')->put('signatures/...', $data)`.
+  * La base de datos (`visit_certificates.instructor_signature`) solo guarda la ruta relativa al archivo (ej. `signatures/instructor_xxxx.png`), y el campo `visit_certificates.instructor_signature_date` almacena el timestamp de la firma.
+  * Si aplica, se actualiza `trainings.trainer_name`.
 
 ---
 

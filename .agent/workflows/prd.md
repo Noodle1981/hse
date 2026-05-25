@@ -86,6 +86,15 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Finalización de Charla y Modal Premium:** La sesión se da por finalizada mediante un comando táctil en cabecera que despliega un modal React de diseño premium con fondos desenfocados en blur e íconos en 3D, actualizando el estado de la capacitación a `'completed'` para sincronizar de inmediato su aparición en la consola cronológica del HUD.
 * **Certificación:** Generación de un PDF de capacitación con validez legal conteniendo las firmas digitalizadas.
   * **Alternancia de Roles en Capacitación:** Las firmas y flujos de firmas de capacitación detectan dinámicamente si el rol activo del operador es de técnico, redirigiéndolo limpiamente al finalizar de vuelta a su HUD de sesión en progreso.
+* **Capacitación Ad-hoc / Libre Unificada (`MyAssignments.jsx`):**
+  - Se consolida el inicio rápido de capacitaciones eliminando la división confusa entre Charla de 5 Minutos y Checklist Estándar. Toda capacitación ad-hoc se asocia obligatoriamente a un checklist/protocolo técnico para garantizar trazabilidad.
+  - Cuenta con buscador reactivo de texto y filtros en cascada de Categoría y Subcategoría (idénticos a los de Inspecciones pero con la paleta de color Índigo Técnico).
+  - Al presionar "Iniciar", la tarjeta del checklist seleccionado se expande verticalmente (Inline Accordion) con transiciones suaves, permitiendo configurar los datos de la sesión antes de comenzar:
+    1. **Modalidad de Capacitación:** Segmented button control táctil ("In situ (Presencial)" y "Online (Virtual)") con glows índigos de neón.
+    2. **Duración Estimada:** Selector rápido (5, 10, 15, 30, 45, 60 minutos).
+    3. **Descripción / Objetivos:** Cuadro de texto para notas tácticas.
+    4. **Confirmar & Iniciar:** Botón final para inyectar la capacitación de forma inmediata.
+  - **Almacenamiento de Modalidad:** La modalidad se guarda directamente en la columna `type` de la tabla `trainings` (como `'presencial'` o `'virtual'`) logrando consistencia con el diseño de base de datos y su correcta visualización en el reporte PDF.
 
 ### 4.6. Módulo de Contratos y PPD (Programa de Prevención de Daños)
 * **Control de Ciclos:** Seguimiento de contratos anuales activos por empresa.

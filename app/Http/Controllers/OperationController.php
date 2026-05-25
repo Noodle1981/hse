@@ -421,6 +421,7 @@ class OperationController extends Controller
             'title' => 'nullable|string|max:255',
             'duration' => 'nullable',
             'description' => 'nullable|string',
+            'modality' => 'nullable|string|in:presencial,virtual',
         ]);
 
         /** @var \App\Models\User $user */
@@ -440,7 +441,8 @@ class OperationController extends Controller
         // Start Visit if none active
         if (!$activeVisit) {
             $sede = \App\Models\Sede::findOrFail($request->sede_id);
-            $activeVisit = $this->visitService->startVisit($user, $sede);
+            $visitType = $request->type === 'training' ? 'training' : 'checklist';
+            $activeVisit = $this->visitService->startVisit($user, $sede, $visitType);
         }
 
         if ($request->source === 'adhoc') {
@@ -463,8 +465,21 @@ class OperationController extends Controller
                     'visit_id' => $activeVisit->id
                 ])->with('message', 'Inspección ad-hoc iniciada.');
             } else {
-                // Training ad-hoc (Express or Template)
+                // Training ad-hoc
                 $checklistId = $request->id;
+
+                $title = $request->title;
+                if ($checklistId && !$title) {
+                    $checklist = \App\Models\DynamicChecklist::find($checklistId);
+                    if ($checklist) {
+                        $title = $checklist->title;
+                    }
+                }
+                if (!$title) {
+                    $title = 'Capacitación Ad-hoc';
+                }
+
+                $modality = $request->input('modality') === 'virtual' ? 'virtual' : 'presencial';
 
                 $training = \App\Models\Training::create([
                     'empresa_id' => $activeVisit->sede->empresa_id,
@@ -472,12 +487,12 @@ class OperationController extends Controller
                     'user_id' => $user->id,
                     'created_by_user_id' => $user->id,
                     'is_template' => false,
-                    'title' => $request->title ?: 'Charla Libre / Express',
-                    'type' => 'ad-hoc',
+                    'title' => $title,
+                    'type' => $modality,
                     'date' => now(),
                     'status' => 'pending',
                     'dynamic_checklist_id' => $checklistId ?: null,
-                    'notes' => 'Charla ad-hoc iniciada desde Consola',
+                    'notes' => 'Capacitación ad-hoc iniciada desde Consola',
                 ]);
 
                 $visitTraining = \App\Models\VisitTraining::create([
@@ -485,7 +500,7 @@ class OperationController extends Controller
                     'training_id' => $training->id,
                     'is_adhoc' => true,
                     'title' => $training->title,
-                    'description' => $request->description ?: 'Charla libre de Higiene y Seguridad',
+                    'description' => $request->description ?: 'Capacitación técnica de ' . $training->title,
                     'duration_minutes' => $request->duration ?: 15,
                     'attendees' => [],
                 ]);
@@ -554,7 +569,7 @@ class OperationController extends Controller
                         'created_by_user_id' => $user->id,
                         'is_template' => false,
                         'title' => $plan->activity_name,
-                        'type' => 'ad-hoc',
+                        'type' => 'presencial',
                         'date' => now(),
                         'status' => 'pending',
                         'dynamic_checklist_id' => $plan->checklist_id,
@@ -649,6 +664,15 @@ class OperationController extends Controller
         // Seguridad: Solo el técnico asignado o un admin
         if ($visit->user_id !== $user->id && !$user->isAdmin()) {
             abort(403);
+        }
+
+        // Redirección inteligente si la visita es únicamente para una capacitación
+        if ($visit->visit_type === 'training') {
+            $visitTraining = \App\Models\VisitTraining::where('visit_certificate_id', $visit->id)->first();
+            if ($visitTraining) {
+                return redirect()->route('tecnico.trainings.session', $visitTraining->id)
+                    ->with('info', 'Sesión de capacitación reanudada automáticamente.');
+            }
         }
 
         if ($visit->status === 'completed' || $visit->status === 'signed') {
@@ -841,7 +865,7 @@ class OperationController extends Controller
                 'created_by_user_id' => $visit->user_id,
                 'is_template' => false,
                 'title' => $plan->activity_name,
-                'type' => 'ad-hoc',
+                'type' => 'presencial',
                 'date' => now(),
                 'status' => 'pending',
                 'dynamic_checklist_id' => $plan->checklist_id,

@@ -27,8 +27,8 @@ export default function MyAssignments({
     // Modal state
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedSedeId, setSelectedSedeId] = useState('');
-    const [trainingForm, setTrainingForm] = useState({ title: '', duration: '15', description: '' });
-    const [selectedChecklistForTraining, setSelectedChecklistForTraining] = useState('');
+    const [trainingForm, setTrainingForm] = useState({ title: '', duration: '15', description: '', modality: 'presencial' });
+    const [selectedChecklistIdForConfig, setSelectedChecklistIdForConfig] = useState(null);
     const [modalSubTab, setModalSubTab] = useState('planned');
     const [modalSearchQuery, setModalSearchQuery] = useState('');
     const [modalSelectedCategory, setModalSelectedCategory] = useState('');
@@ -40,6 +40,7 @@ export default function MyAssignments({
             setModalSearchQuery('');
             setModalSelectedCategory('');
             setModalSelectedSubcategory('');
+            setSelectedChecklistIdForConfig(null);
         }
     }, [modalOpen]);
 
@@ -115,8 +116,8 @@ export default function MyAssignments({
             onSuccess: () => {
                 setModalOpen(false);
                 // Reset form
-                setTrainingForm({ title: '', duration: '15', description: '' });
-                setSelectedChecklistForTraining('');
+                setTrainingForm({ title: '', duration: '15', description: '', modality: 'presencial' });
+                setSelectedChecklistIdForConfig(null);
             }
         });
     };
@@ -950,93 +951,195 @@ export default function MyAssignments({
                                                 </div>
                                             )}
 
-                                            {/* TRAININGS: Express Training Form OR training templates */}
+                                            {/* TRAININGS: Select a checklist template to start ad-hoc training */}
                                             {activeTab === 'trainings' && (
-                                                <div className="space-y-6">
-                                                    {/* Charla Express */}
-                                                    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] p-6 space-y-4">
-                                                        <div>
-                                                            <h5 className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Charla de 5 Minutos / Express</h5>
-                                                            <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Registra un adiestramiento rápido in-situ</p>
-                                                        </div>
-                                                        
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <div className="space-y-2">
-                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Tema / Título</label>
-                                                                <input 
-                                                                    type="text" 
-                                                                    value={trainingForm.title} 
-                                                                    onChange={e => setTrainingForm({...trainingForm, title: e.target.value})} 
-                                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                                                    placeholder="Ej: Uso Correcto de EPP" 
+                                                <div className="space-y-6 animate-fade-in">
+                                                    {/* Filtros de Búsqueda y Categoría */}
+                                                    <div className="bg-[#11111d]/50 border border-white/5 rounded-2xl p-5 space-y-4">
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Buscar por Nombre/Código</label>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Buscar capacitación..."
+                                                                    value={modalSearchQuery}
+                                                                    onChange={e => setModalSearchQuery(e.target.value)}
+                                                                    className="w-full bg-[#16162a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all uppercase placeholder-white/10"
                                                                 />
                                                             </div>
-                                                            <div className="space-y-2">
-                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Duración (Minutos)</label>
-                                                                <select 
-                                                                    value={trainingForm.duration} 
-                                                                    onChange={e => setTrainingForm({...trainingForm, duration: e.target.value})} 
-                                                                    className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
-                                                                >
-                                                                    <option value="5">5 MINUTOS</option>
-                                                                    <option value="10">10 MINUTOS</option>
-                                                                    <option value="15">15 MINUTOS</option>
-                                                                    <option value="30">30 MINUTOS</option>
-                                                                    <option value="45">45 MINUTOS</option>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        <div className="space-y-2">
-                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Descripción / Puntos Clave</label>
-                                                            <textarea 
-                                                                value={trainingForm.description} 
-                                                                onChange={e => setTrainingForm({...trainingForm, description: e.target.value})} 
-                                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                                                rows="2" 
-                                                                placeholder="Ingrese una breve descripción de los puntos tratados..."
-                                                            ></textarea>
-                                                        </div>
-
-                                                        <button 
-                                                            onClick={() => handleExecuteAdhoc('training', null, { title: trainingForm.title, duration: trainingForm.duration, description: trainingForm.description })}
-                                                            disabled={!trainingForm.title}
-                                                            className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none"
-                                                        >
-                                                            Iniciar Charla Express
-                                                        </button>
-                                                    </div>
-
-                                                    {/* Training with Checklist */}
-                                                    <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 space-y-4">
-                                                        <div>
-                                                            <h5 className="text-xs font-black text-white uppercase tracking-widest italic">Capacitación con Checklist Estándar</h5>
-                                                            <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Ejecuta una capacitación evaluada con preguntas estándar</p>
-                                                        </div>
-                                                        
-                                                        <div className="flex flex-col md:flex-row gap-4 items-end">
-                                                            <div className="flex-1 space-y-2 w-full">
-                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Seleccionar Plantilla Evaluativa</label>
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Categoría</label>
                                                                 <select
-                                                                    value={selectedChecklistForTraining}
-                                                                    onChange={e => setSelectedChecklistForTraining(e.target.value)}
-                                                                    className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
+                                                                    value={modalSelectedCategory}
+                                                                    onChange={e => { setModalSelectedCategory(e.target.value); setModalSelectedSubcategory(''); }}
+                                                                    className="w-full bg-[#16162a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all uppercase [color-scheme:dark]"
                                                                 >
-                                                                    <option value="">SELECCIONA CHECKLIST EVALUATIVO...</option>
-                                                                    {checklistTemplates.map(c => (
-                                                                        <option key={c.id} value={c.id}>{c.title}</option>
+                                                                    <option value="">TODAS LAS CATEGORÍAS</option>
+                                                                    {modalCategories.map(cat => (
+                                                                        <option key={cat} value={cat}>{cat.toUpperCase()}</option>
                                                                     ))}
                                                                 </select>
                                                             </div>
-                                                            <button 
-                                                                onClick={() => handleExecuteAdhoc('training', selectedChecklistForTraining, { title: checklistTemplates.find(c => c.id == selectedChecklistForTraining)?.title })}
-                                                                disabled={!selectedChecklistForTraining}
-                                                                className="h-12 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none w-full md:w-auto"
-                                                            >
-                                                                Iniciar Capacitación
-                                                            </button>
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Subcategoría</label>
+                                                                <select
+                                                                    value={modalSelectedSubcategory}
+                                                                    onChange={e => setModalSelectedSubcategory(e.target.value)}
+                                                                    disabled={!modalSelectedCategory}
+                                                                    className="w-full bg-[#16162a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all uppercase [color-scheme:dark] disabled:opacity-20"
+                                                                >
+                                                                    <option value="">TODAS LAS SUBCATEGORÍAS</option>
+                                                                    {modalSubcategories.map(sub => (
+                                                                        <option key={sub} value={sub}>{sub.toUpperCase()}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
                                                         </div>
+
+                                                        {(modalSearchQuery || modalSelectedCategory || modalSelectedSubcategory) && (
+                                                            <div className="flex items-center justify-between text-[8px] font-bold text-white/20 uppercase tracking-widest mt-1">
+                                                                <span>Resultados Encontrados: {modalFilteredTemplates.length}</span>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setModalSearchQuery('');
+                                                                        setModalSelectedCategory('');
+                                                                        setModalSelectedSubcategory('');
+                                                                    }}
+                                                                    className="text-indigo-400 hover:text-white transition-colors uppercase cursor-pointer"
+                                                                >
+                                                                    Limpiar Filtros
+                                                                </button>
+                                                            </div>
+                                                        )}
                                                     </div>
+
+                                                    {modalFilteredTemplates.length === 0 ? (
+                                                        <div className="py-12 text-center text-white/30 italic bg-white/[0.01] border border-white/5 rounded-2xl">
+                                                            No se encontraron checklists para capacitación que coincidan con la búsqueda.
+                                                        </div>
+                                                    ) : (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {modalFilteredTemplates.map(template => {
+                                                                const isExpanded = selectedChecklistIdForConfig === template.id;
+                                                                return (
+                                                                    <div 
+                                                                        key={`adhoc-train-${template.id}`}
+                                                                        className={`bg-black/20 border rounded-2xl p-5 flex flex-col justify-between hover:bg-[#16162a]/20 transition-all duration-300 ${
+                                                                            isExpanded ? 'border-indigo-500/40 bg-[#16162a]/40 shadow-[0_0_25px_rgba(99,102,241,0.15)] col-span-1 md:col-span-2' : 'border-white/5 hover:border-white/10'
+                                                                        }`}
+                                                                    >
+                                                                        <div className="flex items-center justify-between gap-4 w-full">
+                                                                            <div>
+                                                                                <div className="text-[7px] font-bold text-indigo-400 uppercase tracking-wider mb-0.5">CAPACITACIÓN AD-HOC</div>
+                                                                                <div className="text-xs font-black text-white uppercase italic leading-none">{template.title}</div>
+                                                                                <div className="text-[8px] font-bold text-white/20 uppercase tracking-wider mt-1.5 italic">
+                                                                                    {template.category_relation?.name || template.categoryRelation?.name || 'General'}
+                                                                                    { (template.subcategory_relation?.name || template.subcategoryRelation?.name) && ` • ${template.subcategory_relation?.name || template.subcategoryRelation?.name}` }
+                                                                                </div>
+                                                                            </div>
+                                                                            <button 
+                                                                                onClick={() => {
+                                                                                    setSelectedChecklistIdForConfig(isExpanded ? null : template.id);
+                                                                                    if (!isExpanded) {
+                                                                                        setTrainingForm({
+                                                                                            title: template.title,
+                                                                                            duration: '15',
+                                                                                            description: '',
+                                                                                            modality: 'presencial'
+                                                                                        });
+                                                                                    }
+                                                                                }}
+                                                                                className={`px-4 py-2 border rounded-xl text-[8px] font-black uppercase italic tracking-widest transition-all whitespace-nowrap ${
+                                                                                    isExpanded 
+                                                                                        ? 'bg-white/5 border-white/20 text-white/60 hover:bg-white/10'
+                                                                                        : 'bg-indigo-600/10 hover:bg-indigo-600 text-indigo-400 hover:text-white border border-indigo-500/20 hover:border-transparent'
+                                                                                }`}
+                                                                            >
+                                                                                {isExpanded ? 'Cancelar' : 'Iniciar'}
+                                                                            </button>
+                                                                        </div>
+
+                                                                        {/* Inline Expanded Configuration Form */}
+                                                                        {isExpanded && (
+                                                                            <div className="mt-5 pt-5 border-t border-indigo-500/10 space-y-4 animate-fade-in">
+                                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                                    <div className="space-y-2">
+                                                                                        <label className="text-[9px] font-black text-indigo-300 uppercase tracking-widest block ml-1">Modalidad de Capacitación</label>
+                                                                                        <div className="grid grid-cols-2 gap-2 bg-black/40 border border-white/10 rounded-xl p-1">
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => setTrainingForm({...trainingForm, modality: 'presencial'})}
+                                                                                                className={`py-2 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider italic transition-all ${
+                                                                                                    trainingForm.modality === 'presencial' 
+                                                                                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' 
+                                                                                                        : 'text-white/40 hover:text-white/70'
+                                                                                                }`}
+                                                                                            >
+                                                                                                In Situ (Presencial)
+                                                                                            </button>
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() => setTrainingForm({...trainingForm, modality: 'virtual'})}
+                                                                                                className={`py-2 px-3 rounded-lg text-[9px] font-black uppercase tracking-wider italic transition-all ${
+                                                                                                    trainingForm.modality === 'virtual' 
+                                                                                                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' 
+                                                                                                        : 'text-white/40 hover:text-white/70'
+                                                                                                }`}
+                                                                                            >
+                                                                                                Online (Virtual)
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    
+                                                                                    <div className="space-y-2">
+                                                                                        <label className="text-[9px] font-black text-indigo-300 uppercase tracking-widest block ml-1">Duración Estimada</label>
+                                                                                        <select 
+                                                                                            value={trainingForm.duration} 
+                                                                                            onChange={e => setTrainingForm({...trainingForm, duration: e.target.value})} 
+                                                                                            className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
+                                                                                        >
+                                                                                            <option value="5">5 MINUTOS</option>
+                                                                                            <option value="10">10 MINUTOS</option>
+                                                                                            <option value="15">15 MINUTOS</option>
+                                                                                            <option value="30">30 MINUTOS</option>
+                                                                                            <option value="45">45 MINUTOS</option>
+                                                                                            <option value="60">60 MINUTOS</option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                </div>
+                                                                                
+                                                                                <div className="space-y-2">
+                                                                                    <label className="text-[9px] font-black text-indigo-300 uppercase tracking-widest block ml-1">Objetivos de Capacitación / Descripción (Opcional)</label>
+                                                                                    <textarea 
+                                                                                        value={trainingForm.description} 
+                                                                                        onChange={e => setTrainingForm({...trainingForm, description: e.target.value})} 
+                                                                                        className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all uppercase placeholder-white/5" 
+                                                                                        rows="2" 
+                                                                                        placeholder="DEFINA LOS CONTENIDOS TÁCTICOS A TRATAR..."
+                                                                                    ></textarea>
+                                                                                </div>
+
+                                                                                <div className="flex justify-end pt-2">
+                                                                                    <button 
+                                                                                        onClick={() => handleExecuteAdhoc('training', template.id, { 
+                                                                                            title: template.title, 
+                                                                                            modality: trainingForm.modality, 
+                                                                                            duration: trainingForm.duration, 
+                                                                                            description: trainingForm.description 
+                                                                                        })}
+                                                                                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-95"
+                                                                                    >
+                                                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                                                                                        Confirmar & Iniciar
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 

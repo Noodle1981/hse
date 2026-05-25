@@ -197,10 +197,69 @@ class TrainingController extends Controller
      */
     public function finalize(Request $request, VisitTraining $visitTraining)
     {
+        $request->validate([
+            'duration_minutes' => 'required|integer|min:1',
+            'is_external_instructor' => 'boolean',
+            'trainer_name' => 'required_if:is_external_instructor,true|nullable|string|max:255',
+            'instructor_signature' => 'required_if:is_external_instructor,true|nullable|string',
+        ]);
+
+        $visitTraining->update([
+            'duration_minutes' => $request->duration_minutes,
+        ]);
+
+        $signaturePath = null;
+        if ($request->is_external_instructor && $request->instructor_signature) {
+            $sigData = $request->instructor_signature;
+            if (preg_match('/^data:image\/(\w+);base64,/', $sigData, $type)) {
+                $sigData = substr($sigData, strpos($sigData, ',') + 1);
+                $type = strtolower($type[1]);
+            } else {
+                $type = 'png';
+            }
+            $sigData = base64_decode($sigData);
+
+            if ($sigData !== false) {
+                $filename = 'signatures/instructor_' . uniqid() . '.' . $type;
+                \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $sigData);
+                $signaturePath = $filename;
+            }
+        }
+
         if ($visitTraining->training) {
-            $visitTraining->training->update([
+            $updateData = [
                 'status' => 'completed',
+                'duration' => $request->duration_minutes,
+            ];
+            if ($request->is_external_instructor && $request->trainer_name) {
+                $updateData['trainer_name'] = $request->trainer_name;
+            }
+            $visitTraining->training->update($updateData);
+        }
+
+        $visit = $visitTraining->visit;
+        if ($visit) {
+            if ($request->is_external_instructor && $signaturePath) {
+                $visit->instructor_signature = $signaturePath;
+                $visit->instructor_signature_date = now();
+            } else if (!$request->is_external_instructor) {
+                $visit->instructor_signature = null;
+                $visit->instructor_signature_date = null;
+            }
+            $visit->save();
+        }
+
+        if ($visit && $visit->visit_type === 'training') {
+            $visit->update([
+                'end_time' => now(),
+                'status' => 'completed',
+                'general_observations' => 'Capacitación dictada con éxito. Total asistentes: ' . count($visitTraining->attendees ?? []),
+                'notes' => 'Visita de capacitación finalizada automáticamente al completar la charla: ' . $visitTraining->title,
+                'responsible_name' => $request->input('responsible_name', 'Responsable de Sede'),
             ]);
+
+            return redirect()->route('tecnico.checklists.tasks.index', ['tab' => 'trainings'])
+                ->with('message', 'Capacitación finalizada y visita cerrada correctamente.');
         }
 
         return redirect()->route('tecnico.visits.in-progress', $visitTraining->visit_certificate_id)

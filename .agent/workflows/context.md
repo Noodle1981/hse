@@ -107,6 +107,7 @@ ep-back/
 | `answers` | Respuestas específicas | `id`, `inspection_id`, `question_id`, `value` |
 | `sedes` | Plantas físicas y control de jornada | `id`, `empresa_id`, `nombre_sede`, `dias_operativos` (JSON), `hora_apertura`, `hora_cierre`, `es_roster_24_7`, `radio_tolerancia_metros` |
 | `visit_certificates` | Constancias de visita, geolocalización y auditoría horaria | `id`, `sede_id`, `user_id`, `start_time`, `end_time`, `horas_gabinete_estimadas`, `checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng`, `gps_verified` |
+| `trainings` | Sesiones e instancias de capacitación | `id`, `empresa_id`, `sede_id`, `dynamic_checklist_id`, `title`, `description`, `type` (presencial/virtual), `date`, `duration`, `status` |
 | `visit_trainings` | Bitácora y firmas de capacitación en vivo en la visita | `id`, `visit_certificate_id`, `training_id`, `title`, `description`, `notes`, `duration_minutes`, `status`, `attendees` (JSON con DNI y Firmas) |
 
 ---
