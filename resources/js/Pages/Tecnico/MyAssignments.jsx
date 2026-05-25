@@ -29,6 +29,13 @@ export default function MyAssignments({
     const [selectedSedeId, setSelectedSedeId] = useState('');
     const [trainingForm, setTrainingForm] = useState({ title: '', duration: '15', description: '' });
     const [selectedChecklistForTraining, setSelectedChecklistForTraining] = useState('');
+    const [modalSubTab, setModalSubTab] = useState('planned');
+
+    useEffect(() => {
+        if (modalOpen) {
+            setModalSubTab('planned');
+        }
+    }, [modalOpen]);
 
     const safeRoute = (name, params = null) => {
         try {
@@ -675,204 +682,246 @@ export default function MyAssignments({
 
                             {/* MAIN MODAL OPTIONS (Only displayed when Sede is selected or activeVisit is locked) */}
                             {selectedSedeId ? (
-                                <div className="space-y-8">
-                                    {/* 1. Tareas Planificadas */}
-                                    <div className="space-y-4">
-                                        <h4 className={`text-xs font-black uppercase tracking-widest italic ${theme.primary}`}>
-                                            Tareas Planificadas para {activeSedeName.toUpperCase() || 'ESTA SEDE'}
-                                        </h4>
-                                        
-                                        {modalPlannedTasks.length === 0 ? (
-                                            <p className="text-white/40 text-xs italic bg-white/[0.02] px-6 py-4 rounded-xl border border-white/5">
-                                                No hay tareas planificadas pendientes de {theme.tabTitle.toLowerCase()} para esta sede en este mes.
-                                            </p>
-                                        ) : (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {modalPlannedTasks.map(item => (
-                                                    <div 
-                                                        key={`modal-planned-${item.id}`}
-                                                        className="bg-[#1b1b2d] border border-white/5 rounded-[1.5rem] p-5 flex flex-col justify-between hover:border-white/10 transition-all group/card relative overflow-hidden"
-                                                    >
-                                                        {/* Glow top border */}
-                                                        <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r opacity-30 group-hover/card:opacity-100 transition-opacity
-                                                            ${activeTab === 'inspections' ? 'from-orange-500 to-amber-500' :
-                                                              activeTab === 'trainings' ? 'from-indigo-600 to-blue-500' :
-                                                              'from-emerald-500 to-teal-500'}`}
-                                                        ></div>
-                                                        <div>
-                                                            <div className="text-[8px] font-black text-white/30 uppercase tracking-widest italic mb-1">PROGRAMADO • ID: {item.registry_code}</div>
-                                                            <h5 className="text-xs font-black text-white uppercase italic leading-tight">{item.title}</h5>
-                                                        </div>
-                                                        
-                                                        {activeTab === 'reports' ? (
-                                                            <Link
-                                                                href={safeRoute('master-reports.create', { 
-                                                                    sede_id: selectedSedeId, 
-                                                                    periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
-                                                                })}
-                                                                onClick={() => setModalOpen(false)}
-                                                                className={`mt-4 w-full h-11 rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 border border-white/10
-                                                                    ${theme.bg} hover:brightness-110 shadow-lg`}
-                                                            >
-                                                                Iniciar
-                                                            </Link>
-                                                        ) : (
-                                                            <button
-                                                                onClick={() => handleExecute(item)}
-                                                                className={`mt-4 w-full h-11 rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 border border-white/10
-                                                                    ${theme.bg} hover:brightness-110 shadow-lg`}
-                                                            >
-                                                                {item.status === 'in_progress' ? 'Reanudar' : 'Iniciar'}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                <div className="space-y-6">
+                                    {/* Selector de Plan o Libre */}
+                                    <div className="flex bg-[#11111d] p-1 rounded-2xl border border-white/5 w-full">
+                                        <button
+                                            type="button"
+                                            onClick={() => setModalSubTab('planned')}
+                                            className={`flex-1 py-3 px-6 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] italic transition-all flex items-center justify-center gap-2 ${
+                                                modalSubTab === 'planned' 
+                                                    ? (activeTab === 'inspections' 
+                                                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                                                        : activeTab === 'trainings'
+                                                        ? 'bg-[#4f46e5] text-white shadow-lg shadow-[#4f46e5]/20'
+                                                        : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20')
+                                                    : 'text-white/40 hover:text-white/80'
+                                            }`}
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 00-2 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                            Según el Plan
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => setModalSubTab('adhoc')}
+                                            className={`flex-1 py-3 px-6 rounded-xl text-[10px] font-black uppercase tracking-[0.15em] italic transition-all flex items-center justify-center gap-2 ${
+                                                modalSubTab === 'adhoc' 
+                                                    ? (activeTab === 'inspections' 
+                                                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' 
+                                                        : activeTab === 'trainings'
+                                                        ? 'bg-[#4f46e5] text-white shadow-lg shadow-[#4f46e5]/20'
+                                                        : 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/20')
+                                                    : 'text-white/40 hover:text-white/80'
+                                            }`}
+                                        >
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path d="M12 4v16m8-8H4" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                            Ejecución Libre / Ad-hoc
+                                        </button>
                                     </div>
 
-                                    <hr className="border-white/5" />
+                                    {/* 1. Tareas Planificadas */}
+                                    {modalSubTab === 'planned' && (
+                                        <div className="space-y-4 animate-fade-in">
+                                            <h4 className={`text-xs font-black uppercase tracking-widest italic ${theme.primary}`}>
+                                                Tareas Planificadas para {activeSedeName.toUpperCase() || 'ESTA SEDE'}
+                                            </h4>
+                                            
+                                            {modalPlannedTasks.length === 0 ? (
+                                                <p className="text-white/40 text-xs italic bg-white/[0.02] px-6 py-4 rounded-xl border border-white/5">
+                                                    No hay tareas planificadas pendientes de {theme.tabTitle.toLowerCase()} para esta sede en este mes.
+                                                </p>
+                                            ) : (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {modalPlannedTasks.map(item => (
+                                                        <div 
+                                                            key={`modal-planned-${item.id}`}
+                                                            className="bg-[#1b1b2d] border border-white/5 rounded-[1.5rem] p-5 flex flex-col justify-between hover:border-white/10 transition-all group/card relative overflow-hidden"
+                                                        >
+                                                            {/* Glow top border */}
+                                                            <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r opacity-30 group-hover/card:opacity-100 transition-opacity
+                                                                ${activeTab === 'inspections' ? 'from-orange-500 to-amber-500' :
+                                                                  activeTab === 'trainings' ? 'from-indigo-600 to-blue-500' :
+                                                                  'from-emerald-500 to-teal-500'}`}
+                                                            ></div>
+                                                            <div>
+                                                                <div className="text-[8px] font-black text-white/30 uppercase tracking-widest italic mb-1">PROGRAMADO • ID: {item.registry_code}</div>
+                                                                <h5 className="text-xs font-black text-white uppercase italic leading-tight">{item.title}</h5>
+                                                            </div>
+                                                            
+                                                            {activeTab === 'reports' ? (
+                                                                <Link
+                                                                    href={safeRoute('master-reports.create', { 
+                                                                        sede_id: selectedSedeId, 
+                                                                        periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
+                                                                    })}
+                                                                    onClick={() => setModalOpen(false)}
+                                                                    className={`mt-4 w-full h-11 rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 border border-white/10
+                                                                        ${theme.bg} hover:brightness-110 shadow-lg`}
+                                                                >
+                                                                    Iniciar
+                                                                </Link>
+                                                            ) : (
+                                                                <button
+                                                                    onClick={() => handleExecute(item)}
+                                                                    className={`mt-4 w-full h-11 rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 border border-white/10
+                                                                        ${theme.bg} hover:brightness-110 shadow-lg`}
+                                                                >
+                                                                    {item.status === 'in_progress' ? 'Reanudar' : 'Iniciar'}
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
 
                                     {/* 2. Tareas Libres / Ad-hoc */}
-                                    <div className="space-y-4">
-                                        <h4 className="text-xs font-black text-indigo-100/50 uppercase tracking-widest italic">
-                                            Ejecución Libre / Ad-hoc
-                                        </h4>
+                                    {modalSubTab === 'adhoc' && (
+                                        <div className="space-y-4 animate-fade-in">
+                                            <h4 className="text-xs font-black text-indigo-100/50 uppercase tracking-widest italic">
+                                                Ejecución Libre / Ad-hoc
+                                            </h4>
 
-                                        {/* INSPECTIONS: Select a checklist template to start ad-hoc */}
-                                        {activeTab === 'inspections' && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {checklistTemplates.map(template => (
-                                                    <div 
-                                                        key={`adhoc-ins-${template.id}`}
-                                                        className="bg-black/20 border border-white/5 rounded-2xl p-5 flex items-center justify-between hover:bg-white/[0.01] hover:border-white/10 transition-all"
-                                                    >
+                                            {/* INSPECTIONS: Select a checklist template to start ad-hoc */}
+                                            {activeTab === 'inspections' && (
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    {checklistTemplates.map(template => (
+                                                        <div 
+                                                            key={`adhoc-ins-${template.id}`}
+                                                            className="bg-black/20 border border-white/5 rounded-2xl p-5 flex items-center justify-between hover:bg-white/[0.01] hover:border-white/10 transition-all"
+                                                        >
+                                                            <div>
+                                                                <div className="text-[7px] font-bold text-white/30 uppercase tracking-wider mb-0.5">CHECKLIST</div>
+                                                                <div className="text-xs font-black text-white uppercase italic leading-none">{template.title}</div>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => handleExecuteAdhoc('inspection', template.id)}
+                                                                className="px-4 py-2 bg-ep-primary/10 hover:bg-ep-primary text-ep-primary hover:text-white border border-ep-primary/20 hover:border-transparent rounded-xl text-[8px] font-black uppercase italic tracking-widest transition-all"
+                                                            >
+                                                                Iniciar
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* TRAININGS: Express Training Form OR training templates */}
+                                            {activeTab === 'trainings' && (
+                                                <div className="space-y-6">
+                                                    {/* Charla Express */}
+                                                    <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] p-6 space-y-4">
                                                         <div>
-                                                            <div className="text-[7px] font-bold text-white/30 uppercase tracking-wider mb-0.5">CHECKLIST</div>
-                                                            <div className="text-xs font-black text-white uppercase italic leading-none">{template.title}</div>
+                                                            <h5 className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Charla de 5 Minutos / Express</h5>
+                                                            <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Registra un adiestramiento rápido in-situ</p>
                                                         </div>
-                                                        <button 
-                                                            onClick={() => handleExecuteAdhoc('inspection', template.id)}
-                                                            className="px-4 py-2 bg-ep-primary/10 hover:bg-ep-primary text-ep-primary hover:text-white border border-ep-primary/20 hover:border-transparent rounded-xl text-[8px] font-black uppercase italic tracking-widest transition-all"
-                                                        >
-                                                            Iniciar
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
-
-                                        {/* TRAININGS: Express Training Form OR training templates */}
-                                        {activeTab === 'trainings' && (
-                                            <div className="space-y-6">
-                                                {/* Charla Express */}
-                                                <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] p-6 space-y-4">
-                                                    <div>
-                                                        <h5 className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Charla de 5 Minutos / Express</h5>
-                                                        <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Registra un adiestramiento rápido in-situ</p>
-                                                    </div>
-                                                    
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            <div className="space-y-2">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Tema / Título</label>
+                                                                <input 
+                                                                    type="text" 
+                                                                    value={trainingForm.title} 
+                                                                    onChange={e => setTrainingForm({...trainingForm, title: e.target.value})} 
+                                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                                                                    placeholder="Ej: Uso Correcto de EPP" 
+                                                                />
+                                                            </div>
+                                                            <div className="space-y-2">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Duración (Minutos)</label>
+                                                                <select 
+                                                                    value={trainingForm.duration} 
+                                                                    onChange={e => setTrainingForm({...trainingForm, duration: e.target.value})} 
+                                                                    className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
+                                                                >
+                                                                    <option value="5">5 MINUTOS</option>
+                                                                    <option value="10">10 MINUTOS</option>
+                                                                    <option value="15">15 MINUTOS</option>
+                                                                    <option value="30">30 MINUTOS</option>
+                                                                    <option value="45">45 MINUTOS</option>
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                        
                                                         <div className="space-y-2">
-                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Tema / Título</label>
-                                                            <input 
-                                                                type="text" 
-                                                                value={trainingForm.title} 
-                                                                onChange={e => setTrainingForm({...trainingForm, title: e.target.value})} 
+                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Descripción / Puntos Clave</label>
+                                                            <textarea 
+                                                                value={trainingForm.description} 
+                                                                onChange={e => setTrainingForm({...trainingForm, description: e.target.value})} 
                                                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                                                placeholder="Ej: Uso Correcto de EPP" 
-                                                            />
+                                                                rows="2" 
+                                                                placeholder="Ingrese una breve descripción de los puntos tratados..."
+                                                            ></textarea>
                                                         </div>
-                                                        <div className="space-y-2">
-                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Duración (Minutos)</label>
-                                                            <select 
-                                                                value={trainingForm.duration} 
-                                                                onChange={e => setTrainingForm({...trainingForm, duration: e.target.value})} 
-                                                                className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
-                                                            >
-                                                                <option value="5">5 MINUTOS</option>
-                                                                <option value="10">10 MINUTOS</option>
-                                                                <option value="15">15 MINUTOS</option>
-                                                                <option value="30">30 MINUTOS</option>
-                                                                <option value="45">45 MINUTOS</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="space-y-2">
-                                                        <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Descripción / Puntos Clave</label>
-                                                        <textarea 
-                                                            value={trainingForm.description} 
-                                                            onChange={e => setTrainingForm({...trainingForm, description: e.target.value})} 
-                                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
-                                                            rows="2" 
-                                                            placeholder="Ingrese una breve descripción de los puntos tratados..."
-                                                        ></textarea>
-                                                    </div>
 
-                                                    <button 
-                                                        onClick={() => handleExecuteAdhoc('training', null, { title: trainingForm.title, duration: trainingForm.duration, description: trainingForm.description })}
-                                                        disabled={!trainingForm.title}
-                                                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none"
-                                                    >
-                                                        Iniciar Charla Express
-                                                    </button>
-                                                </div>
-
-                                                {/* Training with Checklist */}
-                                                <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 space-y-4">
-                                                    <div>
-                                                        <h5 className="text-xs font-black text-white uppercase tracking-widest italic">Capacitación con Checklist Estándar</h5>
-                                                        <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Ejecuta una capacitación evaluada con preguntas estándar</p>
-                                                    </div>
-                                                    
-                                                    <div className="flex flex-col md:flex-row gap-4 items-end">
-                                                        <div className="flex-1 space-y-2 w-full">
-                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Seleccionar Plantilla Evaluativa</label>
-                                                            <select
-                                                                value={selectedChecklistForTraining}
-                                                                onChange={e => setSelectedChecklistForTraining(e.target.value)}
-                                                                className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
-                                                            >
-                                                                <option value="">SELECCIONA CHECKLIST EVALUATIVO...</option>
-                                                                {checklistTemplates.map(c => (
-                                                                    <option key={c.id} value={c.id}>{c.title}</option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
                                                         <button 
-                                                            onClick={() => handleExecuteAdhoc('training', selectedChecklistForTraining, { title: checklistTemplates.find(c => c.id == selectedChecklistForTraining)?.title })}
-                                                            disabled={!selectedChecklistForTraining}
-                                                            className="h-12 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none w-full md:w-auto"
+                                                            onClick={() => handleExecuteAdhoc('training', null, { title: trainingForm.title, duration: trainingForm.duration, description: trainingForm.description })}
+                                                            disabled={!trainingForm.title}
+                                                            className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none"
                                                         >
-                                                            Iniciar Capacitación
+                                                            Iniciar Charla Express
                                                         </button>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        )}
 
-                                        {/* REPORTS: Master report libre */}
-                                        {activeTab === 'reports' && (
-                                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[2rem] p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
-                                                <div>
-                                                    <h5 className="text-xs font-black text-emerald-400 uppercase tracking-widest italic">Informe Técnico Ad-hoc / Libre</h5>
-                                                    <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Comienza a redactar un informe maestro mensual libre para esta sede</p>
+                                                    {/* Training with Checklist */}
+                                                    <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 space-y-4">
+                                                        <div>
+                                                            <h5 className="text-xs font-black text-white uppercase tracking-widest italic">Capacitación con Checklist Estándar</h5>
+                                                            <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Ejecuta una capacitación evaluada con preguntas estándar</p>
+                                                        </div>
+                                                        
+                                                        <div className="flex flex-col md:flex-row gap-4 items-end">
+                                                            <div className="flex-1 space-y-2 w-full">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Seleccionar Plantilla Evaluativa</label>
+                                                                <select
+                                                                    value={selectedChecklistForTraining}
+                                                                    onChange={e => setSelectedChecklistForTraining(e.target.value)}
+                                                                    className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
+                                                                >
+                                                                    <option value="">SELECCIONA CHECKLIST EVALUATIVO...</option>
+                                                                    {checklistTemplates.map(c => (
+                                                                        <option key={c.id} value={c.id}>{c.title}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                            <button 
+                                                                onClick={() => handleExecuteAdhoc('training', selectedChecklistForTraining, { title: checklistTemplates.find(c => c.id == selectedChecklistForTraining)?.title })}
+                                                                disabled={!selectedChecklistForTraining}
+                                                                className="h-12 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none w-full md:w-auto"
+                                                            >
+                                                                Iniciar Capacitación
+                                                            </button>
+                                                        </div>
+                                                    </div>
                                                 </div>
-                                                
-                                                <Link
-                                                    href={safeRoute('master-reports.create', { 
-                                                        sede_id: selectedSedeId, 
-                                                        periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
-                                                    })}
-                                                    onClick={() => setModalOpen(false)}
-                                                    className="w-full sm:w-auto px-6 h-12 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all"
-                                                >
-                                                    Redactar Informe
-                                                </Link>
-                                            </div>
-                                        )}
-                                    </div>
+                                            )}
+
+                                            {/* REPORTS: Master report libre */}
+                                            {activeTab === 'reports' && (
+                                                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[2rem] p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                                                    <div>
+                                                        <h5 className="text-xs font-black text-emerald-400 uppercase tracking-widest italic">Informe Técnico Ad-hoc / Libre</h5>
+                                                        <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Comienza a redactar un informe maestro mensual libre para esta sede</p>
+                                                    </div>
+                                                    
+                                                    <Link
+                                                        href={safeRoute('master-reports.create', { 
+                                                            sede_id: selectedSedeId, 
+                                                            periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
+                                                        })}
+                                                        onClick={() => setModalOpen(false)}
+                                                        className="w-full sm:w-auto px-6 h-12 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all"
+                                                    >
+                                                        Redactar Informe
+                                                    </Link>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="py-20 text-center text-white/30 animate-pulse">
