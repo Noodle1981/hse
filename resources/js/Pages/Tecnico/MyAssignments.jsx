@@ -161,11 +161,25 @@ export default function MyAssignments({
         return themes[activeTab] || themes['inspections'];
     }, [activeTab]);
 
+    const inspectionsArray = useMemo(() => {
+        if (!inspections) return [];
+        return Array.isArray(inspections) ? inspections : Object.values(inspections);
+    }, [inspections]);
+
+    const trainingsArray = useMemo(() => {
+        if (!trainings) return [];
+        return Array.isArray(trainings) ? trainings : Object.values(trainings);
+    }, [trainings]);
+
+    const reportsArray = useMemo(() => {
+        if (!reports) return [];
+        return Array.isArray(reports) ? reports : Object.values(reports);
+    }, [reports]);
+
     const displayData = useMemo(() => {
-        const rawData = activeTab === 'inspections' ? inspections : (activeTab === 'trainings' ? trainings : reports);
-        if (!rawData) return [];
-        return Array.isArray(rawData) ? rawData : Object.values(rawData);
-    }, [activeTab, inspections, trainings, reports]);
+        const rawData = activeTab === 'inspections' ? inspectionsArray : (activeTab === 'trainings' ? trainingsArray : reportsArray);
+        return rawData;
+    }, [activeTab, inspectionsArray, trainingsArray, reportsArray]);
 
     const safeDate = (dateStr) => {
         if (!dateStr) return 'N/A';
@@ -178,8 +192,8 @@ export default function MyAssignments({
     // Dynamic Tab-Specific KPIs
     const tabKpis = useMemo(() => {
         if (activeTab === 'inspections') {
-            const total = inspections.length;
-            const completed = inspections.filter(i => i.status === 'completed' || i.status === 'finalizado').length;
+            const total = inspectionsArray.length;
+            const completed = inspectionsArray.filter(i => i.status === 'completed' || i.status === 'finalizado').length;
             const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
             return {
                 title1: 'Plan de Inspecciones',
@@ -191,8 +205,8 @@ export default function MyAssignments({
                 pct: pct
             };
         } else if (activeTab === 'trainings') {
-            const total = trainings.length;
-            const completed = trainings.filter(t => t.status === 'completed' || t.status === 'finalizado').length;
+            const total = trainingsArray.length;
+            const completed = trainingsArray.filter(t => t.status === 'completed' || t.status === 'finalizado').length;
             const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
             return {
                 title1: 'Sesiones Completadas',
@@ -204,9 +218,9 @@ export default function MyAssignments({
                 pct: pct
             };
         } else {
-            const total = reports.length;
-            const completed = reports.filter(r => r.status === 'completed' || r.status === 'finalizado' || r.status === 'cerrado').length;
-            const drafts = reports.filter(r => r.status === 'in_progress' || r.status === 'borrador').length;
+            const total = reportsArray.length;
+            const completed = reportsArray.filter(r => r.status === 'completed' || r.status === 'finalizado' || r.status === 'cerrado').length;
+            const drafts = reportsArray.filter(r => r.status === 'in_progress' || r.status === 'borrador').length;
             const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
             return {
                 title1: 'Informes Finalizados',
@@ -218,19 +232,19 @@ export default function MyAssignments({
                 pct: pct
             };
         }
-    }, [activeTab, inspections, trainings, reports, kpis]);
+    }, [activeTab, inspectionsArray, trainingsArray, reportsArray, kpis]);
 
     // Modal Specific calculations
     const modalPlannedTasks = useMemo(() => {
         if (!selectedSedeId) return [];
         if (activeTab === 'inspections') {
-            return inspections.filter(i => i.sede_id.toString() === selectedSedeId.toString() && i.status !== 'completed' && i.status !== 'finalizado');
+            return inspectionsArray.filter(i => i.sede_id?.toString() === selectedSedeId.toString());
         } else if (activeTab === 'trainings') {
-            return trainings.filter(t => t.sede_id.toString() === selectedSedeId.toString() && t.status !== 'completed' && t.status !== 'finalizado');
+            return trainingsArray.filter(t => t.sede_id?.toString() === selectedSedeId.toString());
         } else {
-            return reports.filter(r => r.sede_id.toString() === selectedSedeId.toString() && r.status !== 'completed' && r.status !== 'finalizado' && r.status !== 'cerrado');
+            return reportsArray.filter(r => r.sede_id?.toString() === selectedSedeId.toString());
         }
-    }, [selectedSedeId, activeTab, inspections, trainings, reports]);
+    }, [selectedSedeId, activeTab, inspectionsArray, trainingsArray, reportsArray]);
 
     const activeSedeName = useMemo(() => {
         if (!selectedSedeId) return '';
@@ -332,7 +346,7 @@ export default function MyAssignments({
                                 onClick={() => { setActiveTab('inspections'); updateFilters({ tab: 'inspections' }); }}
                                 label="MISIONES"
                                 title="INSPECCIONES"
-                                count={inspections.length}
+                                count={inspectionsArray.length}
                                 color="ep-primary"
                                 icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="1.5"/></svg>}
                             />
@@ -341,7 +355,7 @@ export default function MyAssignments({
                                 onClick={() => { setActiveTab('trainings'); updateFilters({ tab: 'trainings' }); }}
                                 label="EDUCACIÓN"
                                 title="CAPACITACIONES"
-                                count={trainings.length}
+                                count={trainingsArray.length}
                                 color="indigo-600"
                                 icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z" strokeWidth="1.5"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeWidth="1.5"/></svg>}
                             />
@@ -350,7 +364,7 @@ export default function MyAssignments({
                                 onClick={() => { setActiveTab('reports'); updateFilters({ tab: 'reports' }); }}
                                 label="MÉTRICAS"
                                 title="INFORMES"
-                                count={reports.length}
+                                count={reportsArray.length}
                                 color="emerald-600"
                                 icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="1.5"/></svg>}
                             />
