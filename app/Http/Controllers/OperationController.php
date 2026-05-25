@@ -63,6 +63,7 @@ class OperationController extends Controller
         $selectedEmpresa = $request->empresa_id;
         $selectedSede = $request->sede_id;
         $activeTab = $request->tab ?? 'inspections';
+        $selectedStatus = $request->status ?? 'all';
 
         // IDs de Sedes y Empresas ASIGNADAS al técnico
         $assignedSedes = $user->sedes()->select('sedes.id', 'sedes.empresa_id')->get();
@@ -71,36 +72,26 @@ class OperationController extends Controller
 
         $activeVisit = $this->visitService->getActiveVisit($user);
 
-        // 1️⃣ Manual Assignments (Checklists)
-        $manualQuery = ChecklistAssignment::with(['checklist.categoryRelation', 'checklist.questions', 'sede.empresa'])
+        // 1️⃣ Manual / Automatic Assignments (Checklists) - LOAD ALL FOR GROUPING
+        $assignmentsQuery = ChecklistAssignment::with(['checklist.categoryRelation', 'checklist.questions', 'sede.empresa'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('due_date', $selectedMonth)
-            ->whereYear('due_date', $now->year)
-            ->where(function($q) {
-                $q->whereNull('notes')
-                  ->orWhere(function($sq) {
-                      $sq->where('notes', 'NOT LIKE', '%Vínculo automático desde Plan Anual%')
-                         ->where('notes', 'NOT LIKE', '%Plan Mensual Recomendado%');
-                  });
-            })
-            ->orderBy('due_date', 'asc');
+            ->whereYear('due_date', $now->year);
 
         // 2️⃣ Trainings
         $trainingsQuery = \App\Models\Training::with(['sede.empresa', 'dynamicChecklist.categoryRelation'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('date', $selectedMonth)
-            ->whereYear('date', $now->year)
-            ->orderBy('date', 'asc');
+            ->whereYear('date', $now->year);
 
         // 3️⃣ Reports
         $reportsQuery = \App\Models\MasterReport::with(['sede.empresa'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('created_at', $selectedMonth)
-            ->whereYear('created_at', $now->year)
-            ->orderBy('created_at', 'asc');
+            ->whereYear('created_at', $now->year);
 
         // 4️⃣ Annual Plan Tasks
         $queryMonth = $now->year . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT);
@@ -110,44 +101,240 @@ class OperationController extends Controller
 
         // Apply filters (Empresa/Sede/Search)
         if ($selectedEmpresa) {
-            $manualQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
+            $assignmentsQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
             $trainingsQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
             $reportsQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
             $contractQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
         }
         if ($selectedSede) {
-            $manualQuery->where('sede_id', $selectedSede);
+            $assignmentsQuery->where('sede_id', $selectedSede);
             $trainingsQuery->where('sede_id', $selectedSede);
             $reportsQuery->where('sede_id', $selectedSede);
             $contractQuery->where('sede_id', $selectedSede);
         }
         if ($search) {
-            $manualQuery->whereHas('checklist', fn($q) => $q->where('title', 'like', "%{$search}%"));
+            $assignmentsQuery->whereHas('checklist', fn($q) => $q->where('title', 'like', "%{$search}%"));
             $trainingsQuery->where('title', 'like', "%{$search}%");
             $reportsQuery->where('titulo', 'like', "%{$search}%");
             $contractQuery->where('activity_name', 'like', "%{$search}%");
         }
-        
+
+        $allAssignments = $assignmentsQuery->orderBy('due_date', 'asc')->get();
+        $allTrainings = $trainingsQuery->orderBy('date', 'asc')->get();
+        $allReports = $reportsQuery->orderBy('created_at', 'asc')->get();
         $contractTasks = $contractQuery->get();
 
-        // 5️⃣ Procesamiento de resultados para vista unificada
-        $inspections = $manualQuery->get()
-            ->map(fn($a) => $this->mapInspection($a))
-            ->concat(
-                $contractTasks->where('category', 'Inspección')->map(fn($p) => $this->mapContractToTask($p, 'inspection'))
-            )->values();
+        // 5️⃣ Procesamiento de resultados para vista unificada con agrupación para evitar duplicados y mantener registro único
+        
+        // 5.1️⃣ Inspecciones
+        $unifiedInspections = collect();
+        $contractInspections = $contractTasks->where('category', 'Inspección');
 
-        $trainings = $trainingsQuery->get()
-            ->map(fn($t) => $this->mapTraining($t))
-            ->concat(
-                $contractTasks->where('category', 'Capacitación')->map(fn($p) => $this->mapContractToTask($p, 'training'))
-            )->values();
+        foreach ($contractInspections as $plan) {
+            $matchingAssignments = $allAssignments->where('dynamic_checklist_id', $plan->checklist_id)
+                ->where('sede_id', $plan->sede_id);
 
-        $reports = $reportsQuery->get()
-            ->map(fn($r) => $this->mapReport($r))
-            ->concat(
-                $contractTasks->where('category', 'Informe')->map(fn($p) => $this->mapContractToTask($p, 'report'))
-            )->values();
+            $status = 'scheduled';
+            if ($matchingAssignments->isNotEmpty()) {
+                if ($matchingAssignments->whereIn('status', ['completed', 'finalizado'])->isNotEmpty()) {
+                    $status = 'completed';
+                } elseif ($matchingAssignments->where('status', 'in_progress')->isNotEmpty()) {
+                    $status = 'in_progress';
+                } else {
+                    $status = 'pending';
+                }
+            }
+
+            $key = $plan->checklist_id . '-' . $plan->sede_id;
+            $unifiedInspections->put($key, [
+                'id' => $plan->id, // ID del plan
+                'type' => 'inspection',
+                'title' => $plan->checklist?->title ?? $plan->activity_name,
+                'sede' => $plan->sede?->nombre_sede,
+                'sede_id' => $plan->sede_id,
+                'empresa' => $plan->sede?->empresa?->nombre,
+                'due_date' => Carbon::now()->endOfMonth(),
+                'status' => $status,
+                'checklist_id' => $plan->checklist_id,
+                'source' => 'contract',
+                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+            ]);
+        }
+
+        foreach ($allAssignments as $assignment) {
+            $key = $assignment->dynamic_checklist_id . '-' . $assignment->sede_id;
+            if ($unifiedInspections->has($key)) {
+                continue;
+            }
+
+            $unifiedInspections->put($key, [
+                'id' => $assignment->id,
+                'type' => 'inspection',
+                'title' => $assignment->checklist?->title,
+                'sede' => $assignment->sede?->nombre_sede,
+                'sede_id' => $assignment->sede_id,
+                'empresa' => $assignment->sede?->empresa?->nombre,
+                'due_date' => $assignment->due_date,
+                'status' => $assignment->status,
+                'checklist_id' => $assignment->dynamic_checklist_id,
+                'source' => 'manual',
+                'registry_code' => $assignment->checklist?->registry_code ?? ('TX-' . $assignment->id),
+            ]);
+        }
+        $inspections = $unifiedInspections->values();
+
+        // 5.2️⃣ Capacitaciones
+        $unifiedTrainings = collect();
+        $contractTrainings = $contractTasks->where('category', 'Capacitación');
+
+        foreach ($contractTrainings as $plan) {
+            $matchingTrainings = $allTrainings->where('sede_id', $plan->sede_id)
+                ->filter(function($t) use ($plan) {
+                    return ($plan->checklist_id && $t->dynamic_checklist_id == $plan->checklist_id) 
+                        || (\Illuminate\Support\Str::slug($t->title) === \Illuminate\Support\Str::slug($plan->activity_name));
+                });
+
+            $status = 'scheduled';
+            if ($matchingTrainings->isNotEmpty()) {
+                if ($matchingTrainings->whereIn('status', ['completed', 'finalizado'])->isNotEmpty()) {
+                    $status = 'completed';
+                } elseif ($matchingTrainings->where('status', 'in_progress')->isNotEmpty()) {
+                    $status = 'in_progress';
+                } else {
+                    $status = 'pending';
+                }
+            }
+
+            $key = $plan->checklist_id ? ('c_' . $plan->checklist_id . '_' . $plan->sede_id) : ('t_' . \Illuminate\Support\Str::slug($plan->activity_name) . '_' . $plan->sede_id);
+
+            $unifiedTrainings->put($key, [
+                'id' => $plan->id,
+                'type' => 'training',
+                'title' => $plan->checklist?->title ?? $plan->activity_name,
+                'sede' => $plan->sede?->nombre_sede,
+                'sede_id' => $plan->sede_id,
+                'empresa' => $plan->sede?->empresa?->nombre,
+                'due_date' => Carbon::now()->endOfMonth(),
+                'status' => $status,
+                'checklist_id' => $plan->checklist_id,
+                'source' => 'contract',
+                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+            ]);
+        }
+
+        foreach ($allTrainings as $t) {
+            $key = $t->dynamic_checklist_id ? ('c_' . $t->dynamic_checklist_id . '_' . $t->sede_id) : ('t_' . \Illuminate\Support\Str::slug($t->title) . '_' . $t->sede_id);
+            if ($unifiedTrainings->has($key)) {
+                continue;
+            }
+
+            $unifiedTrainings->put($key, [
+                'id' => $t->id,
+                'type' => 'training',
+                'title' => $t->title,
+                'sede' => $t->sede?->nombre_sede,
+                'sede_id' => $t->sede_id,
+                'empresa' => $t->sede?->empresa?->nombre,
+                'due_date' => $t->date,
+                'status' => $t->status,
+                'checklist_id' => $t->dynamic_checklist_id,
+                'source' => 'manual',
+                'registry_code' => $t->dynamicChecklist?->registry_code ?? ('EDU-' . $t->id),
+            ]);
+        }
+        $trainings = $unifiedTrainings->values();
+
+        // 5.3️⃣ Informes
+        $unifiedReports = collect();
+        $contractReports = $contractTasks->where('category', 'Informe');
+
+        foreach ($contractReports as $plan) {
+            $matchingReports = $allReports->where('sede_id', $plan->sede_id)
+                ->filter(function($r) use ($plan) {
+                    return \Illuminate\Support\Str::slug($r->titulo) === \Illuminate\Support\Str::slug($plan->activity_name);
+                });
+
+            $status = 'scheduled';
+            if ($matchingReports->isNotEmpty()) {
+                if ($matchingReports->whereIn('estado', ['completed', 'finalizado', 'cerrado', 'enviado'])->isNotEmpty()) {
+                    $status = 'completed';
+                } elseif ($matchingReports->where('estado', 'borrador')->isNotEmpty()) {
+                    $status = 'in_progress';
+                } else {
+                    $status = 'pending';
+                }
+            }
+
+            $key = 'r_' . \Illuminate\Support\Str::slug($plan->activity_name) . '_' . $plan->sede_id;
+
+            $unifiedReports->put($key, [
+                'id' => $plan->id,
+                'type' => 'report',
+                'title' => $plan->checklist?->title ?? $plan->activity_name,
+                'sede' => $plan->sede?->nombre_sede,
+                'sede_id' => $plan->sede_id,
+                'empresa' => $plan->sede?->empresa?->nombre,
+                'due_date' => Carbon::now()->endOfMonth(),
+                'status' => $status,
+                'checklist_id' => null,
+                'source' => 'contract',
+                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+            ]);
+        }
+
+        foreach ($allReports as $r) {
+            $key = 'r_' . \Illuminate\Support\Str::slug($r->titulo) . '_' . $r->sede_id;
+            if ($unifiedReports->has($key)) {
+                continue;
+            }
+
+            $unifiedReports->put($key, [
+                'id' => $r->id,
+                'type' => 'report',
+                'title' => $r->titulo,
+                'sede' => $r->sede?->nombre_sede,
+                'sede_id' => $r->sede_id,
+                'empresa' => $r->sede?->empresa?->nombre,
+                'due_date' => $r->created_at->addDays(7),
+                'status' => $r->estado === 'borrador' ? 'in_progress' : 'completed',
+                'source' => 'manual',
+                'registry_code' => 'MET-' . $r->id,
+            ]);
+        }
+        $reports = $unifiedReports->values();
+
+        // 5.4️⃣ Aplicar Filtro de Estado si se solicita
+        if ($selectedStatus !== 'all') {
+            $inspections = $inspections->filter(function($item) use ($selectedStatus) {
+                if ($selectedStatus === 'completed') {
+                    return $item['status'] === 'completed';
+                } elseif ($selectedStatus === 'in_progress') {
+                    return $item['status'] === 'in_progress';
+                } else {
+                    return $item['status'] === 'scheduled' || $item['status'] === 'pending';
+                }
+            })->values();
+
+            $trainings = $trainings->filter(function($item) use ($selectedStatus) {
+                if ($selectedStatus === 'completed') {
+                    return $item['status'] === 'completed';
+                } elseif ($selectedStatus === 'in_progress') {
+                    return $item['status'] === 'in_progress';
+                } else {
+                    return $item['status'] === 'scheduled' || $item['status'] === 'pending';
+                }
+            })->values();
+
+            $reports = $reports->filter(function($item) use ($selectedStatus) {
+                if ($selectedStatus === 'completed') {
+                    return $item['status'] === 'completed';
+                } elseif ($selectedStatus === 'in_progress') {
+                    return $item['status'] === 'in_progress';
+                } else {
+                    return $item['status'] === 'scheduled' || $item['status'] === 'pending';
+                }
+            })->values();
+        }
 
         // 6️⃣ KPIs (Rendimiento Global del Técnico, no atado al filtro mensual)
         $totalTasks = $inspections->count() + $trainings->count() + $reports->count();
@@ -163,8 +350,8 @@ class OperationController extends Controller
         $globalCompleted = $globalManualCompleted + $globalTrainingsCompleted;
 
         $kpis = [
-            'total_tasks' => $totalTasks, // Se mantiene local para la vista
-            'completed' => $completedTasks, // Se mantiene local para la vista
+            'total_tasks' => $totalTasks,
+            'completed' => $completedTasks,
             'percentage' => $globalTotal > 0 ? round(($globalCompleted / $globalTotal) * 100) : 0,
             'critical_findings' => \App\Models\Hallazgo::where('inspector_id', $user->id)->where('criticidad', 'alta')->where('estado', '!=', 'resuelto')->count(),
         ];
@@ -180,7 +367,8 @@ class OperationController extends Controller
                 'search' => $search,
                 'empresa_id' => $selectedEmpresa,
                 'sede_id' => $selectedSede,
-                'tab' => $activeTab
+                'tab' => $activeTab,
+                'status' => $selectedStatus,
             ],
             'empresas' => Empresa::whereIn('id', $assignedEmpresaIds)->get(),
             'sedes' => Sede::whereIn('id', $assignedSedeIds)->get(),
@@ -220,48 +408,112 @@ class OperationController extends Controller
             $activeVisit = $this->visitService->startVisit($user, $sede);
         }
 
-        // Link/Create Task Context
-        $assignmentId = null;
-        $checklistId = null;
+        if ($request->type === 'inspection') {
+            $assignmentId = null;
+            $checklistId = null;
 
-        if ($request->source === 'contract') {
-            $plan = \App\Models\AnnualPlan::findOrFail($request->id);
-            $checklistId = $plan->checklist_id;
-            
-            // Logic to find or create the assignment for this plan in this visit
-            $assignment = \App\Models\ChecklistAssignment::where('user_id', $user->id)
-                ->where('sede_id', $request->sede_id)
-                ->where('notes', 'LIKE', '%desde Plan Anual #' . $plan->id . '%')
-                ->first();
+            if ($request->source === 'contract') {
+                $plan = \App\Models\AnnualPlan::findOrFail($request->id);
+                $checklistId = $plan->checklist_id;
+                
+                // Logic to find or create the assignment for this plan in this visit
+                $assignment = \App\Models\ChecklistAssignment::where('user_id', $user->id)
+                    ->where('sede_id', $request->sede_id)
+                    ->where('notes', 'LIKE', '%desde Plan Anual #' . $plan->id . '%')
+                    ->first();
 
-            if (!$assignment) {
-                $sede = \App\Models\Sede::findOrFail($request->sede_id);
-                $assignment = \App\Models\ChecklistAssignment::create([
-                    'user_id' => $user->id,
-                    'sede_id' => $request->sede_id,
-                    'empresa_id' => $sede->empresa_id,
-                    'dynamic_checklist_id' => $checklistId,
-                    'due_date' => now(),
-                    'status' => 'pending',
-                    'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
-                ]);
-            }
-            $assignmentId = $assignment->id;
-        } else {
-            // Manual Task
-            if ($request->type === 'inspection') {
+                if (!$assignment) {
+                    $assignment = \App\Models\ChecklistAssignment::create([
+                        'user_id' => $user->id,
+                        'sede_id' => $request->sede_id,
+                        'empresa_id' => $activeVisit->sede->empresa_id,
+                        'dynamic_checklist_id' => $checklistId,
+                        'due_date' => now(),
+                        'status' => 'pending',
+                        'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+                    ]);
+                }
+                $assignmentId = $assignment->id;
+            } else {
+                // Manual Task
                 $assignment = \App\Models\ChecklistAssignment::findOrFail($request->id);
                 $assignmentId = $assignment->id;
                 $checklistId = $assignment->dynamic_checklist_id;
-            } else {
-                // Training with checklist
-                $training = \App\Models\Training::findOrFail($request->id);
-                $checklistId = $training->dynamic_checklist_id;
             }
-        }
 
-        return redirect()->route('tecnico.visits.in-progress', $activeVisit->id)
-            ->with('message', 'Visita iniciada. Sincronizando unidad de despliegue...');
+            return redirect()->route('tecnico.checklists.fill', [
+                'id' => $checklistId,
+                'assignment' => $assignmentId,
+                'visit_id' => $activeVisit->id
+            ])->with('message', 'Inspección asignada e iniciada.');
+
+        } else {
+            // Training execution
+            $visitTraining = null;
+
+            if ($request->source === 'contract') {
+                $plan = \App\Models\AnnualPlan::findOrFail($request->id);
+
+                $training = \App\Models\Training::where('user_id', $user->id)
+                    ->where('sede_id', $request->sede_id)
+                    ->where('notes', 'LIKE', '%desde Plan Anual #' . $plan->id . '%')
+                    ->first();
+
+                if (!$training) {
+                    $training = \App\Models\Training::create([
+                        'empresa_id' => $activeVisit->sede->empresa_id,
+                        'sede_id' => $request->sede_id,
+                        'user_id' => $user->id,
+                        'created_by_user_id' => $user->id,
+                        'is_template' => false,
+                        'title' => $plan->activity_name,
+                        'type' => 'ad-hoc',
+                        'date' => now(),
+                        'status' => 'pending',
+                        'dynamic_checklist_id' => $plan->checklist_id,
+                        'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+                    ]);
+                }
+
+                $visitTraining = \App\Models\VisitTraining::where('visit_certificate_id', $activeVisit->id)
+                    ->where('training_id', $training->id)
+                    ->first();
+
+                if (!$visitTraining) {
+                    $visitTraining = \App\Models\VisitTraining::create([
+                        'visit_certificate_id' => $activeVisit->id,
+                        'training_id' => $training->id,
+                        'is_adhoc' => false,
+                        'title' => $training->title,
+                        'description' => $training->description ?? 'Capacitación programada de plan anual',
+                        'duration_minutes' => $training->duration ?? 15,
+                        'attendees' => [],
+                    ]);
+                }
+            } else {
+                // Manual Task
+                $training = \App\Models\Training::findOrFail($request->id);
+
+                $visitTraining = \App\Models\VisitTraining::where('visit_certificate_id', $activeVisit->id)
+                    ->where('training_id', $training->id)
+                    ->first();
+
+                if (!$visitTraining) {
+                    $visitTraining = \App\Models\VisitTraining::create([
+                        'visit_certificate_id' => $activeVisit->id,
+                        'training_id' => $training->id,
+                        'is_adhoc' => true,
+                        'title' => $training->title,
+                        'description' => $training->description ?? 'Capacitación manual',
+                        'duration_minutes' => $training->duration ?? 15,
+                        'attendees' => [],
+                    ]);
+                }
+            }
+
+            return redirect()->route('tecnico.trainings.session', $visitTraining->id)
+                ->with('message', 'Capacitación asignada e iniciada.');
+        }
     }
 
     /**

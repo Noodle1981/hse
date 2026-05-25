@@ -62,6 +62,16 @@ export default function MyAssignments({
         }, { preserveState: true, preserveScroll: true });
     };
 
+    const handleExecute = (item) => {
+        router.post(safeRoute('tecnico.checklists.execute'), {
+            type: item.type,
+            id: item.id,
+            source: item.source,
+            sede_id: item.sede_id
+        });
+    };
+
+
     // Dinámica de Colores por Categoría
     const theme = useMemo(() => {
         const themes = {
@@ -373,34 +383,56 @@ export default function MyAssignments({
                                                 </td>
 
                                                 <td className="px-8 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-2">
-                                                        {item.status !== 'completed' && item.status !== 'finalizado' ? (
-                                                            activeTab === 'reports' ? (
+                                                    <div className="flex items-center justify-end gap-3 flex-wrap">
+                                                        {/* Secondary Action: Historial (only for checklists with checklist_id) */}
+                                                        {item?.checklist_id && (
+                                                            <Link
+                                                                href={safeRoute(
+                                                                    activeTab === 'inspections' 
+                                                                        ? 'tecnico.inspections.index' 
+                                                                        : 'tecnico.trainings.index', 
+                                                                    { checklist_id: item.checklist_id }
+                                                                )}
+                                                                className="px-4 py-2 border border-white/10 hover:border-white/20 hover:bg-white/5 text-white/70 hover:text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] transition-all"
+                                                            >
+                                                                Historial
+                                                            </Link>
+                                                        )}
+
+                                                        {/* Primary Action: Execute / Resume / OK */}
+                                                        {activeTab === 'reports' ? (
+                                                            item.status !== 'completed' && item.status !== 'finalizado' ? (
                                                                 <Link
                                                                     href={safeRoute('master-reports.create', { 
                                                                         sede_id: item.sede_id, 
                                                                         periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
                                                                     })}
-                                                                    className={`px-6 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme?.bg || 'bg-ep-primary'} ${theme?.shadow || ''} outline-none`}
+                                                                    className={`px-5 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme?.bg || 'bg-ep-primary'} ${theme?.shadow || ''} outline-none`}
                                                                 >
-                                                                    {item?.status === 'borrador' ? 'Continuar Redacción' : 'Ejecutar'}
-                                                                </Link>
-                                                            ) : item?.checklist_id ? (
-                                                                <Link
-                                                                    href={safeRoute('tecnico.inspections.index', { checklist_id: item.checklist_id })}
-                                                                    className={`px-6 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme?.bg || 'bg-ep-primary'} ${theme?.shadow || ''} outline-none`}
-                                                                >
-                                                                    Ver Historial
+                                                                    {item?.status === 'borrador' ? 'Reanudar' : 'Ejecutar'}
                                                                 </Link>
                                                             ) : (
-                                                                <button disabled className="px-6 py-2.5 bg-white/5 text-white/20 rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] cursor-not-allowed">
-                                                                    Ver
-                                                                </button>
+                                                                <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="4"/></svg>
+                                                                    <span className="text-[8px] font-black uppercase italic tracking-widest leading-none">OK</span>
+                                                                </div>
                                                             )
                                                         ) : (
-                                                            <div className="flex items-center gap-2 text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
-                                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="4"/></svg>
-                                                                <span className="text-[8px] font-black uppercase italic tracking-widest leading-none">OK</span>
+                                                            <div className="flex items-center gap-2">
+                                                                {/* Status indicator for completed items */}
+                                                                {(item.status === 'completed' || item.status === 'finalizado') && (
+                                                                    <span className="text-[8px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 uppercase italic tracking-widest leading-none mr-1">
+                                                                        OK
+                                                                    </span>
+                                                                )}
+                                                                <button
+                                                                    onClick={() => handleExecute(item)}
+                                                                    className={`px-5 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${
+                                                                        item.status === 'in_progress' ? 'bg-amber-600 shadow-amber-600/20' : theme?.bg || 'bg-ep-primary'
+                                                                    } ${theme?.shadow || ''} outline-none`}
+                                                                >
+                                                                    {item.status === 'in_progress' ? 'Reanudar' : 'Ejecutar'}
+                                                                </button>
                                                             </div>
                                                         )}
                                                     </div>
