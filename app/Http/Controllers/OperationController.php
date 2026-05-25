@@ -126,6 +126,13 @@ class OperationController extends Controller
 
         // 5️⃣ Procesamiento de resultados para vista unificada con agrupación para evitar duplicados y mantener registro único
         
+        // Fetch all completed inspections for this month to calculate the KPI stats
+        $completedInspectionsAll = \App\Models\DynamicInspection::whereIn('sede_id', $assignedSedeIds)
+            ->whereMonth('completed_at', $selectedMonth)
+            ->whereYear('completed_at', $now->year)
+            ->where('status', 'completed')
+            ->get();
+
         // 5.1️⃣ Inspecciones
         $unifiedInspections = collect();
         $contractInspections = $contractTasks->where('category', 'Inspección');
@@ -145,6 +152,12 @@ class OperationController extends Controller
                 }
             }
 
+            $matchingCompleted = $completedInspectionsAll->where('dynamic_checklist_id', $plan->checklist_id)
+                ->where('sede_id', $plan->sede_id);
+            $completedTotal = $matchingCompleted->count();
+            $completedPassed = $matchingCompleted->where('result', 'Pass')->count();
+            $compliancePct = $completedTotal > 0 ? round(($completedPassed / $completedTotal) * 100) : null;
+
             $key = $plan->checklist_id . '-' . $plan->sede_id;
             $unifiedInspections->put($key, [
                 'id' => $plan->id, // ID del plan
@@ -158,6 +171,10 @@ class OperationController extends Controller
                 'checklist_id' => $plan->checklist_id,
                 'source' => 'contract',
                 'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+                'checklist_count' => $matchingAssignments->count(),
+                'completed_count' => $completedTotal,
+                'passed_count' => $completedPassed,
+                'compliance_pct' => $compliancePct,
             ]);
         }
 
@@ -166,6 +183,15 @@ class OperationController extends Controller
             if ($unifiedInspections->has($key)) {
                 continue;
             }
+
+            $matchingManual = $allAssignments->where('dynamic_checklist_id', $assignment->dynamic_checklist_id)
+                ->where('sede_id', $assignment->sede_id);
+
+            $matchingCompleted = $completedInspectionsAll->where('dynamic_checklist_id', $assignment->dynamic_checklist_id)
+                ->where('sede_id', $assignment->sede_id);
+            $completedTotal = $matchingCompleted->count();
+            $completedPassed = $matchingCompleted->where('result', 'Pass')->count();
+            $compliancePct = $completedTotal > 0 ? round(($completedPassed / $completedTotal) * 100) : null;
 
             $unifiedInspections->put($key, [
                 'id' => $assignment->id,
@@ -179,6 +205,10 @@ class OperationController extends Controller
                 'checklist_id' => $assignment->dynamic_checklist_id,
                 'source' => 'manual',
                 'registry_code' => $assignment->checklist?->registry_code ?? ('TX-' . $assignment->id),
+                'checklist_count' => $matchingManual->count(),
+                'completed_count' => $completedTotal,
+                'passed_count' => $completedPassed,
+                'compliance_pct' => $compliancePct,
             ]);
         }
         $inspections = $unifiedInspections->values();
@@ -372,7 +402,7 @@ class OperationController extends Controller
             ],
             'empresas' => Empresa::whereIn('id', $assignedEmpresaIds)->get(),
             'sedes' => Sede::whereIn('id', $assignedSedeIds)->get(),
-            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->get(),
+            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->with(['categoryRelation', 'subcategoryRelation'])->get(),
             'trainingTemplates' => \App\Models\Training::where('is_template', true)->get(),
         ]);
     }
@@ -677,7 +707,7 @@ class OperationController extends Controller
             'pendingAssignments' => $pendingAssignments,
             'pendingTrainings'   => $pendingTrainings,
             'templates'          => \App\Models\Training::where('is_template', true)->get(),
-            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->get(),
+            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->with(['categoryRelation', 'subcategoryRelation'])->get(),
         ]);
     }
 

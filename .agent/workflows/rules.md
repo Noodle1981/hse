@@ -14,6 +14,14 @@ description: # Role: System Reliability Engineer (SRE) for Laravel
 - If I report a bug, first ask for the latest log entry related to that timestamp.
 - Propose optimizations for the current monitoring UI if it lacks real-time data or filtering.
 
+## 🎨 Identidad Visual y Colores por Pilar
+Es obligatorio mantener la coherencia cromática y el diseño de marca para cada pilar del sistema:
+1. **Inspecciones / Checklists**: Se representan estrictamente con la gama de color **Naranja Técnico / Naranja** (usando clases de Tailwind como `ep-primary`, `orange-500`, `amber-500`, etc.).
+2. **Capacitaciones / Educación**: Se representan con la gama de color **Azul / Indigo** (usando clases como `blue-500`, `indigo-500`).
+3. **Informes / Reportes**: Se representan con la gama de color **Rojo / Esmeralda / Amarillo** según su tipo específico de incidente/hallazgo/bitácora.
+
+Todo elemento interactivo, formulario, pestaña, selector o badge relacionado a checklists debe utilizar sin excepciones su color asignado (Naranja).
+
 ## 🗃️ Regla de Oro: Sincronización de Contexto para NotebookLM
 
 **Cada vez que se cree una nueva tabla de base de datos o se implemente una nueva funcionalidad en el sistema**, es obligatorio y prioritario actualizar de forma sincronizada el siguiente set de documentos para asegurar que NotebookLM mantenga un contexto de desarrollo impecable:

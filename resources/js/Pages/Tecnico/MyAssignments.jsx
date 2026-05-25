@@ -121,7 +121,8 @@ export default function MyAssignments({
                 buttonLabel: 'Inspeccionar',
                 badgeBg: 'bg-ep-primary/10',
                 glow: 'shadow-[0_0_25px_rgba(246,146,57,0.35)]',
-                accentColor: 'orange'
+                accentColor: 'orange',
+                column4Label: 'Checklists'
             },
             'trainings': {
                 primary: 'text-indigo-400',
@@ -133,7 +134,8 @@ export default function MyAssignments({
                 buttonLabel: 'Iniciar Capacitación',
                 badgeBg: 'bg-indigo-500/10',
                 glow: 'shadow-[0_0_25px_rgba(99,102,241,0.35)]',
-                accentColor: 'indigo'
+                accentColor: 'indigo',
+                column4Label: 'Estado'
             },
             'reports': {
                 primary: 'text-emerald-400',
@@ -145,7 +147,8 @@ export default function MyAssignments({
                 buttonLabel: 'Ejecutar Informe',
                 badgeBg: 'bg-emerald-500/10',
                 glow: 'shadow-[0_0_25px_rgba(16,185,129,0.35)]',
-                accentColor: 'emerald'
+                accentColor: 'emerald',
+                column4Label: 'Estado'
             }
         };
         return themes[activeTab] || themes['inspections'];
@@ -448,7 +451,7 @@ export default function MyAssignments({
                                             <th className="px-6 py-4">{theme.header}</th>
                                             <th className="px-6 py-4">Ubicación</th>
                                             <th className="px-6 py-4">Vencimiento</th>
-                                            <th className="px-6 py-4">Estado</th>
+                                            <th className="px-6 py-4">{theme.column4Label}</th>
                                             <th className="px-8 py-4 text-right">Acción</th>
                                         </tr>
                                     </thead>
@@ -496,14 +499,47 @@ export default function MyAssignments({
                                                     </div>
                                                 </td>
 
-                                                <td className="px-6 py-4">
-                                                   <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase italic tracking-widest border transition-all duration-300
-                                                        ${item?.status === 'completed' || item?.status === 'finalizado' ? 'text-emerald-500 bg-emerald-500/5 border-emerald-500/20' : 
-                                                          item?.status === 'in_progress' ? 'text-ep-primary bg-ep-primary/5 border-ep-primary/20 animate-pulse' : 'text-white/20 bg-white/5 border-white/5'}
-                                                   `}>
-                                                        {item?.status === 'in_progress' ? 'CURSO' : (item?.status === 'completed' || item?.status === 'finalizado') ? 'FINAL' : 'SOL'}
-                                                   </span>
-                                                </td>
+                                                                                                 <td className="px-6 py-4">
+                                                     {activeTab === 'inspections' ? (
+                                                         <div className="flex flex-col gap-1.5">
+                                                             <div className="flex items-center gap-2">
+                                                                 <span className="text-[11px] font-black text-white italic tracking-tight uppercase leading-none">
+                                                                     {item?.checklist_count || 0} {item?.checklist_count === 1 ? 'registro' : 'registros'}
+                                                                 </span>
+                                                                 {item?.completed_count > 0 && (
+                                                                     <>
+                                                                         <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest leading-none">|</span>
+                                                                         <span className={`text-[10px] font-black uppercase italic tracking-tight leading-none flex items-center gap-1
+                                                                             ${item?.passed_count === item?.completed_count ? 'text-emerald-400' : 'text-red-500'}
+                                                                         `}>
+                                                                             Exitosos: {item?.passed_count}/{item?.completed_count}
+                                                                             {item?.passed_count !== item?.completed_count && <span>⚠️</span>}
+                                                                         </span>
+                                                                     </>
+                                                                 )}
+                                                             </div>
+                                                             {item?.compliance_pct !== null && (
+                                                                 <div className="flex items-center gap-2">
+                                                                     <span className="text-[8px] font-bold text-white/30 uppercase tracking-[0.2em] leading-none italic">
+                                                                         Cumplimiento:
+                                                                     </span>
+                                                                     <span className={`text-[10px] font-black leading-none
+                                                                         ${item?.compliance_pct === 100 ? 'text-emerald-400 glow-text-emerald' : 'text-red-500 glow-text-red'}
+                                                                     `}>
+                                                                         {item?.compliance_pct}%
+                                                                     </span>
+                                                                 </div>
+                                                             )}
+                                                         </div>
+                                                     ) : (
+                                                         <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase italic tracking-widest border transition-all duration-300
+                                                             ${item?.status === 'completed' || item?.status === 'finalizado' ? 'text-emerald-500 bg-emerald-500/5 border-emerald-500/20' : 
+                                                               item?.status === 'in_progress' ? 'text-ep-primary bg-ep-primary/5 border-ep-primary/20 animate-pulse' : 'text-white/20 bg-white/5 border-white/5'}
+                                                         `}>
+                                                             {item?.status === 'in_progress' ? 'CURSO' : (item?.status === 'completed' || item?.status === 'finalizado') ? 'FINAL' : 'SOL'}
+                                                         </span>
+                                                     )}
+                                                 </td>
 
                                                 <td className="px-8 py-4 text-right">
                                                     <div className="flex items-center justify-end gap-3 flex-wrap">
@@ -852,6 +888,8 @@ export default function MyAssignments({
             <style dangerouslySetInnerHTML={{ __html: `
                 .shadow-3xl { filter: drop-shadow(0 35px 60px rgba(0,0,0,0.6)); }
                 select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff20' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 1rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+                .glow-text-emerald { text-shadow: 0 0 8px rgba(52,211,153,0.5); }
+                .glow-text-red { text-shadow: 0 0 8px rgba(239,68,68,0.5); }
             `}} />
         </AuthenticatedLayout>
     );

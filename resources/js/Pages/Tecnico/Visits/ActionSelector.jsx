@@ -13,23 +13,63 @@ export default function ActionSelector({
     trainingTemplates = []
 }) {
     const [activeTab, setActiveTab] = useState('plan'); // 'plan' | 'adhoc'
-    const [expandedCategory, setExpandedCategory] = useState(null);
-    const [showExpressTraining, setShowExpressTraining] = useState(false);
-    const [selectedAdhocTemplate, setSelectedAdhocTemplate] = useState('');
-    
-    // Form for express training
-    const [trainingForm, setTrainingForm] = useState({ title: '', duration: '', description: '' });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedSubcategory, setSelectedSubcategory] = useState('');
 
-    // Group checklist templates by category
-    const templatesByCategory = useMemo(() => {
-        const groups = {};
-        checklistTemplates.forEach(template => {
-            const catName = template.category_relation?.name || 'General';
-            if (!groups[catName]) groups[catName] = [];
-            groups[catName].push(template);
+    // All unique categories present in the active checklist templates
+    const categories = useMemo(() => {
+        const cats = new Set();
+        checklistTemplates.forEach(t => {
+            const catName = t.category_relation?.name || t.categoryRelation?.name;
+            if (catName) cats.add(catName);
         });
-        return groups;
+        return Array.from(cats).sort();
     }, [checklistTemplates]);
+
+    // Unique subcategories available within the selected category
+    const subcategories = useMemo(() => {
+        if (!selectedCategory) return [];
+        const subcats = new Set();
+        checklistTemplates.forEach(t => {
+            const catName = t.category_relation?.name || t.categoryRelation?.name;
+            if (catName === selectedCategory) {
+                const subName = t.subcategory_relation?.name || t.subcategoryRelation?.name;
+                if (subName) subcats.add(subName);
+            }
+        });
+        return Array.from(subcats).sort();
+    }, [checklistTemplates, selectedCategory]);
+
+    // Filtered templates based on query, category, and subcategory
+    const filteredTemplates = useMemo(() => {
+        return checklistTemplates.filter(t => {
+            const catName = t.category_relation?.name || t.categoryRelation?.name;
+            const subName = t.subcategory_relation?.name || t.subcategoryRelation?.name;
+
+            // Search filter
+            if (searchQuery) {
+                const q = searchQuery.toLowerCase();
+                const titleMatch = t.title?.toLowerCase().includes(q);
+                const codeMatch = t.registry_code?.toLowerCase().includes(q);
+                if (!titleMatch && !codeMatch) return false;
+            }
+            // Category filter
+            if (selectedCategory) {
+                if (catName !== selectedCategory) return false;
+            }
+            // Subcategory filter
+            if (selectedSubcategory) {
+                if (subName !== selectedSubcategory) return false;
+            }
+            return true;
+        });
+    }, [checklistTemplates, searchQuery, selectedCategory, selectedSubcategory]);
+
+    const handleCategoryChange = (e) => {
+        setSelectedCategory(e.target.value);
+        setSelectedSubcategory('');
+    };
 
     // Parse the Spanish month from the visit date
     const activeMonthName = useMemo(() => {
@@ -45,6 +85,11 @@ export default function ActionSelector({
         return months[monthNum - 1] || 'ESTE MES';
     }, [visit]);
 
+    // Filter out suggested tasks that are trainings
+    const filteredSuggestedTasks = useMemo(() => {
+        return suggestedTasks.filter(task => task.category !== 'Capacitación');
+    }, [suggestedTasks]);
+
     const handleAssignSuggested = (planId) => {
         router.post(route('tecnico.visits.assign-suggested', visit.id), { plan_id: planId }, {
             onSuccess: () => onClose()
@@ -57,16 +102,6 @@ export default function ActionSelector({
             visit_id: visit.id
         });
         onClose();
-    };
-
-    const submitExpressTraining = (e) => {
-        e.preventDefault();
-        router.post(route('tecnico.trainings.start-in-visit', visit.id), trainingForm, {
-            onSuccess: () => {
-                setShowExpressTraining(false);
-                onClose();
-            }
-        });
     };
 
     if (!isOpen) return null;
@@ -102,7 +137,7 @@ export default function ActionSelector({
                         <button 
                             onClick={() => setActiveTab('adhoc')}
                             className={`px-6 py-3 rounded-xl text-xs font-black uppercase italic tracking-widest transition-all ${
-                                activeTab === 'adhoc' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20' : 'bg-white/5 text-white/40 hover:bg-white/10'
+                                activeTab === 'adhoc' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-white/5 text-white/40 hover:bg-white/10'
                             }`}
                         >
                             Acciones Libres
@@ -118,13 +153,13 @@ export default function ActionSelector({
                             <h3 className="text-sm font-black text-ep-primary uppercase tracking-widest italic">
                                 Obligaciones de {activeMonthName}
                             </h3>
-                            {suggestedTasks.length === 0 && (
+                            {filteredSuggestedTasks.length === 0 && (
                                 <p className="text-white/40 text-xs italic bg-white/5 px-6 py-4 rounded-2xl border border-white/5">
                                     No hay obligaciones pendientes para este mes.
                                 </p>
                             )}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {suggestedTasks.map(task => {
+                                {filteredSuggestedTasks.map(task => {
                                     const isTraining = task.category === 'Capacitación';
                                     return (
                                         <div 
@@ -174,7 +209,7 @@ export default function ActionSelector({
                             <hr className="border-white/5 my-8" />
                             
                             <h3 className="text-sm font-black text-ep-primary uppercase tracking-widest italic">Asignaciones Pendientes</h3>
-                            {pendingAssignments.length === 0 && pendingTrainings.length === 0 && (
+                            {pendingAssignments.length === 0 && (
                                 <p className="text-white/40 text-xs italic bg-white/5 px-6 py-4 rounded-2xl border border-white/5">
                                     No hay asignaciones pendientes en este momento.
                                 </p>
@@ -198,114 +233,135 @@ export default function ActionSelector({
                     {activeTab === 'adhoc' && (
                         <div className="space-y-8">
                             
-                            {/* Capacitación Express */}
-                            <div className="bg-blue-500/10 border border-blue-500/20 rounded-[2rem] p-6 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-4">
-                                    <div>
-                                        <h3 className="text-sm font-black text-blue-400 uppercase tracking-widest italic">Capacitación Express</h3>
-                                        <p className="text-[10px] font-medium text-white/50 uppercase tracking-wide mt-1 italic">Registra una charla de 5 minutos o entrenamiento rápido in-situ.</p>
-                                    </div>
-                                    <button 
-                                        onClick={() => setShowExpressTraining(!showExpressTraining)}
-                                        className="h-10 px-5 bg-blue-500 hover:bg-blue-400 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all"
-                                    >
-                                        {showExpressTraining ? 'Cancelar' : 'Iniciar Charla'}
-                                    </button>
+                            {/* Filtros de Búsqueda y Clasificación */}
+                            <div className="bg-black/20 rounded-[2rem] p-6 border border-white/5 shadow-xl relative overflow-hidden space-y-4">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                                
+                                <div className="space-y-2">
+                                    <h3 className="text-sm font-black text-orange-400 uppercase tracking-widest italic">Buscador y Explorador de Checklists</h3>
+                                    <p className="text-[9px] font-medium text-white/40 uppercase tracking-widest italic leading-relaxed">
+                                        Filtra por nombre, categoría o subcategoría para encontrar el checklist que necesitas ejecutar de forma instantánea.
+                                    </p>
                                 </div>
-                                
-                                {showExpressTraining && (
-                                    <form onSubmit={submitExpressTraining} className="space-y-4 animate-fade-in pt-4 border-t border-blue-500/20">
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] font-black text-blue-300 uppercase tracking-widest block ml-1">Tema / Título</label>
-                                                <input type="text" required value={trainingForm.title} onChange={e => setTrainingForm({...trainingForm, title: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white italic font-bold focus:ring-blue-500 transition-all" placeholder="Ej: Uso Correcto de EPP" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <label className="text-[9px] font-black text-blue-300 uppercase tracking-widest block ml-1">Duración Estimada</label>
-                                                <input type="text" required value={trainingForm.duration} onChange={e => setTrainingForm({...trainingForm, duration: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white italic font-bold focus:ring-blue-500 transition-all" placeholder="Ej: 15 mins" />
-                                            </div>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-blue-300 uppercase tracking-widest block ml-1">Descripción / Bitácora</label>
-                                            <textarea required value={trainingForm.description} onChange={e => setTrainingForm({...trainingForm, description: e.target.value})} className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-xs text-white italic font-bold focus:ring-blue-500 transition-all" rows="2" placeholder="Describa brevemente los puntos tratados..."></textarea>
-                                        </div>
-                                        <button type="submit" className="w-full h-12 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-[0_10px_30px_rgba(59,130,246,0.3)] transition-all">
-                                            Guardar y Tomar Firmas
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
 
-                            {/* Selector Directo de Checklists Libres */}
-                            <div className="bg-black/20 rounded-[2rem] p-6 border border-white/5 shadow-xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
-                                <h3 className="text-sm font-black text-indigo-400 uppercase tracking-widest italic mb-2">Autocargar Checklist a la Visita</h3>
-                                <p className="text-[9px] font-medium text-white/40 uppercase tracking-widest italic mb-6 leading-relaxed">
-                                    Selecciona cualquier checklist activo de la empresa para asignártelo a tu visita en progreso de forma instantánea.
-                                </p>
-                                
-                                <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
-                                    <div className="flex-1">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {/* Buscador */}
+                                    <div className="relative">
+                                        <span className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-white/30">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                        </span>
+                                        <input 
+                                            type="text" 
+                                            value={searchQuery}
+                                            onChange={e => setSearchQuery(e.target.value)}
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl pl-10 pr-4 py-4 text-xs font-bold text-white placeholder-white/20 focus:border-orange-500/50 focus:ring-orange-500/50 transition-all uppercase tracking-tighter"
+                                            placeholder="BUSCAR POR NOMBRE O CÓDIGO..."
+                                        />
+                                    </div>
+
+                                    {/* Categoría */}
+                                    <div>
                                         <select 
-                                            id="adhoc_select"
-                                            value={selectedAdhocTemplate}
-                                            onChange={e => setSelectedAdhocTemplate(e.target.value)}
-                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic focus:ring-indigo-500/50 transition-all uppercase tracking-tighter"
+                                            value={selectedCategory}
+                                            onChange={handleCategoryChange}
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic focus:ring-orange-500/50 transition-all uppercase tracking-tighter"
                                         >
-                                            <option value="">SELECCIONE CUALQUIER CHECKLIST...</option>
-                                            {checklistTemplates.map(t => (
-                                                <option key={t.id} value={t.id} className="bg-[#141421] text-white">
-                                                    {t.title} {t.registry_code ? `(${t.registry_code})` : ''}
-                                                </option>
+                                            <option value="" className="bg-[#141421] text-white">TODAS LAS CATEGORÍAS</option>
+                                            {categories.map(cat => (
+                                                <option key={cat} value={cat} className="bg-[#141421] text-white">{cat}</option>
                                             ))}
                                         </select>
                                     </div>
-                                    <button 
-                                        type="button"
-                                        disabled={!selectedAdhocTemplate}
-                                        onClick={() => handleStartAdhocChecklist(selectedAdhocTemplate)}
-                                        className="h-14 px-8 bg-indigo-500 hover:bg-indigo-400 disabled:opacity-20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-[0_10px_25px_rgba(99,102,241,0.3)] whitespace-nowrap active:scale-95"
-                                    >
-                                        Asignar e Iniciar
-                                    </button>
+
+                                    {/* Subcategoría */}
+                                    <div>
+                                        <select 
+                                            value={selectedSubcategory}
+                                            onChange={e => setSelectedSubcategory(e.target.value)}
+                                            disabled={!selectedCategory}
+                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic focus:ring-orange-500/50 transition-all uppercase tracking-tighter disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                            <option value="" className="bg-[#141421] text-white">
+                                                {!selectedCategory ? 'SELECCIONE CATEGORÍA PRIMERO' : 'TODAS LAS SUBCATEGORÍAS'}
+                                            </option>
+                                            {subcategories.map(sub => (
+                                                <option key={sub} value={sub} className="bg-[#141421] text-white">{sub}</option>
+                                            ))}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Checklists Libres (Accordion por Categorías) */}
-                            <div>
-                                <h3 className="text-sm font-black text-white/60 uppercase tracking-widest italic mb-4">Explorar por Categorías</h3>
-                                <div className="space-y-3">
-                                    {Object.entries(templatesByCategory).map(([category, templates]) => (
-                                        <div key={category} className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden">
-                                            <button 
-                                                onClick={() => setExpandedCategory(expandedCategory === category ? null : category)}
-                                                className="w-full flex items-center justify-between p-4 hover:bg-white/[0.02] transition-colors"
-                                            >
-                                                <span className="font-bold text-white uppercase text-xs tracking-wider">{category} <span className="text-white/30 ml-2">({templates.length})</span></span>
-                                                <svg className={`w-5 h-5 text-white/50 transition-transform ${expandedCategory === category ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                                            </button>
-                                            
-                                            {expandedCategory === category && (
-                                                <div className="p-4 pt-0 border-t border-white/5 bg-black/10 grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                    {templates.map(template => (
-                                                        <div key={template.id} className="bg-white/5 rounded-xl p-3 flex items-center justify-between hover:bg-white/10 transition-colors">
-                                                            <span className="text-xs text-white/80 line-clamp-1 pr-4 uppercase italic font-bold tracking-tight">{template.title}</span>
-                                                            <button 
-                                                                onClick={() => handleStartAdhocChecklist(template.id)}
-                                                                className="shrink-0 px-3 py-1.5 bg-indigo-500/20 text-indigo-300 rounded-lg text-[9px] font-black uppercase hover:bg-indigo-500 hover:text-white transition-colors"
-                                                            >
-                                                                Iniciar
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    ))}
+                            {/* Resultados de Búsqueda */}
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-2">
+                                    <h4 className="text-xs font-black text-white/50 uppercase tracking-widest italic">
+                                        Checklists Disponibles <span className="text-orange-400">({filteredTemplates.length})</span>
+                                    </h4>
+                                    {(searchQuery || selectedCategory || selectedSubcategory) && (
+                                        <button 
+                                            onClick={() => { setSearchQuery(''); setSelectedCategory(''); setSelectedSubcategory(''); }}
+                                            className="text-[9px] font-black text-orange-400 hover:text-orange-300 uppercase tracking-widest italic"
+                                        >
+                                            Limpiar Filtros
+                                        </button>
+                                    )}
                                 </div>
+
+                                {filteredTemplates.length === 0 ? (
+                                    <div className="bg-black/10 border border-white/5 rounded-3xl p-12 text-center space-y-3">
+                                        <svg className="w-12 h-12 text-white/10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        <p className="text-xs text-white/30 italic uppercase tracking-wider font-bold">No se encontraron checklists que coincidan con los filtros.</p>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {filteredTemplates.map(template => {
+                                            const catName = template.category_relation?.name || template.categoryRelation?.name || 'General';
+                                            const subName = template.subcategory_relation?.name || template.subcategoryRelation?.name;
+                                            return (
+                                                <div 
+                                                    key={template.id} 
+                                                    className="bg-white/5 border border-white/5 hover:border-orange-500/30 rounded-3xl p-5 flex flex-col justify-between hover:bg-white/[0.08] transition-all group/card relative overflow-hidden"
+                                                >
+                                                    <div className="space-y-3">
+                                                        <div className="flex flex-wrap gap-1.5">
+                                                            <span className="px-2 py-0.5 bg-orange-500/10 text-orange-400 rounded-md text-[8px] font-black uppercase tracking-widest italic">
+                                                                {catName}
+                                                            </span>
+                                                            {subName && (
+                                                                <span className="px-2 py-0.5 bg-indigo-500/10 text-indigo-300 rounded-md text-[8px] font-black uppercase tracking-widest italic">
+                                                                    {subName}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <h5 className="text-xs font-black text-white uppercase italic tracking-tight group-hover/card:text-orange-400 transition-colors leading-snug">
+                                                                {template.title}
+                                                            </h5>
+                                                            {template.registry_code && (
+                                                                <span className="text-[8px] font-bold text-white/30 tracking-widest block mt-1 uppercase">
+                                                                    Código: {template.registry_code}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="mt-5 flex items-center justify-between pt-4 border-t border-white/5">
+                                                        <span className="text-[8px] text-white/20 uppercase tracking-widest italic">Listo para iniciar</span>
+                                                        <button 
+                                                            onClick={() => handleStartAdhocChecklist(template.id)}
+                                                            className="px-4 py-2 bg-orange-500/10 text-orange-400 border border-orange-500/20 group-hover/card:bg-orange-500 group-hover/card:text-white group-hover/card:border-transparent group-hover/card:shadow-[0_5px_15px_rgba(249,115,22,0.3)] rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all duration-300"
+                                                        >
+                                                            Iniciar
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
                             </div>
-                            
+
                             {/* Enlaces a incidentes / hallazgos */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <Link href={route('tecnico.incidentes.create', { visit_id: visit.id })} onClick={onClose} className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-red-500/20 transition-all group text-center">

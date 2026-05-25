@@ -35,14 +35,25 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 
 ### 4.1. Core Engine: Checklists Dinámicos e Inspecciones
 * **Generación de Plantillas:** Permite a los Gestores definir plantillas de checklists con categorías y tipos de preguntas variados (texto, numérico, opción múltiple, booleano, adjunto de fotos).
-* **HUD del Técnico (ActionSelector):** Panel modal interactivo de pantalla completa activable durante una inspección en progreso. Está dividido en dos secciones:
-  1. **Tareas del Plan (Asignadas):** Muestra las tareas recomendadas y planificadas contractualmente para el mes en curso.
-  2. **Acciones Libres (Ad-Hoc):** Permite iniciar tareas libres o espontáneas para emergencias o imprevistos:
-     - **Checklist Ad-Hoc:** Despliega plantillas de checklist organizadas en un acordeón interactivo y colapsable clasificado por categorías de seguridad.
-     - **Capacitación Express:** Formulario en línea de alta velocidad para registrar tema, descripción y duración.
-     - **Reportar Incidente / Cargar Hallazgo:** Enlaces directos a formularios de alta.
+* **Consola de Técnico Unificada en 3 Pilares (`MyAssignments.jsx`):** Rediseño completo de la interfaz de tareas en un panel dinámico estructurado en tres áreas de acción:
+  1. **Misiones (Inspecciones):** Gestión de checklists preventivos y regulatorios. Muestra un KPI de checklists asignados vs completados, tasa de éxito y cumplimiento normativo.
+  2. **Educación (Capacitaciones):** Charlas express y capacitaciones con registro de firmas e identificación de asistentes (DNI).
+  3. **Métricas (Informes):** Redacción de reportes mensuales y control del avance del contrato.
+* **HUD del Técnico (ActionSelector):** Panel modal interactivo de pantalla completa activable durante una inspección en progreso. Permite iniciar ejecuciones libres o basadas en el plan mensual:
+  - **Buscador Escalable y Filtro Jerárquico:** El técnico puede realizar búsquedas por texto (nombre/código de norma) y aplicar filtros dinámicos en cascada de Categorías y Subcategorías para seleccionar rápidamente plantillas.
+  - **Ejecuciones Ad-Hoc:** Inicia al vuelo una visita y asignación autogenerada cuando se ejecutan checklists o charlas fuera de la planificación ordinaria.
 * **Sesión de Inspección en Progreso:** Toda actividad técnica ocurre bajo una sesión de inspección iniciada ("Nueva Inspección"). La pantalla de progreso muestra un listado de tareas completadas de forma continua, agrupadas por plantilla e identificadas mediante **Counter Badges** de acento neón flotantes en las esquinas superiores (`absolute -top-3 -right-3`, `rounded-2xl`, tipografía `font-black`).
-* **Historial de Inspecciones y Descarga:** El panel "Mis Asignaciones" funciona como un tablero de compromisos comerciales anuales. Se reemplazan los botones de ejecución directa en la tabla por un acceso de **"Ver Historial"** que redirige al historial general de inspecciones pre-filtrado por el `checklist_id` del registro, facilitando la consulta y descarga rápida de todos los PDFs firmados generados para esa tarea.
+* **Métricas y KPIs de Alta Fidelidad en Tablas:** Se reemplaza el estado lineal simple por la columna **"Checklists"** (en la pestaña de Inspecciones) que muestra en tiempo real la proporción de checklists completados. Si existen completados, añade el ratio de **"Exitosos: X/Y"** (en verde esmeralda si pasaron todos, o en rojo de seguridad con el icono `⚠️` si se detectó alguna falla) y el porcentaje de cumplimiento normativo destacado mediante sombras de texto de alta gama (`glow-text`).
+* **Historial de Inspecciones y Descarga (Bóveda de Certificados):** El panel "Mis Asignaciones" proporciona un botón de **"Ver Historial"** que redirige a la consola de historial filtrada por el checklist correspondiente.
+
+### 4.2. Bóveda de Certificados: Historial de Auditoría Agrupado por Fecha y Sede
+* **Consolidación Diaria por Servidor (`InspectionController.php`):** Las inspecciones del técnico se agrupan en el controlador por la fecha de término (`DATE(completed_at)`) y la ubicación (`sede_id`), evitando la saturación del listado al auditar múltiples activos (como 15 vehículos) el mismo día.
+* **Constancia de Visita Principal:** Cada fila principal agrupada representa una jornada de trabajo y provee el enlace directo para descargar el PDF de la **Constancia de Visita** (`VisitCertificate`) firmada digitalmente por el jefe responsable del cliente. Si la visita no se ha firmado o cerrado aún, se muestra un botón en gris deshabilitado `"Sin Constancia"` como advertencia visual estética.
+* **Sub-Acordeón de Inspecciones Individuales:** Cada fila agrupada incorpora un botón interactivo `Ver Checklists (X)`. Al pulsarlo, desliza un subpanel detallado que lista las inspecciones de ese día mostrando:
+  - Título y código regulatorio del checklist.
+  - Hora de finalización y **nombre de quien firmó la inspección (`supervisor_name`)**.
+  - Badge semafórico de resultado: **Pasó** (Verde Esmeralda) o **Falló ⚠️** (Rojo Alerta Neón si se detectó una no-conformidad en el check).
+  - Un botón de descarga directa para el PDF individual de ese check específico.
 
 ### 4.2. Módulo de Campo: Visitas con Validación GPS (Proof of Presence) y Auditoría Horaria
 * **Geolocalización Inmediata:** Captura obligatoria de latitud/longitud del dispositivo móvil del técnico mediante la API nativa de geolocalización al realizar:

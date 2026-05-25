@@ -137,15 +137,23 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
 * **Preparación Proof of Presence (GPS):**
   * La base relacional de `visit_certificates` y `sedes` incluye campos de geolocalización (`checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng` y `radio_tolerancia_metros`) listos para cruzarse en el backend aplicando la **Fórmula matemática de Haversine** para calcular distancias terrestres exactas en metros.
 
-### 3.4. El HUD Táctico del Técnico & Nueva Inspección
-* **Propósito:** Ofrecer un panel de comandos de pantalla completa e inmersivo en el terreno que permita al técnico iniciar misiones planificadas u auto-asignarse checklists.
-* **Operación:**
-  * **Asignaciones como Compromisos:** El listado de asignaciones del técnico ya no contiene disparadores de ejecución directa. En su lugar, es un tablero de compromisos anuales con un botón **"Ver Historial"** que carga los PDFs completados para ese checklist.
-  * **Nueva Inspección (Visita Activa):** Al pulsar "Nueva Inspección", se inicia una sesión activa en `InProgress.jsx` y se abre el **HUD ActionSelector**.
-  * **HUD ActionSelector:**
-    - Panel Izquierdo: Tareas programadas contractualmente para el mes.
-    - Panel Derecho: Acciones espontáneas o de emergencia (Checklist Ad-Hoc categorizados en acordeón, Capacitación Express rápida en línea, reporte de incidentes y hallazgos).
-  * **Counter Badges Acumulativos:** Si el técnico ejecuta múltiples pasadas del mismo checklist en la misma inspección, la tarjeta de progreso en `InProgress.jsx` muestra un **Counter Badge** en la esquina (`absolute -top-3 -right-3`, `rounded-2xl`, `font-black`) indicando la cantidad de ejecuciones completadas.
+### 3.4. La Consola de Mando de Técnico por Pilares y la Bóveda de Certificados Agrupada
+* **Consola Dinámica en 3 Pilares (`MyAssignments.jsx`):**
+  * Supera la interfaz plana de tareas organizando las actividades en tres pestañas: **Misiones (Inspecciones)**, **Educación (Capacitaciones)** y **Métricas (Informes)**.
+  * Los widgets de KPIs en la cabecera mutan en tiempo real para reflejar métricas del pilar seleccionado.
+  * Dispone de botones de acción contextuales unificados (`[+] Inspeccionar`, `[+] Iniciar Capacitación`, `[+] Ejecutar Informe`) ubicados estratégicamente antes de la grilla de tareas para abrir de inmediato modales inteligentes de inicio de sesión planificada y libre (ad-hoc).
+  * Reemplaza el campo de "Estado" lineal por la celda avanzada **"Checklists"** (en la pestaña de Misiones) que detalla de forma interactiva el ratio de éxitos (`Exitosos: X/Y` con advertencias visuales `⚠️` y color de alerta roja si hay no-conformidades en los controles) y el porcentaje de cumplimiento normativo resaltado con sombras de neón (`glow-text`).
+  * Incorpora un buscador por texto escalable y filtros de Categoría y Subcategoría en cascada para checklists libres.
+
+* **Bóveda de Certificados Agrupada por Fecha y Sede (`History.jsx`):**
+  * **Agrupación Inteligente:** En lugar de mostrar un listado plano de cada checklist individual (que satura el historial ante múltiples inspecciones), el servidor agrupa las inspecciones completadas (`DynamicInspection::completed()`) por **Fecha (`completed_date`)** y **Sede (`sede_id`)**.
+  * **Fila Centralizada de Jornada:** Muestra la fecha del día, la sede y empresa asociadas, KPIs resumidos del día (checklists realizados, ratio de éxitos y porcentaje de cumplimiento normativo), y el botón para descargar la **Constancia de Visita Principal** (`VisitCertificate`) firmada por el jefe del cliente. Si la visita no se ha cerrado o firmado aún, se renderiza un botón deshabilitado `"Sin Constancia"` en tono gris con advertencia estética.
+  * **Sub-Acordeón Detallado:** Al pulsar `Ver Checklists (X)`, se despliega suavemente un subpanel con animación fluida que lista cada check individual de la jornada:
+    * Nombre y código de norma del checklist.
+    * Hora exacta de finalización y **nombre del supervisor firmante (`supervisor_name`)**.
+    * Badge semafórico del estado: **Pasó** (Verde Esmeralda) o **Falló ⚠️** (Rojo Alerta Neón pulsante).
+    * Botón de descarga de PDF individual.
+  * **Paginación Robusta:** El controlador backend (`InspectionController.php`) realiza una paginación manual por grupos vía `LengthAwarePaginator`, garantizando la correcta compatibilidad de los filtros interactivos.
 
 ### 3.5. Sistema de Roles Ultra-Robusto (Fix Definitivo)
 * **Propósito:** Prevenir errores recurrentes de autorización (403 Acceso Denegado) provocados por disparidades en la especificación de nombres de roles (plurales, acentos, separadores por coma o barra) entre rutas, políticas y vistas.

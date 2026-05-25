@@ -131,9 +131,6 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                         </div>
                     </div>
                     <div className="flex items-center gap-6">
-                        <button onClick={() => setShowActionSelector(true)} className="px-4 py-2 bg-ep-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic shadow-lg shadow-ep-primary/20 hover:brightness-110 active:scale-95 transition-all">
-                            Nueva Tarea
-                        </button>
                         <div className="hidden sm:flex flex-col items-end">
                             <span className="text-[9px] font-black text-white/20 uppercase tracking-widest italic leading-none mb-1">Efector Asignado</span>
                             <span className="text-[11px] font-black text-indigo-100 uppercase italic leading-none">{user.name}</span>

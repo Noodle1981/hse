@@ -265,10 +265,8 @@ class InspectionController extends Controller
      */
     public function historyTecnico(Request $request)
     {
-        $query = DynamicInspection::with(['checklist', 'sede.empresa'])
-            ->where('user_id', Auth::id())
-            ->completed()
-            ->latest('completed_at');
+        $query = DynamicInspection::where('user_id', Auth::id())
+            ->completed();
 
         if ($request->empresa) {
             $query->whereHas('sede', fn($q) => $q->where('empresa_id', $request->empresa));
@@ -286,7 +284,87 @@ class InspectionController extends Controller
             $query->where('dynamic_checklist_id', $request->checklist_id);
         }
 
-        $inspections = $query->paginate(15)->withQueryString();
+        // Obtener todas las combinaciones únicas de Fecha y Sede
+        $allGroups = $query->select(
+                DB::raw('DATE(completed_at) as completed_date'),
+                'sede_id'
+            )
+            ->groupBy(DB::raw('DATE(completed_at)'), 'sede_id')
+            ->orderBy(DB::raw('DATE(completed_at)'), 'desc')
+            ->orderBy('sede_id', 'desc')
+            ->get();
+
+        // Paginación manual para grupos
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 15;
+        $currentPageItems = $allGroups->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $paginatedGroups = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $allGroups->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
+        );
+        $paginatedGroups->appends($request->all());
+
+        // Mapear y cargar relaciones para el sub-desglose
+        $items = $currentPageItems->map(function ($group) use ($request) {
+            $sede = \App\Models\Sede::with('empresa')->find($group->sede_id);
+            
+            // Buscar constancia de visita firmada/completada para ese día
+            $visitCertificate = \App\Models\VisitCertificate::where('sede_id', $group->sede_id)
+                ->whereDate('visit_date', $group->completed_date)
+                ->first();
+
+            // Obtener las inspecciones individuales de este grupo
+            $inspectionsQuery = DynamicInspection::with('checklist')
+                ->where('user_id', Auth::id())
+                ->where('sede_id', $group->sede_id)
+                ->whereDate('completed_at', $group->completed_date)
+                ->completed();
+
+            if ($request->checklist_id) {
+                $inspectionsQuery->where('dynamic_checklist_id', $request->checklist_id);
+            }
+
+            $inspections = $inspectionsQuery->latest('completed_at')->get();
+
+            $totalCount = $inspections->count();
+            $successCount = $inspections->where('result', '!=', 'Fail')->count();
+            $failedCount = $inspections->where('result', 'Fail')->count();
+            $compliancePercentage = $totalCount > 0 ? round(($successCount / $totalCount) * 100) : 100;
+
+            $checklistDetails = $inspections->map(function ($ins) {
+                return [
+                    'id' => $ins->id,
+                    'checklist_title' => $ins->checklist?->title,
+                    'registry_code' => $ins->checklist?->registry_code,
+                    'completed_time' => $ins->completed_at ? $ins->completed_at->format('H:i') : '00:00',
+                    'supervisor_name' => $ins->supervisor_name ?: 'Sin Firmar',
+                    'result' => $ins->result,
+                    'has_failed' => $ins->result === 'Fail',
+                ];
+            });
+
+            return [
+                'completed_date' => $group->completed_date,
+                'completed_date_formatted' => \Carbon\Carbon::parse($group->completed_date)->format('d/m/Y'),
+                'sede_id' => $group->sede_id,
+                'sede_nombre' => $sede ? $sede->nombre_sede : 'Sede Desconocida',
+                'empresa_nombre' => $sede && $sede->empresa ? $sede->empresa->nombre : 'Empresa Desconocida',
+                'visit_certificate_id' => $visitCertificate ? $visitCertificate->id : null,
+                'visit_certificate_status' => $visitCertificate ? $visitCertificate->status : null,
+                'visit_certificate_code' => $visitCertificate ? $visitCertificate->code : null,
+                'total_count' => $totalCount,
+                'success_count' => $successCount,
+                'failed_count' => $failedCount,
+                'compliance_percentage' => $compliancePercentage,
+                'checklists' => $checklistDetails,
+            ];
+        });
+
+        $paginatedGroups->setCollection($items);
 
         $user = Auth::user();
         $empresasQuery = Empresa::with(['sedes' => function ($q) {
@@ -299,7 +377,7 @@ class InspectionController extends Controller
         $empresas = $empresasQuery->get();
 
         return Inertia::render('Tecnico/Inspections/History', [
-            'inspections' => $inspections,
+            'inspections' => $paginatedGroups,
             'empresas' => $empresas,
             'filters' => $request->only(['empresa', 'sede', 'fecha_inicio', 'fecha_fin', 'checklist_id']),
         ]);
