@@ -30,10 +30,16 @@ export default function MyAssignments({
     const [trainingForm, setTrainingForm] = useState({ title: '', duration: '15', description: '' });
     const [selectedChecklistForTraining, setSelectedChecklistForTraining] = useState('');
     const [modalSubTab, setModalSubTab] = useState('planned');
+    const [modalSearchQuery, setModalSearchQuery] = useState('');
+    const [modalSelectedCategory, setModalSelectedCategory] = useState('');
+    const [modalSelectedSubcategory, setModalSelectedSubcategory] = useState('');
 
     useEffect(() => {
         if (modalOpen) {
             setModalSubTab('planned');
+            setModalSearchQuery('');
+            setModalSelectedCategory('');
+            setModalSelectedSubcategory('');
         }
     }, [modalOpen]);
 
@@ -251,6 +257,55 @@ export default function MyAssignments({
         const found = sedes.find(s => s.id.toString() === selectedSedeId.toString());
         return found ? found.nombre_sede : '';
     }, [selectedSedeId, sedes]);
+
+    // All unique categories present in the active checklist templates
+    const modalCategories = useMemo(() => {
+        const cats = new Set();
+        checklistTemplates.forEach(t => {
+            const catName = t.category_relation?.name || t.categoryRelation?.name;
+            if (catName) cats.add(catName);
+        });
+        return Array.from(cats).sort();
+    }, [checklistTemplates]);
+
+    // Unique subcategories available within the selected category
+    const modalSubcategories = useMemo(() => {
+        if (!modalSelectedCategory) return [];
+        const subcats = new Set();
+        checklistTemplates.forEach(t => {
+            const catName = t.category_relation?.name || t.categoryRelation?.name;
+            if (catName === modalSelectedCategory) {
+                const subName = t.subcategory_relation?.name || t.subcategoryRelation?.name;
+                if (subName) subcats.add(subName);
+            }
+        });
+        return Array.from(subcats).sort();
+    }, [checklistTemplates, modalSelectedCategory]);
+
+    // Filtered templates based on query, category, and subcategory
+    const modalFilteredTemplates = useMemo(() => {
+        return checklistTemplates.filter(t => {
+            const catName = t.category_relation?.name || t.categoryRelation?.name;
+            const subName = t.subcategory_relation?.name || t.subcategoryRelation?.name;
+
+            // Search filter
+            if (modalSearchQuery) {
+                const q = modalSearchQuery.toLowerCase();
+                const titleMatch = t.title?.toLowerCase().includes(q);
+                const codeMatch = t.registry_code?.toLowerCase().includes(q);
+                if (!titleMatch && !codeMatch) return false;
+            }
+            // Category filter
+            if (modalSelectedCategory) {
+                if (catName !== modalSelectedCategory) return false;
+            }
+            // Subcategory filter
+            if (modalSelectedSubcategory) {
+                if (subName !== modalSelectedSubcategory) return false;
+            }
+            return true;
+        });
+    }, [checklistTemplates, modalSearchQuery, modalSelectedCategory, modalSelectedSubcategory]);
 
     return (
         <AuthenticatedLayout 
@@ -803,24 +858,95 @@ export default function MyAssignments({
 
                                             {/* INSPECTIONS: Select a checklist template to start ad-hoc */}
                                             {activeTab === 'inspections' && (
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                    {checklistTemplates.map(template => (
-                                                        <div 
-                                                            key={`adhoc-ins-${template.id}`}
-                                                            className="bg-black/20 border border-white/5 rounded-2xl p-5 flex items-center justify-between hover:bg-white/[0.01] hover:border-white/10 transition-all"
-                                                        >
-                                                            <div>
-                                                                <div className="text-[7px] font-bold text-white/30 uppercase tracking-wider mb-0.5">CHECKLIST</div>
-                                                                <div className="text-xs font-black text-white uppercase italic leading-none">{template.title}</div>
+                                                <div className="space-y-6">
+                                                    {/* Filtros de Busqueda y Categoría */}
+                                                    <div className="bg-[#11111d]/50 border border-white/5 rounded-2xl p-5 space-y-4">
+                                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Buscar por Nombre/Código</label>
+                                                                <input
+                                                                    type="text"
+                                                                    placeholder="Ej: EPP..."
+                                                                    value={modalSearchQuery}
+                                                                    onChange={e => setModalSearchQuery(e.target.value)}
+                                                                    className="w-full bg-[#16162a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-orange-500 transition-all uppercase placeholder-white/10"
+                                                                />
                                                             </div>
-                                                            <button 
-                                                                onClick={() => handleExecuteAdhoc('inspection', template.id)}
-                                                                className="px-4 py-2 bg-ep-primary/10 hover:bg-ep-primary text-ep-primary hover:text-white border border-ep-primary/20 hover:border-transparent rounded-xl text-[8px] font-black uppercase italic tracking-widest transition-all"
-                                                            >
-                                                                Iniciar
-                                                            </button>
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Categoría</label>
+                                                                <select
+                                                                    value={modalSelectedCategory}
+                                                                    onChange={e => { setModalSelectedCategory(e.target.value); setModalSelectedSubcategory(''); }}
+                                                                    className="w-full bg-[#16162a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-orange-500 transition-all uppercase [color-scheme:dark]"
+                                                                >
+                                                                    <option value="">TODAS LAS CATEGORÍAS</option>
+                                                                    {modalCategories.map(cat => (
+                                                                        <option key={cat} value={cat}>{cat.toUpperCase()}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
+                                                            <div className="space-y-1.5">
+                                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Subcategoría</label>
+                                                                <select
+                                                                    value={modalSelectedSubcategory}
+                                                                    onChange={e => setModalSelectedSubcategory(e.target.value)}
+                                                                    disabled={!modalSelectedCategory}
+                                                                    className="w-full bg-[#16162a] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-orange-500 transition-all uppercase [color-scheme:dark] disabled:opacity-20"
+                                                                >
+                                                                    <option value="">TODAS LAS SUBCATEGORÍAS</option>
+                                                                    {modalSubcategories.map(sub => (
+                                                                        <option key={sub} value={sub}>{sub.toUpperCase()}</option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
                                                         </div>
-                                                    ))}
+
+                                                        {(modalSearchQuery || modalSelectedCategory || modalSelectedSubcategory) && (
+                                                            <div className="flex items-center justify-between text-[8px] font-bold text-white/20 uppercase tracking-widest mt-1">
+                                                                <span>Resultados Encontrados: {modalFilteredTemplates.length}</span>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        setModalSearchQuery('');
+                                                                        setModalSelectedCategory('');
+                                                                        setModalSelectedSubcategory('');
+                                                                    }}
+                                                                    className="text-orange-400 hover:text-white transition-colors uppercase cursor-pointer"
+                                                                >
+                                                                    Limpiar Filtros
+                                                                </button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {modalFilteredTemplates.length === 0 ? (
+                                                        <div className="py-12 text-center text-white/30 italic bg-white/[0.01] border border-white/5 rounded-2xl">
+                                                            No se encontraron checklists que coincidan con la búsqueda.
+                                                        </div>
+                                                    ) : (
+                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                            {modalFilteredTemplates.map(template => (
+                                                                <div 
+                                                                    key={`adhoc-ins-${template.id}`}
+                                                                    className="bg-black/20 border border-white/5 rounded-2xl p-5 flex items-center justify-between hover:bg-white/[0.01] hover:border-white/10 transition-all"
+                                                                >
+                                                                    <div>
+                                                                        <div className="text-[7px] font-bold text-white/30 uppercase tracking-wider mb-0.5">CHECKLIST</div>
+                                                                        <div className="text-xs font-black text-white uppercase italic leading-none">{template.title}</div>
+                                                                        <div className="text-[8px] font-bold text-white/20 uppercase tracking-wider mt-1.5 italic">
+                                                                            {template.category_relation?.name || template.categoryRelation?.name || 'General'}
+                                                                            { (template.subcategory_relation?.name || template.subcategoryRelation?.name) && ` • ${template.subcategory_relation?.name || template.subcategoryRelation?.name}` }
+                                                                        </div>
+                                                                    </div>
+                                                                    <button 
+                                                                        onClick={() => handleExecuteAdhoc('inspection', template.id)}
+                                                                        className="px-4 py-2 bg-ep-primary/10 hover:bg-ep-primary text-ep-primary hover:text-white border border-ep-primary/20 hover:border-transparent rounded-xl text-[8px] font-black uppercase italic tracking-widest transition-all"
+                                                                    >
+                                                                        Iniciar
+                                                                    </button>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             )}
 
