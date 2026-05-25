@@ -12,9 +12,10 @@ export default function MyAssignments({
     activeVisit = null, 
     filters = {}, 
     empresas = [], 
-    sedes = [] 
+    sedes = [],
+    checklistTemplates = [],
+    trainingTemplates = []
 }) {
-    // Inicialización segura de estados
     const [activeTab, setActiveTab] = useState(filters?.tab || 'inspections');
     const [search, setSearch] = useState(filters?.search || '');
     const [selectedMonth, setSelectedMonth] = useState(filters?.month || new Date().getMonth() + 1);
@@ -23,7 +24,12 @@ export default function MyAssignments({
     const [selectedStatus, setSelectedStatus] = useState(filters?.status || 'all');
     const [showFilters, setShowFilters] = useState(false);
 
-    // Helper para rutas seguras en el componente
+    // Modal state
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedSedeId, setSelectedSedeId] = useState('');
+    const [trainingForm, setTrainingForm] = useState({ title: '', duration: '15', description: '' });
+    const [selectedChecklistForTraining, setSelectedChecklistForTraining] = useState('');
+
     const safeRoute = (name, params = null) => {
         try {
             return route(name, params);
@@ -33,7 +39,7 @@ export default function MyAssignments({
         }
     };
 
-    // Sincronizar estado local con props de Inertia
+    // Sync filters with props
     useEffect(() => {
         if (filters?.tab && filters?.tab !== activeTab) setActiveTab(filters.tab);
         if (filters?.search !== undefined) setSearch(filters.search || '');
@@ -42,6 +48,15 @@ export default function MyAssignments({
         if (filters?.sede_id !== undefined) setSedeId(filters.sede_id || '');
         if (filters?.status !== undefined) setSelectedStatus(filters.status || 'all');
     }, [filters]);
+
+    // Lock Sede in Modal if there is an active visit
+    useEffect(() => {
+        if (activeVisit) {
+            setSelectedSedeId(activeVisit.sede_id.toString());
+        } else {
+            setSelectedSedeId('');
+        }
+    }, [activeVisit, modalOpen]);
 
     const months = [
         { id: 1, name: 'Enero' }, { id: 2, name: 'Febrero' }, { id: 3, name: 'Marzo' },
@@ -62,17 +77,38 @@ export default function MyAssignments({
         }, { preserveState: true, preserveScroll: true });
     };
 
+    // Quick execute planned task
     const handleExecute = (item) => {
         router.post(safeRoute('tecnico.checklists.execute'), {
             type: item.type,
             id: item.id,
             source: item.source,
             sede_id: item.sede_id
+        }, {
+            onSuccess: () => setModalOpen(false)
         });
     };
 
+    // Quick execute adhoc/free task
+    const handleExecuteAdhoc = (type, templateId, extraData = {}) => {
+        if (!selectedSedeId) return;
+        router.post(safeRoute('tecnico.checklists.execute'), {
+            type,
+            id: templateId,
+            source: 'adhoc',
+            sede_id: selectedSedeId,
+            ...extraData
+        }, {
+            onSuccess: () => {
+                setModalOpen(false);
+                // Reset form
+                setTrainingForm({ title: '', duration: '15', description: '' });
+                setSelectedChecklistForTraining('');
+            }
+        });
+    };
 
-    // Dinámica de Colores por Categoría
+    // Themes
     const theme = useMemo(() => {
         const themes = {
             'inspections': {
@@ -80,30 +116,41 @@ export default function MyAssignments({
                 bg: 'bg-ep-primary',
                 border: 'border-ep-primary/20',
                 shadow: 'shadow-ep-primary/20',
-                header: 'Tarea Técnica',
-                tabTitle: 'Inspecciones'
+                header: 'Inspección',
+                tabTitle: 'Inspecciones',
+                buttonLabel: 'Inspeccionar',
+                badgeBg: 'bg-ep-primary/10',
+                glow: 'shadow-[0_0_25px_rgba(246,146,57,0.35)]',
+                accentColor: 'orange'
             },
             'trainings': {
-                primary: 'text-indigo-500',
+                primary: 'text-indigo-400',
                 bg: 'bg-indigo-600',
                 border: 'border-indigo-500/20',
                 shadow: 'shadow-indigo-600/20',
-                header: 'Programa / Temario',
-                tabTitle: 'Capacitaciones'
+                header: 'Programa / Charla',
+                tabTitle: 'Capacitaciones',
+                buttonLabel: 'Iniciar Capacitación',
+                badgeBg: 'bg-indigo-500/10',
+                glow: 'shadow-[0_0_25px_rgba(99,102,241,0.35)]',
+                accentColor: 'indigo'
             },
             'reports': {
-                primary: 'text-emerald-500',
+                primary: 'text-emerald-400',
                 bg: 'bg-emerald-600',
                 border: 'border-emerald-500/20',
                 shadow: 'shadow-emerald-600/20',
                 header: 'Título del Reporte',
-                tabTitle: 'Informes'
+                tabTitle: 'Informes',
+                buttonLabel: 'Ejecutar Informe',
+                badgeBg: 'bg-emerald-500/10',
+                glow: 'shadow-[0_0_25px_rgba(16,185,129,0.35)]',
+                accentColor: 'emerald'
             }
         };
         return themes[activeTab] || themes['inspections'];
     }, [activeTab]);
 
-    // Normalización forzada de datos
     const displayData = useMemo(() => {
         const rawData = activeTab === 'inspections' ? inspections : (activeTab === 'trainings' ? trainings : reports);
         if (!rawData) return [];
@@ -118,6 +165,69 @@ export default function MyAssignments({
         } catch (e) { return 'N/A'; }
     };
 
+    // Dynamic Tab-Specific KPIs
+    const tabKpis = useMemo(() => {
+        if (activeTab === 'inspections') {
+            const total = inspections.length;
+            const completed = inspections.filter(i => i.status === 'completed' || i.status === 'finalizado').length;
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            return {
+                title1: 'Plan de Inspecciones',
+                val1: `${completed} / ${total}`,
+                title2: 'Hallazgos Activos',
+                val2: kpis.critical_findings || 0,
+                title3: 'Eficacia Mensual',
+                val3: `${pct}%`,
+                pct: pct
+            };
+        } else if (activeTab === 'trainings') {
+            const total = trainings.length;
+            const completed = trainings.filter(t => t.status === 'completed' || t.status === 'finalizado').length;
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            return {
+                title1: 'Sesiones Completadas',
+                val1: `${completed} / ${total}`,
+                title2: 'Charlas del Mes',
+                val2: total,
+                title3: 'Progreso de Plan',
+                val3: `${pct}%`,
+                pct: pct
+            };
+        } else {
+            const total = reports.length;
+            const completed = reports.filter(r => r.status === 'completed' || r.status === 'finalizado' || r.status === 'cerrado').length;
+            const drafts = reports.filter(r => r.status === 'in_progress' || r.status === 'borrador').length;
+            const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+            return {
+                title1: 'Informes Finalizados',
+                val1: `${completed} / ${total}`,
+                title2: 'Informes en Borrador',
+                val2: drafts,
+                title3: 'Cumplimiento',
+                val3: `${pct}%`,
+                pct: pct
+            };
+        }
+    }, [activeTab, inspections, trainings, reports, kpis]);
+
+    // Modal Specific calculations
+    const modalPlannedTasks = useMemo(() => {
+        if (!selectedSedeId) return [];
+        if (activeTab === 'inspections') {
+            return inspections.filter(i => i.sede_id.toString() === selectedSedeId.toString() && i.status !== 'completed' && i.status !== 'finalizado');
+        } else if (activeTab === 'trainings') {
+            return trainings.filter(t => t.sede_id.toString() === selectedSedeId.toString() && t.status !== 'completed' && t.status !== 'finalizado');
+        } else {
+            return reports.filter(r => r.sede_id.toString() === selectedSedeId.toString() && r.status !== 'completed' && r.status !== 'finalizado' && r.status !== 'cerrado');
+        }
+    }, [selectedSedeId, activeTab, inspections, trainings, reports]);
+
+    const activeSedeName = useMemo(() => {
+        if (!selectedSedeId) return '';
+        const found = sedes.find(s => s.id.toString() === selectedSedeId.toString());
+        return found ? found.nombre_sede : '';
+    }, [selectedSedeId, sedes]);
+
     return (
         <AuthenticatedLayout 
             user={auth?.user} 
@@ -127,83 +237,113 @@ export default function MyAssignments({
                         Consola de <span className="text-white">Operaciones</span>
                     </h1>
                     <h2 className="text-sm font-bold text-indigo-100 uppercase tracking-tight leading-none italic">
-                        Gestión de Misiones y Tareas
+                        Misiones de Campo y Cumplimiento
                     </h2>
                 </div>
             }
         >
             <Head title="Consola de Operaciones" />
 
-            <div className="bg-[#11111d] min-h-screen">
+            <div className="bg-[#11111d] min-h-screen text-white">
                 <div className="px-4 py-6 lg:px-8 lg:py-8 selection:bg-ep-primary/30">
                     <div className="max-w-[100rem] mx-auto space-y-8">
                         
-                        {/* HUD SUPERIOR: KPI + DESPLIEGUE */}
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-in fade-in slide-in-from-top-4 duration-700">
-                            {/* KPIs Izquierda */}
-                            <div className="lg:col-span-3 space-y-3">
-                                <div className="bg-[#1a1a2e] rounded-3xl border border-white/5 p-4 flex items-center gap-4 shadow-2xl group hover:border-ep-primary/30 transition-all">
-                                    <div className="relative w-12 h-12 flex items-center justify-center">
-                                        <svg className="w-full h-full transform -rotate-90">
-                                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" fill="transparent" className="text-white/5" />
-                                            <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="3.5" fill="transparent" 
-                                                strokeDasharray={125.6}
-                                                strokeDashoffset={125.6 - (125.6 * (kpis?.percentage || 0)) / 100}
-                                                className={`${theme?.primary || 'text-ep-primary'} transition-all duration-1000 ease-out`} 
-                                                strokeLinecap="round"
-                                            />
-                                        </svg>
-                                        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black italic text-white/90">{kpis?.percentage || 0}%</div>
+                        {/* HUD DE BITÁCORA / SECCIÓN SUPERIOR */}
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                            {/* Panel Despliegue Visita Activa */}
+                            <div className="lg:col-span-6">
+                                <div className={`rounded-[2rem] border p-5 flex items-center justify-between gap-6 shadow-3xl overflow-hidden relative group transition-all duration-700
+                                    ${activeVisit ? 'bg-ep-primary/5 border-ep-primary/20' : 'bg-[#1a1a2e]/60 border-white/5'}
+                                `}>
+                                    <div className="flex flex-row items-center gap-4 relative z-10 flex-nowrap min-w-0">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border flex-shrink-0 transition-all duration-700
+                                             ${activeVisit ? 'bg-ep-primary/10 border-ep-primary/20 text-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.2)] animate-pulse' : 'bg-white/5 border-white/5 text-white/20'}
+                                        `}>
+                                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" strokeWidth="2.5"/></svg>
+                                        </div>
+                                        <div className="flex flex-col min-w-0">
+                                            <div className={`text-[8px] font-black uppercase tracking-[0.4em] mb-1 italic leading-none transition-colors duration-700 ${activeVisit ? 'text-ep-primary' : 'text-white/20'} truncate`}>
+                                                Estado: {activeVisit ? 'Sesión en Progreso' : 'Planificación'}
+                                            </div>
+                                            <h2 className={`text-lg sm:text-xl font-black italic uppercase tracking-tighter leading-none transition-colors duration-700 ${activeVisit ? 'text-white' : 'text-white/40'} truncate`}>
+                                                {activeVisit?.sede?.nombre_sede || 'Sin Visita Activa'}
+                                            </h2>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <div className="text-[7px] font-black text-white/20 uppercase tracking-[0.3em] mb-0.5 italic leading-none">Cumplimiento</div>
-                                        <div className="text-sm font-black text-white italic tracking-tighter uppercase">Eficiencia</div>
-                                    </div>
-                                </div>
-
-                                <div className="bg-[#1a1a2e] rounded-3xl border border-white/5 p-4 flex items-center gap-4 shadow-2xl group border-l-4 border-l-red-500/50 hover:bg-red-500/[0.02] transition-all">
-                                    <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500 border border-red-500/20 animate-pulse">
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeWidth="2.5"/></svg>
-                                    </div>
-                                    <div>
-                                        <div className="text-[7px] font-black text-red-500/40 uppercase tracking-[0.3em] mb-0.5 italic leading-none">Críticos</div>
-                                        <div className="text-xl font-black italic tracking-tighter leading-none text-white">{kpis?.critical_findings || 0}</div>
+                                    <div className="relative z-10 flex-shrink-0">
+                                        {activeVisit ? (
+                                            <Link href={safeRoute('tecnico.visits.in-progress', activeVisit?.id)} className="px-5 py-3 bg-ep-primary text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.3em] shadow-xl hover:brightness-110 hover:scale-[1.03] transition-all whitespace-nowrap inline-block">
+                                                Reanudar Visita
+                                            </Link>
+                                        ) : (
+                                            <Link href={safeRoute('gestor.operations.visits.create')} className="px-5 py-3 bg-[#1e1e38] text-white/80 rounded-xl text-[9px] font-black uppercase italic tracking-[0.3em] border border-white/5 hover:border-ep-primary/30 hover:text-white transition-all whitespace-nowrap inline-block">
+                                                Registrar Entrada
+                                            </Link>
+                                        )}
                                     </div>
                                 </div>
                             </div>
 
-                             {/* Despliegue Derecha */}
-                             <div className={`lg:col-span-9 rounded-[2rem] border p-5 flex flex-col md:flex-row items-center justify-between gap-6 shadow-3xl overflow-hidden relative group transition-all duration-700
-                                 ${activeVisit ? 'bg-ep-primary/5 border-ep-primary/20' : 'bg-[#1a1a2e]/60 border-white/5'}
-                             `}>
-                                <div className="flex flex-row items-center gap-5 relative z-10 flex-nowrap">
-                                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center border flex-shrink-0 transition-all duration-700
-                                         ${activeVisit ? 'bg-ep-primary/10 border-ep-primary/20 text-ep-primary shadow-[0_0_20px_rgba(246,146,57,0.2)] animate-pulse' : 'bg-white/5 border-white/5 text-white/10'}
-                                    `}>
-                                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" strokeWidth="2"/></svg>
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                        <div className={`text-[8px] font-black uppercase tracking-[0.4em] mb-1 italic leading-none transition-colors duration-700 ${activeVisit ? 'text-ep-primary' : 'text-white/20'} truncate`}>
-                                            Estado: {activeVisit ? 'Misión Conectada' : 'Planificación'}
-                                        </div>
-                                        <h2 className={`text-xl sm:text-2xl font-black italic uppercase tracking-tighter leading-none transition-colors duration-700 ${activeVisit ? 'text-white' : 'text-white/40'} truncate`}>
-                                            {activeVisit?.sede?.nombre_sede || 'Consola Desconectada'}
-                                        </h2>
-                                    </div>
+                            {/* DYNAMIC KPIs (Tab-Specific Indicators) */}
+                            <div className="lg:col-span-6 grid grid-cols-3 gap-4">
+                                <div className="bg-[#1a1a2e]/60 rounded-3xl border border-white/5 p-4 flex flex-col justify-between shadow-2xl group hover:border-white/10 transition-all min-h-[5.5rem]">
+                                    <div className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] italic mb-2 leading-none">{tabKpis.title1}</div>
+                                    <div className="text-lg font-black italic tracking-tighter uppercase text-white leading-none">{tabKpis.val1}</div>
                                 </div>
- 
-                                <div className="relative z-10 flex-shrink-0 w-full md:w-auto mt-2 md:mt-0">
-                                    {activeVisit ? (
-                                        <Link href={safeRoute('tecnico.visits.in-progress', activeVisit?.id)} className="w-full md:w-auto text-center px-6 py-3.5 bg-ep-primary text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.3em] shadow-2xl shadow-ep-primary/20 hover:brightness-110 hover:scale-[1.03] active:scale-95 transition-all whitespace-nowrap inline-block">
-                                            Reanudar Inspección
-                                        </Link>
-                                    ) : (
-                                        <Link href={safeRoute('gestor.operations.visits.create')} className="w-full md:w-auto text-center px-6 py-3.5 bg-ep-primary text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.3em] shadow-2xl shadow-ep-primary/20 hover:brightness-110 hover:scale-[1.03] active:scale-95 transition-all outline-none whitespace-nowrap inline-block">
-                                            Nueva Inspección
-                                        </Link>
-                                    )}
+
+                                <div className="bg-[#1a1a2e]/60 rounded-3xl border border-white/5 p-4 flex flex-col justify-between shadow-2xl group hover:border-white/10 transition-all min-h-[5.5rem]">
+                                    <div className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] italic mb-2 leading-none">{tabKpis.title2}</div>
+                                    <div className="text-lg font-black italic tracking-tighter uppercase text-white leading-none">{tabKpis.val2}</div>
                                 </div>
-                             </div>
+
+                                <div className="bg-[#1a1a2e]/60 rounded-3xl border border-white/5 p-4 flex flex-col items-center justify-center gap-2 shadow-2xl relative min-h-[5.5rem] overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.01] to-transparent pointer-events-none"></div>
+                                    <div className="relative w-11 h-11 flex items-center justify-center">
+                                        <svg className="w-full h-full transform -rotate-90">
+                                            <circle cx="22" cy="22" r="18" stroke="currentColor" strokeWidth="3" fill="transparent" className="text-white/5" />
+                                            <circle cx="22" cy="22" r="18" stroke="currentColor" strokeWidth="3" fill="transparent" 
+                                                strokeDasharray={113}
+                                                strokeDashoffset={113 - (113 * (tabKpis.pct || 0)) / 100}
+                                                className={`${theme.primary} transition-all duration-1000 ease-out`} 
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center text-[9px] font-black italic text-white">{tabKpis.pct || 0}%</div>
+                                    </div>
+                                    <span className="text-[7px] font-black text-white/30 uppercase tracking-[0.2em] italic leading-none">{tabKpis.title3}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* SELECTORES DE SECCIÓN (PILLAR CARDS) */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <SectionCard 
+                                active={activeTab === 'inspections'} 
+                                onClick={() => { setActiveTab('inspections'); updateFilters({ tab: 'inspections' }); }}
+                                label="MISIONES"
+                                title="INSPECCIONES"
+                                count={inspections.length}
+                                color="ep-primary"
+                                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="1.5"/></svg>}
+                            />
+                            <SectionCard 
+                                active={activeTab === 'trainings'} 
+                                onClick={() => { setActiveTab('trainings'); updateFilters({ tab: 'trainings' }); }}
+                                label="EDUCACIÓN"
+                                title="CAPACITACIONES"
+                                count={trainings.length}
+                                color="indigo-600"
+                                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z" strokeWidth="1.5"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeWidth="1.5"/></svg>}
+                            />
+                            <SectionCard 
+                                active={activeTab === 'reports'} 
+                                onClick={() => { setActiveTab('reports'); updateFilters({ tab: 'reports' }); }}
+                                label="MÉTRICAS"
+                                title="INFORMES"
+                                count={reports.length}
+                                color="emerald-600"
+                                icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="1.5"/></svg>}
+                            />
                         </div>
 
                         {/* FILTROS COMANDO */}
@@ -224,7 +364,7 @@ export default function MyAssignments({
                             </div>
 
                             {showFilters && (
-                                <div className="bg-[#1a1a2e] rounded-[1.5rem] border border-white/5 p-6 flex flex-col xl:flex-row gap-4 items-end shadow-2xl animate-in slide-in-from-top-2 duration-300">
+                                <div className="bg-[#1a1a2e]/60 rounded-[1.5rem] border border-white/5 p-6 flex flex-col xl:flex-row gap-4 items-end shadow-2xl animate-in slide-in-from-top-2 duration-300">
                                     <FilterItem label="Búsqueda" flex="flex-1">
                                         <input id="search" name="search" 
                                             type="text" 
@@ -285,44 +425,27 @@ export default function MyAssignments({
                             )}
                         </div>
 
-                        {/* SELECTORES DE SECCIÓN (TAB CARDS) */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <SectionCard 
-                                active={activeTab === 'inspections'} 
-                                onClick={() => { setActiveTab('inspections'); updateFilters({ tab: 'inspections' }); }}
-                                label="MISIONES"
-                                title="INSPECCIONES"
-                                count={(Array.isArray(inspections) ? inspections : []).length}
-                                color="ep-primary"
-                                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeWidth="1.5"/></svg>}
-                            />
-                            <SectionCard 
-                                active={activeTab === 'trainings'} 
-                                onClick={() => { setActiveTab('trainings'); updateFilters({ tab: 'trainings' }); }}
-                                label="EDUCACIÓN"
-                                title="CAPACITACIONES"
-                                count={(Array.isArray(trainings) ? trainings : []).length}
-                                color="indigo-600"
-                                icon={<svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 14l9-5-9-5-9 5 9 5z" strokeWidth="1.5"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" strokeWidth="1.5"/></svg>}
-                            />
-                            <SectionCard 
-                                active={activeTab === 'reports'} 
-                                onClick={() => { setActiveTab('reports'); updateFilters({ tab: 'reports' }); }}
-                                label="MÉTRICAS"
-                                title="INFORMES"
-                                count={(Array.isArray(reports) ? reports : []).length}
-                                color="emerald-600"
-                                icon={<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeWidth="1.5"/></svg>}
-                            />
+                        {/* BIG INTERACTIVE BUTTON BEFORE TABLE */}
+                        <div className="flex justify-center md:justify-start pt-2">
+                            <button
+                                onClick={() => setModalOpen(true)}
+                                className={`w-full md:w-auto h-16 px-10 rounded-2xl flex items-center justify-center gap-3 text-xs font-black uppercase italic tracking-[0.2em] transition-all text-white border border-white/10 hover:border-white/20
+                                    ${theme.bg} ${theme.glow} hover:scale-[1.02] active:scale-95`}
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
+                                    <path d="M12 4v16m8-8H4" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                {theme.buttonLabel}
+                            </button>
                         </div>
 
-                        {/* MATRIZ DE TAREAS TÉCNICAS (TABLA) */}
-                        <div className={`bg-[#1a1a2e]/40 backdrop-blur-3xl rounded-[3rem] border shadow-3xl overflow-hidden transition-all duration-700 ${theme?.border || 'border-white/5'}`}>
+                        {/* MATRIZ DE TAREAS OPERATIVAS (TABLA) */}
+                        <div className={`bg-[#1a1a2e]/40 backdrop-blur-3xl rounded-[3rem] border shadow-3xl overflow-hidden transition-all duration-700 ${theme.border}`}>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
                                     <thead>
-                                        <tr className="bg-black/20 text-[9px] font-black text-white/20 uppercase italic tracking-[0.3em] border-b border-white/5 transition-colors duration-500">
-                                            <th className="px-6 py-4">{theme?.header || 'Tarea'}</th>
+                                        <tr className="bg-black/20 text-[9px] font-black text-white/20 uppercase italic tracking-[0.3em] border-b border-white/5">
+                                            <th className="px-6 py-4">{theme.header}</th>
                                             <th className="px-6 py-4">Ubicación</th>
                                             <th className="px-6 py-4">Vencimiento</th>
                                             <th className="px-6 py-4">Estado</th>
@@ -334,7 +457,7 @@ export default function MyAssignments({
                                             <tr key={`${activeTab}-${item?.id || idx}`} className="group hover:bg-white/[0.02] transition-colors">
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center gap-4">
-                                                        <div className={`w-10 h-10 rounded-xl bg-black/40 flex items-center justify-center border border-white/5 transition-all duration-300 group-hover:shadow-[0_0_10px_currentColor] ${theme?.primary || 'text-ep-primary'} group-hover:border-current`}>
+                                                        <div className={`w-10 h-10 rounded-xl bg-black/40 flex items-center justify-center border border-white/5 transition-all duration-300 group-hover:shadow-[0_0_10px_currentColor] ${theme.primary} group-hover:border-current`}>
                                                             {activeTab === 'inspections' ? (
                                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" strokeWidth="2.5"/></svg>
                                                             ) : activeTab === 'trainings' ? (
@@ -407,7 +530,7 @@ export default function MyAssignments({
                                                                         sede_id: item.sede_id, 
                                                                         periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
                                                                     })}
-                                                                    className={`px-5 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme?.bg || 'bg-ep-primary'} ${theme?.shadow || ''} outline-none`}
+                                                                    className={`px-5 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme.bg} ${theme.shadow || ''} outline-none`}
                                                                 >
                                                                     {item?.status === 'borrador' ? 'Reanudar' : 'Ejecutar'}
                                                                 </Link>
@@ -428,8 +551,8 @@ export default function MyAssignments({
                                                                 <button
                                                                     onClick={() => handleExecute(item)}
                                                                     className={`px-5 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${
-                                                                        item.status === 'in_progress' ? 'bg-amber-600 shadow-amber-600/20' : theme?.bg || 'bg-ep-primary'
-                                                                    } ${theme?.shadow || ''} outline-none`}
+                                                                        item.status === 'in_progress' ? 'bg-amber-600 shadow-amber-600/20' : theme.bg
+                                                                    } ${theme.shadow || ''} outline-none`}
                                                                 >
                                                                     {item.status === 'in_progress' ? 'Reanudar' : 'Ejecutar'}
                                                                 </button>
@@ -456,6 +579,275 @@ export default function MyAssignments({
                     </div>
                 </div>
             </div>
+
+            {/* TAB-SPECIFIC ACTION MODALS */}
+            {modalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    {/* Backdrop */}
+                    <div 
+                        className="absolute inset-0 bg-[#07070c]/90 backdrop-blur-sm transition-all duration-300 animate-fade-in"
+                        onClick={() => setModalOpen(false)}
+                    ></div>
+
+                    {/* Modal Card */}
+                    <div className="relative w-full max-w-4xl bg-[#141421] border border-white/10 rounded-[2.5rem] shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col max-h-[85vh] animate-scale-up z-10 text-white">
+                        {/* Header glowing line */}
+                        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
+                            activeTab === 'inspections' ? 'from-orange-500 to-amber-500' :
+                            activeTab === 'trainings' ? 'from-indigo-600 to-blue-500' :
+                            'from-emerald-500 to-teal-500'
+                        }`}></div>
+
+                        {/* Header */}
+                        <div className="p-8 border-b border-white/5 bg-black/20 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-xl font-black uppercase italic tracking-tighter">
+                                    {activeTab === 'inspections' ? 'Consola de Inspección' :
+                                     activeTab === 'trainings' ? 'Consola de Capacitación' :
+                                     'Consola de Informe'}
+                                </h3>
+                                <p className="text-[10px] text-white/40 uppercase tracking-widest mt-1">
+                                    {activeVisit ? `Ejecutando en Sede: ${activeVisit.sede?.nombre_sede}` : 'Establecer sede e iniciar ejecución'}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => setModalOpen(false)}
+                                className="p-2 bg-white/5 hover:bg-white/10 rounded-full text-white/50 hover:text-white transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                            {/* SEDE SELECTOR (If visit not active) */}
+                            {!activeVisit && (
+                                <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 space-y-3">
+                                    <label className="text-[10px] font-black text-white/50 uppercase tracking-widest italic block">Seleccionar Sede Destino</label>
+                                    <select
+                                        value={selectedSedeId}
+                                        onChange={e => setSelectedSedeId(e.target.value)}
+                                        className="w-full bg-[#11111d] border border-white/10 rounded-xl px-5 py-4 text-xs font-black text-white focus:ring-ep-primary/50 transition-all italic uppercase [color-scheme:dark]"
+                                    >
+                                        <option value="">SELECCIONA UBICACIÓN...</option>
+                                        {sedes.map(s => (
+                                            <option key={s.id} value={s.id}>{s.nombre_sede.toUpperCase()}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+
+                            {/* MAIN MODAL OPTIONS (Only displayed when Sede is selected or activeVisit is locked) */}
+                            {selectedSedeId ? (
+                                <div className="space-y-8">
+                                    {/* 1. Tareas Planificadas */}
+                                    <div className="space-y-4">
+                                        <h4 className={`text-xs font-black uppercase tracking-widest italic ${theme.primary}`}>
+                                            Tareas Planificadas para {activeSedeName.toUpperCase() || 'ESTA SEDE'}
+                                        </h4>
+                                        
+                                        {modalPlannedTasks.length === 0 ? (
+                                            <p className="text-white/40 text-xs italic bg-white/[0.02] px-6 py-4 rounded-xl border border-white/5">
+                                                No hay tareas planificadas pendientes de {theme.tabTitle.toLowerCase()} para esta sede en este mes.
+                                            </p>
+                                        ) : (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {modalPlannedTasks.map(item => (
+                                                    <div 
+                                                        key={`modal-planned-${item.id}`}
+                                                        className="bg-[#1b1b2d] border border-white/5 rounded-[1.5rem] p-5 flex flex-col justify-between hover:border-white/10 transition-all group/card relative overflow-hidden"
+                                                    >
+                                                        {/* Glow top border */}
+                                                        <div className={`absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r opacity-30 group-hover/card:opacity-100 transition-opacity
+                                                            ${activeTab === 'inspections' ? 'from-orange-500 to-amber-500' :
+                                                              activeTab === 'trainings' ? 'from-indigo-600 to-blue-500' :
+                                                              'from-emerald-500 to-teal-500'}`}
+                                                        ></div>
+                                                        <div>
+                                                            <div className="text-[8px] font-black text-white/30 uppercase tracking-widest italic mb-1">PROGRAMADO • ID: {item.registry_code}</div>
+                                                            <h5 className="text-xs font-black text-white uppercase italic leading-tight">{item.title}</h5>
+                                                        </div>
+                                                        
+                                                        {activeTab === 'reports' ? (
+                                                            <Link
+                                                                href={safeRoute('master-reports.create', { 
+                                                                    sede_id: selectedSedeId, 
+                                                                    periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
+                                                                })}
+                                                                onClick={() => setModalOpen(false)}
+                                                                className={`mt-4 w-full h-11 rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 border border-white/10
+                                                                    ${theme.bg} hover:brightness-110 shadow-lg`}
+                                                            >
+                                                                Iniciar
+                                                            </Link>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleExecute(item)}
+                                                                className={`mt-4 w-full h-11 rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all flex items-center justify-center gap-2 border border-white/10
+                                                                    ${theme.bg} hover:brightness-110 shadow-lg`}
+                                                            >
+                                                                {item.status === 'in_progress' ? 'Reanudar' : 'Iniciar'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <hr className="border-white/5" />
+
+                                    {/* 2. Tareas Libres / Ad-hoc */}
+                                    <div className="space-y-4">
+                                        <h4 className="text-xs font-black text-indigo-100/50 uppercase tracking-widest italic">
+                                            Ejecución Libre / Ad-hoc
+                                        </h4>
+
+                                        {/* INSPECTIONS: Select a checklist template to start ad-hoc */}
+                                        {activeTab === 'inspections' && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {checklistTemplates.map(template => (
+                                                    <div 
+                                                        key={`adhoc-ins-${template.id}`}
+                                                        className="bg-black/20 border border-white/5 rounded-2xl p-5 flex items-center justify-between hover:bg-white/[0.01] hover:border-white/10 transition-all"
+                                                    >
+                                                        <div>
+                                                            <div className="text-[7px] font-bold text-white/30 uppercase tracking-wider mb-0.5">CHECKLIST</div>
+                                                            <div className="text-xs font-black text-white uppercase italic leading-none">{template.title}</div>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => handleExecuteAdhoc('inspection', template.id)}
+                                                            className="px-4 py-2 bg-ep-primary/10 hover:bg-ep-primary text-ep-primary hover:text-white border border-ep-primary/20 hover:border-transparent rounded-xl text-[8px] font-black uppercase italic tracking-widest transition-all"
+                                                        >
+                                                            Iniciar
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* TRAININGS: Express Training Form OR training templates */}
+                                        {activeTab === 'trainings' && (
+                                            <div className="space-y-6">
+                                                {/* Charla Express */}
+                                                <div className="bg-indigo-500/5 border border-indigo-500/10 rounded-[2rem] p-6 space-y-4">
+                                                    <div>
+                                                        <h5 className="text-xs font-black text-indigo-400 uppercase tracking-widest italic">Charla de 5 Minutos / Express</h5>
+                                                        <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Registra un adiestramiento rápido in-situ</p>
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                        <div className="space-y-2">
+                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Tema / Título</label>
+                                                            <input 
+                                                                type="text" 
+                                                                value={trainingForm.title} 
+                                                                onChange={e => setTrainingForm({...trainingForm, title: e.target.value})} 
+                                                                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                                                                placeholder="Ej: Uso Correcto de EPP" 
+                                                            />
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Duración (Minutos)</label>
+                                                            <select 
+                                                                value={trainingForm.duration} 
+                                                                onChange={e => setTrainingForm({...trainingForm, duration: e.target.value})} 
+                                                                className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
+                                                            >
+                                                                <option value="5">5 MINUTOS</option>
+                                                                <option value="10">10 MINUTOS</option>
+                                                                <option value="15">15 MINUTOS</option>
+                                                                <option value="30">30 MINUTOS</option>
+                                                                <option value="45">45 MINUTOS</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="space-y-2">
+                                                        <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Descripción / Puntos Clave</label>
+                                                        <textarea 
+                                                            value={trainingForm.description} 
+                                                            onChange={e => setTrainingForm({...trainingForm, description: e.target.value})} 
+                                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
+                                                            rows="2" 
+                                                            placeholder="Ingrese una breve descripción de los puntos tratados..."
+                                                        ></textarea>
+                                                    </div>
+
+                                                    <button 
+                                                        onClick={() => handleExecuteAdhoc('training', null, { title: trainingForm.title, duration: trainingForm.duration, description: trainingForm.description })}
+                                                        disabled={!trainingForm.title}
+                                                        className="w-full h-11 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none"
+                                                    >
+                                                        Iniciar Charla Express
+                                                    </button>
+                                                </div>
+
+                                                {/* Training with Checklist */}
+                                                <div className="bg-white/[0.02] border border-white/5 rounded-[2rem] p-6 space-y-4">
+                                                    <div>
+                                                        <h5 className="text-xs font-black text-white uppercase tracking-widest italic">Capacitación con Checklist Estándar</h5>
+                                                        <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Ejecuta una capacitación evaluada con preguntas estándar</p>
+                                                    </div>
+                                                    
+                                                    <div className="flex flex-col md:flex-row gap-4 items-end">
+                                                        <div className="flex-1 space-y-2 w-full">
+                                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-widest block ml-1">Seleccionar Plantilla Evaluativa</label>
+                                                            <select
+                                                                value={selectedChecklistForTraining}
+                                                                onChange={e => setSelectedChecklistForTraining(e.target.value)}
+                                                                className="w-full bg-[#11111d] border border-white/10 rounded-xl px-4 py-3 text-xs text-white italic font-bold focus:ring-indigo-500 transition-all [color-scheme:dark]"
+                                                            >
+                                                                <option value="">SELECCIONA CHECKLIST EVALUATIVO...</option>
+                                                                {checklistTemplates.map(c => (
+                                                                    <option key={c.id} value={c.id}>{c.title}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <button 
+                                                            onClick={() => handleExecuteAdhoc('training', selectedChecklistForTraining, { title: checklistTemplates.find(c => c.id == selectedChecklistForTraining)?.title })}
+                                                            disabled={!selectedChecklistForTraining}
+                                                            className="h-12 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg shadow-indigo-600/20 transition-all disabled:opacity-30 disabled:pointer-events-none w-full md:w-auto"
+                                                        >
+                                                            Iniciar Capacitación
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* REPORTS: Master report libre */}
+                                        {activeTab === 'reports' && (
+                                            <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-[2rem] p-8 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+                                                <div>
+                                                    <h5 className="text-xs font-black text-emerald-400 uppercase tracking-widest italic">Informe Técnico Ad-hoc / Libre</h5>
+                                                    <p className="text-[9px] text-white/40 uppercase tracking-wider mt-0.5">Comienza a redactar un informe maestro mensual libre para esta sede</p>
+                                                </div>
+                                                
+                                                <Link
+                                                    href={safeRoute('master-reports.create', { 
+                                                        sede_id: selectedSedeId, 
+                                                        periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
+                                                    })}
+                                                    onClick={() => setModalOpen(false)}
+                                                    className="w-full sm:w-auto px-6 h-12 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic shadow-lg flex items-center justify-center gap-2 hover:scale-[1.03] active:scale-95 transition-all"
+                                                >
+                                                    Redactar Informe
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="py-20 text-center text-white/30 animate-pulse">
+                                    <svg className="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeWidth="1.5"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeWidth="1.5"/></svg>
+                                    <p className="text-xs font-black uppercase italic tracking-widest">Por favor, selecciona una sede para continuar</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style dangerouslySetInnerHTML={{ __html: `
                 .shadow-3xl { filter: drop-shadow(0 35px 60px rgba(0,0,0,0.6)); }

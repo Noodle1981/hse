@@ -372,6 +372,8 @@ class OperationController extends Controller
             ],
             'empresas' => Empresa::whereIn('id', $assignedEmpresaIds)->get(),
             'sedes' => Sede::whereIn('id', $assignedSedeIds)->get(),
+            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->get(),
+            'trainingTemplates' => \App\Models\Training::where('is_template', true)->get(),
         ]);
     }
 
@@ -383,9 +385,12 @@ class OperationController extends Controller
     {
         $request->validate([
             'type' => 'required|in:inspection,training',
-            'id' => 'required',
-            'source' => 'required|in:manual,contract',
+            'id' => 'required_without:title',
+            'source' => 'required|in:manual,contract,adhoc',
             'sede_id' => 'required|exists:sedes,id',
+            'title' => 'nullable|string|max:255',
+            'duration' => 'nullable',
+            'description' => 'nullable|string',
         ]);
 
         /** @var \App\Models\User $user */
@@ -406,6 +411,58 @@ class OperationController extends Controller
         if (!$activeVisit) {
             $sede = \App\Models\Sede::findOrFail($request->sede_id);
             $activeVisit = $this->visitService->startVisit($user, $sede);
+        }
+
+        if ($request->source === 'adhoc') {
+            if ($request->type === 'inspection') {
+                $checklistId = $request->id;
+
+                $assignment = \App\Models\ChecklistAssignment::create([
+                    'user_id' => $user->id,
+                    'sede_id' => $request->sede_id,
+                    'empresa_id' => $activeVisit->sede->empresa_id,
+                    'dynamic_checklist_id' => $checklistId,
+                    'due_date' => now(),
+                    'status' => 'in_progress',
+                    'notes' => 'Asignación ad-hoc iniciada desde Consola',
+                ]);
+
+                return redirect()->route('tecnico.checklists.fill', [
+                    'id' => $checklistId,
+                    'assignment' => $assignment->id,
+                    'visit_id' => $activeVisit->id
+                ])->with('message', 'Inspección ad-hoc iniciada.');
+            } else {
+                // Training ad-hoc (Express or Template)
+                $checklistId = $request->id;
+
+                $training = \App\Models\Training::create([
+                    'empresa_id' => $activeVisit->sede->empresa_id,
+                    'sede_id' => $request->sede_id,
+                    'user_id' => $user->id,
+                    'created_by_user_id' => $user->id,
+                    'is_template' => false,
+                    'title' => $request->title ?: 'Charla Libre / Express',
+                    'type' => 'ad-hoc',
+                    'date' => now(),
+                    'status' => 'pending',
+                    'dynamic_checklist_id' => $checklistId ?: null,
+                    'notes' => 'Charla ad-hoc iniciada desde Consola',
+                ]);
+
+                $visitTraining = \App\Models\VisitTraining::create([
+                    'visit_certificate_id' => $activeVisit->id,
+                    'training_id' => $training->id,
+                    'is_adhoc' => true,
+                    'title' => $training->title,
+                    'description' => $request->description ?: 'Charla libre de Higiene y Seguridad',
+                    'duration_minutes' => $request->duration ?: 15,
+                    'attendees' => [],
+                ]);
+
+                return redirect()->route('tecnico.trainings.session', $visitTraining->id)
+                    ->with('message', 'Capacitación ad-hoc iniciada.');
+            }
         }
 
         if ($request->type === 'inspection') {
