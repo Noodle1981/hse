@@ -1,54 +1,33 @@
 # Plan de Prevención y Futuros Fixes (XamaSafe)
 
-Este documento registra la resolución del crash en el detalle de inspecciones técnicas y establece las directrices y buenas prácticas operativas para prevenir fallos similares en la infraestructura de enrutamiento y vinculación de datos (Route Model Binding) de Laravel + Inertia.js.
+Es una excelente pregunta y toca uno de los aspectos más importantes del Vibe Coding (desarrollar de forma ágil guiado por la IA). Cuando trabajamos con asistentes de IA, es muy fácil avanzar rápido agregando funcionalidades, pero con el tiempo el código puede volverse redundante, pesado o difícil de mantener (lo que llamamos Deuda Técnica).
 
----
+Para el futuro, este proceso que buscas se conoce como Auditoría de Código, Análisis de Deuda Técnica y Plan de Refactorización.
 
-## 🚀 Resoluciones de Enrutamiento y Crashes
+Aquí tienes la guía de cómo deberías pedírmelo, qué términos usar y cómo estructurarlo para que la IA haga un trabajo extraordinario sin romper lo que ya funciona.
 
-### 1. Detalle de Inspección Técnica (`/tecnico/inspections/4`)
-* **Problema**: Al ingresar a la URL de detalle [http://ep-back.test/tecnico/inspections/4](http://ep-back.test/tecnico/inspections/4), la pantalla sufría un crash crítico en la consola del navegador con el siguiente error:
-  ```text
-  Uncaught Error: Ziggy error: 'id' parameter is required for route 'tecnico.inspections.pdf.preview'.
-  ```
-* **Causa Raíz**:
-  1. **Disparidad de Parámetros**: En `routes/web.php`, la ruta de detalle estaba definida con el comodín de parámetro genérico `{id}` (`tecnico/inspections/{id}`), pero el controlador `InspectionController@show` inyectaba y tipaba explícitamente el modelo `$inspection` (`DynamicInspection $inspection`).
-  2. **Fallo de Route Model Binding**: Debido a la discrepancia de nombres (`{id}` vs `$inspection`), el motor de Laravel no podía enlazar automáticamente el modelo de base de datos. Inyectaba una instancia vacía de `DynamicInspection` con todos sus atributos en `null` (incluyendo su `id`).
-  3. **Generación con Ziggy**: El frontend de Inertia recibía `inspection` con `id: null`. Al invocar la función de generación de rutas `route('tecnico.inspections.pdf.preview', { id: inspection.id })`, Ziggy recibía un valor indefinido para el parámetro obligatorio `id`, rompiendo la carga de la interfaz.
+1. ¿Cómo deberías pedírmelo? (Estructura de la Solicitud)
+Cuando quieras iniciar este proceso, puedes escribirme un mensaje con esta estructura. Puedes copiar y pegar este prompt adaptado:
 
-* **Solución de Raíz Aplicada**:
-  * **Saneamiento del Enrutador**: Cambiamos el parámetro de la ruta en [routes/web.php](file:///d:/ep-back/routes/web.php) de `/{id}` a `/{inspection}`. Ahora la vinculación implícita de Laravel funciona perfectamente, hidratando el modelo con los datos de base de datos reales y el ID correcto (`4`).
-  * **Seguridad Defensiva en Frontend**: En [Show.jsx](file:///d:/ep-back/resources/js/Pages/Tecnico/Inspections/Show.jsx), envolvimos el botón de descarga del PDF en una validación defensiva (`{inspection?.id && (...) }`), blindando la renderización de la página contra estados transitorios o de carga asíncrona.
+"Quiero hacer una Auditoría de Código y un Plan de Refactorización sobre [Módulo o Sección, ej: el flujo de Visitas y Capacitaciones].
 
----
+Por favor, analiza la base de código actual bajo estos pilares:
 
-## 🛠️ Correcciones Preventivas Adicionales
+Reutilización y Limpieza: Identifica si hay código duplicado, funciones redundantes o "código muerto" (que ya no se usa) que podamos consolidar en servicios o componentes compartidos.
+Buenas Prácticas (Clean Code): Evalúa si los controladores, modelos y componentes React siguen los estándares de Laravel y React 19 (ej. inyección de dependencias, abstracción, legibilidad).
+Eficiencia y Rendimiento: Busca cuellos de botella (como consultas N+1 en Eloquent, re-renders innecesarios en React o peticiones pesadas).
+Consistencia Visual: Verifica que los estilos y paletas HUD sigan la guía visual premium y no tengan utilidades ad-hoc.
+Quiero que primero me presentes un Reporte de Hallazgos y un Plan de Acción por fases (sin tocar código aún) para que lo revisemos juntos."
 
-### 2. Saneamiento del Módulo de Hallazgos y Seguimiento
-* **Diagnóstico**: Detectamos la misma discrepancia de nombres de parámetros en las rutas de **Hallazgos** (`FindingController@show` y `@addUpdate` inyectan `$finding` pero el enrutador usaba `{id}`).
-* **Solución**: Renombramos preventivamente los parámetros a `{finding}` en las siguientes rutas en `routes/web.php`:
-  * Ruta de detalle de hallazgo (Gestor): `gestor/hallazgos/{finding}`
-  * Ruta de actualización/seguimiento de hallazgo (Gestor): `gestor/hallazgos/{finding}/update`
-  * Ruta de detalle de hallazgo (Técnico): `tecnico/hallazgos/{finding}`
+2. ¿Qué herramientas y comandos de la interfaz puedes sugerir?
+En nuestro entorno disponemos de comandos avanzados que puedes invocar directamente en el chat para estas tareas:
 
----
+Puedes recomendar el uso de /grill-me (Entrevista de alineación): Esto le dice a la IA que te haga preguntas clave sobre tus prioridades antes de armar el plan (por ejemplo: "¿Prefieres priorizar velocidad de carga, simplicidad del código o facilidad para futuros cambios?").
+Puedes pedir un "Implementation Plan (Plan de Implementación)": Esto obligará a la IA a escribir un documento formal en tu carpeta de artefactos detallando exactamente qué archivos se tocarán, qué se eliminará y cómo se mantendrá la retrocompatibilidad antes de escribir una sola línea de código.
+3. Las Reglas de Oro para Auditar/Refactorizar con IA (Para ti como Director)
+Aunque no seas programador profesional, tu rol es el de Director de Orquesta / Arquitecto de Producto. Has aprendido lo más valioso: entender cómo interactúan las piezas. Para que tu experiencia sea exitosa y segura, sigue estas reglas:
 
-## 💡 Directrices Maestro para Futuros Desarrollos
-
-> [!IMPORTANT]
-> Para evitar regresiones o fallos inesperados de enrutamiento al expandir el sistema:
-
-1. **Garantizar Coincidencia de Nombres de Parámetros**:
-   * Al usar **Route Model Binding** en controladores de Laravel (ej. `public function show(Sede $sede)`), asegúrate de que el parámetro en `routes/web.php` use **exactamente** el mismo nombre del argumento en minúsculas (ej. `Route::get('/sedes/{sede}', ...)`). **Evita usar `{id}` de forma genérica** a menos que el controlador espere un entero primitivo `$id`.
-
-2. **Programación Defensiva en Rutas Ziggy (Frontend)**:
-   * Al invocar la función `route()` en componentes React para generar enlaces de descarga, botones de edición o redirecciones, verifica siempre que las propiedades de identificación existan (`inspection?.id`, `finding?.id`).
-   * **Patrón Recomendado**:
-     ```javascript
-     {item?.id && (
-         <a href={route('mi.ruta.pdf', { id: item.id })}>Ver PDF</a>
-     )}
-     ```
-
-3. **Cargar Relaciones Eager con Seguridad**:
-   * Si las vistas del frontend consumen datos anidados (como `inspection.checklist.title` o `finding.sede.empresa`), asegúrate de que el controlador los cargue explícitamente en el backend mediante `$model->load(...)` antes de inyectarlos al método `Inertia::render()`.
+Refactoriza por Módulos, nunca todo el proyecto a la vez: Pídele a la IA que audite un flujo específico (ej: "Hoy auditemos solo MyAssignments.jsx y sus controladores asociados"). Si intentas refactorizar todo el proyecto en un solo paso, es muy fácil que se rompan relaciones ocultas.
+Exige un plan de reversión: Antes de aplicar cambios, asegúrate de tener un commit limpio (como el que acabamos de hacer). Si algo sale mal, siempre puedes hacer un git reset --hard para volver al estado seguro anterior.
+Automatiza las pruebas de compilación: Cada vez que la IA haga una refactorización de limpieza, pídele que ejecute los comandos de validación (php -l y npm run build) para certificar que el "limpiar" no rompió la compilación del código.
+¡Es un paso fantástico para dar más adelante! Hará que XamaSafe no solo se vea increíble por fuera, sino que sea una obra de arte robusta y ultrarrápida por dentro. Cuando estés listo para dar ese paso, solo dímelo usando los términos anteriores y nos pondremos a auditar juntos. ¡Buen descanso!
