@@ -66,7 +66,13 @@ class VisitTraining extends Model
 
     public function getNotesAttribute($value)
     {
-        return $value ?: ($this->training ? $this->training->notes : null);
+        $notes = $value ?: ($this->training ? $this->training->notes : null);
+
+        if ($notes && str_contains($notes, 'Vínculo automático desde Plan Anual')) {
+            return null;
+        }
+
+        return $notes;
     }
 
     public function getAttendeesCountAttribute()
