@@ -181,6 +181,14 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   * La base de datos (`visit_certificates.instructor_signature`) solo guarda la ruta relativa al archivo (ej. `signatures/instructor_xxxx.png`), y el campo `visit_certificates.instructor_signature_date` almacena el timestamp de la firma.
   * Si aplica, se actualiza `trainings.trainer_name`.
 
+### 3.8. Blindaje de Fechas e Inmutabilidad (SRE Security & HUD Sync Badge)
+* **Propósito:** Prevenir el fraude de horarios o alteración malintencionada de marcas de tiempo en la finalización de checklists mediante el bloqueo absoluto de entradas de tiempo desde el cliente.
+* **Funcionamiento Backend:**
+  - Se implementa el FormRequest `StoreChecklistCompletionRequest` para sanitizar las peticiones de completado, eliminando del payload campos de tiempo como `completed_at`, `date`, `time` o `timestamp` mediante el método `validatedWithSafeTime()`.
+  - Si el request contiene cualquiera de estos campos manipulados, `InspectionController` dispara una advertencia detallada `[SRE SECURITY AUDIT]` en `laravel.log` que recopila la IP de origen, usuario/técnico, ID de visita y los valores de tiempo descartados, persistiendo estrictamente la fecha con `now()` del servidor.
+* **Funcionamiento Frontend:**
+  - En `Wizard.jsx`, se despliega un badge centrado y glowing en Naranja Técnico justo encima del progress bar: `"⌚ Tiempo Real (Sync Servidor)"` (con animación `animate-pulse` en el reloj), certificando visualmente la sincronización del tiempo con el servidor.
+
 ---
 
 ## 4. 💡 PLAYBOOK DE PROMPTS: Optimización para Desarrollar con IA (NotebookLM)

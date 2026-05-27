@@ -122,6 +122,14 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-orange-500/30">
                 <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
                     
+                    {/* HUD Title & Sync Badge */}
+                    <div className="text-center space-y-3">
+                        <h1 className="text-xl font-black italic uppercase tracking-tight text-white/90">{checklist.title}</h1>
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-full text-[10px] font-black uppercase tracking-widest italic text-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.1)]">
+                            <span className="animate-pulse">⌚</span> Tiempo Real (Sync Servidor)
+                        </div>
+                    </div>
+
                     {/* Progress Loader */}
                     <div className="bg-[#16162a]/60 backdrop-blur-xl rounded-full border border-white/5 p-2 flex items-center gap-4 px-6 shadow-2xl">
                         <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">

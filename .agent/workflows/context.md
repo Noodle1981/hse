@@ -117,13 +117,15 @@ ep-back/
 ### Backend (Laravel 12)
 - ✅ **Manejo de Roles Robusto:** Toda validación de roles en la plataforma (rutas, plantillas, policies) debe apoyarse en la lógica unificada del modelo `User::hasRole()`. Evitar splitting manual ad-hoc en controladores o middleware.
 - ✅ **Nombres de Parámetros de Ruta Coincidentes:** Para que la vinculación implícita de modelos (Route Model Binding) de Laravel funcione de forma transparente, el comodín de la ruta (ej. `{inspection}`) debe coincidir exactamente con el nombre de la variable inyectada en el controlador (ej. `DynamicInspection $inspection`). Evitar usar `{id}` genérico si se tipa el modelo, para prevenir inyecciones de modelos vacíos en el frontend.
+- ✅ **Inmutabilidad y Blindaje de Fechas (SRE Audit):** Al finalizar una inspección, es obligatorio ignorar y sanitizar cualquier campo de fecha/hora enviado por el frontend (`completed_at`, `date`, `time`, `timestamp`). La persistencia debe forzar estrictamente `now()` en el servidor y disparar alertas detalladas (`Log::warning()`) ante cualquier discrepancia para evitar fraude de horarios.
 - ✅ Usar Type Hints y Return Types estrictos.
 - ✅ Form Requests independientes para la validación de peticiones.
 - ✅ Eager Loading (`with()`) en Eloquent para evitar consultas N+1.
 - ✅ Retornar respuestas nativas de Inertia: `return Inertia::render('Componente', [...]);`.
-
+ 
 ### Frontend (React 19 & Inertia)
 - ✅ **Diseño HUD Táctico y Modular:** Componentes HUD oscuros premium, modularizados y reutilizables. El modal `ActionSelector` es el estándar para paneles de comandos y acciones spontaneous.
+- ✅ **HUD Sync Badge (Naranja Técnico):** El asistente de checklists (`Wizard.jsx`) debe mostrar arriba de la barra de progreso un badge centrado `"⌚ Tiempo Real (Sync Servidor)"` en Naranja Técnico para indicar la inmutabilidad de la fecha en tiempo real.
 - ✅ **Counter Badges HUD:** Uso de insignias flotantes absolutas (`absolute -top-3 -right-3`, `rounded-2xl`, `font-black`) para indicar múltiples ejecuciones continuas en flujos activos de inspección.
 - ✅ Componentes modulares, pequeños y altamente enfocados.
 - ✅ Control de estado mediante hooks nativos de React (`useState`, `useEffect`, `useMemo`).

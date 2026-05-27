@@ -21,9 +21,12 @@ $tables = [
     'dynamic_inspections',              // Inspecciones/checklist completados o en borrador
     'dynamic_answers',                  // Respuestas de los checklists
     'visit_certificates',               // Constancias de visitas (Proof of Presence)
+    'visit_checklist_completions',      // Completados de checklists en visitas
     'constancia_actividades',           // Actividades asociadas a constancias
     'trainings',                        // Capacitaciones registradas
     'training_attendances',             // Asistencias y firmas de capacitaciones
+    'visit_trainings',                  // Capacitaciones realizadas dentro de visitas
+    'visit_epp_deliveries',             // Entregas de EPP en visitas
     'capacitacion_presencials',         // Registros de capacitaciones presenciales
     'capacitacion_virtuals',            // Registros de capacitaciones virtuales
     'capacitacion_virual_asistentes',   // Asistentes a capacitaciones virtuales

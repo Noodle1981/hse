@@ -10,8 +10,10 @@ use App\Models\VisitCertificate;
 use App\Services\VisitService;
 use App\Models\Empresa;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreChecklistCompletionRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class InspectionController extends Controller
@@ -133,16 +135,28 @@ class InspectionController extends Controller
         return back()->with('message', 'Progreso sincronizado.');
     }
 
-    public function complete(Request $request, $id, $inspection)
+    public function complete(StoreChecklistCompletionRequest $request, $id, $inspection): \Illuminate\Http\RedirectResponse
     {
         $inspection = DynamicInspection::findOrFail($inspection);
-        $request->validate([
-            'supervisor_name' => 'required|string',
-            'supervisor_signature' => 'required|string',
-            'technician_signature' => 'required|string',
-        ]);
 
-        DB::transaction(function () use ($request, $inspection) {
+        // Auditoría SRE: detectar intentos de manipulación de fechas
+        $timeFields = ['completed_at', 'date', 'time', 'timestamp'];
+        if ($request->hasAny($timeFields)) {
+            $user = Auth::user();
+            $attemptedPayload = $request->only($timeFields);
+            Log::warning('[SRE SECURITY AUDIT] Posible intento de manipulación/fraude de horarios en checklist.', [
+                'user_id' => $user ? $user->id : null,
+                'user_name' => $user ? ($user->name ?? $user->nombres) : 'Invitado',
+                'visit_id' => $request->input('visit_id'),
+                'ip' => $request->ip(),
+                'time_payload' => $attemptedPayload,
+            ]);
+        }
+
+        // Sanitizar request para excluir campos de tiempo manipulados
+        $safeData = $request->validatedWithSafeTime();
+
+        DB::transaction(function () use ($request, $inspection, $safeData) {
             // Reutilizar lógica optimizada de guardado de respuestas
             $this->doSaveProgress($request, $inspection);
 
@@ -181,9 +195,9 @@ class InspectionController extends Controller
 
             $inspection->update([
                 'status' => 'completed',
-                'completed_at' => now(),
-                'notes' => $request->notes,
-                'supervisor_name' => $request->supervisor_name,
+                'completed_at' => now(), // Timestamp inmutable del servidor
+                'notes' => $safeData['notes'] ?? null,
+                'supervisor_name' => $safeData['supervisor_name'],
                 'supervisor_signature' => $supervisorSignaturePath,
                 'technician_signature' => $technicianSignaturePath,
                 'result' => $inspection->evaluateResult(),
@@ -224,9 +238,7 @@ class InspectionController extends Controller
      */
     public function historyGestor(Request $request)
     {
-        $query = DynamicInspection::with(['checklist', 'user', 'sede.empresa'])
-            ->completed()
-            ->latest('completed_at');
+        $query = DynamicInspection::completed();
 
         if ($request->empresa) {
             $query->whereHas('sede', fn($q) => $q->where('empresa_id', $request->empresa));
@@ -240,8 +252,93 @@ class InspectionController extends Controller
         if ($request->fecha_fin) {
             $query->whereDate('completed_at', '<=', $request->fecha_fin);
         }
+        if ($request->tecnico_id) {
+            $query->where('user_id', $request->tecnico_id);
+        }
 
-        $inspections = $query->paginate(15)->withQueryString();
+        // Obtener todas las combinaciones únicas de Fecha, Sede y Técnico (user_id)
+        $allGroups = $query->select(
+                DB::raw('DATE(completed_at) as completed_date'),
+                'sede_id',
+                'user_id'
+            )
+            ->groupBy(DB::raw('DATE(completed_at)'), 'sede_id', 'user_id')
+            ->orderBy(DB::raw('DATE(completed_at)'), 'desc')
+            ->orderBy('sede_id', 'desc')
+            ->orderBy('user_id', 'desc')
+            ->get();
+
+        // Paginación manual para grupos
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 15;
+        $currentPageItems = $allGroups->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        $paginatedGroups = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $allGroups->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
+        );
+        $paginatedGroups->appends($request->all());
+
+        // Mapear y cargar relaciones para el sub-desglose
+        $items = $currentPageItems->map(function ($group) {
+            $sede = \App\Models\Sede::with('empresa')->find($group->sede_id);
+            $techUser = \App\Models\User::find($group->user_id);
+            
+            // Buscar constancia de visita firmada/completada para ese día por ese técnico
+            $visitCertificate = \App\Models\VisitCertificate::where('sede_id', $group->sede_id)
+                ->where('user_id', $group->user_id)
+                ->whereDate('visit_date', $group->completed_date)
+                ->first();
+
+            // Obtener las inspecciones individuales de este grupo
+            $inspections = DynamicInspection::with('checklist')
+                ->where('user_id', $group->user_id)
+                ->where('sede_id', $group->sede_id)
+                ->whereDate('completed_at', $group->completed_date)
+                ->completed()
+                ->latest('completed_at')
+                ->get();
+
+            $totalCount = $inspections->count();
+            $successCount = $inspections->where('result', '!=', 'Fail')->count();
+            $failedCount = $inspections->where('result', 'Fail')->count();
+            $compliancePercentage = $totalCount > 0 ? round(($successCount / $totalCount) * 100) : 100;
+
+            $checklistDetails = $inspections->map(function ($ins) {
+                return [
+                    'id' => $ins->id,
+                    'checklist_title' => $ins->checklist?->title,
+                    'registry_code' => $ins->checklist?->registry_code,
+                    'completed_time' => $ins->completed_at ? $ins->completed_at->format('H:i') : '00:00',
+                    'supervisor_name' => $ins->supervisor_name ?: 'Sin Firmar',
+                    'result' => $ins->result,
+                    'has_failed' => $ins->result === 'Fail',
+                ];
+            });
+
+            return [
+                'completed_date' => $group->completed_date,
+                'completed_date_formatted' => \Carbon\Carbon::parse($group->completed_date)->format('d/m/Y'),
+                'sede_id' => $group->sede_id,
+                'sede_nombre' => $sede ? $sede->nombre_sede : 'Sede Desconocida',
+                'empresa_nombre' => $sede && $sede->empresa ? $sede->empresa->nombre : 'Empresa Desconocida',
+                'visit_certificate_id' => $visitCertificate ? $visitCertificate->id : null,
+                'visit_certificate_status' => $visitCertificate ? $visitCertificate->status : null,
+                'visit_certificate_code' => $visitCertificate ? $visitCertificate->code : null,
+                'tecnico_id' => $group->user_id,
+                'tecnico_nombre' => $techUser ? $techUser->name : 'Técnico Desconocido',
+                'total_count' => $totalCount,
+                'success_count' => $successCount,
+                'failed_count' => $failedCount,
+                'compliance_percentage' => $compliancePercentage,
+                'checklists' => $checklistDetails,
+            ];
+        });
+
+        $paginatedGroups->setCollection($items);
 
         $user = Auth::user();
         $empresasQuery = Empresa::with(['sedes' => function ($q) {
@@ -253,10 +350,20 @@ class InspectionController extends Controller
         }
         $empresas = $empresasQuery->get();
 
+        // Obtener listado de técnicos para el filtro
+        $tecnicosQuery = \App\Models\User::where(function($q) {
+            $q->where('rol', 'tecnico')->orWhere('rol', 'Técnico');
+        });
+        if ($user->consultora_id) {
+            $tecnicosQuery->where('consultora_id', $user->consultora_id);
+        }
+        $tecnicos = $tecnicosQuery->orderBy('name')->get();
+
         return Inertia::render('Gestor/Inspections/Index', [
-            'inspections' => $inspections,
+            'inspections' => $paginatedGroups,
             'empresas' => $empresas,
-            'filters' => $request->only(['empresa', 'sede', 'fecha_inicio', 'fecha_fin']),
+            'tecnicos' => $tecnicos,
+            'filters' => $request->only(['empresa', 'sede', 'fecha_inicio', 'fecha_fin', 'tecnico_id']),
         ]);
     }
 
