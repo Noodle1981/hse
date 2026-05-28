@@ -13,18 +13,41 @@ class TrainingPDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $training = Training::with([
-            'empresa',
-            'sede',
-            'responsibleUser',
-            'attendances'
-        ])->findOrFail($id);
+        // 1. Intentar buscar ejecución en la visita (VisitTraining)
+        $visitTraining = \App\Models\VisitTraining::with([
+            'visit.sede.empresa',
+            'visit.user',
+            'training.responsibleUser'
+        ])->find($id);
+
+        if ($visitTraining) {
+            $training = $visitTraining;
+            // Enriquecer dinámicamente para compatibilidad con la vista del PDF
+            $training->status = 'completed';
+            $training->sede = $visitTraining->visit->sede ?? null;
+            $training->empresa = $visitTraining->visit->sede->empresa ?? null;
+            $training->responsibleUser = $visitTraining->visit->user ?? ($visitTraining->training->responsibleUser ?? null);
+            $training->trainer_name = $visitTraining->visit->user ? $visitTraining->visit->user->nombres : ($visitTraining->training->trainer_name ?? 'Instructor Externo');
+            $training->date = $visitTraining->created_at;
+            $training->duration = $visitTraining->duration_minutes;
+            
+            // Forzar a la vista a usar la columna JSON/Array de asistentes
+            $training->attendances = collect();
+        } else {
+            // Fallback heredado a plantilla base o inyección directa
+            $training = Training::with([
+                'empresa',
+                'sede',
+                'responsibleUser',
+                'attendances'
+            ])->findOrFail($id);
+        }
 
         $branding = BrandingService::forUser($training->responsibleUser);
 
         $pdf = Pdf::loadView('pdf.training-attendance', [
             'training'    => $training,
-            'attendances' => $training->attendances()->orderBy('created_at')->get(),
+            'attendances' => $training instanceof \App\Models\VisitTraining ? [] : $training->attendances()->orderBy('created_at')->get(),
             'branding'    => $branding,
         ]);
 
@@ -37,18 +60,41 @@ class TrainingPDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $training = Training::with([
-            'empresa',
-            'sede',
-            'responsibleUser',
-            'attendances'
-        ])->findOrFail($id);
+        // 1. Intentar buscar ejecución en la visita (VisitTraining)
+        $visitTraining = \App\Models\VisitTraining::with([
+            'visit.sede.empresa',
+            'visit.user',
+            'training.responsibleUser'
+        ])->find($id);
+
+        if ($visitTraining) {
+            $training = $visitTraining;
+            // Enriquecer dinámicamente para compatibilidad con la vista del PDF
+            $training->status = 'completed';
+            $training->sede = $visitTraining->visit->sede ?? null;
+            $training->empresa = $visitTraining->visit->sede->empresa ?? null;
+            $training->responsibleUser = $visitTraining->visit->user ?? ($visitTraining->training->responsibleUser ?? null);
+            $training->trainer_name = $visitTraining->visit->user ? $visitTraining->visit->user->nombres : ($visitTraining->training->trainer_name ?? 'Instructor Externo');
+            $training->date = $visitTraining->created_at;
+            $training->duration = $visitTraining->duration_minutes;
+            
+            // Forzar a la vista a usar la columna JSON/Array de asistentes
+            $training->attendances = collect();
+        } else {
+            // Fallback heredado a plantilla base o inyección directa
+            $training = Training::with([
+                'empresa',
+                'sede',
+                'responsibleUser',
+                'attendances'
+            ])->findOrFail($id);
+        }
 
         $branding = BrandingService::forUser($training->responsibleUser);
 
         $pdf = Pdf::loadView('pdf.training-attendance', [
             'training'    => $training,
-            'attendances' => $training->attendances()->orderBy('created_at')->get(),
+            'attendances' => $training instanceof \App\Models\VisitTraining ? [] : $training->attendances()->orderBy('created_at')->get(),
             'branding'    => $branding,
         ]);
 

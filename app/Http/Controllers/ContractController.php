@@ -115,7 +115,10 @@ class ContractController extends Controller
             'category' => 'required|in:Capacitación,Inspección,Informe',
             'frequency' => 'required|in:none,mensual,bimestral,trimestral',
             'contract_start' => 'required|string',
-            'duration' => 'required|integer'
+            'duration' => 'required|integer',
+            'duration_minutes' => 'nullable|integer',
+            'modality' => 'nullable|string|in:presencial,virtual,hibrido',
+            'multi_trainer' => 'nullable|boolean',
         ]);
 
         $startDate = Carbon::createFromFormat('Y-m', $request->contract_start)->startOfMonth();
@@ -147,7 +150,10 @@ class ContractController extends Controller
                 'activity_name' => $request->activity_name,
                 'activity_code' => $request->activity_code,
                 'checklist_id' => in_array($request->category, ['Inspección', 'Capacitación']) ? $request->checklist_id : null,
-                'scheduled_months' => $scheduled
+                'scheduled_months' => $scheduled,
+                'duration_minutes' => $request->category === 'Capacitación' ? ($request->duration_minutes ?: 15) : null,
+                'modality' => $request->category === 'Capacitación' ? ($request->modality ?: 'presencial') : null,
+                'multi_trainer' => $request->category === 'Capacitación' ? (bool)$request->multi_trainer : false,
             ]);
         });
 
@@ -202,6 +208,9 @@ class ContractController extends Controller
             'category' => 'required|in:Capacitación,Inspección,Informe',
             'activity_code' => 'nullable|string|max:255',
             'frequency' => 'required|in:none,mensual,bimestral,trimestral',
+            'duration_minutes' => 'nullable|integer',
+            'modality' => 'nullable|string|in:presencial,virtual,hibrido',
+            'multi_trainer' => 'nullable|boolean',
         ]);
 
         $plan = AnnualPlan::findOrFail($id);
@@ -235,6 +244,9 @@ class ContractController extends Controller
             'checklist_id' => in_array($request->category, ['Inspección', 'Capacitación']) ? $request->checklist_id : null,
             'frequency' => $request->frequency,
             'scheduled_months' => $scheduled,
+            'duration_minutes' => $request->category === 'Capacitación' ? ($request->duration_minutes ?: 15) : null,
+            'modality' => $request->category === 'Capacitación' ? ($request->modality ?: 'presencial') : null,
+            'multi_trainer' => $request->category === 'Capacitación' ? (bool)$request->multi_trainer : false,
         ]);
 
         return back()->with('message', 'Actividad actualizada.');

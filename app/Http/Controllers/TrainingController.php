@@ -109,14 +109,33 @@ class TrainingController extends Controller
             $training = Training::find($request->training_id);
         }
 
+        // Buscar si existe un plan anual programado para esta sede y checklist
+        $durationMinutes = 15;
+        $modality = 'presencial';
+        $multiTrainer = false;
+
+        if ($training && $training->dynamic_checklist_id) {
+            $plan = \App\Models\AnnualPlan::where('sede_id', $visit->sede_id)
+                ->where('checklist_id', $training->dynamic_checklist_id)
+                ->first();
+
+            if ($plan) {
+                $durationMinutes = $plan->duration_minutes ?: 15;
+                $modality = $plan->modality ?: 'presencial';
+                $multiTrainer = (bool)$plan->multi_trainer;
+            }
+        }
+
         $visitTraining = VisitTraining::create([
             'visit_certificate_id' => $visit->id,
             'training_id' => $request->training_id,
             'is_adhoc' => !$request->training_id,
             'title' => $training ? $training->title : $request->title,
             'description' => $training ? $training->description : $request->description,
-            'duration_minutes' => $training ? $training->duration : ($request->duration ?: 15),
+            'duration_minutes' => $training ? ($training->duration ?: $durationMinutes) : ($request->duration ?: $durationMinutes),
             'attendees' => [],
+            // Almacenar información heredada del plan para auditoría interna
+            'notes' => $training ? null : $request->notes,
         ]);
 
         return back()->with('message', 'Capacitación iniciada en la visita.');

@@ -20,6 +20,9 @@ class AnnualPlan extends Model
         'period_end',
         'scheduled_months',
         'scheduled_dates',
+        'duration_minutes',
+        'modality',
+        'multi_trainer',
     ];
 
     protected $casts = [
@@ -27,6 +30,7 @@ class AnnualPlan extends Model
         'period_end' => 'date',
         'scheduled_months' => 'array',
         'scheduled_dates'  => 'array',
+        'multi_trainer'    => 'boolean',
     ];
 
     public function sede()

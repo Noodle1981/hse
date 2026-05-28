@@ -12,7 +12,10 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
         activity_name: '',
         activity_code: '',
         checklist_id: '',
-        frequency: 'none'
+        frequency: 'none',
+        duration_minutes: 15,
+        modality: 'presencial',
+        multi_trainer: false
     });
 
     const openEditModal = (plan) => {
@@ -22,7 +25,10 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
             activity_name: plan.activity_name,
             activity_code: plan.activity_code || '',
             checklist_id: plan.checklist_id || '',
-            frequency: plan.frequency || 'none'
+            frequency: plan.frequency || 'none',
+            duration_minutes: plan.duration_minutes || 15,
+            modality: plan.modality || 'presencial',
+            multi_trainer: !!plan.multi_trainer
         });
     };
 
@@ -47,7 +53,10 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
             category: val,
             activity_name: val === 'Informe' ? 'Informe HSE' : '',
             activity_code: val === 'Informe' ? 'EP-INF-01' : '',
-            checklist_id: ''
+            checklist_id: '',
+            duration_minutes: val === 'Capacitación' ? 15 : null,
+            modality: val === 'Capacitación' ? 'presencial' : null,
+            multi_trainer: val === 'Capacitación' ? false : null
         }));
     };
 
@@ -390,6 +399,62 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                         <option value="trimestral">TRIMESTRAL</option>
                                     </select>
                                 </div>
+
+                                {/* Opciones de Capacitación Dinámicas en Edición */}
+                                {editForm.data.category === 'Capacitación' && (
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:col-span-2 p-6 bg-white/5 rounded-3xl border border-white/5 animate-fade-in w-full">
+                                        {/* Duración */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Duración Planificada</label>
+                                            <select
+                                                value={editForm.data.duration_minutes}
+                                                onChange={e => editForm.setData('duration_minutes', parseInt(e.target.value))}
+                                                className="w-full bg-[#11111d] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic"
+                                            >
+                                                <option value={5}>5 MINUTOS</option>
+                                                <option value={10}>10 MINUTOS</option>
+                                                <option value={15}>15 MINUTOS</option>
+                                                <option value={30}>30 MINUTOS</option>
+                                                <option value={45}>45 MINUTOS</option>
+                                                <option value={60}>1 HORA</option>
+                                                <option value={90}>1:30 HORAS</option>
+                                                <option value={120}>2 HORAS</option>
+                                                <option value={180}>3 HORAS</option>
+                                            </select>
+                                        </div>
+                                        {/* Modalidad */}
+                                        <div className="space-y-2">
+                                            <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Modalidad</label>
+                                            <select
+                                                value={editForm.data.modality}
+                                                onChange={e => editForm.setData('modality', e.target.value)}
+                                                className="w-full bg-[#11111d] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic"
+                                            >
+                                                <option value="presencial">PRESENCIAL</option>
+                                                <option value="virtual">VIRTUAL</option>
+                                                <option value="hibrido">HÍBRIDO</option>
+                                            </select>
+                                        </div>
+                                        {/* Multi Instructor Switch */}
+                                        <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                                            <div>
+                                                <span className="block text-[10px] font-black text-white uppercase italic">Múltiples Instructores</span>
+                                                <span className="block text-[8px] font-black text-white/30 uppercase italic mt-0.5">Asignación para co-instructores</span>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={() => editForm.setData('multi_trainer', !editForm.data.multi_trainer)}
+                                                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                                                    editForm.data.multi_trainer ? 'bg-indigo-600 shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-white/10'
+                                                }`}
+                                            >
+                                                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                                                    editForm.data.multi_trainer ? 'translate-x-5' : 'translate-x-0'
+                                                }`} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex justify-end gap-4 pt-4 border-t border-white/5 mt-8">
                                 <button type="button" onClick={closeEditModal} className="px-6 py-3 bg-white/5 text-white/50 hover:text-white rounded-xl text-[10px] font-black uppercase tracking-widest italic transition-all">Cancelar</button>

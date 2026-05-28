@@ -32,6 +32,9 @@ El sistema cuenta con las siguientes entidades principales:
 | `period_end` | `date` | Sí ✅ | *ninguno* |  |
 | `scheduled_months` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `scheduled_dates` | `TEXT` | Sí ✅ | *ninguno* |  |
+| `duration_minutes` | `INTEGER` | No ❌ | `15` |  |
+| `modality` | `varchar` | No ❌ | `'presencial'` |  |
+| `multi_trainer` | `tinyint(1)` | No ❌ | `'0'` |  |
 
 ### 🔗 Relaciones (Foreign Keys)
 - `checklist_id` → vincula con `dynamic_checklists`(`id`)

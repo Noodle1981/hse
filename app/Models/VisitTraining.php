@@ -44,24 +44,28 @@ class VisitTraining extends Model
 
     public function getDescriptionAttribute($value)
     {
-        return $this->training ? $this->training->description : $value;
+        return ($this->training && $this->training->description) ? $this->training->description : $value;
     }
 
     public function getDurationMinutesAttribute($value)
     {
-        $duration = $this->training ? $this->training->duration : $value;
-        
-        if ($duration && $duration > 0) {
-            return $duration;
+        // 1. Si la columna local tiene un valor guardado, usarlo
+        if ($value && $value > 0) {
+            return $value;
         }
 
-        // Si es 0 o null, armar desde la lógica (diferencia de timestamps)
+        // 2. Si hay una plantilla vinculada, heredar su duración
+        if ($this->training && $this->training->duration && $this->training->duration > 0) {
+            return $this->training->duration;
+        }
+
+        // 3. Fallback de diferencia de tiempo de guardado (solo si no se programó nada)
         if ($this->created_at && $this->updated_at) {
             $diff = $this->created_at->diffInMinutes($this->updated_at);
-            return $diff > 0 ? $diff : 15; // 15 min de mínimo
+            return $diff > 0 ? $diff : 15;
         }
 
-        return 15; // Fallback por defecto en lugar de 0
+        return 15;
     }
 
     public function getNotesAttribute($value)

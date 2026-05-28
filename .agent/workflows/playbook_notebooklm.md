@@ -124,7 +124,14 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   * `sede_id`: Sede sobre la que aplica la cobertura.
   * `category`: Categorías `Inspección` (Checklists), `Capacitación` o `Informe`.
   * `scheduled_months`: Array JSON con los períodos planificados en formato Año-Mes (ej: `["2026-01", "2026-02", "2026-07"]`).
+  * **Opciones de Capacitación Incorporadas:**
+    * `duration_minutes`: Duración planificada de la charla (tiempos parametrizados: 5m, 10m, 15m, 30m, 45m, 1h, 1:30h, 2h, 3h).
+    * `modality`: Tipo de capacitación ("presencial", "virtual", "hibrido").
+    * `multi_trainer`: Switch booleano para programar la presencia de 1 o más capacitadores en campo.
 * **Sincronización:** Cuando un técnico inicia una visita presencial en el mes de Enero, el dashboard le sugiere automáticamente realizar las tareas planificadas en el Plan Anual para `2026-01`. Si la ejecuta, el motor del Reporte Maestro la mapea como completada exitosamente, sumándola al porcentaje de eficiencia del contrato.
+* **Herencia en Sesiones y Cierre Simplificado:** Al iniciar la sesión en vivo desde la visita, el sistema busca el plan programado y preconfigura automáticamente la duración y la modalidad. El cierre de sesión prescinde de firmas adicionales de instructores, valiéndose únicamente de la firma única del técnico auditor y la lectura del cronómetro en vivo para certificar la duración real.
+* **Acordeón Táctico y Listados Fluidos de Alta Escala:** Para evitar la fatiga visual ante grupos masivos (30+ asistentes), la grilla de capacitaciones finalizadas del Gestor implementa un sub-acordeón con un listado limpio tipo tabla (Nombre, Puesto, DNI) en lugar de un grid pesado de firmas digitalizadas.
+* **PDFs de Alta Fidelidad en Caliente:** El controlador de exportación PDF (`TrainingPDFController`) detecta si la solicitud proviene de una ejecución real (`VisitTraining`), cruzando dinámicamente las firmas e inputs capturados durante la visita presencial en lugar de leer la plantilla base.
 
 ### 3.3. Cómo se Audita la Jornada Laboral y el Roster Minero 24/7
 * **Finalidad:** Controlar el tiempo presencial (Horas de Campo) vs. de oficina (Horas de Gabinete) y auditar desvíos horarios para cumplir con la ERL.

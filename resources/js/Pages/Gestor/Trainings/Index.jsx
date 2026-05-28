@@ -1,6 +1,6 @@
 import { router, Head, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Index({ templates, history, empresas = [], sedes = [], filters }) {
     const { auth, flash } = usePage().props;
@@ -146,97 +146,13 @@ export default function Index({ templates, history, empresas = [], sedes = [], f
                                         </tr>
                                     )}
                                     {history.data.map(session => (
-                                        <tr key={session.id} className="group/row hover:bg-white/5 transition-all duration-500 relative">
-                                            <td className="px-8 py-6 relative">
-                                                <div className="flex items-center gap-4">
-                                                    <SourceIcon adhoc={session.is_adhoc || session.training_id === null} />
-                                                    <div className="flex flex-col">
-                                                        <div className="text-sm font-black text-white italic uppercase tracking-tight leading-tight group-hover/row:text-indigo-400 transition-colors">
-                                                            {session.title}
-                                                        </div>
-                                                        <div className="text-[8px] font-black text-white/20 uppercase tracking-widest italic mt-1">
-                                                            {session.is_adhoc ? 'Inyección Manual / Ad-Hoc' : 'Plan Operativo Maestro'}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <td className="hidden xl:table-cell px-8 py-6">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-indigo-400">
-                                                        {session.visit?.user?.nombres?.charAt(0) || session.training?.responsible_user?.nombres?.charAt(0) || '?'}
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <div className="text-[11px] font-black text-white/60 italic uppercase leading-none">
-                                                            {session.visit?.user?.nombres || session.training?.responsible_user?.nombres || 'No asignado'}
-                                                        </div>
-                                                        <div className="text-[9px] font-bold text-white/20 italic mt-0.5">{session.visit?.user?.email || 'System'}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <td className="hidden lg:table-cell px-8 py-6">
-                                                <div className="flex flex-col">
-                                                    <div className="text-[10px] font-black text-white/60 italic uppercase truncate max-w-[180px] group-hover/row:text-orange-500 transition-colors">
-                                                        {session.visit?.sede?.empresa?.nombre || 'General'}
-                                                    </div>
-                                                    <div className="text-[8px] font-bold text-white/20 italic mt-0.5 uppercase tracking-widest">
-                                                        {session.visit?.sede?.nombre_sede || 'Base'}
-                                                    </div>
-                                                </div>
-                                            </td>
-
-                                            <td className="px-8 py-6">
-                                                <div className="flex flex-col gap-1">
-                                                    <div className="flex items-center gap-2 text-[10px] font-black text-white/60 italic">
-                                                        <svg className="w-3.5 h-3.5 text-indigo-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                                                        {session.created_at ? new Date(session.created_at).toLocaleDateString() : 'N/A'}
-                                                    </div>
-                                                    <span className="text-[8px] font-black text-indigo-400 uppercase italic tracking-widest whitespace-nowrap">⏳ {session.duration_minutes || 60} min</span>
-                                                </div>
-                                            </td>
-
-                                            <td className="hidden sm:table-cell px-8 py-6 text-center">
-                                                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
-                                                    {Array.isArray(session.attendees) ? session.attendees.length : 0}
-                                                </span>
-                                            </td>
-
-                                            <td className="px-8 py-6 text-center">
-                                                <StatusBadge status="completed" />
-                                            </td>
-
-                                            <td className="px-8 py-6 text-right">
-                                                <div className="flex justify-end gap-3 transition-all duration-500">
-                                                    {!(session.is_adhoc || session.training_id === null) ? (
-                                                        <Link 
-                                                            href={route('gestor.trainings.attendance', session.id)}
-                                                            className="h-10 px-4 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg text-[9px] font-black uppercase italic tracking-widest"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                                                            <span className="hidden md:inline">Plan Maestro</span>
-                                                        </Link>
-                                                    ) : (
-                                                        <>
-                                                            <a 
-                                                                href={route('gestor.trainings.pdf.preview', { id: session.id })}
-                                                                target="_blank"
-                                                                className="h-10 w-10 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg"
-                                                                title="Reporte PDF"
-                                                            >
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                                            </a>
-                                                            <Link 
-                                                                href={route('gestor.trainings.edit', session.id)}
-                                                                className="h-10 w-10 bg-white/5 border border-white/10 text-white/40 hover:bg-white/20 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg"
-                                                            >
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                                            </Link>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
+                                        <TrainingRow 
+                                            key={session.id} 
+                                            session={session} 
+                                            auth={auth} 
+                                            SourceIcon={SourceIcon} 
+                                            StatusBadge={StatusBadge} 
+                                        />
                                     ))}
                                 </tbody>
                             </table>
@@ -297,6 +213,150 @@ export default function Index({ templates, history, empresas = [], sedes = [], f
                 @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
             `}</style>
         </AuthenticatedLayout>
+    );
+}
+
+function TrainingRow({ session, auth, SourceIcon, StatusBadge }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const isAdhoc = session.is_adhoc || session.training_id === null;
+
+    return (
+        <React.Fragment>
+            <tr 
+                onClick={() => setIsOpen(!isOpen)}
+                className="group/row hover:bg-white/5 transition-all duration-500 relative cursor-pointer border-b border-white/5"
+            >
+                <td className="px-8 py-6 relative">
+                    <div className="flex items-center gap-4">
+                        <SourceIcon adhoc={isAdhoc} />
+                        <div className="flex flex-col">
+                            <div className="text-sm font-black text-white italic uppercase tracking-tight leading-tight group-hover/row:text-indigo-400 transition-colors flex items-center gap-2">
+                                {session.title}
+                                <svg className={`w-3.5 h-3.5 text-white/30 transition-transform duration-300 ${isOpen ? 'rotate-180 text-indigo-400' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
+                            <div className="text-[8px] font-black text-white/20 uppercase tracking-widest italic mt-1">
+                                {isAdhoc ? 'Inyección Manual / Ad-Hoc' : 'Plan Operativo Maestro'}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td className="hidden xl:table-cell px-8 py-6">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black text-indigo-400">
+                            {session.visit?.user?.nombres?.charAt(0) || session.training?.responsible_user?.nombres?.charAt(0) || '?'}
+                        </div>
+                        <div className="flex flex-col">
+                            <div className="text-[11px] font-black text-white/60 italic uppercase leading-none">
+                                {session.visit?.user?.nombres || session.training?.responsible_user?.nombres || 'No asignado'}
+                            </div>
+                            <div className="text-[9px] font-bold text-white/20 italic mt-0.5">{session.visit?.user?.email || 'System'}</div>
+                        </div>
+                    </div>
+                </td>
+
+                <td className="hidden lg:table-cell px-8 py-6">
+                    <div className="flex flex-col">
+                        <div className="text-[10px] font-black text-white/60 italic uppercase truncate max-w-[180px] group-hover/row:text-orange-500 transition-colors">
+                            {session.visit?.sede?.empresa?.nombre || 'General'}
+                        </div>
+                        <div className="text-[8px] font-bold text-white/20 italic mt-0.5 uppercase tracking-widest">
+                            {session.visit?.sede?.nombre_sede || 'Base'}
+                        </div>
+                    </div>
+                </td>
+
+                <td className="px-8 py-6">
+                    <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-white/60 italic">
+                            <svg className="w-3.5 h-3.5 text-indigo-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            {session.created_at ? new Date(session.created_at).toLocaleDateString() : 'N/A'}
+                        </div>
+                        <span className="text-[8px] font-black text-indigo-400 uppercase italic tracking-widest whitespace-nowrap">⏳ {session.duration_minutes || 60} min</span>
+                    </div>
+                </td>
+
+                <td className="hidden sm:table-cell px-8 py-6 text-center">
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)]">
+                        {Array.isArray(session.attendees) ? session.attendees.length : 0}
+                    </span>
+                </td>
+
+                <td className="px-8 py-6 text-center">
+                    <StatusBadge status="completed" />
+                </td>
+
+                <td className="px-8 py-6 text-right">
+                    <div className="flex justify-end gap-3 transition-all duration-500" onClick={e => e.stopPropagation()}>
+                        <a 
+                            href={route(auth.user.rol?.toLowerCase() === 'tecnico' || auth.user.rol?.toLowerCase() === 'técnico' ? 'tecnico.trainings.pdf.preview' : 'gestor.trainings.pdf.preview', { id: session.id })}
+                            target="_blank"
+                            className="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg text-[9px] font-black uppercase italic tracking-widest"
+                            title="Descargar Constancia en PDF"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            Constancia
+                        </a>
+                    </div>
+                </td>
+            </tr>
+
+            {/* ACORDEÓN TÁCTICO DETALLADO */}
+            {isOpen && (
+                <tr className="bg-black/20 border-b border-white/5 animate-fade-in">
+                    <td colSpan="7" className="px-8 py-8 space-y-8">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            {/* Bitácora / Temario */}
+                            <div className="bg-[#11111d] border border-white/5 p-6 rounded-3xl space-y-4">
+                                <span className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic block">Temario / Descripción de Charla</span>
+                                <p className="text-xs font-bold text-white/70 italic whitespace-pre-line leading-relaxed uppercase">
+                                    {session.description || 'Sin temario registrado.'}
+                                </p>
+                            </div>
+
+                            {/* Observaciones */}
+                            <div className="bg-[#11111d] border border-white/5 p-6 rounded-3xl space-y-4">
+                                <span className="text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic block">Observaciones / Notas de Campo</span>
+                                <p className="text-xs font-bold text-white/70 italic whitespace-pre-line leading-relaxed uppercase">
+                                    {session.notes || 'Sin observaciones registradas.'}
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Asistentes */}
+                        <div className="space-y-4">
+                            <span className="text-[8px] font-black text-indigo-400 uppercase tracking-[0.3em] italic block">Listado de Asistentes Certificados ({session.attendees?.length || 0})</span>
+                            {session.attendees && session.attendees.length > 0 ? (
+                                <div className="bg-[#11111d] border border-white/5 rounded-3xl overflow-hidden shadow-inner">
+                                    <table className="table-auto w-full border-collapse text-left">
+                                        <thead>
+                                            <tr className="bg-black/40 border-b border-white/5">
+                                                <th className="px-6 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.2em] italic">Nombre</th>
+                                                <th className="px-6 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.2em] italic">Función / Puesto</th>
+                                                <th className="px-6 py-4 text-[9px] font-black text-white/40 uppercase tracking-[0.2em] italic">Documento / DNI</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5">
+                                            {session.attendees.map((attendee, index) => (
+                                                <tr key={index} className="hover:bg-white/2 transition-colors">
+                                                    <td className="px-6 py-3 text-xs font-black text-white uppercase italic">{attendee.name}</td>
+                                                    <td className="px-6 py-3 text-xs font-bold text-white/60 uppercase italic">{attendee.position || 'OPERARIO'}</td>
+                                                    <td className="px-6 py-3 text-xs font-bold text-indigo-400/80 uppercase italic tracking-wider">{attendee.dni || '-'}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="p-8 bg-[#11111d] rounded-3xl border border-white/5 text-center">
+                                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest italic">No se registraron asistentes en esta capacitación.</span>
+                                </div>
+                            )}
+                        </div>
+                    </td>
+                </tr>
+            )}
+        </React.Fragment>
     );
 }
 

@@ -10,13 +10,16 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
         checklist_id: '',
         frequency: 'none',
         contract_start: contractStart,
-        duration: duration
+        duration: duration,
+        duration_minutes: 15,
+        modality: 'presencial',
+        multi_trainer: false
     });
 
     const submit = (e) => {
         e.preventDefault();
         post(route('annual-contract.store'), {
-            onSuccess: () => reset('activity_name', 'activity_code', 'checklist_id', 'frequency'),
+            onSuccess: () => reset('activity_name', 'activity_code', 'checklist_id', 'frequency', 'duration_minutes', 'modality', 'multi_trainer'),
             preserveScroll: true
         });
     };
@@ -27,7 +30,10 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
             category: val,
             activity_name: val === 'Informe' ? 'Informe HSE' : '',
             activity_code: val === 'Informe' ? 'EP-INF-01' : '',
-            checklist_id: ''
+            checklist_id: '',
+            duration_minutes: val === 'Capacitación' ? 15 : null,
+            modality: val === 'Capacitación' ? 'presencial' : null,
+            multi_trainer: val === 'Capacitación' ? false : null
         }));
     };
 
@@ -126,6 +132,62 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                             <option value="trimestral">TRIMESTRAL</option>
                         </select>
                     </div>
+
+                    {/* Opciones de Capacitación Dinámicas */}
+                    {data.category === 'Capacitación' && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:col-span-6 p-6 bg-white/5 rounded-3xl border border-white/5 animate-fade-in w-full mt-4">
+                            {/* Duración */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Duración Planificada</label>
+                                <select
+                                    value={data.duration_minutes}
+                                    onChange={e => setData('duration_minutes', parseInt(e.target.value))}
+                                    className="w-full bg-[#11111d] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic"
+                                >
+                                    <option value={5}>5 MINUTOS</option>
+                                    <option value={10}>10 MINUTOS</option>
+                                    <option value={15}>15 MINUTOS</option>
+                                    <option value={30}>30 MINUTOS</option>
+                                    <option value={45}>45 MINUTOS</option>
+                                    <option value={60}>1 HORA</option>
+                                    <option value={90}>1:30 HORAS</option>
+                                    <option value={120}>2 HORAS</option>
+                                    <option value={180}>3 HORAS</option>
+                                </select>
+                            </div>
+                            {/* Modalidad */}
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Modalidad</label>
+                                <select
+                                    value={data.modality}
+                                    onChange={e => setData('modality', e.target.value)}
+                                    className="w-full bg-[#11111d] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic"
+                                >
+                                    <option value="presencial">PRESENCIAL</option>
+                                    <option value="virtual">VIRTUAL</option>
+                                    <option value="hibrido">HÍBRIDO</option>
+                                </select>
+                            </div>
+                            {/* Multi Instructor Switch */}
+                            <div className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                                <div>
+                                    <span className="block text-[10px] font-black text-white uppercase italic">Múltiples Instructores</span>
+                                    <span className="block text-[8px] font-black text-white/30 uppercase italic mt-0.5">Asignación para co-instructores</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setData('multi_trainer', !data.multi_trainer)}
+                                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+                                        data.multi_trainer ? 'bg-indigo-600 shadow-[0_0_15px_rgba(99,102,241,0.3)]' : 'bg-white/10'
+                                    }`}
+                                >
+                                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                                        data.multi_trainer ? 'translate-x-5' : 'translate-x-0'
+                                    }`} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex justify-end pt-4">

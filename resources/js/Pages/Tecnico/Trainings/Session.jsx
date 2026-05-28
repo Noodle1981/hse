@@ -80,20 +80,14 @@ export default function Session({ session }) {
     const handleFinalize = (e) => {
         e.preventDefault();
 
-        if (finalizeForm.data.is_external_instructor) {
-            if (!instructorSigPad.current || instructorSigPad.current.isEmpty()) {
-                setInstructorSigError('La firma digital del instructor especialista es obligatoria.');
-                return;
-            }
-            setInstructorSigError(null);
-        }
+        const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
 
-        finalizeForm.transform((data) => ({
-            ...data,
-            instructor_signature: data.is_external_instructor && instructorSigPad.current 
-                ? instructorSigPad.current.toDataURL() 
-                : '',
-        })).post(route(`${prefix}.trainings.finalize`, session.id), {
+        router.post(route(`${prefix}.trainings.finalize`, session.id), {
+            duration_minutes: elapsedMinutes,
+            is_external_instructor: false,
+            trainer_name: '',
+            instructor_signature: ''
+        }, {
             onSuccess: () => {
                 setShowFinalizeModal(false);
                 finalizeForm.reset();
@@ -170,10 +164,12 @@ export default function Session({ session }) {
 
         setSignatureError(null);
 
-        form.transform((data) => ({
-            ...data,
-            signature: signaturePad.current.toDataURL(),
-        })).post(route(`${prefix}.trainings.add-attendee`, session.id), {
+        router.post(route(`${prefix}.trainings.add-attendee`, session.id), {
+            name: form.data.name,
+            position: form.data.position,
+            dni: form.data.dni,
+            signature: signaturePad.current.toDataURL()
+        }, {
             onSuccess: () => {
                 setIsAdding(false);
                 form.reset();
@@ -209,7 +205,7 @@ export default function Session({ session }) {
                         <div className="flex items-center gap-4">
                             {/* TIEMPO PLANIFICADO */}
                             <div className="px-6 py-4 bg-black/40 border border-white/5 rounded-2xl text-center min-w-[120px]">
-                                <div className="text-[8px] font-black text-white/20 uppercase italic leading-none mb-1.5">Tiempo Estimado</div>
+                                <div className="text-[8px] font-black text-white/20 uppercase italic leading-none mb-1.5">Tiempo Programado</div>
                                 <div className="text-xl font-black text-indigo-400 italic leading-none">
                                     {session.duration_minutes ? Math.round(session.duration_minutes) : 15} min
                                </div>
@@ -266,8 +262,8 @@ export default function Session({ session }) {
                                     <textarea 
                                         value={detailsForm.data.description}
                                         onChange={e => detailsForm.setData('description', e.target.value)}
-                                        rows="2"
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase placeholder-white/5 italic"
+                                        rows="10"
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase placeholder-white/5 italic"
                                         placeholder="Escriba los temas explicados en la capacitación..."
                                     />
                                 </div>
@@ -276,8 +272,8 @@ export default function Session({ session }) {
                                     <textarea 
                                         value={detailsForm.data.notes}
                                         onChange={e => detailsForm.setData('notes', e.target.value)}
-                                        rows="2"
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase placeholder-white/5 italic"
+                                        rows="10"
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase placeholder-white/5 italic"
                                         placeholder="Registrar novedades, comentarios o notas operativas de la capacitación..."
                                     />
                                 </div>
@@ -287,17 +283,17 @@ export default function Session({ session }) {
 
                     {!isAdding ? (
                         <div className="space-y-8 animate-fade-in-up">
-                            {/* BOTÓN DE ACCESORIO GIGANTE PARA TABLETS */}
+                            {/* BOTÓN DE REGISTRO COMPACTO Y ELEGANTE */}
                             <button 
                                 onClick={() => setIsAdding(true)} 
-                                className="w-full py-12 bg-blue-600/10 border-2 border-dashed border-blue-500/40 rounded-[3rem] flex flex-col items-center justify-center gap-6 hover:bg-blue-600/20 active:scale-95 transition-all group"
+                                className="w-full py-4 bg-blue-600/10 border border-dashed border-blue-500/30 rounded-2xl flex items-center justify-center gap-4 hover:bg-blue-600/20 active:scale-95 transition-all group"
                             >
-                                <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center shadow-2xl shadow-blue-600/40 group-hover:scale-110 transition-transform">
-                                    <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M12 4v16m8-8H4"/></svg>
+                                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:scale-105 transition-transform">
+                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4"/></svg>
                                 </div>
-                                <div className="text-center">
-                                    <span className="text-xl font-black uppercase italic tracking-widest block">Registrar Nuevo Alumno</span>
-                                    <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em] mt-2 block italic">Click para abrir panel de firma</span>
+                                <div className="text-left">
+                                    <span className="text-xs font-black uppercase italic tracking-widest block text-white group-hover:text-blue-400 transition-colors">Registrar Nuevo Alumno</span>
+                                    <span className="text-[7px] font-black text-white/20 uppercase tracking-[0.2em] mt-0.5 block italic">Click para abrir panel de firma táctil</span>
                                 </div>
                             </button>
 
@@ -434,7 +430,7 @@ export default function Session({ session }) {
                             {/* Información Comparativa de Tiempo */}
                             <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-left space-y-2 px-6 py-4">
                                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest italic text-white/40 leading-none">
-                                    <span>Tiempo Estimado:</span>
+                                    <span>Tiempo Programado:</span>
                                     <span className="text-indigo-400 font-black">{session.duration_minutes ? Math.round(session.duration_minutes) : 15} minutos</span>
                                 </div>
                                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest italic text-white/40 leading-none">
@@ -443,89 +439,6 @@ export default function Session({ session }) {
                                 </div>
                             </div>
 
-                            {/* Campo de Duración Requerido */}
-                            <div className="w-full text-left space-y-2 px-2">
-                                <label htmlFor="duration_minutes" className="block text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic">
-                                    Tiempo Real Dictado (Minutos)*
-                                </label>
-                                <input 
-                                    id="duration_minutes"
-                                    name="duration_minutes"
-                                    type="number"
-                                    min="1"
-                                    required
-                                    value={finalizeForm.data.duration_minutes}
-                                    onChange={e => finalizeForm.setData('duration_minutes', e.target.value)}
-                                    placeholder="Ej. 15, 30, 45..."
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white placeholder-white/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 hover:ring-2 hover:ring-indigo-500/50 transition-all uppercase"
-                                />
-                                {finalizeForm.errors.duration_minutes && (
-                                    <p className="text-[9px] font-black text-red-500 mt-1 uppercase italic">{finalizeForm.errors.duration_minutes}</p>
-                                )}
-                            </div>
-
-                            {/* Toggle Switch para Instructor Externo */}
-                            <div className="w-full flex items-center justify-between px-2 pt-2">
-                                <span className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic">
-                                    ¿Instructor Externo / Especialista?
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={() => finalizeForm.setData('is_external_instructor', !finalizeForm.data.is_external_instructor)}
-                                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                                        finalizeForm.data.is_external_instructor
-                                            ? 'bg-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.3)]'
-                                            : 'bg-white/10'
-                                    }`}
-                                >
-                                    <span
-                                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                                            finalizeForm.data.is_external_instructor ? 'translate-x-5' : 'translate-x-0'
-                                        }`}
-                                    />
-                                </button>
-                            </div>
-
-                            {/* Panel Condicional Glassmorphic */}
-                            {finalizeForm.data.is_external_instructor && (
-                                <div className="w-full bg-white/5 border border-white/5 backdrop-blur-xl rounded-2xl p-5 text-left space-y-4 animate-fade-in-up">
-                                    <div className="space-y-1">
-                                        <label htmlFor="trainer_name" className="block text-[9px] font-black text-orange-400 uppercase tracking-[0.2em] italic">
-                                            Nombre del Instructor Especialista*
-                                        </label>
-                                        <input
-                                            id="trainer_name"
-                                            name="trainer_name"
-                                            type="text"
-                                            required={finalizeForm.data.is_external_instructor}
-                                            value={finalizeForm.data.trainer_name}
-                                            onChange={e => finalizeForm.setData('trainer_name', e.target.value)}
-                                            placeholder="..."
-                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white placeholder-white/10 focus:outline-none focus:ring-2 focus:ring-orange-500/50 hover:ring-2 hover:ring-orange-500/50 transition-all uppercase italic"
-                                        />
-                                        {finalizeForm.errors.trainer_name && (
-                                            <p className="text-[9px] font-black text-red-500 mt-1 uppercase italic">{finalizeForm.errors.trainer_name}</p>
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        {instructorSigError && (
-                                            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-2 animate-fade-in">
-                                                <svg className="w-4 h-4 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                                                <span className="text-[9px] font-black text-red-500 uppercase tracking-widest italic leading-none">{instructorSigError}</span>
-                                            </div>
-                                        )}
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[9px] font-black text-orange-400/40 uppercase tracking-[0.2em] italic">Firma del Instructor Especialista*</span>
-                                            <button type="button" onClick={() => instructorSigPad.current?.clear()} className="text-[8px] font-black text-red-500 uppercase italic hover:underline">Limpiar Firma</button>
-                                        </div>
-                                        <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden h-32 touch-none cursor-crosshair relative brightness-0 invert opacity-90">
-                                            <canvas ref={instructorCanvasRef} className="w-full h-full"></canvas>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-                            
                             <div className="grid grid-cols-2 gap-4 w-full pt-4">
                                 <button 
                                     type="button"
