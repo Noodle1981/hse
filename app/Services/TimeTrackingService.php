@@ -53,8 +53,25 @@ class TimeTrackingService
             $checkinTimeStr = $carbonCheckin->format($timeFormat);
             
             // Asegurar formato de comparación HH:MM:SS
-            $aperturaStr = Carbon::createFromFormat('H:i:s', $sede->hora_apertura)->format($timeFormat);
-            $cierreStr = Carbon::createFromFormat('H:i:s', $sede->hora_cierre)->format($timeFormat);
+            try {
+                $aperturaStr = Carbon::createFromFormat('H:i:s', $sede->hora_apertura)->format($timeFormat);
+            } catch (\Exception $e) {
+                try {
+                    $aperturaStr = Carbon::createFromFormat('H:i', $sede->hora_apertura)->format($timeFormat);
+                } catch (\Exception $e2) {
+                    $aperturaStr = '00:00:00';
+                }
+            }
+
+            try {
+                $cierreStr = Carbon::createFromFormat('H:i:s', $sede->hora_cierre)->format($timeFormat);
+            } catch (\Exception $e) {
+                try {
+                    $cierreStr = Carbon::createFromFormat('H:i', $sede->hora_cierre)->format($timeFormat);
+                } catch (\Exception $e2) {
+                    $cierreStr = '23:59:59';
+                }
+            }
 
             if ($checkinTimeStr < $aperturaStr || $checkinTimeStr > $cierreStr) {
                 return false;

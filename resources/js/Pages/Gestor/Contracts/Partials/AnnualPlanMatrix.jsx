@@ -1,8 +1,40 @@
 import React, { useState } from 'react';
 import { router, useForm } from '@inertiajs/react';
 
+const parseSafeDate = (dateStr, includeTime = false) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return 'N/A';
+    if (includeTime) {
+        // If it includes 'T' or a space/time, format with time, otherwise just date
+        const hasTime = dateStr.includes('T') || dateStr.includes(' ');
+        if (hasTime) {
+            return d.toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+    }
+    return d.toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+};
+
+const parseSafeDateShort = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    return d.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' });
+};
+
 export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData, editMode, checklistOptions = [] }) {
     const [editingCell, setEditingCell] = useState(null);
+    const [selectedCellHistory, setSelectedCellHistory] = useState(null);
     const [editingDate, setEditingDate] = useState('');
     const [planToDelete, setPlanToDelete] = useState(null);
     const [planToEdit, setPlanToEdit] = useState(null);
@@ -165,13 +197,19 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                     <td key={monthValue} className="p-0 border-r border-white/[0.03] relative group/cell">
                                         <div className="flex flex-col items-center justify-center h-full py-4 gap-1">
                                             <div 
-                                                onClick={() => toggleMonth(plan.id, monthValue)}
+                                                onClick={() => {
+                                                    if (editMode) {
+                                                        toggleMonth(plan.id, monthValue);
+                                                    } else if (status === 'completed') {
+                                                        setSelectedCellHistory({ plan, month: info.name, data });
+                                                    }
+                                                }}
                                                 className={`w-10 h-10 rounded-2xl border-2 flex items-center justify-center transition-all duration-300 relative group/status
                                                     ${status === 'completed' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]' : ''}
                                                     ${status === 'overdue' ? 'bg-red-500/20 border-red-500/40 text-red-500 shadow-[0_0_25px_rgba(239,68,68,0.2)]' : ''}
                                                     ${status === 'pending' ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400' : ''}
                                                     ${status === 'none' ? 'border-dashed border-white/5 opacity-40 hover:opacity-100 hover:border-ep-primary/50' : ''}
-                                                    ${editMode ? 'cursor-pointer hover:scale-110' : 'cursor-default transition-none'}
+                                                    ${editMode ? 'cursor-pointer hover:scale-110' : (status === 'completed' ? 'cursor-pointer hover:scale-110' : 'cursor-default transition-none')}
                                                 `}
                                             >
                                                 {status === 'completed' && (
@@ -196,47 +234,17 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                                     onClick={() => openDatePicker(plan.id, monthValue, cellDate)}
                                                     className={`text-[8px] font-black uppercase italic px-1.5 py-0.5 rounded transition-all ${cellDate ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' : (editMode ? 'text-white/20 hover:text-white/60' : 'text-transparent')}`}
                                                 >
-                                                    {cellDate ? new Date(cellDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit' }) : (editMode ? '...' : '')}
+                                                    {cellDate ? parseSafeDateShort(cellDate) : (editMode ? '...' : '')}
                                                 </button>
                                             )}
 
                                             {/* Tooltip Detalle Táctico (Hover) */}
                                             {status === 'completed' && !editMode && (
-                                                <div className="absolute bottom-full mb-6 left-1/2 -translate-x-1/2 w-64 bg-[#141421]/95 backdrop-blur-3xl border border-white/10 p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.8)] opacity-0 invisible group-hover/cell:opacity-100 group-hover/cell:visible transition-all duration-500 z-50 pointer-events-none translate-y-4 group-hover/cell:translate-y-0 text-left">
-                                                    <div className="flex justify-between items-start mb-6 border-b border-white/5 pb-4">
-                                                        <div>
-                                                            <span className="block text-[10px] font-black text-ep-primary uppercase tracking-[0.2em] italic leading-none">{info.name}</span>
-                                                            <span className="text-[8px] font-bold text-indigo-100/20 uppercase tracking-widest mt-1">Auditado OK</span>
-                                                        </div>
-                                                        <div className="w-8 h-8 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center">
-                                                            <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="4"/></svg>
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <div className="p-3 bg-white/5 rounded-2xl border border-white/5">
-                                                            <span className="block text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5 leading-none">Ejecución</span>
-                                                            <span className="text-[10px] font-black text-white italic truncate block">{data.details?.execution_date || 'N/A'}</span>
-                                                        </div>
-                                                        <div className="p-3 bg-white/5 rounded-2xl border border-white/5">
-                                                            <span className="block text-[7px] font-black text-white/20 uppercase tracking-widest mb-1.5 leading-none">Registros</span>
-                                                            <span className="text-[10px] font-black text-ep-primary italic">{data.count} DETECTADO</span>
-                                                        </div>
-                                                        {data.details?.attendees > 0 && (
-                                                            <div className="col-span-2 p-3 bg-blue-500/10 rounded-2xl border border-blue-500/20">
-                                                                <span className="block text-[7px] font-black text-blue-300 uppercase tracking-widest mb-1.5 leading-none">Capacitados</span>
-                                                                <span className="text-[11px] font-black text-white italic">{data.details.attendees} COLABORADORES ACTIVOS</span>
-                                                            </div>
-                                                        )}
-                                                        {data.details?.findings > 0 && (
-                                                            <div className="col-span-2 p-3 bg-red-500/10 rounded-2xl border border-red-500/20">
-                                                                <span className="block text-[7px] font-black text-red-300 uppercase tracking-widest mb-1.5 leading-none">Desvíos Operativos</span>
-                                                                <span className="text-[11px] font-black text-white italic">{data.details.findings} ALERTAS POR CERRAR</span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-4 h-4 bg-[#141421] rotate-45 border-r border-b border-white/10 -translate-y-2"></div>
+                                                <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#141421]/95 backdrop-blur-md border border-emerald-500/30 px-3 py-1.5 rounded-xl shadow-[0_0_15px_rgba(16,185,129,0.2)] opacity-0 invisible group-hover/cell:opacity-100 group-hover/cell:visible transition-all duration-300 z-50 pointer-events-none translate-y-1 group-hover/cell:translate-y-0 text-center">
+                                                    <span className="text-[10px] font-black text-emerald-400 uppercase tracking-wider italic flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span>
+                                                        Haga click para auditar {data.count} {data.count === 1 ? 'ejecución' : 'ejecuciones'}
+                                                    </span>
                                                 </div>
                                             )}
 
@@ -463,6 +471,154 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* MODAL HISTORIAL DE EJECUCIONES COMPILADAS */}
+        {selectedCellHistory && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                {/* Backdrop */}
+                <div 
+                    className="fixed inset-0 bg-[#0a0a0f]/80 backdrop-blur-md animate-fade-in"
+                    onClick={() => setSelectedCellHistory(null)}
+                ></div>
+                
+                {/* Card Modal */}
+                <div className="relative w-full max-w-xl bg-[#141421]/90 backdrop-blur-2xl border border-emerald-500/20 rounded-[2.5rem] shadow-[0_25px_70px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-up">
+                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-emerald-500 to-transparent opacity-50"></div>
+                    
+                    <div className="p-8">
+                        <div className="flex justify-between items-start mb-6 border-b border-white/5 pb-4">
+                            <div>
+                                <span className="block text-[10px] font-black text-emerald-400 uppercase tracking-[0.2em] italic leading-none">Matriz de Cumplimiento</span>
+                                <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mt-1">
+                                    Historial de Ejecución - {selectedCellHistory.month}
+                                </h3>
+                                <p className="text-[10px] font-bold text-indigo-100/30 uppercase tracking-widest mt-1">
+                                    {selectedCellHistory.plan?.activity_name} • {selectedCellHistory.plan?.activity_code || 'SIN CÓDIGO'}
+                                </p>
+                            </div>
+                            <button 
+                                onClick={() => setSelectedCellHistory(null)} 
+                                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/10 transition-all text-xs font-bold"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* List of executions */}
+                        <div className="max-h-[350px] overflow-y-auto custom-scrollbar pr-2 space-y-4 mb-8">
+                            {(!selectedCellHistory.data?.details?.history || selectedCellHistory.data.details.history.length === 0) ? (
+                                <div className="py-8 text-center bg-white/5 rounded-2xl border border-white/5">
+                                    <p className="text-xs font-black text-indigo-100/25 uppercase italic tracking-widest">Sin registros históricos detallados</p>
+                                </div>
+                            ) : (
+                                selectedCellHistory.data.details.history.map((item, idx) => {
+                                    const category = selectedCellHistory.plan?.category;
+
+                                    if (category === 'Inspección') {
+                                        return (
+                                            <div key={idx} className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
+                                                        <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1">
+                                                            📅 {parseSafeDate(item.date, true)}
+                                                        </span>
+                                                        <div className="text-xs font-bold text-white flex items-center gap-1">
+                                                            👷 {item.technician_name || 'Técnico no especificado'}
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-1">
+                                                        <div className="flex items-center justify-between px-3 py-2 rounded-xl text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-bold">
+                                                            <span className="opacity-80">Checklists Hechos:</span>
+                                                            <span className="font-black text-xs">{item.total_checklists ?? 0}</span>
+                                                        </div>
+                                                        <div className="flex items-center justify-between px-3 py-2 rounded-xl text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-bold shadow-[0_0_10px_rgba(16,185,129,0.05)]">
+                                                            <span className="opacity-80">Exitosos:</span>
+                                                            <span className="font-black text-xs">{item.passed ?? 0}</span>
+                                                        </div>
+                                                        {(item.failed ?? 0) > 0 ? (
+                                                            <div className="flex items-center justify-between px-3 py-2 rounded-xl text-red-400 bg-red-500/10 border border-red-500/30 text-[10px] font-bold shadow-[0_0_10px_rgba(239,68,68,0.05)]">
+                                                                <span className="opacity-80">Fallidos:</span>
+                                                                <span className="font-black text-xs">{item.failed}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="flex items-center justify-between px-3 py-2 rounded-xl text-white/20 bg-white/5 border border-white/5 text-[10px] font-bold">
+                                                                <span className="opacity-60">Fallidos:</span>
+                                                                <span className="font-black text-xs">{item.failed ?? 0}</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+
+                                    if (category === 'Capacitación') {
+                                        const attendeesCount = item.asistentes ?? item.attendees_count ?? 0;
+                                        return (
+                                            <div key={idx} className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
+                                                        <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1">
+                                                            📅 {parseSafeDate(item.date, true)}
+                                                        </span>
+                                                        <div className="text-xs font-bold text-white flex items-center gap-1">
+                                                            👷 {item.technician_name || 'Instructor no especificado'}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                        <span className="px-3 py-1.5 rounded-xl text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 text-[10px] font-black uppercase tracking-wider italic flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.05)]">
+                                                            👥 Asistentes: {attendeesCount} capacitados
+                                                        </span>
+                                                        {(item.observaciones || item.observations) && (
+                                                            <span className="px-3 py-1.5 rounded-xl text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-semibold italic flex items-center gap-1">
+                                                                💬 "{item.observaciones ?? item.observations}"
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    }
+
+                                    // Default/Informe category
+                                    const observations = item.observaciones ?? item.observations ?? 'Sin observaciones registradas';
+                                    return (
+                                        <div key={idx} className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-white/10 transition-colors">
+                                            <div className="flex flex-col gap-3">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2">
+                                                    <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest flex items-center gap-1">
+                                                        📅 {parseSafeDate(item.date, true)}
+                                                    </span>
+                                                    <div className="text-xs font-bold text-white flex items-center gap-1">
+                                                        👷 {item.technician_name || 'Autor no especificado'}
+                                                    </div>
+                                                </div>
+                                                <div className="mt-1 p-3 bg-white/5 rounded-xl border border-white/5">
+                                                    <span className="block text-[8px] font-black text-white/30 uppercase tracking-wider mb-1">Observaciones / Detalles:</span>
+                                                    <p className="text-[11px] font-semibold text-indigo-200 italic leading-relaxed">
+                                                        "{observations}"
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+
+                        <div className="flex justify-end pt-4 border-t border-white/5">
+                            <button 
+                                onClick={() => setSelectedCellHistory(null)}
+                                className="w-full sm:w-auto h-12 px-8 bg-white/5 border border-white/10 rounded-2xl text-[10px] font-black text-white uppercase tracking-widest italic hover:bg-white/10 active:scale-95 transition-all"
+                            >
+                                Cerrar Panel
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

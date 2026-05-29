@@ -364,11 +364,31 @@ class AdministrationController extends Controller
                 // Si las horas de campo exceden la duración de la jornada operativa de la sede
                 $sede = $visit->sede;
                 if ($sede && !$sede->es_roster_24_7 && $sede->hora_apertura && $sede->hora_cierre) {
-                    $apertura = \Carbon\Carbon::createFromFormat('H:i:s', $sede->hora_apertura);
-                    $cierre = \Carbon\Carbon::createFromFormat('H:i:s', $sede->hora_cierre);
-                    $maxHours = $cierre->diffInSeconds($apertura) / 3600.0;
-                    if ($fieldHours > $maxHours) {
-                        $exceededWarningsCount++;
+                    try {
+                        $apertura = \Carbon\Carbon::createFromFormat('H:i:s', $sede->hora_apertura);
+                    } catch (\Exception $e) {
+                        try {
+                            $apertura = \Carbon\Carbon::createFromFormat('H:i', $sede->hora_apertura);
+                        } catch (\Exception $e2) {
+                            $apertura = null;
+                        }
+                    }
+
+                    try {
+                        $cierre = \Carbon\Carbon::createFromFormat('H:i:s', $sede->hora_cierre);
+                    } catch (\Exception $e) {
+                        try {
+                            $cierre = \Carbon\Carbon::createFromFormat('H:i', $sede->hora_cierre);
+                        } catch (\Exception $e2) {
+                            $cierre = null;
+                        }
+                    }
+
+                    if ($apertura && $cierre) {
+                        $maxHours = $cierre->diffInSeconds($apertura) / 3600.0;
+                        if ($fieldHours > $maxHours) {
+                            $exceededWarningsCount++;
+                        }
                     }
                 }
             }

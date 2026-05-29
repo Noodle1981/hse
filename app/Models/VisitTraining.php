@@ -92,7 +92,10 @@ class VisitTraining extends Model
     public function getAttendeesCountAttribute()
     {
         if ($this->training) {
-            return $this->training->attendances()->count();
+            $count = $this->training->attendances()->count();
+            if ($count > 0) {
+                return $count;
+            }
         }
         return is_array($this->attendees) ? count($this->attendees) : 0;
     }
