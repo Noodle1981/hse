@@ -105,11 +105,22 @@ class TrainingControllerTest extends TestCase
     /** @test */
     public function a_technician_can_finalize_training_with_external_instructor()
     {
+        // Registrar al menos un asistente en la base de datos para la sesión
+        \App\Models\TrainingAttendance::create([
+            'training_id' => $this->training->id,
+            'visit_training_id' => $this->visitTraining->id,
+            'employee_name' => 'Test Attendee',
+            'dni' => '12345678',
+            'signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+        ]);
+
         $payload = [
             'duration_minutes' => 25,
             'is_external_instructor' => true,
             'trainer_name' => 'Ing. Juan Carlos (Especialista)',
             'instructor_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+            'responsible_name' => 'Supervisor Responsable',
+            'responsible_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
         ];
 
         $response = $this->actingAs($this->tecnico)->post(
