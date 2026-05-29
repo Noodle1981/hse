@@ -8,6 +8,13 @@ export default function Session({ session }) {
     const [isAdding, setIsAdding] = useState(false);
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const [signatureError, setSignatureError] = useState(null);
+    const [finalizeError, setFinalizeError] = useState(null);
+
+    useEffect(() => {
+        if (session.attendees?.length > 0) {
+            setFinalizeError(null);
+        }
+    }, [session.attendees?.length]);
     
     // Detect active role using shared backend prop
     const isTecnico = auth?.user?.is_technician;
@@ -37,6 +44,8 @@ export default function Session({ session }) {
         is_external_instructor: false,
         trainer_name: '',
         instructor_signature: '',
+        responsible_name: session.visit?.responsible_name || '',
+        responsible_signature: '',
     });
 
     const handleSaveDetails = (e) => {
@@ -72,13 +81,31 @@ export default function Session({ session }) {
     };
 
     const handleFinalizeSession = () => {
+        if (!session.attendees || session.attendees.length === 0) {
+            setFinalizeError('Debe registrar la firma de al menos un participante para poder finalizar y guardar la capacitación.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+        setFinalizeError(null);
         const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
-        finalizeForm.setData('duration_minutes', elapsedMinutes);
+        finalizeForm.setData({
+            duration_minutes: elapsedMinutes,
+            is_external_instructor: false,
+            trainer_name: '',
+            instructor_signature: '',
+            responsible_name: session.visit?.responsible_name || '',
+            responsible_signature: '',
+        });
         setShowFinalizeModal(true);
     };
 
     const handleFinalize = (e) => {
         e.preventDefault();
+
+        if (!responsibleSigPad.current || responsibleSigPad.current.isEmpty()) {
+            alert('La firma de la persona a cargo es obligatoria para certificar el cierre de la capacitación.');
+            return;
+        }
 
         const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60));
 
@@ -86,7 +113,9 @@ export default function Session({ session }) {
             duration_minutes: elapsedMinutes,
             is_external_instructor: false,
             trainer_name: '',
-            instructor_signature: ''
+            instructor_signature: '',
+            responsible_name: finalizeForm.data.responsible_name,
+            responsible_signature: responsibleSigPad.current.toDataURL(),
         }, {
             onSuccess: () => {
                 setShowFinalizeModal(false);
@@ -101,6 +130,33 @@ export default function Session({ session }) {
     const instructorCanvasRef = useRef(null);
     const instructorSigPad = useRef(null);
     const [instructorSigError, setInstructorSigError] = useState(null);
+
+    const responsibleCanvasRef = useRef(null);
+    const responsibleSigPad = useRef(null);
+
+    // Inicializar firma de la Persona a Cargo (Cierre) reactivamente
+    useEffect(() => {
+        if (showFinalizeModal && responsibleCanvasRef.current) {
+            responsibleSigPad.current = new SignaturePad(responsibleCanvasRef.current, {
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                penColor: '#10B981', // Verde Esmeralda
+            });
+
+            const resizeResponsibleCanvas = () => {
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                if (responsibleCanvasRef.current) {
+                    responsibleCanvasRef.current.width = responsibleCanvasRef.current.offsetWidth * ratio;
+                    responsibleCanvasRef.current.height = responsibleCanvasRef.current.offsetHeight * ratio;
+                    responsibleCanvasRef.current.getContext("2d").scale(ratio, ratio);
+                    responsibleSigPad.current.clear();
+                }
+            };
+
+            window.addEventListener("resize", resizeResponsibleCanvas);
+            resizeResponsibleCanvas();
+            return () => window.removeEventListener("resize", resizeResponsibleCanvas);
+        }
+    }, [showFinalizeModal]);
 
     // Inicializar firma del Instructor Externo de forma reactiva al montarse en el DOM condicional
     useEffect(() => {
@@ -236,6 +292,18 @@ export default function Session({ session }) {
                             </button>
                         </div>
                     </div>
+
+                    {finalizeError && (
+                        <div className="bg-red-500/10 border border-red-500/20 rounded-[2rem] p-6 flex items-center gap-4 animate-fade-in-up shadow-lg shadow-red-500/5">
+                            <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400 shrink-0">
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            </div>
+                            <div>
+                                <h4 className="text-xs font-black uppercase tracking-widest text-red-400 italic">Firma de Participantes Requerida</h4>
+                                <p className="text-[10px] font-bold text-white/60 uppercase tracking-wider mt-1 italic leading-tight">{finalizeError}</p>
+                            </div>
+                        </div>
+                    )}
 
                     {/* BITÁCORA Y OBSERVACIONES (PREMIUM UI DARK) */}
                     <div className="bg-[#16162a]/40 backdrop-blur-md border border-white/5 rounded-[2.5rem] p-8 shadow-2xl relative group overflow-hidden animate-fade-in-down">
@@ -436,6 +504,34 @@ export default function Session({ session }) {
                                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest italic text-white/40 leading-none">
                                     <span>Tiempo Demorado (Cronómetro):</span>
                                     <span className="text-blue-400 font-black">{Math.max(1, Math.round(elapsedSeconds / 60))} minutos</span>
+                                </div>
+                            </div>
+
+                            {/* REGISTRO Y FIRMA DE LA PERSONA A CARGO (TIPO VISITA) */}
+                            <div className="w-full text-left space-y-6">
+                                <div className="relative group">
+                                    <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-emerald-400 uppercase tracking-[0.3em] italic z-10">Nombre de la Persona a Cargo</span>
+                                    <input 
+                                        type="text" 
+                                        value={finalizeForm.data.responsible_name}
+                                        onChange={e => finalizeForm.setData('responsible_name', e.target.value)}
+                                        required
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-black text-white focus:ring-2 focus:ring-emerald-500/50 transition-all uppercase placeholder-white/5 italic"
+                                        placeholder="Escriba el nombre del responsable de sede..."
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <div className="flex justify-between items-center px-1">
+                                        <span className="text-[8px] font-black text-emerald-400 uppercase tracking-[0.3em] italic">Firma del Responsable / Autorizante</span>
+                                        <button type="button" onClick={() => responsibleSigPad.current?.clear()} className="text-[8px] font-black text-red-500 uppercase italic hover:underline">Limpiar Firma</button>
+                                    </div>
+                                    <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden h-36 touch-none cursor-crosshair relative">
+                                        <canvas ref={responsibleCanvasRef} className="w-full h-full"></canvas>
+                                        <div className="absolute inset-x-0 bottom-4 text-center pointer-events-none opacity-[0.02]">
+                                            <span className="text-lg font-black italic uppercase text-white tracking-[0.5em]">XAMASAFE FIRMA</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 

@@ -13,6 +13,14 @@ El sistema cuenta con las siguientes entidades principales:
 - **Seguridad en Campo**: Incidentes, hallazgos, fotos y certificados de visitas (`incidentes`, `hallazgos`, `hallazgo_seguimientos`, `hallazgo_fotos`, `visit_certificates`).
 - **Planificación**: Plan Anual de HyS (`annual_plans`).
 
+### 🖋️ Gestión y Representación de Firmas en Base de Datos
+* **Firma Tipo A (Firma de Perfil / Identidad Permanente):**
+  * Tabla `users`: Columnas `firma` (VARCHAR, ruta relativa al archivo permanente `.png` en storage, ej: `signatures/user_1.png`), `firma_temp` (VARCHAR, ruta de firma cargada por técnico a la espera de auditoría), y `firma_status` (VARCHAR, estado de la firma: `'pending'`, `'approved'`, `'rejected'`).
+* **Firma Tipo B (Firma Transaccional / De Visita o Planilla):**
+  * Tabla `visit_certificates`: Columnas `responsible_signature` y `instructor_signature` (TEXT, datos serializados o Base64).
+  * Tabla `visit_trainings`: Columna `attendees` (TEXT en formato JSON serializado conteniendo nombres, puestos, DNI y strings de firmas en Base64 de cada asistente).
+  * Tabla `dynamic_inspections`: Columnas `supervisor_signature` y `technician_signature` (TEXT).
+
 ---
 
 ## Tabla: `annual_plans`
@@ -830,6 +838,8 @@ El sistema cuenta con las siguientes entidades principales:
 | `matricula` | `varchar` | Sí ✅ | *ninguno* |  |
 | `estado` | `tinyint(1)` | No ❌ | `'1'` |  |
 | `firma` | `varchar` | Sí ✅ | *ninguno* |  |
+| `firma_temp` | `varchar` | Sí ✅ | *ninguno* |  |
+| `firma_status` | `varchar` | No ❌ | `'approved'` |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `deleted_at` | `datetime` | Sí ✅ | *ninguno* |  |

@@ -106,9 +106,23 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
     4. **Confirmar & Iniciar:** Botón final para inyectar la capacitación de forma inmediata.
   - **Almacenamiento de Modalidad:** La modalidad se guarda directamente en la columna `type` de la tabla `trainings` (como `'presencial'` o `'virtual'`) logrando consistencia con el diseño de base de datos y su correcta visualización en el reporte PDF.
 
-### 4.6. Módulo de Contratos y PPD (Programa de Prevención de Daños)
-* **Control de Ciclos:** Seguimiento de contratos anuales activos por empresa.
-* **Alertas de Vencimiento:** Avisos visuales y de control de visitas requeridas en base al acuerdo de servicio (ej. frecuencia mensual, trimestral).
+### 4.7. Control y Gestión de Firmas Digitales y Aprobación Segura
+* **Tipología de Firmas del Sistema:**
+  * **Firma Tipo A (Firma de Perfil / Identidad Permanente):**
+    * **Definición:** Es la firma oficial y permanente que identifica a un Técnico o Usuario en el sistema.
+    * **Flujo de Captura:** Se realiza desde la pantalla de Perfil (`/perfil`) usando un canvas de dibujo React.
+    * **Almacenamiento Físico:** Al subirla, el backend decodifica la cadena Base64, genera un archivo físico `.png` y lo almacena en `storage/app/public/signatures/` con un nombre único aleatorio para preservar el historial legal. En la base de datos se guarda la ruta relativa al archivo (no el Base64) en el campo `users.firma`.
+    * **Auditoría Obligatoria:** No se aplica inmediatamente. Pasa a estado pendiente (`firma_status = 'pending'`) y se guarda temporalmente en `firma_temp`.
+  * **Firma Tipo B (Firma Transaccional / De Visita o Planilla):**
+    * **Definición:** Firma única, temporal y dinámica capturada en caliente para certificar un evento específico (asistencia a capacitación, cierre de checklist, o constancia de visita).
+    * **Almacenamiento:** Mapeadas como Base64 serializadas o strings codificados en caliente asociados de forma directa a registros temporales de la base de datos (como la firma del cliente al cerrar una constancia, o las firmas de los operarios en la tabla `visit_trainings.attendees`).
+
+* **Política de Firma Pendiente (Auditoría de Identidad):**
+  * Cuando un Técnico actualiza su firma digital desde su panel de Perfil (`/perfil`), esta entra en estado de aprobación pendiente (`firma_status = 'pending'`) y la firma propuesta se almacena en la ruta temporal `firma_temp`.
+  * **Auditoría por Gestor (Panel Táctico):** Los Gestores visualizan las firmas pendientes en el listado maestro de identidades (`Users.jsx`). El componente `PendingSignaturesList.jsx` destaca las firmas pendientes con contrastes oscuros inmersivos y les permite tomar una acción interactiva:
+    * **Aprobar:** Copia físicamente el archivo de la firma temporal a la ruta permanente final, cambia el estado a `approved`, actualiza la firma activa en `users.firma` y limpia `firma_temp`.
+    * **Rechazar:** Elimina físicamente el archivo temporal en el storage y marca `firma_status = 'rejected'` para notificar visualmente al técnico y permitirle reintentar.
+  * **Visor de Firmas Oficiales:** Se integra un modal visor Glassmorphic en el listado de usuarios que permite a los Gestores visualizar de forma inmediata las firmas aprobadas vigentes de cada técnico a través de un botón interactivo de inspección visual ("ojito").
 
 ---
 

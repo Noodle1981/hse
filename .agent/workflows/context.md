@@ -119,9 +119,14 @@ ep-back/
 - ✅ **Manejo de Roles Robusto:** Toda validación de roles en la plataforma (rutas, plantillas, policies) debe apoyarse en la lógica unificada del modelo `User::hasRole()`. Evitar splitting manual ad-hoc en controladores o middleware.
 - ✅ **Nombres de Parámetros de Ruta Coincidentes:** Para que la vinculación implícita de modelos (Route Model Binding) de Laravel funcione de forma transparente, el comodín de la ruta (ej. `{inspection}`) debe coincidir exactamente con el nombre de la variable inyectada en el controlador (ej. `DynamicInspection $inspection`). Evitar usar `{id}` genérico si se tipa el modelo, para prevenir inyecciones de modelos vacíos en el frontend.
 - ✅ **Inmutabilidad y Blindaje de Fechas (SRE Audit):** Al finalizar una inspección, es obligatorio ignorar y sanitizar cualquier campo de fecha/hora enviado por el frontend (`completed_at`, `date`, `time`, `timestamp`). La persistencia debe forzar estrictamente `now()` en el servidor y disparar alertas detalladas (`Log::warning()`) ante cualquier discrepancia para evitar fraude de horarios.
+- ✅ **Arquitectura y Ciclo de Firmas Digitales:**
+  - **Firma Tipo A (Perfil/Permanente):** Trazada en canvas, decodificada de Base64 a archivo físico `.png` en storage, a la espera de auditoría visual en `PendingSignaturesList.jsx` por parte del Gestor.
+  - **Firma Tipo B (Transaccional/Hojas de Firma):** Guardadas como Base64 serializados o strings directamente sobre planillas específicas en DB (e.g. `visit_trainings.attendees`).
+  - **DomPDF Resolution Constraint:** Se garantiza que al exportar las plantillas o reportes PDF en Laravel, el motor DomPDF resuelva las rutas físicas absolutas locales (`public_path('storage/' . $path)`) evitando fallas de visualización (como marcos cruzados o placeholders vacíos).
 - ✅ Usar Type Hints y Return Types estrictos.
 - ✅ Form Requests independientes para la validación de peticiones.
 - ✅ Eager Loading (`with()`) en Eloquent para evitar consultas N+1.
+- ✅ **Flujo de Aprobación de Firma Digital (Auditoría):** Los cambios de firma digital del técnico entran en estado `pending` en `firma_status` y se guardan temporalmente en `firma_temp`. Los Gestores auditan y aprueban o rechazan el cambio físicamente a través de la consola de usuarios (`Users.jsx`).
 - ✅ Retornar respuestas nativas de Inertia: `return Inertia::render('Componente', [...]);`.
  
 ### Frontend (React 19 & Inertia)

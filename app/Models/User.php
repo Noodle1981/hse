@@ -35,6 +35,8 @@ class User extends Authenticatable
         'matricula',
         'estado',
         'firma',
+        'firma_temp',
+        'firma_status',
         'titulo',
         'must_change_password',
     ];
@@ -213,5 +215,13 @@ class User extends Authenticatable
     public function getFullNameAttribute(): string
     {
         return trim("{$this->nombres} {$this->apellidos}");
+    }
+
+    /**
+     * Accesor para signature (mapea a la columna firma de la base de datos)
+     */
+    public function getSignatureAttribute(): ?string
+    {
+        return $this->firma;
     }
 }

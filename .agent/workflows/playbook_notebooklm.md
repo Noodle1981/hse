@@ -196,6 +196,27 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
 * **Funcionamiento Frontend:**
   - En `Wizard.jsx`, se despliega un badge centrado y glowing en Naranja Técnico justo encima del progress bar: `"⌚ Tiempo Real (Sync Servidor)"` (con animación `animate-pulse` en el reloj), certificando visualmente la sincronización del tiempo con el servidor.
 
+### 3.9. Política de Firma Pendiente y Flujo de Aprobación Táctica (Auditoría de Firmas)
+* **Propósito:** Garantizar que los técnicos no puedan actualizar su firma oficial inmediatamente sin que un Gestor audite visualmente su validez, evitando falsificaciones o trazos inválidos que anulen legalmente las planillas firmadas.
+* **Tipología de Firmas en el Ecosistema XamaSafe:**
+  * **Firma Tipo A (Identidad / Perfil Permanente):**
+    * Firma oficial e inmutable cargada en el perfil del usuario.
+    * Convertida de Base64 a archivo físico `.png` en el storage de Laravel para evitar saturación de la base de datos.
+    * Entra en estado `'pending'` (`firma_status`) y se guarda en la columna `firma_temp` y ruta física temporal.
+    * Requiere la aprobación interactiva de un Gestor mediante la consola `PendingSignaturesList.jsx`.
+    * **DomPDF Resolution Constraint:** Para su correcta impresión en certificados PDF, el servidor traduce la ruta relativa de la base de datos a una ruta física absoluta mediante `public_path('storage/' . $firma)`, evitando el renderizado del clásico cuadro cruzado roto de DomPDF.
+  * **Firma Tipo B (Transaccionales / Dinámicas en Caliente):**
+    * Firmas asociadas a eventos específicos (asistencia de operarios a charlas, constancia final del supervisor en la sede al terminar la visita).
+    * Persistidas directamente en formato Base64 o estructuras JSON serializadas dentro de las tablas correspondientes (`visit_trainings.attendees`, `visit_certificates.responsible_signature`, etc.), garantizando ligereza e inmediatez sin necesidad de procesos de auditoría del perfil.
+
+* **Flujo Operativo de Aprobación (Tipo A):**
+  1. **Captura Temporal:** El Técnico actualiza su firma en `/perfil` mediante un canvas React. El backend decodifica el Base64 y lo almacena como archivo `.png` en un directorio temporal (`storage/app/public/signatures/temp_uid.png`), guardando la ruta en `firma_temp` y marcando `firma_status = 'pending'`. El perfil del técnico queda bloqueado con indicador "Aprobación Pendiente".
+  2. **Auditoría de Gestor:** El componente `PendingSignaturesList.jsx` se inyecta en la cabecera de la matriz de usuarios (`Users.jsx`) y lee las firmas en estado pendiente. Muestra la firma invertida (`brightness-0 invert opacity-90`) sobre fondo oscuro premium.
+  3. **Resolución:**
+     * **Aprobar:** Copia físicamente la firma temporal a una ruta permanente aleatoria única para mantener el historial forense inmutable, actualiza `users.firma` con esta ruta, limpia `firma_temp` y setea `firma_status = 'approved'`.
+     * **Rechazar:** Elimina físicamente el archivo temporal en el storage y marca `firma_status = 'rejected'`, habilitando al técnico a reintentar y mostrando una advertencia de rechazo en su perfil.
+  4. **Visor de Firmas Oficiales:** Se habilita un botón de "ojito" en cada fila del usuario en la matriz de identidades para que el Gestor previsualice con un modal de alta gama Glassmorphic la firma activa y aprobada actual.
+
 ---
 
 ## 4. 💡 PLAYBOOK DE PROMPTS: Optimización para Desarrollar con IA (NotebookLM)

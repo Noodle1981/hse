@@ -572,6 +572,7 @@ class OperationController extends Controller
                         'type' => 'presencial',
                         'date' => now(),
                         'status' => 'pending',
+                        'duration' => $plan->duration_minutes ?? 15,
                         'dynamic_checklist_id' => $plan->checklist_id,
                         'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
                     ]);
@@ -588,7 +589,7 @@ class OperationController extends Controller
                         'is_adhoc' => false,
                         'title' => $training->title,
                         'description' => $training->description ?? 'Capacitación programada de plan anual',
-                        'duration_minutes' => $training->duration ?? 15,
+                        'duration_minutes' => $training->duration ?? $plan->duration_minutes ?? 15,
                         'attendees' => [],
                     ]);
                 }
@@ -868,6 +869,7 @@ class OperationController extends Controller
                 'type' => 'presencial',
                 'date' => now(),
                 'status' => 'pending',
+                'duration' => $plan->duration_minutes ?? 15,
                 'dynamic_checklist_id' => $plan->checklist_id,
                 'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
             ]);
@@ -879,7 +881,7 @@ class OperationController extends Controller
                 'is_adhoc' => false,
                 'title' => $training->title,
                 'description' => $training->description ?? 'Capacitación programada de plan anual',
-                'duration_minutes' => $training->duration ?? 15,
+                'duration_minutes' => $training->duration ?? $plan->duration_minutes ?? 15,
                 'attendees' => [],
             ]);
 

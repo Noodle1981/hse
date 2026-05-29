@@ -59,8 +59,18 @@ class VisitTraining extends Model
             return $this->training->duration;
         }
 
-        // 3. Fallback de diferencia de tiempo de guardado (solo si no se programó nada)
-        if ($this->created_at && $this->updated_at) {
+        // 3. Buscar en el plan anual si existe un tiempo programado
+        if ($this->training && $this->training->dynamic_checklist_id && $this->visit) {
+            $plan = \App\Models\AnnualPlan::where('sede_id', $this->visit->sede_id)
+                ->where('checklist_id', $this->training->dynamic_checklist_id)
+                ->first();
+            if ($plan && $plan->duration_minutes > 0) {
+                return $plan->duration_minutes;
+            }
+        }
+
+        // 4. Fallback de diferencia de tiempo de guardado (solo para ad-hoc)
+        if ($this->is_adhoc && $this->created_at && $this->updated_at) {
             $diff = $this->created_at->diffInMinutes($this->updated_at);
             return $diff > 0 ? $diff : 15;
         }

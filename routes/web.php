@@ -17,6 +17,7 @@ use App\Http\Controllers\FindingController;
 use App\Http\Controllers\IncidenteController;
 use App\Http\Controllers\MasterReportController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\SignatureApprovalController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/perfil', [ProfileController::class, 'show'])->name('profile');
     Route::post('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/perfil/signature', [ProfileController::class, 'updateSignature'])->name('profile.signature');
     
     /*
     |--------------------------------------------------------------------------
@@ -90,6 +92,9 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/save', [AdministrationController::class, 'saveUser'])->name('users.save');
             Route::delete('/{user}', [AdministrationController::class, 'deleteUser'])->name('users.delete');
             Route::post('/{id}/restore', [AdministrationController::class, 'restoreUser'])->name('users.restore');
+            Route::get('/pending-signatures', [SignatureApprovalController::class, 'pending'])->name('signatures.pending');
+            Route::post('/{user}/approve-signature', [SignatureApprovalController::class, 'approve'])->name('signatures.approve');
+            Route::post('/{user}/reject-signature', [SignatureApprovalController::class, 'reject'])->name('signatures.reject');
         });
         
         Route::prefix('tecnicos')->group(function () {

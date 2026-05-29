@@ -391,7 +391,16 @@
             </td>
             <td class="signature-box">
                 @if($visit->user->signature)
-                    <img src="{{ $visit->user->signature }}" class="signature-img">
+                    @php 
+                        $sigPath = public_path('storage/' . $visit->user->signature); 
+                    @endphp
+                    @if(str_starts_with($visit->user->signature, 'data:image'))
+                        <img src="{{ $visit->user->signature }}" class="signature-img">
+                    @elseif(file_exists($sigPath))
+                        <img src="{{ $sigPath }}" class="signature-img">
+                    @else
+                        <div style="height: 70px; color: #cbd5e1; font-size: 8px; line-height: 70px;">Firma no encontrada</div>
+                    @endif
                 @else
                     <div style="height: 70px;"></div>
                 @endif

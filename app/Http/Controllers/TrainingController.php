@@ -216,11 +216,17 @@ class TrainingController extends Controller
      */
     public function finalize(Request $request, VisitTraining $visitTraining)
     {
+        if (empty($visitTraining->attendees) || count($visitTraining->attendees) === 0) {
+            return back()->with('error', 'Debe haber al menos un participante con firma registrado para poder finalizar la capacitación.');
+        }
+
         $request->validate([
             'duration_minutes' => 'required|integer|min:1',
             'is_external_instructor' => 'boolean',
             'trainer_name' => 'required_if:is_external_instructor,true|nullable|string|max:255',
             'instructor_signature' => 'required_if:is_external_instructor,true|nullable|string',
+            'responsible_name' => 'required|string|max:255',
+            'responsible_signature' => 'required|string',
         ]);
 
         $visitTraining->update([
@@ -265,20 +271,23 @@ class TrainingController extends Controller
                 $visit->instructor_signature = null;
                 $visit->instructor_signature_date = null;
             }
+            $visit->responsible_name = $request->responsible_name;
+            $visit->signature = $request->responsible_signature;
             $visit->save();
         }
 
         if ($visit && $visit->visit_type === 'training') {
             $visit->update([
                 'end_time' => now(),
-                'status' => 'completed',
+                'status' => 'signed',
                 'general_observations' => 'Capacitación dictada con éxito. Total asistentes: ' . count($visitTraining->attendees ?? []),
                 'notes' => 'Visita de capacitación finalizada automáticamente al completar la charla: ' . $visitTraining->title,
-                'responsible_name' => $request->input('responsible_name', 'Responsable de Sede'),
+                'responsible_name' => $request->responsible_name,
+                'signature' => $request->responsible_signature,
             ]);
 
             return redirect()->route('tecnico.checklists.tasks.index', ['tab' => 'trainings'])
-                ->with('message', 'Capacitación finalizada y visita cerrada correctamente.');
+                ->with('message', 'Capacitación finalizada y visita cerrada correctamente con firma del responsable.');
         }
 
         return redirect()->route('tecnico.visits.in-progress', $visitTraining->visit_certificate_id)

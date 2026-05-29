@@ -40,3 +40,5 @@ Para evitar la saturación y el "bloat" de la base de datos, se debe aplicar la 
 2. **Decodificación en Backend**: El controlador (`TrainingController`) intercepta el string, extrae la cabecera de datos, lo decodifica de forma segura y lo guarda como un archivo físico `.png` en el disco público de la aplicación (`Storage::disk('public')->put('signatures/filename.png', $data)`).
 3. **Persistencia Ligera**: En la base de datos (`visit_certificates.instructor_signature`), solo se almacena la ruta relativa (ej. `signatures/instructor_xxxx.png`). Esto previene el crecimiento desmedido de las filas de texto largo (`TEXT`/`LONGTEXT`) y mantiene las consultas optimizadas.
 
+
+usa php tinker para leer tablas por favor

@@ -1,6 +1,7 @@
 import { router, Head, Link, useForm, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useState, useEffect } from 'react';
+import PendingSignaturesList from './Partials/PendingSignaturesList';
 
 export default function Index({ users, filters }) {
     const { auth, flash } = usePage().props;
@@ -13,6 +14,15 @@ export default function Index({ users, filters }) {
     const [editingId, setEditingId] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
+
+    // Visor de Firma Aprobada
+    const [showSignaturePreview, setShowSignaturePreview] = useState(false);
+    const [previewUser, setPreviewUser] = useState(null);
+
+    const openSignaturePreview = (user) => {
+        setPreviewUser(user);
+        setShowSignaturePreview(true);
+    };
 
     // Formulario unificado para Crear/Editar
     const form = useForm({
@@ -110,6 +120,9 @@ export default function Index({ users, filters }) {
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-[#F69239]/30">
                 <div className="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
                     
+                    {/* AUDITORÍA DE FIRMAS PENDIENTES */}
+                    <PendingSignaturesList />
+
                     {/* HUB DE FILTRADO Y ACCIÓN MAESTRA */}
                     <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-6 shadow-2xl relative overflow-hidden animate-fade-in-down">
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#F69239]/30 to-transparent"></div>
@@ -287,6 +300,14 @@ export default function Index({ users, filters }) {
                                                         </button>
                                                     ) : (
                                                         <>
+                                                            {user.firma && (
+                                                                <button onClick={() => openSignaturePreview(user)} className="h-10 w-10 bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg" title="Ver Firma Aprobada">
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                                    </svg>
+                                                                </button>
+                                                            )}
                                                             <button onClick={() => openEditModal(user)} className="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
                                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeWidth="2"/></svg>
                                                             </button>
@@ -357,6 +378,49 @@ export default function Index({ users, filters }) {
                              </button>
                             <button onClick={handleDelete} className="px-10 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg animate-pulse">
                                 Confirmar Baja
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Signature Preview Modal */}
+            {showSignaturePreview && previewUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowSignaturePreview(false)}></div>
+                    <div className="bg-[#16162a] border border-white/10 rounded-[3rem] p-10 max-w-lg w-full relative z-10 shadow-2xl text-center overflow-hidden">
+                        <div className="absolute inset-x-0 top-0 h-1 bg-amber-500/50"></div>
+                        <h3 className="text-xl font-black text-white uppercase italic tracking-widest mb-2">Visor de Firma</h3>
+                        <p className="text-[10px] text-white/40 uppercase tracking-widest mb-6 font-black italic">
+                            Identidad: {previewUser.nombres} {previewUser.apellidos}
+                        </p>
+                        
+                        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 flex flex-col items-center justify-center relative">
+                            {/* Grid pattern background */}
+                            <div className="absolute inset-0 opacity-5 pointer-events-none bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+                            
+                            <div className="w-full h-32 bg-black/40 border border-white/5 rounded-2xl flex items-center justify-center p-4 relative z-10">
+                                <img 
+                                    src={`/storage/${previewUser.firma}`} 
+                                    alt="Firma Aprobada" 
+                                    className="max-h-full brightness-0 invert opacity-90" 
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col gap-4 items-center mb-8">
+                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest italic border text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Firma Oficial Aprobada
+                            </span>
+                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest italic">
+                                Matrícula: {previewUser.matricula || 'N/A'}
+                            </span>
+                        </div>
+
+                        <div className="flex justify-center">
+                            <button onClick={() => setShowSignaturePreview(false)} className="px-10 py-4 bg-white/5 text-white/60 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all border border-white/5 hover:border-white/10">
+                                Cerrar Visor
                             </button>
                         </div>
                     </div>

@@ -26,8 +26,52 @@ class ProfileController extends Controller
                 'telefono' => $user->telefono,
                 'matricula' => $user->matricula,
                 'rol' => $user->rol,
+                'firma' => $user->firma,
+                'firma_temp' => $user->firma_temp,
+                'firma_status' => $user->firma_status,
             ],
         ]);
+    }
+
+    /**
+     * Update the user's signature (pending review).
+     */
+    public function updateSignature(Request $request)
+    {
+        $request->validate([
+            'signature' => 'required|string',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if ($user->firma_status === 'pending') {
+            return back()->with('error', 'Ya tienes una firma en revisión por el Gestor.');
+        }
+
+        $sigData = $request->signature;
+
+        if (preg_match('/^data:image\/(\w+);base64,/', $sigData, $type)) {
+            $sigData = substr($sigData, strpos($sigData, ',') + 1);
+            $type = strtolower($type[1]);
+        } else {
+            $type = 'png';
+        }
+        $sigData = base64_decode($sigData);
+
+        if ($sigData !== false) {
+            $filename = 'signatures/temp_' . $user->id . '_' . time() . '.' . $type;
+            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $sigData);
+
+            $user->update([
+                'firma_temp' => $filename,
+                'firma_status' => 'pending',
+            ]);
+
+            return back()->with('message', 'Nueva firma propuesta enviada a revisión por el Gestor.');
+        }
+
+        return back()->with('error', 'Formato de firma inválido.');
     }
 
     /**
