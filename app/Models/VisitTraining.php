@@ -16,14 +16,16 @@ class VisitTraining extends Model
         'title',
         'description',
         'duration_minutes',
-        'attendees',
         'materials_delivered',
         'notes',
     ];
 
     protected $casts = [
         'is_adhoc' => 'boolean',
-        'attendees' => 'array', // [{name, position, signature}]
+    ];
+
+    protected $appends = [
+        'attendees',
     ];
 
     public function visit()
@@ -89,14 +91,26 @@ class VisitTraining extends Model
         return $notes;
     }
 
+    public function attendances()
+    {
+        return $this->hasMany(\App\Models\TrainingAttendance::class, 'visit_training_id');
+    }
+
     public function getAttendeesCountAttribute()
     {
-        if ($this->training) {
-            $count = $this->training->attendances()->count();
-            if ($count > 0) {
-                return $count;
-            }
-        }
-        return is_array($this->attendees) ? count($this->attendees) : 0;
+        return $this->attendances()->count();
+    }
+
+    public function getAttendeesAttribute()
+    {
+        return $this->attendances()->get()->map(function($att) {
+            return [
+                'id' => $att->id,
+                'name' => $att->employee_name,
+                'dni' => $att->dni,
+                'signature' => $att->signature,
+                'timestamp' => $att->created_at ? $att->created_at->toDateTimeString() : null,
+            ];
+        })->toArray();
     }
 }

@@ -153,16 +153,13 @@ class TrainingController extends Controller
             'signature' => 'required|string',
         ]);
 
-        $attendees = $visitTraining->attendees ?? [];
-        $attendees[] = [
-            'name' => $request->name,
-            'position' => $request->position,
+        \App\Models\TrainingAttendance::create([
+            'training_id' => $visitTraining->training_id, // NULL if ad-hoc
+            'visit_training_id' => $visitTraining->id,
+            'employee_name' => $request->name,
             'dni' => $request->dni,
             'signature' => $request->signature,
-            'timestamp' => now()->toDateTimeString(),
-        ];
-
-        $visitTraining->update(['attendees' => $attendees]);
+        ]);
 
         return back()->with('message', 'Asistente registrado.');
     }
@@ -184,10 +181,9 @@ class TrainingController extends Controller
      */
     public function removeAttendee(Request $request, VisitTraining $visitTraining, $index)
     {
-        $attendees = $visitTraining->attendees ?? [];
-        if (isset($attendees[$index])) {
-            unset($attendees[$index]);
-            $visitTraining->update(['attendees' => array_values($attendees)]);
+        $attendance = $visitTraining->attendances()->orderBy('id')->skip($index)->first();
+        if ($attendance) {
+            $attendance->delete();
         }
 
         return back()->with('message', 'Asistente eliminado.');

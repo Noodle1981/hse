@@ -31,8 +31,8 @@ class TrainingPDFController extends Controller
             $training->date = $visitTraining->created_at;
             $training->duration = $visitTraining->duration_minutes;
             
-            // Forzar a la vista a usar la columna JSON/Array de asistentes
-            $training->attendances = collect();
+            // Cargar asistentes desde la relación
+            $training->attendances = $visitTraining->attendances()->orderBy('created_at')->get();
         } else {
             // Fallback heredado a plantilla base o inyección directa
             $training = Training::with([
@@ -47,7 +47,7 @@ class TrainingPDFController extends Controller
 
         $pdf = Pdf::loadView('pdf.training-attendance', [
             'training'    => $training,
-            'attendances' => $training instanceof \App\Models\VisitTraining ? [] : $training->attendances()->orderBy('created_at')->get(),
+            'attendances' => $training->attendances()->orderBy('created_at')->get(),
             'branding'    => $branding,
         ]);
 
@@ -78,8 +78,8 @@ class TrainingPDFController extends Controller
             $training->date = $visitTraining->created_at;
             $training->duration = $visitTraining->duration_minutes;
             
-            // Forzar a la vista a usar la columna JSON/Array de asistentes
-            $training->attendances = collect();
+            // Cargar asistentes desde la relación
+            $training->attendances = $visitTraining->attendances()->orderBy('created_at')->get();
         } else {
             // Fallback heredado a plantilla base o inyección directa
             $training = Training::with([
@@ -94,7 +94,7 @@ class TrainingPDFController extends Controller
 
         $pdf = Pdf::loadView('pdf.training-attendance', [
             'training'    => $training,
-            'attendances' => $training instanceof \App\Models\VisitTraining ? [] : $training->attendances()->orderBy('created_at')->get(),
+            'attendances' => $training->attendances()->orderBy('created_at')->get(),
             'branding'    => $branding,
         ]);
 

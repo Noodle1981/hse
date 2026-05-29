@@ -372,7 +372,7 @@ class ContractController extends Controller
 
         // 3. Capacitaciones de Visita
         VisitTraining::whereHas('visit', fn($q) => $q->where('sede_id', $sedeId)->whereBetween('fecha_visita', [$startDate, $endDate]))
-            ->with(['visit.user', 'training'])
+            ->with(['visit.user', 'training', 'attendances'])
             ->get()
             ->each(function($vt) use (&$trainLookup, &$trainChecklistLookup) {
                 $m = $vt->created_at->format('Y-m');
@@ -382,7 +382,7 @@ class ContractController extends Controller
                 $historyItem = [
                     'date' => $vt->created_at->toIso8601String(),
                     'technician_name' => $techName,
-                    'asistentes' => $vt->attendees_count,
+                    'asistentes' => $vt->attendances->count(),
                     'notes' => $vt->notes ? strip_tags($vt->notes) : null
                 ];
 
@@ -397,7 +397,7 @@ class ContractController extends Controller
                     ];
                 }
                 $trainLookup[$title][$m]['count']++;
-                $trainLookup[$title][$m]['attendees'] += $vt->attendees_count;
+                $trainLookup[$title][$m]['attendees'] += $vt->attendances->count();
                 $trainLookup[$title][$m]['history'][] = $historyItem;
 
                 // Por Checklist (vía entrenamiento base)
@@ -412,7 +412,7 @@ class ContractController extends Controller
                         ];
                     }
                     $trainChecklistLookup[$cId][$m]['count']++;
-                    $trainChecklistLookup[$cId][$m]['attendees'] += $vt->attendees_count;
+                    $trainChecklistLookup[$cId][$m]['attendees'] += $vt->attendances->count();
                     $trainChecklistLookup[$cId][$m]['history'][] = $historyItem;
                 }
             });
