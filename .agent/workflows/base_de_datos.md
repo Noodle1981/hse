@@ -18,7 +18,7 @@ El sistema cuenta con las siguientes entidades principales:
   * Tabla `users`: Columnas `firma` (VARCHAR, ruta relativa al archivo permanente `.png` en storage, ej: `signatures/user_1.png`), `firma_temp` (VARCHAR, ruta de firma cargada por técnico a la espera de auditoría), y `firma_status` (VARCHAR, estado de la firma: `'pending'`, `'approved'`, `'rejected'`).
 * **Firma Tipo B (Firma Transaccional / De Visita o Planilla):**
   * Tabla `visit_certificates`: Columnas `responsible_signature` y `instructor_signature` (TEXT, datos serializados o Base64).
-  * Tabla `visit_trainings`: Columna `attendees` (TEXT en formato JSON serializado conteniendo nombres, puestos, DNI y strings de firmas en Base64 de cada asistente).
+  * Tabla `training_attendances`: Relacionada con `visit_trainings` y `trainings`, normalizando nombres, puestos, DNI y firmas en Base64 en filas independientes en lugar de campos JSON.
   * Tabla `dynamic_inspections`: Columnas `supervisor_signature` y `technician_signature` (TEXT).
 
 ---
@@ -775,7 +775,8 @@ El sistema cuenta con las siguientes entidades principales:
 | Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
 |---|---|---|---|---|
 | `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
-| `training_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `training_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
+| `visit_training_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
 | `user_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
 | `employee_name` | `varchar` | Sí ✅ | *ninguno* |  |
 | `dni` | `varchar` | Sí ✅ | *ninguno* |  |
@@ -786,6 +787,7 @@ El sistema cuenta con las siguientes entidades principales:
 ### 🔗 Relaciones (Foreign Keys)
 - `user_id` → vincula con `users`(`id`)
 - `training_id` → vincula con `trainings`(`id`)
+- `visit_training_id` → vincula con `visit_trainings`(`id`)
 
 ---
 
@@ -928,7 +930,6 @@ El sistema cuenta con las siguientes entidades principales:
 | `title` | `varchar` | Sí ✅ | *ninguno* |  |
 | `description` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `duration_minutes` | `INTEGER` | Sí ✅ | *ninguno* |  |
-| `attendees` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `materials_delivered` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `notes` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |

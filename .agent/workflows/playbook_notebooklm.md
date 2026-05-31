@@ -205,9 +205,7 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
     * Entra en estado `'pending'` (`firma_status`) y se guarda en la columna `firma_temp` y ruta física temporal.
     * Requiere la aprobación interactiva de un Gestor mediante la consola `PendingSignaturesList.jsx`.
     * **DomPDF Resolution Constraint:** Para su correcta impresión en certificados PDF, el servidor traduce la ruta relativa de la base de datos a una ruta física absoluta mediante `public_path('storage/' . $firma)`, evitando el renderizado del clásico cuadro cruzado roto de DomPDF.
-  * **Firma Tipo B (Transaccionales / Dinámicas en Caliente):**
-    * Firmas asociadas a eventos específicos (asistencia de operarios a charlas, constancia final del supervisor en la sede al terminar la visita).
-    * Persistidas directamente en formato Base64 o estructuras JSON serializadas dentro de las tablas correspondientes (`visit_trainings.attendees`, `visit_certificates.responsible_signature`, etc.), garantizando ligereza e inmediatez sin necesidad de procesos de auditoría del perfil.
+    * Persistidas directamente en formato Base64 o estructuras serializadas dentro de las tablas correspondientes (`training_attendances.signature`, `visit_certificates.responsible_signature`, etc.), garantizando ligereza e inmediatez sin necesidad de procesos de auditoría del perfil.
 
 * **Flujo Operativo de Aprobación (Tipo A):**
   1. **Captura Temporal:** El Técnico actualiza su firma en `/perfil` mediante un canvas React. El backend decodifica el Base64 y lo almacena como archivo `.png` en un directorio temporal (`storage/app/public/signatures/temp_uid.png`), guardando la ruta en `firma_temp` y marcando `firma_status = 'pending'`. El perfil del técnico queda bloqueado con indicador "Aprobación Pendiente".

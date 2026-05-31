@@ -85,7 +85,7 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 ### 4.5. Módulo de Formación (Capacitaciones)
 * **Registro Técnico:** Planificación y ejecución de capacitaciones grupales o individuales en campo.
 * **Firma Digital Integradora:** Registro directo en pantalla de los asistentes y capacitadores utilizando un panel digital (`signature_pad` integrado en React).
-* **Asistencia e Identificación Completa (DNI):** El formulario de asistencia incluye Nombre, Puesto y **DNI / Identificación obligatorio**, persistiendo los asistentes y sus firmas digitales serializados en la base de datos (columna `attendees` de la tabla `visit_trainings`). Las tarjetas en la consola reflejan de forma clara el DNI y rol del participante (ej. `OPERARIO • DNI: 95827361`).
+* **Asistencia e Identificación Completa (DNI):** El formulario de asistencia incluye Nombre, Puesto y **DNI / Identificación obligatorio**, persistiendo los asistentes y sus firmas digitales en filas normalizadas en la base de datos (tabla `training_attendances` vinculada a `visit_trainings`). Las tarjetas en la consola reflejan de forma clara el DNI y rol del participante (ej. `OPERARIO • DNI: 95827361`).
 * **Bitácora y Editor de Notas Técnica en Caliente:** Permite al técnico editar y guardar en tiempo real el temario desarrollado (`description`) y observaciones de campo (`notes`) directamente sobre columnas estructuradas e independientes en la tabla de base de datos `visit_trainings` de la visita en progreso.
 * **Finalización de Charla y Modal Premium:** La sesión se da por finalizada mediante un comando táctil en cabecera que despliega un modal React de diseño premium con fondos desenfocados en blur e íconos en 3D, actualizando el estado de la capacitación a `'completed'` para sincronizar de inmediato su aparición en la consola cronológica del HUD.
 * **Planificación de Capacitación Anual Avanzada:** Permite al Gestor registrar y editar al momento de crear o editar las actividades en el Plan Anual (`AnnualPlan`):
@@ -115,7 +115,7 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
     * **Auditoría Obligatoria:** No se aplica inmediatamente. Pasa a estado pendiente (`firma_status = 'pending'`) y se guarda temporalmente en `firma_temp`.
   * **Firma Tipo B (Firma Transaccional / De Visita o Planilla):**
     * **Definición:** Firma única, temporal y dinámica capturada en caliente para certificar un evento específico (asistencia a capacitación, cierre de checklist, o constancia de visita).
-    * **Almacenamiento:** Mapeadas como Base64 serializadas o strings codificados en caliente asociados de forma directa a registros temporales de la base de datos (como la firma del cliente al cerrar una constancia, o las firmas de los operarios en la tabla `visit_trainings.attendees`).
+    * **Almacenamiento:** Mapeadas como Base64 serializadas o strings codificados en caliente asociados de forma directa a registros de la base de datos (como la firma del cliente al cerrar una constancia, o las firmas de los operarios en la tabla `training_attendances`).
 
 * **Política de Firma Pendiente (Auditoría de Identidad):**
   * Cuando un Técnico actualiza su firma digital desde su panel de Perfil (`/perfil`), esta entra en estado de aprobación pendiente (`firma_status = 'pending'`) y la firma propuesta se almacena en la ruta temporal `firma_temp`.

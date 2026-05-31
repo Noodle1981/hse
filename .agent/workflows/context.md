@@ -108,7 +108,8 @@ ep-back/
 | `sedes` | Plantas físicas y control de jornada | `id`, `empresa_id`, `nombre_sede`, `dias_operativos` (JSON), `hora_apertura`, `hora_cierre`, `es_roster_24_7`, `radio_tolerancia_metros` |
 | `visit_certificates` | Constancias de visita, geolocalización y auditoría horaria | `id`, `sede_id`, `user_id`, `start_time`, `end_time`, `horas_gabinete_estimadas`, `checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng`, `gps_verified` |
 | `trainings` | Sesiones e instancias de capacitación | `id`, `empresa_id`, `sede_id`, `dynamic_checklist_id`, `title`, `description`, `type` (presencial/virtual), `date`, `duration`, `status` |
-| `visit_trainings` | Bitácora y firmas de capacitación en vivo en la visita | `id`, `visit_certificate_id`, `training_id`, `title`, `description`, `notes`, `duration_minutes`, `status`, `attendees` (JSON con DNI y Firmas) |
+| `training_attendances` | Firmas y asistencia individual de alumnos normalizada | `id`, `training_id`, `visit_training_id`, `user_id`, `employee_name`, `dni`, `signature` |
+| `visit_trainings` | Bitácora y capacitación en vivo en la visita | `id`, `visit_certificate_id`, `training_id`, `title`, `description`, `notes`, `duration_minutes`, `status` |
 | `annual_plans` | Planificación anual del contrato de HyS por sede | `id`, `sede_id`, `category`, `activity_name`, `checklist_id`, `duration_minutes`, `modality`, `multi_trainer`, `scheduled_months` (JSON) |
 
 ---
@@ -121,7 +122,7 @@ ep-back/
 - ✅ **Inmutabilidad y Blindaje de Fechas (SRE Audit):** Al finalizar una inspección, es obligatorio ignorar y sanitizar cualquier campo de fecha/hora enviado por el frontend (`completed_at`, `date`, `time`, `timestamp`). La persistencia debe forzar estrictamente `now()` en el servidor y disparar alertas detalladas (`Log::warning()`) ante cualquier discrepancia para evitar fraude de horarios.
 - ✅ **Arquitectura y Ciclo de Firmas Digitales:**
   - **Firma Tipo A (Perfil/Permanente):** Trazada en canvas, decodificada de Base64 a archivo físico `.png` en storage, a la espera de auditoría visual en `PendingSignaturesList.jsx` por parte del Gestor.
-  - **Firma Tipo B (Transaccional/Hojas de Firma):** Guardadas como Base64 serializados o strings directamente sobre planillas específicas en DB (e.g. `visit_trainings.attendees`).
+  - **Firma Tipo B (Transaccional/Hojas de Firma):** Guardadas como Base64 serializados o strings directamente sobre planillas específicas en DB (e.g. `training_attendances`).
   - **DomPDF Resolution Constraint:** Se garantiza que al exportar las plantillas o reportes PDF en Laravel, el motor DomPDF resuelva las rutas físicas absolutas locales (`public_path('storage/' . $path)`) evitando fallas de visualización (como marcos cruzados o placeholders vacíos).
 - ✅ Usar Type Hints y Return Types estrictos.
 - ✅ Form Requests independientes para la validación de peticiones.
