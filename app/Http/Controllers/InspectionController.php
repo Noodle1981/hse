@@ -484,7 +484,7 @@ class InspectionController extends Controller
      */
     public function show(DynamicInspection $inspection)
     {
-        $inspection->load(['checklist.questions', 'user', 'sede.empresa', 'answers.question']);
+        $inspection->load(['checklist.sections.questions', 'checklist.questions', 'user', 'sede.empresa', 'answers.question']);
         
         /** @var \App\Models\User $user */
         $user = Auth::user();

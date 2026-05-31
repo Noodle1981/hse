@@ -88,6 +88,48 @@ export default function Show({ inspection }) {
                                     </div>
                                 </div>
                             ))}
+
+                            {/* PREGUNTAS DIRECTAS (SIN SECCIÓN) */}
+                            {checklist?.questions?.filter(q => !q.section_id).length > 0 && (
+                                <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[3rem] border border-white/5 overflow-hidden shadow-2xl animate-fade-in-up">
+                                    <div className="px-10 py-6 border-b border-white/5 bg-white/5">
+                                        <h3 className="text-sm font-black text-white italic uppercase tracking-[0.3em] flex items-center gap-3">
+                                            <span className="w-1.5 h-6 bg-emerald-500 rounded-full"></span>
+                                            Evaluaciones Directas / Generales
+                                        </h3>
+                                    </div>
+                                    <div className="p-10 space-y-8">
+                                        {checklist.questions.filter(q => !q.section_id).map((q, qi) => (
+                                            <div key={q.id} className="group border-b border-white/5 pb-8 last:border-0 last:pb-0">
+                                                <div className="flex justify-between items-start gap-10">
+                                                    <div className="space-y-4 flex-1">
+                                                        <div className="flex items-start gap-3">
+                                                            <span className="text-[10px] font-black text-white/20 italic mt-1">G.{qi+1}</span>
+                                                            <label className="text-sm font-black text-white italic uppercase tracking-tight">{q.label}</label>
+                                                        </div>
+                                                        <div className="pl-6 text-xl font-black text-emerald-400 italic uppercase">
+                                                            {getAnswerValue(q.id)}
+                                                        </div>
+                                                    </div>
+                                                    {/* Badge de tipo */}
+                                                    <div className="text-[8px] font-black text-white/10 uppercase tracking-widest border border-white/5 px-2 py-1 rounded-lg italic">
+                                                        {q.type}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ESTADO SIN PREGUNTAS NI RESPUESTAS (EMPTY STATE PREMIUM) */}
+                            {(!checklist?.sections || checklist.sections.length === 0) && (!checklist?.questions || checklist.questions.filter(q => !q.section_id).length === 0) && (
+                                <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[3rem] border border-white/5 p-16 text-center space-y-4 shadow-2xl animate-fade-in-up">
+                                    <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 rounded-[2.5rem] flex items-center justify-center text-3xl mx-auto italic shadow-lg">📋</div>
+                                    <h4 className="text-lg font-black uppercase italic tracking-wider">Sin Cuestionarios Registrados</h4>
+                                    <p className="text-xs text-white/40 uppercase font-black tracking-widest leading-relaxed">Este protocolo no contiene secciones ni preguntas cargadas en la base de datos.</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* COLUMNA DERECHA: METADATOS Y FIRMAS */}
