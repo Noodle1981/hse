@@ -178,20 +178,9 @@ class InspectionController extends Controller
                 }
             }
 
-            // Handle technician_signature
-            if ($request->hasFile('technician_signature')) {
-                $technicianSignaturePath = $request->file('technician_signature')->store('signatures', 'public');
-            } elseif ($request->filled('technician_signature')) {
-                $data = $request->input('technician_signature');
-                if (\Illuminate\Support\Str::startsWith($data, 'data:image')) {
-                    $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
-                    $fileName = 'signatures/' . \Illuminate\Support\Str::random(40) . '.png';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
-                    $technicianSignaturePath = $fileName;
-                } else {
-                    $technicianSignaturePath = $data;
-                }
-            }
+            // Control de Seguridad SRE: Ignorar cualquier payload enviado desde el cliente.
+            // La firma del técnico certificante se asocia de forma inmutable y directa desde el registro oficial en la DB.
+            $technicianSignaturePath = Auth::user()->firma;
 
             $inspection->update([
                 'status' => 'completed',
