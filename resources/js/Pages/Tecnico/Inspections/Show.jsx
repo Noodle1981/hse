@@ -7,6 +7,14 @@ export default function Show({ inspection }) {
     const checklist = inspection.checklist;
     const answers = inspection.answers || [];
 
+    const getSignatureUrl = (path) => {
+        if (!path) return '';
+        if (path.startsWith('data:image') || path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+        return `/storage/${path}`;
+    };
+
     const getAnswerValue = (qId) => {
         const ans = answers.find(a => a.dynamic_question_id === qId);
         if (!ans) return 'N/A';
@@ -106,7 +114,7 @@ export default function Show({ inspection }) {
                                                 Firma Responsable: {inspection.supervisor_name}
                                             </div>
                                             <div className="bg-white/5 p-4 rounded-xl border border-white/10 h-32 flex items-center justify-center overflow-hidden">
-                                                <img src={inspection.supervisor_signature} alt="Firma Responsable" className="max-h-full brightness-0 invert opacity-60" />
+                                                <img src={getSignatureUrl(inspection.supervisor_signature)} alt="Firma Responsable" className="max-h-full brightness-0 invert opacity-60" />
                                             </div>
                                         </div>
 
@@ -116,7 +124,7 @@ export default function Show({ inspection }) {
                                                 Tu Firma: {inspection.user?.name}
                                             </div>
                                             <div className="bg-white/5 p-4 rounded-xl border border-white/10 h-32 flex items-center justify-center overflow-hidden">
-                                                <img src={inspection.technician_signature} alt="Firma Técnico" className="max-h-full brightness-0 invert opacity-60" />
+                                                <img src={getSignatureUrl(inspection.technician_signature)} alt="Firma Técnico" className="max-h-full brightness-0 invert opacity-60" />
                                             </div>
                                         </div>
                                     </div>
