@@ -18,6 +18,7 @@ function toArray(val) {
 export default function Wizard({ checklist, assignment = {}, inspection = {}, visitId = null, initialAnswers = {}, isEmulation = false }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
+    console.log("DEBUG - User in Wizard props:", user);
     const [currentStep, setCurrentStep] = useState(0);
     const [useStoredSignature, setUseStoredSignature] = useState(!!user?.signature);
     const sections = checklist.sections || [];
