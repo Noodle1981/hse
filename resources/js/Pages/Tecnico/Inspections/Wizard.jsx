@@ -344,7 +344,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                                         <div className="space-y-6">
                                             <div className="group">
-                                                <label htmlFor="supervisor_name" className="block text-[10px] font-black text-orange-400 uppercase tracking-[0.3em] italic mb-3 ml-2">Responsable en Sede</label>
+                                                <label htmlFor="supervisor_name" className="block text-[10px] font-black text-orange-400 uppercase tracking-[0.3em] italic mb-3 ml-2">Operario / Personal chequeado o revisado</label>
                                                 <input id="supervisor_name" name="supervisor_name" type="text" value={form.data.supervisor_name} onChange={e => form.setData('supervisor_name', e.target.value)} required className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500 transition-all uppercase"/>
                                             </div>
                                             <div className="space-y-4">
