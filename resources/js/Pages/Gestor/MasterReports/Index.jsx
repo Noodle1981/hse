@@ -44,7 +44,7 @@ export default function Index({ auth, reports, filters }) {
                     {/* HUD HEADER: ACCIONES */}
                     <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-8">
                         {/* Solo Gestores pueden solicitar informes fuera de contrato */}
-                        {auth.user.rol?.toLowerCase() !== 'tecnico' && auth.user.rol?.toLowerCase() !== 'técnico' && (
+                        {!auth.user.is_technician && (
                             <Link
                                 href={route('master-reports.create')}
                                 className="group relative h-16 px-10 bg-ep-primary text-white text-xs font-black uppercase tracking-[0.2em] italic rounded-2xl shadow-2xl shadow-ep-primary/20 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 overflow-hidden"
@@ -113,7 +113,7 @@ export default function Index({ auth, reports, filters }) {
                                     </div>
 
                                     {/* ALERTA DE REVISIÓN PARA TÉCNICOS */}
-                                    {(auth.user.rol?.toLowerCase() === 'tecnico' || auth.user.rol?.toLowerCase() === 'técnico') && report.estado === 'en_redaccion' && report.observacion_revision && (
+                                    {auth.user.is_technician && report.estado === 'en_redaccion' && report.observacion_revision && (
                                         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-4 animate-pulse mt-4">
                                             <div className="p-2 bg-red-500/20 rounded-lg text-red-500">
                                                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -150,7 +150,7 @@ export default function Index({ auth, reports, filters }) {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3 mt-8">
-                                    {(auth.user.rol?.toLowerCase() === 'tecnico' || auth.user.rol?.toLowerCase() === 'técnico') ? (
+                                    {auth.user.is_technician ? (
                                         report.estado !== 'finalizado' ? (
                                             <Link
                                                 href={route('master-reports.edit', report.id)}

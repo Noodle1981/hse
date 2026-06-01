@@ -1,13 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 
 export default function Wizard({ auth, report, periodData }) {
-    const canvasRef = useRef(null);
-    const [isDrawing, setIsDrawing] = useState(false);
-    const [hasSignature, setHasSignature] = useState(false);
-
-    const { data, setData, put, processing, errors } = useForm({
+    const { data, setData, put, processing, errors, transform } = useForm({
         resumen_ejecutivo: report.resumen_ejecutivo || '',
         observaciones_visitas: report.observaciones_visitas || '',
         observaciones_checklists: report.observaciones_checklists || '',
@@ -15,72 +11,38 @@ export default function Wizard({ auth, report, periodData }) {
         observaciones_hallazgos_incidentes: report.observaciones_hallazgos_incidentes || '',
         observaciones_matriz: report.observaciones_matriz || '',
         datos_anexo: report.datos_anexo || {},
-        finalize: false,
+        observacion_revision: report.observacion_revision || '',
+        action: '',
     });
 
+    const isReadOnly = !auth.user.is_technician || ['finalizado', 'aprobado'].includes(report.estado);
+
     const submit = (finalize = false) => {
-        data.finalize = finalize;
+        transform((data) => ({
+            ...data,
+            finalize: finalize,
+        }));
         put(route('master-reports.update', report.id));
     };
 
-    // Canvas Logic for Signature
-    useEffect(() => {
-        if (canvasRef.current) {
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext('2d');
-            const rect = canvas.getBoundingClientRect();
-            canvas.width = rect.width;
-            canvas.height = rect.height;
-            ctx.strokeStyle = '#F69239'; // Primary Orange
-            ctx.lineWidth = 3;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            
-            if (report.datos_anexo?.firma_tecnico) {
-                const img = new Image();
-                img.onload = () => ctx.drawImage(img, 0, 0);
-                img.src = report.datos_anexo.firma_tecnico;
-                setHasSignature(true);
-            }
+    const handleApprove = () => {
+        transform((data) => ({
+            ...data,
+            action: 'approve',
+        }));
+        put(route('master-reports.update', report.id));
+    };
+
+    const handleObserve = () => {
+        if (!data.observacion_revision || !data.observacion_revision.trim()) {
+            alert('Por favor, redacte una observación sobre qué debe revisar o corregir el técnico antes de devolver el informe.');
+            return;
         }
-    }, [report.id]);
-
-    const startDrawing = (e) => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-        const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        setIsDrawing(true);
-    };
-
-    const draw = (e) => {
-        if (!isDrawing) return;
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
-        const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
-        ctx.lineTo(x, y);
-        ctx.stroke();
-    };
-
-    const stopDrawing = () => {
-        if (!isDrawing) return;
-        setIsDrawing(false);
-        setHasSignature(true);
-        const signatureBase64 = canvasRef.current.toDataURL('image/png');
-        setData('datos_anexo', { ...data.datos_anexo, firma_tecnico: signatureBase64 });
-    };
-
-    const clearSignature = () => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setHasSignature(false);
-        setData('datos_anexo', { ...data.datos_anexo, firma_tecnico: null });
+        transform((data) => ({
+            ...data,
+            action: 'observe',
+        }));
+        put(route('master-reports.update', report.id));
     };
 
     const StatusBadge = ({ status }) => {
@@ -137,11 +99,49 @@ export default function Wizard({ auth, report, periodData }) {
                                 </div>
                             </div>
                             <div className="w-px h-10 bg-white/10 mx-2"></div>
-                            <button onClick={() => submit(false)} disabled={processing} className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest italic rounded-[1.2rem] border border-white/10 transition-all shadow-xl">
-                                {processing ? 'GUARDANDO...' : 'GUARDAR AVANCE'}
-                            </button>
+                            {!isReadOnly ? (
+                                <button onClick={() => submit(false)} disabled={processing} className="px-8 py-4 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest italic rounded-[1.2rem] border border-white/10 transition-all shadow-xl">
+                                    {processing ? 'GUARDANDO...' : 'GUARDAR AVANCE'}
+                                </button>
+                            ) : (
+                                <span className={`px-5 py-3 rounded-xl text-[9px] font-black uppercase tracking-[0.15em] italic border ${
+                                    report.estado === 'aprobado' 
+                                        ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                        : report.estado === 'finalizado'
+                                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                            : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                                }`}>
+                                    {report.estado === 'aprobado' 
+                                        ? 'APROBADO' 
+                                        : report.estado === 'finalizado'
+                                            ? 'EN REVISIÓN'
+                                            : 'EN REDACCIÓN'}
+                                </span>
+                            )}
                         </div>
                     </div>
+
+                    {/* ALERTA DE REVISIÓN PARA EL TÉCNICO */}
+                    {report.observacion_revision && (
+                        <div className="bg-red-500/10 border-2 border-red-500/20 backdrop-blur-md p-10 sm:p-14 rounded-[3.5rem] shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-red-500/5 via-transparent to-transparent pointer-events-none"></div>
+                            <div className="flex items-start gap-8">
+                                <div className="w-16 h-16 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center justify-center text-red-500 text-3xl font-black italic flex-shrink-0">⚠️</div>
+                                <div className="flex-grow">
+                                    <h3 className="text-xl font-black text-white uppercase italic tracking-tight mb-2">Correcciones Solicitadas por el Gestor</h3>
+                                    <p className="text-[10px] text-red-100/40 uppercase tracking-[0.2em] font-black italic mb-4">Notas de Auditoría Interna</p>
+                                    <div className="bg-black/40 rounded-[2rem] p-8 border border-white/5 shadow-inner">
+                                        <p className="text-sm text-indigo-100/70 italic leading-relaxed font-semibold">
+                                            "{report.observacion_revision}"
+                                        </p>
+                                    </div>
+                                    <p className="text-[10px] text-white/30 font-semibold italic mt-4 uppercase tracking-widest leading-relaxed">
+                                        Por favor, revise las secciones comentadas, aplique las correcciones necesarias y vuelva a enviar el informe a través del botón "Generar Informe Final" al final de la página.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* SECCIÓN 0: PLAN ANUAL TÁCTICO */}
                     <div className="bg-ep-dark/40 backdrop-blur-md p-10 sm:p-14 rounded-[3.5rem] border border-white/5 shadow-2xl relative overflow-hidden group">
@@ -225,7 +225,8 @@ export default function Wizard({ auth, report, periodData }) {
                                 value={data.observaciones_visitas}
                                 onChange={e => setData('observaciones_visitas', e.target.value)}
                                 rows={5}
-                                className="w-full bg-black/60 border-white/10 rounded-[2.5rem] px-10 py-8 text-white text-sm italic font-medium focus:ring-2 focus:ring-ep-primary transition-all placeholder-white/5 outline-none border"
+                                readOnly={isReadOnly}
+                                className="w-full bg-black/60 border-white/10 rounded-[2.5rem] px-10 py-8 text-white text-sm italic font-medium focus:ring-2 focus:ring-ep-primary transition-all placeholder-white/5 outline-none border read-only:opacity-60 read-only:cursor-not-allowed"
                                 placeholder="..."
                             />
                         </div>
@@ -264,7 +265,8 @@ export default function Wizard({ auth, report, periodData }) {
                                 value={data.observaciones_checklists}
                                 onChange={e => setData('observaciones_checklists', e.target.value)}
                                 rows={4}
-                                className="w-full bg-black/60 border-white/10 rounded-[2.5rem] px-10 py-8 text-white text-sm italic font-medium focus:ring-2 focus:ring-emerald-500/30 transition-all placeholder-white/5 outline-none border"
+                                readOnly={isReadOnly}
+                                className="w-full bg-black/60 border-white/10 rounded-[2.5rem] px-10 py-8 text-white text-sm italic font-medium focus:ring-2 focus:ring-emerald-500/30 transition-all placeholder-white/5 outline-none border read-only:opacity-60 read-only:cursor-not-allowed"
                                 placeholder="..."
                             />
                         </div>
@@ -319,7 +321,8 @@ export default function Wizard({ auth, report, periodData }) {
                                 value={data.observaciones_hallazgos_incidentes}
                                 onChange={e => setData('observaciones_hallazgos_incidentes', e.target.value)}
                                 rows={4}
-                                className="w-full bg-black/60 border-white/10 rounded-[2.5rem] px-10 py-8 text-white text-sm italic font-medium focus:ring-2 focus:ring-red-500/30 transition-all placeholder-white/5 outline-none border"
+                                readOnly={isReadOnly}
+                                className="w-full bg-black/60 border-white/10 rounded-[2.5rem] px-10 py-8 text-white text-sm italic font-medium focus:ring-2 focus:ring-red-500/30 transition-all placeholder-white/5 outline-none border read-only:opacity-60 read-only:cursor-not-allowed"
                                 placeholder="..."
                             />
                         </div>
@@ -339,7 +342,8 @@ export default function Wizard({ auth, report, periodData }) {
                             value={data.resumen_ejecutivo}
                             onChange={e => setData('resumen_ejecutivo', e.target.value)}
                             rows={10}
-                            className="w-full bg-black/60 border-2 border-white/5 rounded-[3.5rem] text-white placeholder-white/5 shadow-inner focus:ring-4 focus:ring-ep-primary/30 text-xl font-bold p-12 italic leading-relaxed transition-all relative z-10 outline-none scrollbar-hide"
+                            readOnly={isReadOnly}
+                            className="w-full bg-black/60 border-2 border-white/5 rounded-[3.5rem] text-white placeholder-white/5 shadow-inner focus:ring-4 focus:ring-ep-primary/30 text-xl font-bold p-12 italic leading-relaxed transition-all relative z-10 outline-none scrollbar-hide read-only:opacity-60 read-only:cursor-not-allowed"
                             placeholder="Redacte aquí la visión técnica consolidada del periodo auditado..."
                         />
                          {errors.resumen_ejecutivo && <div className="mt-6 px-10 text-red-500 text-xs font-black uppercase italic tracking-[0.2em] animate-pulse">{errors.resumen_ejecutivo}</div>}
@@ -355,67 +359,188 @@ export default function Wizard({ auth, report, periodData }) {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-                            <div>
-                                <p className="text-[11px] text-white/30 italic font-medium leading-relaxed uppercase tracking-[0.2em] mb-10">
-                                    Utilice el panel táctico derecho para registrar su rúbrica digital. Este trazo será incrustado en el documento PDF final como evidencia de validación técnica autorizada.
+                        {(() => {
+                            const tecnicoFirma = report.tecnico?.firma || (auth.user.is_technician ? auth.user.firma : null);
+                            const tecnicoNombre = report.tecnico 
+                                ? `${report.tecnico.nombres} ${report.tecnico.apellidos || ''}` 
+                                : `${auth.user.nombres} ${auth.user.apellidos || ''}`;
+
+                            if (tecnicoFirma) {
+                                return (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                                        <div>
+                                            <div className="inline-flex items-center gap-3 px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[9px] font-black uppercase tracking-widest rounded-xl mb-6">
+                                                <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
+                                                Firma Autorizada Vinculada
+                                            </div>
+                                            <h4 className="text-xl font-bold text-white mb-3">Certificación de Perfil Activa</h4>
+                                            <p className="text-[11px] text-indigo-100/40 italic font-medium leading-relaxed uppercase tracking-[0.2em] mb-4">
+                                                El informe maestro será validado utilizando la rúbrica registrada en el perfil del técnico certificante. No es necesario realizar trazos manuales; el sistema garantiza la inalterabilidad y autenticidad del documento final.
+                                            </p>
+                                            <div className="text-xs font-black text-white uppercase italic tracking-tighter">
+                                                TÉCNICO: <span className="text-ep-primary">{tecnicoNombre}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div className="relative">
+                                            <div className="bg-black/60 shadow-[inset_0_0_60px_rgba(0,0,0,0.9)] border-2 border-white/5 rounded-[4rem] p-10 flex flex-col justify-center items-center relative overflow-hidden group/sig">
+                                                <div className="absolute inset-0 bg-gradient-to-tr from-ep-primary/5 via-transparent to-transparent pointer-events-none opacity-50"></div>
+                                                <span className="block text-[8px] font-black text-indigo-100/20 uppercase tracking-[0.5em] mb-6 italic">RÚBRICA DIGITAL EN PERFIL</span>
+                                                <div className="p-6 bg-white/5 border border-white/10 rounded-3xl w-full max-w-[280px]">
+                                                    <img src={`/storage/${tecnicoFirma}`} className="h-28 object-contain brightness-0 invert opacity-90 mx-auto" />
+                                                </div>
+                                                <div className="mt-6 text-[8px] text-white/30 font-black uppercase tracking-[0.6em] italic animate-pulse">Sello Verificado SRE</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <div className="bg-red-500/5 border border-red-500/20 rounded-[2.5rem] p-10 sm:p-14">
+                                        <div className="flex flex-col md:flex-row gap-8 items-center">
+                                            <div className="w-16 h-16 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-500 text-3xl font-black italic">!</div>
+                                            <div className="flex-grow">
+                                                <h4 className="text-xl font-bold text-white mb-2 uppercase italic tracking-tight">Firma Digital Requerida</h4>
+                                                <p className="text-sm text-indigo-100/50 italic leading-relaxed mb-4">
+                                                    El técnico certificante <strong className="text-white font-black">{tecnicoNombre}</strong> no cuenta con una firma digital registrada en su perfil. Para cumplir con las políticas de auditoría del Playbook de XamaSafe, todos los informes maestros deben validarse con la rúbrica de perfil.
+                                                </p>
+                                                <div className="flex flex-wrap items-center gap-6 mt-6">
+                                                    <span className="px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-400 text-[9px] font-black uppercase tracking-widest rounded-lg">
+                                                        ESTADO: BLOQUEADO
+                                                    </span>
+                                                    {auth.user.is_technician && (
+                                                        <Link href="/profile" className="px-6 py-2.5 bg-red-600/20 border border-red-500/30 hover:bg-red-600 text-white text-[10px] font-black uppercase tracking-widest italic rounded-xl transition-all">
+                                                            Ir a mi Perfil para Cargar Firma
+                                                        </Link>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                        })()}
+                    </div>
+
+                    {/* SECCIÓN 6: EVALUACIÓN DEL GESTOR */}
+                    {!auth.user.is_technician && report.estado === 'finalizado' && (
+                        <div className="bg-[#141421] p-10 sm:p-14 rounded-[4rem] shadow-[0_0_80px_rgba(0,0,0,0.6)] border-t-8 border-indigo-500 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none opacity-50"></div>
+                            <div className="flex items-center mb-12 pb-8 border-b border-white/10 relative z-10">
+                                <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-black text-3xl shadow-[0_0_30px_rgba(99,102,241,0.4)] rotate-3 italic">6</div>
+                                <div className="ml-8">
+                                    <h3 className="text-3xl font-black text-white uppercase italic tracking-tight">Evaluación del Gestor</h3>
+                                    <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mt-2 italic">Control de Calidad y Retroalimentación Operativa</p>
+                                </div>
+                            </div>
+                            <div className="space-y-6 relative z-10">
+                                <p className="text-[11px] text-indigo-100/40 uppercase tracking-[0.2em] font-black italic px-4">
+                                    Si decide observar el informe, detalle a continuación los puntos a corregir por el especialista técnico. Si aprueba el informe, este comentario se limpiará automáticamente.
                                 </p>
-                                {auth.user.firma && (
-                                     <div className="p-10 bg-black/40 rounded-[2.5rem] border border-white/5 inline-block opacity-20 hover:opacity-100 transition-opacity duration-700">
-                                        <span className="block text-[8px] font-black text-indigo-100/20 uppercase tracking-[0.5em] mb-6 italic text-center">Firma de Perfil Autorizada</span>
-                                        <img src={`/storage/${auth.user.firma}`} className="h-28 brightness-0 invert opacity-60 mx-auto" />
+                                <textarea id="field_gestor_obs" name="field_gestor_obs" 
+                                    value={data.observacion_revision}
+                                    onChange={e => setData('observacion_revision', e.target.value)}
+                                    rows={6}
+                                    className="w-full bg-black/60 border border-white/10 rounded-[2.5rem] text-white placeholder-white/10 shadow-inner focus:ring-2 focus:ring-indigo-500 transition-all text-sm font-semibold p-8 italic leading-relaxed outline-none"
+                                    placeholder="Redacte aquí las observaciones técnicas, correcciones solicitadas o comentarios de aprobación..."
+                                />
+                                {errors.observacion_revision && (
+                                    <div className="mt-4 px-6 text-red-500 text-xs font-black uppercase italic tracking-[0.2em] animate-pulse">
+                                        {errors.observacion_revision}
                                     </div>
                                 )}
                             </div>
-                            
-                            <div className="relative group/canvas">
-                                <div className="bg-black shadow-[inset_0_0_60px_rgba(0,0,0,0.9)] border-2 border-dashed border-white/10 rounded-[4rem] overflow-hidden group-focus-within/canvas:border-ep-primary/50 transition-all duration-700">
-                                    <canvas 
-                                        ref={canvasRef}
-                                        onMouseDown={startDrawing}
-                                        onMouseMove={draw}
-                                        onMouseUp={stopDrawing}
-                                        onMouseLeave={stopDrawing}
-                                        onTouchStart={startDrawing}
-                                        onTouchMove={draw}
-                                        onTouchEnd={stopDrawing}
-                                        className="w-full h-64 cursor-crosshair"
-                                    />
-                                    <button 
-                                        type="button" 
-                                        onClick={clearSignature}
-                                        className="absolute top-10 right-10 p-4 bg-red-600/10 border border-red-500/30 rounded-2xl text-red-500 hover:bg-red-600 hover:text-white transition-all backdrop-blur-md shadow-2xl"
-                                        title="Limpiar panel"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"/></svg>
-                                    </button>
-                                </div>
-                                <div className="absolute inset-x-0 bottom-6 flex justify-center pointer-events-none">
-                                    <p className="text-[9px] text-white/5 font-black uppercase tracking-[0.6em] italic animate-pulse">Panel Táctico Activo</p>
-                                </div>
-                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* BOTONERA DE ACCIÓN GLOBAL */}
                     <div className="fixed bottom-10 left-0 right-0 z-50 px-8 pointer-events-none">
                         <div className="max-w-7xl mx-auto flex justify-center pointer-events-auto">
                             <div className="bg-ep-dark/80 backdrop-blur-3xl p-5 rounded-[2.8rem] border border-white/10 shadow-[0_-30px_60px_rgba(0,0,0,0.7)] flex items-center gap-8">
-                                <button 
-                                    onClick={() => submit(false)}
-                                    disabled={processing}
-                                    className="px-12 py-5 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-[0.2em] italic rounded-2xl border border-white/10 transition-all shadow-xl"
-                                >
-                                    GUARDAR BORRADOR
-                                </button>
-                                <button 
-                                    onClick={() => submit(true)}
-                                    disabled={processing}
-                                    className="h-20 px-16 bg-ep-primary text-white text-sm font-black uppercase tracking-[0.3em] italic rounded-3xl shadow-[0_0_40px_rgba(246,146,57,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-5 disabled:opacity-50 disabled:grayscale"
-                                >
-                                    <svg className="w-8 h-8 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    GENERAR INFORME FINAL
-                                </button>
+                                {(() => {
+                                    if (report.estado === 'aprobado') {
+                                        return (
+                                            <div className="flex items-center gap-4 px-10 py-5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                                                <div className="w-3 h-3 bg-emerald-400 rounded-full animate-ping"></div>
+                                                <span className="text-[11px] font-black text-emerald-400 uppercase tracking-[0.3em] italic">
+                                                    INFORME APROBADO Y REGISTRADO
+                                                </span>
+                                            </div>
+                                        );
+                                    }
+
+                                    if (!auth.user.is_technician) {
+                                        // GESTOR / ADMIN
+                                        if (report.estado === 'finalizado') {
+                                            return (
+                                                <div className="flex items-center gap-6">
+                                                    <button 
+                                                        onClick={handleObserve}
+                                                        disabled={processing}
+                                                        className="px-10 py-5 bg-red-600/10 hover:bg-red-600/20 text-red-400 text-[11px] font-black uppercase tracking-[0.2em] italic rounded-2xl border border-red-500/30 transition-all shadow-xl hover:scale-105 active:scale-95 animate-pulse"
+                                                    >
+                                                        OBSERVAR & PEDIR REVISIÓN
+                                                    </button>
+                                                    <button 
+                                                        onClick={handleApprove}
+                                                        disabled={processing}
+                                                        className="h-20 px-16 bg-emerald-500 text-white text-sm font-black uppercase tracking-[0.3em] italic rounded-3xl shadow-[0_0_40px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-5 disabled:opacity-50 disabled:grayscale"
+                                                    >
+                                                        <svg className="w-8 h-8 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                        </svg>
+                                                        APROBAR INFORME MAESTRO
+                                                    </button>
+                                                </div>
+                                            );
+                                        }
+
+                                        // Muted read-only for Gestor if state is NOT finalizado (e.g. en_redaccion or solicitado)
+                                        return (
+                                            <div className="flex items-center gap-4 px-10 py-5 bg-indigo-500/10 border border-indigo-500/30 rounded-2xl">
+                                                <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-pulse"></div>
+                                                <span className="text-[11px] font-black text-indigo-400 uppercase tracking-[0.3em] italic">
+                                                    MODO LECTURA ACTIVO: EN REDACCIÓN
+                                                </span>
+                                            </div>
+                                        );
+                                    } else {
+                                        // TÉCNICO
+                                        if (['en_redaccion', 'solicitado'].includes(report.estado)) {
+                                            return (
+                                                <div className="flex items-center gap-6">
+                                                    <button 
+                                                        onClick={() => submit(false)}
+                                                        disabled={processing}
+                                                        className="px-12 py-5 bg-white/5 hover:bg-white/10 text-white text-[11px] font-black uppercase tracking-[0.2em] italic rounded-2xl border border-white/10 transition-all shadow-xl hover:scale-105 active:scale-95"
+                                                    >
+                                                        {processing ? 'GUARDANDO...' : 'GUARDAR BORRADOR'}
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => submit(true)}
+                                                        disabled={processing}
+                                                        className="h-20 px-16 bg-ep-primary text-white text-sm font-black uppercase tracking-[0.3em] italic rounded-3xl shadow-[0_0_40px_rgba(246,146,57,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center gap-5 disabled:opacity-50 disabled:grayscale"
+                                                    >
+                                                        <svg className="w-8 h-8 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                                            <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                        </svg>
+                                                        {processing ? 'GENERANDO...' : 'GENERAR INFORME FINAL'}
+                                                    </button>
+                                                </div>
+                                            );
+                                        }
+
+                                        // Muted read-only for Técnico if state is NOT en_redaccion (e.g. finalizado/en revisión)
+                                        return (
+                                            <div className="flex items-center gap-4 px-10 py-5 bg-blue-500/10 border border-blue-500/30 rounded-2xl">
+                                                <div className="w-2.5 h-2.5 bg-blue-400 rounded-full animate-pulse"></div>
+                                                <span className="text-[11px] font-black text-blue-400 uppercase tracking-[0.3em] italic">
+                                                    MODO LECTURA ACTIVO: EN REVISIÓN
+                                                </span>
+                                            </div>
+                                        );
+                                    }
+                                })()}
                             </div>
                         </div>
                     </div>

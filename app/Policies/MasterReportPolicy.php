@@ -36,13 +36,19 @@ class MasterReportPolicy
      */
     public function update(User $user, MasterReport $report): bool
     {
-        // Solo el autor (tecnico) o el super admin pueden editar reportes en borrador
+        // El Super Admin tiene acceso total
         if ($user->isSuperAdmin()) {
             return true;
         }
 
+        // El Gestor puede actualizar si el reporte pertenece a su consultora (para aprobar u observar)
+        if ($user->isGestor()) {
+            return $user->consultora_id === ($report->sede?->empresa?->consultora_id ?? null);
+        }
+
+        // El Técnico solo edita sus propios informes cuando están en borrador/redacción
         if ($user->isTechnician()) {
-            return $user->id === $report->user_id && $report->estado !== 'finalizado';
+            return $user->id === $report->user_id && in_array($report->estado, ['en_redaccion', 'solicitado']);
         }
 
         return false;

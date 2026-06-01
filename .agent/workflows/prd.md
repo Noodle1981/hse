@@ -124,6 +124,38 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
     * **Rechazar:** Elimina físicamente el archivo temporal en el storage y marca `firma_status = 'rejected'` para notificar visualmente al técnico y permitirle reintentar.
   * **Visor de Firmas Oficiales:** Se integra un modal visor Glassmorphic en el listado de usuarios que permite a los Gestores visualizar de forma inmediata las firmas aprobadas vigentes de cada técnico a través de un botón interactivo de inspección visual ("ojito").
 
+### 4.8. Consolidación de Informes Maestros y Hardening Arquitectónico (SRE Audit)
+* **Flujo de Trabajo Intacto e Ininterrumpido:** Se respeta al 100% el flujo de inicio desde *Mis Asignaciones* (pestaña Informes) mediante el botón interactivo de "Ejecutar", heredando limpiamente los parámetros contextuales de `sede_id` y `periodo` hacia el Wizard de Redacción.
+* **Erradicación Absoluta de Firmas Manuales (Canvas):** No se permite en absoluto el trazo manual en pantalla dentro del Informe Maestro. El sistema adopta como fuente de verdad única e inmutable la **Firma Tipo A (Rúbrica de Perfil)** cargada en el perfil del técnico certificante (`report.tecnico.firma`). 
+* **Consola de Redacción Wizard y Validación Táctica:**
+  - **Firma Autorizada Vinculada:** Si el técnico posee su firma de perfil activa y aprobada, el Wizard renderiza una tarjeta de validación de solo lectura con estilo Glassmorphic Ultra-Premium DARK, destacada con un glow verde de seguridad (`bg-emerald-500/10 border-emerald-500/30`), la rúbrica con filtro inverso de contraste (`brightness-0 invert opacity-90`) y un badge animado (`animate-ping`) "Sello Verificado SRE".
+  - **Bloqueo Inteligente:** Si no hay firma registrada en el perfil del redactor, el sistema bloquea de forma absoluta el envío y finalización del informe maestro, desplegando una alerta roja Glassmorphic e inyectando un botón directo al Perfil para la carga del recurso.
+* **Blindaje Backend y Route Model Binding (RMB):**
+  - **Identificadores Semánticos:** Las rutas web en `routes/web.php` y los controladores se migran de identificadores genéricos `{id}` a Route Model Binding estricto (`{masterReport}`). Laravel resuelve la existencia y validez de la instancia del informe en base de datos al resolver la ruta.
+  - **Autorización por Políticas:** El controlador `MasterReportController` ejecuta la verificación en caliente `$this->authorize('update', $masterReport)` al inicio de la edición y actualización para prevenir manipulación cruzada de reportes.
+  - **FormRequests Robustos:** La creación y actualización se encapsulan en `StoreMasterReportRequest` y `UpdateMasterReportRequest` respectivamente. El método `safeData()` y la sanitización en backend bloquean y descartan de forma absoluta cualquier intento de inyección en campos de auditoría (`estado`, `user_id`, `sede_id`, `solicitado_por`).
+  - **Inmutes de Finalización:** El campo temporal/transitorio de acción `finalize` se procesa y consume únicamente en la capa del controlador para modificar el `estado` a `'finalizado'`, excluyéndose limpiamente de los datos inyectados al modelo mediante `safeData()` para evitar errores de persistencia en columnas no existentes.
+* **Exportación de PDF de Alta Fidelidad y Rendimiento N+1:**
+  - **Eager Loading de Asistencia:** Al compilar los datos en `aggregatePeriodData()`, el sistema carga previamente las relaciones (`trainings.attendances`), eliminando la sobrecarga y latencia del problema de consultas N+1 en bases de datos masivas.
+  - **Listado Detallado de Charla:** El PDF del reporte maestro expande de forma detallada la columna de asistencia de cada capacitación de ese mes, listando el Nombre completo, DNI y la firma transaccional individual en Base64 o path físico de cada asistente.
+  - **Corrección de Columnas:** Se corrige el campo de la base de datos para incidentes de `$inc->tipo_evento` a su nombre de columna correcto y nativo `$inc->tipo`.
+* **Clasificación Estricta de Actividades Ad-Hoc (Fuera de Plan):** 
+  - **Evitar Falsos Ad-Hoc:** Si un checklist o capacitación se completa varias veces dentro de un periodo de plan, la primera ejecución satisface la meta planificada. Las ejecuciones adicionales (repeticiones) se identifican por plantilla (`dynamic_checklist_id` o `registry_code`) o tema/título, y **se excluyen estrictamente del listado de actividades Ad-Hoc / Fuera del Plan**.
+  - **Verdadero Ad-Hoc:** La sección de *Inspecciones Técnicas No Rutinarias* (Ad-Hoc) del reporte solo lista aquellas actividades que fueron ejecutadas de forma totalmente libre e improvisada, es decir, que **no tienen ninguna relación ni coincidencia en absoluto** con lo programado en el `AnnualPlan` de la Sede.
+* **Flujo Seguro de Revisión y Aprobación de Gestores**:
+  - **Máquina de Estados de Auditoría**: El ciclo de vida de los reportes se gestiona a través de transiciones de estados seguras controladas por roles:
+    - *Técnico*: Completa el borrador y lo firma utilizando su rúbrica inmutable del perfil, cambiando el estado a `'finalizado'`.
+    - *Gestor*: Una vez en `'finalizado'`, el Wizard del Técnico se bloquea por completo (`readOnly`), y el Gestor toma el control. El Gestor puede escribir una nota de auditoría (`observacion_revision`) y ejecutar una de dos acciones:
+      - **Aprobar**: Cambia el estado a `'aprobado'` y limpia automáticamente cualquier nota de revisión del modelo. El reporte queda permanentemente archivado y de solo lectura.
+      - **Observar / Devolver**: Guarda el comentario del Gestor y revierte el estado a `'en_redaccion'`, desbloqueando los campos y notificando al técnico.
+  - **Bandeja de Entrada en Wizard (Técnico)**: Al entrar a un reporte observado, el Técnico visualiza una prominente tarjeta Glassmorphic roja con la observación de auditoría del Gestor justo al inicio del Wizard.
+  - **Sección 6 — Evaluación del Gestor**: Módulo inyectado en el pie de página de redacción, visible únicamente para Gestores/Administradores y solo cuando el reporte se encuentra en estado `'finalizado'`.
+  - **Botonera de Acción Flotante Global**: Barra táctica inteligente que evalúa en caliente el rol de usuario y estado del informe para renderizar triggers contextualmente correctos:
+    - *Aprobado*: Badge inmutable verde esmeralda con glow (`INFORME APROBADO Y REGISTRADO`).
+    - *Gestor + Finalizado*: Botones de `APROBAR INFORME MAESTRO` y `OBSERVAR & PEDIR REVISIÓN`.
+    - *Técnico + Redactando*: Botones de `GUARDAR BORRADOR` y `GENERAR INFORME FINAL`.
+    - *Otros Estados (Lectura)*: Badge pulsante azul/índigo con leyenda de `MODO LECTURA ACTIVO`.
+
 ---
 
 ## 5. Requisitos de Experiencia de Usuario y Diseño (Aesthetics)

@@ -5,7 +5,7 @@ import { Head, useForm, Link } from '@inertiajs/react';
 export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial_periodo }) {
     const { data, setData, post, processing, errors } = useForm({
         sede_id: initial_sede_id || '',
-        user_id: auth.user.rol === 'Técnico' ? auth.user.id : '',
+        user_id: auth.user.is_technician ? auth.user.id : '',
         titulo: 'Informe Maestro de Servicio - ' + new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase(),
         periodo: initial_periodo || new Date().toISOString().substring(0, 7), // YYYY-MM
         frecuencia: 'mensual',

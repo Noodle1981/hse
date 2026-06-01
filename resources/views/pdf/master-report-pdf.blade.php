@@ -321,17 +321,61 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Tema Desarrollado</th>
+                        <th style="width: 35%">Tema Desarrollado</th>
                         <th style="text-align: center; width: 15%">Asistentes</th>
-                        <th>Notas del Instructor</th>
+                        <th style="width: 50%">Notas e Instructor / Registro de Firmas</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($data['trainings'] as $tr)
                         <tr>
-                            <td><strong>{{ $tr->title }}</strong></td>
-                            <td style="text-align: center;">{{ $tr->attendees_count }}</td>
-                            <td>{{ $tr->notes ?: '-' }}</td>
+                            <td>
+                                <strong>{{ $tr->title }}</strong>
+                                @if($tr->description)
+                                    <div style="font-size: 7px; color: #7e8299; margin-top: 3px; font-style: italic; line-height: 1.2;">{{ $tr->description }}</div>
+                                @endif
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                <span style="font-size: 12px; font-weight: bold; color: <?php echo $primaryColor; ?>;">{{ $tr->attendees_count }}</span>
+                            </td>
+                            <td>
+                                <div style="margin-bottom: 6px;">{{ $tr->notes ?: 'Sin observaciones específicas registradas por el instructor.' }}</div>
+                                
+                                @if($tr->attendances && $tr->attendances->count() > 0)
+                                    <div style="margin-top: 6px; border-top: 1px dashed #ebedf3; padding-top: 5px;">
+                                        <div style="font-size: 7px; color: #7e8299; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">Asistentes Certificados:</div>
+                                        <table style="width: 100%; margin: 0; border: none; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach($tr->attendances as $att)
+                                                    <tr style="background: transparent !important;">
+                                                        <td style="border: none; padding: 2px 0; font-size: 8px; width: 65%;">
+                                                            • <strong>{{ $att->employee_name }}</strong> 
+                                                            @if($att->dni)
+                                                                <span style="color: #7e8299; font-size: 7px;">(DNI: {{ $att->dni }})</span>
+                                                            @endif
+                                                        </td>
+                                                        <td style="border: none; padding: 2px 0; text-align: right; width: 35%;">
+                                                            @if($att->signature)
+                                                                @if(str_starts_with($att->signature, 'data:image'))
+                                                                    <img src="{{ $att->signature }}" style="height: 16px; max-width: 90px; object-fit: contain; vertical-align: middle; filter: grayscale(100%);">
+                                                                @elseif(file_exists(public_path('storage/' . $att->signature)))
+                                                                    <img src="{{ public_path('storage/' . $att->signature) }}" style="height: 16px; max-width: 90px; object-fit: contain; vertical-align: middle;">
+                                                                @else
+                                                                    <span style="font-size: 6px; color: #1bc5bd; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Firmado</span>
+                                                                @endif
+                                                            @else
+                                                                <span style="font-size: 6px; color: #ffa800; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Sin Firma</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div style="font-size: 7px; color: #ffa800; font-style: italic; margin-top: 4px;">Sin firmas de asistentes registradas en esta capacitación.</div>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -384,7 +428,7 @@
                                 @forelse($data['incidentes'] as $inc)
                                     <tr>
                                         <td style="border: none; border-bottom: 1px solid #ebedf3; padding: 10px;">
-                                            <div style="font-weight: bold;">{{ $inc->tipo_evento }}</div>
+                                            <div style="font-weight: bold;">{{ strtoupper(str_replace('_', ' ', $inc->tipo)) }}</div>
                                             <div style="color: #f64e60; font-size: 8px; margin-top: 2px;">FECHA: {{ \Carbon\Carbon::parse($inc->fecha_ocurrencia)->format('d/m/Y') }}</div>
                                             <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $inc->descripcion }}</div>
                                             @if(count($inc->fotos ?? []) > 0)

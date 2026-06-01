@@ -38,6 +38,7 @@ El sistema opera bajo un esquema estricto de multi-tenancy y control de accesos 
   * Configurar los planes de contratación anual (`AnnualPlan`) para definir qué tareas deben cumplirse cada mes.
   * Auditar desvíos complejos, incidentes y planes de acción correctiva en campo.
   * Consolidar visitas, capacitaciones e inspecciones en **Reportes Maestros** (`MasterReport`) y generar los informes consolidados en PDF.
+  * Auditar, observar, devolver y aprobar los Informes Maestros redactados por los técnicos a su cargo, redactando observaciones de corrección (`observacion_revision`).
 * **Páginas React / Inertia asociadas:** 
   * Directorio `resources/js/Pages/Gestor/*` (Dashboard, MasterReports, Inspections, Visits, Companies, Checklist administration, Annual Plan).
 
@@ -98,7 +99,13 @@ El flujo operativo comercial y técnico de XamaSafe sigue un ciclo continuo e in
    * **Cierre de Visita (Check-out):** Al terminar la jornada en planta, el técnico pulsa "Finalizar Visita". El responsable de la Sede física del cliente firma en pantalla, se calcula la distancia GPS de salida, y la visita cambia a estado `signed`, enviándose de forma automática por email en formato PDF.
 
 6. **Paso 6: Consolidación y Reporte Maestro (Gestor):**
-   A fin de mes (o trimestre), el Gestor ingresa al Wizard de **Reportes Maestros**. El sistema consolida automáticamente toda la actividad ejecutada en el período. El motor de cálculos compara lo completado contra el Plan Anual, calcula el porcentaje de cumplimiento y lista los hallazgos y desvíos detectados. El Gestor redacta las conclusiones, firma, y el sistema genera el informe consolidado formal de Higiene y Seguridad del cliente en un PDF de alta definición optimizado para impresión física.
+   A fin de mes (o trimestre), el Gestor o el Técnico a cargo inician el Wizard de **Reportes Maestros** para recopilar lo ejecutado. El motor compara la data con el `AnnualPlan`, calcula el cumplimiento, y agrupa los desvíos/capacitaciones.
+   - **El Ciclo de Revisión y Aprobación**:
+     1. El Técnico edita el borrador (`'en_redaccion'`) y lo cierra como `'finalizado'`.
+     2. El informe se bloquea para el Técnico, y se habilita la **Sección 6: Evaluación del Gestor** para los supervisores.
+     3. El Gestor puede **Aprobar** (el estado cambia a `'aprobado'` y se limpia la observación de revisión) o **Observar/Devolver** (se guarda la observación en `observacion_revision` y el estado regresa a `'en_redaccion'`).
+     4. Si es devuelto, el Técnico visualiza una tarjeta Glassmorphic roja con el mensaje de retroalimentación en la cabecera de su Wizard para aplicar las correcciones y volver a finalizar.
+     5. Si es aprobado, se archiva de solo lectura para todos los roles de usuario.
 
 ---
 
@@ -161,7 +168,7 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
     * Hora exacta de finalización y **nombre del supervisor firmante (`supervisor_name`)**.
     * Badge semafórico del estado: **Pasó** (Verde Esmeralda) o **Falló ⚠️** (Rojo Alerta Neón pulsante).
     * Botón de descarga de PDF individual.
-  * **Paginación Robusta:** El controlador backend (`InspectionController.php`) realiza una paginación manual por grupos vía `LengthAwarePaginator`, garantizando la correcta compatibilidad de los filtros interactivos.
+  * **Paginación Robustecida:** El controlador backend (`InspectionController.php`) realiza una paginación manual por grupos vía `LengthAwarePaginator`, garantizando la correcta compatibilidad de los filtros interactivos.
 
 ### 3.5. Sistema de Roles Ultra-Robusto (Fix Definitivo)
 * **Propósito:** Prevenir errores recurrentes de autorización (403 Acceso Denegado) provocados por disparidades en la especificación de nombres de roles (plurales, acentos, separadores por coma o barra) entre rutas, políticas y vistas.
@@ -197,7 +204,7 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   - En `Wizard.jsx`, se despliega un badge centrado y glowing en Naranja Técnico justo encima del progress bar: `"⌚ Tiempo Real (Sync Servidor)"` (con animación `animate-pulse` en el reloj), certificando visualmente la sincronización del tiempo con el servidor.
 
 ### 3.9. Política de Firma Pendiente y Flujo de Aprobación Táctica (Auditoría de Firmas)
-* **Propósito:** Garantizar que los técnicos no puedan actualizar su firma oficial inmediatamente sin que un Gestor audite visualmente su validez, evitando falsificaciones o trazos inválidos que anulen legalmente las planillas firmadas.
+* **Propósito:** Garantizar que los técnicos no puedan actualizar su firma oficial inmediatamente sin que un Gestor audite visualmente su validez, evitando falsificaciones o firmas inválidas.
 * **Tipología de Firmas en el Ecosistema XamaSafe:**
   * **Firma Tipo A (Identidad / Perfil Permanente):**
     * Firma oficial e inmutable cargada en el perfil del usuario.
@@ -205,15 +212,38 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
     * Entra en estado `'pending'` (`firma_status`) y se guarda en la columna `firma_temp` y ruta física temporal.
     * Requiere la aprobación interactiva de un Gestor mediante la consola `PendingSignaturesList.jsx`.
     * **DomPDF Resolution Constraint:** Para su correcta impresión en certificados PDF, el servidor traduce la ruta relativa de la base de datos a una ruta física absoluta mediante `public_path('storage/' . $firma)`, evitando el renderizado del clásico cuadro cruzado roto de DomPDF.
+  * **Firma Tipo B (Firma Transaccional / De Visita o Planilla):**
     * Persistidas directamente en formato Base64 o estructuras serializadas dentro de las tablas correspondientes (`training_attendances.signature`, `visit_certificates.responsible_signature`, etc.), garantizando ligereza e inmediatez sin necesidad de procesos de auditoría del perfil.
 
 * **Flujo Operativo de Aprobación (Tipo A):**
   1. **Captura Temporal:** El Técnico actualiza su firma en `/perfil` mediante un canvas React. El backend decodifica el Base64 y lo almacena como archivo `.png` en un directorio temporal (`storage/app/public/signatures/temp_uid.png`), guardando la ruta en `firma_temp` y marcando `firma_status = 'pending'`. El perfil del técnico queda bloqueado con indicador "Aprobación Pendiente".
-  2. **Auditoría de Gestor:** El componente `PendingSignaturesList.jsx` se inyecta en la cabecera de la matriz de usuarios (`Users.jsx`) y lee las firmas en estado pendiente. Muestra la firma invertida (`brightness-0 invert opacity-90`) sobre fondo oscuro premium.
+  2. **Auditoría de Gestor:** El Componente `PendingSignaturesList.jsx` se inyecta en la cabecera de la matriz de usuarios (`Users.jsx`) y lee las firmas en estado pendiente. Muestra la firma invertida (`brightness-0 invert opacity-90`) sobre fondo oscuro premium.
   3. **Resolución:**
      * **Aprobar:** Copia físicamente la firma temporal a una ruta permanente aleatoria única para mantener el historial forense inmutable, actualiza `users.firma` con esta ruta, limpia `firma_temp` y setea `firma_status = 'approved'`.
      * **Rechazar:** Elimina físicamente el archivo temporal en el storage y marca `firma_status = 'rejected'`, habilitando al técnico a reintentar y mostrando una advertencia de rechazo en su perfil.
   4. **Visor de Firmas Oficiales:** Se habilita un botón de "ojito" en cada fila del usuario en la matriz de identidades para que el Gestor previsualice con un modal de alta gama Glassmorphic la firma activa y aprobada actual.
+
+### 3.10. Validación Táctica de Informes Maestros y Hardening Backend (SRE Audit)
+* **Propósito:** Prevenir la manipulación maliciosa de reportes consolidados (inyección de identificadores) y asegurar la autenticidad del documento sin depender de firmas manuales canvas.
+* **Operación de Firmas Inmutables:**
+  - Se remueve en absoluto el signature canvas manual en la sección 5 del Wizard de Redacción de Informes Maestros (`Wizard.jsx`).
+  - El sistema extrae la firma digital del perfil autorizada y aprobada del técnico asignado (`report.tecnico.firma`). 
+  - **HUD de Validación:** Si existe la firma de perfil aprobada, se muestra inmutable y con filtro invertido (`brightness-0 invert opacity-90`) con un glow verde táctico. Si no existe, se bloquea por completo la finalización del reporte y se provee un botón directo hacia su Perfil.
+* **Mecanismos de Hardening (Seguridad SRE) y Flujo de Aprobación**:
+  - **Route Model Binding (RMB) Semántico:** Las rutas web en Laravel se declaran como `{masterReport}` coincidiendo con el modelo inyectado en `MasterReportController`. Esto evita que peticiones vacías o manipuladas pasen la validación.
+  - **Autorización por Políticas:** Todo endpoint (`edit`, `update`, `preview`) ejecuta `$this->authorize('view/update', $masterReport)` validando que pertenezca al autor o consultora dueña de la sede, garantizando aislamiento multi-tenancy absoluto.
+  - **Sanitización por FormRequests:** Se inyectan `StoreMasterReportRequest` y `UpdateMasterReportRequest`. Los campos críticos (`estado`, `user_id`, `sede_id`) se sanitizan en backend y se descartan del payload utilizando `safeData()` y `validatedWithSafeTime()`.
+  - **Acciones Transitorias y Flujo de Aprobación**:
+    - Parámetros dinámicos y volátiles como `finalize` (para pasar a `'finalizado'`) y `action` (`'approve'` o `'observe'`) se consumen en la lógica del controlador para orquestar la máquina de estados, pero se purgan en `safeData()` antes de invocar `$masterReport->update()`, evitando errores SQL por columnas inexistentes.
+    - La acción de aprobación (`'approve'`) actualiza el estado a `'aprobado'` y limpia la columna `observacion_revision`.
+    - La acción de devolución (`'observe'`) actualiza el estado a `'en_redaccion'` y persiste la retroalimentación en `observacion_revision` para que el técnico la visualice en una tarjeta Glassmorphic roja al inicio de su Wizard en React.
+* **Optimización y Eager Loading en Exportación PDF:**
+  - El controlador ejecuta **Eager Loading** (`trainings.attendances`) al compilar los datos para la plantilla Blade, reduciendo a cero el problema N+1 de consultas en base de datos.
+  - El PDF final lista cada charla del periodo, incorporando en la columna de registro de firmas la lista completa de asistentes reales normalizados en base de datos con su Nombre, DNI y firma transaccional real.
+  - Se corrige la visualización de la columna de incidentes mapeando directamente a `$inc->tipo` en lugar de la columna inexistente `$inc->tipo_evento`.
+* **Filtro Estricto de Falsos Ad-Hoc:**
+  - Las repeticiones o múltiples ejecuciones de checklists/capacitaciones programadas en el `AnnualPlan` para el periodo actual no deben listarse como "Ad-Hoc / Fuera de Plan". 
+  - La lógica en `aggregatePeriodData` obtiene todas las actividades del plan anual y valida los checklists/trainings excedentes (los no asignados como completados principales de la meta). Si un excedente coincide en código, ID de plantilla o título con lo planificado, se descarta del listado Ad-Hoc. Solo se reportan como "Inspecciones Técnicas No Rutinarias" aquellas actividades completamente espontáneas e imprevistas.
 
 ---
 

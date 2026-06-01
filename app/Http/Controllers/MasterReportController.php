@@ -10,6 +10,8 @@ use App\Models\AnnualPlan;
 use App\Models\VisitCertificate;
 use App\Services\BrandingService;
 use Illuminate\Http\Request;
+use App\Http\Requests\StoreMasterReportRequest;
+use App\Http\Requests\UpdateMasterReportRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -68,21 +70,13 @@ class MasterReportController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreMasterReportRequest $request)
     {
-        $request->validate([
-            'sede_id' => 'required|exists:sedes,id',
-            'user_id' => 'required|exists:users,id',
-            'titulo' => 'required|string|max:255',
-            'periodo' => 'required|string',
-            'frecuencia' => 'required|in:mensual,trimestral,semestral,anual',
-        ]);
-
         /** @var User $user */
         $user = Auth::user();
 
         $report = MasterReport::create([
-            ...$request->all(),
+            ...$request->validatedWithSafeTime(),
             'solicitado_por' => Auth::id(),
             'estado' => $user->isTechnician() ? 'en_redaccion' : 'solicitado',
         ]);
@@ -91,59 +85,74 @@ class MasterReportController extends Controller
             ->with('message', 'Informe iniciado correctamente.');
     }
 
-    public function edit($id)
+    public function edit(MasterReport $masterReport)
     {
-        $report = MasterReport::with(['sede.empresa', 'tecnico', 'gestor'])->findOrFail($id);
-        $this->authorize('view', $report);
+        $this->authorize('view', $masterReport);
         
-        $data = $this->aggregatePeriodData($report);
+        $masterReport->load(['sede.empresa', 'tecnico', 'gestor']);
+        $data = $this->aggregatePeriodData($masterReport);
 
         return Inertia::render('Gestor/MasterReports/Wizard', [
-            'report' => $report,
+            'report' => $masterReport,
             'periodData' => $data,
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(UpdateMasterReportRequest $request, MasterReport $masterReport)
     {
-        $report = MasterReport::findOrFail($id);
+        $this->authorize('update', $masterReport);
         
-        $report->update($request->only([
-            'resumen_ejecutivo',
-            'observaciones_visitas',
-            'observaciones_checklists',
-            'observaciones_capacitaciones',
-            'observaciones_hallazgos_incidentes',
-            'observaciones_matriz',
-            'datos_anexo',
-        ]));
+        $masterReport->update($request->safeData());
 
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Procesar acciones de revisión del Gestor / Super Admin
+        if ($user->isGestor() || $user->isSuperAdmin()) {
+            if ($request->action === 'approve') {
+                $masterReport->update([
+                    'estado' => 'aprobado',
+                    'observacion_revision' => null, // Limpiar observación anterior al aprobar
+                ]);
+                return redirect()->route('master-reports.index')->with('message', 'Informe maestro aprobado exitosamente.');
+            }
+
+            if ($request->action === 'observe') {
+                $masterReport->update([
+                    'estado' => 'en_redaccion', // Vuelve al técnico
+                    'observacion_revision' => $request->observacion_revision,
+                ]);
+                return redirect()->route('master-reports.index')->with('message', 'Informe maestro observado y devuelto al técnico.');
+            }
+        }
+
+        // Acción del Técnico
         if ($request->finalize) {
-            $report->update(['estado' => 'finalizado']);
+            $masterReport->update(['estado' => 'finalizado']);
             return redirect()->route('master-reports.index')->with('message', 'Informe finalizado exitosamente.');
         }
 
         return back()->with('message', 'Borrador guardado.');
     }
 
-    public function preview($id)
+    public function preview(MasterReport $masterReport)
     {
         ini_set('memory_limit', '512M');
         ini_set('max_execution_time', 300);
 
-        $report   = MasterReport::with(['sede.empresa', 'tecnico', 'gestor'])->findOrFail($id);
-        $this->authorize('view', $report);
+        $this->authorize('view', $masterReport);
 
-        $data     = $this->aggregatePeriodData($report);
-        $branding = BrandingService::forUser($report->tecnico ?? $report->gestor);
+        $masterReport->load(['sede.empresa', 'tecnico', 'gestor']);
+        $data     = $this->aggregatePeriodData($masterReport);
+        $branding = BrandingService::forUser($masterReport->tecnico ?? $masterReport->gestor);
         
         $pdf = Pdf::loadView('pdf.master-report-pdf', [
-            'report'   => $report,
+            'report'   => $masterReport,
             'data'     => $data,
             'branding' => $branding,
         ]);
 
-        return $pdf->stream("Informe_Maestro_{$report->periodo}.pdf");
+        return $pdf->stream("Informe_Maestro_{$masterReport->periodo}.pdf");
     }
 
     private function aggregatePeriodData(MasterReport $report)
@@ -180,7 +189,7 @@ class MasterReportController extends Controller
         $visits = $report->sede->visitCertificates()
             ->with([
                 'checklistCompletions.assignment.checklist', 
-                'trainings', 
+                'trainings.attendances', 
                 'hallazgos.fotos', 
                 'incidentes.fotos',
                 'user'
@@ -202,10 +211,36 @@ class MasterReportController extends Controller
         $satisfiedCheckIds = $data['annual_plan_status']['satisfied_checklist_ids'] ?? collect();
         $satisfiedTrainIds = $data['annual_plan_status']['satisfied_training_ids'] ?? collect();
 
+        $plans = $report->sede->annualPlans()
+            ->where('period_start', '<=', $endDate)
+            ->where('period_end', '>=', $startDate)
+            ->get();
+
         $adhoc = collect();
         
         $data['checklists']->reject(fn($c) => $satisfiedCheckIds->contains($c->id))
-            ->each(function($c) use ($adhoc) {
+            ->each(function($c) use ($adhoc, $plans) {
+                // Si la actividad coincide con alguna programada en el plan anual, NO es ad-hoc (aunque sea una repetición)
+                $isProgrammed = $plans->contains(function($plan) use ($c) {
+                    if ($plan->category !== 'Inspección') {
+                        return false;
+                    }
+                    if ($plan->checklist_id && $plan->checklist_id == ($c->assignment?->dynamic_checklist_id ?? null)) {
+                        return true;
+                    }
+                    if ($plan->activity_code && ($c->assignment?->checklist?->registry_code ?? '') === $plan->activity_code) {
+                        return true;
+                    }
+                    if ($plan->activity_name && mb_strtolower($plan->activity_name) === mb_strtolower($c->assignment?->checklist?->title ?? '')) {
+                        return true;
+                    }
+                    return false;
+                });
+
+                if ($isProgrammed) {
+                    return;
+                }
+
                 $adhoc->push([
                     'activity' => $c->assignment?->checklist?->title ?? 'Punto de Control',
                     'category' => 'Inspección',
@@ -216,7 +251,29 @@ class MasterReportController extends Controller
             });
 
         $data['trainings']->reject(fn($t) => $satisfiedTrainIds->contains($t->id))
-            ->each(function($t) use ($adhoc) {
+            ->each(function($t) use ($adhoc, $plans) {
+                // Si la capacitación coincide con alguna programada en el plan anual, NO es ad-hoc (aunque sea una repetición)
+                $isProgrammed = $plans->contains(function($plan) use ($t) {
+                    if ($plan->category !== 'Capacitación') {
+                        return false;
+                    }
+                    if ($plan->activity_code && str_contains(mb_strtolower($t->title), mb_strtolower($plan->activity_code))) {
+                        return true;
+                    }
+                    if ($plan->activity_name) {
+                        $planTitle = mb_strtolower($plan->activity_name);
+                        $trainingTitle = mb_strtolower($t->title);
+                        if (str_contains($trainingTitle, $planTitle) || str_contains($planTitle, $trainingTitle)) {
+                            return true;
+                        }
+                    }
+                    return false;
+                });
+
+                if ($isProgrammed) {
+                    return;
+                }
+
                 $adhoc->push([
                     'activity' => $t->title,
                     'category' => 'Capacitación',

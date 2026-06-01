@@ -16,10 +16,21 @@ El sistema cuenta con las siguientes entidades principales:
 ### 🖋️ Gestión y Representación de Firmas en Base de Datos
 * **Firma Tipo A (Firma de Perfil / Identidad Permanente):**
   * Tabla `users`: Columnas `firma` (VARCHAR, ruta relativa al archivo permanente `.png` en storage, ej: `signatures/user_1.png`), `firma_temp` (VARCHAR, ruta de firma cargada por técnico a la espera de auditoría), y `firma_status` (VARCHAR, estado de la firma: `'pending'`, `'approved'`, `'rejected'`).
+  * **Uso en Informes Maestros (`master_reports`):** A diferencia de las visitas, los informes maestros no almacenan firmas transaccionales Base64 independientes. El sistema hereda y vincula directamente la firma de perfil aprobada del Técnico asignado (`master_reports.user_id` -> `users.firma`). El PDF renderiza este archivo de forma dinámica e inmutable para garantizar la autenticidad e integridad del documento final.
 * **Firma Tipo B (Firma Transaccional / De Visita o Planilla):**
   * Tabla `visit_certificates`: Columnas `responsible_signature` y `instructor_signature` (TEXT, datos serializados o Base64).
   * Tabla `training_attendances`: Relacionada con `visit_trainings` y `trainings`, normalizando nombres, puestos, DNI y firmas en Base64 en filas independientes en lugar de campos JSON.
   * Tabla `dynamic_inspections`: Columnas `supervisor_signature` y `technician_signature` (TEXT).
+
+### 🔄 Control de Estados y Auditoría en Informes Maestros
+* Tabla `master_reports`:
+  * **Columna `estado`** (VARCHAR): Controla el ciclo de vida del reporte maestro:
+    - `'solicitado'`: El Gestor solicita formalmente la redacción al técnico.
+    - `'en_redaccion'`: El Técnico trabaja sobre el borrador y guarda avances.
+    - `'finalizado'`: El Técnico cierra el borrador, inmutando los campos de llenado (`readOnly`) y pasándolo a la cola de revisión del Gestor.
+    - `'aprobado'`: El Gestor convalida y cierra de forma definitiva el reporte.
+  * **Columna `observacion_revision`** (TEXT, nullable): Almacena las observaciones detalladas del Gestor cuando el informe es observado y devuelto a `'en_redaccion'`. Si el informe es `'aprobado'`, este campo se limpia automáticamente para preservar la limpieza de datos.
+  * **Sanitización de Request (`UpdateMasterReportRequest`)**: Campos transitorios y volátiles como `action` (`'approve'` o `'observe'`) y `finalize` se consumen en la capa del controlador para guiar las transiciones de estado, pero se purgan en `safeData()` antes de invocar `$masterReport->update()`, evitando errores SQL por columnas inexistentes.
 
 ---
 
