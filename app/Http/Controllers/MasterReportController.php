@@ -85,6 +85,20 @@ class MasterReportController extends Controller
             ->with('message', 'Informe iniciado correctamente.');
     }
 
+    public function show(MasterReport $masterReport)
+    {
+        $this->authorize('view', $masterReport);
+
+        $masterReport->load(['sede.empresa', 'tecnico', 'gestor']);
+        $data = $this->aggregatePeriodData($masterReport);
+
+        return Inertia::render('Gestor/MasterReports/Wizard', [
+            'report'     => $masterReport,
+            'periodData' => $data,
+            'readOnly'   => true, // Siempre solo-lectura desde la vista "show"
+        ]);
+    }
+
     public function edit(MasterReport $masterReport)
     {
         $this->authorize('view', $masterReport);

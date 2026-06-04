@@ -6,9 +6,9 @@ description: Documento de Requisitos de Producto (PRD) para XamaSafe
 
 ## 1. Control del Documento
 * **Nombre del Producto:** XamaSafe
-* **Versión del PRD:** v2.1 (Stack React + Inertia.js)
+* **Versión del PRD:** v2.2 (Stack React + Inertia.js)
 * **Estado:** Activo / En Desarrollo
-* **Última Actualización:** 20 Mayo 2026
+* **Última Actualización:** 4 Junio 2026
 * **Tecnología Core:** Laravel 12 + Inertia.js (React 19) + Tailwind CSS v4 + SQLite/MySQL + Ziggy JS
 
 ---
@@ -126,35 +126,36 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 
 ### 4.8. Consolidación de Informes Maestros y Hardening Arquitectónico (SRE Audit)
 * **Flujo de Trabajo Intacto e Ininterrumpido:** Se respeta al 100% el flujo de inicio desde *Mis Asignaciones* (pestaña Informes) mediante el botón interactivo de "Ejecutar", heredando limpiamente los parámetros contextuales de `sede_id` y `periodo` hacia el Wizard de Redacción.
-* **Erradicación Absoluta de Firmas Manuales (Canvas):** No se permite en absoluto el trazo manual en pantalla dentro del Informe Maestro. El sistema adopta como fuente de verdad única e inmutable la **Firma Tipo A (Rúbrica de Perfil)** cargada en el perfil del técnico certificante (`report.tecnico.firma`). 
+* **Erradicación Absoluta de Firmas Manuales (Canvas):** No se permite en absoluto el trazo manual en pantalla dentro del Informe Maestro. El sistema adopta como fuente de verdad única e inmutable la **Firma Tipo A (Rúbrica de Perfil)** cargada en el perfil del técnico certificante (`report.tecnico.firma`).
+* **Máquina de 5 Estados del Informe Maestro (Backend-Driven):**
+  El campo `accion` es calculado **exclusivamente en el backend** (`OperationController.php`) y transmitido al frontend. El frontend `MyAssignments.jsx` solo renderiza basándose en este campo. La lógica es:
+  1. **`ejecutar`** — No existe ningún `MasterReport` para esta sede en el periodo seleccionado. Se muestra el botón naranja "+ EJECUTAR".
+  2. **`reanudar`** — Existe un informe con `estado = 'en_redaccion'` sin observaciones de revisión. Se muestra el enlace índigo "REANUDAR" al Wizard de edición.
+  3. **`corregir`** — Existe un informe con `estado = 'en_redaccion'` Y `observacion_revision` no nulo (devuelto por el gestor). Se muestra el enlace rojo pulsante "⚠ CORREGIR" con sombra de alerta neón.
+  4. **`pendiente`** — El informe está en `estado = 'finalizado'` (enviado al gestor). Se muestra un badge ámbar de solo lectura "⏳ PENDIENTE GESTOR" sin ningún botón de acción.
+  5. **`aprobado`** — El informe tiene `estado = 'aprobado'`. Se muestra el enlace emerald "✅ VER INFORME" hacia `GET /master-reports/{id}`.
+  **Regla de Unicidad:** Solo puede existir un informe por periodo (`YYYY-MM`) por sede+técnico. El backend busca por el campo `periodo` (no por `created_at`) para detectar el informe existente.
 * **Consola de Redacción Wizard y Validación Táctica:**
   - **Firma Autorizada Vinculada:** Si el técnico posee su firma de perfil activa y aprobada, el Wizard renderiza una tarjeta de validación de solo lectura con estilo Glassmorphic Ultra-Premium DARK, destacada con un glow verde de seguridad (`bg-emerald-500/10 border-emerald-500/30`), la rúbrica con filtro inverso de contraste (`brightness-0 invert opacity-90`) y un badge animado (`animate-ping`) "Sello Verificado SRE".
   - **Bloqueo Inteligente:** Si no hay firma registrada en el perfil del redactor, el sistema bloquea de forma absoluta el envío y finalización del informe maestro, desplegando una alerta roja Glassmorphic e inyectando un botón directo al Perfil para la carga del recurso.
 * **Blindaje Backend y Route Model Binding (RMB):**
-  - **Identificadores Semánticos:** Las rutas web en `routes/web.php` y los controladores se migran de identificadores genéricos `{id}` a Route Model Binding estricto (`{masterReport}`). Laravel resuelve la existencia y validez de la instancia del informe en base de datos al resolver la ruta.
-  - **Autorización por Políticas:** El controlador `MasterReportController` ejecuta la verificación en caliente `$this->authorize('update', $masterReport)` al inicio de la edición y actualización para prevenir manipulación cruzada de reportes.
-  - **FormRequests Robustos:** La creación y actualización se encapsulan en `StoreMasterReportRequest` y `UpdateMasterReportRequest` respectivamente. El método `safeData()` y la sanitización en backend bloquean y descartan de forma absoluta cualquier intento de inyección en campos de auditoría (`estado`, `user_id`, `sede_id`, `solicitado_por`).
-  - **Inmutes de Finalización:** El campo temporal/transitorio de acción `finalize` se procesa y consume únicamente en la capa del controlador para modificar el `estado` a `'finalizado'`, excluyéndose limpiamente de los datos inyectados al modelo mediante `safeData()` para evitar errores de persistencia en columnas no existentes.
+  - **Identificadores Semánticos:** Las rutas web en `routes/web.php` y los controladores se migran de identificadores genéricos `{id}` a Route Model Binding estricto (`{masterReport}`).
+  - **Autorización por Políticas:** El controlador `MasterReportController` ejecuta la verificación `$this->authorize('view', $masterReport)` en los métodos `show`, `edit` y `update`.
+  - **FormRequests Robustos:** La creación y actualización se encapsulan en `StoreMasterReportRequest` y `UpdateMasterReportRequest`. El campo `estado` está blindado contra inyección desde el cliente.
+  - **Inmutes de Finalización:** El campo transitorio `finalize` se consume únicamente en la capa del controlador y se excluye de `safeData()`.
 * **Exportación de PDF de Alta Fidelidad y Rendimiento N+1:**
-  - **Eager Loading de Asistencia:** Al compilar los datos en `aggregatePeriodData()`, el sistema carga previamente las relaciones (`trainings.attendances`), eliminando la sobrecarga y latencia del problema de consultas N+1 en bases de datos masivas.
-  - **Listado Detallado de Charla:** El PDF del reporte maestro expande de forma detallada la columna de asistencia de cada capacitación de ese mes, listando el Nombre completo, DNI y la firma transaccional individual en Base64 o path físico de cada asistente.
-  - **Corrección de Columnas:** Se corrige el campo de la base de datos para incidentes de `$inc->tipo_evento` a su nombre de columna correcto y nativo `$inc->tipo`.
-* **Clasificación Estricta de Actividades Ad-Hoc (Fuera de Plan):** 
-  - **Evitar Falsos Ad-Hoc:** Si un checklist o capacitación se completa varias veces dentro de un periodo de plan, la primera ejecución satisface la meta planificada. Las ejecuciones adicionales (repeticiones) se identifican por plantilla (`dynamic_checklist_id` o `registry_code`) o tema/título, y **se excluyen estrictamente del listado de actividades Ad-Hoc / Fuera del Plan**.
-  - **Verdadero Ad-Hoc:** La sección de *Inspecciones Técnicas No Rutinarias* (Ad-Hoc) del reporte solo lista aquellas actividades que fueron ejecutadas de forma totalmente libre e improvisada, es decir, que **no tienen ninguna relación ni coincidencia en absoluto** con lo programado en el `AnnualPlan` de la Sede.
+  - **Eager Loading de Asistencia:** Al compilar los datos en `aggregatePeriodData()`, el sistema carga previamente las relaciones (`trainings.attendances`), eliminando el problema N+1.
+  - **Listado Detallado de Charla:** El PDF expande la columna de asistencia listando Nombre, DNI y firma de cada asistente.
+* **Bóveda de Informes (Gestor Index):**
+  - El botón "SOLICITAR INFORME MAESTRO" fue eliminado del header. Los informes se crean exclusivamente desde el plan mensual del técnico.
+  - La paleta de estados en el Index usa: Ámbar = PENDIENTE (finalizado), Emerald = APROBADO, Naranja = EN REDACCIÓN, Amarillo = SOLICITADO.
+  - Un técnico con informe `aprobado` solo ve "DESCARGAR PDF APROBADO". Un gestor con informe `aprobado` solo ve "PDF FINAL". Ninguno puede editar un informe ya aprobado.
 * **Flujo Seguro de Revisión y Aprobación de Gestores**:
-  - **Máquina de Estados de Auditoría**: El ciclo de vida de los reportes se gestiona a través de transiciones de estados seguras controladas por roles:
-    - *Técnico*: Completa el borrador y lo firma utilizando su rúbrica inmutable del perfil, cambiando el estado a `'finalizado'`.
-    - *Gestor*: Una vez en `'finalizado'`, el Wizard del Técnico se bloquea por completo (`readOnly`), y el Gestor toma el control. El Gestor puede escribir una nota de auditoría (`observacion_revision`) y ejecutar una de dos acciones:
-      - **Aprobar**: Cambia el estado a `'aprobado'` y limpia automáticamente cualquier nota de revisión del modelo. El reporte queda permanentemente archivado y de solo lectura.
-      - **Observar / Devolver**: Guarda el comentario del Gestor y revierte el estado a `'en_redaccion'`, desbloqueando los campos y notificando al técnico.
-  - **Bandeja de Entrada en Wizard (Técnico)**: Al entrar a un reporte observado, el Técnico visualiza una prominente tarjeta Glassmorphic roja con la observación de auditoría del Gestor justo al inicio del Wizard.
-  - **Sección 6 — Evaluación del Gestor**: Módulo inyectado en el pie de página de redacción, visible únicamente para Gestores/Administradores y solo cuando el reporte se encuentra en estado `'finalizado'`.
-  - **Botonera de Acción Flotante Global**: Barra táctica inteligente que evalúa en caliente el rol de usuario y estado del informe para renderizar triggers contextualmente correctos:
-    - *Aprobado*: Badge inmutable verde esmeralda con glow (`INFORME APROBADO Y REGISTRADO`).
-    - *Gestor + Finalizado*: Botones de `APROBAR INFORME MAESTRO` y `OBSERVAR & PEDIR REVISIÓN`.
-    - *Técnico + Redactando*: Botones de `GUARDAR BORRADOR` y `GENERAR INFORME FINAL`.
-    - *Otros Estados (Lectura)*: Badge pulsante azul/índigo con leyenda de `MODO LECTURA ACTIVO`.
+  - **Botonera de Acción Flotante Global**: Barra táctica inteligente que evalúa rol y estado para renderizar:
+    - *Aprobado*: Badge inmutable verde esmeralda "INFORME APROBADO Y REGISTRADO".
+    - *Gestor + Finalizado*: Botones "APROBAR INFORME MAESTRO" y "OBSERVAR & PEDIR REVISIÓN".
+    - *Técnico + Redactando*: Botones "GUARDAR BORRADOR" y "GENERAR INFORME FINAL".
+    - *Otros (Lectura)*: Badge pulsante índigo "MODO LECTURA ACTIVO".
 
 ---
 

@@ -279,56 +279,111 @@ class OperationController extends Controller
         $contractReports = $contractTasks->where('category', 'Informe');
 
         foreach ($contractReports as $plan) {
-            $matchingReports = $allReports->where('sede_id', $plan->sede_id)
-                ->filter(function($r) use ($plan) {
-                    return \Illuminate\Support\Str::slug($r->titulo) === \Illuminate\Support\Str::slug($plan->activity_name);
-                });
+            // Buscar el informe existente usando el campo `periodo` (YYYY-MM) — dato canónico.
+            // El campo `periodo` es lo que el técnico seleccionó al crear el informe,
+            // independientemente del mes en que fue creado físicamente (created_at).
+            $matchingReport = \App\Models\MasterReport::where('sede_id', $plan->sede_id)
+                ->where('user_id', $user->id)
+                ->where('periodo', $queryMonth)
+                ->orderByDesc('created_at')
+                ->first();
 
-            $status = 'scheduled';
-            if ($matchingReports->isNotEmpty()) {
-                if ($matchingReports->whereIn('estado', ['completed', 'finalizado', 'cerrado', 'enviado'])->isNotEmpty()) {
-                    $status = 'completed';
-                } elseif ($matchingReports->where('estado', 'borrador')->isNotEmpty()) {
-                    $status = 'in_progress';
-                } else {
-                    $status = 'pending';
-                }
+            // Fallback: si no hay match por periodo exacto, buscar cualquier informe
+            // de esta sede+usuario en el año actual (cubre casos de periodo mal formateado)
+            if (!$matchingReport) {
+                $matchingReport = \App\Models\MasterReport::where('sede_id', $plan->sede_id)
+                    ->where('user_id', $user->id)
+                    ->whereYear('created_at', $now->year)
+                    ->whereMonth('created_at', $selectedMonth)
+                    ->orderByDesc('created_at')
+                    ->first();
             }
+
+            // El backend calcula la acción visual que debe mostrar el frontend
+            $accion = match(true) {
+                is_null($matchingReport)                                                               => 'ejecutar',
+                $matchingReport->estado === 'aprobado'                                                 => 'aprobado',
+                $matchingReport->estado === 'finalizado'                                               => 'pendiente',
+                $matchingReport->estado === 'en_redaccion' && !is_null($matchingReport->observacion_revision) => 'corregir',
+                $matchingReport->estado === 'en_redaccion'                                             => 'reanudar',
+                default                                                                                => 'ejecutar',
+            };
+
+            // Status genérico para el filtro UI (compatible con el selector de estados)
+            $status = match($accion) {
+                'aprobado'  => 'completed',
+                'pendiente' => 'pending_review',
+                'corregir'  => 'correction',
+                'reanudar'  => 'in_progress',
+                default     => 'scheduled',
+            };
 
             $key = 'r_' . \Illuminate\Support\Str::slug($plan->activity_name) . '_' . $plan->sede_id;
 
             $unifiedReports->put($key, [
-                'id' => $plan->id,
-                'type' => 'report',
-                'title' => $plan->checklist?->title ?? $plan->activity_name,
-                'sede' => $plan->sede?->nombre_sede,
-                'sede_id' => $plan->sede_id,
-                'empresa' => $plan->sede?->empresa?->nombre,
-                'due_date' => Carbon::now()->endOfMonth(),
-                'status' => $status,
-                'checklist_id' => null,
-                'source' => 'contract',
-                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+                'id'                   => $plan->id,
+                'type'                 => 'report',
+                'title'                => $plan->checklist?->title ?? $plan->activity_name,
+                'sede'                 => $plan->sede?->nombre_sede,
+                'sede_id'              => $plan->sede_id,
+                'empresa'              => $plan->sede?->empresa?->nombre,
+                'due_date'             => Carbon::now()->endOfMonth(),
+                'status'               => $status,
+                'checklist_id'         => null,
+                'source'               => 'contract',
+                'registry_code'        => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+                // Campos nuevos para la lógica de 5 estados
+                'accion'               => $accion,
+                'master_report_id'     => $matchingReport?->id,
+                'observacion_revision' => $matchingReport?->observacion_revision,
             ]);
         }
 
+        // Recolectar los IDs de MasterReport ya vinculados a filas del plan anual
+        // para que el loop ad-hoc no los duplique con otra fila.
+        $usedMasterReportIds = $unifiedReports
+            ->pluck('master_report_id')
+            ->filter()
+            ->values()
+            ->toArray();
+
         foreach ($allReports as $r) {
+            // Saltar si este MasterReport ya está representado por una fila del plan anual
+            if (in_array($r->id, $usedMasterReportIds)) {
+                continue;
+            }
+
             $key = 'r_' . \Illuminate\Support\Str::slug($r->titulo) . '_' . $r->sede_id;
             if ($unifiedReports->has($key)) {
                 continue;
             }
 
+            // Informes ad-hoc (no del plan anual): también calculamos su acción
+            $accionAdhoc = match(true) {
+                $r->estado === 'aprobado'    => 'aprobado',
+                $r->estado === 'finalizado'  => 'pendiente',
+                $r->estado === 'en_redaccion' && !is_null($r->observacion_revision) => 'corregir',
+                $r->estado === 'en_redaccion' => 'reanudar',
+                default                      => 'reanudar',
+            };
+
             $unifiedReports->put($key, [
-                'id' => $r->id,
-                'type' => 'report',
-                'title' => $r->titulo,
-                'sede' => $r->sede?->nombre_sede,
-                'sede_id' => $r->sede_id,
-                'empresa' => $r->sede?->empresa?->nombre,
-                'due_date' => $r->created_at->addDays(7),
-                'status' => $r->estado === 'borrador' ? 'in_progress' : 'completed',
-                'source' => 'manual',
-                'registry_code' => 'MET-' . $r->id,
+                'id'                   => $r->id,
+                'type'                 => 'report',
+                'title'                => $r->titulo,
+                'sede'                 => $r->sede?->nombre_sede,
+                'sede_id'              => $r->sede_id,
+                'empresa'              => $r->sede?->empresa?->nombre,
+                'due_date'             => $r->created_at->addDays(7),
+                'status'               => match($accionAdhoc) {
+                    'aprobado' => 'completed', 'pendiente' => 'pending_review',
+                    'corregir' => 'correction', default => 'in_progress',
+                },
+                'source'               => 'manual',
+                'registry_code'        => 'MET-' . $r->id,
+                'accion'               => $accionAdhoc,
+                'master_report_id'     => $r->id,
+                'observacion_revision' => $r->observacion_revision,
             ]);
         }
         $reports = $unifiedReports->values();

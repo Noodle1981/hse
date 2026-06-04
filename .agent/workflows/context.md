@@ -236,6 +236,6 @@ npm run dev
 
 ---
 
-*Documento actualizado: 20 Mayo 2026*  
-*Versión del Sistema: V2.1.0.0 Premium (Inertia + React)*  
-*Especialidad: Monolito Laravel con UI React táctica y moderna (Tactical Premium Dark)*  
+*Documento actualizado: 4 Junio 2026*
+*Versión del Sistema: V2.2.0.0 Premium (Inertia + React)*
+*Especialidad: Monolito Laravel con UI React táctica y moderna (Tactical Premium Dark)*

@@ -609,13 +609,27 @@ export default function MyAssignments({
                                                              )}
                                                          </div>
                                                      ) : (
-                                                         <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase italic tracking-widest border transition-all duration-300
-                                                             ${item?.status === 'completed' || item?.status === 'finalizado' ? 'text-emerald-500 bg-emerald-500/5 border-emerald-500/20' : 
-                                                               item?.status === 'in_progress' ? 'text-ep-primary bg-ep-primary/5 border-ep-primary/20 animate-pulse' : 'text-white/20 bg-white/5 border-white/5'}
-                                                         `}>
-                                                             {item?.status === 'in_progress' ? 'CURSO' : (item?.status === 'completed' || item?.status === 'finalizado') ? 'FINAL' : 'SOL'}
-                                                         </span>
-                                                     )}
+                                                          (() => {
+                                                              if (activeTab === 'reports') {
+                                                                  const badgeMap = {
+                                                                      'aprobado':  { label: 'APROBADO',  cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' },
+                                                                      'pendiente': { label: 'PENDIENTE', cls: 'text-amber-400 bg-amber-500/10 border-amber-500/20' },
+                                                                      'corregir':  { label: 'REVISIÓN',  cls: 'text-red-400 bg-red-500/10 border-red-500/30 animate-pulse' },
+                                                                      'reanudar':  { label: 'BORRADOR',  cls: 'text-indigo-300 bg-indigo-500/10 border-indigo-500/20' },
+                                                                      'ejecutar':  { label: 'PLANIF.',   cls: 'text-white/20 bg-white/5 border-white/5' },
+                                                                  };
+                                                                  const badge = badgeMap[item?.accion] ?? badgeMap['ejecutar'];
+                                                                  return <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase italic tracking-widest border transition-all duration-300 ${badge.cls}`}>{badge.label}</span>;
+                                                              }
+                                                              const statusCls = item?.status === 'completed' || item?.status === 'finalizado'
+                                                                  ? 'text-emerald-500 bg-emerald-500/5 border-emerald-500/20'
+                                                                  : item?.status === 'in_progress'
+                                                                  ? 'text-ep-primary bg-ep-primary/5 border-ep-primary/20 animate-pulse'
+                                                                  : 'text-white/20 bg-white/5 border-white/5';
+                                                              const statusLabel = item?.status === 'in_progress' ? 'CURSO' : (item?.status === 'completed' || item?.status === 'finalizado') ? 'FINAL' : 'SOL';
+                                                              return <span className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase italic tracking-widest border transition-all duration-300 ${statusCls}`}>{statusLabel}</span>;
+                                                          })()
+                                                      )}
                                                  </td>
 
                                                 <td className="px-8 py-4 text-right">
@@ -635,25 +649,75 @@ export default function MyAssignments({
                                                             </Link>
                                                         )}
 
-                                                        {/* Primary Action: Execute / Resume / OK */}
-                                                        {activeTab === 'reports' ? (
-                                                            item.status !== 'completed' && item.status !== 'finalizado' ? (
-                                                                <Link
-                                                                    href={safeRoute('master-reports.create', { 
-                                                                        sede_id: item.sede_id, 
-                                                                        periodo: `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}` 
-                                                                    })}
-                                                                    className={`px-5 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme.bg} ${theme.shadow || ''} outline-none`}
-                                                                >
-                                                                    {item?.status === 'borrador' ? 'Reanudar' : 'Ejecutar'}
-                                                                </Link>
-                                                            ) : (
-                                                                <div className="flex items-center gap-1.5 text-emerald-500 bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
-                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="4"/></svg>
-                                                                    <span className="text-[8px] font-black uppercase italic tracking-widest leading-none">OK</span>
-                                                                </div>
-                                                            )
-                                                        ) : (
+                                                        {/* Primary Action — 5-Estado Machine para Reports */}
+                                                         {activeTab === 'reports' ? (
+                                                             (() => {
+                                                                 const accion = item?.accion;
+                                                                 const reportId = item?.master_report_id;
+                                                                 const observacion = item?.observacion_revision;
+                                                                 const periodo = `${new Date().getFullYear()}-${String(selectedMonth).padStart(2, '0')}`;
+
+                                                                 // ✅ APROBADO — Enlace al informe final
+                                                                 if (accion === 'aprobado') {
+                                                                     return (
+                                                                         <Link
+                                                                             href={`/master-reports/${reportId}`}
+                                                                             className="px-4 py-2 text-[9px] font-black uppercase italic tracking-[0.2em] text-emerald-400 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/10 transition-all duration-300 flex items-center gap-1.5"
+                                                                         >
+                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeWidth="3"/></svg>
+                                                                             VER INFORME
+                                                                         </Link>
+                                                                     );
+                                                                 }
+
+                                                                 // ⏳ PENDIENTE — Solo lectura, esperando al gestor
+                                                                 if (accion === 'pendiente') {
+                                                                     return (
+                                                                         <span className="px-4 py-2 text-[9px] font-black uppercase italic tracking-[0.2em] text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-xl flex items-center gap-1.5">
+                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth="2"/></svg>
+                                                                             PENDIENTE GESTOR
+                                                                         </span>
+                                                                     );
+                                                                 }
+
+                                                                 // ⚠️ CORREGIR — Devuelto con observaciones
+                                                                 if (accion === 'corregir') {
+                                                                     return (
+                                                                         <Link
+                                                                             href={`/master-reports/${reportId}/edit`}
+                                                                             className="px-4 py-2 text-[9px] font-black uppercase italic tracking-[0.2em] text-red-400 bg-red-500/20 border border-red-500/50 rounded-xl shadow-[0_0_15px_rgba(239,68,68,0.3)] animate-pulse flex items-center gap-1.5"
+                                                                         >
+                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" strokeWidth="2"/></svg>
+                                                                             ⚠ CORREGIR
+                                                                         </Link>
+                                                                     );
+                                                                 }
+
+                                                                 // 📝 REANUDAR — Borrador en edición
+                                                                 if (accion === 'reanudar') {
+                                                                     return (
+                                                                         <Link
+                                                                             href={`/master-reports/${reportId}/edit`}
+                                                                             className="px-4 py-2 text-[9px] font-black uppercase italic tracking-[0.2em] text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 rounded-xl hover:bg-indigo-500/30 transition-all flex items-center gap-1.5"
+                                                                         >
+                                                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeWidth="2"/></svg>
+                                                                             REANUDAR
+                                                                         </Link>
+                                                                     );
+                                                                 }
+
+                                                                 // 🚀 EJECUTAR — No existe informe aún
+                                                                 return (
+                                                                     <Link
+                                                                         href={safeRoute('master-reports.create', { sede_id: item.sede_id, periodo })}
+                                                                         className={`px-5 py-2.5 text-white rounded-xl text-[9px] font-black uppercase italic tracking-[0.2em] shadow-xl hover:scale-105 transition-all ${theme.bg} ${theme.shadow || ''} outline-none flex items-center gap-1.5`}
+                                                                     >
+                                                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeWidth="3"/></svg>
+                                                                         EJECUTAR
+                                                                     </Link>
+                                                                 );
+                                                             })()
+                                                         ) : (
                                                             <div className="flex items-center gap-2">
                                                                 {/* Status indicator for completed items */}
                                                                 {(item.status === 'completed' || item.status === 'finalizado') && (

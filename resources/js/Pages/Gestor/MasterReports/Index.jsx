@@ -15,10 +15,21 @@ export default function Index({ auth, reports, filters }) {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'solicitado': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
+            case 'solicitado':   return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20';
             case 'en_redaccion': return 'text-ep-primary bg-ep-primary/10 border-ep-primary/20 shadow-[0_0_15px_rgba(246,146,57,0.1)]';
-            case 'finalizado': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20 shadow-[0_0_15px_rgba(52,211,153,0.1)]';
-            default: return 'text-gray-400 bg-gray-400/10 border-gray-400/20';
+            case 'finalizado':   return 'text-amber-400 bg-amber-400/10 border-amber-400/20 shadow-[0_0_15px_rgba(251,191,36,0.1)]';
+            case 'aprobado':     return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20 shadow-[0_0_15px_rgba(52,211,153,0.15)]';
+            default:             return 'text-gray-400 bg-gray-400/10 border-gray-400/20';
+        }
+    };
+
+    const getStatusLabel = (status) => {
+        switch (status) {
+            case 'solicitado':   return 'SOLICITADO';
+            case 'en_redaccion': return 'EN REDACCIÓN';
+            case 'finalizado':   return 'PENDIENTE';
+            case 'aprobado':     return 'APROBADO';
+            default:             return status.replace('_', ' ');
         }
     };
 
@@ -41,19 +52,11 @@ export default function Index({ auth, reports, filters }) {
             <div className="py-12 bg-[#11111d] min-h-screen">
                 <div className="max-w-[98rem] mx-auto sm:px-6 lg:px-8 space-y-10">
                     
-                    {/* HUD HEADER: ACCIONES */}
+                    {/* HUD HEADER */}
                     <div className="flex flex-col md:flex-row justify-end items-start md:items-center gap-8">
-                        {/* Solo Gestores pueden solicitar informes fuera de contrato */}
-                        {!auth.user.is_technician && (
-                            <Link
-                                href={route('master-reports.create')}
-                                className="group relative h-16 px-10 bg-ep-primary text-white text-xs font-black uppercase tracking-[0.2em] italic rounded-2xl shadow-2xl shadow-ep-primary/20 flex items-center gap-3 transition-all hover:scale-105 active:scale-95 overflow-hidden"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                                SOLICITAR INFORME MAESTRO
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M12 4v16m8-8H4"/></svg>
-                            </Link>
-                        )}
+                        <div className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] italic">
+                            Bóveda de Informes Consolidados
+                        </div>
                     </div>
 
                     {/* FILTRADO TÁCTICO */}
@@ -85,7 +88,8 @@ export default function Index({ auth, reports, filters }) {
                                     <option value="">TODOS</option>
                                     <option value="solicitado">SOLICITADOS</option>
                                     <option value="en_redaccion">EN REDACCIÓN</option>
-                                    <option value="finalizado">FINALIZADOS</option>
+                                    <option value="finalizado">PENDIENTES</option>
+                                    <option value="aprobado">APROBADOS</option>
                                 </select>
                             </div>
                         </form>
@@ -97,7 +101,7 @@ export default function Index({ auth, reports, filters }) {
                             <div key={report.id} className="group relative bg-[#141421]/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-8 shadow-2xl hover:border-ep-primary/30 transition-all duration-500 overflow-hidden flex flex-col">
                                 <div className="absolute top-0 right-0 p-6">
                                     <span className={`px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest border ${getStatusColor(report.estado)}`}>
-                                        {report.estado.replace('_', ' ')}
+                                        {getStatusLabel(report.estado)}
                                     </span>
                                 </div>
 
@@ -151,41 +155,63 @@ export default function Index({ auth, reports, filters }) {
 
                                 <div className="grid grid-cols-2 gap-3 mt-8">
                                     {auth.user.is_technician ? (
-                                        report.estado !== 'finalizado' ? (
+                                        // === VISTA TÉCNICO ===
+                                        report.estado === 'aprobado' ? (
+                                            // APROBADO: solo PDF
+                                            <a
+                                                href={route('master-reports.pdf', report.id)}
+                                                target="_blank"
+                                                className="col-span-2 py-5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-emerald-500/20 transition-all text-center flex items-center justify-center gap-2 shadow-lg"
+                                            >
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
+                                                DESCARGAR PDF APROBADO
+                                            </a>
+                                        ) : report.estado === 'finalizado' ? (
+                                            // PENDIENTE: solo lectura
+                                            <span className="col-span-2 py-5 bg-amber-500/10 text-amber-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-amber-500/20 text-center flex items-center justify-center gap-2">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeWidth="2"/></svg>
+                                                ESPERANDO REVISIÓN
+                                            </span>
+                                        ) : (
+                                            // EN REDACCIÓN / CORREGIR: editar
                                             <Link
                                                 href={route('master-reports.edit', report.id)}
                                                 className="col-span-2 py-5 bg-ep-primary text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl transition-all text-center shadow-xl shadow-ep-primary/20 relative overflow-hidden group/btn"
                                             >
                                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000"></div>
-                                                REDACTAR REPORTE
+                                                {report.observacion_revision ? '⚠ CORREGIR' : 'REDACTAR REPORTE'}
                                             </Link>
-                                        ) : (
-                                            <a
-                                                href={route('master-reports.pdf', report.id)}
-                                                target="_blank"
-                                                className="col-span-2 py-5 bg-white/5 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 transition-all text-center flex items-center justify-center gap-2 shadow-lg"
-                                            >
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
-                                                DESCARGAR PDF FINAL
-                                            </a>
                                         )
                                     ) : (
-                                        <>
-                                            <Link
-                                                href={route('master-reports.edit', report.id)}
-                                                className="px-4 py-4 bg-white/5 hover:bg-ep-primary text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 transition-all text-center shadow-lg"
-                                            >
-                                                {report.estado === 'finalizado' ? 'REVISAR' : 'EDITAR'}
-                                            </Link>
+                                        // === VISTA GESTOR ===
+                                        report.estado === 'aprobado' ? (
+                                            // APROBADO: solo ver PDF
                                             <a
                                                 href={route('master-reports.pdf', report.id)}
                                                 target="_blank"
-                                                className="px-4 py-4 bg-white/5 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 transition-all text-center flex items-center justify-center gap-2"
+                                                className="col-span-2 py-5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-emerald-500/20 transition-all text-center flex items-center justify-center gap-2 shadow-lg"
                                             >
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
-                                                PDF
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
+                                                PDF FINAL
                                             </a>
-                                        </>
+                                        ) : (
+                                            <>
+                                                <Link
+                                                    href={route('master-reports.edit', report.id)}
+                                                    className="px-4 py-4 bg-white/5 hover:bg-ep-primary text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 transition-all text-center shadow-lg"
+                                                >
+                                                    {report.estado === 'finalizado' ? 'REVISAR' : 'EDITAR'}
+                                                </Link>
+                                                <a
+                                                    href={route('master-reports.pdf', report.id)}
+                                                    target="_blank"
+                                                    className="px-4 py-4 bg-white/5 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 transition-all text-center flex items-center justify-center gap-2"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
+                                                    PDF
+                                                </a>
+                                            </>
+                                        )
                                     )}
                                 </div>
                             </div>

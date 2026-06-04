@@ -98,14 +98,22 @@ El flujo operativo comercial y técnico de XamaSafe sigue un ciclo continuo e in
    * **Capacitaciones:** Se dicta la capacitación a los empleados presentes. Se registran sus datos y firman en la pantalla de la tablet del técnico.
    * **Cierre de Visita (Check-out):** Al terminar la jornada en planta, el técnico pulsa "Finalizar Visita". El responsable de la Sede física del cliente firma en pantalla, se calcula la distancia GPS de salida, y la visita cambia a estado `signed`, enviándose de forma automática por email en formato PDF.
 
-6. **Paso 6: Consolidación y Reporte Maestro (Gestor):**
-   A fin de mes (o trimestre), el Gestor o el Técnico a cargo inician el Wizard de **Reportes Maestros** para recopilar lo ejecutado. El motor compara la data con el `AnnualPlan`, calcula el cumplimiento, y agrupa los desvíos/capacitaciones.
-   - **El Ciclo de Revisión y Aprobación**:
-     1. El Técnico edita el borrador (`'en_redaccion'`) y lo cierra como `'finalizado'`.
-     2. El informe se bloquea para el Técnico, y se habilita la **Sección 6: Evaluación del Gestor** para los supervisores.
-     3. El Gestor puede **Aprobar** (el estado cambia a `'aprobado'` y se limpia la observación de revisión) o **Observar/Devolver** (se guarda la observación en `observacion_revision` y el estado regresa a `'en_redaccion'`).
-     4. Si es devuelto, el Técnico visualiza una tarjeta Glassmorphic roja con el mensaje de retroalimentación en la cabecera de su Wizard para aplicar las correcciones y volver a finalizar.
-     5. Si es aprobado, se archiva de solo lectura para todos los roles de usuario.
+6. **Paso 6: Consolidación y Reporte Maestro (Técnico + Gestor):**
+   El Técnico inicia el Wizard de **Reportes Maestros** desde la pestaña "Métricas" en `MyAssignments.jsx`. El motor compara la data con el `AnnualPlan`, calcula el cumplimiento, y agrupa desvíos/capacitaciones.
+   - **Máquina de 5 Estados (Backend-Driven):**
+     El campo `accion` lo calcula el backend (`OperationController.php`) buscando el `MasterReport` por `periodo` (YYYY-MM) + `sede_id` + `user_id`, y lo transmite al frontend. El frontend `MyAssignments.jsx` solo renderiza en base a este campo:
+     1. **`ejecutar`** → No existe informe para ese periodo. Botón naranja "+ EJECUTAR".
+     2. **`reanudar`** → `estado = 'en_redaccion'`, sin observación. Enlace índigo "REANUDAR" al Wizard.
+     3. **`corregir`** → `estado = 'en_redaccion'` + `observacion_revision` no nulo. Enlace rojo pulsante "⚠ CORREGIR".
+     4. **`pendiente`** → `estado = 'finalizado'`. Badge ámbar solo-lectura "⏳ PENDIENTE GESTOR".
+     5. **`aprobado`** → `estado = 'aprobado'`. Enlace emerald "✅ VER INFORME" hacia `GET /master-reports/{id}`.
+   - **Regla de Unicidad:** Un técnico solo puede tener un informe por `periodo` (YYYY-MM) y `sede`. El backend previene la creación de duplicados.
+   - **El Ciclo de Revisión y Aprobación (Gestor)**:
+     1. El Técnico edita el borrador (`'en_redaccion'`) y lo cierra como `'finalizado'` desde el Wizard.
+     2. El informe se bloquea para el Técnico. La **Sección 6: Evaluación del Gestor** se habilita en `master-reports/{id}/edit`.
+     3. El Gestor puede **Aprobar** (estado → `'aprobado'`, se limpia `observacion_revision`) o **Observar/Devolver** (se guarda observación y estado → `'en_redaccion'`).
+     4. Si es devuelto, el Técnico ve una tarjeta Glassmorphic roja al inicio del Wizard con el feedback del Gestor.
+     5. Si es aprobado, queda archivado en solo-lectura para todos. La `MasterReports/Index.jsx` muestra solo el botón "PDF FINAL" para el gestor y "DESCARGAR PDF APROBADO" para el técnico.
 
 ---
 

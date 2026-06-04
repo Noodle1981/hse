@@ -266,6 +266,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [MasterReportController::class, 'index'])->name('index');
             Route::get('/create', [MasterReportController::class, 'create'])->name('create');
             Route::post('/', [MasterReportController::class, 'store'])->name('store');
+            Route::get('/{masterReport}', [MasterReportController::class, 'show'])->name('show');
             Route::get('/{masterReport}/edit', [MasterReportController::class, 'edit'])->name('edit');
             Route::put('/{masterReport}', [MasterReportController::class, 'update'])->name('update');
             Route::get('/{masterReport}/pdf', [MasterReportController::class, 'preview'])->name('pdf');

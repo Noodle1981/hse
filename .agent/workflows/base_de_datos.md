@@ -635,6 +635,8 @@ El sistema cuenta con las siguientes entidades principales:
 | `resumen_ejecutivo` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `observaciones_matriz` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `estado` | `varchar` | No ❌ | `'solicitado'` |  |
+> **Valores permitidos (CHECK constraint):** `solicitado`, `en_redaccion`, `finalizado`, `aprobado`, `archivado`
+> Migración: `2026_06_03_213939_add_aprobado_estado_to_master_reports_table`
 | `datos_anexo` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
@@ -649,6 +651,17 @@ El sistema cuenta con las siguientes entidades principales:
 - `solicitado_por` → vincula con `users`(`id`)
 - `user_id` → vincula con `users`(`id`)
 - `sede_id` → vincula con `sedes`(`id`)
+
+### 🔄 Máquina de Estados (`estado`)
+```
+solicitado → en_redaccion → finalizado → aprobado
+                  ↑               |
+                  └───────────────┘  (gestor devuelve con observacion_revision)
+```
+- **`solicitado`**: Informe iniciado pero no comenzado a redactar.
+- **`en_redaccion`**: Técnico redactando. Si `observacion_revision` ≠ null: fue devuelto por el gestor para corrección.
+- **`finalizado`**: Técnico envió al gestor para revisión. Solo lectura para técnico.
+- **`aprobado`**: Gestor aprobó. Documento archivado permanentemente. Solo lectura para todos.
 
 ---
 
