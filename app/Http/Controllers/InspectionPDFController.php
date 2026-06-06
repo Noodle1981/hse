@@ -3,54 +3,60 @@
 namespace App\Http\Controllers;
 
 use App\Models\DynamicInspection;
+use App\Services\BrandingService;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Http\Request;
 
 class InspectionPDFController extends Controller
 {
-    /**
-     * Genera y descarga el PDF de una inspección completada
-     */
     public function download(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $inspection = DynamicInspection::with([
             'checklist.sections',
             'user',
             'sede.empresa',
-            'answers.question'
+            'answers.question',
         ])->findOrFail($id);
 
-        // Usar Policy para autorización
         \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
 
-        $pdf = Pdf::loadView('pdf.inspection', [
+        $branding = BrandingService::forUser($inspection->user);
+
+        $pdf = Pdf::setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])->loadView('pdf.inspection', [
             'inspection' => $inspection,
             'answers' => $inspection->answers,
             'sections' => $inspection->checklist->sections->sortBy('order'),
+            'branding' => $branding,
         ]);
 
-        $filename = 'reporte_inspeccion_' . $inspection->id . '.pdf';
-        return $pdf->download($filename);
+        return $pdf->download('reporte_inspeccion_'.$inspection->id.'.pdf');
     }
 
     public function preview(int $id)
     {
+        ini_set('memory_limit', '512M');
+        set_time_limit(300);
+
         $inspection = DynamicInspection::with([
             'checklist.sections',
             'user',
             'sede.empresa',
-            'answers.question'
+            'answers.question',
         ])->findOrFail($id);
 
-        // Usar Policy para autorización
         \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
 
-        $pdf = Pdf::loadView('pdf.inspection', [
+        $branding = BrandingService::forUser($inspection->user);
+
+        $pdf = Pdf::setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])->loadView('pdf.inspection', [
             'inspection' => $inspection,
             'answers' => $inspection->answers,
             'sections' => $inspection->checklist->sections->sortBy('order'),
+            'branding' => $branding,
         ]);
 
-        return $pdf->stream('reporte_inspeccion_' . $inspection->id . '.pdf');
+        return $pdf->stream('reporte_inspeccion_'.$inspection->id.'.pdf');
     }
 }

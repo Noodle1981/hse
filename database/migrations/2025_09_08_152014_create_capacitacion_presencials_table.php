@@ -20,7 +20,7 @@ return new class extends Migration
             $table->boolean('estado')->default(false);
             $table->string('email_responsable', length: 50)->nullable();
             $table->timestamps();
-            
+
         });
     }
 

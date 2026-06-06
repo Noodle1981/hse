@@ -14,17 +14,21 @@ class DynamicQuestion extends Model
     protected $fillable = [
         'dynamic_checklist_id',
         'section_id',      // Nueva relación con sección (nullable)
-        'risk_id',         // Relación con Matriz de Riesgo
         'label',
         'type',
         'options',
         'min_value',
         'max_value',
         'failure_values',
+        'failure_logic',   // Nueva lógica de falla (fail_if_selected vs fail_if_missing)
         'order',
         'is_required',
         'help_text',
     ];
+
+    public const LOGIC_FAIL_IF_SELECTED = 'fail_if_selected';
+
+    public const LOGIC_FAIL_IF_MISSING = 'fail_if_missing';
 
     protected $casts = [
         'options' => 'array',
@@ -70,14 +74,6 @@ class DynamicQuestion extends Model
     public function section(): BelongsTo
     {
         return $this->belongsTo(ChecklistSection::class, 'section_id');
-    }
-
-    /**
-     * El riesgo asociado en la Matriz de Riesgos
-     */
-    public function risk(): BelongsTo
-    {
-        return $this->belongsTo(Risk::class, 'risk_id');
     }
 
     /**

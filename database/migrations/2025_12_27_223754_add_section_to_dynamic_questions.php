@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('dynamic_questions', function (Blueprint $table) {
             $table->foreignId('section_id')->nullable()->after('dynamic_checklist_id')->constrained('checklist_sections')->nullOnDelete();
-            
+
             $table->index('section_id');
         });
     }

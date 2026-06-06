@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Rules\ValidCuil;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StoreEmployeeRequest extends FormRequest
 {
@@ -12,7 +13,10 @@ class StoreEmployeeRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->isAdmin();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        return Auth::check() && $user->isAdmin();
     }
 
     /**
@@ -36,8 +40,6 @@ class StoreEmployeeRequest extends FormRequest
 
     /**
      * Get custom messages for validator errors.
-     *
-     * @return array
      */
     public function messages(): array
     {

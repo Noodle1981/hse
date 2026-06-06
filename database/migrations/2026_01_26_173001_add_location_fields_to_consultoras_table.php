@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('province')->nullable()->after('fiscal_address');
             $table->string('locality')->nullable()->after('province');
             // Nota: Para integración futura con Países, se podría agregar 'country' o 'country_code'
-            // $table->string('country_code')->default('AR')->after('locality'); 
+            // $table->string('country_code')->default('AR')->after('locality');
         });
     }
 

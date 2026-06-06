@@ -24,7 +24,9 @@ class HallazgoFoto extends Model
 
     // Tipos de foto
     public const TIPO_ANTES = 'antes';
+
     public const TIPO_DURANTE = 'durante';
+
     public const TIPO_DESPUES = 'despues';
 
     // ============================================
@@ -76,7 +78,10 @@ class HallazgoFoto extends Model
      */
     public function getUrlAttribute(): string
     {
-        return Storage::disk('public')->url($this->ruta_archivo);
+        /** @var \Illuminate\Filesystem\FilesystemAdapter $storage */
+        $storage = Storage::disk('public');
+
+        return $storage->url($this->ruta_archivo);
     }
 
     /**
@@ -130,7 +135,7 @@ class HallazgoFoto extends Model
             $i++;
         }
 
-        return round($bytes, 2) . ' ' . $units[$i];
+        return round($bytes, 2).' '.$units[$i];
     }
 
     /**
@@ -145,4 +150,3 @@ class HallazgoFoto extends Model
         });
     }
 }
-

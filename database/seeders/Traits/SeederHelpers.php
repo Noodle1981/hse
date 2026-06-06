@@ -2,16 +2,21 @@
 
 namespace Database\Seeders\Traits;
 
-use App\Models\{
-    DynamicChecklist, ChecklistSection, DynamicQuestion,
-    DynamicInspection, DynamicAnswer,
-    Training, TrainingAttendance,
-    Employee, EppItem, EppDelivery,
-    RiskMatrix, Risk, RiskControl, RiskEvaluation,
-    AnnualPlan, Category,
-    VisitCertificate, VisitTraining, VisitChecklistCompletion,
-    Hallazgo, Incidente
-};
+use App\Models\AnnualPlan;
+use App\Models\Category;
+use App\Models\ChecklistSection;
+use App\Models\DynamicAnswer;
+use App\Models\DynamicChecklist;
+use App\Models\DynamicInspection;
+use App\Models\DynamicQuestion;
+use App\Models\Employee as EmployeeModel;
+use App\Models\Hallazgo;
+use App\Models\Incidente;
+use App\Models\Training;
+use App\Models\TrainingAttendance;
+use App\Models\VisitCertificate;
+use App\Models\VisitChecklistCompletion;
+use App\Models\VisitTraining;
 
 trait SeederHelpers
 {
@@ -48,7 +53,6 @@ trait SeederHelpers
                     'min_value' => $config['min_value'] ?? null,
                     'max_value' => $config['max_value'] ?? null,
                     'failure_values' => $config['failure_values'] ?? null,
-                    'risk_id' => $config['risk_id'] ?? null,
                     'is_required' => in_array($config['type'], ['radio', 'select', 'text', 'number']),
                     'order' => $questionOrder++,
                 ]);
@@ -83,7 +87,6 @@ trait SeederHelpers
                 'min_value' => $config['min_value'] ?? null,
                 'max_value' => $config['max_value'] ?? null,
                 'failure_values' => $config['failure_values'] ?? null,
-                'risk_id' => $config['risk_id'] ?? null,
                 'is_required' => in_array($config['type'], ['radio', 'select', 'text', 'number']),
                 'order' => $questionOrder++,
             ]);
@@ -100,7 +103,7 @@ trait SeederHelpers
         foreach ($checklists as $checklist) {
             for ($i = 0; $i < $perChecklist; $i++) {
                 $tecnico = $tecnicos[array_rand($tecnicos)];
-                
+
                 $inspection = DynamicInspection::create([
                     'dynamic_checklist_id' => $checklist->id,
                     'user_id' => $tecnico->id,
@@ -137,8 +140,8 @@ trait SeederHelpers
         foreach ($trainingsData as $data) {
             $daysOffset = $data[2]; // Negativo = pasado, Positivo = futuro
             $date = now()->addDays($daysOffset);
-            
-            $checklistId = !empty($checklists) ? $checklists[array_rand($checklists)]->id : null;
+
+            $checklistId = ! empty($checklists) ? $checklists[array_rand($checklists)]->id : null;
 
             $training = Training::create([
                 'empresa_id' => $sede->empresa_id,
@@ -154,17 +157,19 @@ trait SeederHelpers
             ]);
 
             // Si es pasada, agregar asistentes (usar empleados si existen)
-            if ($daysOffset < 0 && !empty($employees)) {
+            if ($daysOffset < 0 && ! empty($employees)) {
                 $numAttendees = rand(min(5, count($employees)), count($employees));
                 $selectedEmployees = array_rand($employees, $numAttendees);
-                if (!is_array($selectedEmployees)) $selectedEmployees = [$selectedEmployees];
-                
+                if (! is_array($selectedEmployees)) {
+                    $selectedEmployees = [$selectedEmployees];
+                }
+
                 foreach ($selectedEmployees as $empIndex) {
                     $employee = $employees[$empIndex];
                     TrainingAttendance::create([
                         'training_id' => $training->id,
                         'user_id' => null, // Empleado, no usuario del sistema
-                        'employee_name' => $employee->name . ' ' . $employee->last_name,
+                        'employee_name' => $employee->name.' '.$employee->last_name,
                         'dni' => $employee->dni,
                         'signature' => $this->getDefaultSignature(),
                     ]);
@@ -179,9 +184,9 @@ trait SeederHelpers
     protected function createEmployees($sede, array $employeesData): array
     {
         $employees = [];
-        
+
         foreach ($employeesData as $data) {
-            $employees[] = Employee::create([
+            $employees[] = EmployeeModel::create([
                 'name' => $data[0],
                 'last_name' => $data[1],
                 'dni' => $data[2],
@@ -192,134 +197,8 @@ trait SeederHelpers
                 'is_active' => true,
             ]);
         }
-        
+
         return $employees;
-    }
-
-    /**
-     * Crear items de EPP
-     */
-    protected function createEppItems(array $itemsData): array
-    {
-        $items = [];
-        
-        foreach ($itemsData as $data) {
-            $items[] = EppItem::firstOrCreate(
-                ['nombre' => $data[0]],
-                [
-                    'tipo' => $data[1],
-                    'codigo_norma' => $data[2],
-                    'vida_util_meses' => $data[3],
-                    'is_active' => true,
-                ]
-            );
-        }
-        
-        return $items;
-    }
-
-    /**
-     * Crear entregas de EPP
-     */
-    protected function createEppDeliveries($sede, array $employees, array $tecnicos, array $eppItems, int $count = 10): void
-    {
-        for ($i = 0; $i < $count; $i++) {
-            $employee = $employees[array_rand($employees)];
-            $tecnico = $tecnicos[array_rand($tecnicos)];
-            
-            $delivery = EppDelivery::create([
-                'employee_id' => $employee->id,
-                'user_id' => $tecnico->id,
-                'delivery_date' => now()->subDays(rand(1, 90)),
-                'observaciones' => $i % 2 == 0 ? 'Entrega de renovación' : 'Entrega por ingreso',
-                'signature' => $this->getDefaultSignature(),
-            ]);
-
-            // Agregar items a la entrega (2-4 items por entrega)
-            $itemCount = rand(2, 4);
-            $selectedItems = array_rand($eppItems, min($itemCount, count($eppItems)));
-            if (!is_array($selectedItems)) $selectedItems = [$selectedItems];
-            
-            foreach ($selectedItems as $itemIndex) {
-                $delivery->items()->attach($eppItems[$itemIndex]->id, [
-                    'cantidad' => rand(1, 3),
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Crear matriz de riesgos
-     */
-    protected function createRiskMatrix($sede, $tecnico, string $title, string $description, string $area, string $process, array $risksData): void
-    {
-        $matrix = RiskMatrix::create([
-            'title' => $title,
-            'description' => $description,
-            'area' => $area,
-            'process' => $process,
-            'empresa_id' => $sede->empresa_id,
-            'sede_id' => $sede->id,
-            'user_id' => $tecnico->id,
-            'status' => 'active',
-        ]);
-
-        $order = 1;
-        foreach ($risksData as $riskData) {
-            $risk = $matrix->risks()->create([
-                'hazard' => $riskData['hazard'],
-                'type' => $riskData['type'],
-                'consequence' => $riskData['consequence'],
-                'order' => $order++,
-            ]);
-
-            // Crear controles
-            foreach ($riskData['controls'] as $controlData) {
-                $risk->controls()->create([
-                    'measure' => $controlData[0],
-                    'type' => $controlData[1],
-                ]);
-            }
-
-            // Crear evaluación
-            if (isset($riskData['probability']) && isset($riskData['severity'])) {
-                $probability = $riskData['probability'];
-                $severity = $riskData['severity'];
-                $score = $probability * $severity;
-                
-                // Determinar nivel según matriz 5x5
-                if ($score >= 15) {
-                    $level = 'Crítico';
-                } elseif ($score >= 10) {
-                    $level = 'Alto';
-                } elseif ($score >= 5) {
-                    $level = 'Medio';
-                } else {
-                    $level = 'Bajo';
-                }
-
-                // Determinar color según nivel
-                $color = match($level) {
-                    'Crítico' => '#dc2626', // red-600
-                    'Alto' => '#ea580c', // orange-600
-                    'Medio' => '#ca8a04', // yellow-600
-                    'Bajo' => '#16a34a', // green-600
-                    default => '#6b7280', // gray-500
-                };
-
-                RiskEvaluation::create([
-                    'risk_id' => $risk->id,
-                    'user_id' => $tecnico->id,
-                    'probability' => $probability,
-                    'severity' => $severity,
-                    'score' => $score,
-                    'level' => $level,
-                    'color' => $color,
-                    'justification' => 'Evaluación inicial',
-                    'evaluation_date' => now()->subDays(rand(1, 30)),
-                ]);
-            }
-        }
     }
 
     /**
@@ -330,7 +209,7 @@ trait SeederHelpers
         $year = now()->year;
         $monthColumns = [
             'january', 'february', 'march', 'april', 'may', 'june',
-            'july', 'august', 'september', 'october', 'november', 'december'
+            'july', 'august', 'september', 'october', 'november', 'december',
         ];
 
         // Crear una actividad por cada checklist
@@ -338,23 +217,25 @@ trait SeederHelpers
             // Seleccionar meses aleatorios para esta actividad (3-6 meses)
             $numMonths = rand(3, 6);
             $selectedMonths = array_rand(array_flip($monthColumns), $numMonths);
-            if (!is_array($selectedMonths)) $selectedMonths = [$selectedMonths];
-            
+            if (! is_array($selectedMonths)) {
+                $selectedMonths = [$selectedMonths];
+            }
+
             // Preparar datos base
             $data = [
                 'sede_id' => $sede->id,
                 'category' => 'Inspección',
                 'activity_name' => $checklist->title,
-                'activity_code' => 'INSP-' . str_pad($index + 1, 3, '0', STR_PAD_LEFT),
+                'activity_code' => 'INSP-'.str_pad($index + 1, 3, '0', STR_PAD_LEFT),
                 'checklist_id' => $checklist->id,
                 'year' => $year,
             ];
-            
+
             // Agregar meses seleccionados como true
             foreach ($selectedMonths as $month) {
                 $data[$month] = true;
             }
-            
+
             AnnualPlan::create($data);
         }
     }
@@ -368,21 +249,25 @@ trait SeederHelpers
         $shouldFail = rand(1, 10) === 1;
 
         if ($shouldFail) {
-            if (!empty($question->failure_values)) {
+            if (! empty($question->failure_values)) {
                 return is_array($question->failure_values) ? $question->failure_values[array_rand($question->failure_values)] : $question->failure_values;
             }
             if ($question->type === 'number') {
-                if ($question->min_value !== null) return (float)$question->min_value - 5.0;
-                if ($question->max_value !== null) return (float)$question->max_value + 5.0;
+                if ($question->min_value !== null) {
+                    return (float) $question->min_value - 5.0;
+                }
+                if ($question->max_value !== null) {
+                    return (float) $question->max_value + 5.0;
+                }
             }
         }
 
-        return match($question->type) {
+        return match ($question->type) {
             'text' => $this->generateTextValue($question->label),
             'textarea' => rand(0, 1) ? 'Sin observaciones' : 'Requiere seguimiento',
             'date' => now()->subDays(rand(1, 30))->format('Y-m-d'),
-            'number' => $question->min_value !== null && $question->max_value !== null 
-                        ? rand((int)$question->min_value, (int)$question->max_value) 
+            'number' => $question->min_value !== null && $question->max_value !== null
+                        ? rand((int) $question->min_value, (int) $question->max_value)
                         : rand(10, 100),
             'radio' => $question->options ? $question->options[array_rand($question->options)] : 'Sí',
             'select' => $question->options ? $question->options[array_rand($question->options)] : 'Bueno',
@@ -398,18 +283,18 @@ trait SeederHelpers
     private function generateTextValue(string $label): string
     {
         $lower = strtolower($label);
-        
+
         if (str_contains($lower, 'sector') || str_contains($lower, 'área')) {
             return ['Producción', 'Almacén', 'Oficina', 'Taller', 'Depósito'][rand(0, 4)];
         }
         if (str_contains($lower, 'número') || str_contains($lower, 'n°')) {
-            return 'N-' . rand(100, 999);
+            return 'N-'.rand(100, 999);
         }
         if (str_contains($lower, 'producto')) {
             return ['Sanitizante A', 'Desinfectante B', 'Limpiador C'][rand(0, 2)];
         }
-        
-        return 'Valor-' . rand(1, 100);
+
+        return 'Valor-'.rand(1, 100);
     }
 
     /**
@@ -427,8 +312,8 @@ trait SeederHelpers
     {
         $nombres = ['Juan', 'María', 'Carlos', 'Ana', 'Pedro', 'Laura', 'José', 'Sofía', 'Luis', 'Carmen'];
         $apellidos = ['García', 'Rodríguez', 'Martínez', 'López', 'González', 'Pérez', 'Sánchez', 'Ramírez'];
-        
-        return $nombres[array_rand($nombres)] . ' ' . $apellidos[array_rand($apellidos)];
+
+        return $nombres[array_rand($nombres)].' '.$apellidos[array_rand($apellidos)];
     }
 
     /**
@@ -444,7 +329,9 @@ trait SeederHelpers
      */
     protected function createDemoAssignments(array $checklists, $tecnico, $sede): void
     {
-        if (empty($checklists)) return;
+        if (empty($checklists)) {
+            return;
+        }
 
         // 2 Asignaciones VENCIDAS (overdue)
         \App\Models\ChecklistAssignment::create([
@@ -525,6 +412,7 @@ trait SeederHelpers
 
         echo "   📋 7 asignaciones creadas (2 vencidas, 5 pendientes)\n";
     }
+
     /**
      * Crear tareas con fecha de vencimiento específica (Ej: 31 Enero)
      */
@@ -533,10 +421,12 @@ trait SeederHelpers
         // 1. Asignaciones de Checklists (3 tareas)
         $tasksCount = 3;
         for ($i = 0; $i < $tasksCount; $i++) {
-            if (empty($checklists)) break;
-            
+            if (empty($checklists)) {
+                break;
+            }
+
             $checklist = $checklists[$i % count($checklists)];
-            
+
             \App\Models\ChecklistAssignment::create([
                 'dynamic_checklist_id' => $checklist->id,
                 'user_id' => $tecnico->id,
@@ -544,7 +434,7 @@ trait SeederHelpers
                 'empresa_id' => $sede->empresa_id,
                 'due_date' => $date,
                 'status' => 'pending',
-                'notes' => 'Tarea prioritaria con vencimiento: ' . $date->format('d/m/Y'),
+                'notes' => 'Tarea prioritaria con vencimiento: '.$date->format('d/m/Y'),
             ]);
         }
     }
@@ -557,11 +447,11 @@ trait SeederHelpers
         $topics = [
             'Seguridad Operativa Avanzada',
             'Protocolos de Emergencia 2026',
-            'Actualización Normativa ISO 45001'
+            'Actualización Normativa ISO 45001',
         ];
 
         foreach ($topics as $topic) {
-            $checklistId = !empty($checklists) ? $checklists[array_rand($checklists)]->id : null;
+            $checklistId = ! empty($checklists) ? $checklists[array_rand($checklists)]->id : null;
 
             Training::create([
                 'empresa_id' => $sede->empresa_id,
@@ -579,47 +469,9 @@ trait SeederHelpers
     }
 
     /**
-     * Crear solicitudes de EPP pendientes
-     */
-    protected function createPendingEppRequests($tecnico, $sede, $date): void
-    {
-        // Solicitudes de EPP (Si existe el modelo EppDeliveryRequest o similar)
-        if (!class_exists(\App\Models\EppDeliveryRequest::class)) return;
-
-        // Necesitamos empleados para asignar la solicitud
-        $employees = \App\Models\Employee::where('sede_id', $sede->id)->inRandomOrder()->take(3)->get();
-        if ($employees->isEmpty()) return;
-        
-        // Crear 3 solicitudes (o tantas como empleados encontremos hasta 3)
-        foreach ($employees as $employee) {
-            // Items aleatorios para esta solicitud
-            $items = EppItem::inRandomOrder()->take(rand(1, 3))->get();
-            if ($items->isEmpty()) continue;
-
-            $itemsJson = $items->map(function($item) {
-                return [
-                    'item_id' => $item->id,
-                    'cantidad' => rand(1, 2),
-                    'tipo' => $item->tipo
-                ];
-            })->toArray();
-
-            \App\Models\EppDeliveryRequest::create([
-                 'empresa_id' => $sede->empresa_id,
-                 'sede_id' => $sede->id,
-                 'employee_id' => $employee->id,
-                 'requested_by_user_id' => $tecnico->id,
-                 'status' => 'pending',
-                 'items' => $itemsJson,
-                 'notes' => 'Solicitud urgente. Vencimiento requerido: ' . $date->format('d/m/Y'),
-             ]);
-        }
-    }
-
-    /**
      * Crear una visita completa con integraciones
      */
-    protected function createCompleteVisit($sede, $tecnico, $date, array $checklists, array $employees, ?Risk $riskToFail = null): VisitCertificate
+    protected function createCompleteVisit($sede, $tecnico, $date, array $checklists, array $employees): VisitCertificate
     {
         $visit = VisitCertificate::create([
             'user_id' => $tecnico->id,
@@ -629,7 +481,7 @@ trait SeederHelpers
             'start_time' => $date->copy()->setTime(9, 0),
             'end_time' => $date->copy()->setTime(17, 0),
             'status' => 'signed',
-            'code' => 'VIS-' . $date->format('Ymd') . '-' . rand(100, 999),
+            'code' => 'VIS-'.$date->format('Ymd').'-'.rand(100, 999),
             'responsible_name' => 'Juan Responsable',
             'general_observations' => 'Visita de control programada 2025.',
             'signature' => $this->getDefaultSignature(),
@@ -668,8 +520,7 @@ trait SeederHelpers
             // Generar respuestas (algunas pueden fallar si el riesgo es coincidente)
             $responsesForJson = [];
             foreach ($checklist->questions as $question) {
-                $isTargetRisk = ($riskToFail && $question->risk_id == $riskToFail->id);
-                $value = $isTargetRisk ? $this->generateFailureValue($question) : $this->generateAnswerValue($question);
+                $value = $this->generateAnswerValue($question);
 
                 DynamicAnswer::create([
                     'dynamic_inspection_id' => $inspection->id,
@@ -682,13 +533,13 @@ trait SeederHelpers
                 // Si falló, crear un Hallazgo vinculado
                 $tempAnswer = new DynamicAnswer(['dynamic_question_id' => $question->id, 'value' => $value]);
                 if ($tempAnswer->isFailure()) {
-                    $this->createHallazgo($visit, $tecnico, $question, $riskToFail);
+                    $this->createHallazgo($visit, $tecnico, $question);
                 }
             }
-            
+
             // Actualizar el JSON de respuestas en la constancia
             $completion->update(['responses' => $responsesForJson]);
-            
+
             // Evaluar y guardar resultado final de la inspección (preservando fecha histórica)
             $inspection->update([
                 'result' => $inspection->evaluateResult(),
@@ -708,17 +559,16 @@ trait SeederHelpers
     /**
      * Crear un Hallazgo vinculado a un fallo
      */
-    protected function createHallazgo($visit, $tecnico, $question, ?Risk $risk = null): Hallazgo
+    protected function createHallazgo($visit, $tecnico, $question): Hallazgo
     {
         return Hallazgo::create([
             'sede_id' => $visit->sede_id,
             'user_id' => $tecnico->id,
-            'titulo' => 'Desviación detectada: ' . $question->label,
+            'titulo' => 'Desviación detectada: '.$question->label,
             'descripcion' => 'Se detectó un incumplimiento crítico durante la inspección del control operativo.',
             'criticidad' => 'alto',
             'estado' => 'pendiente',
             'fecha_deteccion' => $visit->visit_date,
-            'risk_id' => $risk ? $risk->id : $question->risk_id,
             'visit_certificate_id' => $visit->id,
             'question_id' => $question->id,
         ]);
@@ -736,7 +586,7 @@ trait SeederHelpers
             'tipo' => 'incidente',
             'gravedad' => 'moderado',
             'fecha_ocurrencia' => $date,
-            'titulo' => 'Evento adverso relacionado con ' . $hallazgo->titulo,
+            'titulo' => 'Evento adverso relacionado con '.$hallazgo->titulo,
             'descripcion' => 'Incidente derivado de un fallo en el control preventivo detectado previamente.',
             'estado' => 'investigacion',
             'visit_certificate_id' => $hallazgo->visit_certificate_id,
@@ -745,12 +595,13 @@ trait SeederHelpers
 
     private function generateFailureValue($question)
     {
-        if (!empty($question->failure_values)) {
+        if (! empty($question->failure_values)) {
             return is_array($question->failure_values) ? $question->failure_values[array_rand($question->failure_values)] : $question->failure_values;
         }
         if ($question->type === 'number') {
-            return ($question->min_value !== null) ? (float)$question->min_value - 10 : (float)$question->max_value + 10;
+            return ($question->min_value !== null) ? (float) $question->min_value - 10 : (float) $question->max_value + 10;
         }
+
         return 'Fallo';
     }
 }

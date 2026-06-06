@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Crear tabla de Visitas (Contenedor Principal)
-        if (!Schema::hasTable('visit_certificates')) {
+        if (! Schema::hasTable('visit_certificates')) {
             Schema::create('visit_certificates', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null')->comment('Técnico responsable');
@@ -29,7 +29,7 @@ return new class extends Migration
         }
 
         // 2. Tabla para vincular Checklists completados a la Visita
-        if (!Schema::hasTable('visit_checklist_completions')) {
+        if (! Schema::hasTable('visit_checklist_completions')) {
             Schema::create('visit_checklist_completions', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('visit_certificate_id')->constrained()->onDelete('cascade');
@@ -42,7 +42,7 @@ return new class extends Migration
         }
 
         // 3. Tabla para Capacitaciones impartidas durante la Visita
-        if (!Schema::hasTable('visit_trainings')) {
+        if (! Schema::hasTable('visit_trainings')) {
             Schema::create('visit_trainings', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('visit_certificate_id')->constrained()->onDelete('cascade');
@@ -59,7 +59,7 @@ return new class extends Migration
         }
 
         // 4. Tabla para Entregas de EPP durante la Visita
-        if (!Schema::hasTable('visit_epp_deliveries')) {
+        if (! Schema::hasTable('visit_epp_deliveries')) {
             Schema::create('visit_epp_deliveries', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('visit_certificate_id')->constrained()->onDelete('cascade');
@@ -73,30 +73,30 @@ return new class extends Migration
 
         // 5. Agregar campos a tabla Hallazgos
         Schema::table('hallazgos', function (Blueprint $table) {
-            if (!Schema::hasColumn('hallazgos', 'visit_certificate_id')) {
+            if (! Schema::hasColumn('hallazgos', 'visit_certificate_id')) {
                 $table->foreignId('visit_certificate_id')->nullable()->constrained()->onDelete('set null');
             }
-            if (!Schema::hasColumn('hallazgos', 'checklist_completion_id')) {
+            if (! Schema::hasColumn('hallazgos', 'checklist_completion_id')) {
                 $table->foreignId('checklist_completion_id')->nullable()->constrained('visit_checklist_completions')->onDelete('set null');
             }
-            if (!Schema::hasColumn('hallazgos', 'question_id')) {
+            if (! Schema::hasColumn('hallazgos', 'question_id')) {
                 $table->foreignId('question_id')->nullable()->constrained('dynamic_questions')->onDelete('set null');
             }
         });
 
         // 6. Agregar campos a tabla Incidentes
         Schema::table('incidentes', function (Blueprint $table) {
-            if (!Schema::hasColumn('incidentes', 'visit_certificate_id')) {
+            if (! Schema::hasColumn('incidentes', 'visit_certificate_id')) {
                 $table->foreignId('visit_certificate_id')->nullable()->constrained()->onDelete('set null');
             }
         });
 
         // 7. Modificar tabla Trainings para soporte Ad-hoc
         Schema::table('trainings', function (Blueprint $table) {
-            if (!Schema::hasColumn('trainings', 'created_by_user_id')) {
+            if (! Schema::hasColumn('trainings', 'created_by_user_id')) {
                 $table->foreignId('created_by_user_id')->nullable()->constrained('users')->onDelete('set null');
             }
-            if (!Schema::hasColumn('trainings', 'is_template')) {
+            if (! Schema::hasColumn('trainings', 'is_template')) {
                 $table->boolean('is_template')->default(true);
             }
             // status ya existe en la tabla original

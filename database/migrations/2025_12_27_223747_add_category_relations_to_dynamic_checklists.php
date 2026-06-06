@@ -14,10 +14,10 @@ return new class extends Migration
         Schema::table('dynamic_checklists', function (Blueprint $table) {
             $table->foreignId('category_id')->nullable()->after('description')->constrained();
             $table->foreignId('subcategory_id')->nullable()->after('category_id')->constrained();
-            
+
             // Código de registro normativo (ej: REG-001-OT, EP-REG-008)
             $table->string('registry_code', 50)->nullable()->after('subcategory_id');
-            
+
             $table->index('category_id');
             $table->index('subcategory_id');
             $table->index('registry_code');

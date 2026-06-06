@@ -25,6 +25,15 @@ class VisitCertificate extends Model
         'code',
         'responsible_name',
         'date_firma_responsable',
+        'token_expires_at',
+        'token_used',
+        'horas_gabinete_estimadas',
+        'checkin_lat',
+        'checkin_lng',
+        'checkout_lat',
+        'checkout_lng',
+        'gps_verified',
+        'visit_type',
     ];
 
     protected $casts = [
@@ -32,6 +41,14 @@ class VisitCertificate extends Model
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'date_firma_responsable' => 'datetime',
+        'token_expires_at' => 'datetime',
+        'token_used' => 'boolean',
+        'horas_gabinete_estimadas' => 'float',
+        'checkin_lat' => 'float',
+        'checkin_lng' => 'float',
+        'checkout_lat' => 'float',
+        'checkout_lng' => 'float',
+        'gps_verified' => 'boolean',
     ];
 
     // Relaciones principales
@@ -61,11 +78,6 @@ class VisitCertificate extends Model
         return $this->hasMany(VisitTraining::class);
     }
 
-    public function eppDeliveries()
-    {
-        return $this->hasMany(VisitEppDelivery::class);
-    }
-
     public function hallazgos()
     {
         return $this->hasMany(Hallazgo::class);
@@ -79,7 +91,7 @@ class VisitCertificate extends Model
     // Helpers
     public function getStatusBadgeAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'draft' => 'bg-gray-100 text-gray-800',
             'in_progress' => 'bg-blue-100 text-blue-800',
             'completed' => 'bg-green-100 text-green-800',
@@ -90,7 +102,7 @@ class VisitCertificate extends Model
 
     public function getStatusLabelAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'draft' => 'Borrador',
             'in_progress' => 'En Progreso',
             'completed' => 'Completada',
@@ -107,5 +119,26 @@ class VisitCertificate extends Model
     public function getResponsibleSignatureAttribute()
     {
         return $this->signature;
+    }
+
+    // Legacy Aliases for GeneradorConstancia compatibility
+    public function getFechaVisitaAttribute()
+    {
+        return $this->visit_date;
+    }
+
+    public function getTipoVisitaAttribute()
+    {
+        return $this->status === 'signed' ? 'Certificada' : 'Técnica';
+    }
+
+    public function getFirmaResponsableAttribute()
+    {
+        return $this->signature;
+    }
+
+    public function getObservacionAttribute()
+    {
+        return $this->general_observations;
     }
 }

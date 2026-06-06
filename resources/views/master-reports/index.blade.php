@@ -1,11 +1,5 @@
-<x-layouts.app title="Informes Mensuales Maestros">
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    @livewire('master-reports.master-report-index')
-                </div>
-            </div>
-        </div>
+<x-layouts.app title="Informe Maestro">
+    <div class="px-4 sm:px-6 lg:px-8 pt-8 w-full max-w-9xl mx-auto">
+        @livewire('master-reports.master-report-index')
     </div>
 </x-layouts.app>

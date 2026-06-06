@@ -1,21 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\AdministrationController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ChecklistController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ContractController;
+use App\Http\Controllers\FindingController;
+use App\Http\Controllers\IncidenteController;
+use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\InspectionPDFController;
-use App\Livewire\Checklists\Dashboard;
-use App\Livewire\Admin\AdminDashboard;
-use App\Livewire\Technician\TechnicianDashboard;
-use App\Livewire\Checklists\ChecklistIndex;
-use App\Livewire\Checklists\ChecklistBuilder;
-use App\Livewire\Checklists\ChecklistFiller;
-use App\Livewire\Checklists\InspectionHistory;
-use App\Livewire\Checklists\InspectionShow;
-use App\Livewire\Auth\Login;
-use App\Livewire\Categories\CategoryIndex;
-use App\Livewire\Categories\CategoryBuilder as CategoryBuilderComponent;
-use App\Livewire\Categories\SubcategoryManager;
+use App\Http\Controllers\MasterReportController;
+use App\Http\Controllers\OperationController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SignatureApprovalController;
+use App\Http\Controllers\TrainingController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,8 +26,12 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('/login', Login::class)->name('login');
-Route::get('/constancia/firmar/{token}', \App\Livewire\Public\PublicSignature::class)->name('constancia.firmar');
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+Route::get('/constancia/firmar/{token}', function () {
+    // TODO: Migrar PublicSignature a React
+    abort(404, 'Vista de firma pública pendiente de migración a React.');
+})->name('constancia.firmar');
 
 /*
 |--------------------------------------------------------------------------
@@ -37,156 +41,231 @@ Route::get('/constancia/firmar/{token}', \App\Livewire\Public\PublicSignature::c
 Route::middleware(['auth'])->group(function () {
     // Redirect condicional al dashboard correcto
     Route::get('/dashboard', function () {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
         if ($user->isSuperAdmin()) {
             return redirect()->route('admin.dashboard');
         }
-        if ($user->isAdmin()) {
-            return redirect()->route('gestor.dashboard');
+        if ($user->isTechnician()) {
+            return redirect()->route('tecnico.checklists.tasks.index');
         }
-        return redirect()->route('tecnico.dashboard');
+
+        // Redireccionar al Dashboard de Gestor por defecto para Administradores/Otros
+        return redirect()->route('gestor.dashboard');
     })->name('dashboard');
-    
+
+    Route::get('/perfil', [ProfileController::class, 'show'])->name('profile');
+    Route::post('/perfil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::post('/perfil/signature', [ProfileController::class, 'updateSignature'])->name('profile.signature');
+
     /*
     |--------------------------------------------------------------------------
     | Rutas GESTOR (Prefijo: /gestor)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador'])->group(function() {
-        // Dashboard
-        Route::get('/dashboard', AdminDashboard::class)->name('dashboard');
+    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador'])->group(function () {
+        // Dashboard del Gestor (principal)
+        Route::get('/dashboard', [AdministrationController::class, 'gestorDashboard'])->name('dashboard');
 
         // Visitas
         Route::prefix('visits')->name('visits.')->group(function () {
-            Route::get('/history', \App\Livewire\Visits\VisitHistory::class)->name('history');
-            Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
             Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
             Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
             Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
             Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 
         // Administración
-        Route::get('/administracion', \App\Livewire\Admin\AdministrationHub::class)->name('administration.hub');
-        
-        Route::prefix('users')->group(function () {
-            Route::get('/', \App\Livewire\Users\UserManager::class)->name('users.index');
+        Route::get('/administracion', [AdministrationController::class, 'hub'])->name('administration.hub');
+
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::get('/dashboard', [AdministrationController::class, 'dashboard'])->name('dashboard');
+            Route::get('/hub', [AdministrationController::class, 'hub'])->name('hub');
         });
-        
+
+        Route::prefix('users')->group(function () {
+            Route::get('/', [AdministrationController::class, 'users'])->name('users.index');
+            Route::post('/save', [AdministrationController::class, 'saveUser'])->name('users.save');
+            Route::delete('/{user}', [AdministrationController::class, 'deleteUser'])->name('users.delete');
+            Route::post('/{id}/restore', [AdministrationController::class, 'restoreUser'])->name('users.restore');
+            Route::get('/pending-signatures', [SignatureApprovalController::class, 'pending'])->name('signatures.pending');
+            Route::post('/{user}/approve-signature', [SignatureApprovalController::class, 'approve'])->name('signatures.approve');
+            Route::post('/{user}/reject-signature', [SignatureApprovalController::class, 'reject'])->name('signatures.reject');
+        });
+
         Route::prefix('tecnicos')->group(function () {
-            Route::get('/', \App\Livewire\Users\TechnicianManager::class)->name('technicians.index');
+            Route::get('/', [AdministrationController::class, 'technicians'])->name('technicians.index');
+            Route::post('/{user}/assign', [AdministrationController::class, 'assignSede'])->name('technicians.assign');
+            Route::post('/{user}/remove', [AdministrationController::class, 'removeAssignment'])->name('technicians.remove');
+        });
+
+        // API para componentes React (Administración)
+        Route::prefix('api')->group(function () {
+            Route::get('/companies/{empresa}/sites', [AdministrationController::class, 'getCompanySites']);
+            Route::get('/technicians/{user}/assignments', [AdministrationController::class, 'getTechnicianAssignments']);
         });
 
         Route::prefix('companies')->name('companies.')->group(function () {
-            Route::get('/', \App\Livewire\Companies\CompanyIndex::class)->name('index');
-            Route::get('/create', \App\Livewire\Companies\CompanyBuilder::class)->name('create');
-            Route::get('/{id}/edit', \App\Livewire\Companies\CompanyBuilder::class)->name('edit');
-            Route::get('/{empresa}/locations', \App\Livewire\Companies\LocationManager::class)->name('locations');
+            Route::get('/', [CompanyController::class, 'index'])->name('index');
+            Route::get('/create', [CompanyController::class, 'create'])->name('create');
+            Route::get('/{id}/edit', [CompanyController::class, 'edit'])->name('edit');
+            Route::post('/save', [CompanyController::class, 'save'])->name('save');
+            Route::delete('/{company}', [CompanyController::class, 'destroy'])->name('delete');
+            Route::post('/{id}/restore', [CompanyController::class, 'restore'])->name('restore');
+
+            // Sedes (Locations)
+            Route::prefix('{empresa}/sedes')->name('locations')->group(function () {
+                Route::get('/', [CompanyController::class, 'locations']);
+                Route::post('/save', [CompanyController::class, 'saveLocation'])->name('.save');
+            });
+        });
+
+        Route::prefix('sedes')->name('companies.locations.')->group(function () {
+            Route::delete('/{sede}', [CompanyController::class, 'deleteLocation'])->name('delete');
+            Route::post('/{id}/restore', [CompanyController::class, 'restoreLocation'])->name('restore');
+            Route::post('/{sede}/toggle-user', [CompanyController::class, 'toggleUserAssignment'])->name('toggle-user');
         });
 
         Route::prefix('assignments')->name('assignments.')->group(function () {
-            Route::get('/', \App\Livewire\Assignments\AssignmentManager::class)->name('index');
-        });
-        
-        /*
-        Route::prefix('projects')->name('projects.')->group(function () {
-            Route::get('/', \App\Livewire\Companies\ProjectManager::class)->name('index'); // Si existiera
-        });
-        */
-
-        // Gestión EPP
-         Route::prefix('epp')->name('epp.')->group(function () {
-            Route::get('/catalog', \App\Livewire\Epp\EppCatalog::class)->name('catalog');
-            Route::get('/import-employees', \App\Livewire\Epp\EmployeeImporter::class)->name('employees.import');
-            Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('employees.index');
-            Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
-            Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('delivery.pdf');
-            Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('delivery.pdf.preview');
-            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('deliver');
+            // TODO: Migrar AssignmentManager a React
         });
 
-        // Hallazgos
+        // Hallazgos (React)
         Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
-            Route::get('/', \App\Livewire\Hallazgos\HallazgoManager::class)->name('index');
-            Route::get('/crear', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('create');
-            Route::get('/{id}/editar', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('edit');
-            Route::get('/{id}', \App\Livewire\Hallazgos\HallazgoDetail::class)->name('show');
+            Route::get('/', [FindingController::class, 'index'])->name('index');
+            Route::get('/reportar', [FindingController::class, 'create'])->name('create');
+            Route::post('/', [FindingController::class, 'store'])->name('store');
+            Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
+            Route::post('/{finding}/update', [FindingController::class, 'addUpdate'])->name('update');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });
 
-        // Incidentes
+        // Incidentes (React)
         Route::prefix('incidentes')->name('incidentes.')->group(function () {
-            Route::get('/', \App\Livewire\Incidentes\IncidenteManager::class)->name('index');
+            Route::get('/', [IncidenteController::class, 'index'])->name('index');
+            Route::get('/{incident}', [IncidenteController::class, 'show'])->name('show');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('pdf');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('pdf.preview');
         });
 
-        // Historial Inspecciones
+        // Historial Inspecciones (React)
         Route::prefix('inspections')->name('inspections.')->group(function () {
-            Route::get('/', \App\Livewire\Checklists\InspectionHistory::class)->name('index');
-            Route::get('/{id}', \App\Livewire\Checklists\InspectionShow::class)->name('show');
+            Route::get('/', [InspectionController::class, 'historyGestor'])->name('index');
+            Route::get('/{inspection}', [InspectionController::class, 'show'])->name('show');
             Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('pdf.preview');
-            // Route::get('/{id}/delete', ...)->name('delete'); // Pendiente funcionalidad
+        });
+
+        // Operaciones (Visitas e Inspecciones)
+        Route::prefix('operations')->name('operations.')->group(function () {
+            Route::prefix('visits')->name('visits.')->group(function () {
+                Route::get('/', [OperationController::class, 'index'])->middleware(['role:Administrador'])->name('index');
+            });
+
+            Route::prefix('trainings')->name('trainings.')->group(function () {
+                Route::get('/', [TrainingController::class, 'index'])->name('index');
+                Route::get('/create', [TrainingController::class, 'create'])->name('create');
+                Route::post('/store', [TrainingController::class, 'store'])->name('store');
+                Route::get('/session/{visitTraining}', [TrainingController::class, 'session'])->name('session');
+                Route::post('/start-in-visit/{visit}', [TrainingController::class, 'startInVisit'])->name('start-in-visit');
+                Route::post('/add-attendee/{visitTraining}', [TrainingController::class, 'addAttendee'])->name('add-attendee');
+                Route::post('/remove-attendee/{visitTraining}/{index}', [TrainingController::class, 'removeAttendee'])->name('remove-attendee');
+                Route::post('/session/{visitTraining}/update-details', [TrainingController::class, 'updateDetails'])->name('update-details');
+                Route::post('/session/{visitTraining}/finalize', [TrainingController::class, 'finalize'])->name('finalize');
+            });
+
         });
 
         // Checklists
         Route::prefix('checklists')->name('checklists.')->group(function () {
-            Route::get('/', ChecklistIndex::class)->name('index');
-            Route::get('/create', ChecklistBuilder::class)->name('create');
-            Route::get('/{id}/edit', ChecklistBuilder::class)->name('edit');
-            Route::get('/{id}', ChecklistBuilder::class)->name('show'); // Añadida ruta show si es necesario
+            Route::get('/', [ChecklistController::class, 'index'])->name('index');
+            Route::get('/create', [ChecklistController::class, 'create'])->name('create');
+            Route::get('/{id}/edit', [ChecklistController::class, 'edit'])->name('edit');
+            Route::post('/save', [ChecklistController::class, 'save'])->name('save');
+            Route::post('/{checklist}/toggle', [ChecklistController::class, 'toggleStatus'])->name('toggle');
+            Route::post('/{original}/duplicate', [ChecklistController::class, 'duplicate'])->name('duplicate');
+
+            Route::get('/{checklist}/emular', [ChecklistController::class, 'emulate'])->name('emulator');
+            Route::get('/{id}/wizard', [InspectionController::class, 'wizard'])->name('fill');
+            Route::post('/{id}/wizard/save/{inspection}', [InspectionController::class, 'saveProgress'])->name('wizard.save');
+            Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
         });
 
-            // Rutas de Categorías
+        // Rutas de Categorías
         Route::prefix('categories')->name('categories.')->group(function () {
-            Route::get('/', CategoryIndex::class)->name('index');
-            Route::get('/create', CategoryBuilderComponent::class)->name('create');
-            Route::get('/{id}/edit', CategoryBuilderComponent::class)->name('edit');
-            Route::get('/{category}/subcategories', SubcategoryManager::class)->name('subcategories');
+            Route::get('/', [CategoryController::class, 'index'])->name('index');
+            Route::get('/create', [CategoryController::class, 'create'])->name('create');
+            Route::get('/{category}/edit', [CategoryController::class, 'edit'])->name('edit');
+            Route::post('/save', [CategoryController::class, 'save'])->name('save');
+            Route::get('/{category}/subcategories', [CategoryController::class, 'subcategories'])->name('subcategories');
+            Route::post('/{category}/subcategories/save', [CategoryController::class, 'saveSubcategory'])->name('subcategories.save');
+            Route::post('/toggle/{type}/{id}', [CategoryController::class, 'toggleStatus'])->name('toggle');
         });
 
-        // Capacitaciones
+        // Capacitaciones (React)
         Route::prefix('trainings')->name('trainings.')->group(function () {
-            Route::get('/', \App\Livewire\Trainings\TrainingIndex::class)->name('index');
-            Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('create');
-            Route::get('/{id}/edit', \App\Livewire\Trainings\TrainingBuilder::class)->name('edit');
-            Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('attendance');
+            Route::get('/', [TrainingController::class, 'index'])->name('index');
+            Route::get('/create', [TrainingController::class, 'create'])->name('create');
+            Route::post('/', [TrainingController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [TrainingController::class, 'edit'])->name('edit');
+            Route::get('/{id}/attendance', [TrainingController::class, 'attendance'])->name('attendance');
             Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
-            // Delete route if needed
         });
 
-        // Ejecuciones Avanzadas
-        Route::middleware(['role:Administrador'])->group(function () {
-             Route::get('/risk-matrices/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
+        // Personalización de Empresa (TODO: Migrar a React)
+        // Route::get('/administration/branding/{id}', ...)->name('administration.branding');
+
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas GESTOR Compartidas con Técnico (Prefijo: /gestor)
+    |--------------------------------------------------------------------------
+    */
+    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->group(function () {
+        Route::prefix('operations')->name('operations.')->group(function () {
+            Route::prefix('visits')->name('visits.')->group(function () {
+                Route::get('/create', [OperationController::class, 'create'])->name('create');
+                Route::post('/store', [OperationController::class, 'store'])->name('store');
+                Route::get('/{visit}', [OperationController::class, 'show'])->name('show');
+                Route::post('/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
+            });
+        });
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Rutas COMPARTIDAS (Gestor + Técnico)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->group(function () {
+
+        // Contrato Anual / PPD
+        Route::prefix('contrato-anual')->name('annual-contract.')->group(function () {
+            Route::get('/', [ContractController::class, 'index'])->name('index');
+            Route::post('/activity', [ContractController::class, 'store'])->name('store');
+            Route::post('/activity/{id}/toggle', [ContractController::class, 'toggleMonth'])->name('toggle');
+            Route::post('/activity/{id}/date', [ContractController::class, 'updateDate'])->name('date');
+            Route::put('/activity/{id}', [ContractController::class, 'update'])->name('update');
+            Route::delete('/activity/{id}', [ContractController::class, 'destroy'])->name('destroy');
+            Route::get('/pdf', [\App\Http\Controllers\Contracts\AnnualContractReportController::class, 'export'])->name('pdf');
         });
 
-        Route::prefix('risk-matrices')->name('risk-matrices.')->group(function () {
-            Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index');
-            Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
-            Route::get('/{matrixId}/editor', \App\Livewire\Risks\RiskMatrixEditor::class)->name('editor');
-            Route::get('/dashboard/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'dashboardExport'])->name('dashboard.pdf');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
-            // Contrato Anual
-            Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
-        });
-        
-        // Contrato Anual PDF - fuera del grupo risk-matrices pero con nombre consistente?
-        Route::get('/contrato-anual/pdf', [\App\Http\Controllers\Risks\AnnualContractReportController::class, 'export'])->name('annual-contract.pdf');
-
-        // Informe Maestro (Informe de la Muerte)
+        // Informe Maestro
         Route::prefix('master-reports')->name('master-reports.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\MasterReportController::class, 'index'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\MasterReportController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\MasterReportController::class, 'store'])->name('store');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\MasterReportController::class, 'preview'])->name('pdf');
+            Route::get('/', [MasterReportController::class, 'index'])->name('index');
+            Route::get('/create', [MasterReportController::class, 'create'])->name('create');
+            Route::post('/', [MasterReportController::class, 'store'])->name('store');
+            Route::get('/{masterReport}', [MasterReportController::class, 'show'])->name('show');
+            Route::get('/{masterReport}/edit', [MasterReportController::class, 'edit'])->name('edit');
+            Route::put('/{masterReport}', [MasterReportController::class, 'update'])->name('update');
+            Route::get('/{masterReport}/pdf', [MasterReportController::class, 'preview'])->name('pdf');
         });
-
-        // Personalización de Empresa
-        Route::get('/administration/branding/{id}', \App\Livewire\Companies\CompanyBranding::class)->name('administration.branding');
-
     });
 
     /*
@@ -194,86 +273,71 @@ Route::middleware(['auth'])->group(function () {
     | Rutas TÉCNICO (Prefijo: /tecnico)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico'])->group(function() {
-        // Dashboard
-        Route::get('/dashboard', TechnicianDashboard::class)->name('dashboard');
+    Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico,tecnico,gestor,Administrador,Socio'])->group(function () {
 
-        // Checklists (Asignaciones y Llenado)
+        // Checklists (Asignaciones y Llenado) (React)
         Route::prefix('checklists')->name('checklists.')->group(function () {
-             Route::get('/my-assignments', \App\Livewire\Technician\MyAssignments::class)->name('tasks.index'); // Mis Tareas / Inspecciones
-             Route::get('/{id}/fill', \App\Livewire\Technician\InspectionWizard::class)->name('fill');
+            Route::get('/my-assignments', [OperationController::class, 'myAssignments'])->name('tasks.index'); // Mis Tareas / Inspecciones
+            Route::get('/{id}/fill/{assignment?}', [InspectionController::class, 'wizard'])->name('fill');
+            Route::post('/execute', [OperationController::class, 'startQuickExecution'])->name('execute');
+            Route::post('/{id}/wizard/save/{inspection}', [InspectionController::class, 'saveProgress'])->name('wizard.save');
+            Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
         });
 
-        // Visitas
+        // Visitas (React)
         Route::prefix('visits')->name('visits.')->group(function () {
-            Route::get('/', \App\Livewire\Visits\VisitManager::class)->name('index'); // Mis Visitas
-            Route::get('/in-progress/{visit}', \App\Livewire\Visits\VisitInProgress::class)->name('in-progress');
+            Route::get('/', [OperationController::class, 'myVisits'])->name('index'); // Mis Visitas (Same as Assignments for now or specialized)
+            Route::get('/in-progress/{visit}', [OperationController::class, 'show'])->name('in-progress');
+            Route::post('/in-progress/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
+            Route::post('/in-progress/{visit}/assign-suggested', [OperationController::class, 'assignSuggestedTask'])->name('assign-suggested');
             Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
             Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
             Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
             Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 
-        // Capacitaciones
+        // Capacitaciones (Técnico - React)
         Route::prefix('trainings')->name('trainings.')->group(function () {
-            Route::get('/create', \App\Livewire\Trainings\TrainingBuilder::class)->name('create');
-            Route::get('/{id}/attendance', \App\Livewire\Trainings\AttendanceTracker::class)->name('attendance');
+            Route::get('/', [TrainingController::class, 'index'])->name('index');
+            Route::get('/create', [TrainingController::class, 'create'])->name('create');
+            Route::get('/{id}/attendance', [TrainingController::class, 'attendance'])->name('attendance');
             Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/session/{visitTraining}', [TrainingController::class, 'session'])->name('session');
+            Route::post('/add-attendee/{visitTraining}', [TrainingController::class, 'addAttendee'])->name('add-attendee');
+            Route::post('/remove-attendee/{visitTraining}/{index}', [TrainingController::class, 'removeAttendee'])->name('remove-attendee');
+            Route::post('/start-in-visit/{visit}', [TrainingController::class, 'startInVisit'])->name('start-in-visit');
+            Route::post('/session/{visitTraining}/update-details', [TrainingController::class, 'updateDetails'])->name('update-details');
+            Route::post('/session/{visitTraining}/finalize', [TrainingController::class, 'finalize'])->name('finalize');
         });
 
-        // Ejecuciones Avanzadas
-        Route::get('/risk-matrices/ejecuciones-avanzadas', \App\Livewire\Risks\AdvancedExecutionsHub::class)->name('advanced-executions.hub');
-
-        Route::prefix('risk-matrices')->name('risk-matrices.')->group(function () {
-            Route::get('/', \App\Livewire\Risks\RiskMatrixManager::class)->name('index'); // Evaluar
-            Route::get('/dashboard-riesgos', \App\Livewire\Risks\RiskDashboard::class)->name('dashboard');
-            Route::get('/{matrixId}/evaluate', \App\Livewire\Risks\RiskEvaluator::class)->name('evaluator');
-            Route::get('/dashboard/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'dashboardExport'])->name('dashboard.pdf');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\Risks\RiskMatrixReportController::class, 'export'])->name('pdf');
-            Route::get('/contrato-anual', \App\Livewire\Risks\AnnualContractDashboard::class)->name('annual-contract.index');
-        });
-
-        // Gestión EPP
-        Route::prefix('epp')->name('epp.')->group(function () {
-            Route::get('/deliver', \App\Livewire\Epp\EppDeliveryWizard::class)->name('deliver');
-            Route::get('/history', \App\Livewire\Epp\EppHistory::class)->name('history');
-            Route::get('/employees', \App\Livewire\Epp\EmployeeManager::class)->name('employees.index'); // Solo lectura?
-            Route::get('/delivery/{id}/pdf', [\App\Http\Controllers\EppPDFController::class, 'download'])->name('delivery.pdf');
-            Route::get('/delivery/{id}/pdf/preview', [\App\Http\Controllers\EppPDFController::class, 'preview'])->name('delivery.pdf.preview');
-        });
-
-        // Mis Hallazgos
-        Route::get('/mis-hallazgos', \App\Livewire\Hallazgos\MisHallazgos::class)->name('hallazgos.index');
-        
-        // Hallazgos (Crear/Ver) - Nota: Crear principal es via Modal en visitas, pero mantenemos wizard si existe
+        // Hallazgos (Técnico - React)
         Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
-             Route::get('/crear', \App\Livewire\Hallazgos\HallazgoWizard::class)->name('create');
-             Route::get('/{id}', \App\Livewire\Hallazgos\HallazgoDetail::class)->name('show');
-             Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
-             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/', [FindingController::class, 'myFindings'])->name('index'); // Redundante con mis-hallazgos mas arriba pero seguro
+            Route::get('/reportar', [FindingController::class, 'create'])->name('create');
+            Route::post('/', [FindingController::class, 'store'])->name('store');
+            Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });
 
-        // Historial Inspecciones
+        // Historial Inspecciones (Técnico - React)
         Route::prefix('inspections')->name('inspections.')->group(function () {
-            Route::get('/', \App\Livewire\Checklists\InspectionHistory::class)->name('index');
-            Route::get('/{id}', \App\Livewire\Checklists\InspectionShow::class)->name('show');
+            Route::get('/', [InspectionController::class, 'historyTecnico'])->name('index');
+            Route::get('/{inspection}', [InspectionController::class, 'show'])->name('show');
             Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('pdf.preview');
         });
 
-        // Mis Incidentes
-        Route::get('/incidentes', \App\Livewire\Incidentes\IncidenteManager::class)->name('incidentes.index');
+        // Incidentes (React)
+        Route::get('/incidentes', [IncidenteController::class, 'index'])->name('incidentes.index');
+        Route::get('/incidentes/reportar', [IncidenteController::class, 'create'])->name('incidentes.create');
+        Route::get('/incidentes/{incident}', [IncidenteController::class, 'show'])->name('incidentes.show');
+        Route::post('/incidentes/store', [IncidenteController::class, 'store'])->name('incidentes.store');
         Route::get('/incidentes/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('incidentes.pdf');
         Route::get('/incidentes/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('incidentes.pdf.preview');
-
-        // Informe Maestro (Redacción)
-        Route::prefix('master-reports')->name('master-reports.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\MasterReportController::class, 'index'])->name('index');
-            Route::get('/{id}/edit', [\App\Http\Controllers\MasterReportController::class, 'edit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\MasterReportController::class, 'update'])->name('update');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\MasterReportController::class, 'preview'])->name('pdf');
-        });
 
     });
 
@@ -283,24 +347,15 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     | Reservado para la gestión global de consultoras y monitoreo del ecosistema.
     */
-    Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function() {
-        Route::get('/dashboard', \App\Livewire\Admin\EcosystemDashboard::class)->name('dashboard');
-        Route::get('/consultants', \App\Livewire\Admin\ConsultantManager::class)->name('consultants');
-        Route::get('/consultants/{consultant}/users', \App\Livewire\Admin\ConsultantUsers::class)->name('consultants.users');
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
+        Route::get('/dashboard', [AdministrationController::class, 'dashboard'])->name('dashboard');
+        // TODO: Migrar Consultants admin a React
     });
 
-    /*
-    |--------------------------------------------------------------------------
-    | Rutas LEGACY (Mantener temporalmente para compatibilidad)
-    |--------------------------------------------------------------------------
-    */
-    
     // Logout
+    // Role Switch
+    Route::get('/switch-role/{role}', [\App\Http\Controllers\SwitchRoleController::class, 'switch'])->name('switch-role');
+
     // Logout
-    Route::match(['get', 'post'], '/logout', function () {
-        Auth::logout();
-        session()->invalidate();
-        session()->regenerateToken();
-        return redirect('/login');
-    })->name('logout');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });

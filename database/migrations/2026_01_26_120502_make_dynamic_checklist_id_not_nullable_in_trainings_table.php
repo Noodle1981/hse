@@ -13,7 +13,7 @@ return new class extends Migration
     {
         // 1. Asignar un checklist por defecto a los registros existentes que tengan NULL
         $defaultChecklist = \App\Models\DynamicChecklist::active()->first();
-        
+
         if ($defaultChecklist) {
             \App\Models\Training::whereNull('dynamic_checklist_id')
                 ->update(['dynamic_checklist_id' => $defaultChecklist->id]);
@@ -22,8 +22,8 @@ return new class extends Migration
         // 2. Hacer la columna NOT NULL
         Schema::table('trainings', function (Blueprint $table) {
             $table->foreignId('dynamic_checklist_id')
-                  ->nullable(false)
-                  ->change();
+                ->nullable(false)
+                ->change();
         });
     }
 
@@ -34,8 +34,8 @@ return new class extends Migration
     {
         Schema::table('trainings', function (Blueprint $table) {
             $table->foreignId('dynamic_checklist_id')
-                  ->nullable()
-                  ->change();
+                ->nullable()
+                ->change();
         });
     }
 };

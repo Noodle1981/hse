@@ -14,14 +14,14 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('sede_id')->constrained()->onDelete('cascade');
             $table->foreignId('empresa_id')->constrained()->onDelete('cascade');
-            
+
             $table->enum('frequency', ['once', 'weekly', 'monthly', 'quarterly', 'yearly'])->default('once');
             $table->date('due_date')->nullable();
             $table->enum('status', ['pending', 'in_progress', 'completed'])->default('pending');
             $table->text('notes')->nullable();
-            
+
             $table->timestamps();
-            
+
             // Índices para mejorar performance
             $table->index(['empresa_id', 'sede_id']);
             $table->index('status');

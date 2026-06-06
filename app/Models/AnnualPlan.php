@@ -12,27 +12,25 @@ class AnnualPlan extends Model
     protected $fillable = [
         'sede_id',
         'category',
+        'frequency',
         'activity_name',
         'activity_code',
         'checklist_id',
-        'year',
-        'january', 'february', 'march', 'april', 'may', 'june',
-        'july', 'august', 'september', 'october', 'november', 'december',
+        'period_start',
+        'period_end',
+        'scheduled_months',
+        'scheduled_dates',
+        'duration_minutes',
+        'modality',
+        'multi_trainer',
     ];
 
     protected $casts = [
-        'january' => 'boolean',
-        'february' => 'boolean',
-        'march' => 'boolean',
-        'april' => 'boolean',
-        'may' => 'boolean',
-        'june' => 'boolean',
-        'july' => 'boolean',
-        'august' => 'boolean',
-        'september' => 'boolean',
-        'october' => 'boolean',
-        'november' => 'boolean',
-        'december' => 'boolean',
+        'period_start' => 'date',
+        'period_end' => 'date',
+        'scheduled_months' => 'array',
+        'scheduled_dates' => 'array',
+        'multi_trainer' => 'boolean',
     ];
 
     public function sede()

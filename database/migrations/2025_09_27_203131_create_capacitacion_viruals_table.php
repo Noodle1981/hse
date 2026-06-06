@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('duracion')->nullable();
             $table->string('email_responsable', length: 50)->nullable();
             $table->timestamps();
-            
+
         });
     }
 

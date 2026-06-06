@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
@@ -21,23 +22,31 @@ class Employee extends Model
         'is_active',
     ];
 
-    public function empresa()
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    /**
+     * Empresa a la que pertenece el empleado.
+     */
+    public function empresa(): BelongsTo
     {
         return $this->belongsTo(Empresa::class);
     }
 
-    public function sede()
+    /**
+     * Sede a la que pertenece el empleado.
+     */
+    public function sede(): BelongsTo
     {
         return $this->belongsTo(Sede::class);
     }
 
-    public function deliveries()
+    /**
+     * Accesor para nombre completo
+     */
+    public function getFullNameAttribute(): string
     {
-        return $this->hasMany(EppDelivery::class);
-    }
-
-    public function getFullNameAttribute()
-    {
-        return "{$this->last_name}, {$this->name}";
+        return "{$this->name} {$this->last_name}";
     }
 }

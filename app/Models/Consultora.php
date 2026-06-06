@@ -23,6 +23,10 @@ class Consultora extends Model
         'locality',
         'email',
         'phone',
+        'logo_path',
+        'color_primary',
+        'color_secondary',
+        'color_accent',
     ];
 
     protected $casts = [

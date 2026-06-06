@@ -14,12 +14,12 @@ class Subcategory extends Model
         'name',
         'description',
         'is_active',
-        'order'
+        'order',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'order' => 'integer'
+        'order' => 'integer',
     ];
 
     public function category(): BelongsTo

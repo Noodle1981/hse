@@ -21,3 +21,24 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Archivos legacy de build anterior (Blade/SPA standalone)
+/public/browser.zip
+/public/index.html
+/public/index.js
+/public/style.css
+/public/styles-*.css
+/public/main-*.js
+/public/polyfills-*.js
+/public/chunk-*.js
+
+# Scripts de mantenimiento y diagnóstico (no van a producción)
+/database_cleanup.php
+/diag_report.php
+/resetplanes.php
+/scratch/
+
+# Archivos de documentación interna
+/results.txt
+/futuros_fix.md
+/ultraminizacion.md

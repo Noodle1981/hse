@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Tabla para almacenar las RESPUESTAS específicas de cada inspección.
      * Cada respuesta corresponde a una pregunta dentro de una inspección.
      */
@@ -17,12 +17,12 @@ return new class extends Migration
         Schema::create('dynamic_answers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('dynamic_inspection_id')
-                  ->constrained('dynamic_inspections')
-                  ->cascadeOnDelete();
+                ->constrained('dynamic_inspections')
+                ->cascadeOnDelete();
             $table->foreignId('dynamic_question_id')
-                  ->constrained('dynamic_questions')
-                  ->cascadeOnDelete();
-            
+                ->constrained('dynamic_questions')
+                ->cascadeOnDelete();
+
             $table->text('value')->nullable();  // La respuesta (texto, JSON para arrays, o base64 para firmas)
             $table->timestamps();
 

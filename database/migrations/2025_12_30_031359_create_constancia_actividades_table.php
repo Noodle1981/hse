@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('actividad_type'); // Polymorphic: DynamicInspection, Training, RiskEvaluation, EppDelivery
             $table->unsignedBigInteger('actividad_id');
             $table->timestamps();
-            
+
             $table->index(['actividad_type', 'actividad_id']);
             $table->unique(['generador_constancia_id', 'actividad_type', 'actividad_id'], 'constancia_actividad_unique');
         });

@@ -3,14 +3,14 @@
 namespace App\Jobs;
 
 use App\Models\Employee;
-use App\Models\Empresa;
-use App\Models\Sede;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Shuchkin\SimpleXLSX;
 
 class ImportEmployeesJob implements ShouldQueue
@@ -18,8 +18,11 @@ class ImportEmployeesJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $filePath;
+
     protected $empresaId;
+
     protected $sedeId;
+
     protected $userId;
 
     /**
@@ -46,12 +49,12 @@ class ImportEmployeesJob implements ShouldQueue
             if ($xlsx = SimpleXLSX::parse($this->filePath)) {
                 $rows = $xlsx->rows();
                 $header = array_shift($rows);
-                
+
                 $colMap = array_flip(array_map('strtolower', $header));
-                
+
                 // Procesar en chunks de 50
                 foreach (array_chunk($rows, 50) as $chunk) {
-                    \DB::transaction(function () use ($chunk, $colMap, &$count, &$errors, &$errorLog) {
+                    DB::transaction(function () use ($chunk, $colMap, &$count, &$errors, &$errorLog) {
                         foreach ($chunk as $index => $row) {
                             try {
                                 $nombre = $row[$colMap['nombre']] ?? null;
@@ -60,17 +63,24 @@ class ImportEmployeesJob implements ShouldQueue
                                 $cuil = $row[$colMap['cuil']] ?? null;
                                 $puesto = $row[$colMap['puesto']] ?? null;
 
-                                if (!$nombre || !$apellido || !$dni) {
-                                    $errorLog[] = "Fila " . ($index + 2) . ": Datos obligatorios faltantes.";
+                                if (! $nombre || ! $apellido || ! $dni) {
+                                    $errorLog[] = 'Fila '.($index + 2).': Datos obligatorios faltantes.';
                                     $errors++;
+
                                     continue;
                                 }
 
                                 // Validar CUIL si está presente
-                                if ($cuil && !(new \App\Rules\ValidCuil())->passes('cuil', $cuil)) {
-                                    $errorLog[] = "Fila " . ($index + 2) . ": CUIL inválido ($cuil).";
-                                    $errors++;
-                                    continue;
+                                if ($cuil) {
+                                    $validator = Validator::make(['cuil' => $cuil], [
+                                        'cuil' => [new \App\Rules\ValidCuil],
+                                    ]);
+                                    if ($validator->fails()) {
+                                        $errorLog[] = 'Fila '.($index + 2).": CUIL inválido ($cuil).";
+                                        $errors++;
+
+                                        continue;
+                                    }
                                 }
 
                                 Employee::updateOrCreate(
@@ -87,31 +97,31 @@ class ImportEmployeesJob implements ShouldQueue
                                 );
                                 $count++;
                             } catch (\Exception $e) {
-                                $errorLog[] = "Fila " . ($index + 2) . ": " . $e->getMessage();
+                                $errorLog[] = 'Fila '.($index + 2).': '.$e->getMessage();
                                 $errors++;
                             }
                         }
                     });
                 }
 
-                Log::info("Importación de empleados completada", [
+                Log::info('Importación de empleados completada', [
                     'user_id' => $this->userId,
                     'count' => $count,
-                    'errors' => $errors
+                    'errors' => $errors,
                 ]);
 
                 // TODO: Notificar al usuario (email o notificación)
-                
+
             } else {
-                Log::error("Error al parsear archivo Excel", [
+                Log::error('Error al parsear archivo Excel', [
                     'file' => $this->filePath,
-                    'error' => SimpleXLSX::parseError()
+                    'error' => SimpleXLSX::parseError(),
                 ]);
             }
         } catch (\Exception $e) {
-            Log::error("Error en ImportEmployeesJob", [
+            Log::error('Error en ImportEmployeesJob', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
         } finally {
             // Limpiar archivo temporal

@@ -5,102 +5,146 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Super Admin - XamaSafe' }}</title>
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'ep-primary': '#4338ca', // Indigo para diferenciarlo del naranja corporativo de las empresas
-                        'ep-primary-dark': '#3730a3',
-                        'ep-dark': '#111827',
-                        'ep-sidebar': '#111827',
-                        'ep-text': '#9ca3af',
-                    }
-                }
-            }
-        }
-    </script>
+    @vite(['resources/css/app.css'])
     
     <style>
         .sidebar-transition { transition: width 0.3s ease-in-out; }
         .menu-item-active {
-            background: rgba(67, 56, 202, 0.1);
+            background: rgba(67, 56, 202, 0.15);
             border-left: 3px solid #4338ca;
             color: white;
         }
+        .menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .sidebar-scroll::-webkit-scrollbar { width: 6px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(67,56,202,0.4); border-radius: 4px; }
     </style>
+
+    {{-- Coloris color picker --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.css">
+    <script src="https://cdn.jsdelivr.net/gh/mdbassit/Coloris@latest/dist/coloris.min.js"></script>
+    <style>
+        .clr-field button { width: 100%; height: 44px; border-radius: 12px; border: 2px solid #e5e7eb; cursor: pointer; }
+        .clr-field { width: 100%; }
+        #clr-picker { border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); z-index: 9999; }
+    </style>
+
     
     @livewireStyles
 </head>
-<body class="bg-gray-50 min-h-screen" x-data="{ sidebarOpen: true, mobileMenuOpen: false }">
+<body class="bg-[#11111d] min-h-screen text-white" x-data="{ sidebarOpen: window.innerWidth >= 1024, mobileMenuOpen: false }">
     <div class="flex min-h-screen">
         <!-- Admin Sidebar -->
-        <aside :class="sidebarOpen ? 'w-64' : 'w-20'" 
-               class="fixed left-0 top-0 h-screen bg-ep-sidebar sidebar-transition z-40 flex flex-col lg:relative lg:translate-x-0"
-               :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+        <aside class="fixed left-0 top-0 h-screen bg-ep-sidebar sidebar-transition z-40 flex flex-col lg:relative lg:translate-x-0"
+               :class="[
+                   (sidebarOpen || mobileMenuOpen) ? 'w-64' : 'w-20',
+                   mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+               ]">
             
-            <div class="h-16 flex items-center justify-between px-4 border-b border-gray-800">
+            <!-- Brand -->
+            <div class="h-16 flex items-center justify-between px-4 border-b border-white/5 flex-shrink-0">
                 <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-ep-primary rounded-lg flex items-center justify-center font-bold text-white text-lg">
+                    <div class="w-10 h-10 bg-ep-primary rounded-lg flex items-center justify-center font-bold text-white text-lg flex-shrink-0 shadow-lg">
                         SA
                     </div>
-                    <span x-show="sidebarOpen" class="text-white font-bold text-lg">SuperAdmin</span>
+                    <span x-show="sidebarOpen || mobileMenuOpen" class="text-white font-black uppercase italic tracking-tight text-lg">SuperAdmin</span>
                 </div>
+                <!-- Desktop collapse toggle -->
+                <button @click="sidebarOpen = !sidebarOpen" class="hidden lg:block text-ep-primary hover:text-white p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              :d="sidebarOpen ? 'M11 19l-7-7 7-7m8 14l-7-7 7-7' : 'M13 5l7 7-7 7M5 5l7 7-7 7'"/>
+                    </svg>
+                </button>
             </div>
             
-            <nav class="flex-1 overflow-y-auto py-4">
+            <!-- Nav Links -->
+            <nav class="flex-1 overflow-y-auto sidebar-scroll py-4">
                 <ul class="space-y-1 px-3">
                     <li>
                         <a href="{{ route('admin.dashboard') }}" 
-                           class="flex items-center px-3 py-3 rounded-lg text-ep-text hover:bg-gray-800 hover:text-white transition-all
-                                  {{ request()->routeIs('admin.dashboard') ? 'menu-item-active' : '' }}">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                            <span x-show="sidebarOpen">Dashboard Global</span>
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('admin.dashboard') ? 'menu-item-active text-white' : '' }}">
+                            <span class="flex-shrink-0 mr-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            </span>
+                            <span x-show="sidebarOpen || mobileMenuOpen" class="font-bold">Dashboard Global</span>
                         </a>
                     </li>
                     <li>
                         <a href="{{ route('admin.consultants') }}" 
-                           class="flex items-center px-3 py-3 rounded-lg text-ep-text hover:bg-gray-800 hover:text-white transition-all
-                                  {{ request()->routeIs('admin.consultants') ? 'menu-item-active' : '' }}">
-                            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                            <span x-show="sidebarOpen">Consultoras</span>
+                           class="menu-item flex items-center px-3 py-3 rounded-lg text-ep-text hover:text-ep-text-hover transition-colors
+                                  {{ request()->routeIs('admin.consultants*') ? 'menu-item-active text-white' : '' }}">
+                            <span class="flex-shrink-0 mr-3">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                            </span>
+                            <span x-show="sidebarOpen || mobileMenuOpen" class="font-bold">Consultoras</span>
                         </a>
                     </li>
                 </ul>
             </nav>
 
-            <div class="p-4 border-t border-gray-800">
+            <!-- Logout -->
+            <div class="p-4 border-t border-white/5 flex-shrink-0">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="w-full flex items-center justify-center px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                    <button type="submit"
+                            x-show="sidebarOpen || mobileMenuOpen"
+                            class="w-full flex items-center justify-center px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                        <span x-show="sidebarOpen">Cerrar Sesión</span>
+                        Cerrar Sesión
+                    </button>
+                    <button type="submit"
+                            x-show="!(sidebarOpen || mobileMenuOpen)"
+                            title="Cerrar Sesión"
+                            class="w-full flex items-center justify-center px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                     </button>
                 </form>
+                <div x-show="sidebarOpen || mobileMenuOpen" class="text-[9px] text-gray-600 text-center mt-3 font-black uppercase tracking-widest italic">
+                    XamaSafe v1.0.0 • Admin Mode
+                </div>
             </div>
         </aside>
         
+        <!-- Mobile Overlay -->
+        <div x-show="mobileMenuOpen"
+             @click="mobileMenuOpen = false"
+             class="fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
+        
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col h-screen overflow-hidden">
-            <header class="h-16 bg-white shadow-sm flex items-center justify-between px-8 flex-shrink-0 z-20">
-                <button @click="sidebarOpen = !sidebarOpen" class="p-2 text-gray-600 hover:text-gray-900">
+        <div class="flex-1 flex flex-col h-screen overflow-hidden bg-ep-dark">
+            <!-- Top Header -->
+            <header class="h-16 bg-ep-dark/80 backdrop-blur-md shadow-lg flex items-center justify-between px-4 lg:px-8 flex-shrink-0 z-20 border-b border-white/5">
+                <!-- Mobile hamburger -->
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="lg:hidden p-2 text-gray-400 hover:text-white focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
-                <h1 class="text-xl font-bold text-gray-800">{{ $title ?? 'Super Administración' }}</h1>
-                <div class="flex items-center space-x-2">
-                    <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-bold">A</div>
-                    <span class="text-sm font-medium text-gray-700">Administrador Global</span>
+
+                <h1 class="text-xl font-black text-white uppercase italic tracking-tight">{{ $title ?? 'Super Administración' }}</h1>
+
+                <div class="flex items-center space-x-4">
+                    <div class="flex flex-col items-end">
+                        <span class="hidden md:block text-xs font-black text-white uppercase italic tracking-wide">Administrador Global</span>
+                        <span class="text-[9px] font-black text-indigo-100/30 uppercase tracking-widest leading-none">Security Level Alpha</span>
+                    </div>
+                    <div class="w-10 h-10 bg-ep-primary rounded-full flex items-center justify-center text-white text-sm font-black shadow-lg ring-2 ring-white/10">A</div>
                 </div>
             </header>
             
-            <main class="flex-1 overflow-y-auto p-6">
-                {{ $slot }}
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto bg-[#11111d]">
+                <div class="p-6">
+                    {{ $slot }}
+                </div>
+
             </main>
         </div>
     </div>
 
     @livewireScripts
+    @stack('scripts')
 </body>
 </html>

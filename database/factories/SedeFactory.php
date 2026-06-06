@@ -17,7 +17,13 @@ class SedeFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'empresa_id' => \App\Models\Empresa::factory(),
+            'nombre_sede' => $this->faker->city(),
+            'direccion' => $this->faker->address(),
+            'correo' => $this->faker->unique()->safeEmail(),
+            'telefono' => $this->faker->phoneNumber(),
+            'tipo_sede' => 'Principal',
+            'localidad' => $this->faker->city(),
         ];
     }
 }
