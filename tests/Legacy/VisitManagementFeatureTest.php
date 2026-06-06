@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Sede;
-use App\Models\Empresa;
-use App\Models\VisitCertificate;
-use App\Livewire\Visits\VisitInProgress;
-use App\Livewire\Visits\VisitHistory;
 use App\Livewire\Technician\TechnicianDashboard;
+use App\Livewire\Visits\VisitHistory;
+use App\Livewire\Visits\VisitInProgress;
+use App\Models\Empresa;
+use App\Models\Sede;
+use App\Models\User;
+use App\Models\VisitCertificate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -18,8 +18,11 @@ class VisitManagementFeatureTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
+
     protected $tecnico;
+
     protected $sede;
+
     protected $empresa;
 
     protected function setUp(): void
@@ -28,7 +31,7 @@ class VisitManagementFeatureTest extends TestCase
 
         $this->admin = User::factory()->admin()->create(['nombres' => 'Admin', 'apellidos' => 'User']);
         $this->tecnico = User::factory()->inspector()->create(['nombres' => 'Tecnico', 'apellidos' => 'User']);
-        
+
         // Cargar roles si el sistema usa Spatie Permission o similar
         if (method_exists($this->tecnico, 'assignRole')) {
             $this->admin->assignRole('Administrador');
@@ -88,7 +91,7 @@ class VisitManagementFeatureTest extends TestCase
         // 2. Simular que el tiempo avanza a 65 min (segundo bloque)
         // Como no podemos "hacer avanzar" el tiempo real en la misma instancia fácilmente
         // sin inyectar un Clock, vamos a crear una nueva prueba o manipular la propiedad.
-        
+
         $visit->start_time = now()->subMinutes(65);
         $visit->save();
 
@@ -149,7 +152,7 @@ class VisitManagementFeatureTest extends TestCase
         Livewire::test(VisitHistory::class)
             ->call('editVisit', $visit->id)
             ->assertSet('showEditModal', false); // No debería abrirse
-            
+
         $this->assertNull($visit->end_time);
     }
 

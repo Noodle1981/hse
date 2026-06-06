@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Hacer user_id nullable para permitir inspecciones sin usuario autenticado
      */
     public function up(): void
@@ -18,22 +18,22 @@ return new class extends Migration
         // Schema::table('dynamic_inspections', function (Blueprint $table) {
         //     $table->foreignId('user_id')->nullable()->change();
         // });
-        
+
         // Para SQLite, recreamos la tabla (solo desarrollo)
         if (config('database.default') === 'sqlite') {
             Schema::dropIfExists('dynamic_answers');
             Schema::dropIfExists('dynamic_inspections');
-            
+
             Schema::create('dynamic_inspections', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('dynamic_checklist_id')
-                      ->constrained('dynamic_checklists')
-                      ->cascadeOnDelete();
+                    ->constrained('dynamic_checklists')
+                    ->cascadeOnDelete();
                 $table->foreignId('user_id')
-                      ->nullable()
-                      ->constrained()
-                      ->nullOnDelete();
-                
+                    ->nullable()
+                    ->constrained()
+                    ->nullOnDelete();
+
                 $table->timestamp('completed_at')->nullable();
                 $table->text('notes')->nullable();
                 $table->string('status')->default('draft');
@@ -43,18 +43,18 @@ return new class extends Migration
                 $table->index('completed_at');
                 $table->index('status');
             });
-            
+
             Schema::create('dynamic_answers', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('dynamic_inspection_id')
-                      ->constrained('dynamic_inspections')
-                      ->cascadeOnDelete();
+                    ->constrained('dynamic_inspections')
+                    ->cascadeOnDelete();
                 $table->foreignId('dynamic_question_id')
-                      ->constrained('dynamic_questions')
-                      ->cascadeOnDelete();
+                    ->constrained('dynamic_questions')
+                    ->cascadeOnDelete();
                 $table->text('value')->nullable();
                 $table->timestamps();
-                
+
                 $table->index(['dynamic_inspection_id', 'dynamic_question_id']);
             });
         }

@@ -31,7 +31,7 @@ return new class extends Migration
                 'hora_apertura',
                 'hora_cierre',
                 'es_roster_24_7',
-                'radio_tolerancia_metros'
+                'radio_tolerancia_metros',
             ]);
         });
     }

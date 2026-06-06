@@ -208,7 +208,7 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                         {completedTasks.length === 0 ? (
                                             <div className="text-center py-16 border-2 border-dashed border-white/5 rounded-[2rem] bg-black/10">
                                                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] italic leading-relaxed max-w-xs mx-auto">
-                                                    Aún no se han registrado tareas en esta visita. Presiona "Nueva Tarea" arriba para iniciar.
+                                                    Aún no se han registrado tareas en esta visita. Presiona &quot;Nueva Tarea&quot; arriba para iniciar.
                                                 </p>
                                             </div>
                                         ) : (

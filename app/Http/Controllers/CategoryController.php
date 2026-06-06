@@ -16,8 +16,8 @@ class CategoryController extends Controller
     public function index(Request $request)
     {
         $categories = Category::query()
-            ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->when($request->boolean('showInactive') == false, fn($q) => $q->where('is_active', true))
+            ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->when($request->boolean('showInactive') == false, fn ($q) => $q->where('is_active', true))
             ->withCount('subcategories')
             ->orderBy('order')
             ->paginate(15)
@@ -55,20 +55,20 @@ class CategoryController extends Controller
     public function save(Request $request)
     {
         $id = $request->input('id');
-        
+
         $request->validate([
             'code' => 'required|string|max:50',
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('categories', 'name')->ignore($id)
+                Rule::unique('categories', 'name')->ignore($id),
             ],
             'description' => 'nullable|string',
             'color' => 'required|string|size:7|regex:/^#[0-9A-Fa-f]{6}$/',
             'icon' => 'nullable|string|max:50',
             'is_active' => 'boolean',
-            'order' => 'integer|min:0'
+            'order' => 'integer|min:0',
         ]);
 
         $data = $request->only(['code', 'name', 'description', 'color', 'icon', 'is_active', 'order']);
@@ -85,6 +85,7 @@ class CategoryController extends Controller
         if ($request->has('redirect_back')) {
             return back()->with('message', $message);
         }
+
         return redirect()->route('gestor.categories.index')->with('message', $message);
     }
 
@@ -105,14 +106,14 @@ class CategoryController extends Controller
     public function saveSubcategory(Request $request, Category $category)
     {
         $id = $request->input('id');
-        
+
         $request->validate([
             'code' => 'required|string|max:50',
             'name' => [
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('subcategories', 'name')->ignore($id)
+                Rule::unique('subcategories', 'name')->ignore($id),
             ],
             'description' => 'nullable|string',
             'is_active' => 'boolean',
@@ -145,9 +146,9 @@ class CategoryController extends Controller
             $model = Subcategory::findOrFail($id);
         }
 
-        $model->update(['is_active' => !$model->is_active]);
+        $model->update(['is_active' => ! $model->is_active]);
         $status = $model->is_active ? 'activada' : 'desactivada';
 
-        return back()->with('message', ucfirst($type) . " $status exitosamente.");
+        return back()->with('message', ucfirst($type)." $status exitosamente.");
     }
 }

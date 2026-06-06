@@ -2,11 +2,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
-
 use Illuminate\Support\Facades\Gate;
-use App\Models\DynamicInspection;
-use App\Policies\InspectionPolicy;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

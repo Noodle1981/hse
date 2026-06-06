@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Sede;
 use App\Models\Empresa;
+use App\Models\Sede;
 use App\Models\Training;
+use App\Models\User;
 use App\Models\VisitCertificate;
 use App\Models\VisitTraining;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,11 +17,17 @@ class TrainingControllerTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
+
     protected $tecnico;
+
     protected $empresa;
+
     protected $sede;
+
     protected $visit;
+
     protected $training;
+
     protected $visitTraining;
 
     protected function setUp(): void
@@ -95,7 +101,7 @@ class TrainingControllerTest extends TestCase
         );
 
         $response->assertRedirect();
-        
+
         $this->visitTraining->refresh();
         $this->assertCount(1, $this->visitTraining->attendees);
         $this->assertEquals('Marcos Lopez', $this->visitTraining->attendees[0]['name']);

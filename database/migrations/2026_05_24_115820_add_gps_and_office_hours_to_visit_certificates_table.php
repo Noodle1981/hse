@@ -33,7 +33,7 @@ return new class extends Migration
                 'checkin_lng',
                 'checkout_lat',
                 'checkout_lng',
-                'gps_verified'
+                'gps_verified',
             ]);
         });
     }

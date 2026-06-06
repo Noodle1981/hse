@@ -3,15 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnnualPlan;
-use App\Models\Sede;
-use App\Models\Empresa;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
-use App\Models\Training;
-use App\Models\VisitTraining;
+use App\Models\Empresa;
 use App\Models\MasterReport;
-use App\Models\Incidente;
+use App\Models\Sede;
+use App\Models\Training;
 use App\Models\User;
+use App\Models\VisitTraining;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +22,7 @@ class ContractController extends Controller
     {
         /** @var User $user */
         $user = Auth::user();
-        
+
         // 1. Contexto de filtrado
         $availableSedes = $user->isAdmin()
             ? Sede::select('id', 'nombre_sede', 'empresa_id')->orderBy('nombre_sede')->get()
@@ -36,9 +35,9 @@ class ContractController extends Controller
 
         $companyId = $request->query('company_id', $companies->first()?->id);
         $sedes = $availableSedes->where('empresa_id', $companyId)->values();
-        
+
         $sedeId = $request->query('sede_id');
-        if (!$sedeId && $sedes->isNotEmpty()) {
+        if (! $sedeId && $sedes->isNotEmpty()) {
             $sedeId = $sedes->first()->id;
         }
 
@@ -51,7 +50,7 @@ class ContractController extends Controller
         $contractDuration = (int) $request->query('duration', 12);
 
         // Si no se pasó inicio, intentar detectar del último plan
-        if (!$request->has('contract_start') && $sedeId) {
+        if (! $request->has('contract_start') && $sedeId) {
             $latestPlan = AnnualPlan::where('sede_id', $sedeId)->latest('id')->first();
             if ($latestPlan && $latestPlan->period_start) {
                 $contractStart = $latestPlan->period_start->format('Y-m');
@@ -80,7 +79,7 @@ class ContractController extends Controller
 
         // 4. Datos de Cumplimiento
         $plans = AnnualPlan::where('sede_id', $sedeId)
-            ->when($request->category, fn($q) => $q->where('category', $request->category))
+            ->when($request->category, fn ($q) => $q->where('category', $request->category))
             ->with('checklist')
             ->orderBy('category')
             ->get();
@@ -129,9 +128,13 @@ class ContractController extends Controller
             for ($i = 0; $i < $request->duration; $i++) {
                 $monthNum = $i + 1;
                 $shouldCheck = false;
-                if ($request->frequency === 'mensual') $shouldCheck = true;
-                elseif ($request->frequency === 'bimestral' && $monthNum % 2 === 0) $shouldCheck = true;
-                elseif ($request->frequency === 'trimestral' && $monthNum % 3 === 0) $shouldCheck = true;
+                if ($request->frequency === 'mensual') {
+                    $shouldCheck = true;
+                } elseif ($request->frequency === 'bimestral' && $monthNum % 2 === 0) {
+                    $shouldCheck = true;
+                } elseif ($request->frequency === 'trimestral' && $monthNum % 3 === 0) {
+                    $shouldCheck = true;
+                }
 
                 if ($shouldCheck) {
                     $scheduled[] = $startDate->copy()->addMonths($i)->format('Y-m');
@@ -153,7 +156,7 @@ class ContractController extends Controller
                 'scheduled_months' => $scheduled,
                 'duration_minutes' => $request->category === 'Capacitación' ? ($request->duration_minutes ?: 15) : null,
                 'modality' => $request->category === 'Capacitación' ? ($request->modality ?: 'presencial') : null,
-                'multi_trainer' => $request->category === 'Capacitación' ? (bool)$request->multi_trainer : false,
+                'multi_trainer' => $request->category === 'Capacitación' ? (bool) $request->multi_trainer : false,
             ]);
         });
 
@@ -187,7 +190,7 @@ class ContractController extends Controller
         $plan = AnnualPlan::findOrFail($id);
         $monthValue = $request->month;
         $dateValue = $request->date;
-        
+
         $dates = $plan->scheduled_dates ?? [];
         if ($dateValue) {
             $dates[$monthValue] = $dateValue;
@@ -214,21 +217,25 @@ class ContractController extends Controller
         ]);
 
         $plan = AnnualPlan::findOrFail($id);
-        
+
         $scheduled = $plan->scheduled_months ?? [];
         if ($request->frequency !== $plan->frequency) {
             $startDate = Carbon::parse($plan->period_start)->startOfMonth();
             $endDate = Carbon::parse($plan->period_end)->endOfMonth();
             $duration = (int) $startDate->diffInMonths($endDate) + 1;
-            
+
             $scheduled = [];
             if ($request->frequency !== 'none') {
                 for ($i = 0; $i < $duration; $i++) {
                     $monthNum = $i + 1;
                     $shouldCheck = false;
-                    if ($request->frequency === 'mensual') $shouldCheck = true;
-                    elseif ($request->frequency === 'bimestral' && $monthNum % 2 === 0) $shouldCheck = true;
-                    elseif ($request->frequency === 'trimestral' && $monthNum % 3 === 0) $shouldCheck = true;
+                    if ($request->frequency === 'mensual') {
+                        $shouldCheck = true;
+                    } elseif ($request->frequency === 'bimestral' && $monthNum % 2 === 0) {
+                        $shouldCheck = true;
+                    } elseif ($request->frequency === 'trimestral' && $monthNum % 3 === 0) {
+                        $shouldCheck = true;
+                    }
 
                     if ($shouldCheck) {
                         $scheduled[] = $startDate->copy()->addMonths($i)->format('Y-m');
@@ -246,7 +253,7 @@ class ContractController extends Controller
             'scheduled_months' => $scheduled,
             'duration_minutes' => $request->category === 'Capacitación' ? ($request->duration_minutes ?: 15) : null,
             'modality' => $request->category === 'Capacitación' ? ($request->modality ?: 'presencial') : null,
-            'multi_trainer' => $request->category === 'Capacitación' ? (bool)$request->multi_trainer : false,
+            'multi_trainer' => $request->category === 'Capacitación' ? (bool) $request->multi_trainer : false,
         ]);
 
         return back()->with('message', 'Actividad actualizada.');
@@ -255,17 +262,20 @@ class ContractController extends Controller
     public function destroy($id)
     {
         AnnualPlan::findOrFail($id)->delete();
+
         return back()->with('message', 'Actividad eliminada.');
     }
 
     private function calculateComplianceData($activeSede, $plans, $dynamicMonths, $startDate, $endDate)
     {
-        if (!$activeSede) return [];
+        if (! $activeSede) {
+            return [];
+        }
 
         $sedeId = $activeSede->id;
 
         // --- PRE-PROCESAMIENTO DE LOOKUP TABLES (OPTIMIZACIÓN O(R)) ---
-        
+
         // 1. Mapa de Inspecciones: [checklist_id][month] => count/details
         $insLookup = [];
         DynamicInspection::with('user')
@@ -273,28 +283,28 @@ class ContractController extends Controller
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->where('status', 'completed')
             ->get()
-            ->each(function($inp) use (&$insLookup) {
+            ->each(function ($inp) use (&$insLookup) {
                 $m = $inp->completed_at->format('Y-m');
                 $id = $inp->dynamic_checklist_id;
-                if (!isset($insLookup[$id][$m])) {
+                if (! isset($insLookup[$id][$m])) {
                     $insLookup[$id][$m] = [
-                        'count' => 0, 
-                        'passed' => 0, 
-                        'failed' => 0, 
-                        'findings' => 0, 
+                        'count' => 0,
+                        'passed' => 0,
+                        'failed' => 0,
+                        'findings' => 0,
                         'execution_date' => $inp->completed_at->format('d/m/Y'),
-                        'history_groups' => []
+                        'history_groups' => [],
                     ];
                 }
                 $insLookup[$id][$m]['count']++;
                 $inp->result === 'Pass' ? $insLookup[$id][$m]['passed']++ : $insLookup[$id][$m]['failed']++;
-                
-                $techName = $inp->user ? trim($inp->user->nombres . ' ' . $inp->user->apellidos) : 'N/D';
+
+                $techName = $inp->user ? trim($inp->user->nombres.' '.$inp->user->apellidos) : 'N/D';
                 $day = $inp->completed_at->format('Y-m-d');
                 $userId = $inp->user_id ?? 0;
-                $groupKey = $day . '_' . $userId;
+                $groupKey = $day.'_'.$userId;
 
-                if (!isset($insLookup[$id][$m]['history_groups'][$groupKey])) {
+                if (! isset($insLookup[$id][$m]['history_groups'][$groupKey])) {
                     $insLookup[$id][$m]['history_groups'][$groupKey] = [
                         'date' => $inp->completed_at->toIso8601String(),
                         'technician_name' => $techName,
@@ -330,24 +340,24 @@ class ContractController extends Controller
             ->where('status', 'completed')
             ->withCount('attendances')
             ->get()
-            ->each(function($t) use (&$trainLookup, &$trainChecklistLookup) {
+            ->each(function ($t) use (&$trainLookup, &$trainChecklistLookup) {
                 $m = Carbon::parse($t->date)->format('Y-m');
-                $techName = $t->responsibleUser ? trim($t->responsibleUser->nombres . ' ' . $t->responsibleUser->apellidos) : 'N/D';
+                $techName = $t->responsibleUser ? trim($t->responsibleUser->nombres.' '.$t->responsibleUser->apellidos) : 'N/D';
                 $historyItem = [
                     'date' => Carbon::parse($t->date)->toIso8601String(),
                     'technician_name' => $techName,
                     'asistentes' => $t->attendances_count,
-                    'notes' => $t->notes ? strip_tags($t->notes) : null
+                    'notes' => $t->notes ? strip_tags($t->notes) : null,
                 ];
 
                 // Por Nombre
                 $title = mb_strtolower($t->title);
-                if (!isset($trainLookup[$title][$m])) {
+                if (! isset($trainLookup[$title][$m])) {
                     $trainLookup[$title][$m] = [
-                        'count' => 0, 
-                        'attendees' => 0, 
+                        'count' => 0,
+                        'attendees' => 0,
                         'execution_date' => Carbon::parse($t->date)->format('d/m/Y'),
-                        'history' => []
+                        'history' => [],
                     ];
                 }
                 $trainLookup[$title][$m]['count']++;
@@ -356,12 +366,12 @@ class ContractController extends Controller
 
                 // Por Checklist
                 if ($t->dynamic_checklist_id) {
-                    if (!isset($trainChecklistLookup[$t->dynamic_checklist_id][$m])) {
+                    if (! isset($trainChecklistLookup[$t->dynamic_checklist_id][$m])) {
                         $trainChecklistLookup[$t->dynamic_checklist_id][$m] = [
-                            'count' => 0, 
-                            'attendees' => 0, 
+                            'count' => 0,
+                            'attendees' => 0,
                             'execution_date' => Carbon::parse($t->date)->format('d/m/Y'),
-                            'history' => []
+                            'history' => [],
                         ];
                     }
                     $trainChecklistLookup[$t->dynamic_checklist_id][$m]['count']++;
@@ -371,29 +381,29 @@ class ContractController extends Controller
             });
 
         // 3. Capacitaciones de Visita
-        VisitTraining::whereHas('visit', fn($q) => $q->where('sede_id', $sedeId)->whereBetween('fecha_visita', [$startDate, $endDate]))
+        VisitTraining::whereHas('visit', fn ($q) => $q->where('sede_id', $sedeId)->whereBetween('fecha_visita', [$startDate, $endDate]))
             ->with(['visit.user', 'training', 'attendances'])
             ->get()
-            ->each(function($vt) use (&$trainLookup, &$trainChecklistLookup) {
+            ->each(function ($vt) use (&$trainLookup, &$trainChecklistLookup) {
                 $m = $vt->created_at->format('Y-m');
-                
+
                 $user = $vt->visit?->user;
-                $techName = $user ? trim($user->nombres . ' ' . $user->apellidos) : 'N/D';
+                $techName = $user ? trim($user->nombres.' '.$user->apellidos) : 'N/D';
                 $historyItem = [
                     'date' => $vt->created_at->toIso8601String(),
                     'technician_name' => $techName,
                     'asistentes' => $vt->attendances->count(),
-                    'notes' => $vt->notes ? strip_tags($vt->notes) : null
+                    'notes' => $vt->notes ? strip_tags($vt->notes) : null,
                 ];
 
                 // Por Nombre
                 $title = mb_strtolower($vt->title);
-                if (!isset($trainLookup[$title][$m])) {
+                if (! isset($trainLookup[$title][$m])) {
                     $trainLookup[$title][$m] = [
-                        'count' => 0, 
-                        'attendees' => 0, 
+                        'count' => 0,
+                        'attendees' => 0,
                         'execution_date' => $vt->created_at->format('d/m/Y'),
-                        'history' => []
+                        'history' => [],
                     ];
                 }
                 $trainLookup[$title][$m]['count']++;
@@ -403,12 +413,12 @@ class ContractController extends Controller
                 // Por Checklist (vía entrenamiento base)
                 if ($vt->training?->dynamic_checklist_id) {
                     $cId = $vt->training->dynamic_checklist_id;
-                    if (!isset($trainChecklistLookup[$cId][$m])) {
+                    if (! isset($trainChecklistLookup[$cId][$m])) {
                         $trainChecklistLookup[$cId][$m] = [
-                            'count' => 0, 
-                            'attendees' => 0, 
+                            'count' => 0,
+                            'attendees' => 0,
                             'execution_date' => $vt->created_at->format('d/m/Y'),
-                            'history' => []
+                            'history' => [],
                         ];
                     }
                     $trainChecklistLookup[$cId][$m]['count']++;
@@ -423,28 +433,28 @@ class ContractController extends Controller
             ->where('sede_id', $sedeId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
-            ->each(function($r) use (&$repLookup) {
+            ->each(function ($r) use (&$repLookup) {
                 $m = str_contains($r->periodo, '-') ? $r->periodo : $r->created_at->format('Y-m');
-                if (!isset($repLookup[$m])) {
+                if (! isset($repLookup[$m])) {
                     $repLookup[$m] = [
-                        'count' => 0, 
+                        'count' => 0,
                         'execution_date' => $r->created_at->format('d/m/Y'),
-                        'history' => []
+                        'history' => [],
                     ];
                 }
                 $repLookup[$m]['count']++;
-                
-                $techName = $r->tecnico ? trim($r->tecnico->nombres . ' ' . $r->tecnico->apellidos) : 'N/D';
+
+                $techName = $r->tecnico ? trim($r->tecnico->nombres.' '.$r->tecnico->apellidos) : 'N/D';
                 $repLookup[$m]['history'][] = [
                     'date' => $r->created_at->toIso8601String(),
                     'technician_name' => $techName,
                     'observaciones' => $r->observaciones_visitas ?: 'Sin observaciones',
-                    'notes' => $r->resumen_ejecutivo ? strip_tags($r->resumen_ejecutivo) : null
+                    'notes' => $r->resumen_ejecutivo ? strip_tags($r->resumen_ejecutivo) : null,
                 ];
             });
 
         // --- CONSTRUCCIÓN DE MATRIZ (OPTIMIZACIÓN O(N*M)) ---
-        
+
         $data = [];
         $currentDate = now()->format('Y-m');
 
@@ -453,14 +463,15 @@ class ContractController extends Controller
             $scheduledMonths = $plan->scheduled_months ?? [];
 
             foreach ($dynamicMonths as $monthValue => $monthInfo) {
-                if (!in_array($monthValue, $scheduledMonths)) {
+                if (! in_array($monthValue, $scheduledMonths)) {
                     $data[$plan->id][$monthValue] = ['status' => 'none', 'count' => 0];
+
                     continue;
                 }
 
-                $count = 0; 
+                $count = 0;
                 $details = ['passed' => 0, 'failed' => 0, 'findings' => 0, 'attendees' => 0, 'execution_date' => null, 'history' => []];
-                
+
                 if ($plan->category === 'Inspección' && $plan->checklist_id) {
                     $found = $insLookup[$plan->checklist_id][$monthValue] ?? null;
                     if ($found) {
@@ -474,7 +485,7 @@ class ContractController extends Controller
                         $title = mb_strtolower($plan->activity_name);
                         $found = $trainLookup[$title][$monthValue] ?? null;
                     }
-                    
+
                     if ($found) {
                         $count = $found['count'];
                         $details = array_merge($details, $found);
@@ -496,6 +507,7 @@ class ContractController extends Controller
                 }
             }
         }
+
         return $data;
     }
 
@@ -504,16 +516,27 @@ class ContractController extends Controller
         $stats = ['global' => 0, 'inspeccion' => 0, 'capacitacion' => 0, 'informe' => 0, 'counts' => ['total' => 0, 'completed' => 0, 'overdue' => 0, 'pending' => 0]];
         foreach ($complianceData as $planId => $months) {
             $plan = $plans->firstWhere('id', $planId);
-            if (!$plan) continue;
+            if (! $plan) {
+                continue;
+            }
             foreach ($months as $month => $data) {
-                if ($data['status'] === 'none') continue;
+                if ($data['status'] === 'none') {
+                    continue;
+                }
                 $stats['counts']['total']++;
-                if ($data['status'] === 'completed') $stats['counts']['completed']++;
-                if ($data['status'] === 'overdue') $stats['counts']['overdue']++;
-                if ($data['status'] === 'pending') $stats['counts']['pending']++;
+                if ($data['status'] === 'completed') {
+                    $stats['counts']['completed']++;
+                }
+                if ($data['status'] === 'overdue') {
+                    $stats['counts']['overdue']++;
+                }
+                if ($data['status'] === 'pending') {
+                    $stats['counts']['pending']++;
+                }
             }
         }
         $stats['global'] = $stats['counts']['total'] > 0 ? round(($stats['counts']['completed'] / $stats['counts']['total']) * 100) : 0;
+
         return $stats;
     }
 }

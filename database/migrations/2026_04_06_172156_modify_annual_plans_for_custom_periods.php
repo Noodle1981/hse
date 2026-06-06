@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::table('annual_plans', function (Blueprint $table) {
             $table->dropColumn([
-                'year', 'january', 'february', 'march', 'april', 'may', 'june', 
-                'july', 'august', 'september', 'october', 'november', 'december'
+                'year', 'january', 'february', 'march', 'april', 'may', 'june',
+                'july', 'august', 'september', 'october', 'november', 'december',
             ]);
             $table->date('period_start')->nullable();
             $table->date('period_end')->nullable();

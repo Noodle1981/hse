@@ -17,7 +17,7 @@ class InspectionPDFController extends Controller
             'checklist.sections',
             'user',
             'sede.empresa',
-            'answers.question'
+            'answers.question',
         ])->findOrFail($id);
 
         \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
@@ -26,12 +26,12 @@ class InspectionPDFController extends Controller
 
         $pdf = Pdf::setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])->loadView('pdf.inspection', [
             'inspection' => $inspection,
-            'answers'    => $inspection->answers,
-            'sections'   => $inspection->checklist->sections->sortBy('order'),
-            'branding'   => $branding,
+            'answers' => $inspection->answers,
+            'sections' => $inspection->checklist->sections->sortBy('order'),
+            'branding' => $branding,
         ]);
 
-        return $pdf->download('reporte_inspeccion_' . $inspection->id . '.pdf');
+        return $pdf->download('reporte_inspeccion_'.$inspection->id.'.pdf');
     }
 
     public function preview(int $id)
@@ -43,7 +43,7 @@ class InspectionPDFController extends Controller
             'checklist.sections',
             'user',
             'sede.empresa',
-            'answers.question'
+            'answers.question',
         ])->findOrFail($id);
 
         \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
@@ -52,11 +52,11 @@ class InspectionPDFController extends Controller
 
         $pdf = Pdf::setOption(['isRemoteEnabled' => true, 'isHtml5ParserEnabled' => true])->loadView('pdf.inspection', [
             'inspection' => $inspection,
-            'answers'    => $inspection->answers,
-            'sections'   => $inspection->checklist->sections->sortBy('order'),
-            'branding'   => $branding,
+            'answers' => $inspection->answers,
+            'sections' => $inspection->checklist->sections->sortBy('order'),
+            'branding' => $branding,
         ]);
 
-        return $pdf->stream('reporte_inspeccion_' . $inspection->id . '.pdf');
+        return $pdf->stream('reporte_inspeccion_'.$inspection->id.'.pdf');
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\VisitCertificate;
-use App\Models\User;
-use App\Models\Sede;
 use App\Models\Empresa;
+use App\Models\Sede;
+use App\Models\User;
+use App\Models\VisitCertificate;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class VisitCertificateFactory extends Factory

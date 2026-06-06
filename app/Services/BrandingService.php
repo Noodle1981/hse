@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Consultora;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class BrandingService
@@ -14,11 +14,11 @@ class BrandingService
     public static function defaults(): array
     {
         return [
-            'logo'      => public_path('images/logo.png'),
-            'primary'   => '#1e40af',
+            'logo' => public_path('images/logo.png'),
+            'primary' => '#1e40af',
             'secondary' => '#6b7280',
-            'accent'    => '#16a34a',
-            'name'      => 'XAMASAFE',
+            'accent' => '#16a34a',
+            'name' => 'XAMASAFE',
         ];
     }
 
@@ -38,18 +38,18 @@ class BrandingService
      */
     public static function fromConsultora(?Consultora $consultora): array
     {
-        if (!$consultora) {
+        if (! $consultora) {
             return self::defaults();
         }
 
         return [
-            'logo'      => $consultora->logo_path
-                            ? public_path('storage/' . $consultora->logo_path)
+            'logo' => $consultora->logo_path
+                            ? public_path('storage/'.$consultora->logo_path)
                             : public_path('images/logo.png'),
-            'primary'   => $consultora->color_primary   ?? '#1e40af',
+            'primary' => $consultora->color_primary ?? '#1e40af',
             'secondary' => $consultora->color_secondary ?? '#6b7280',
-            'accent'    => $consultora->color_accent    ?? '#16a34a',
-            'name'      => $consultora->nombre          ?? 'XAMASAFE',
+            'accent' => $consultora->color_accent ?? '#16a34a',
+            'name' => $consultora->nombre ?? 'XAMASAFE',
         ];
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -22,7 +21,7 @@ class SignatureApprovalController extends Controller
 
         $query = User::where('firma_status', 'pending');
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $query->where('consultora_id', $currentUser->consultora_id);
         }
 
@@ -39,7 +38,7 @@ class SignatureApprovalController extends Controller
         $this->ensureGestor();
         $this->ensureTenancy($user);
 
-        if ($user->firma_status !== 'pending' || !$user->firma_temp) {
+        if ($user->firma_status !== 'pending' || ! $user->firma_temp) {
             return back()->with('error', 'El usuario no tiene una firma pendiente de aprobación.');
         }
 
@@ -47,12 +46,12 @@ class SignatureApprovalController extends Controller
         $extension = pathinfo($tempPath, PATHINFO_EXTENSION) ?: 'png';
 
         // Definir nueva ruta definitiva con nombre único aleatorio para preservar el historial forense
-        $newFilename = 'signatures/user_sig_' . $user->id . '_' . Str::random(12) . '.' . $extension;
+        $newFilename = 'signatures/user_sig_'.$user->id.'_'.Str::random(12).'.'.$extension;
 
         if (Storage::disk('public')->exists($tempPath)) {
             // Copiar físicamente el archivo al almacenamiento permanente
             Storage::disk('public')->copy($tempPath, $newFilename);
-            
+
             // Eliminar el archivo temporal original
             Storage::disk('public')->delete($tempPath);
         }
@@ -75,7 +74,7 @@ class SignatureApprovalController extends Controller
         $this->ensureGestor();
         $this->ensureTenancy($user);
 
-        if ($user->firma_status !== 'pending' || !$user->firma_temp) {
+        if ($user->firma_status !== 'pending' || ! $user->firma_temp) {
             return back()->with('error', 'El usuario no tiene una firma pendiente de aprobación.');
         }
 
@@ -102,7 +101,7 @@ class SignatureApprovalController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (!$user->isAdmin()) {
+        if (! $user->isAdmin()) {
             abort(403, 'Acceso denegado. Se requieren privilegios de Gestor.');
         }
     }
@@ -114,7 +113,7 @@ class SignatureApprovalController extends Controller
     {
         /** @var \App\Models\User $currentUser */
         $currentUser = Auth::user();
-        if (!$currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
+        if (! $currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
             abort(403, 'Acceso denegado. Inconsistencia de consultora.');
         }
     }

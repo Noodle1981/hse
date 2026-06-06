@@ -12,6 +12,6 @@ class SedeUser extends Model
 
     protected $fillable = [
         'user_id',
-        'sede_id'
+        'sede_id',
     ];
 }

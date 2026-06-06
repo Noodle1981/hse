@@ -1,23 +1,21 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth;
-
-use App\Http\Controllers\InspectionPDFController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\InspectionController;
-use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AdministrationController;
-use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ChecklistController;
-use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ContractController;
 use App\Http\Controllers\FindingController;
 use App\Http\Controllers\IncidenteController;
+use App\Http\Controllers\InspectionController;
+use App\Http\Controllers\InspectionPDFController;
 use App\Http\Controllers\MasterReportController;
-use App\Http\Controllers\ContractController;
+use App\Http\Controllers\OperationController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SignatureApprovalController;
+use App\Http\Controllers\TrainingController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,7 +28,7 @@ Route::get('/', function () {
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
-Route::get('/constancia/firmar/{token}', function() {
+Route::get('/constancia/firmar/{token}', function () {
     // TODO: Migrar PublicSignature a React
     abort(404, 'Vista de firma pública pendiente de migración a React.');
 })->name('constancia.firmar');
@@ -51,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
         if ($user->isTechnician()) {
             return redirect()->route('tecnico.checklists.tasks.index');
         }
+
         // Redireccionar al Dashboard de Gestor por defecto para Administradores/Otros
         return redirect()->route('gestor.dashboard');
     })->name('dashboard');
@@ -59,13 +58,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/perfil/signature', [ProfileController::class, 'updateSignature'])->name('profile.signature');
-    
+
     /*
     |--------------------------------------------------------------------------
     | Rutas GESTOR (Prefijo: /gestor)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador'])->group(function() {
+    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador'])->group(function () {
         // Dashboard del Gestor (principal)
         Route::get('/dashboard', [AdministrationController::class, 'gestorDashboard'])->name('dashboard');
 
@@ -81,7 +80,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Administración
         Route::get('/administracion', [AdministrationController::class, 'hub'])->name('administration.hub');
-        
+
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/dashboard', [AdministrationController::class, 'dashboard'])->name('dashboard');
             Route::get('/hub', [AdministrationController::class, 'hub'])->name('hub');
@@ -96,7 +95,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{user}/approve-signature', [SignatureApprovalController::class, 'approve'])->name('signatures.approve');
             Route::post('/{user}/reject-signature', [SignatureApprovalController::class, 'reject'])->name('signatures.reject');
         });
-        
+
         Route::prefix('tecnicos')->group(function () {
             Route::get('/', [AdministrationController::class, 'technicians'])->name('technicians.index');
             Route::post('/{user}/assign', [AdministrationController::class, 'assignSede'])->name('technicians.assign');
@@ -133,8 +132,6 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('assignments')->name('assignments.')->group(function () {
             // TODO: Migrar AssignmentManager a React
         });
-        
-
 
         // Hallazgos (React)
         Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
@@ -191,14 +188,14 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/save', [ChecklistController::class, 'save'])->name('save');
             Route::post('/{checklist}/toggle', [ChecklistController::class, 'toggleStatus'])->name('toggle');
             Route::post('/{original}/duplicate', [ChecklistController::class, 'duplicate'])->name('duplicate');
-            
+
             Route::get('/{checklist}/emular', [ChecklistController::class, 'emulate'])->name('emulator');
             Route::get('/{id}/wizard', [InspectionController::class, 'wizard'])->name('fill');
             Route::post('/{id}/wizard/save/{inspection}', [InspectionController::class, 'saveProgress'])->name('wizard.save');
             Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
         });
 
-            // Rutas de Categorías
+        // Rutas de Categorías
         Route::prefix('categories')->name('categories.')->group(function () {
             Route::get('/', [CategoryController::class, 'index'])->name('index');
             Route::get('/create', [CategoryController::class, 'create'])->name('create');
@@ -220,8 +217,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
         });
 
-
-
         // Personalización de Empresa (TODO: Migrar a React)
         // Route::get('/administration/branding/{id}', ...)->name('administration.branding');
 
@@ -232,7 +227,7 @@ Route::middleware(['auth'])->group(function () {
     | Rutas GESTOR Compartidas con Técnico (Prefijo: /gestor)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->group(function() {
+    Route::prefix('gestor')->name('gestor.')->middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->group(function () {
         Route::prefix('operations')->name('operations.')->group(function () {
             Route::prefix('visits')->name('visits.')->group(function () {
                 Route::get('/create', [OperationController::class, 'create'])->name('create');
@@ -248,8 +243,8 @@ Route::middleware(['auth'])->group(function () {
     | Rutas COMPARTIDAS (Gestor + Técnico)
     |--------------------------------------------------------------------------
     */
-    Route::middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->group(function() {
-        
+    Route::middleware(['role:Administrador,Gestor,tecnico,Técnico,Socio'])->group(function () {
+
         // Contrato Anual / PPD
         Route::prefix('contrato-anual')->name('annual-contract.')->group(function () {
             Route::get('/', [ContractController::class, 'index'])->name('index');
@@ -278,15 +273,15 @@ Route::middleware(['auth'])->group(function () {
     | Rutas TÉCNICO (Prefijo: /tecnico)
     |--------------------------------------------------------------------------
     */
-    Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico,tecnico,gestor,Administrador,Socio'])->group(function() {
+    Route::prefix('tecnico')->name('tecnico.')->middleware(['role:Técnico,tecnico,gestor,Administrador,Socio'])->group(function () {
 
         // Checklists (Asignaciones y Llenado) (React)
         Route::prefix('checklists')->name('checklists.')->group(function () {
-             Route::get('/my-assignments', [OperationController::class, 'myAssignments'])->name('tasks.index'); // Mis Tareas / Inspecciones
-             Route::get('/{id}/fill/{assignment?}', [InspectionController::class, 'wizard'])->name('fill');
-             Route::post('/execute', [OperationController::class, 'startQuickExecution'])->name('execute');
-             Route::post('/{id}/wizard/save/{inspection}', [InspectionController::class, 'saveProgress'])->name('wizard.save');
-             Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
+            Route::get('/my-assignments', [OperationController::class, 'myAssignments'])->name('tasks.index'); // Mis Tareas / Inspecciones
+            Route::get('/{id}/fill/{assignment?}', [InspectionController::class, 'wizard'])->name('fill');
+            Route::post('/execute', [OperationController::class, 'startQuickExecution'])->name('execute');
+            Route::post('/{id}/wizard/save/{inspection}', [InspectionController::class, 'saveProgress'])->name('wizard.save');
+            Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
         });
 
         // Visitas (React)
@@ -318,17 +313,14 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/session/{visitTraining}/finalize', [TrainingController::class, 'finalize'])->name('finalize');
         });
 
-
-
-
         // Hallazgos (Técnico - React)
         Route::prefix('hallazgos')->name('hallazgos.')->group(function () {
-             Route::get('/', [FindingController::class, 'myFindings'])->name('index'); // Redundante con mis-hallazgos mas arriba pero seguro
-             Route::get('/reportar', [FindingController::class, 'create'])->name('create');
-             Route::post('/', [FindingController::class, 'store'])->name('store');
-             Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
-             Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
-             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/', [FindingController::class, 'myFindings'])->name('index'); // Redundante con mis-hallazgos mas arriba pero seguro
+            Route::get('/reportar', [FindingController::class, 'create'])->name('create');
+            Route::post('/', [FindingController::class, 'store'])->name('store');
+            Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
+            Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });
 
         // Historial Inspecciones (Técnico - React)
@@ -347,7 +339,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/incidentes/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('incidentes.pdf');
         Route::get('/incidentes/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('incidentes.pdf.preview');
 
-
     });
 
     /*
@@ -356,7 +347,7 @@ Route::middleware(['auth'])->group(function () {
     |--------------------------------------------------------------------------
     | Reservado para la gestión global de consultoras y monitoreo del ecosistema.
     */
-    Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function() {
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
         Route::get('/dashboard', [AdministrationController::class, 'dashboard'])->name('dashboard');
         // TODO: Migrar Consultants admin a React
     });

@@ -14,7 +14,7 @@ class ProvinciaSeeder extends Seeder
             'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja', 'Mendoza',
             'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan', 'San Luis',
             'Santa Cruz', 'Santa Fe', 'Santiago del Estero', 'Tierra del Fuego', 'Tucumán',
-            'Ciudad Autónoma de Buenos Aires'
+            'Ciudad Autónoma de Buenos Aires',
         ];
 
         foreach ($provincias as $nombre) {

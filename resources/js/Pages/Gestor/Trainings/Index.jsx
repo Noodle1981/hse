@@ -292,7 +292,7 @@ function TrainingRow({ session, auth, SourceIcon, StatusBadge }) {
                             href={route(auth.user.rol?.toLowerCase() === 'tecnico' || auth.user.rol?.toLowerCase() === 'técnico' ? 'tecnico.trainings.pdf.preview' : 'gestor.trainings.pdf.preview', { id: session.id })}
                             target="_blank"
                             className="h-10 px-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-600 hover:text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg text-[9px] font-black uppercase italic tracking-widest"
-                            title="Descargar Constancia en PDF"
+                            title="Descargar Constancia en PDF" rel="noreferrer"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                             Constancia

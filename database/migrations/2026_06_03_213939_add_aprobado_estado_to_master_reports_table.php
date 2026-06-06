@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -32,7 +32,7 @@ return new class extends Migration
         Schema::table('master_reports', function (Blueprint $table) {
             // 4. Crear la columna con el nuevo enum que incluye 'aprobado'
             $table->enum('estado', ['solicitado', 'en_redaccion', 'finalizado', 'aprobado', 'archivado'])
-                  ->default('solicitado');
+                ->default('solicitado');
         });
 
         // 5. Restaurar los datos desde la columna temporal
@@ -58,7 +58,7 @@ return new class extends Migration
 
         Schema::table('master_reports', function (Blueprint $table) {
             $table->enum('estado', ['solicitado', 'en_redaccion', 'finalizado', 'archivado'])
-                  ->default('solicitado');
+                ->default('solicitado');
         });
 
         DB::statement('UPDATE master_reports SET estado = estado_new');

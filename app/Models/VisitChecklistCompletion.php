@@ -48,16 +48,18 @@ class VisitChecklistCompletion extends Model
     public function getFormattedResponsesAttribute()
     {
         $responses = $this->responses ?? [];
-        if (empty($responses)) return [];
+        if (empty($responses)) {
+            return [];
+        }
 
         $checklist = $this->assignment?->checklist ?? null;
-        if (!$checklist) {
-            return array_map(function($resp) {
+        if (! $checklist) {
+            return array_map(function ($resp) {
                 return [
                     'question_id' => $resp['question_id'] ?? null,
                     'question_label' => 'Punto de Control',
                     'value' => $resp['value'] ?? 'N/A',
-                    'observation' => $resp['observation'] ?? null
+                    'observation' => $resp['observation'] ?? null,
                 ];
             }, $responses);
         }
@@ -68,12 +70,12 @@ class VisitChecklistCompletion extends Model
         foreach ($responses as $resp) {
             $qId = $resp['question_id'] ?? null;
             $question = $questions->get($qId);
-            
+
             $formatted[] = [
                 'question_id' => $qId,
                 'question_label' => $question ? $question->label : 'Punto de Control Eliminado',
                 'value' => $resp['value'] ?? 'N/A',
-                'observation' => $resp['observation'] ?? null
+                'observation' => $resp['observation'] ?? null,
             ];
         }
 
@@ -108,10 +110,11 @@ class VisitChecklistCompletion extends Model
                         $failedCount++;
                     }
                 }
+
                 return [
                     'total' => $totalCount,
                     'failed' => $failedCount,
-                    'is_failed' => $failedCount > 0
+                    'is_failed' => $failedCount > 0,
                 ];
             }
         }
@@ -119,12 +122,12 @@ class VisitChecklistCompletion extends Model
         // 2. Lógica fallback sobre el campo responses de la completación (ej. migraciones legacy)
         $responses = $this->responses ?? [];
         $checklist = $this->assignment?->checklist ?? null;
-        
-        if (!$checklist) {
+
+        if (! $checklist) {
             return [
                 'total' => count($responses),
                 'failed' => 0,
-                'is_failed' => false
+                'is_failed' => false,
             ];
         }
 
@@ -134,13 +137,17 @@ class VisitChecklistCompletion extends Model
 
         foreach ($responses as $response) {
             $qId = $response['question_id'] ?? null;
-            if (!$qId) continue;
+            if (! $qId) {
+                continue;
+            }
 
             $question = $questions->get($qId);
-            if (!$question) continue;
+            if (! $question) {
+                continue;
+            }
 
             $value = $response['value'] ?? null;
-            
+
             if ($this->checkIfValueIsFailure($question, $value)) {
                 $failedCount++;
             }
@@ -149,7 +156,7 @@ class VisitChecklistCompletion extends Model
         return [
             'total' => $totalCount,
             'failed' => $failedCount,
-            'is_failed' => $failedCount > 0
+            'is_failed' => $failedCount > 0,
         ];
     }
 
@@ -161,24 +168,32 @@ class VisitChecklistCompletion extends Model
         $processedValue = is_string($value) ? (json_decode($value, true) ?? $value) : $value;
 
         // 1. Disparadores de falla (failure_values)
-        if (!empty($question->failure_values)) {
+        if (! empty($question->failure_values)) {
             $logic = $question->failure_logic ?? DynamicQuestion::LOGIC_FAIL_IF_SELECTED;
 
             if ($logic === DynamicQuestion::LOGIC_FAIL_IF_MISSING) {
                 if (is_array($processedValue)) {
                     foreach ($question->failure_values as $required) {
-                        if (!in_array($required, $processedValue)) return true;
+                        if (! in_array($required, $processedValue)) {
+                            return true;
+                        }
                     }
                 } else {
-                    if (!in_array($processedValue, $question->failure_values)) return true;
+                    if (! in_array($processedValue, $question->failure_values)) {
+                        return true;
+                    }
                 }
             } else {
                 if (is_array($processedValue)) {
                     foreach ($processedValue as $val) {
-                        if (in_array($val, $question->failure_values)) return true;
+                        if (in_array($val, $question->failure_values)) {
+                            return true;
+                        }
                     }
                 } else {
-                    if (in_array($processedValue, $question->failure_values)) return true;
+                    if (in_array($processedValue, $question->failure_values)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -186,8 +201,12 @@ class VisitChecklistCompletion extends Model
         // 2. Rangos numéricos
         if ($question->type === 'number' && ($question->min_value !== null || $question->max_value !== null)) {
             $numValue = (float) $processedValue;
-            if ($question->min_value !== null && $numValue < (float) $question->min_value) return true;
-            if ($question->max_value !== null && $numValue > (float) $question->max_value) return true;
+            if ($question->min_value !== null && $numValue < (float) $question->min_value) {
+                return true;
+            }
+            if ($question->max_value !== null && $numValue > (float) $question->max_value) {
+                return true;
+            }
         }
 
         return false;

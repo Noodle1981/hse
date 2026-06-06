@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('comentario')->nullable();
             $table->dateTime('fecha_seguimiento');
             $table->timestamps();
-            
+
             $table->index('hallazgo_id');
             $table->index('fecha_seguimiento');
         });

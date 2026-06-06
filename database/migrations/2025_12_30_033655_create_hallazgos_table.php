@@ -24,16 +24,16 @@ return new class extends Migration
             $table->string('responsable_correccion')->nullable();
             $table->dateTime('fecha_deteccion');
             $table->dateTime('fecha_resolucion')->nullable();
-            
+
             // Relación polimórfica con origen (Inspección, Constancia, Manual)
             $table->string('origen_type')->nullable();
             $table->unsignedBigInteger('origen_id')->nullable();
-            
+
             // Vinculación opcional con matriz de riesgo (Deprecado si la tabla risks no existe)
             // $table->foreignId('risk_id')->nullable()->constrained('risks')->nullOnDelete();
-            
+
             $table->timestamps();
-            
+
             $table->index(['origen_type', 'origen_id']);
             $table->index(['estado', 'criticidad']);
             $table->index('fecha_deteccion');

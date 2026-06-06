@@ -60,11 +60,10 @@ class HallazgoSeguimiento extends Model
      */
     public function getDescripcionCambio(): string
     {
-        if (!$this->huboambioEstado()) {
-            return "Actualización sin cambio de estado";
+        if (! $this->huboambioEstado()) {
+            return 'Actualización sin cambio de estado';
         }
 
         return "Cambió de '{$this->estado_anterior}' a '{$this->estado_nuevo}'";
     }
 }
-

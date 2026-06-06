@@ -132,11 +132,11 @@ export default function Wizard({ auth, report, periodData }) {
                                     <p className="text-[10px] text-red-100/40 uppercase tracking-[0.2em] font-black italic mb-4">Notas de Auditoría Interna</p>
                                     <div className="bg-black/40 rounded-[2rem] p-8 border border-white/5 shadow-inner">
                                         <p className="text-sm text-indigo-100/70 italic leading-relaxed font-semibold">
-                                            "{report.observacion_revision}"
+                                            {`"${report.observacion_revision}"`}
                                         </p>
                                     </div>
                                     <p className="text-[10px] text-white/30 font-semibold italic mt-4 uppercase tracking-widest leading-relaxed">
-                                        Por favor, revise las secciones comentadas, aplique las correcciones necesarias y vuelva a enviar el informe a través del botón "Generar Informe Final" al final de la página.
+                                        Por favor, revise las secciones comentadas, aplique las correcciones necesarias y vuelva a enviar el informe a través del botón &quot;Generar Informe Final&quot; al final de la página.
                                     </p>
                                 </div>
                             </div>

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\File;
 class ExportChecklists extends Command
 {
     protected $signature = 'checklists:export {--path= : Output path (default: database/seeds/checklists_export.json)}';
+
     protected $description = 'Exporta todos los checklists activos a un archivo JSON para poder restaurarlos (seeder)';
 
     public function handle(): int
@@ -23,18 +24,18 @@ class ExportChecklists extends Command
 
         $data = $checklists->map(function (DynamicChecklist $cl) {
             return [
-                'title'           => $cl->title,
-                'description'     => $cl->description,
-                'registry_code'   => $cl->registry_code,
-                'is_active'       => $cl->is_active,
-                'category_id'     => $cl->category_id,
-                'subcategory_id'  => $cl->subcategory_id,
+                'title' => $cl->title,
+                'description' => $cl->description,
+                'registry_code' => $cl->registry_code,
+                'is_active' => $cl->is_active,
+                'category_id' => $cl->category_id,
+                'subcategory_id' => $cl->subcategory_id,
                 'sections' => $cl->sections->map(function ($section) {
                     return [
-                        'title'       => $section->title,
+                        'title' => $section->title,
                         'description' => $section->description ?? null,
-                        'order'       => $section->order,
-                        'questions'   => $section->questions->map(fn ($q) => $this->mapQuestion($q))->values()->toArray(),
+                        'order' => $section->order,
+                        'questions' => $section->questions->map(fn ($q) => $this->mapQuestion($q))->values()->toArray(),
                     ];
                 })->values()->toArray(),
                 'questions' => $cl->questions->map(fn ($q) => $this->mapQuestion($q))->values()->toArray(),
@@ -45,22 +46,23 @@ class ExportChecklists extends Command
         File::ensureDirectoryExists(dirname($path));
         File::put($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 
-        $this->info("✅ " . count($data) . " checklists exportados a: {$path}");
+        $this->info('✅ '.count($data)." checklists exportados a: {$path}");
+
         return 0;
     }
 
     private function mapQuestion($q): array
     {
         return [
-            'label'          => $q->label,
-            'type'           => $q->type,
-            'options'        => $q->options,
+            'label' => $q->label,
+            'type' => $q->type,
+            'options' => $q->options,
             'failure_values' => $q->failure_values,
-            'min_value'      => $q->min_value,
-            'max_value'      => $q->max_value,
-            'order'          => $q->order,
-            'is_required'    => $q->is_required,
-            'help_text'      => $q->help_text,
+            'min_value' => $q->min_value,
+            'max_value' => $q->max_value,
+            'order' => $q->order,
+            'is_required' => $q->is_required,
+            'help_text' => $q->help_text,
         ];
     }
 }

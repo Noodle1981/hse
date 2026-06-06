@@ -11,7 +11,6 @@ use App\Services\VisitService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class OperationController extends Controller
@@ -94,17 +93,17 @@ class OperationController extends Controller
             ->whereYear('created_at', $now->year);
 
         // 4️⃣ Annual Plan Tasks
-        $queryMonth = $now->year . '-' . str_pad($selectedMonth, 2, '0', STR_PAD_LEFT);
+        $queryMonth = $now->year.'-'.str_pad($selectedMonth, 2, '0', STR_PAD_LEFT);
         $contractQuery = \App\Models\AnnualPlan::with(['checklist.categoryRelation', 'sede.empresa'])
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereJsonContains('scheduled_months', $queryMonth);
 
         // Apply filters (Empresa/Sede/Search)
         if ($selectedEmpresa) {
-            $assignmentsQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
-            $trainingsQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
-            $reportsQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
-            $contractQuery->whereHas('sede', fn($q) => $q->where('empresa_id', $selectedEmpresa));
+            $assignmentsQuery->whereHas('sede', fn ($q) => $q->where('empresa_id', $selectedEmpresa));
+            $trainingsQuery->whereHas('sede', fn ($q) => $q->where('empresa_id', $selectedEmpresa));
+            $reportsQuery->whereHas('sede', fn ($q) => $q->where('empresa_id', $selectedEmpresa));
+            $contractQuery->whereHas('sede', fn ($q) => $q->where('empresa_id', $selectedEmpresa));
         }
         if ($selectedSede) {
             $assignmentsQuery->where('sede_id', $selectedSede);
@@ -113,7 +112,7 @@ class OperationController extends Controller
             $contractQuery->where('sede_id', $selectedSede);
         }
         if ($search) {
-            $assignmentsQuery->whereHas('checklist', fn($q) => $q->where('title', 'like', "%{$search}%"));
+            $assignmentsQuery->whereHas('checklist', fn ($q) => $q->where('title', 'like', "%{$search}%"));
             $trainingsQuery->where('title', 'like', "%{$search}%");
             $reportsQuery->where('titulo', 'like', "%{$search}%");
             $contractQuery->where('activity_name', 'like', "%{$search}%");
@@ -125,7 +124,7 @@ class OperationController extends Controller
         $contractTasks = $contractQuery->get();
 
         // 5️⃣ Procesamiento de resultados para vista unificada con agrupación para evitar duplicados y mantener registro único
-        
+
         // Fetch all completed inspections for this month to calculate the KPI stats
         $completedInspectionsAll = \App\Models\DynamicInspection::whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('completed_at', $selectedMonth)
@@ -158,7 +157,7 @@ class OperationController extends Controller
             $completedPassed = $matchingCompleted->where('result', 'Pass')->count();
             $compliancePct = $completedTotal > 0 ? round(($completedPassed / $completedTotal) * 100) : null;
 
-            $key = $plan->checklist_id . '-' . $plan->sede_id;
+            $key = $plan->checklist_id.'-'.$plan->sede_id;
             $unifiedInspections->put($key, [
                 'id' => $plan->id, // ID del plan
                 'type' => 'inspection',
@@ -170,7 +169,7 @@ class OperationController extends Controller
                 'status' => $status,
                 'checklist_id' => $plan->checklist_id,
                 'source' => 'contract',
-                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-'.$plan->id),
                 'checklist_count' => $matchingAssignments->count(),
                 'completed_count' => $completedTotal,
                 'passed_count' => $completedPassed,
@@ -179,7 +178,7 @@ class OperationController extends Controller
         }
 
         foreach ($allAssignments as $assignment) {
-            $key = $assignment->dynamic_checklist_id . '-' . $assignment->sede_id;
+            $key = $assignment->dynamic_checklist_id.'-'.$assignment->sede_id;
             if ($unifiedInspections->has($key)) {
                 continue;
             }
@@ -204,7 +203,7 @@ class OperationController extends Controller
                 'status' => $assignment->status,
                 'checklist_id' => $assignment->dynamic_checklist_id,
                 'source' => 'manual',
-                'registry_code' => $assignment->checklist?->registry_code ?? ('TX-' . $assignment->id),
+                'registry_code' => $assignment->checklist?->registry_code ?? ('TX-'.$assignment->id),
                 'checklist_count' => $matchingManual->count(),
                 'completed_count' => $completedTotal,
                 'passed_count' => $completedPassed,
@@ -219,8 +218,8 @@ class OperationController extends Controller
 
         foreach ($contractTrainings as $plan) {
             $matchingTrainings = $allTrainings->where('sede_id', $plan->sede_id)
-                ->filter(function($t) use ($plan) {
-                    return ($plan->checklist_id && $t->dynamic_checklist_id == $plan->checklist_id) 
+                ->filter(function ($t) use ($plan) {
+                    return ($plan->checklist_id && $t->dynamic_checklist_id == $plan->checklist_id)
                         || (\Illuminate\Support\Str::slug($t->title) === \Illuminate\Support\Str::slug($plan->activity_name));
                 });
 
@@ -235,7 +234,7 @@ class OperationController extends Controller
                 }
             }
 
-            $key = $plan->checklist_id ? ('c_' . $plan->checklist_id . '_' . $plan->sede_id) : ('t_' . \Illuminate\Support\Str::slug($plan->activity_name) . '_' . $plan->sede_id);
+            $key = $plan->checklist_id ? ('c_'.$plan->checklist_id.'_'.$plan->sede_id) : ('t_'.\Illuminate\Support\Str::slug($plan->activity_name).'_'.$plan->sede_id);
 
             $unifiedTrainings->put($key, [
                 'id' => $plan->id,
@@ -248,12 +247,12 @@ class OperationController extends Controller
                 'status' => $status,
                 'checklist_id' => $plan->checklist_id,
                 'source' => 'contract',
-                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-'.$plan->id),
             ]);
         }
 
         foreach ($allTrainings as $t) {
-            $key = $t->dynamic_checklist_id ? ('c_' . $t->dynamic_checklist_id . '_' . $t->sede_id) : ('t_' . \Illuminate\Support\Str::slug($t->title) . '_' . $t->sede_id);
+            $key = $t->dynamic_checklist_id ? ('c_'.$t->dynamic_checklist_id.'_'.$t->sede_id) : ('t_'.\Illuminate\Support\Str::slug($t->title).'_'.$t->sede_id);
             if ($unifiedTrainings->has($key)) {
                 continue;
             }
@@ -269,7 +268,7 @@ class OperationController extends Controller
                 'status' => $t->status,
                 'checklist_id' => $t->dynamic_checklist_id,
                 'source' => 'manual',
-                'registry_code' => $t->dynamicChecklist?->registry_code ?? ('EDU-' . $t->id),
+                'registry_code' => $t->dynamicChecklist?->registry_code ?? ('EDU-'.$t->id),
             ]);
         }
         $trainings = $unifiedTrainings->values();
@@ -290,7 +289,7 @@ class OperationController extends Controller
 
             // Fallback: si no hay match por periodo exacto, buscar cualquier informe
             // de esta sede+usuario en el año actual (cubre casos de periodo mal formateado)
-            if (!$matchingReport) {
+            if (! $matchingReport) {
                 $matchingReport = \App\Models\MasterReport::where('sede_id', $plan->sede_id)
                     ->where('user_id', $user->id)
                     ->whereYear('created_at', $now->year)
@@ -300,41 +299,41 @@ class OperationController extends Controller
             }
 
             // El backend calcula la acción visual que debe mostrar el frontend
-            $accion = match(true) {
-                is_null($matchingReport)                                                               => 'ejecutar',
-                $matchingReport->estado === 'aprobado'                                                 => 'aprobado',
-                $matchingReport->estado === 'finalizado'                                               => 'pendiente',
-                $matchingReport->estado === 'en_redaccion' && !is_null($matchingReport->observacion_revision) => 'corregir',
-                $matchingReport->estado === 'en_redaccion'                                             => 'reanudar',
-                default                                                                                => 'ejecutar',
+            $accion = match (true) {
+                is_null($matchingReport) => 'ejecutar',
+                $matchingReport->estado === 'aprobado' => 'aprobado',
+                $matchingReport->estado === 'finalizado' => 'pendiente',
+                $matchingReport->estado === 'en_redaccion' && ! is_null($matchingReport->observacion_revision) => 'corregir',
+                $matchingReport->estado === 'en_redaccion' => 'reanudar',
+                default => 'ejecutar',
             };
 
             // Status genérico para el filtro UI (compatible con el selector de estados)
-            $status = match($accion) {
-                'aprobado'  => 'completed',
+            $status = match ($accion) {
+                'aprobado' => 'completed',
                 'pendiente' => 'pending_review',
-                'corregir'  => 'correction',
-                'reanudar'  => 'in_progress',
-                default     => 'scheduled',
+                'corregir' => 'correction',
+                'reanudar' => 'in_progress',
+                default => 'scheduled',
             };
 
-            $key = 'r_' . \Illuminate\Support\Str::slug($plan->activity_name) . '_' . $plan->sede_id;
+            $key = 'r_'.\Illuminate\Support\Str::slug($plan->activity_name).'_'.$plan->sede_id;
 
             $unifiedReports->put($key, [
-                'id'                   => $plan->id,
-                'type'                 => 'report',
-                'title'                => $plan->checklist?->title ?? $plan->activity_name,
-                'sede'                 => $plan->sede?->nombre_sede,
-                'sede_id'              => $plan->sede_id,
-                'empresa'              => $plan->sede?->empresa?->nombre,
-                'due_date'             => Carbon::now()->endOfMonth(),
-                'status'               => $status,
-                'checklist_id'         => null,
-                'source'               => 'contract',
-                'registry_code'        => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-' . $plan->id),
+                'id' => $plan->id,
+                'type' => 'report',
+                'title' => $plan->checklist?->title ?? $plan->activity_name,
+                'sede' => $plan->sede?->nombre_sede,
+                'sede_id' => $plan->sede_id,
+                'empresa' => $plan->sede?->empresa?->nombre,
+                'due_date' => Carbon::now()->endOfMonth(),
+                'status' => $status,
+                'checklist_id' => null,
+                'source' => 'contract',
+                'registry_code' => $plan->checklist?->registry_code ?? $plan->activity_code ?? ('AN-'.$plan->id),
                 // Campos nuevos para la lógica de 5 estados
-                'accion'               => $accion,
-                'master_report_id'     => $matchingReport?->id,
+                'accion' => $accion,
+                'master_report_id' => $matchingReport?->id,
                 'observacion_revision' => $matchingReport?->observacion_revision,
             ]);
         }
@@ -353,36 +352,36 @@ class OperationController extends Controller
                 continue;
             }
 
-            $key = 'r_' . \Illuminate\Support\Str::slug($r->titulo) . '_' . $r->sede_id;
+            $key = 'r_'.\Illuminate\Support\Str::slug($r->titulo).'_'.$r->sede_id;
             if ($unifiedReports->has($key)) {
                 continue;
             }
 
             // Informes ad-hoc (no del plan anual): también calculamos su acción
-            $accionAdhoc = match(true) {
-                $r->estado === 'aprobado'    => 'aprobado',
-                $r->estado === 'finalizado'  => 'pendiente',
-                $r->estado === 'en_redaccion' && !is_null($r->observacion_revision) => 'corregir',
+            $accionAdhoc = match (true) {
+                $r->estado === 'aprobado' => 'aprobado',
+                $r->estado === 'finalizado' => 'pendiente',
+                $r->estado === 'en_redaccion' && ! is_null($r->observacion_revision) => 'corregir',
                 $r->estado === 'en_redaccion' => 'reanudar',
-                default                      => 'reanudar',
+                default => 'reanudar',
             };
 
             $unifiedReports->put($key, [
-                'id'                   => $r->id,
-                'type'                 => 'report',
-                'title'                => $r->titulo,
-                'sede'                 => $r->sede?->nombre_sede,
-                'sede_id'              => $r->sede_id,
-                'empresa'              => $r->sede?->empresa?->nombre,
-                'due_date'             => $r->created_at->addDays(7),
-                'status'               => match($accionAdhoc) {
+                'id' => $r->id,
+                'type' => 'report',
+                'title' => $r->titulo,
+                'sede' => $r->sede?->nombre_sede,
+                'sede_id' => $r->sede_id,
+                'empresa' => $r->sede?->empresa?->nombre,
+                'due_date' => $r->created_at->addDays(7),
+                'status' => match ($accionAdhoc) {
                     'aprobado' => 'completed', 'pendiente' => 'pending_review',
                     'corregir' => 'correction', default => 'in_progress',
                 },
-                'source'               => 'manual',
-                'registry_code'        => 'MET-' . $r->id,
-                'accion'               => $accionAdhoc,
-                'master_report_id'     => $r->id,
+                'source' => 'manual',
+                'registry_code' => 'MET-'.$r->id,
+                'accion' => $accionAdhoc,
+                'master_report_id' => $r->id,
                 'observacion_revision' => $r->observacion_revision,
             ]);
         }
@@ -390,7 +389,7 @@ class OperationController extends Controller
 
         // 5.4️⃣ Aplicar Filtro de Estado si se solicita
         if ($selectedStatus !== 'all') {
-            $inspections = $inspections->filter(function($item) use ($selectedStatus) {
+            $inspections = $inspections->filter(function ($item) use ($selectedStatus) {
                 if ($selectedStatus === 'completed') {
                     return $item['status'] === 'completed';
                 } elseif ($selectedStatus === 'in_progress') {
@@ -400,7 +399,7 @@ class OperationController extends Controller
                 }
             })->values();
 
-            $trainings = $trainings->filter(function($item) use ($selectedStatus) {
+            $trainings = $trainings->filter(function ($item) use ($selectedStatus) {
                 if ($selectedStatus === 'completed') {
                     return $item['status'] === 'completed';
                 } elseif ($selectedStatus === 'in_progress') {
@@ -410,7 +409,7 @@ class OperationController extends Controller
                 }
             })->values();
 
-            $reports = $reports->filter(function($item) use ($selectedStatus) {
+            $reports = $reports->filter(function ($item) use ($selectedStatus) {
                 if ($selectedStatus === 'completed') {
                     return $item['status'] === 'completed';
                 } elseif ($selectedStatus === 'in_progress') {
@@ -448,7 +447,7 @@ class OperationController extends Controller
             'kpis' => $kpis,
             'activeVisit' => $activeVisit,
             'filters' => [
-                'month' => (int)$selectedMonth,
+                'month' => (int) $selectedMonth,
                 'search' => $search,
                 'empresa_id' => $selectedEmpresa,
                 'sede_id' => $selectedSede,
@@ -484,17 +483,17 @@ class OperationController extends Controller
         $activeVisit = $this->visitService->getActiveVisit($user);
 
         // Security: Check if user is assigned to this sede
-        if (!$user->isAdmin() && !$user->sedes()->where('sedes.id', $request->sede_id)->exists()) {
+        if (! $user->isAdmin() && ! $user->sedes()->where('sedes.id', $request->sede_id)->exists()) {
             abort(403, 'No tienes permiso para operar en esta sede.');
         }
 
         // Handle Active Visit Conflicts
         if ($activeVisit && $activeVisit->sede_id != $request->sede_id) {
-            return back()->with('error', 'Ya tienes una visita activa en ' . $activeVisit->sede->nombre_sede . '. Finalízala antes de iniciar otra en ' . \App\Models\Sede::find($request->sede_id)->nombre_sede . '.');
+            return back()->with('error', 'Ya tienes una visita activa en '.$activeVisit->sede->nombre_sede.'. Finalízala antes de iniciar otra en '.\App\Models\Sede::find($request->sede_id)->nombre_sede.'.');
         }
 
         // Start Visit if none active
-        if (!$activeVisit) {
+        if (! $activeVisit) {
             $sede = \App\Models\Sede::findOrFail($request->sede_id);
             $visitType = $request->type === 'training' ? 'training' : 'checklist';
             $activeVisit = $this->visitService->startVisit($user, $sede, $visitType);
@@ -517,20 +516,20 @@ class OperationController extends Controller
                 return redirect()->route('tecnico.checklists.fill', [
                     'id' => $checklistId,
                     'assignment' => $assignment->id,
-                    'visit_id' => $activeVisit->id
+                    'visit_id' => $activeVisit->id,
                 ])->with('message', 'Inspección ad-hoc iniciada.');
             } else {
                 // Training ad-hoc
                 $checklistId = $request->id;
 
                 $title = $request->title;
-                if ($checklistId && !$title) {
+                if ($checklistId && ! $title) {
                     $checklist = \App\Models\DynamicChecklist::find($checklistId);
                     if ($checklist) {
                         $title = $checklist->title;
                     }
                 }
-                if (!$title) {
+                if (! $title) {
                     $title = 'Capacitación Ad-hoc';
                 }
 
@@ -555,7 +554,7 @@ class OperationController extends Controller
                     'training_id' => $training->id,
                     'is_adhoc' => true,
                     'title' => $training->title,
-                    'description' => $request->description ?: 'Capacitación técnica de ' . $training->title,
+                    'description' => $request->description ?: 'Capacitación técnica de '.$training->title,
                     'duration_minutes' => $request->duration ?: 15,
                     'attendees' => [],
                 ]);
@@ -572,14 +571,14 @@ class OperationController extends Controller
             if ($request->source === 'contract') {
                 $plan = \App\Models\AnnualPlan::findOrFail($request->id);
                 $checklistId = $plan->checklist_id;
-                
+
                 // Logic to find or create the assignment for this plan in this visit
                 $assignment = \App\Models\ChecklistAssignment::where('user_id', $user->id)
                     ->where('sede_id', $request->sede_id)
-                    ->where('notes', 'LIKE', '%desde Plan Anual #' . $plan->id . '%')
+                    ->where('notes', 'LIKE', '%desde Plan Anual #'.$plan->id.'%')
                     ->first();
 
-                if (!$assignment) {
+                if (! $assignment) {
                     $assignment = \App\Models\ChecklistAssignment::create([
                         'user_id' => $user->id,
                         'sede_id' => $request->sede_id,
@@ -587,7 +586,7 @@ class OperationController extends Controller
                         'dynamic_checklist_id' => $checklistId,
                         'due_date' => now(),
                         'status' => 'pending',
-                        'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+                        'notes' => 'Vínculo automático desde Plan Anual #'.$plan->id,
                     ]);
                 }
                 $assignmentId = $assignment->id;
@@ -601,7 +600,7 @@ class OperationController extends Controller
             return redirect()->route('tecnico.checklists.fill', [
                 'id' => $checklistId,
                 'assignment' => $assignmentId,
-                'visit_id' => $activeVisit->id
+                'visit_id' => $activeVisit->id,
             ])->with('message', 'Inspección asignada e iniciada.');
 
         } else {
@@ -613,10 +612,10 @@ class OperationController extends Controller
 
                 $training = \App\Models\Training::where('user_id', $user->id)
                     ->where('sede_id', $request->sede_id)
-                    ->where('notes', 'LIKE', '%desde Plan Anual #' . $plan->id . '%')
+                    ->where('notes', 'LIKE', '%desde Plan Anual #'.$plan->id.'%')
                     ->first();
 
-                if (!$training) {
+                if (! $training) {
                     $training = \App\Models\Training::create([
                         'empresa_id' => $activeVisit->sede->empresa_id,
                         'sede_id' => $request->sede_id,
@@ -629,7 +628,7 @@ class OperationController extends Controller
                         'status' => 'pending',
                         'duration' => $plan->duration_minutes ?? 15,
                         'dynamic_checklist_id' => $plan->checklist_id,
-                        'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+                        'notes' => 'Vínculo automático desde Plan Anual #'.$plan->id,
                     ]);
                 }
 
@@ -637,7 +636,7 @@ class OperationController extends Controller
                     ->where('training_id', $training->id)
                     ->first();
 
-                if (!$visitTraining) {
+                if (! $visitTraining) {
                     $visitTraining = \App\Models\VisitTraining::create([
                         'visit_certificate_id' => $activeVisit->id,
                         'training_id' => $training->id,
@@ -656,7 +655,7 @@ class OperationController extends Controller
                     ->where('training_id', $training->id)
                     ->first();
 
-                if (!$visitTraining) {
+                if (! $visitTraining) {
                     $visitTraining = \App\Models\VisitTraining::create([
                         'visit_certificate_id' => $activeVisit->id,
                         'training_id' => $training->id,
@@ -681,11 +680,11 @@ class OperationController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
-        $sedes = $user->isAdmin() 
+
+        $sedes = $user->isAdmin()
             ? Sede::with('empresa')->orderBy('nombre_sede')->get()
             : $user->sedes()->with('empresa')->orderBy('nombre_sede')->get();
-        
+
         return Inertia::render('Gestor/Visits/Start', [
             'sedes' => $sedes,
         ]);
@@ -701,7 +700,7 @@ class OperationController extends Controller
         ]);
 
         $sede = Sede::findOrFail($request->sede_id);
-        
+
         // El servicio maneja la lógica de si ya hay una activa o no
         $visit = $this->visitService->startVisit(Auth::user(), $sede);
 
@@ -718,7 +717,7 @@ class OperationController extends Controller
         $user = Auth::user();
 
         // Seguridad: Solo el técnico asignado o un admin
-        if ($visit->user_id !== $user->id && !$user->isAdmin()) {
+        if ($visit->user_id !== $user->id && ! $user->isAdmin()) {
             abort(403);
         }
 
@@ -743,12 +742,12 @@ class OperationController extends Controller
             'checklistCompletions.assignment.inspection',
             'trainings.training.attendances',
             'hallazgos',
-            'incidentes'
+            'incidentes',
         ]);
 
         // Tareas del Plan Anual para este mes (excluir Informes — son trabajo personal)
         $now = \Carbon\Carbon::now();
-        $queryMonth = $now->year . '-' . str_pad($now->month, 2, '0', STR_PAD_LEFT);
+        $queryMonth = $now->year.'-'.str_pad($now->month, 2, '0', STR_PAD_LEFT);
         $endOfMonth = $now->copy()->endOfMonth()->toDateString();
 
         $suggestedPlanTasks = \App\Models\AnnualPlan::with(['checklist'])
@@ -758,12 +757,12 @@ class OperationController extends Controller
             ->get()
             ->map(function ($plan) use ($endOfMonth) {
                 return [
-                    'id'            => $plan->id,
+                    'id' => $plan->id,
                     'activity_name' => $plan->activity_name,
                     'activity_code' => $plan->activity_code,
-                    'category'      => $plan->category,
-                    'checklist_id'  => $plan->checklist_id,
-                    'due_date'      => $endOfMonth, // vence al final del mes corriente
+                    'category' => $plan->category,
+                    'checklist_id' => $plan->checklist_id,
+                    'due_date' => $endOfMonth, // vence al final del mes corriente
                 ];
             });
 
@@ -781,12 +780,12 @@ class OperationController extends Controller
             ->get();
 
         return Inertia::render('Tecnico/Visits/InProgress', [
-            'visit'              => $visit,
-            'user'               => $user,
+            'visit' => $visit,
+            'user' => $user,
             'suggestedPlanTasks' => $suggestedPlanTasks,
             'pendingAssignments' => $pendingAssignments,
-            'pendingTrainings'   => $pendingTrainings,
-            'templates'          => \App\Models\Training::where('is_template', true)->get(),
+            'pendingTrainings' => $pendingTrainings,
+            'templates' => \App\Models\Training::where('is_template', true)->get(),
             'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->with(['categoryRelation', 'subcategoryRelation'])->get(),
         ]);
     }
@@ -821,7 +820,7 @@ class OperationController extends Controller
     public function showInspection(\App\Models\DynamicInspection $inspection)
     {
         $inspection->load(['checklist.sections.questions', 'answers', 'sede.empresa', 'user']);
-        
+
         return Inertia::render('Gestor/Inspections/Show', [
             'inspection' => $inspection,
         ]);
@@ -865,7 +864,7 @@ class OperationController extends Controller
         \Illuminate\Support\Facades\Log::info('Finalizando visita', [
             'visit_id' => $visit->id,
             'user_id' => \Illuminate\Support\Facades\Auth::id(),
-            'has_signature' => !empty($request->signature),
+            'has_signature' => ! empty($request->signature),
             'signature_unavailable' => $request->signature_unavailable,
             'payload' => $request->except(['signature']),
         ]);
@@ -879,7 +878,7 @@ class OperationController extends Controller
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Illuminate\Support\Facades\Log::warning('Fallo de validación al finalizar visita', [
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ]);
             throw $e;
         }
@@ -894,8 +893,8 @@ class OperationController extends Controller
         );
 
         // Redirigir según el contexto (Técnico o Gestor/Admin)
-        $redirectRoute = str_contains($request->route()->getName(), 'tecnico') 
-            ? 'tecnico.visits.index' 
+        $redirectRoute = str_contains($request->route()->getName(), 'tecnico')
+            ? 'tecnico.visits.index'
             : 'gestor.operations.visits.index';
 
         return redirect()->route($redirectRoute)
@@ -926,7 +925,7 @@ class OperationController extends Controller
                 'status' => 'pending',
                 'duration' => $plan->duration_minutes ?? 15,
                 'dynamic_checklist_id' => $plan->checklist_id,
-                'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+                'notes' => 'Vínculo automático desde Plan Anual #'.$plan->id,
             ]);
 
             // Crear el registro de sesión de capacitación en la visita de forma automática
@@ -951,13 +950,13 @@ class OperationController extends Controller
                 'dynamic_checklist_id' => $plan->checklist_id,
                 'due_date' => now(),
                 'status' => 'pending',
-                'notes' => 'Vínculo automático desde Plan Anual #' . $plan->id,
+                'notes' => 'Vínculo automático desde Plan Anual #'.$plan->id,
             ]);
 
             return redirect()->route('tecnico.checklists.fill', [
                 'id' => $assignment->dynamic_checklist_id,
                 'assignment' => $assignment->id,
-                'visit_id' => $visit->id
+                'visit_id' => $visit->id,
             ])->with('message', 'Inspección asignada e iniciada.');
         }
     }
@@ -978,7 +977,7 @@ class OperationController extends Controller
             'status' => $a->status,
             'checklist_id' => $a->dynamic_checklist_id,
             'source' => 'manual',
-            'registry_code' => $a->checklist?->registry_code ?? ('TX-' . $a->id),
+            'registry_code' => $a->checklist?->registry_code ?? ('TX-'.$a->id),
         ];
     }
 
@@ -997,7 +996,7 @@ class OperationController extends Controller
             'due_date' => $t->date,
             'status' => $t->status,
             'source' => 'manual',
-            'registry_code' => $t->dynamicChecklist?->registry_code ?? ('EDU-' . $t->id),
+            'registry_code' => $t->dynamicChecklist?->registry_code ?? ('EDU-'.$t->id),
         ];
     }
 
@@ -1016,7 +1015,7 @@ class OperationController extends Controller
             'due_date' => $r->created_at->addDays(7),
             'status' => $r->estado,
             'source' => 'manual',
-            'registry_code' => 'MET-' . $r->id,
+            'registry_code' => 'MET-'.$r->id,
         ];
     }
 
@@ -1036,7 +1035,7 @@ class OperationController extends Controller
             'status' => 'scheduled',
             'checklist_id' => $p->checklist_id ?? null,
             'source' => 'contract',
-            'registry_code' => $p->checklist?->registry_code ?? $p->activity_code ?? ('AN-' . $p->id),
+            'registry_code' => $p->checklist?->registry_code ?? $p->activity_code ?? ('AN-'.$p->id),
         ];
     }
 }

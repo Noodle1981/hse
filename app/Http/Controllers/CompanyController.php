@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Empresa;
+use App\Models\Provincia;
 use App\Models\Sede;
 use App\Models\User;
-use App\Models\Provincia;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
-use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
@@ -23,7 +22,7 @@ class CompanyController extends Controller
         $currentUser = Auth::user();
         $query = Empresa::query();
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $query->where('consultora_id', $currentUser->consultora_id);
         }
 
@@ -32,10 +31,10 @@ class CompanyController extends Controller
         }
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('nombre', 'like', "%{$request->search}%")
-                  ->orWhere('razon_social', 'like', "%{$request->search}%")
-                  ->orWhere('cuit', 'like', "%{$request->search}%");
+                    ->orWhere('razon_social', 'like', "%{$request->search}%")
+                    ->orWhere('cuit', 'like', "%{$request->search}%");
             });
         }
 
@@ -66,7 +65,7 @@ class CompanyController extends Controller
         $currentUser = Auth::user();
         $query = Empresa::query();
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $query->where('consultora_id', $currentUser->consultora_id);
         }
 
@@ -90,12 +89,12 @@ class CompanyController extends Controller
         $request->validate([
             'nombre' => [
                 'required', 'string', 'max:255',
-                Rule::unique('empresas', 'nombre')->where('consultora_id', $consultoraId)->ignore($id)
+                Rule::unique('empresas', 'nombre')->where('consultora_id', $consultoraId)->ignore($id),
             ],
             'razon_social' => 'required|string|max:255',
             'cuit' => [
                 'required', 'string', 'max:13',
-                Rule::unique('empresas', 'cuit')->where('consultora_id', $consultoraId)->ignore($id)
+                Rule::unique('empresas', 'cuit')->where('consultora_id', $consultoraId)->ignore($id),
             ],
             'direccion' => 'nullable|string|max:255',
             'email' => 'nullable|email|max:255',
@@ -105,7 +104,7 @@ class CompanyController extends Controller
 
         $data = $request->only(['nombre', 'razon_social', 'cuit', 'direccion', 'email', 'primary_color']);
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $data['consultora_id'] = $consultoraId;
         }
 
@@ -133,6 +132,7 @@ class CompanyController extends Controller
     {
         $this->ensureTenancy($company);
         $company->delete();
+
         return back()->with('message', 'Empresa dada de baja exitosamente.');
     }
 
@@ -144,6 +144,7 @@ class CompanyController extends Controller
         $company = Empresa::withTrashed()->findOrFail($id);
         $this->ensureTenancy($company);
         $company->restore();
+
         return back()->with('message', 'Empresa restaurada exitosamente.');
     }
 
@@ -153,14 +154,14 @@ class CompanyController extends Controller
     public function locations(Request $request, Empresa $empresa)
     {
         $this->ensureTenancy($empresa);
-        
+
         $query = $empresa->sedes()->with(['provincia', 'users']);
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('nombre_sede', 'like', "%{$request->search}%")
-                  ->orWhere('localidad', 'like', "%{$request->search}%")
-                  ->orWhere('direccion', 'like', "%{$request->search}%");
+                    ->orWhere('localidad', 'like', "%{$request->search}%")
+                    ->orWhere('direccion', 'like', "%{$request->search}%");
             });
         }
 
@@ -187,12 +188,12 @@ class CompanyController extends Controller
     public function saveLocation(Request $request, Empresa $empresa)
     {
         $this->ensureTenancy($empresa);
-        
+
         $id = $request->input('id');
         $request->validate([
             'nombre_sede' => [
                 'required', 'string', 'max:255',
-                Rule::unique('sedes', 'nombre_sede')->where('empresa_id', $empresa->id)->ignore($id)
+                Rule::unique('sedes', 'nombre_sede')->where('empresa_id', $empresa->id)->ignore($id),
             ],
             'direccion' => 'nullable|string|max:255',
             'localidad' => 'nullable|string|max:255',
@@ -209,12 +210,12 @@ class CompanyController extends Controller
         ]);
 
         $data = $request->only([
-            'nombre_sede', 'direccion', 'localidad', 'provincia_id', 
+            'nombre_sede', 'direccion', 'localidad', 'provincia_id',
             'telefono', 'correo', 'tipo_sede', 'rubro',
             'responsable_1_nombre', 'responsable_1_cargo', 'responsable_1_email',
             'responsable_2_nombre', 'responsable_2_cargo', 'responsable_2_email',
             'responsable_3_nombre', 'responsable_3_cargo', 'responsable_3_email',
-            'dias_operativos', 'hora_apertura', 'hora_cierre', 'es_roster_24_7', 'radio_tolerancia_metros'
+            'dias_operativos', 'hora_apertura', 'hora_cierre', 'es_roster_24_7', 'radio_tolerancia_metros',
         ]);
 
         if ($id) {
@@ -236,6 +237,7 @@ class CompanyController extends Controller
     {
         $this->ensureTenancy($sede->empresa);
         $sede->delete();
+
         return back()->with('message', 'Sede dada de baja.');
     }
 
@@ -247,6 +249,7 @@ class CompanyController extends Controller
         $sede = Sede::withTrashed()->findOrFail($id);
         $this->ensureTenancy($sede->empresa);
         $sede->restore();
+
         return back()->with('message', 'Sede restaurada.');
     }
 
@@ -257,7 +260,7 @@ class CompanyController extends Controller
     {
         $this->ensureTenancy($sede->empresa);
         $userId = $request->input('user_id');
-        
+
         if ($sede->users()->where('users.id', $userId)->exists()) {
             $sede->users()->detach($userId);
             $message = 'Técnico desvinculado.';
@@ -273,7 +276,7 @@ class CompanyController extends Controller
     {
         /** @var \App\Models\User $currentUser */
         $currentUser = Auth::user();
-        if (!$currentUser->isSuperAdmin() && $empresa->consultora_id !== $currentUser->consultora_id) {
+        if (! $currentUser->isSuperAdmin() && $empresa->consultora_id !== $currentUser->consultora_id) {
             abort(403, 'Acceso no autorizado.');
         }
     }

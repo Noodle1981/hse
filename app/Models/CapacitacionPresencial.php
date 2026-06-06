@@ -5,14 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CapacitacionPresencial extends Model
 {
     /** @use HasFactory<\Database\Factories\CapacitacionFactory> */
     use HasFactory;
 
-    
     protected $fillable = [
         'sede_id',
         'user_id',

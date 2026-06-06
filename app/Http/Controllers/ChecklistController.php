@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DynamicChecklist;
 use App\Models\Category;
-use App\Models\DynamicQuestion;
 use App\Models\ChecklistSection;
+use App\Models\DynamicChecklist;
+use App\Models\DynamicQuestion;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -19,7 +19,7 @@ class ChecklistController extends Controller
         $checklists = DynamicChecklist::query()
             ->with(['categoryRelation', 'subcategoryRelation'])
             ->when($request->search, function ($query) use ($request) {
-                $query->where('title', 'like', '%' . $request->search . '%');
+                $query->where('title', 'like', '%'.$request->search.'%');
             })
             ->when($request->categoryFilter, function ($query) use ($request) {
                 $query->where('category_id', $request->categoryFilter);
@@ -49,8 +49,9 @@ class ChecklistController extends Controller
      */
     public function toggleStatus(DynamicChecklist $checklist)
     {
-        $checklist->update(['is_active' => !$checklist->is_active]);
+        $checklist->update(['is_active' => ! $checklist->is_active]);
         $status = $checklist->is_active ? 'activado' : 'desactivado';
+
         return back()->with('message', "Checklist $status correctamente.");
     }
 
@@ -60,14 +61,14 @@ class ChecklistController extends Controller
     public function duplicate(DynamicChecklist $original)
     {
         $original->load(['questions', 'sections']);
-        
+
         // Crear copia como borrador
         $copy = $original->replicate();
-        $copy->title = '📝 [BORRADOR] ' . $original->title . ' (Copia)';
+        $copy->title = '📝 [BORRADOR] '.$original->title.' (Copia)';
         $copy->is_draft = true;
         $copy->is_active = false;
         $copy->save();
-        
+
         // Copiar todas las secciones
         $sectionMapping = [];
         foreach ($original->sections as $section) {
@@ -76,20 +77,20 @@ class ChecklistController extends Controller
             $newSection->save();
             $sectionMapping[$section->id] = $newSection->id;
         }
-        
+
         // Copiar todas las preguntas
         foreach ($original->questions as $question) {
             $newQuestion = $question->replicate();
             $newQuestion->dynamic_checklist_id = $copy->id;
-            
+
             // Actualizar section_id si existe
             if ($question->section_id && isset($sectionMapping[$question->section_id])) {
                 $newQuestion->section_id = $sectionMapping[$question->section_id];
             }
-            
+
             $newQuestion->save();
         }
-        
+
         return redirect()->route('gestor.checklists.edit', $copy->id)
             ->with('message', '¡Checklist duplicado! Edita el título y guarda para activarlo.');
     }
@@ -111,7 +112,7 @@ class ChecklistController extends Controller
     public function edit($id)
     {
         $checklist = DynamicChecklist::with(['questions', 'sections'])->findOrFail($id);
-        
+
         return Inertia::render('Gestor/Checklists/Builder', [
             'checklist' => $checklist,
             'categories' => Category::active()->with('subcategories')->orderBy('order')->get(),
@@ -124,7 +125,7 @@ class ChecklistController extends Controller
     public function save(Request $request)
     {
         $id = $request->input('id');
-        
+
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'nullable|exists:categories,id',
@@ -183,6 +184,7 @@ class ChecklistController extends Controller
                 'order' => $index,
             ]);
         }
+
         return redirect()->route('gestor.checklists.index')
             ->with('message', $id ? 'Checklist actualizado.' : 'Checklist creado correctamente.');
     }
@@ -192,8 +194,8 @@ class ChecklistController extends Controller
      */
     public function emulate(DynamicChecklist $checklist)
     {
-        $checklist->load(['sections.questions', 'questions' => fn($q) => $q->whereNull('section_id')]);
-        
+        $checklist->load(['sections.questions', 'questions' => fn ($q) => $q->whereNull('section_id')]);
+
         return Inertia::render('Tecnico/Inspections/Wizard', [
             'checklist' => $checklist,
             'isEmulation' => true,

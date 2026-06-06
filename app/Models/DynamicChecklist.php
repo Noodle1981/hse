@@ -85,7 +85,6 @@ class DynamicChecklist extends Model
         return $query->where('category', $category);
     }
 
-
     /**
      * Capacitaciones asociadas a este checklist
      */

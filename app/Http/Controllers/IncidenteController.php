@@ -30,7 +30,7 @@ class IncidenteController extends Controller
             ->latest('fecha_ocurrencia');
 
         // Tenancy check (if not super admin, only own consultora)
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             $query->whereHas('sede', function ($q) use ($user) {
                 $q->where('consultora_id', $user->consultora_id);
             });
@@ -40,10 +40,10 @@ class IncidenteController extends Controller
         if ($request->search) {
             $query->where(function ($q) use ($request) {
                 $q->where('titulo', 'like', "%{$request->search}%")
-                  ->orWhere('descripcion', 'like', "%{$request->search}%")
-                  ->orWhereHas('sede', function ($sq) use ($request) {
-                      $sq->where('nombre_sede', 'like', "%{$request->search}%");
-                  });
+                    ->orWhere('descripcion', 'like', "%{$request->search}%")
+                    ->orWhereHas('sede', function ($sq) use ($request) {
+                        $sq->where('nombre_sede', 'like', "%{$request->search}%");
+                    });
             });
         }
 
@@ -84,7 +84,7 @@ class IncidenteController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $sedes = $user->isTechnician() 
+        $sedes = $user->isTechnician()
             ? $user->sedes()->with('empresa')->get()
             : Sede::with('empresa')->orderBy('nombre_sede')->get();
 
@@ -121,7 +121,7 @@ class IncidenteController extends Controller
 
             if ($request->hasFile('fotos')) {
                 foreach ($request->file('fotos') as $file) {
-                    $path = $file->store('incidentes/' . $incidente->id, 'public');
+                    $path = $file->store('incidentes/'.$incidente->id, 'public');
                     IncidenteFoto::create([
                         'incidente_id' => $incidente->id,
                         'ruta_archivo' => $path,
@@ -130,7 +130,7 @@ class IncidenteController extends Controller
                 }
             }
 
-            $redirect = $request->visit_certificate_id 
+            $redirect = $request->visit_certificate_id
                 ? route('tecnico.operations.visits.show', $request->visit_certificate_id)
                 : route('gestor.incidentes.index');
 

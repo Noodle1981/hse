@@ -78,7 +78,6 @@ class VisitCertificate extends Model
         return $this->hasMany(VisitTraining::class);
     }
 
-
     public function hallazgos()
     {
         return $this->hasMany(Hallazgo::class);
@@ -92,7 +91,7 @@ class VisitCertificate extends Model
     // Helpers
     public function getStatusBadgeAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'draft' => 'bg-gray-100 text-gray-800',
             'in_progress' => 'bg-blue-100 text-blue-800',
             'completed' => 'bg-green-100 text-green-800',
@@ -103,7 +102,7 @@ class VisitCertificate extends Model
 
     public function getStatusLabelAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'draft' => 'Borrador',
             'in_progress' => 'En Progreso',
             'completed' => 'Completada',
@@ -143,4 +142,3 @@ class VisitCertificate extends Model
         return $this->general_observations;
     }
 }
-

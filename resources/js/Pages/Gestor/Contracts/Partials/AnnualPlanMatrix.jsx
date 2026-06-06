@@ -576,7 +576,7 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                                         </span>
                                                         {(item.observaciones || item.observations) && (
                                                             <span className="px-3 py-1.5 rounded-xl text-indigo-300 bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-semibold italic flex items-center gap-1">
-                                                                💬 "{item.observaciones ?? item.observations}"
+                                                                💬 {`"${item.observaciones ?? item.observations}"`}
                                                             </span>
                                                         )}
                                                     </div>
@@ -601,7 +601,7 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                                 <div className="mt-1 p-3 bg-white/5 rounded-xl border border-white/5">
                                                     <span className="block text-[8px] font-black text-white/30 uppercase tracking-wider mb-1">Observaciones / Detalles:</span>
                                                     <p className="text-[11px] font-semibold text-indigo-200 italic leading-relaxed">
-                                                        "{observations}"
+                                                        {`"${observations}"`}
                                                     </p>
                                                 </div>
                                             </div>

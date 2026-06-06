@@ -27,6 +27,7 @@ class DynamicQuestion extends Model
     ];
 
     public const LOGIC_FAIL_IF_SELECTED = 'fail_if_selected';
+
     public const LOGIC_FAIL_IF_MISSING = 'fail_if_missing';
 
     protected $casts = [

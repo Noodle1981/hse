@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('activity_code')->nullable();
             $table->foreignId('checklist_id')->nullable()->constrained('dynamic_checklists')->onDelete('set null');
             $table->integer('year')->default(date('Y'));
-            
+
             // Meses Planificados (las "X")
             $table->boolean('january')->default(false);
             $table->boolean('february')->default(false);
@@ -33,7 +33,7 @@ return new class extends Migration
             $table->boolean('october')->default(false);
             $table->boolean('november')->default(false);
             $table->boolean('december')->default(false);
-            
+
             $table->timestamps();
         });
     }

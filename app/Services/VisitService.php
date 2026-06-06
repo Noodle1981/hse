@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Models\ChecklistAssignment;
-use App\Models\Hallazgo;
-use App\Models\Incidente;
 use App\Models\Sede;
 use App\Models\Training;
 use App\Models\User;

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('training_attendances', function (Blueprint $table) {
             $table->unsignedBigInteger('training_id')->nullable()->change();
-            
+
             $table->foreignId('visit_training_id')
                 ->nullable()
                 ->after('training_id')

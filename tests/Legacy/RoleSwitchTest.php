@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Consultora;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Models\User;
-use App\Models\Consultora;
 
 class RoleSwitchTest extends TestCase
 {
@@ -85,13 +85,13 @@ class RoleSwitchTest extends TestCase
     public function a_gestor_in_tecnico_mode_can_access_tecnico_routes()
     {
         $this->actingAs($this->gestor);
-        
+
         // 1. En modo Gestor (default) no debería entrar a rutas de técnico
         // (Nota: Depende de cómo esté configurado el middleware, pero probemos el cambio)
-        
+
         // 2. Activar modo Técnico
         $this->get(route('switch-role', 'tecnico'));
-        
+
         // 3. Intentar acceder a una ruta de técnico
         $response = $this->get(route('tecnico.dashboard'));
         $response->assertOk();
@@ -101,10 +101,10 @@ class RoleSwitchTest extends TestCase
     public function a_gestor_in_tecnico_mode_cannot_access_gestor_routes()
     {
         $this->actingAs($this->gestor);
-        
+
         // 1. Activar modo Técnico
         $this->get(route('switch-role', 'tecnico'));
-        
+
         // 2. Intentar acceder a una ruta de gestor (que use el middleware role:Administrador)
         $response = $this->get(route('gestor.dashboard'));
         $response->assertForbidden();

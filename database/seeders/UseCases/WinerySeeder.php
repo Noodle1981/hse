@@ -2,15 +2,18 @@
 
 namespace Database\Seeders\UseCases;
 
-use Illuminate\Database\Seeder;
+use App\Models\Category;
+use App\Models\Empresa;
+use App\Models\Sede;
 use Database\Seeders\Traits\SeederHelpers;
-use App\Models\{User, Empresa, Sede, Category};
+use Illuminate\Database\Seeder;
 
 class WinerySeeder extends Seeder
 {
     use SeederHelpers;
 
     private $tecnicos = [];
+
     private $sede;
 
     public function run(): void
@@ -28,7 +31,7 @@ class WinerySeeder extends Seeder
 
         // Tareas con vencimiento 31 Enero 2026
         $deadline = \Carbon\Carbon::create(2026, 1, 31, 12, 0, 0);
-        if (!empty($this->tecnicos)) {
+        if (! empty($this->tecnicos)) {
             $this->createDeadlineTasks($this->tecnicos[0], $this->sede, $checklists, $deadline);
             $this->createScheduledTrainings($this->tecnicos[0], $this->sede, $deadline, $checklists);
             $this->createPendingEppRequests($this->tecnicos[0], $this->sede, $deadline);
@@ -55,7 +58,7 @@ class WinerySeeder extends Seeder
             'correo' => 'produccion@bodegasdelvalle.com',
         ]);
 
-        $this->sede->users()->attach(array_map(fn($t) => $t->id, $this->tecnicos));
+        $this->sede->users()->attach(array_map(fn ($t) => $t->id, $this->tecnicos));
     }
 
     private function createChecklists(): array

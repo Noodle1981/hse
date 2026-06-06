@@ -2,14 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Sede;
-use App\Models\Empresa;
-use App\Models\Training;
-use App\Models\DynamicChecklist;
-use App\Models\VisitCertificate;
-use App\Models\Hallazgo;
 use App\Livewire\Visits\VisitInProgress;
+use App\Models\Empresa;
+use App\Models\Hallazgo;
+use App\Models\Sede;
+use App\Models\Training;
+use App\Models\User;
+use App\Models\VisitCertificate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -19,8 +18,11 @@ class CoreVisitFlowTest extends TestCase
     use RefreshDatabase;
 
     protected $user;
+
     protected $sede;
+
     protected $empresa;
+
     protected $visit;
 
     protected function setUp(): void
@@ -32,7 +34,7 @@ class CoreVisitFlowTest extends TestCase
 
         $this->empresa = Empresa::factory()->create();
         $this->sede = Sede::factory()->create(['empresa_id' => $this->empresa->id]);
-        
+
         // 2. Crear visita en progreso
         $this->visit = VisitCertificate::factory()->create([
             'user_id' => $this->user->id,
@@ -59,7 +61,7 @@ class CoreVisitFlowTest extends TestCase
             'user_id' => $this->user->id,
             'sede_id' => $this->sede->id,
         ]);
-        
+
         $component->call('onHallazgoCreated')
             ->assertSet('showHallazgoModal', false);
 
@@ -68,7 +70,7 @@ class CoreVisitFlowTest extends TestCase
             'sede_id' => $this->sede->id,
             'empresa_id' => $this->empresa->id,
         ]);
-        
+
         // El componente crea una entrada en visit_trainings
         $this->visit->trainings()->create([
             'training_id' => $training->id,
@@ -93,7 +95,7 @@ class CoreVisitFlowTest extends TestCase
         $this->assertNotNull($this->visit->end_time);
         $this->assertEquals('Juan Perez (Gerente Sede)', $this->visit->responsible_name);
         $this->assertNotNull($this->visit->signature);
-        
+
         // Verificar que los hallazgos y capacitaciones sigan vinculados
         $this->assertCount(1, $this->visit->hallazgos);
         $this->assertCount(1, $this->visit->trainings);

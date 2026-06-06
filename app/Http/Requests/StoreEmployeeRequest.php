@@ -15,6 +15,7 @@ class StoreEmployeeRequest extends FormRequest
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
+
         return Auth::check() && $user->isAdmin();
     }
 
@@ -39,8 +40,6 @@ class StoreEmployeeRequest extends FormRequest
 
     /**
      * Get custom messages for validator errors.
-     *
-     * @return array
      */
     public function messages(): array
     {

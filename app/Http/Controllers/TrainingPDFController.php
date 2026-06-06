@@ -17,7 +17,7 @@ class TrainingPDFController extends Controller
         $visitTraining = \App\Models\VisitTraining::with([
             'visit.sede.empresa',
             'visit.user',
-            'training.responsibleUser'
+            'training.responsibleUser',
         ])->find($id);
 
         if ($visitTraining) {
@@ -30,7 +30,7 @@ class TrainingPDFController extends Controller
             $training->trainer_name = $visitTraining->visit->user ? $visitTraining->visit->user->nombres : ($visitTraining->training->trainer_name ?? 'Instructor Externo');
             $training->date = $visitTraining->created_at;
             $training->duration = $visitTraining->duration_minutes;
-            
+
             // Cargar asistentes desde la relación
             $training->attendances = $visitTraining->attendances()->orderBy('created_at')->get();
         } else {
@@ -39,19 +39,20 @@ class TrainingPDFController extends Controller
                 'empresa',
                 'sede',
                 'responsibleUser',
-                'attendances'
+                'attendances',
             ])->findOrFail($id);
         }
 
         $branding = BrandingService::forUser($training->responsibleUser);
 
         $pdf = Pdf::loadView('pdf.training-attendance', [
-            'training'    => $training,
+            'training' => $training,
             'attendances' => $training->attendances()->orderBy('created_at')->get(),
-            'branding'    => $branding,
+            'branding' => $branding,
         ]);
 
-        $filename = 'asistencias_' . str_replace(' ', '_', $training->title) . '_' . $training->id . '.pdf';
+        $filename = 'asistencias_'.str_replace(' ', '_', $training->title).'_'.$training->id.'.pdf';
+
         return $pdf->download($filename);
     }
 
@@ -64,7 +65,7 @@ class TrainingPDFController extends Controller
         $visitTraining = \App\Models\VisitTraining::with([
             'visit.sede.empresa',
             'visit.user',
-            'training.responsibleUser'
+            'training.responsibleUser',
         ])->find($id);
 
         if ($visitTraining) {
@@ -77,7 +78,7 @@ class TrainingPDFController extends Controller
             $training->trainer_name = $visitTraining->visit->user ? $visitTraining->visit->user->nombres : ($visitTraining->training->trainer_name ?? 'Instructor Externo');
             $training->date = $visitTraining->created_at;
             $training->duration = $visitTraining->duration_minutes;
-            
+
             // Cargar asistentes desde la relación
             $training->attendances = $visitTraining->attendances()->orderBy('created_at')->get();
         } else {
@@ -86,19 +87,20 @@ class TrainingPDFController extends Controller
                 'empresa',
                 'sede',
                 'responsibleUser',
-                'attendances'
+                'attendances',
             ])->findOrFail($id);
         }
 
         $branding = BrandingService::forUser($training->responsibleUser);
 
         $pdf = Pdf::loadView('pdf.training-attendance', [
-            'training'    => $training,
+            'training' => $training,
             'attendances' => $training->attendances()->orderBy('created_at')->get(),
-            'branding'    => $branding,
+            'branding' => $branding,
         ]);
 
-        $filename = 'asistencias_' . str_replace(' ', '_', $training->title) . '_' . $training->id . '.pdf';
+        $filename = 'asistencias_'.str_replace(' ', '_', $training->title).'_'.$training->id.'.pdf';
+
         return $pdf->stream($filename);
     }
 }

@@ -39,13 +39,18 @@ class Incidente extends Model
 
     // Tipos de incidente
     public const TIPO_ACCIDENTE = 'accidente';
+
     public const TIPO_INCIDENTE = 'incidente';
+
     public const TIPO_CUASI_ACCIDENTE = 'cuasi_accidente';
 
     // Niveles de gravedad
     public const GRAVEDAD_LEVE = 'leve';
+
     public const GRAVEDAD_MODERADO = 'moderado';
+
     public const GRAVEDAD_GRAVE = 'grave';
+
     public const GRAVEDAD_FATAL = 'fatal';
 
     // ============================================
@@ -91,7 +96,6 @@ class Incidente extends Model
     {
         return $this->hasMany(IncidenteFoto::class);
     }
-
 
     // ============================================
     // SCOPES
@@ -194,7 +198,7 @@ class Incidente extends Model
      */
     public function getColorGravedad(): string
     {
-        return match($this->gravedad) {
+        return match ($this->gravedad) {
             self::GRAVEDAD_FATAL => 'red',
             self::GRAVEDAD_GRAVE => 'orange',
             self::GRAVEDAD_MODERADO => 'yellow',
@@ -208,7 +212,7 @@ class Incidente extends Model
      */
     public function getColorTipo(): string
     {
-        return match($this->tipo) {
+        return match ($this->tipo) {
             self::TIPO_ACCIDENTE => 'red',
             self::TIPO_INCIDENTE => 'orange',
             self::TIPO_CUASI_ACCIDENTE => 'blue',
@@ -242,4 +246,3 @@ class Incidente extends Model
         return ($diasPerdidos * 1000000) / $horasTrabajadas;
     }
 }
-

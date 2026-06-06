@@ -19,7 +19,7 @@ class DynamicQuestionFactory extends Factory
     public function definition(): array
     {
         $type = fake()->randomElement(DynamicQuestion::TYPES);
-        
+
         return [
             'dynamic_checklist_id' => DynamicChecklist::factory(),
             'label' => $this->getQuestionLabel($type),
@@ -87,7 +87,7 @@ class DynamicQuestionFactory extends Factory
      */
     private function getOptionsForType(string $type): ?array
     {
-        if (!in_array($type, ['select', 'radio', 'checkbox'])) {
+        if (! in_array($type, ['select', 'radio', 'checkbox'])) {
             return null;
         }
 

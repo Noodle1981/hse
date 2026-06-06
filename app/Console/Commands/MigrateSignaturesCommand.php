@@ -33,12 +33,12 @@ class MigrateSignaturesCommand extends Command
                 foreach ($inspections as $inspection) {
                     $data = $inspection->technician_signature;
                     $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
-                    $fileName = 'signatures/' . \Illuminate\Support\Str::random(40) . '.png';
+                    $fileName = 'signatures/'.\Illuminate\Support\Str::random(40).'.png';
                     \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
-                    
+
                     $inspection->technician_signature = $fileName;
                     $inspection->save();
-                    
+
                     $this->line("Migrada firma técnica para inspección ID: {$inspection->id}");
                 }
             });
@@ -49,12 +49,12 @@ class MigrateSignaturesCommand extends Command
                 foreach ($inspections as $inspection) {
                     $data = $inspection->supervisor_signature;
                     $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
-                    $fileName = 'signatures/' . \Illuminate\Support\Str::random(40) . '.png';
+                    $fileName = 'signatures/'.\Illuminate\Support\Str::random(40).'.png';
                     \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
-                    
+
                     $inspection->supervisor_signature = $fileName;
                     $inspection->save();
-                    
+
                     $this->line("Migrada firma de supervisor para inspección ID: {$inspection->id}");
                 }
             });

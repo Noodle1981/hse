@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
+use App\Models\Empresa;
 use App\Models\Hallazgo;
 use App\Models\MasterReport;
-use App\Models\Empresa;
 use App\Models\Sede;
-use App\Models\DynamicChecklist;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -47,7 +47,7 @@ class IntegrationReportTest extends TestCase
     {
         $empresa = Empresa::factory()->create();
         $sede = Sede::factory()->create(['empresa_id' => $empresa->id]);
-        
+
         $hallazgo = Hallazgo::create([
             'empresa_id' => $empresa->id,
             'sede_id' => $sede->id,
@@ -71,7 +71,7 @@ class IntegrationReportTest extends TestCase
     {
         $empresa = Empresa::factory()->create();
         $sede = Sede::factory()->create(['empresa_id' => $empresa->id]);
-        
+
         $response = $this->actingAs($this->admin)
             ->get(route('gestor.annual-contract.pdf', ['sede_id' => $sede->id]));
 

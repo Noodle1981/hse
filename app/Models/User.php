@@ -5,9 +5,9 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -77,7 +77,7 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Sede::class, 'sede_users');
     }
-    
+
     public function visitCertificates()
     {
         return $this->hasMany(VisitCertificate::class);
@@ -97,16 +97,17 @@ class User extends Authenticatable
     {
         return $this->hasMany(CapacitacionVirual::class);
     }
-    
+
     public function masterReports()
     {
         return $this->hasMany(MasterReport::class);
     }
 
-
     // Role Constants
     public const ROLE_SUPER_ADMIN = 'super_admin';
+
     public const ROLE_GESTOR = 'gestor';
+
     public const ROLE_TECNICO = 'tecnico';
 
     /**
@@ -115,15 +116,15 @@ class User extends Authenticatable
     private function normalizeRole(string $role): string
     {
         $role = strtolower(trim($role));
-        
+
         if (in_array($role, ['administrador', 'admin', 'gestor', 'administradores', 'socio'])) {
             return self::ROLE_GESTOR;
         }
-        
+
         if (in_array($role, ['técnico', 'tecnico', 'technician', 'técnicos', 'tecnicos'])) {
             return self::ROLE_TECNICO;
         }
-        
+
         return $role;
     }
 
@@ -172,7 +173,7 @@ class User extends Authenticatable
                 return true;
             }
         }
-        
+
         return false;
     }
 

@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Empresa;
-use App\Models\Sede;
 use App\Models\AnnualPlan;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
-use App\Models\DynamicInspection;
 use App\Models\ChecklistAssignment;
-use App\Models\Training;
+use App\Models\DynamicInspection;
+use App\Models\Empresa;
 use App\Models\Hallazgo;
 use App\Models\Incidente;
 use App\Models\MasterReport;
-use Illuminate\Support\Facades\DB;
+use App\Models\Sede;
+use App\Models\Training;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class AdministrationController extends Controller
@@ -44,7 +43,7 @@ class AdministrationController extends Controller
         $currentUser = Auth::user();
         $query = User::query();
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $query->where('consultora_id', $currentUser->consultora_id);
         }
 
@@ -53,11 +52,11 @@ class AdministrationController extends Controller
         }
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('nombres', 'like', "%{$request->search}%")
-                  ->orWhere('apellidos', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%")
-                  ->orWhere('matricula', 'like', "%{$request->search}%");
+                    ->orWhere('apellidos', 'like', "%{$request->search}%")
+                    ->orWhere('email', 'like', "%{$request->search}%")
+                    ->orWhere('matricula', 'like', "%{$request->search}%");
             });
         }
 
@@ -82,16 +81,16 @@ class AdministrationController extends Controller
         $currentUser = Auth::user();
         $query = User::query()->where('rol', User::ROLE_TECNICO);
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $query->where('consultora_id', $currentUser->consultora_id);
         }
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('nombres', 'like', "%{$request->search}%")
-                  ->orWhere('apellidos', 'like', "%{$request->search}%")
-                  ->orWhere('email', 'like', "%{$request->search}%")
-                  ->orWhere('matricula', 'like', "%{$request->search}%");
+                    ->orWhere('apellidos', 'like', "%{$request->search}%")
+                    ->orWhere('email', 'like', "%{$request->search}%")
+                    ->orWhere('matricula', 'like', "%{$request->search}%");
             });
         }
 
@@ -123,6 +122,7 @@ class AdministrationController extends Controller
     public function getTechnicianAssignments(User $user)
     {
         $this->ensureTenancy($user);
+
         return response()->json($user->sedes()->with('empresa')->get());
     }
 
@@ -132,7 +132,7 @@ class AdministrationController extends Controller
     public function assignSede(Request $request, User $user)
     {
         $this->ensureTenancy($user);
-        
+
         $request->validate([
             'sede_id' => 'required|exists:sedes,id',
         ]);
@@ -142,7 +142,7 @@ class AdministrationController extends Controller
         }
 
         $user->sedes()->attach($request->sede_id);
-        
+
         return back()->with('message', 'Sede asignada correctamente.');
     }
 
@@ -152,13 +152,13 @@ class AdministrationController extends Controller
     public function removeAssignment(Request $request, User $user)
     {
         $this->ensureTenancy($user);
-        
+
         $request->validate([
             'sede_id' => 'required|exists:sedes,id',
         ]);
 
         $user->sedes()->detach($request->sede_id);
-        
+
         return back()->with('message', 'Asignación eliminada correctamente.');
     }
 
@@ -181,7 +181,7 @@ class AdministrationController extends Controller
             'estado' => 'required|in:activo,inactivo',
         ];
 
-        if (!$editingId || $request->password) {
+        if (! $editingId || $request->password) {
             $rules['password'] = 'required|string|min:6';
         }
 
@@ -189,7 +189,7 @@ class AdministrationController extends Controller
 
         $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'matricula', 'telefono', 'estado']);
 
-        if (!$currentUser->isSuperAdmin()) {
+        if (! $currentUser->isSuperAdmin()) {
             $data['consultora_id'] = $currentUser->consultora_id;
         }
 
@@ -221,7 +221,7 @@ class AdministrationController extends Controller
         }
 
         $this->ensureTenancy($user);
-        
+
         $user->update(['estado' => 'inactivo']);
         $user->delete();
 
@@ -235,7 +235,7 @@ class AdministrationController extends Controller
     {
         $user = User::withTrashed()->findOrFail($id);
         $this->ensureTenancy($user);
-        
+
         $user->restore();
         $user->update(['estado' => 'activo']);
 
@@ -268,7 +268,7 @@ class AdministrationController extends Controller
         // Rankings
         $rankings = [
             'top_technicians' => User::where('rol', 'tecnico')
-                ->withCount(['checklists' => fn($q) => $q->where('status', 'completed')])
+                ->withCount(['checklists' => fn ($q) => $q->where('status', 'completed')])
                 ->orderByDesc('checklists_count')
                 ->take(5)
                 ->get(),
@@ -285,7 +285,7 @@ class AdministrationController extends Controller
             'filters' => [
                 'from' => $from,
                 'to' => $to,
-            ]
+            ],
         ]);
     }
 
@@ -305,17 +305,17 @@ class AdministrationController extends Controller
         $kpis = [
             'total_companies' => Empresa::where('consultora_id', $consultoraId)->count(),
             'total_inspections' => DynamicInspection::whereBetween('completed_at', [$from, $to])
-                ->whereHas('user', fn($q) => $q->where('consultora_id', $consultoraId))
+                ->whereHas('user', fn ($q) => $q->where('consultora_id', $consultoraId))
                 ->completed()
                 ->count(),
             'total_findings' => Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
-                ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+                ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
                 ->count(),
             'total_incidents' => Incidente::whereBetween('fecha_ocurrencia', [$from, $to])
-                ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+                ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
                 ->count(),
             'total_reports' => MasterReport::whereBetween('updated_at', [$from, $to])
-                ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+                ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
                 ->where('estado', 'finalizado')
                 ->count(),
         ];
@@ -323,12 +323,12 @@ class AdministrationController extends Controller
         // Intelligence Matrix: Companies with metrics
         $companies = Empresa::where('consultora_id', $consultoraId)
             ->withCount([
-                'inspecciones' => fn($q) => $q->whereBetween('completed_at', [$from, $to])->completed(),
-                'hallazgos' => fn($q) => $q->whereBetween('fecha_deteccion', [$from, $to]),
-                'incidentes' => fn($q) => $q->whereBetween('fecha_ocurrencia', [$from, $to]),
-                'informes' => fn($q) => $q->where('estado', 'finalizado'),
+                'inspecciones' => fn ($q) => $q->whereBetween('completed_at', [$from, $to])->completed(),
+                'hallazgos' => fn ($q) => $q->whereBetween('fecha_deteccion', [$from, $to]),
+                'incidentes' => fn ($q) => $q->whereBetween('fecha_ocurrencia', [$from, $to]),
+                'informes' => fn ($q) => $q->where('estado', 'finalizado'),
                 'checklistAssignments as active_assignments_count',
-                'sedes as sedes_con_plan_count' => fn($q) => $q->whereHas('annualPlans', fn($p) => $p->where('year', now()->year))
+                'sedes as sedes_con_plan_count' => fn ($q) => $q->whereHas('annualPlans', fn ($p) => $p->where('year', now()->year)),
             ])
             ->orderBy('nombre')
             ->get();
@@ -340,9 +340,9 @@ class AdministrationController extends Controller
         $recentEvents = $this->getTacticalTerminalEvents($consultoraId);
 
         // Audit de horas (Campo vs Gabinete y alertas de sobrejornada)
-        $timeService = new \App\Services\TimeTrackingService();
+        $timeService = new \App\Services\TimeTrackingService;
         $visits = \App\Models\VisitCertificate::with('sede')
-            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->whereBetween('visit_date', [$from, $to])
             ->whereIn('status', ['completed', 'signed'])
             ->get();
@@ -354,16 +354,16 @@ class AdministrationController extends Controller
         foreach ($visits as $visit) {
             $fieldHours = $timeService->calculateFieldHours($visit);
             $totalFieldHours += $fieldHours;
-            $totalOfficeHours += (float)$visit->horas_gabinete_estimadas;
+            $totalOfficeHours += (float) $visit->horas_gabinete_estimadas;
 
             // Alerta si el checkin ocurrió fuera del horario de la sede (siempre que no sea roster 24/7)
-            if ($visit->start_time && !$timeService->verifyWorkingHours($visit->sede, $visit->start_time)) {
+            if ($visit->start_time && ! $timeService->verifyWorkingHours($visit->sede, $visit->start_time)) {
                 $exceededWarningsCount++;
             } else {
                 // Cálculo dinámico inteligente de sobrejornada:
                 // Si las horas de campo exceden la duración de la jornada operativa de la sede
                 $sede = $visit->sede;
-                if ($sede && !$sede->es_roster_24_7 && $sede->hora_apertura && $sede->hora_cierre) {
+                if ($sede && ! $sede->es_roster_24_7 && $sede->hora_apertura && $sede->hora_cierre) {
                     try {
                         $apertura = \Carbon\Carbon::createFromFormat('H:i:s', $sede->hora_apertura);
                     } catch (\Exception $e) {
@@ -409,7 +409,7 @@ class AdministrationController extends Controller
             'filters' => [
                 'from' => $from,
                 'to' => $to,
-            ]
+            ],
         ]);
     }
 
@@ -419,60 +419,60 @@ class AdministrationController extends Controller
 
         // 1. Inspections
         $inspections = DynamicInspection::with(['checklist', 'user', 'sede.empresa'])
-            ->whereHas('user', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->whereHas('user', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->completed()
             ->latest('completed_at')
             ->limit($limit)
             ->get()
-            ->map(fn($i) => [
+            ->map(fn ($i) => [
                 'time' => $i->completed_at,
                 'label' => 'INSPECCIÓN',
                 'color' => 'emerald',
-                'description' => "{$i->user?->full_name} finalizó '{$i->checklist?->title}' en " . ($i->sede?->empresa?->nombre ?? 'Sede desconocida'),
-                'diffText' => $i->completed_at?->diffForHumans()
+                'description' => "{$i->user?->full_name} finalizó '{$i->checklist?->title}' en ".($i->sede?->empresa?->nombre ?? 'Sede desconocida'),
+                'diffText' => $i->completed_at?->diffForHumans(),
             ]);
 
         // 2. Hallazgos
         $findings = Hallazgo::with(['sede.empresa'])
-            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->latest('fecha_deteccion')
             ->limit($limit)
             ->get()
-            ->map(fn($h) => [
+            ->map(fn ($h) => [
                 'time' => $h->created_at,
                 'label' => 'HALLAZGO',
                 'color' => 'yellow',
-                'description' => "Nuevo hallazgo '{$h->titulo}' detectado en " . ($h->sede?->empresa?->nombre ?? 'Sede desconocida') . " (Nivel: {$h->criticidad})",
-                'diffText' => $h->created_at?->diffForHumans()
+                'description' => "Nuevo hallazgo '{$h->titulo}' detectado en ".($h->sede?->empresa?->nombre ?? 'Sede desconocida')." (Nivel: {$h->criticidad})",
+                'diffText' => $h->created_at?->diffForHumans(),
             ]);
 
         // 3. Incidentes
         $incidents = Incidente::with(['sede.empresa'])
-            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->latest('fecha_ocurrencia')
             ->limit($limit)
             ->get()
-            ->map(fn($inc) => [
+            ->map(fn ($inc) => [
                 'time' => $inc->created_at,
                 'label' => 'SINIESTRO',
                 'color' => 'red',
-                'description' => "Siniestro reportado en " . ($inc->sede?->empresa?->nombre ?? 'Sede desconocida') . ": {$inc->tipo}",
-                'diffText' => $inc->created_at?->diffForHumans()
+                'description' => 'Siniestro reportado en '.($inc->sede?->empresa?->nombre ?? 'Sede desconocida').": {$inc->tipo}",
+                'diffText' => $inc->created_at?->diffForHumans(),
             ]);
 
         // 4. Reportes
         $reports = MasterReport::with(['sede.empresa'])
-            ->whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->where('estado', 'finalizado')
             ->latest('updated_at')
             ->limit($limit)
             ->get()
-            ->map(fn($r) => [
+            ->map(fn ($r) => [
                 'time' => $r->updated_at,
                 'label' => 'REPORTE',
                 'color' => 'blue',
-                'description' => "Informe Maestro consolidado para " . ($r->sede?->empresa?->nombre ?? 'Sede desconocida') . " ({$r->periodo})",
-                'diffText' => $r->updated_at?->diffForHumans()
+                'description' => 'Informe Maestro consolidado para '.($r->sede?->empresa?->nombre ?? 'Sede desconocida')." ({$r->periodo})",
+                'diffText' => $r->updated_at?->diffForHumans(),
             ]);
 
         return collect([])
@@ -489,12 +489,12 @@ class AdministrationController extends Controller
     {
         $year = now()->year;
         $month = now()->month;
-        
-        $totalPlanned = AnnualPlan::whereHas('sede.empresa', fn($q) => $q->where('consultora_id', $consultoraId))
-            ->where('scheduled_months', 'like', "%{$year}-" . str_pad($month, 2, '0', STR_PAD_LEFT) . "%")
+
+        $totalPlanned = AnnualPlan::whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
+            ->where('scheduled_months', 'like', "%{$year}-".str_pad($month, 2, '0', STR_PAD_LEFT).'%')
             ->count();
 
-        $totalDone = DynamicInspection::whereHas('user', fn($q) => $q->where('consultora_id', $consultoraId))
+        $totalDone = DynamicInspection::whereHas('user', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->whereYear('completed_at', $year)
             ->whereMonth('completed_at', $month)
             ->completed()
@@ -503,19 +503,19 @@ class AdministrationController extends Controller
         return [
             'percentage' => $totalPlanned > 0 ? round(($totalDone / $totalPlanned) * 100) : 0,
             'planned' => $totalPlanned,
-            'done' => $totalDone
+            'done' => $totalDone,
         ];
     }
 
     private function getConsultoraActivity($consultoraId)
     {
         return DynamicInspection::with(['checklist', 'user', 'sede.empresa'])
-            ->whereHas('user', fn($q) => $q->where('consultora_id', $consultoraId))
+            ->whereHas('user', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->completed()
             ->latest('completed_at')
             ->limit(10)
             ->get()
-            ->map(fn($i) => [
+            ->map(fn ($i) => [
                 'type' => 'inspection',
                 'title' => 'Cierre de Inspección',
                 'description' => $i->checklist->title ?? 'N/A',
@@ -535,7 +535,7 @@ class AdministrationController extends Controller
             ->latest('completed_at')
             ->limit(10)
             ->get()
-            ->map(fn($i) => [
+            ->map(fn ($i) => [
                 'type' => 'inspection',
                 'title' => 'Inspección Finalizada',
                 'description' => $i->checklist->title ?? 'General',
@@ -550,7 +550,7 @@ class AdministrationController extends Controller
             ->latest('fecha_ocurrencia')
             ->limit(5)
             ->get()
-            ->map(fn($i) => [
+            ->map(fn ($i) => [
                 'type' => 'incident',
                 'title' => 'Incidente Reportado',
                 'description' => $i->descripcion,
@@ -567,7 +567,7 @@ class AdministrationController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (!$user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin()) {
             abort(403, 'Acceso restringido a Super Administradores.');
         }
     }
@@ -576,7 +576,7 @@ class AdministrationController extends Controller
     {
         /** @var \App\Models\User $currentUser */
         $currentUser = Auth::user();
-        if (!$currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
+        if (! $currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
             abort(403, 'Acceso no autorizado.');
         }
     }

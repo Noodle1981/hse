@@ -124,7 +124,7 @@ export default function Index({ auth, reports, filters }) {
                                             </div>
                                             <div>
                                                 <p className="text-[8px] font-black text-red-500 uppercase tracking-widest italic mb-1">Nota de Corrección</p>
-                                                <p className="text-[10px] font-bold text-red-100/60 leading-tight italic">"{report.observacion_revision}"</p>
+                                                <p className="text-[10px] font-bold text-red-100/60 leading-tight italic">{`"${report.observacion_revision}"`}</p>
                                             </div>
                                         </div>
                                     )}
@@ -161,7 +161,7 @@ export default function Index({ auth, reports, filters }) {
                                             <a
                                                 href={route('master-reports.pdf', report.id)}
                                                 target="_blank"
-                                                className="col-span-2 py-5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-emerald-500/20 transition-all text-center flex items-center justify-center gap-2 shadow-lg"
+                                                className="col-span-2 py-5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-emerald-500/20 transition-all text-center flex items-center justify-center gap-2 shadow-lg" rel="noreferrer"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
                                                 DESCARGAR PDF APROBADO
@@ -189,7 +189,7 @@ export default function Index({ auth, reports, filters }) {
                                             <a
                                                 href={route('master-reports.pdf', report.id)}
                                                 target="_blank"
-                                                className="col-span-2 py-5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-emerald-500/20 transition-all text-center flex items-center justify-center gap-2 shadow-lg"
+                                                className="col-span-2 py-5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-emerald-500/20 transition-all text-center flex items-center justify-center gap-2 shadow-lg" rel="noreferrer"
                                             >
                                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
                                                 PDF FINAL
@@ -205,7 +205,7 @@ export default function Index({ auth, reports, filters }) {
                                                 <a
                                                     href={route('master-reports.pdf', report.id)}
                                                     target="_blank"
-                                                    className="px-4 py-4 bg-white/5 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 transition-all text-center flex items-center justify-center gap-2"
+                                                    className="px-4 py-4 bg-white/5 hover:bg-white hover:text-black text-white text-[10px] font-black uppercase tracking-widest italic rounded-2xl border border-white/10 transition-all text-center flex items-center justify-center gap-2" rel="noreferrer"
                                                 >
                                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" strokeWidth="3"/></svg>
                                                     PDF

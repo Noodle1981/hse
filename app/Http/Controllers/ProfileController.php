@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 
@@ -60,7 +60,7 @@ class ProfileController extends Controller
         $sigData = base64_decode($sigData);
 
         if ($sigData !== false) {
-            $filename = 'signatures/temp_' . $user->id . '_' . time() . '.' . $type;
+            $filename = 'signatures/temp_'.$user->id.'_'.time().'.'.$type;
             \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $sigData);
 
             $user->update([
@@ -81,7 +81,7 @@ class ProfileController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         $request->validate([
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
@@ -115,7 +115,7 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $user->update([
-            'password' => Hash::make($request->new_password)
+            'password' => Hash::make($request->new_password),
         ]);
 
         return back()->with('password_message', 'Contraseña actualizada exitosamente.');

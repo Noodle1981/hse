@@ -15,7 +15,7 @@ class IncidentePDFController extends Controller
         set_time_limit(300);
 
         $incidente = Incidente::with([
-            'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit'
+            'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($incidente->user);
@@ -25,7 +25,8 @@ class IncidentePDFController extends Controller
             'branding' => $branding,
         ]);
 
-        $filename = 'reporte_incidente_' . $incidente->id . '_' . date('Ymd_His') . '.pdf';
+        $filename = 'reporte_incidente_'.$incidente->id.'_'.date('Ymd_His').'.pdf';
+
         return $pdf->download($filename);
     }
 
@@ -35,7 +36,7 @@ class IncidentePDFController extends Controller
         set_time_limit(300);
 
         $incidente = Incidente::with([
-            'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit'
+            'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($incidente->user);
@@ -45,6 +46,6 @@ class IncidentePDFController extends Controller
             'branding' => $branding,
         ]);
 
-        return $pdf->stream('reporte_incidente_' . $incidente->id . '.pdf');
+        return $pdf->stream('reporte_incidente_'.$incidente->id.'.pdf');
     }
 }

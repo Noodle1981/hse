@@ -2,13 +2,14 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use App\Models\Consultora;
 use App\Models\Empresa;
-use App\Models\Sede;
 use App\Models\Provincia;
+use App\Models\Sede;
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
 // use App\Models\Employee;
 
 class DevelopmentSeeder extends Seeder
@@ -38,7 +39,7 @@ class DevelopmentSeeder extends Seeder
         );
 
         // 3. Usuarios (según doc/credenciales.md)
-        
+
         // Super Admin
         User::updateOrCreate(
             ['email' => 'xamanen@app.com'],

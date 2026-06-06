@@ -2,11 +2,11 @@
 
 namespace Database\Factories;
 
-use App\Models\Training;
+use App\Models\DynamicChecklist;
 use App\Models\Empresa;
 use App\Models\Sede;
+use App\Models\Training;
 use App\Models\User;
-use App\Models\DynamicChecklist;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TrainingFactory extends Factory

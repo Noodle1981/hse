@@ -15,19 +15,20 @@ class HallazgoPDFController extends Controller
         set_time_limit(300);
 
         $hallazgo = Hallazgo::with([
-            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen'
+            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($hallazgo->user);
 
         $pdf = Pdf::loadView('pdf.hallazgo-report', [
-            'finding'      => $hallazgo,
+            'finding' => $hallazgo,
             'seguimientos' => $hallazgo->seguimientos->sortByDesc('fecha_seguimiento'),
-            'fotos'        => $hallazgo->fotos,
-            'branding'     => $branding,
+            'fotos' => $hallazgo->fotos,
+            'branding' => $branding,
         ]);
 
-        $filename = 'reporte_hallazgo_' . $hallazgo->id . '_' . date('Ymd_His') . '.pdf';
+        $filename = 'reporte_hallazgo_'.$hallazgo->id.'_'.date('Ymd_His').'.pdf';
+
         return $pdf->download($filename);
     }
 
@@ -37,18 +38,18 @@ class HallazgoPDFController extends Controller
         set_time_limit(300);
 
         $hallazgo = Hallazgo::with([
-            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen'
+            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($hallazgo->user);
 
         $pdf = Pdf::loadView('pdf.hallazgo-report', [
-            'finding'      => $hallazgo,
+            'finding' => $hallazgo,
             'seguimientos' => $hallazgo->seguimientos->sortByDesc('fecha_seguimiento'),
-            'fotos'        => $hallazgo->fotos,
-            'branding'     => $branding,
+            'fotos' => $hallazgo->fotos,
+            'branding' => $branding,
         ]);
 
-        return $pdf->stream('reporte_hallazgo_' . $hallazgo->id . '.pdf');
+        return $pdf->stream('reporte_hallazgo_'.$hallazgo->id.'.pdf');
     }
 }

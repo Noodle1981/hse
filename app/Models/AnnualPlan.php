@@ -29,8 +29,8 @@ class AnnualPlan extends Model
         'period_start' => 'date',
         'period_end' => 'date',
         'scheduled_months' => 'array',
-        'scheduled_dates'  => 'array',
-        'multi_trainer'    => 'boolean',
+        'scheduled_dates' => 'array',
+        'multi_trainer' => 'boolean',
     ];
 
     public function sede()

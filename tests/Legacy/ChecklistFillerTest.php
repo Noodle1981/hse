@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\DynamicChecklist;
-use App\Models\DynamicQuestion;
-use App\Models\DynamicInspection;
 use App\Models\DynamicAnswer;
+use App\Models\DynamicChecklist;
+use App\Models\DynamicInspection;
+use App\Models\DynamicQuestion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -16,6 +16,7 @@ class ChecklistFillerTest extends TestCase
     use RefreshDatabase;
 
     private DynamicChecklist $checklist;
+
     private User $user;
 
     protected function setUp(): void
@@ -112,7 +113,7 @@ class ChecklistFillerTest extends TestCase
 
         Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
             ->set('currentStep', 1)
-            ->set("answers.{$questions[0]->id}", '') 
+            ->set("answers.{$questions[0]->id}", '')
             ->set("answers.{$questions[1]->id}", '')
             ->call('nextStep')
             ->assertHasErrors(["answers.{$questions[0]->id}", "answers.{$questions[1]->id}"]);
@@ -129,7 +130,7 @@ class ChecklistFillerTest extends TestCase
             ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'Juan')
             ->set("answers.{$questions[1]->id}", 'Sí')
-            ->set("answers.{$questions[2]->id}", '') 
+            ->set("answers.{$questions[2]->id}", '')
             ->call('nextStep')
             ->assertHasNoErrors();
     }
@@ -152,7 +153,7 @@ class ChecklistFillerTest extends TestCase
             ->call('complete');
 
         $inspection = DynamicInspection::first();
-        
+
         $this->assertEquals($this->user->id, $inspection->user_id);
         $this->assertEquals($this->user->id, $inspection->user->id);
     }
@@ -175,7 +176,7 @@ class ChecklistFillerTest extends TestCase
             ->call('complete');
 
         $answer = DynamicAnswer::where('dynamic_question_id', $questions[0]->id)->first();
-        
+
         $this->assertEquals('María López', $answer->value);
         $this->assertEquals('¿Nombre del inspector?', $answer->question->label);
     }
@@ -209,7 +210,7 @@ class ChecklistFillerTest extends TestCase
             ->call('complete');
 
         $answer = DynamicAnswer::where('dynamic_question_id', $checkboxQuestion->id)->first();
-        
+
         $this->assertJson($answer->value);
         $decoded = json_decode($answer->value, true);
         $this->assertContains('Casco', $decoded);

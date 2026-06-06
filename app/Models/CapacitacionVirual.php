@@ -33,7 +33,7 @@ class CapacitacionVirual extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function asistentes(): HasMany
     {
         return $this->hasMany(CapacitacionVirualAsistente::class);

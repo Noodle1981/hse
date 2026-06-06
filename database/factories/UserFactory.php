@@ -36,7 +36,7 @@ class UserFactory extends Factory
             'rol' => fake()->randomElement(['Administrador', 'Técnico']),
             'matricula' => fake()->numerify('MAT-####'),
             'estado' => true,
-            'firma' => 'data:image/png;base64,' . fake()->regexify('[A-Za-z0-9]{20}'),
+            'firma' => 'data:image/png;base64,'.fake()->regexify('[A-Za-z0-9]{20}'),
             'consultora_id' => \App\Models\Consultora::factory(),
         ];
     }

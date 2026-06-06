@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Training extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'empresa_id',
         'sede_id',
@@ -26,6 +27,7 @@ class Training extends Model
     ];
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_COMPLETED = 'completed';
 
     protected $casts = [
@@ -70,7 +72,7 @@ class Training extends Model
     {
         return $this->hasMany(\App\Models\TrainingAttendance::class);
     }
-    
+
     // Ejecuciones de esta capacitación en visitas
     public function visitTrainings()
     {

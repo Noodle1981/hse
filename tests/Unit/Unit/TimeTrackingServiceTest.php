@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Unit;
 
-use Tests\TestCase;
 use App\Models\Sede;
 use App\Models\VisitCertificate;
 use App\Services\TimeTrackingService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class TimeTrackingServiceTest extends TestCase
 {
@@ -18,7 +18,7 @@ class TimeTrackingServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->service = new TimeTrackingService();
+        $this->service = new TimeTrackingService;
     }
 
     /**

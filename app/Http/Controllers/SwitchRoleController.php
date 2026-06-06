@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SwitchRoleController extends Controller
@@ -18,13 +18,13 @@ class SwitchRoleController extends Controller
 
         // Validar que el usuario tenga permiso para alternar
         // Solo Gestores y Super Admins pueden alternar a modo Técnico
-        if (!$user || !($user->rol === User::ROLE_GESTOR || $user->rol === User::ROLE_SUPER_ADMIN)) {
+        if (! $user || ! ($user->rol === User::ROLE_GESTOR || $user->rol === User::ROLE_SUPER_ADMIN)) {
             abort(403, 'No tienes permisos para alternar roles.');
         }
 
         // Validar el rol solicitado
         $targetRole = strtolower($role);
-        if (!in_array($targetRole, [User::ROLE_GESTOR, User::ROLE_TECNICO])) {
+        if (! in_array($targetRole, [User::ROLE_GESTOR, User::ROLE_TECNICO])) {
             abort(400, 'Rol no válido para alternancia.');
         }
 

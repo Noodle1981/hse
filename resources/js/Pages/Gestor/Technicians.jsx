@@ -117,7 +117,7 @@ export default function Index({ technicians, companies, filters }) {
                                     placeholder="BUSCAR TÉCNICO, DOCUMENTO O CANAL DE ENLACE..."
                                 />
                                 <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                                    <svg className="h-5 w-5 text-indigo-500/50 group-focus-within:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                    <svg className="h-5 w-5 text-indigo-500/50 group-focus-within:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                     </svg>
                                 </div>

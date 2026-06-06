@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sede extends Model
@@ -37,13 +37,13 @@ class Sede extends Model
         'hora_apertura',
         'hora_cierre',
         'es_roster_24_7',
-        'radio_tolerancia_metros'
+        'radio_tolerancia_metros',
     ];
 
     protected $casts = [
         'dias_operativos' => 'array',
         'es_roster_24_7' => 'boolean',
-        'radio_tolerancia_metros' => 'integer'
+        'radio_tolerancia_metros' => 'integer',
     ];
 
     public function empresa()
@@ -71,7 +71,6 @@ class Sede extends Model
         return $this->hasMany(VisitCertificate::class);
     }
 
-
     public function checklists()
     {
         return $this->hasMany(ChecklistAssignment::class);
@@ -96,7 +95,7 @@ class Sede extends Model
     {
         return $this->hasMany(CapacitacionVirual::class);
     }
-    
+
     public function masterReports()
     {
         return $this->hasMany(MasterReport::class);

@@ -2,16 +2,21 @@
 
 namespace Database\Seeders\UseCases;
 
-use Illuminate\Database\Seeder;
+use App\Models\Category;
+use App\Models\Empresa;
+use App\Models\Sede;
+use App\Models\User;
 use Database\Seeders\Traits\SeederHelpers;
-use App\Models\{User, Empresa, Sede, Category, Risk};
+use Illuminate\Database\Seeder;
 
 class SafetyTraceabilitySeeder extends Seeder
 {
     use SeederHelpers;
 
     private $tecnico;
+
     private $gestor;
+
     private $sede;
 
     public function run($gestor = null, $tecnico = null): void
@@ -22,20 +27,20 @@ class SafetyTraceabilitySeeder extends Seeder
         echo "🛡️  Refinando Caso de Uso Maestro: Trazabilidad Total 2026...\n";
 
         $this->createCompanyAndSede();
-        
+
         // 1. Crear Matriz IPERC
         $this->seedRiskMatrix();
-        
+
         // 2. Crear 10 Tareas de Checklist (5 Completadas, 5 Pendientes)
         // Necesitamos definiciones de Checklists (Plantillas)
         $checklistDefinitions = $this->createTraceableChecklists();
-        
+
         // 3. Empleados
         $employees = $this->seedEmployees();
 
         // 4. Checklists Reales (Asignaciones)
         $assignments = $this->createCustomChecklistAssignments($checklistDefinitions);
-        
+
         // 5. Capacitaciones (Vinculadas a los completados)
         $this->seedCustomTrainings($employees);
 
@@ -62,7 +67,7 @@ class SafetyTraceabilitySeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             $def = $definitions[$i % count($definitions)]; // Ciclar entre las definiciones
             $status = $i < 5 ? 'completed' : 'pending';
-            
+
             // Crear asignación
             $assignment = \App\Models\ChecklistAssignment::create([
                 'dynamic_checklist_id' => $def->id,
@@ -85,7 +90,7 @@ class SafetyTraceabilitySeeder extends Seeder
                     'completed_at' => $completedDate,
                     // 'data' y 'score' no existen en la tabla base
                     'status' => 'completed', // STATUS_COMPLETED
-                    'result' => 'Pass'
+                    'result' => 'Pass',
                 ]);
 
                 // Hacer que la 3ra completada falle (índice 2)
@@ -93,7 +98,7 @@ class SafetyTraceabilitySeeder extends Seeder
                     $inspection->update(['result' => 'Fail']);
                     $failed = $inspection;
                 }
-                
+
                 $completed[] = $inspection;
             } else {
                 $pending[] = $assignment;
@@ -111,7 +116,7 @@ class SafetyTraceabilitySeeder extends Seeder
             'code' => 'EPP-001',
             'stock' => 50,
             'is_active' => true,
-            'consultora_id' => null
+            'consultora_id' => null,
         ]);
 
         // 2 Entregadas
@@ -124,15 +129,15 @@ class SafetyTraceabilitySeeder extends Seeder
                 'quantity' => 1,
                 'delivery_date' => now()->subDays(rand(1, 10)),
                 'status' => 'delivered', // Entregado
-                'signature_path' => 'dummy_signature.png'
+                'signature_path' => 'dummy_signature.png',
             ]);
         }
 
         // 3 Pendientes (Solicitudes)
         for ($i = 2; $i < 5; $i++) {
-             // Usar empleado si existe, sino ciclar
-             $emp = $employees[$i % count($employees)];
-             \App\Models\EppDelivery::create([
+            // Usar empleado si existe, sino ciclar
+            $emp = $employees[$i % count($employees)];
+            \App\Models\EppDelivery::create([
                 'epp_item_id' => $casco->id,
                 'employee_id' => $emp->id,
                 'user_id' => $this->tecnico->id,
@@ -148,8 +153,8 @@ class SafetyTraceabilitySeeder extends Seeder
     {
         // Crear capacitaciones relacionadas a los checklists (Altura y Autoelevadores)
         $topics = [
-            'Seguridad en Altura y Uso de Arnés', 
-            'Operación Segura de Montacargas'
+            'Seguridad en Altura y Uso de Arnés',
+            'Operación Segura de Montacargas',
         ];
 
         foreach ($topics as $index => $topic) {
@@ -162,7 +167,7 @@ class SafetyTraceabilitySeeder extends Seeder
                 'sede_id' => $this->sede->id,
                 'date' => $isCompleted ? now()->subDays(15) : now()->addDays(10),
                 'duration_minutes' => 60,
-                'status' => $isCompleted ? 'completed' : 'scheduled'
+                'status' => $isCompleted ? 'completed' : 'scheduled',
             ]);
 
             if ($isCompleted) {
@@ -172,7 +177,7 @@ class SafetyTraceabilitySeeder extends Seeder
                         'training_id' => $training->id,
                         'employee_id' => $emp->id,
                         'attended' => true,
-                        'signature_path' => 'dummy.png'
+                        'signature_path' => 'dummy.png',
                     ]);
                 }
             }
@@ -184,34 +189,34 @@ class SafetyTraceabilitySeeder extends Seeder
         // 5 Constancias de Visita
         for ($i = 0; $i < 5; $i++) {
             $date = now()->subDays((5 - $i) * 3); // Espaciadas
-            
+
             $constancia = \App\Models\GeneradorConstancia::create([
                 'user_id' => $this->tecnico->id,
                 'sede_id' => $this->sede->id,
                 'fecha' => $date,
                 'hora_ingreso' => '09:00',
                 'hora_egreso' => '13:00',
-                'observaciones' => 'Visita de rutina nro ' . ($i + 1),
+                'observaciones' => 'Visita de rutina nro '.($i + 1),
                 'firma_tecnico' => 'signed',
                 // Las constancias suelen firmarse por el responsable
                 'firma_responsable' => $i < 3 ? 'signed_resp' : null, // 3 firmadas, 2 pendientes
-                'date_firma_responsable' => $i < 3 ? $date : null
+                'date_firma_responsable' => $i < 3 ? $date : null,
             ]);
 
             // Asociar inspecciones a la constancia (Agrupar)
             // Distribuir las 5 inspecciones completadas entre las visitas
             if (isset($completedInspections[$i])) {
-                 // Nota: En la estructura actual, no hay tabla pivote directa constancia_inspeccion en el modelo básico
-                 // a menos que uses `attach` si existe relación. 
-                 // Asumiré que quieres que existan en el tiempo de la visita.
-                 // Si hay relación directa, la usamos:
-                 // $constancia->inspections()->attach($completedInspections[$i]->id);
+                // Nota: En la estructura actual, no hay tabla pivote directa constancia_inspeccion en el modelo básico
+                // a menos que uses `attach` si existe relación.
+                // Asumiré que quieres que existan en el tiempo de la visita.
+                // Si hay relación directa, la usamos:
+                // $constancia->inspections()->attach($completedInspections[$i]->id);
             }
         }
-        
+
         // El checklist NO completado (fallido) ya está en $failedInspection (es una inspección rejected)
         if ($failedInspection) {
-             echo "   ❌ Checklist Fallido ID: " . $failedInspection->id . "\n";
+            echo '   ❌ Checklist Fallido ID: '.$failedInspection->id."\n";
         }
     }
 
@@ -244,34 +249,34 @@ class SafetyTraceabilitySeeder extends Seeder
     {
         // Crear matriz básica si no existe
         $matrix = \App\Models\RiskMatrix::create([
-             'user_id' => $this->tecnico->id,
-             'sede_id' => $this->sede->id,
-             'empresa_id' => $this->sede->empresa_id,
-             'title' => 'Matriz IPERC - Operaciones Logísticas',
-             'description' => 'Control de riesgos en altura y movimiento de cargas',
-             'area' => 'Logística',
-             'process' => 'Almacenamiento y Despacho',
-             'status' => 'active'
+            'user_id' => $this->tecnico->id,
+            'sede_id' => $this->sede->id,
+            'empresa_id' => $this->sede->empresa_id,
+            'title' => 'Matriz IPERC - Operaciones Logísticas',
+            'description' => 'Control de riesgos en altura y movimiento de cargas',
+            'area' => 'Logística',
+            'process' => 'Almacenamiento y Despacho',
+            'status' => 'active',
         ]);
 
         $riesgosData = [
-                [
-                    'hazard' => 'Caída de personas a distinto nivel',
-                    'type' => 'Físico',
-                    'probability' => 3, 'severity' => 5, // Crítico
-                ],
-                [
-                    'hazard' => 'Atropello por autoelevadores',
-                    'type' => 'Mecánico',
-                    'probability' => 4, 'severity' => 5, // Muy Crítico
-                ],
-                [
-                    'hazard' => 'Caída de objetos desde altura',
-                    'type' => 'Mecánico',
-                    'probability' => 3, 'severity' => 4,
-                ]
-            ];
-            
+            [
+                'hazard' => 'Caída de personas a distinto nivel',
+                'type' => 'Físico',
+                'probability' => 3, 'severity' => 5, // Crítico
+            ],
+            [
+                'hazard' => 'Atropello por autoelevadores',
+                'type' => 'Mecánico',
+                'probability' => 4, 'severity' => 5, // Muy Crítico
+            ],
+            [
+                'hazard' => 'Caída de objetos desde altura',
+                'type' => 'Mecánico',
+                'probability' => 3, 'severity' => 4,
+            ],
+        ];
+
         foreach ($riesgosData as $r) {
             $risk = \App\Models\Risk::create([
                 'risk_matrix_id' => $matrix->id,
@@ -289,7 +294,7 @@ class SafetyTraceabilitySeeder extends Seeder
                 'score' => $r['probability'] * $r['severity'],
                 'level' => 'Alto', // Simplificado
                 'color' => '#EF4444', // Rojo
-                'evaluation_date' => now()
+                'evaluation_date' => now(),
             ]);
         }
 
@@ -299,21 +304,21 @@ class SafetyTraceabilitySeeder extends Seeder
     private function createTraceableChecklists(): array
     {
         $hys = Category::where('code', 'hys')->first();
-        
+
         $c1 = \App\Models\DynamicChecklist::create([
             'title' => 'Pre-Operacional de Autoelevadores',
             'description' => 'Control diario',
             // 'user_id' => $this->gestor->id, // No existe en fillable
             'is_active' => true,
-            'category_id' => $hys?->id
+            'category_id' => $hys?->id,
         ]);
-        
+
         $c2 = \App\Models\DynamicChecklist::create([
             'title' => 'Inspección de Equipos de Altura',
             'description' => 'Verificación mensual',
             // 'user_id' => $this->gestor->id,
             'is_active' => true,
-            'category_id' => $hys?->id
+            'category_id' => $hys?->id,
         ]);
 
         return [$c1, $c2];
@@ -327,9 +332,9 @@ class SafetyTraceabilitySeeder extends Seeder
             ['Jorge', 'Rios', '30234567', '20-30234567-1', 'Operador de Autoelevador'],
             ['Silvia', 'Luna', '35345678', '27-35345678-2', 'Operario'],
         ];
-        
+
         $employees = [];
-        foreach($data as $d) {
+        foreach ($data as $d) {
             $employees[] = \App\Models\Employee::create([
                 'empresa_id' => $this->sede->empresa_id, // Requerido por Employee
                 'sede_id' => $this->sede->id,
@@ -338,9 +343,10 @@ class SafetyTraceabilitySeeder extends Seeder
                 'dni' => $d[2],
                 'cuil' => $d[3],
                 'puesto' => $d[4],    // position -> puesto
-                'is_active' => true
+                'is_active' => true,
             ]);
         }
+
         return $employees;
     }
 }

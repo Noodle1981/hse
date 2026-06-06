@@ -21,16 +21,16 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+            'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
-            
+
             /** @var \App\Models\User $user */
             $user = Auth::user();
-            
+
             if ($user->isGestor() || $user->isSocio()) {
                 return redirect()->intended(route('gestor.dashboard'));
             }
@@ -48,6 +48,7 @@ class LoginController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
         return redirect()->route('login');
     }
 }

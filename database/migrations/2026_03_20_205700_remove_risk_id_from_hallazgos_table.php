@@ -14,7 +14,7 @@ return new class extends Migration
         // Workaround para SQLite: Crear la tabla risks temporalmente si no existe
         // para que SQLite no falle al intentar leer/copiar el esquema de hallazgos
         // que tiene una clave foránea apuntando a ella.
-        if (!Schema::hasTable('risks')) {
+        if (! Schema::hasTable('risks')) {
             Schema::create('risks', function (Blueprint $table) {
                 $table->id();
                 $table->timestamps();
@@ -40,7 +40,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('hallazgos', function (Blueprint $table) {
-            if (!Schema::hasColumn('hallazgos', 'risk_id')) {
+            if (! Schema::hasColumn('hallazgos', 'risk_id')) {
                 $table->foreignId('risk_id')->nullable()->comment('Remanente')->after('origen_id');
             }
         });

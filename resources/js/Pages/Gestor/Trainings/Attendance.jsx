@@ -26,7 +26,7 @@ export default function Attendance({ session }) {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <a href={route('gestor.trainings.pdf.preview', { id: session.id })} target="_blank" className="px-10 py-5 bg-red-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-red-600/20 hover:brightness-110 active:scale-95">Descargar Acta PDF</a>
+                            <a href={route('gestor.trainings.pdf.preview', { id: session.id })} target="_blank" className="px-10 py-5 bg-red-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-red-600/20 hover:brightness-110 active:scale-95" rel="noreferrer">Descargar Acta PDF</a>
                         </div>
                     </div>
 

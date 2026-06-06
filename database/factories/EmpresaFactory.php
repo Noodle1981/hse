@@ -18,7 +18,7 @@ class EmpresaFactory extends Factory
     {
         return [
             'nombre' => $this->faker->company(),
-            'razon_social' => $this->faker->company() . ' S.A.',
+            'razon_social' => $this->faker->company().' S.A.',
             'cuit' => $this->faker->unique()->numerify('###########'),
             'consultora_id' => \App\Models\Consultora::factory(),
         ];

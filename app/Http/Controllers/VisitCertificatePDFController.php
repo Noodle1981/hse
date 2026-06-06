@@ -12,14 +12,14 @@ class VisitCertificatePDFController extends Controller
     {
         $visit = VisitCertificate::with('sede')->findOrFail($id);
         $prefix = request()->is('gestor/*') ? 'gestor' : 'tecnico';
-        
+
         return view('pdf.loading', [
             'title' => 'Generando Constancia',
             'subtitle' => 'Expediente de Visita',
-            'description' => 'Sincronizando registros de ' . $visit->sede->nombre_sede . ' y compilando firmas digitales...',
-            'redirectUrl' => request()->has('download') 
-                ? route($prefix . '.visits.certificate.download', $id) 
-                : route($prefix . '.visits.certificate.preview', $id)
+            'description' => 'Sincronizando registros de '.$visit->sede->nombre_sede.' y compilando firmas digitales...',
+            'redirectUrl' => request()->has('download')
+                ? route($prefix.'.visits.certificate.download', $id)
+                : route($prefix.'.visits.certificate.preview', $id),
         ]);
     }
 
@@ -32,7 +32,7 @@ class VisitCertificatePDFController extends Controller
             'checklistCompletions.assignment.checklist',
             'trainings.training',
             'hallazgos.fotos',
-            'incidentes.fotos'
+            'incidentes.fotos',
         ])->findOrFail($id);
     }
 
@@ -41,11 +41,12 @@ class VisitCertificatePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $visit    = $this->loadVisit($id);
+        $visit = $this->loadVisit($id);
         $branding = BrandingService::forUser($visit->user);
 
         $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit', 'branding'));
-        return $pdf->stream('constancia-visita-' . $visit->id . '.pdf');
+
+        return $pdf->stream('constancia-visita-'.$visit->id.'.pdf');
     }
 
     public function download($id)
@@ -53,25 +54,26 @@ class VisitCertificatePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $visit    = $this->loadVisit($id);
+        $visit = $this->loadVisit($id);
         $branding = BrandingService::forUser($visit->user);
 
         $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit', 'branding'));
-        return $pdf->download('constancia-visita-' . $visit->id . '.pdf');
+
+        return $pdf->download('constancia-visita-'.$visit->id.'.pdf');
     }
 
     public function checklistLoading($id)
     {
         $completion = \App\Models\VisitChecklistCompletion::with(['visit.sede', 'assignment.checklist'])->findOrFail($id);
         $prefix = request()->is('gestor/*') ? 'gestor' : 'tecnico';
-        
+
         return view('pdf.loading', [
             'title' => 'Procesando Inspección',
             'subtitle' => 'Checklist Técnico',
-            'description' => 'Generando reporte detallado de ' . $completion->assignment->checklist->title . '...',
-            'redirectUrl' => request()->has('download') 
-                ? route($prefix . '.visits.checklist.download', $id) 
-                : route($prefix . '.visits.checklist.preview', $id)
+            'description' => 'Generando reporte detallado de '.$completion->assignment->checklist->title.'...',
+            'redirectUrl' => request()->has('download')
+                ? route($prefix.'.visits.checklist.download', $id)
+                : route($prefix.'.visits.checklist.preview', $id),
         ]);
     }
 
@@ -82,13 +84,14 @@ class VisitCertificatePDFController extends Controller
 
         $completion = \App\Models\VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
-            'assignment.checklist.sections'
+            'assignment.checklist.sections',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($completion->visit->user);
 
         $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion', 'branding'));
-        return $pdf->stream('inspeccion-' . $completion->id . '.pdf');
+
+        return $pdf->stream('inspeccion-'.$completion->id.'.pdf');
     }
 
     public function checklistDownload($id)
@@ -98,12 +101,13 @@ class VisitCertificatePDFController extends Controller
 
         $completion = \App\Models\VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
-            'assignment.checklist.sections'
+            'assignment.checklist.sections',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($completion->visit->user);
 
         $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion', 'branding'));
-        return $pdf->download('inspeccion-' . $completion->id . '.pdf');
+
+        return $pdf->download('inspeccion-'.$completion->id.'.pdf');
     }
 }

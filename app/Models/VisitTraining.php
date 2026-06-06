@@ -74,6 +74,7 @@ class VisitTraining extends Model
         // 4. Fallback de diferencia de tiempo de guardado (solo para ad-hoc)
         if ($this->is_adhoc && $this->created_at && $this->updated_at) {
             $diff = $this->created_at->diffInMinutes($this->updated_at);
+
             return $diff > 0 ? $diff : 15;
         }
 
@@ -103,7 +104,7 @@ class VisitTraining extends Model
 
     public function getAttendeesAttribute()
     {
-        return $this->attendances()->get()->map(function($att) {
+        return $this->attendances()->get()->map(function ($att) {
             return [
                 'id' => $att->id,
                 'name' => $att->employee_name,

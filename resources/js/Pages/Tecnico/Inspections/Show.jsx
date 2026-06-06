@@ -52,7 +52,7 @@ export default function Show({ inspection }) {
 
                         <div className="flex items-center gap-4">
                             {inspection?.id && (
-                                <a href={route('tecnico.inspections.pdf.preview', { id: inspection.id })} target="_blank" className="px-10 py-5 bg-blue-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-blue-600/20 hover:brightness-110 active:scale-95">Ver Certificado PDF</a>
+                                <a href={route('tecnico.inspections.pdf.preview', { id: inspection.id })} target="_blank" className="px-10 py-5 bg-blue-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-blue-600/20 hover:brightness-110 active:scale-95" rel="noreferrer">Ver Certificado PDF</a>
                             )}
                         </div>
                     </div>

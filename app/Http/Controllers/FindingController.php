@@ -4,13 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Hallazgo;
 use App\Models\HallazgoFoto;
-use App\Models\HallazgoSeguimiento;
 use App\Models\Sede;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class FindingController extends Controller
@@ -35,18 +33,18 @@ class FindingController extends Controller
 
         // 3. SEGURIDAD DE ACCESO
         if ($user->isTechnician()) {
-            $query->where(function($q) use ($user) {
+            $query->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                  ->orWhereIn('sede_id', $user->sedes->pluck('id'));
+                    ->orWhereIn('sede_id', $user->sedes->pluck('id'));
             });
         }
 
         // 4. FILTROS TÁCTICOS
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('titulo', 'like', "%{$request->search}%")
-                  ->orWhere('descripcion', 'like', "%{$request->search}%")
-                  ->orWhere('ubicacion_especifica', 'like', "%{$request->search}%");
+                    ->orWhere('descripcion', 'like', "%{$request->search}%")
+                    ->orWhere('ubicacion_especifica', 'like', "%{$request->search}%");
             });
         }
 
@@ -69,9 +67,9 @@ class FindingController extends Controller
         if ($request->vencidos === 'si') {
             $query->vencidos();
         } elseif ($request->vencidos === 'no') {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->where('plazo_correccion', '>=', now())
-                  ->orWhereIn('estado', ['resuelto', 'cerrado']);
+                    ->orWhereIn('estado', ['resuelto', 'cerrado']);
             });
         }
 
@@ -103,7 +101,7 @@ class FindingController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $sedes = $user->isTechnician() 
+        $sedes = $user->isTechnician()
             ? $user->sedes()->with('empresa')->get()
             : Sede::with('empresa')->orderBy('nombre_sede')->get();
 
@@ -138,12 +136,12 @@ class FindingController extends Controller
             // Manejo de Fotos
             if ($request->hasFile('fotos')) {
                 foreach ($request->file('fotos') as $index => $file) {
-                    $path = $file->store('hallazgos/' . $hallazgo->id, 'public');
+                    $path = $file->store('hallazgos/'.$hallazgo->id, 'public');
                     HallazgoFoto::create([
                         'hallazgo_id' => $hallazgo->id,
                         'tipo' => HallazgoFoto::TIPO_ANTES,
                         'ruta_archivo' => $path,
-                        'descripcion' => 'Foto de evidencia inicial #' . ($index + 1),
+                        'descripcion' => 'Foto de evidencia inicial #'.($index + 1),
                     ]);
                 }
             }
@@ -160,7 +158,8 @@ class FindingController extends Controller
             /** @var \App\Models\User $user */
             $user = Auth::user();
             $routePrefix = $user->isTechnician() ? 'tecnico.hallazgos' : 'gestor.hallazgos';
-            return redirect()->route($routePrefix . '.show', $hallazgo->id)
+
+            return redirect()->route($routePrefix.'.show', $hallazgo->id)
                 ->with('message', 'Hallazgo registrado y certificado táctocamente.');
         });
     }
@@ -209,9 +208,9 @@ class FindingController extends Controller
             ->latest();
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('titulo', 'like', "%{$request->search}%")
-                  ->orWhereHas('sede', fn($sq) => $sq->where('nombre_sede', 'like', "%{$request->search}%"));
+                    ->orWhereHas('sede', fn ($sq) => $sq->where('nombre_sede', 'like', "%{$request->search}%"));
             });
         }
 

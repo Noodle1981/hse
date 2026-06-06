@@ -29,7 +29,7 @@ class SecurityAccessTest extends TestCase
         $technician = User::factory()->inspector()->create();
 
         $response = $this->actingAs($technician)->get('/gestor/dashboard');
-        
+
         // Dependiendo de cómo esté configurado el middleware, puede ser 403 o redirección
         $response->assertStatus(403);
     }
@@ -40,7 +40,7 @@ class SecurityAccessTest extends TestCase
         $admin = User::factory()->admin()->create();
 
         $response = $this->actingAs($admin)->get('/gestor/dashboard');
-        
+
         $response->assertStatus(200);
     }
 
@@ -50,7 +50,7 @@ class SecurityAccessTest extends TestCase
         $technician = User::factory()->inspector()->create();
 
         $response = $this->actingAs($technician)->get('/tecnico/dashboard');
-        
+
         $response->assertStatus(200);
     }
 
@@ -60,7 +60,7 @@ class SecurityAccessTest extends TestCase
         $technician = User::factory()->inspector()->create();
 
         $response = $this->actingAs($technician)->get('/gestor/checklists');
-        
+
         $response->assertStatus(403);
     }
 
@@ -70,11 +70,11 @@ class SecurityAccessTest extends TestCase
         // En este proyecto, el middleware de técnico permite 'Administrador' o 'Técnico'?
         // Revisando web.php: middleware(['role:Técnico,tecnico'])
         // Si el middleware no incluye Administrador, entonces el admin NO puede entrar a /tecnico
-        
+
         $admin = User::factory()->admin()->create();
 
         $response = $this->actingAs($admin)->get('/tecnico/dashboard');
-        
+
         // Si el middleware es estricto, esto debería ser 403
         // Vamos a verificar qué sucede
         $response->assertStatus(403);

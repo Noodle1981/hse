@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DynamicChecklist;
+use App\Http\Requests\StoreChecklistCompletionRequest;
 use App\Models\ChecklistAssignment;
-use App\Models\DynamicInspection;
 use App\Models\DynamicAnswer;
+use App\Models\DynamicChecklist;
+use App\Models\DynamicInspection;
+use App\Models\Empresa;
 use App\Models\VisitCertificate;
 use App\Services\VisitService;
-use App\Models\Empresa;
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreChecklistCompletionRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -30,7 +30,7 @@ class InspectionController extends Controller
      */
     public function wizard(Request $request, $checklist_id, $assignmentId = null)
     {
-        $checklist = DynamicChecklist::with(['sections.questions', 'questions' => function($q) {
+        $checklist = DynamicChecklist::with(['sections.questions', 'questions' => function ($q) {
             $q->whereNull('section_id');
         }])->findOrFail($checklist_id);
 
@@ -38,7 +38,7 @@ class InspectionController extends Controller
         $visitId = $request->query('visit_id');
 
         // Autogenerar asignación al vuelo si estamos dentro de una visita y es ad-hoc (sin asignación previa)
-        if (!$assignmentId && $visitId) {
+        if (! $assignmentId && $visitId) {
             $visit = \App\Models\VisitCertificate::find($visitId);
             if ($visit) {
                 $assignment = \App\Models\ChecklistAssignment::create([
@@ -48,7 +48,7 @@ class InspectionController extends Controller
                     'dynamic_checklist_id' => $checklist->id,
                     'due_date' => now(),
                     'status' => 'in_progress',
-                    'notes' => 'Vínculo automático al vuelo para visita #' . $visit->id,
+                    'notes' => 'Vínculo automático al vuelo para visita #'.$visit->id,
                 ]);
                 $assignmentId = $assignment->id;
             }
@@ -75,7 +75,7 @@ class InspectionController extends Controller
 
         $inspection = $query->latest()->first();
 
-        if (!$inspection) {
+        if (! $inspection) {
             $inspection = DynamicInspection::create([
                 'dynamic_checklist_id' => $checklist->id,
                 'user_id' => Auth::id(),
@@ -103,6 +103,7 @@ class InspectionController extends Controller
     public function saveProgress(Request $request, $id, $inspection)
     {
         $inspection = DynamicInspection::findOrFail($inspection);
+
         return $this->doSaveProgress($request, $inspection);
     }
 
@@ -110,12 +111,12 @@ class InspectionController extends Controller
     {
         DB::transaction(function () use ($request, $inspection) {
             $answers = $request->input('answers', []);
-            
+
             // Optimización: Eliminar respuestas previas y reinsertar en lote (o updateOrCreate optimizado)
             // Por simplicidad y asegurar unicidad sin depender de constraints únicas de BD, limpiamos y reinsertamos
             $inspection->answers()->delete();
-            
-            if (!empty($answers)) {
+
+            if (! empty($answers)) {
                 $batchData = [];
                 foreach ($answers as $questionId => $value) {
                     $batchData[] = [
@@ -170,7 +171,7 @@ class InspectionController extends Controller
                 $data = $request->input('supervisor_signature');
                 if (\Illuminate\Support\Str::startsWith($data, 'data:image')) {
                     $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
-                    $fileName = 'signatures/' . \Illuminate\Support\Str::random(40) . '.png';
+                    $fileName = 'signatures/'.\Illuminate\Support\Str::random(40).'.png';
                     \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
                     $supervisorSignaturePath = $fileName;
                 } else {
@@ -194,7 +195,7 @@ class InspectionController extends Controller
 
             if ($inspection->checklist_assignment_id) {
                 $assignment = ChecklistAssignment::find($inspection->checklist_assignment_id);
-                
+
                 if ($assignment) {
                     // Si hay visita vincular
                     if ($request->visit_id) {
@@ -215,7 +216,7 @@ class InspectionController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        $redirect = $request->visit_id 
+        $redirect = $request->visit_id
             ? route('tecnico.visits.in-progress', $request->visit_id)
             : ($user->isTechnician() ? route('tecnico.checklists.tasks.index') : route('gestor.inspections.index'));
 
@@ -230,7 +231,7 @@ class InspectionController extends Controller
         $query = DynamicInspection::completed();
 
         if ($request->empresa) {
-            $query->whereHas('sede', fn($q) => $q->where('empresa_id', $request->empresa));
+            $query->whereHas('sede', fn ($q) => $q->where('empresa_id', $request->empresa));
         }
         if ($request->sede) {
             $query->where('sede_id', $request->sede);
@@ -247,10 +248,10 @@ class InspectionController extends Controller
 
         // Obtener todas las combinaciones únicas de Fecha, Sede y Técnico (user_id)
         $allGroups = $query->select(
-                DB::raw('DATE(completed_at) as completed_date'),
-                'sede_id',
-                'user_id'
-            )
+            DB::raw('DATE(completed_at) as completed_date'),
+            'sede_id',
+            'user_id'
+        )
             ->groupBy(DB::raw('DATE(completed_at)'), 'sede_id', 'user_id')
             ->orderBy(DB::raw('DATE(completed_at)'), 'desc')
             ->orderBy('sede_id', 'desc')
@@ -275,7 +276,7 @@ class InspectionController extends Controller
         $items = $currentPageItems->map(function ($group) {
             $sede = \App\Models\Sede::with('empresa')->find($group->sede_id);
             $techUser = \App\Models\User::find($group->user_id);
-            
+
             // Buscar constancia de visita firmada/completada para ese día por ese técnico
             $visitCertificate = \App\Models\VisitCertificate::where('sede_id', $group->sede_id)
                 ->where('user_id', $group->user_id)
@@ -340,7 +341,7 @@ class InspectionController extends Controller
         $empresas = $empresasQuery->get();
 
         // Obtener listado de técnicos para el filtro
-        $tecnicosQuery = \App\Models\User::where(function($q) {
+        $tecnicosQuery = \App\Models\User::where(function ($q) {
             $q->where('rol', 'tecnico')->orWhere('rol', 'Técnico');
         });
         if ($user->consultora_id) {
@@ -365,7 +366,7 @@ class InspectionController extends Controller
             ->completed();
 
         if ($request->empresa) {
-            $query->whereHas('sede', fn($q) => $q->where('empresa_id', $request->empresa));
+            $query->whereHas('sede', fn ($q) => $q->where('empresa_id', $request->empresa));
         }
         if ($request->sede) {
             $query->where('sede_id', $request->sede);
@@ -382,9 +383,9 @@ class InspectionController extends Controller
 
         // Obtener todas las combinaciones únicas de Fecha y Sede
         $allGroups = $query->select(
-                DB::raw('DATE(completed_at) as completed_date'),
-                'sede_id'
-            )
+            DB::raw('DATE(completed_at) as completed_date'),
+            'sede_id'
+        )
             ->groupBy(DB::raw('DATE(completed_at)'), 'sede_id')
             ->orderBy(DB::raw('DATE(completed_at)'), 'desc')
             ->orderBy('sede_id', 'desc')
@@ -407,7 +408,7 @@ class InspectionController extends Controller
         // Mapear y cargar relaciones para el sub-desglose
         $items = $currentPageItems->map(function ($group) use ($request) {
             $sede = \App\Models\Sede::with('empresa')->find($group->sede_id);
-            
+
             // Buscar constancia de visita firmada/completada para ese día
             $visitCertificate = \App\Models\VisitCertificate::where('sede_id', $group->sede_id)
                 ->whereDate('visit_date', $group->completed_date)
@@ -485,13 +486,13 @@ class InspectionController extends Controller
     public function show(DynamicInspection $inspection)
     {
         $inspection->load(['checklist.sections.questions', 'checklist.questions', 'user', 'sede.empresa', 'answers.question']);
-        
+
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        
+
         // Determinar si es Gestor o Técnico para la vista
-        $component = $user->isTechnician() 
-            ? 'Tecnico/Inspections/Show' 
+        $component = $user->isTechnician()
+            ? 'Tecnico/Inspections/Show'
             : 'Gestor/Inspections/Show';
 
         return Inertia::render($component, [

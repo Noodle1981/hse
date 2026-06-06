@@ -13,10 +13,6 @@ class TimeTrackingService
     /**
      * Verifica si la visita se inició dentro de los días y horas operativos de la Sede.
      * Si la sede opera bajo modalidad "Roster 24/7" (minería), se aprueba automáticamente.
-     * 
-     * @param Sede $sede
-     * @param \DateTimeInterface $checkinTime
-     * @return bool
      */
     public function verifyWorkingHours(Sede $sede, \DateTimeInterface $checkinTime): bool
     {
@@ -27,7 +23,7 @@ class TimeTrackingService
 
         // 2. Si no es roster 24/7, validar días y horarios operativos
         $carbonCheckin = Carbon::instance($checkinTime);
-        
+
         // Obtener el día de la semana en español
         $diasMap = [
             0 => 'Domingo',
@@ -38,12 +34,12 @@ class TimeTrackingService
             5 => 'Viernes',
             6 => 'Sábado',
         ];
-        
+
         $dayOfWeekInSpanish = $diasMap[$carbonCheckin->dayOfWeek];
 
         // Verificar si el día de la semana está admitido
         $diasOperativos = $sede->dias_operativos ?? [];
-        if (!in_array($dayOfWeekInSpanish, $diasOperativos, true)) {
+        if (! in_array($dayOfWeekInSpanish, $diasOperativos, true)) {
             return false;
         }
 
@@ -51,7 +47,7 @@ class TimeTrackingService
         if ($sede->hora_apertura && $sede->hora_cierre) {
             $timeFormat = 'H:i:s';
             $checkinTimeStr = $carbonCheckin->format($timeFormat);
-            
+
             // Asegurar formato de comparación HH:MM:SS
             try {
                 $aperturaStr = Carbon::createFromFormat('H:i:s', $sede->hora_apertura)->format($timeFormat);
@@ -84,13 +80,10 @@ class TimeTrackingService
     /**
      * Calcula las horas de campo acumuladas de una visita restando el start_time y end_time.
      * Retorna el valor en formato decimal (ej: 4.5 horas).
-     * 
-     * @param VisitCertificate $visit
-     * @return float
      */
     public function calculateFieldHours(VisitCertificate $visit): float
     {
-        if (!$visit->start_time || !$visit->end_time) {
+        if (! $visit->start_time || ! $visit->end_time) {
             return 0.0;
         }
 
@@ -111,9 +104,6 @@ class TimeTrackingService
      * Valida de forma preliminar la presencia GPS del técnico.
      * En el futuro, este método usará calculateHaversineDistance para verificar que las
      * coordenadas de checkin y checkout estén dentro del radio de tolerancia de la Sede.
-     * 
-     * @param VisitCertificate $visit
-     * @return bool
      */
     public function verifyGpsPresence(VisitCertificate $visit): bool
     {
@@ -126,17 +116,13 @@ class TimeTrackingService
         //     );
         //     return $distance <= $sede->radio_tolerancia_metros;
         // }
-        
+
         return true;
     }
 
     /**
      * Calcula la distancia en metros entre dos coordenadas geográficas usando la fórmula de Haversine.
-     * 
-     * @param float $lat1
-     * @param float $lon1
-     * @param float $lat2
-     * @param float $lon2
+     *
      * @return float Distancia en metros
      */
     private function calculateHaversineDistance(float $lat1, float $lon1, float $lat2, float $lon2): float

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Contracts;
 use App\Http\Controllers\Controller;
 use App\Models\AnnualPlan;
 use App\Models\Sede;
-use App\Models\DynamicInspection;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -22,13 +21,13 @@ class AnnualContractReportController extends Controller
         $endDate = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
 
         $plans = AnnualPlan::where('sede_id', $sedeId)
-            ->where(function($q) use ($startDate, $endDate) {
+            ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('period_start', [$startDate, $endDate])
-                  ->orWhereBetween('period_end', [$startDate, $endDate])
-                  ->orWhere(function($sub) use ($startDate, $endDate) {
-                      $sub->where('period_start', '<=', $startDate)
-                          ->where('period_end', '>=', $endDate);
-                  });
+                    ->orWhereBetween('period_end', [$startDate, $endDate])
+                    ->orWhere(function ($sub) use ($startDate, $endDate) {
+                        $sub->where('period_start', '<=', $startDate)
+                            ->where('period_end', '>=', $endDate);
+                    });
             })
             ->with('checklist')
             ->orderBy('category')
@@ -37,7 +36,7 @@ class AnnualContractReportController extends Controller
         $months = [
             'enero' => 1, 'febrero' => 2, 'marzo' => 3, 'abril' => 4,
             'mayo' => 5, 'junio' => 6, 'julio' => 7, 'agosto' => 8,
-            'septiembre' => 9, 'octubre' => 10, 'noviembre' => 11, 'diciembre' => 12
+            'septiembre' => 9, 'octubre' => 10, 'noviembre' => 11, 'diciembre' => 12,
         ];
 
         // --- OPTIMIZATION: PRE-LOAD ALL COMPLIANCE FOR THE YEAR ---
@@ -49,7 +48,7 @@ class AnnualContractReportController extends Controller
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->where('status', 'completed')
             ->get()
-            ->groupBy(fn($i) => $i->dynamic_checklist_id . '_' . $i->completed_at->format('Y-m'));
+            ->groupBy(fn ($i) => $i->dynamic_checklist_id.'_'.$i->completed_at->format('Y-m'));
 
         // 2. Trainings (Direct & via VisitTraining)
         $trainLookup = [];
@@ -59,44 +58,49 @@ class AnnualContractReportController extends Controller
             ->whereBetween('date', [$startDate, $endDate])
             ->where('status', 'completed')
             ->get()
-            ->each(function($t) use (&$trainLookup, &$trainChecklistLookup) {
+            ->each(function ($t) use (&$trainLookup, &$trainChecklistLookup) {
                 $m = $t->date->format('Y-m');
                 $trainLookup[mb_strtolower($t->title)][$m] = true;
-                if ($t->dynamic_checklist_id) $trainChecklistLookup[$t->dynamic_checklist_id][$m] = true;
+                if ($t->dynamic_checklist_id) {
+                    $trainChecklistLookup[$t->dynamic_checklist_id][$m] = true;
+                }
             });
 
-        \App\Models\VisitTraining::whereHas('visit', fn($q) => $q->where('sede_id', $sedeId)->whereBetween('fecha_visita', [$startDate, $endDate]))
+        \App\Models\VisitTraining::whereHas('visit', fn ($q) => $q->where('sede_id', $sedeId)->whereBetween('fecha_visita', [$startDate, $endDate]))
             ->with('training')
             ->get()
-            ->each(function($vt) use (&$trainLookup, &$trainChecklistLookup) {
+            ->each(function ($vt) use (&$trainLookup, &$trainChecklistLookup) {
                 $m = $vt->created_at->format('Y-m');
                 $trainLookup[mb_strtolower($vt->title)][$m] = true;
-                if ($vt->training?->dynamic_checklist_id) $trainChecklistLookup[$vt->training->dynamic_checklist_id][$m] = true;
+                if ($vt->training?->dynamic_checklist_id) {
+                    $trainChecklistLookup[$vt->training->dynamic_checklist_id][$m] = true;
+                }
             });
 
         // 3. Reports
         $repLookup = \App\Models\MasterReport::where('sede_id', $sedeId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
-            ->groupBy(fn($r) => str_contains($r->periodo, '-') ? $r->periodo : $r->created_at->format('Y-m'));
+            ->groupBy(fn ($r) => str_contains($r->periodo, '-') ? $r->periodo : $r->created_at->format('Y-m'));
 
         $reportData = [];
         foreach ($plans as $plan) {
             $monthData = [];
             foreach ($months as $name => $num) {
-                $monthStr = $year . '-' . str_pad($num, 2, '0', STR_PAD_LEFT);
-                
+                $monthStr = $year.'-'.str_pad($num, 2, '0', STR_PAD_LEFT);
+
                 // 1. Is it scheduled?
                 $isScheduled = in_array($monthStr, $plan->scheduled_months ?? []);
-                if (!$isScheduled) {
+                if (! $isScheduled) {
                     $monthData[$name] = ['status' => 'none', 'count' => 0];
+
                     continue;
                 }
 
                 // 2. Check Compliance
                 $count = 0;
                 if ($plan->category === 'Inspección' && $plan->checklist_id) {
-                    $count = isset($insLookup[$plan->checklist_id . '_' . $monthStr]) ? $insLookup[$plan->checklist_id . '_' . $monthStr]->count() : 0;
+                    $count = isset($insLookup[$plan->checklist_id.'_'.$monthStr]) ? $insLookup[$plan->checklist_id.'_'.$monthStr]->count() : 0;
                 } elseif ($plan->category === 'Capacitación') {
                     if ($plan->checklist_id) {
                         $count = isset($trainChecklistLookup[$plan->checklist_id][$monthStr]) ? 1 : 0;
@@ -118,7 +122,7 @@ class AnnualContractReportController extends Controller
 
             $reportData[] = [
                 'plan' => $plan,
-                'months' => $monthData
+                'months' => $monthData,
             ];
         }
 

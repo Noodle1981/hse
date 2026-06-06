@@ -14,9 +14,10 @@ class ChecklistsFromJsonSeeder extends Seeder
     {
         $path = base_path('database/seeds/checklists_export.json');
 
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             $this->command->error("❌ No se encontró el archivo: {$path}");
-            $this->command->info("   Primero ejecuta: php artisan checklists:export");
+            $this->command->info('   Primero ejecuta: php artisan checklists:export');
+
             return;
         }
 
@@ -31,15 +32,16 @@ class ChecklistsFromJsonSeeder extends Seeder
 
             if ($existing) {
                 $this->command->warn("⚠️  Ya existe checklist: \"{$data['title']}\" — omitido");
+
                 continue;
             }
 
             $checklist = DynamicChecklist::create([
-                'title'          => $data['title'],
-                'description'    => $data['description'],
-                'registry_code'  => $data['registry_code'],
-                'is_active'      => $data['is_active'] ?? true,
-                'category_id'    => null, // Temporal para version-minina
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'registry_code' => $data['registry_code'],
+                'is_active' => $data['is_active'] ?? true,
+                'category_id' => null, // Temporal para version-minina
                 'subcategory_id' => null, // Temporal para version-minina
             ]);
 
@@ -47,7 +49,7 @@ class ChecklistsFromJsonSeeder extends Seeder
             foreach ($data['questions'] ?? [] as $qData) {
                 DynamicQuestion::create([
                     'dynamic_checklist_id' => $checklist->id,
-                    'section_id'           => null,
+                    'section_id' => null,
                 ] + $this->questionFields($qData));
             }
 
@@ -55,15 +57,15 @@ class ChecklistsFromJsonSeeder extends Seeder
             foreach ($data['sections'] ?? [] as $sData) {
                 $section = ChecklistSection::create([
                     'dynamic_checklist_id' => $checklist->id,
-                    'title'                => $sData['title'],
-                    'description'          => $sData['description'] ?? null,
-                    'order'                => $sData['order'],
+                    'title' => $sData['title'],
+                    'description' => $sData['description'] ?? null,
+                    'order' => $sData['order'],
                 ]);
 
                 foreach ($sData['questions'] ?? [] as $qData) {
                     DynamicQuestion::create([
                         'dynamic_checklist_id' => $checklist->id,
-                        'section_id'           => $section->id,
+                        'section_id' => $section->id,
                     ] + $this->questionFields($qData));
                 }
             }
@@ -78,15 +80,15 @@ class ChecklistsFromJsonSeeder extends Seeder
     private function questionFields(array $q): array
     {
         return [
-            'label'          => $q['label'],
-            'type'           => $q['type'],
-            'options'        => $q['options'] ? json_encode($q['options']) : null,
+            'label' => $q['label'],
+            'type' => $q['type'],
+            'options' => $q['options'] ? json_encode($q['options']) : null,
             'failure_values' => $q['failure_values'] ? json_encode($q['failure_values']) : null,
-            'min_value'      => $q['min_value'],
-            'max_value'      => $q['max_value'],
-            'order'          => $q['order'],
-            'is_required'    => $q['is_required'],
-            'help_text'      => $q['help_text'],
+            'min_value' => $q['min_value'],
+            'max_value' => $q['max_value'],
+            'order' => $q['order'],
+            'is_required' => $q['is_required'],
+            'help_text' => $q['help_text'],
         ];
     }
 }

@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Training;
-use App\Models\VisitTraining;
-use App\Models\VisitCertificate;
-use App\Models\TrainingAttendance;
 use App\Models\Sede;
+use App\Models\Training;
+use App\Models\VisitCertificate;
+use App\Models\VisitTraining;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class TrainingController extends Controller
@@ -27,16 +25,16 @@ class TrainingController extends Controller
         $history = VisitTraining::query()
             ->with(['visit.sede.empresa', 'visit.user', 'training.responsibleUser', 'training.creator'])
             ->when($request->search, function ($query) use ($request) {
-                $query->where('title', 'like', '%' . $request->search . '%')
-                      ->orWhere('description', 'like', '%' . $request->search . '%');
+                $query->where('title', 'like', '%'.$request->search.'%')
+                    ->orWhere('description', 'like', '%'.$request->search.'%');
             })
             ->when($request->empresaFilter, function ($query) use ($request) {
-                $query->whereHas('visit.sede', function($q) use ($request) {
+                $query->whereHas('visit.sede', function ($q) use ($request) {
                     $q->where('empresa_id', $request->empresaFilter);
                 });
             })
             ->when($request->sedeFilter, function ($query) use ($request) {
-                $query->whereHas('visit', function($q) use ($request) {
+                $query->whereHas('visit', function ($q) use ($request) {
                     $q->where('sede_id', $request->sedeFilter);
                 });
             })
@@ -122,14 +120,14 @@ class TrainingController extends Controller
             if ($plan) {
                 $durationMinutes = $plan->duration_minutes ?: 15;
                 $modality = $plan->modality ?: 'presencial';
-                $multiTrainer = (bool)$plan->multi_trainer;
+                $multiTrainer = (bool) $plan->multi_trainer;
             }
         }
 
         $visitTraining = VisitTraining::create([
             'visit_certificate_id' => $visit->id,
             'training_id' => $request->training_id,
-            'is_adhoc' => !$request->training_id,
+            'is_adhoc' => ! $request->training_id,
             'title' => $training ? $training->title : $request->title,
             'description' => $training ? $training->description : $request->description,
             'duration_minutes' => $training ? ($training->duration ?: $durationMinutes) : ($request->duration ?: $durationMinutes),
@@ -170,7 +168,7 @@ class TrainingController extends Controller
     public function session(VisitTraining $visitTraining)
     {
         $visitTraining->load('visit.sede.empresa');
-        
+
         return Inertia::render('Tecnico/Trainings/Session', [
             'session' => $visitTraining,
         ]);
@@ -241,7 +239,7 @@ class TrainingController extends Controller
             $sigData = base64_decode($sigData);
 
             if ($sigData !== false) {
-                $filename = 'signatures/instructor_' . uniqid() . '.' . $type;
+                $filename = 'signatures/instructor_'.uniqid().'.'.$type;
                 \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $sigData);
                 $signaturePath = $filename;
             }
@@ -263,7 +261,7 @@ class TrainingController extends Controller
             if ($request->is_external_instructor && $signaturePath) {
                 $visit->instructor_signature = $signaturePath;
                 $visit->instructor_signature_date = now();
-            } else if (!$request->is_external_instructor) {
+            } elseif (! $request->is_external_instructor) {
                 $visit->instructor_signature = null;
                 $visit->instructor_signature_date = null;
             }
@@ -276,8 +274,8 @@ class TrainingController extends Controller
             $visit->update([
                 'end_time' => now(),
                 'status' => 'signed',
-                'general_observations' => 'Capacitación dictada con éxito. Total asistentes: ' . count($visitTraining->attendees ?? []),
-                'notes' => 'Visita de capacitación finalizada automáticamente al completar la charla: ' . $visitTraining->title,
+                'general_observations' => 'Capacitación dictada con éxito. Total asistentes: '.count($visitTraining->attendees ?? []),
+                'notes' => 'Visita de capacitación finalizada automáticamente al completar la charla: '.$visitTraining->title,
                 'responsible_name' => $request->responsible_name,
                 'signature' => $request->responsible_signature,
             ]);
@@ -307,7 +305,7 @@ class TrainingController extends Controller
     public function attendance($id)
     {
         $session = VisitTraining::with(['visit.sede.empresa', 'training'])->findOrFail($id);
-        
+
         return Inertia::render('Gestor/Trainings/Attendance', [
             'session' => $session,
         ]);

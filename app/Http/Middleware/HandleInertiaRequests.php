@@ -31,35 +31,35 @@ class HandleInertiaRequests extends Middleware
 
         // Branding dinámico (igual que el layout Blade actual)
         $consultora = $user?->consultora;
-        $sede       = $user?->sedes()->first();
-        $empresa    = $sede?->empresa;
+        $sede = $user?->sedes()->first();
+        $empresa = $sede?->empresa;
 
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $user ? [
-                    'id'            => $user->id,
-                    'nombres'       => $user->nombres,
-                    'apellidos'     => $user->apellidos,
-                    'email'         => $user->email,
-                    'rol'           => $user->rol,
-                    'active_role'   => session('active_role', $user->rol),
-                    'is_admin'      => $user->isAdmin(),
+                    'id' => $user->id,
+                    'nombres' => $user->nombres,
+                    'apellidos' => $user->apellidos,
+                    'email' => $user->email,
+                    'rol' => $user->rol,
+                    'active_role' => session('active_role', $user->rol),
+                    'is_admin' => $user->isAdmin(),
                     'is_technician' => $user->isTechnician(),
-                    'is_super_admin'=> $user->isSuperAdmin(),
-                    'signature'     => $user->signature ? (str_starts_with($user->signature, 'data:image') ? $user->signature : asset('storage/' . $user->signature)) : null,
+                    'is_super_admin' => $user->isSuperAdmin(),
+                    'signature' => $user->signature ? (str_starts_with($user->signature, 'data:image') ? $user->signature : asset('storage/'.$user->signature)) : null,
                 ] : null,
             ],
             'branding' => [
-                'logo'          => $consultora?->logo_path
-                                    ? asset('storage/' . $consultora->logo_path)
+                'logo' => $consultora?->logo_path
+                                    ? asset('storage/'.$consultora->logo_path)
                                     : asset('images/logo.png'),
-                'name'          => $consultora?->nombre ?? 'EP - EQUIPO PREVENTIVO',
+                'name' => $consultora?->nombre ?? 'EP - EQUIPO PREVENTIVO',
                 'primary_color' => $empresa?->primary_color ?? '#F69239',
             ],
             'flash' => [
                 'message' => $request->session()->get('message'),
-                'error'   => $request->session()->get('error'),
+                'error' => $request->session()->get('error'),
                 'warning' => $request->session()->get('warning'),
             ],
         ];

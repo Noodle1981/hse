@@ -2,13 +2,13 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Livewire\Companies\CompanyIndex;
 use App\Models\Consultora;
 use App\Models\Empresa;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use Livewire\Livewire;
-use App\Livewire\Companies\CompanyIndex;
+use Tests\TestCase;
 
 class TenancyIsolationTest extends TestCase
 {
@@ -56,7 +56,7 @@ class TenancyIsolationTest extends TestCase
 
         // Assuming CompanyBuilder handles editing by ID via Livewire component property or mount
         // Let's verify how CompanyBuilder works. If it uses route binding or internal query.
-        
+
         Livewire::actingAs($adminA)
             ->test(\App\Livewire\Companies\CompanyBuilder::class, ['id' => $empresaB->id])
             ->assertStatus(404);

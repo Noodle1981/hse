@@ -2,19 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMasterReportRequest;
+use App\Http\Requests\UpdateMasterReportRequest;
 use App\Models\MasterReport;
 use App\Models\Sede;
 use App\Models\User;
-use App\Models\DynamicChecklist;
-use App\Models\AnnualPlan;
 use App\Models\VisitCertificate;
 use App\Services\BrandingService;
-use Illuminate\Http\Request;
-use App\Http\Requests\StoreMasterReportRequest;
-use App\Http\Requests\UpdateMasterReportRequest;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
@@ -38,10 +36,10 @@ class MasterReportController extends Controller
         }
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
-                $q->whereHas('sede', function($sq) use ($request) {
-                    $sq->where('nombre_sede', 'like', '%' . $request->search . '%');
-                })->orWhere('titulo', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->whereHas('sede', function ($sq) use ($request) {
+                    $sq->where('nombre_sede', 'like', '%'.$request->search.'%');
+                })->orWhere('titulo', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -56,7 +54,7 @@ class MasterReportController extends Controller
         /** @var User $user */
         $user = Auth::user();
 
-        $sedes = $user->isTechnician() 
+        $sedes = $user->isTechnician()
             ? $user->sedes()->with('empresa')->get()
             : Sede::with('empresa')->orderBy('nombre_sede')->get();
 
@@ -93,16 +91,16 @@ class MasterReportController extends Controller
         $data = $this->aggregatePeriodData($masterReport);
 
         return Inertia::render('Gestor/MasterReports/Wizard', [
-            'report'     => $masterReport,
+            'report' => $masterReport,
             'periodData' => $data,
-            'readOnly'   => true, // Siempre solo-lectura desde la vista "show"
+            'readOnly' => true, // Siempre solo-lectura desde la vista "show"
         ]);
     }
 
     public function edit(MasterReport $masterReport)
     {
         $this->authorize('view', $masterReport);
-        
+
         $masterReport->load(['sede.empresa', 'tecnico', 'gestor']);
         $data = $this->aggregatePeriodData($masterReport);
 
@@ -115,7 +113,7 @@ class MasterReportController extends Controller
     public function update(UpdateMasterReportRequest $request, MasterReport $masterReport)
     {
         $this->authorize('update', $masterReport);
-        
+
         $masterReport->update($request->safeData());
 
         /** @var User $user */
@@ -128,6 +126,7 @@ class MasterReportController extends Controller
                     'estado' => 'aprobado',
                     'observacion_revision' => null, // Limpiar observación anterior al aprobar
                 ]);
+
                 return redirect()->route('master-reports.index')->with('message', 'Informe maestro aprobado exitosamente.');
             }
 
@@ -136,6 +135,7 @@ class MasterReportController extends Controller
                     'estado' => 'en_redaccion', // Vuelve al técnico
                     'observacion_revision' => $request->observacion_revision,
                 ]);
+
                 return redirect()->route('master-reports.index')->with('message', 'Informe maestro observado y devuelto al técnico.');
             }
         }
@@ -143,6 +143,7 @@ class MasterReportController extends Controller
         // Acción del Técnico
         if ($request->finalize) {
             $masterReport->update(['estado' => 'finalizado']);
+
             return redirect()->route('master-reports.index')->with('message', 'Informe finalizado exitosamente.');
         }
 
@@ -157,12 +158,12 @@ class MasterReportController extends Controller
         $this->authorize('view', $masterReport);
 
         $masterReport->load(['sede.empresa', 'tecnico', 'gestor']);
-        $data     = $this->aggregatePeriodData($masterReport);
+        $data = $this->aggregatePeriodData($masterReport);
         $branding = BrandingService::forUser($masterReport->tecnico ?? $masterReport->gestor);
-        
+
         $pdf = Pdf::loadView('pdf.master-report-pdf', [
-            'report'   => $masterReport,
-            'data'     => $data,
+            'report' => $masterReport,
+            'data' => $data,
             'branding' => $branding,
         ]);
 
@@ -175,25 +176,25 @@ class MasterReportController extends Controller
         $freq = $report->frecuencia ?? 'mensual';
 
         if ($freq === 'trimestral') {
-            $q = (int)substr($period, -1);
-            $y = (int)substr($period, 0, 4);
+            $q = (int) substr($period, -1);
+            $y = (int) substr($period, 0, 4);
             $startMonth = ($q - 1) * 3 + 1;
             $startDate = Carbon::create($y, $startMonth, 1)->startOfMonth();
             $endDate = Carbon::create($y, $startMonth + 2, 1)->endOfMonth();
         } elseif ($freq === 'semestral') {
-            $s = (int)substr($period, -1);
-            $y = (int)substr($period, 0, 4);
+            $s = (int) substr($period, -1);
+            $y = (int) substr($period, 0, 4);
             $startMonth = ($s - 1) * 6 + 1;
             $startDate = Carbon::create($y, $startMonth, 1)->startOfMonth();
             $endDate = Carbon::create($y, $startMonth + 5, 1)->endOfMonth();
         } elseif ($freq === 'anual') {
-            $y = (int)substr($period, 0, 4);
+            $y = (int) substr($period, 0, 4);
             $startDate = Carbon::create($y, 1, 1)->startOfMonth();
             $endDate = Carbon::create($y, 12, 31)->endOfMonth();
         } else {
             try {
-                $startDate = Carbon::parse($period . '-01')->startOfMonth();
-                $endDate = Carbon::parse($period . '-01')->endOfMonth();
+                $startDate = Carbon::parse($period.'-01')->startOfMonth();
+                $endDate = Carbon::parse($period.'-01')->endOfMonth();
             } catch (\Exception $e) {
                 $startDate = now()->startOfMonth();
                 $endDate = now()->endOfMonth();
@@ -202,11 +203,11 @@ class MasterReportController extends Controller
 
         $visits = $report->sede->visitCertificates()
             ->with([
-                'checklistCompletions.assignment.checklist', 
-                'trainings.attendances', 
-                'hallazgos.fotos', 
+                'checklistCompletions.assignment.checklist',
+                'trainings.attendances',
+                'hallazgos.fotos',
                 'incidentes.fotos',
-                'user'
+                'user',
             ])
             ->whereBetween('visit_date', [$startDate, $endDate])
             ->whereIn('status', ['completed', 'signed'])
@@ -221,7 +222,7 @@ class MasterReportController extends Controller
         ];
 
         $data['annual_plan_status'] = $this->calculateAnnualPlanStatus($report->sede, $startDate, $endDate, $data);
-        
+
         $satisfiedCheckIds = $data['annual_plan_status']['satisfied_checklist_ids'] ?? collect();
         $satisfiedTrainIds = $data['annual_plan_status']['satisfied_training_ids'] ?? collect();
 
@@ -231,11 +232,11 @@ class MasterReportController extends Controller
             ->get();
 
         $adhoc = collect();
-        
-        $data['checklists']->reject(fn($c) => $satisfiedCheckIds->contains($c->id))
-            ->each(function($c) use ($adhoc, $plans) {
+
+        $data['checklists']->reject(fn ($c) => $satisfiedCheckIds->contains($c->id))
+            ->each(function ($c) use ($adhoc, $plans) {
                 // Si la actividad coincide con alguna programada en el plan anual, NO es ad-hoc (aunque sea una repetición)
-                $isProgrammed = $plans->contains(function($plan) use ($c) {
+                $isProgrammed = $plans->contains(function ($plan) use ($c) {
                     if ($plan->category !== 'Inspección') {
                         return false;
                     }
@@ -248,6 +249,7 @@ class MasterReportController extends Controller
                     if ($plan->activity_name && mb_strtolower($plan->activity_name) === mb_strtolower($c->assignment?->checklist?->title ?? '')) {
                         return true;
                     }
+
                     return false;
                 });
 
@@ -260,14 +262,14 @@ class MasterReportController extends Controller
                     'category' => 'Inspección',
                     'description' => $c->assignment?->checklist?->description ?? null,
                     'date' => Carbon::parse($c->completed_at)->format('d/m/Y'),
-                    'technician' => $c->visitCertificate->technician_name ?? 'N/A'
+                    'technician' => $c->visitCertificate->technician_name ?? 'N/A',
                 ]);
             });
 
-        $data['trainings']->reject(fn($t) => $satisfiedTrainIds->contains($t->id))
-            ->each(function($t) use ($adhoc, $plans) {
+        $data['trainings']->reject(fn ($t) => $satisfiedTrainIds->contains($t->id))
+            ->each(function ($t) use ($adhoc, $plans) {
                 // Si la capacitación coincide con alguna programada en el plan anual, NO es ad-hoc (aunque sea una repetición)
-                $isProgrammed = $plans->contains(function($plan) use ($t) {
+                $isProgrammed = $plans->contains(function ($plan) use ($t) {
                     if ($plan->category !== 'Capacitación') {
                         return false;
                     }
@@ -281,6 +283,7 @@ class MasterReportController extends Controller
                             return true;
                         }
                     }
+
                     return false;
                 });
 
@@ -293,7 +296,7 @@ class MasterReportController extends Controller
                     'category' => 'Capacitación',
                     'description' => $t->description,
                     'date' => Carbon::parse($t->date ?? $t->created_at)->format('d/m/Y'),
-                    'technician' => $t->trainer_name ?? 'N/A'
+                    'technician' => $t->trainer_name ?? 'N/A',
                 ]);
             });
 
@@ -310,14 +313,16 @@ class MasterReportController extends Controller
             ->where('period_end', '>=', $startDate)
             ->get();
 
-        if ($plans->isEmpty()) return [
-            'percentage' => 0,
-            'programmed' => collect(),
-            'total_targets' => 0,
-            'achieved' => 0,
-            'satisfied_checklist_ids' => collect(),
-            'satisfied_training_ids' => collect()
-        ];
+        if ($plans->isEmpty()) {
+            return [
+                'percentage' => 0,
+                'programmed' => collect(),
+                'total_targets' => 0,
+                'achieved' => 0,
+                'satisfied_checklist_ids' => collect(),
+                'satisfied_training_ids' => collect(),
+            ];
+        }
 
         $monthsToEval = [];
         $curr = $startDate->copy();
@@ -336,17 +341,25 @@ class MasterReportController extends Controller
             foreach ($monthsToEval as $m) {
                 if (is_array($plan->scheduled_months) && in_array($m, $plan->scheduled_months)) {
                     $isReport = ($plan->category === 'Informe');
-                    if (!$isReport) $totalTargets++;
-
-                    $dt = Carbon::parse($m . '-01');
-                    $completion = $this->checkActivityCompletion($plan, $dt->month, $dt->year, $data);
-                    
-                    if ($completion) {
-                        if (!$isReport) $achievedTargets++;
-                        if ($plan->category === 'Inspección' && isset($completion->id)) $satisfiedChecklistIds->push($completion->id);
-                        if ($plan->category === 'Capacitación' && isset($completion->id)) $satisfiedTrainingIds->push($completion->id);
+                    if (! $isReport) {
+                        $totalTargets++;
                     }
-                    
+
+                    $dt = Carbon::parse($m.'-01');
+                    $completion = $this->checkActivityCompletion($plan, $dt->month, $dt->year, $data);
+
+                    if ($completion) {
+                        if (! $isReport) {
+                            $achievedTargets++;
+                        }
+                        if ($plan->category === 'Inspección' && isset($completion->id)) {
+                            $satisfiedChecklistIds->push($completion->id);
+                        }
+                        if ($plan->category === 'Capacitación' && isset($completion->id)) {
+                            $satisfiedTrainingIds->push($completion->id);
+                        }
+                    }
+
                     $executedAt = null;
                     $technician = null;
                     if ($completion && is_object($completion)) {
@@ -361,16 +374,16 @@ class MasterReportController extends Controller
                             $technician = $completion->user?->nombres ?? 'N/A';
                         }
                     }
-                    
+
                     $programmed->push([
                         'activity' => $plan->activity_name,
                         'code' => $plan->activity_code,
                         'category' => $plan->category,
                         'description' => $plan->checklist->description ?? null,
-                        'month' => Carbon::parse($m . '-01')->translatedFormat('F'),
+                        'month' => Carbon::parse($m.'-01')->translatedFormat('F'),
                         'status' => $completion ? 'completed' : 'pending',
                         'executed_at' => $executedAt,
-                        'technician' => $technician
+                        'technician' => $technician,
                     ]);
                 }
             }
@@ -382,58 +395,64 @@ class MasterReportController extends Controller
             'total_targets' => $totalTargets,
             'achieved' => $achievedTargets,
             'satisfied_checklist_ids' => $satisfiedChecklistIds,
-            'satisfied_training_ids' => $satisfiedTrainingIds
+            'satisfied_training_ids' => $satisfiedTrainingIds,
         ];
     }
 
     private function checkActivityCompletion($plan, $month, $year, $data)
     {
         if (stripos($plan->activity_name, 'Visita') !== false) {
-            return $data['visits']->first(function($v) use ($month, $year) {
+            return $data['visits']->first(function ($v) use ($month, $year) {
                 return $v->visit_date->month == $month && $v->visit_date->year == $year;
             });
         }
 
         if ($plan->activity_code) {
             if ($plan->category === 'Inspección') {
-                $found = $data['checklists']->first(function($c) use ($plan, $month, $year) {
+                $found = $data['checklists']->first(function ($c) use ($plan, $month, $year) {
                     $date = Carbon::parse($c->completed_at);
-                    return $date->month == $month && $date->year == $year && 
+
+                    return $date->month == $month && $date->year == $year &&
                            (($c->assignment?->checklist?->registry_code ?? '') === $plan->activity_code);
                 });
-                if ($found) return $found;
+                if ($found) {
+                    return $found;
+                }
             }
 
             if ($plan->category === 'Capacitación') {
-                $found = $data['trainings']->first(function($t) use ($plan, $month, $year) {
+                $found = $data['trainings']->first(function ($t) use ($plan, $month, $year) {
                     $date = Carbon::parse($t->date ?? $t->created_at);
-                    return $date->month == $month && $date->year == $year && 
+
+                    return $date->month == $month && $date->year == $year &&
                            (str_contains(mb_strtolower($t->title), mb_strtolower($plan->activity_code)));
                 });
-                if ($found) return $found;
+                if ($found) {
+                    return $found;
+                }
             }
         }
 
         if ($plan->category === 'Inspección' && $plan->checklist_id) {
-            return $data['checklists']->first(function($c) use ($plan, $month, $year) {
+            return $data['checklists']->first(function ($c) use ($plan, $month, $year) {
                 $date = Carbon::parse($c->completed_at);
-                return ($c->assignment?->dynamic_checklist_id ?? null) == $plan->checklist_id 
+
+                return ($c->assignment?->dynamic_checklist_id ?? null) == $plan->checklist_id
                         && $date->month == $month && $date->year == $year;
             });
         }
-        
+
         if ($plan->category === 'Capacitación') {
-            return $data['trainings']->first(function($t) use ($plan, $month, $year) {
+            return $data['trainings']->first(function ($t) use ($plan, $month, $year) {
                 $date = Carbon::parse($t->date ?? $t->created_at);
                 $planTitle = mb_strtolower($plan->activity_name);
                 $trainingTitle = mb_strtolower($t->title);
-                return (str_contains($trainingTitle, $planTitle) || str_contains($planTitle, $trainingTitle)) 
+
+                return (str_contains($trainingTitle, $planTitle) || str_contains($planTitle, $trainingTitle))
                         && $date->month == $month && $date->year == $year;
             });
         }
 
         return false;
     }
-
-
 }
