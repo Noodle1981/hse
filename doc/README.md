@@ -1,6 +1,6 @@
 # 📚 ÍNDICE DE DOCUMENTACIÓN - EP-BACK
 
-> **Última actualización:** 2025-12-31  
+> **Última actualización:** 2026-03-09  
 > **Propósito:** Navegación rápida de toda la documentación del proyecto
 
 ---
@@ -16,9 +16,7 @@ doc/
 │
 ├── 📁 Desarrollos/
 │   ├── banco_de_preguntas.md      ← Knowledge base técnico (Q&A)
-│   ├── nuevos_requerimientos.md   ← Inbox de nuevos features
-│   └── Auditorías/
-│       └── auditoriageneral.md    ← Docs de auditoría EDUGE
+│   └── nuevos_requerimientos.md   ← Inbox de nuevos features
 │
 ├── 📁 Lógica_del_diseño/
 │   ├── COMPONENTES_LIVEWARE.MD    ← Catálogo de componentes Livewire

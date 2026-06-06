@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Tabla para almacenar las PLANTILLAS de checklist dinámicos.
      * Cada checklist es una plantilla reutilizable que contiene preguntas.
      */

@@ -9,25 +9,25 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckRole
 {
     /**
-     * Verifica que el usuario tenga uno de los roles permitidos
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next, string ...$roles): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        if (!$request->user()) {
-            return redirect('/login');
+        if (! $request->user()) {
+            return redirect('login');
         }
 
-        $userRole = strtolower($request->user()->rol);
-        $allowedRoles = array_map('strtolower', $roles);
+        $user = $request->user();
 
-        \Log::info('CheckRole Debug:', [
-            'user' => $request->user()->email,
-            'user_role' => $userRole,
-            'allowed_roles' => $allowedRoles
-        ]);
+        // Allow super admin to bypass specific role checks
+        if ($user->isSuperAdmin()) {
+            return $next($request);
+        }
 
-        if (!in_array($userRole, $allowedRoles)) {
-            abort(403, 'No tienes permiso para acceder a esta página.');
+        if (! $user->hasRole($roles)) {
+            abort(403, 'Acceso Denegado.');
         }
 
         return $next($request);

@@ -49,4 +49,39 @@ class Empresa extends Model
     {
         return $this->hasMany(ChecklistAssignment::class);
     }
+
+    public function hallazgos()
+    {
+        return $this->hasManyThrough(Hallazgo::class, Sede::class);
+    }
+
+    public function incidentes()
+    {
+        return $this->hasManyThrough(Incidente::class, Sede::class);
+    }
+
+    public function informes()
+    {
+        return $this->hasManyThrough(MasterReport::class, Sede::class);
+    }
+
+    public function inspecciones()
+    {
+        return $this->hasManyThrough(DynamicInspection::class, Sede::class);
+    }
+
+    public function visitCertificates()
+    {
+        return $this->hasMany(VisitCertificate::class);
+    }
+
+    public function visitChecklistCompletions()
+    {
+        return $this->hasManyThrough(VisitChecklistCompletion::class, VisitCertificate::class);
+    }
+
+    public function visitTrainings()
+    {
+        return $this->hasManyThrough(VisitTraining::class, VisitCertificate::class);
+    }
 }

@@ -45,7 +45,12 @@ class ChecklistAssignment extends Model
 
     public function visitCompletion(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(VisitChecklistCompletion::class, 'checklist_assignment_id');
+        return $this->hasOne(VisitChecklistCompletion::class, 'checklist_assignment_id')->latest('id');
+    }
+
+    public function inspection(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(DynamicInspection::class, 'checklist_assignment_id')->latest('id');
     }
 
     // Scopes
@@ -72,7 +77,7 @@ class ChecklistAssignment extends Model
     public function scopeOverdue($query)
     {
         return $query->where('due_date', '<', now())
-                     ->where('status', '!=', 'completed');
+            ->where('status', '!=', 'completed');
     }
 
     public function scopeForEmpresa($query, int $empresaId)
@@ -88,8 +93,8 @@ class ChecklistAssignment extends Model
     // Helpers
     public function isOverdue(): bool
     {
-        return $this->due_date && 
-               $this->due_date->isPast() && 
+        return $this->due_date &&
+               $this->due_date->isPast() &&
                $this->status !== 'completed';
     }
 
@@ -99,7 +104,7 @@ class ChecklistAssignment extends Model
             return 'red';
         }
 
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => 'yellow',
             'in_progress' => 'blue',
             'completed' => 'green',
@@ -110,7 +115,7 @@ class ChecklistAssignment extends Model
 
     public function getFrequencyLabel(): string
     {
-        return match($this->frequency) {
+        return match ($this->frequency) {
             'once' => 'Única vez',
             'weekly' => 'Semanal',
             'monthly' => 'Mensual',
@@ -123,7 +128,7 @@ class ChecklistAssignment extends Model
     public function canBeEdited(): bool
     {
         // Solo se puede editar si está pendiente y no tiene una inspección iniciada
-        return $this->status === 'pending' && !$this->visitCompletion;
+        return $this->status === 'pending' && ! $this->visitCompletion;
     }
 
     public function canBeDeleted(): bool

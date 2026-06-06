@@ -31,7 +31,7 @@ return new class extends Migration
                 'email_responsable',
                 'token_responsable',
                 'code',
-                'date_firma_responsable'
+                'date_firma_responsable',
             ]);
         });
     }

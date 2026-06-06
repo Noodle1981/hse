@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Sede extends Model
@@ -22,6 +22,7 @@ class Sede extends Model
         'provincia_id',
         'latitud',
         'longitud',
+        'rubro',
         'responsable_1_nombre',
         'responsable_1_cargo',
         'responsable_1_email',
@@ -31,7 +32,18 @@ class Sede extends Model
         'responsable_3_nombre',
         'responsable_3_cargo',
         'responsable_3_email',
-        'empresa_id'
+        'empresa_id',
+        'dias_operativos',
+        'hora_apertura',
+        'hora_cierre',
+        'es_roster_24_7',
+        'radio_tolerancia_metros',
+    ];
+
+    protected $casts = [
+        'dias_operativos' => 'array',
+        'es_roster_24_7' => 'boolean',
+        'radio_tolerancia_metros' => 'integer',
     ];
 
     public function empresa()
@@ -49,19 +61,19 @@ class Sede extends Model
         return $this->belongsToMany(User::class, 'sede_users');
     }
 
-    public function generadorConstancias()
+    public function visitCertificates()
     {
-        return $this->hasMany(GeneradorConstancia::class);
+        return $this->hasMany(VisitCertificate::class);
     }
 
     public function constancias()
     {
-        return $this->hasMany(GeneradorConstancia::class);
+        return $this->hasMany(VisitCertificate::class);
     }
 
     public function checklists()
     {
-        return $this->hasMany(ChecklistsAsign::class);
+        return $this->hasMany(ChecklistAssignment::class);
     }
 
     public function assignments()
@@ -83,10 +95,10 @@ class Sede extends Model
     {
         return $this->hasMany(CapacitacionVirual::class);
     }
-    
-    public function informes()
+
+    public function masterReports()
     {
-        return $this->hasMany(Informe::class);
+        return $this->hasMany(MasterReport::class);
     }
 
     public function inspections()
@@ -104,17 +116,18 @@ class Sede extends Model
         return $this->hasMany(Employee::class);
     }
 
-    public function riskMatrices()
-    {
-        return $this->hasMany(RiskMatrix::class);
-    }
-
     public function annualPlans()
     {
         return $this->hasMany(AnnualPlan::class);
     }
-    public function visitCertificates()
+
+    public function hallazgos()
     {
-        return $this->hasMany(VisitCertificate::class);
+        return $this->hasMany(Hallazgo::class);
+    }
+
+    public function incidentes()
+    {
+        return $this->hasMany(Incidente::class);
     }
 }

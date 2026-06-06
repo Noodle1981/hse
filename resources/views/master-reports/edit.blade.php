@@ -1,11 +1,7 @@
 <x-layouts.app title="Redactar Informe Maestro">
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    @livewire('master-reports.master-report-wizard', ['mode' => 'edit', 'reportId' => $id])
-                </div>
-            </div>
+    <div class="py-4 sm:py-8">
+        <div class="max-w-screen-2xl mx-auto px-1 sm:px-6 lg:px-8">
+            @livewire('master-reports.master-report-wizard', ['mode' => 'edit', 'reportId' => $id])
         </div>
     </div>
 </x-layouts.app>

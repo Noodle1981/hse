@@ -1,5 +1,10 @@
 <x-pdf.layout :title="$inspection->checklist->title ?? 'Reporte de Inspección'" :code="'INSP-' . str_pad($inspection->id, 6, '0', STR_PAD_LEFT)" :status="$inspection->status">
 
+    <style>
+        .text-placeholder { color: #d1d5db; font-weight: 500; }
+        .text-value { color: #111827; font-weight: 500; }
+    </style>
+
     {{-- 1. Cabecera (Grid de 3 columnas simulado con Tabla) --}}
     <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
         <table class="no-border">
@@ -76,7 +81,7 @@
             <div style="margin-bottom: 25px; page-break-inside: avoid;">
                 {{-- Título de Sección --}}
                 <h3 style="font-size: 12pt; font-weight: bold; color: #111827; border-left: 4px solid #1e3a8a; padding-left: 10px; margin-bottom: 15px;">
-                    {{ $sections[$sectionId]->title ?? 'Preguntas Generales' }}
+                    {{ $sectionId && isset($sections[$sectionId]) ? $sections[$sectionId]->title : 'Preguntas Generales' }}
                 </h3>
 
                 {{-- Tabla de Preguntas --}}
@@ -116,7 +121,7 @@
                                         <span style="font-size: 8pt; color: #6b7280;">(Ver Anexo Fotos)</span>
                                     </div>
                                 @else
-                                    <div style="font-weight: 500; color: {{ empty($answer->value) ? '#d1d5db' : '#111827' }};">
+                                    <div class="{{ empty($answer->value) ? 'text-placeholder' : 'text-value' }}">
                                         {{ $answer->value ?: '-' }}
                                     </div>
                                 @endif
@@ -148,7 +153,7 @@
                 <td style="width: 50%; padding: 0 20px; text-align: center;">
                     <div style="border-bottom: 2px solid #d1d5db; height: 80px; margin-bottom: 10px; display: flex; align-items: flex-end; justify-content: center;">
                          @if($inspection->supervisor_signature)
-                            <img src="{{ $inspection->supervisor_signature }}" style="max-height: 75px; margin: 0 auto;">
+                            <img src="{{ str_starts_with($inspection->supervisor_signature, 'data:image') ? $inspection->supervisor_signature : storage_path('app/public/' . $inspection->supervisor_signature) }}" style="max-height: 75px; margin: 0 auto;">
                         @else
                             <span style="color: #e5e7eb; font-size: 9pt; font-style: italic; line-height: 80px;">(Firma vacía)</span>
                         @endif
@@ -165,11 +170,11 @@
                 <td style="width: 50%; padding: 0 20px; text-align: center;">
                     <div style="border-bottom: 2px solid #d1d5db; height: 80px; margin-bottom: 10px; display: flex; align-items: flex-end; justify-content: center;">
                          @if($inspection->technician_signature)
-                            <img src="{{ $inspection->technician_signature }}" style="max-height: 75px; margin: 0 auto;">
+                            <img src="{{ str_starts_with($inspection->technician_signature, 'data:image') ? $inspection->technician_signature : storage_path('app/public/' . $inspection->technician_signature) }}" style="max-height: 75px; margin: 0 auto;">
                         @else
                             {{-- Intentar usar firma del usuario si no está guardada explícitamente en technical_signature --}}
                             @if($inspection->user->firma)
-                                <img src="{{ $inspection->user->firma }}" style="max-height: 75px; margin: 0 auto;">
+                                <img src="{{ str_starts_with($inspection->user->firma, 'data:image') ? $inspection->user->firma : storage_path('app/public/' . $inspection->user->firma) }}" style="max-height: 75px; margin: 0 auto;">
                             @else
                                 <span style="color: #e5e7eb; font-size: 9pt; font-style: italic; line-height: 80px;">(Firma vacía)</span>
                             @endif

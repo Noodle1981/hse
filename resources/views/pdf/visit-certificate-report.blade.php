@@ -110,6 +110,10 @@
             position: fixed; bottom: -10px; width: 100%; text-align: center; 
             font-size: 8px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 10px;
         }
+
+        /* Failure states */
+        .bg-failure { background-color: #fef2f2 !important; }
+        .text-failure { color: #b91c1c !important; font-weight: bold !important; }
     </style>
 </head>
 <body>
@@ -178,35 +182,36 @@
         @foreach($visit->checklistCompletions as $completion)
             <div style="margin-bottom: 20px;">
                 <div style="background: #1e293b; color: white; padding: 5px 10px; font-size: 9px; font-weight: bold;">
-                    CONTROL: {{ $completion->assignment->checklist->title }}
+                    CONTROL: {{ $completion->assignment?->checklist?->title ?? 'Protocolo No Identificado' }}
                 </div>
                 <table class="detail-table">
                     <thead>
                         <tr>
-                            <th style="width: 60%">Punto de Control Evaluado</th>
-                            <th style="width: 10%; text-align: center;">Estado</th>
-                            <th style="width: 30%">Observaciones</th>
+                            <th style="width: 75%">Punto de Control Evaluado</th>
+                            <th style="width: 25%; text-align: center;">Estado</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($completion->formatted_responses as $resp)
                             @php 
-                                $val = strtolower((string)($resp['value'] ?? '')); 
+                                $rawVal = $resp['value'] ?? '';
+                                $valStr = is_array($rawVal) ? implode(', ', $rawVal) : (string)$rawVal;
+                                $val = strtolower($valStr); 
                                 $isFailure = in_array($val, ['no', 'no cumple']);
                                 $isSuccess = in_array($val, ['si', 'cumple', 'pasa']);
                             @endphp
                             <tr class="{{ $loop->even ? 'row-alt' : '' }}">
-                                <td style="padding: 10px; border-bottom: 1px solid #edf2f7; {{ $isFailure ? 'color: #b91c1c; font-weight: bold; background-color: #fef2f2;' : '' }}">
+                                <td @class(['bg-failure text-failure' => $isFailure]) style="padding: 10px; border-bottom: 1px solid #edf2f7;">
                                     <div style="font-size: 10px; margin-bottom: 2px; color: #1e293b;">
                                         {{ $resp['question_label'] ?? 'Punto de Control' }}
                                     </div>
                                     @if(!empty($resp['observation']))
-                                        <div style="font-size: 8px; color: #64748b; font-style: italic; margin-top: 4px; padding-left: 5px; border-left: 2px solid #e2e8f0;">
-                                            Nota: {{ $resp['observation'] }}
+                                        <div style="font-size: 9px; color: #64748b; font-style: italic; margin-top: 4px; padding-left: 8px; border-left: 2px solid #e2e8f0; line-height: 1.3;">
+                                            Nota: {!! nl2br(e($resp['observation'])) !!}
                                         </div>
                                     @endif
                                 </td>
-                                <td style="width: 80px; text-align: center; vertical-align: middle; border-bottom: 1px solid #edf2f7; {{ $isFailure ? 'background-color: #fef2f2;' : '' }}">
+                                <td @class(['bg-failure' => $isFailure]) style="width: 80px; text-align: center; vertical-align: middle; border-bottom: 1px solid #edf2f7;">
                                     <span class="pill {{ $isSuccess ? 'pill-success' : ($isFailure ? 'pill-danger' : 'pill-info') }}" style="display: inline-block; min-width: 60px;">
                                         {{ strtoupper($val) ?: 'PENDIENTE' }}
                                     </span>
@@ -251,7 +256,7 @@
                                 </tr>
                             @else
                                 <tr>
-                                    <td colspan="2">{{ (string)$att }}</td>
+                                    <td colspan="2">{{ is_array($att) ? ($att['name'] ?? 'N/A') : (string)$att }}</td>
                                     <td style="text-align: center;"><span class="pill pill-success">Presente</span></td>
                                 </tr>
                             @endif
@@ -365,37 +370,6 @@
     </div>
     @endif
 
-    {{-- 6. ENTREGAS EPP --}}
-    @if($visit->eppDeliveries->count() > 0)
-    <div class="section">
-        <div class="section-header"><h2>6. Gestión de EPP</h2></div>
-        @foreach($visit->eppDeliveries as $delivery)
-            <div style="margin-bottom: 15px; border: 1px dashed #cbd5e1; padding: 10px;">
-                <div style="font-size: 10px; font-weight: bold; color: #1e293b; margin-bottom: 5px;">
-                    RECEPTOR: {{ $delivery->employee->name ?? '' }} {{ $delivery->employee->last_name ?? '' }} ({{ $delivery->employee->document_number ?? '-' }})
-                </div>
-                <table class="detail-table">
-                    <thead>
-                        <tr>
-                            <th>Elemento Entregado</th>
-                            <th style="text-align: center; width: 80px;">Cantidad</th>
-                            <th style="text-align: center; width: 60px;">Talle</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($delivery->epp_items ?? [] as $item)
-                        <tr>
-                            <td>{{ $item['name'] ?? 'Protección' }}</td>
-                            <td style="text-align: center;">{{ $item['quantity'] ?? $item['qty'] ?? 1 }}</td>
-                            <td style="text-align: center;">{{ $item['size'] ?? '-' }}</td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endforeach
-    </div>
-    @endif
 
     {{-- 7. FIRMAS --}}
     <table class="signature-table">
@@ -417,7 +391,16 @@
             </td>
             <td class="signature-box">
                 @if($visit->user->signature)
-                    <img src="{{ $visit->user->signature }}" class="signature-img">
+                    @php 
+                        $sigPath = public_path('storage/' . $visit->user->signature); 
+                    @endphp
+                    @if(str_starts_with($visit->user->signature, 'data:image'))
+                        <img src="{{ $visit->user->signature }}" class="signature-img">
+                    @elseif(file_exists($sigPath))
+                        <img src="{{ $sigPath }}" class="signature-img">
+                    @else
+                        <div style="height: 70px; color: #cbd5e1; font-size: 8px; line-height: 70px;">Firma no encontrada</div>
+                    @endif
                 @else
                     <div style="height: 70px;"></div>
                 @endif

@@ -14,12 +14,12 @@ class Category extends Model
         'color',
         'icon',
         'is_active',
-        'order'
+        'order',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
-        'order' => 'integer'
+        'order' => 'integer',
     ];
 
     public function subcategories(): HasMany

@@ -33,12 +33,14 @@ class DynamicInspection extends Model
      * Estados posibles de una inspección
      */
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_COMPLETED = 'completed';
 
     /**
      * Resultados posibles de una inspección
      */
     public const RESULT_PASS = 'Pass';
+
     public const RESULT_FAIL = 'Fail';
 
     /**
@@ -115,7 +117,7 @@ class DynamicInspection extends Model
     public function evaluateResult(): string
     {
         $this->load(['answers.question']);
-        
+
         foreach ($this->answers as $answer) {
             if ($answer->isFailure()) {
                 return self::RESULT_FAIL;

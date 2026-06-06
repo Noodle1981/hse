@@ -12,6 +12,7 @@ class MasterReport extends Model
         'solicitado_por',
         'titulo',
         'periodo',
+        'frecuencia',
         'observaciones_visitas',
         'observaciones_checklists',
         'observaciones_capacitaciones',
@@ -20,6 +21,7 @@ class MasterReport extends Model
         'observaciones_matriz',
         'estado',
         'datos_anexo',
+        'observacion_revision',
     ];
 
     protected $casts = [
@@ -39,5 +41,38 @@ class MasterReport extends Model
     public function gestor()
     {
         return $this->belongsTo(User::class, 'solicitado_por');
+    }
+
+    public function getFormattedPeriodAttribute()
+    {
+        $period = $this->periodo;
+        $freq = $this->frecuencia ?? 'mensual';
+
+        if ($freq === 'trimestral' || str_contains($period, '-Q')) {
+            $q = substr($period, -1);
+            $y = substr($period, 0, 4);
+
+            return "TRIMESTRE $q - $y";
+        }
+
+        if ($freq === 'semestral' || str_contains($period, '-S')) {
+            $s = substr($period, -1);
+            $y = substr($period, 0, 4);
+
+            return "SEMESTRE $s - $y";
+        }
+
+        if ($freq === 'anual' || str_contains($period, '-A')) {
+            $y = substr($period, 0, 4);
+
+            return "ANUAL - $y";
+        }
+
+        // Por defecto: Mensual
+        try {
+            return \Carbon\Carbon::parse($period.'-01')->translatedFormat('F Y');
+        } catch (\Exception $e) {
+            return $period;
+        }
     }
 }

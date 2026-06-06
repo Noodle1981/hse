@@ -49,7 +49,7 @@ class DynamicAnswerFactory extends Factory
             'date' => fake()->date('Y-m-d'),
             'select', 'radio' => $question->options ? fake()->randomElement($question->options) : 'N/A',
             'checkbox' => $question->options ? json_encode(fake()->randomElements($question->options, rand(1, count($question->options)))) : '[]',
-            'signature' => 'data:image/png;base64,' . fake()->regexify('[A-Za-z0-9]{50}'),
+            'signature' => 'data:image/png;base64,'.fake()->regexify('[A-Za-z0-9]{50}'),
             default => fake()->word(),
         };
     }

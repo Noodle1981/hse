@@ -24,7 +24,7 @@ return new class extends Migration
             $table->integer('dias_perdidos')->nullable();
             $table->text('medidas_tomadas')->nullable();
             $table->timestamps();
-            
+
             $table->index('hallazgo_id');
             $table->index('sede_id');
             $table->index(['tipo', 'gravedad']);

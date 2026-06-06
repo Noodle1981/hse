@@ -3,8 +3,8 @@
 namespace Tests\Unit;
 
 use App\Models\DynamicChecklist;
-use App\Models\DynamicQuestion;
 use App\Models\DynamicInspection;
+use App\Models\DynamicQuestion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -31,7 +31,7 @@ class DynamicChecklistTest extends TestCase
     public function it_has_many_questions(): void
     {
         $checklist = DynamicChecklist::factory()->create();
-        
+
         DynamicQuestion::factory()->count(5)->create([
             'dynamic_checklist_id' => $checklist->id,
         ]);
@@ -44,7 +44,7 @@ class DynamicChecklistTest extends TestCase
     {
         $checklist = DynamicChecklist::factory()->create();
         $user = User::factory()->create();
-        
+
         DynamicInspection::factory()->count(3)->create([
             'dynamic_checklist_id' => $checklist->id,
             'user_id' => $user->id,
@@ -70,8 +70,8 @@ class DynamicChecklistTest extends TestCase
         DynamicChecklist::factory()->category('hys')->count(2)->create();
         DynamicChecklist::factory()->category('calidad')->count(3)->create();
 
-        $hysChecklists = DynamicChecklist::category('hys')->get();
-        $calidadChecklists = DynamicChecklist::category('calidad')->get();
+        $hysChecklists = DynamicChecklist::byCategory('hys')->get();
+        $calidadChecklists = DynamicChecklist::byCategory('calidad')->get();
 
         $this->assertCount(2, $hysChecklists);
         $this->assertCount(3, $calidadChecklists);
@@ -81,7 +81,7 @@ class DynamicChecklistTest extends TestCase
     public function questions_are_ordered_by_order_field(): void
     {
         $checklist = DynamicChecklist::factory()->create();
-        
+
         DynamicQuestion::factory()->create([
             'dynamic_checklist_id' => $checklist->id,
             'label' => 'Pregunta 3',
@@ -109,7 +109,7 @@ class DynamicChecklistTest extends TestCase
     public function question_options_are_cast_to_array(): void
     {
         $checklist = DynamicChecklist::factory()->create();
-        
+
         $question = DynamicQuestion::factory()->create([
             'dynamic_checklist_id' => $checklist->id,
             'type' => 'radio',
@@ -125,7 +125,7 @@ class DynamicChecklistTest extends TestCase
     {
         $user = User::factory()->create();
         $checklist = DynamicChecklist::factory()->create();
-        
+
         $inspection = DynamicInspection::factory()->draft()->create([
             'dynamic_checklist_id' => $checklist->id,
             'user_id' => $user->id,
@@ -144,7 +144,7 @@ class DynamicChecklistTest extends TestCase
     public function it_deletes_questions_when_checklist_is_deleted(): void
     {
         $checklist = DynamicChecklist::factory()->create();
-        
+
         DynamicQuestion::factory()->count(3)->create([
             'dynamic_checklist_id' => $checklist->id,
         ]);

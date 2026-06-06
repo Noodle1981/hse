@@ -8,7 +8,7 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Tabla para almacenar cada EJECUCIÓN/LLENADO de un checklist.
      * Una inspección es una instancia de un checklist completado por un usuario.
      */
@@ -17,12 +17,12 @@ return new class extends Migration
         Schema::create('dynamic_inspections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('dynamic_checklist_id')
-                  ->constrained('dynamic_checklists')
-                  ->cascadeOnDelete();
+                ->constrained('dynamic_checklists')
+                ->cascadeOnDelete();
             $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
-            
+                ->constrained()
+                ->cascadeOnDelete();
+
             $table->timestamp('completed_at')->nullable();  // Cuándo se completó
             $table->text('notes')->nullable();              // Observaciones generales
             $table->string('status')->default('draft');     // draft, completed

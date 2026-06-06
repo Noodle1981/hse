@@ -1,0 +1,453 @@
+@php
+    $primaryColor = $branding['primary'] ?? '#1e1e2d';
+@endphp
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ $report->titulo }}</title>
+    <style>
+        /* Configuración de Página */
+        @page {
+            margin: 0; /* Margen cero para que la portada sea total */
+        }
+        
+        body { 
+            font-family: 'Helvetica', sans-serif; 
+            color: #1e1e2d; 
+            line-height: 1.4; 
+            margin: 0; 
+            padding: 0; 
+            font-size: 10px; 
+        }
+
+        /* Utilidades de Salto de Página */
+        .page-break { page-break-after: always; }
+        .no-break { page-break-inside: avoid; }
+
+        /* PORTADA */
+        .cover { 
+            width: 100%; 
+            height: 1050px; /* Altura fija para A4 @ 96dpi aprox */
+            background-color: #1e1e2d; 
+            color: white; 
+            position: relative;
+        }
+        .cover-content { 
+            padding-top: 200px; 
+            text-align: center; 
+        }
+        .logo { max-width: 250px; margin-bottom: 30px; }
+        .cover h1 { 
+            font-size: 36px; 
+            text-transform: uppercase; 
+            margin: 0; 
+            letter-spacing: 2px; 
+        }
+        .cover h2 { font-size: 18px; color: #B5B5C3; margin: 10px 0; font-weight: normal; }
+        
+        /* Clases de branding dinamicas - Usamos PHP echo para evitar errores de parseo de IDE con Blade */
+        .text-primary { color: <?php echo $primaryColor; ?>; }
+        .border-primary-bottom { border-bottom: 2px solid <?php echo $primaryColor; ?>; }
+        .border-primary-left { border-left: 4px solid <?php echo $primaryColor; ?>; }
+        .border-primary-top-thick { border-top: 10px solid <?php echo $primaryColor; ?>; }
+
+        .cover-info-table { 
+            margin: 80px auto 0; 
+            width: 70%; 
+            border: none; 
+        }
+        .cover-info-table td { 
+            color: white; 
+            border: none; 
+            padding: 10px; 
+            font-size: 14px; 
+            background: transparent !important;
+        }
+
+        /* CONTENIDO DE PÁGINAS */
+        .content-wrapper { 
+            padding: 40px 50px; 
+            position: relative; 
+            min-height: 970px;
+        }
+
+        /* Header y Footer */
+        .header { margin-bottom: 20px; padding-bottom: 10px; width: 100%; }
+        .header-title { font-size: 12px; font-weight: bold; text-transform: uppercase; }
+        .header-meta { float: right; font-size: 9px; color: #7e8299; }
+        
+        .footer { 
+            position: fixed; 
+            bottom: 20px; 
+            left: 50px; 
+            right: 50px; 
+            font-size: 8px; 
+            color: #b5b5c3; 
+            border-top: 1px solid #ebedf3; 
+            padding-top: 5px; 
+            text-align: center;
+        }
+        .page-number:before { content: "Página " counter(page); }
+
+        /* Secciones */
+        .section { margin-bottom: 30px; }
+        .section-header { 
+            background: #f4f4f7; 
+            padding: 8px 12px; 
+            margin-bottom: 10px; 
+        }
+        .section-header h3 { margin: 0; font-size: 10px; text-transform: uppercase; color: #1e1e2d; }
+
+        /* KPIs */
+        .kpi-table { width: 100%; border-collapse: separate; border-spacing: 10px 0; margin-bottom: 20px; }
+        .kpi-box { 
+            background: #ffffff; 
+            border: 1px solid #ebedf3; 
+            border-radius: 6px; 
+            padding: 15px 5px; 
+            text-align: center; 
+            width: 25%;
+        }
+        .kpi-val { font-size: 20px; font-weight: bold; display: block; }
+        .kpi-label { font-size: 7px; text-transform: uppercase; color: #7e8299; font-weight: bold; }
+
+        /* Tablas */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+        th { background: #1e1e2d; color: white; padding: 6px; text-align: left; font-size: 8px; text-transform: uppercase; border: 1px solid #1e1e2d; }
+        td { padding: 7px; border: 1px solid #ebedf3; vertical-align: top; font-size: 9px; }
+        tr:nth-child(even) { background-color: #fcfcfd; }
+        
+        /* Cajas de Observación */
+        .obs-container { margin: 10px 0; }
+        .observation-label { font-size: 8px; font-weight: bold; color: #7e8299; text-transform: uppercase; margin-bottom: 3px; }
+        .observation-box { 
+            background: #fffcf5; 
+            border: 1px solid #fff4de; 
+            padding: 10px; 
+            border-radius: 4px; 
+            color: #3f4254; 
+            font-style: italic; 
+            border-left: 3px solid #ffcd13;
+            white-space: pre-wrap;
+        }
+
+        .badge { display: inline-block; padding: 2px 6px; border-radius: 3px; font-size: 7px; font-weight: bold; text-transform: uppercase; }
+        .badge-warning { background: #fff4de; color: #ffa800; }
+        .badge-danger { background: #ffe2e5; color: #f64e60; }
+        .badge-success { background: #c9f7f5; color: #1bc5bd; }
+
+        .clear { clear: both; }
+    </style>
+</head>
+<body>
+
+    {{-- 1. PORTADA --}}
+    <div class="cover">
+        <div class="cover-content">
+            @if(file_exists($branding['logo'] ?? ''))
+                <img src="{{ $branding['logo'] }}" class="logo">
+            @else
+                <div class="text-primary" style="font-size: 40px; font-weight: bold; margin-bottom: 40px;">{{ $branding['name'] ?? 'EP SALUD Y SEGURIDAD' }}</div>
+            @endif
+            
+            <h1 class="text-primary">INFORME DE GESTIÓN</h1>
+            <h2>{{ strtoupper($report->formatted_period) }}</h2>
+            
+            <table class="cover-info-table">
+                <tr>
+                    <td style="text-align: right; color: #B5B5C3; width: 40%;">CLIENTE:</td>
+                    <td style="text-align: left; font-weight: bold;">{{ $report->sede->empresa->nombre }}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; color: #B5B5C3;">SEDE:</td>
+                    <td style="text-align: left; font-weight: bold;">{{ $report->sede->nombre_sede }}</td>
+                </tr>
+                <tr>
+                    <td style="text-align: right; color: #B5B5C3;">TÉCNICO:</td>
+                    <td style="text-align: left; font-weight: bold;">{{ $report->tecnico->nombres }} {{ $report->tecnico->apellidos }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    {{-- 2. RESUMEN Y VISITAS --}}
+    <div class="content-wrapper">
+        <div class="header border-primary-bottom">
+            <span class="header-meta">REPORTE #{{ $report->id }} | {{ date('d/m/Y') }}</span>
+            <span class="header-title">Resumen de Actividades</span>
+        </div>
+
+        <table class="kpi-table">
+            <tr>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['visits']) }}</span><span class="kpi-label">Visitas</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['checklists']) }}</span><span class="kpi-label">Controles</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['trainings']) }}</span><span class="kpi-label">Formación</span></td>
+                <td class="kpi-box">
+                    <span class="kpi-val" style="color:<?php echo $primaryColor; ?>;">{{ $data['annual_plan_status']['percentage'] ?? 0 }}%</span>
+                    <span class="kpi-label">Cumplimiento Plan</span>
+                </td>
+            </tr>
+        </table>
+
+        {{-- NUEVA SECCIÓN: PLAN ANUAL PACTADO --}}
+        <div class="section">
+            <div class="section-header border-primary-left"><h3>Cumplimiento del Plan Anual (Pactado)</h3></div>
+            <div style="background: #fcfcfd; padding: 15px; border: 1px solid #ebedf3; border-radius: 6px; margin-bottom: 15px;">
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 5px; color: #7e8299; text-transform: uppercase;">Estado de Ejecución Contractual:</div>
+                <div style="width: 100%; background: #ebedf3; height: 12px; border-radius: 6px; position: relative; overflow: hidden;">
+                    <div style="width: {{ $data['annual_plan_status']['percentage'] ?? 0 }}%; height: 100%; background: <?php echo $primaryColor; ?>;"></div>
+                </div>
+                <div style="margin-top: 5px; font-size: 8px; color: #1e1e2d;">
+                    <strong>{{ $data['annual_plan_status']['achieved'] }}</strong> actividades completadas de <strong>{{ $data['annual_plan_status']['total_targets'] }}</strong> programadas para este periodo.
+                </div>
+            </div>
+
+            @php
+                $categoryLabels = [
+                    'Inspección' => 'Controles y Checklists Normativos',
+                    'Capacitación' => 'Formación y Capacitación Técnica',
+                    'Informe' => 'Informes y Gestión Administrativa'
+                ];
+                $programmedByCat = collect($data['annual_plan_status']['programmed'] ?? [])->groupBy('category');
+            @endphp
+
+            @foreach($categoryLabels as $catKey => $label)
+                @if($programmedByCat->has($catKey))
+                    <div style="background: #fcfcfd; padding: 6px 10px; margin-top: 15px; margin-bottom: 8px; border-left: 3px solid <?php echo $primaryColor; ?>;">
+                        <span style="font-size: 8px; font-weight: bold; color: #1e1e2d; text-transform: uppercase; letter-spacing: 1px;">{{ $label }}</span>
+                    </div>
+                    <table style="font-size: 10px; margin-bottom: 15px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%; text-align: left;">Código</th>
+                                <th style="width: 50%; text-align: left;">Actividad Programada</th>
+                                <th style="width: 12%; text-align: left;">Mes</th>
+                                <th style="width: 26%; text-align: center;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($programmedByCat->get($catKey) as $prog)
+                                <tr>
+                                    <td style="color: #b5b5c3; font-weight: bold; border-bottom: 1px solid #f4f4f7;">{{ $prog['code'] ?? 'N/A' }}</td>
+                                    <td style="border-bottom: 1px solid #f4f4f7; padding-bottom: 5px; padding-top: 5px;">
+                                        <strong>{{ $prog['activity'] }}</strong>
+                                        @if($prog['description'])
+                                            <div style="font-size: 8px; color: #7e8299; font-style: italic; margin-top: 2px; line-height: 1.2;">{{ $prog['description'] }}</div>
+                                        @endif
+                                    </td>
+                                    <td style="text-transform: uppercase; border-bottom: 1px solid #f4f4f7;">{{ $prog['month'] }}</td>
+                                    <td style="text-align: center; border-bottom: 1px solid #f4f4f7;">
+                                        @if($prog['status'] === 'completed')
+                                            <span class="badge badge-success" style="font-size: 7px; padding: 2px 6px;">COMPLETADO</span>
+                                        @else
+                                            <span class="badge" style="background: #f4f4f7; color: #b5b5c3; font-size: 7px; padding: 2px 6px;">PENDIENTE</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            @endforeach
+        </div>
+
+        <div class="section">
+            <div class="section-header border-primary-left"><h3>1. Cronograma de Visitas Técnicas</h3></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 25%">Fecha</th>
+                        <th>Observaciones de Campo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($data['visits'] as $visit)
+                        <tr>
+                            <td style="vertical-align: top;">
+                                <strong>{{ $visit->visit_date->format('d/m/Y') }}</strong><br>
+                                <span style="font-size: 7px; color: #b5b5c3;">Técnico: {{ $visit->user->nombres }}</span>
+                            </td>
+                            <td>
+                                <div style="margin-bottom: 5px;">{{ $visit->general_observations ?: 'Sin observaciones' }}</div>
+                                @if($visit->checklistCompletions->count() > 0)
+                                    <div style="font-size: 7px; color: <?php echo $primaryColor; ?>; font-weight: bold; margin-top: 5px; text-transform: uppercase;">Procedimientos:</div>
+                                    <div style="font-size: 7px; color: #7e8299;">
+                                        @foreach($visit->checklistCompletions as $index => $comp)
+                                            • {{ $comp->assignment->checklist->title ?? 'Inspección técnica' }}{{ $index < $visit->checklistCompletions->count() - 1 ? '' : '' }}<br>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @if($report->observaciones_visitas)
+                <div class="obs-container">
+                    <div class="observation-label">Comentarios del Profesional:</div>
+                    <div class="observation-box">{{ $report->observaciones_visitas }}</div>
+                </div>
+            @endif
+        </div>
+
+        <div class="section no-break">
+            <div class="section-header border-primary-left"><h3>2. Protocolos e Inspecciones (Trabajos Extra / Fuera de Contrato)</h3></div>
+            <div style="font-size: 8px; color: #7e8299; font-style: italic;">
+                No se registraron inspecciones fuera de contrato en este periodo.
+            </div>
+            @if($report->observaciones_checklists)
+                <div class="obs-container">
+                    <div class="observation-label">Análisis de Inspecciones:</div>
+                    <div class="observation-box">{{ $report->observaciones_checklists }}</div>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    {{-- 3. CAPACITACIÓN Y RIESGOS --}}
+    <div class="content-wrapper">
+        <div class="header border-primary-bottom">
+            <span class="header-meta">{{ $report->sede->nombre_sede }}</span>
+            <span class="header-title">Formación y Gestión de Riesgos</span>
+        </div>
+
+        <div class="section">
+            <div class="section-header border-primary-left"><h3>3. Capacitación del Personal</h3></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tema Desarrollado</th>
+                        <th style="text-align: center; width: 15%">Asistentes</th>
+                        <th>Notas del Instructor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($data['trainings'] as $tr)
+                        <tr>
+                            <td><strong>{{ $tr->title }}</strong></td>
+                            <td style="text-align: center;">{{ $tr->attendees_count }}</td>
+                            <td>{{ $tr->notes ?: '-' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+            @if($report->observaciones_capacitaciones)
+                <div class="obs-container">
+                    <div class="observation-label">Evaluación Formativa:</div>
+                    <div class="observation-box">{{ $report->observaciones_capacitaciones }}</div>
+                </div>
+            @endif
+        </div>
+
+        <div class="section">
+            <div class="section-header border-primary-left"><h3>4. Análisis Operativo: Hallazgos e Incidentes</h3></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50%; background: #ffcd13; border: 1px solid #ffcd13;">Hallazgos Recalificantes ({{ count($data['hallazgos']) }})</th>
+                        <th style="width: 50%; background: #f64e60; border: 1px solid #f64e60;">Incidentes Registrados ({{ count($data['incidentes']) }})</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 0;">
+                            <table style="margin: 0; border: none;">
+                                @forelse($data['hallazgos'] as $hal)
+                                    <tr>
+                                        <td style="border: none; border-bottom: 1px solid #ebedf3; padding: 10px;">
+                                            <div style="font-weight: bold;">{{ $hal->titulo }} <span class="badge {{ $hal->criticidad == 'Alta' ? 'badge-danger' : 'badge-warning' }}">{{ $hal->criticidad }}</span></div>
+                                            <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $hal->descripcion }}</div>
+                                            @if(count($hal->fotos ?? []) > 0)
+                                                <div style="margin-top: 5px;">
+                                                    @foreach($hal->fotos as $foto)
+                                                        @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
+                                                        @if(file_exists($path))
+                                                            <img src="{{ $path }}" style="width: 80px; height: 80px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td style="border: none; color: #b5b5c3; padding: 20px; text-align: center;">Sin hallazgos en el periodo</td></tr>
+                                @endforelse
+                            </table>
+                        </td>
+                        <td style="padding: 0;">
+                            <table style="margin: 0; border: none;">
+                                @forelse($data['incidentes'] as $inc)
+                                    <tr>
+                                        <td style="border: none; border-bottom: 1px solid #ebedf3; padding: 10px;">
+                                            <div style="font-weight: bold;">{{ $inc->tipo_evento }}</div>
+                                            <div style="color: #f64e60; font-size: 8px; margin-top: 2px;">FECHA: {{ \Carbon\Carbon::parse($inc->fecha_ocurrencia)->format('d/m/Y') }}</div>
+                                            <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $inc->descripcion }}</div>
+                                            @if(count($inc->fotos ?? []) > 0)
+                                                <div style="margin-top: 5px;">
+                                                    @foreach($inc->fotos as $foto)
+                                                        @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
+                                                        @if(file_exists($path))
+                                                            <img src="{{ $path }}" style="width: 80px; height: 80px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr><td style="border: none; color: #b5b5c3; padding: 20px; text-align: center;">Sin incidentes reportados</td></tr>
+                                @endforelse
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            @if($report->observaciones_hallazgos_incidentes)
+                <div class="obs-container">
+                    <div class="observation-label">Resumen de Seguridad Operativa:</div>
+                    <div class="observation-box">{{ $report->observaciones_hallazgos_incidentes }}</div>
+                </div>
+            @endif
+        </div>
+
+        {{-- SECCIÓN 5: CONCLUSIÓN --}}
+        <div class="section" style="margin-top: 50px;">
+            <div class="border-primary-top-thick" style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 class="text-primary" style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">5. Resumen Ejecutivo Final</h3>
+                <div style="font-size: 12px; line-height: 1.8; color: #e2e8f0;">
+                    {{ $report->resumen_ejecutivo ?: 'No se registró una conclusión final detallada para este periodo.' }}
+                </div>
+            </div>
+        </div>
+
+        <div style="position: absolute; bottom: 50px; left: 0; right: 0; text-align: center;">
+            <div style="width: 250px; margin: 0 auto; border-top: 1px solid #1e1e2d; padding-top: 15px;">
+                @if(isset($report->datos_anexo['firma_tecnico']) && $report->datos_anexo['firma_tecnico'])
+                    <img src="{{ $report->datos_anexo['firma_tecnico'] }}" style="width: 140px; height: 60px; margin: 0 auto 5px auto; display: block; object-fit: contain;">
+                @elseif($report->tecnico->firma && file_exists(public_path('storage/' . $report->tecnico->firma)))
+                    <img src="{{ public_path('storage/' . $report->tecnico->firma) }}" style="width: 140px; height: 60px; margin: 0 auto 5px auto; display: block; object-fit: contain;">
+                @else
+                    <div style="height: 40px;"></div> {{-- Espacio para firma en blanco --}}
+                @endif
+
+                <div style="font-weight: bold; font-size: 11px;">{{ strtoupper($report->tecnico->nombres) }} {{ strtoupper($report->tecnico->apellidos) }}</div>
+                <div style="font-size: 9px; color: #7e8299; margin-top: 3px;">Técnico Responsable HyS</div>
+                <div style="font-size: 8px; color: #b5b5c3;">XamaSafe Reporting System</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div style="float: left;">XamaSafe v2.0 | {{ $report->sede->nombre_sede }}</div>
+        <div style="float: right;" class="page-number"></div>
+        <div class="clear"></div>
+    </div>
+    </div>
+</body>
+</html>

@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::table('trainings', function (Blueprint $table) {
             $table->foreignId('dynamic_checklist_id')
-                  ->nullable()
-                  ->after('sede_id')
-                  ->constrained('dynamic_checklists')
-                  ->nullOnDelete();
+                ->nullable()
+                ->after('sede_id')
+                ->constrained('dynamic_checklists')
+                ->nullOnDelete();
         });
     }
 

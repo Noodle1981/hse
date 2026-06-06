@@ -20,7 +20,7 @@ class DynamicInspectionFactory extends Factory
     public function definition(): array
     {
         $status = fake()->randomElement(['draft', 'completed']);
-        
+
         return [
             'dynamic_checklist_id' => DynamicChecklist::factory(),
             'user_id' => User::factory(),

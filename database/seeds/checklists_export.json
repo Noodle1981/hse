@@ -1,0 +1,1677 @@
+[
+    {
+        "title": "OBSERVACIÓN DE TAREA",
+        "description": "Formulario dinámico para la inspección de seguridad en tareas operativas. Evalúa el ambiente de trabajo, la actitud del personal y el estado de herramientas y EPP en tiempo real para prevenir incidentes laborales",
+        "registry_code": "EP – REG 001",
+        "is_active": true,
+        "category_id": 1,
+        "subcategory_id": 1,
+        "sections": [
+            {
+                "title": "AMBIENTE DE TRABAJO",
+                "description": "",
+                "order": 0,
+                "questions": [
+                    {
+                        "label": "1. Se observan elementos tirados en los lugares de circulación",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 0,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Se observan botellas, papeles, etc. tirados en el lugar de trabajo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 1,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Se observan machas de químicos en el suelo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 2,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Se observa peligros potenciales en el área de trabajo como huecos, barandas flojas o pisos levantados que pudiesen ocasionar accidentes.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 3,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Las herramientas manuales utilizadas se encuentran en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 4,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Los equipos de oxicorte se encuentran en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 5,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "7. Las herramientas eléctricas cuentan con sus protecciones y en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 6,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "8. Se ha delimitado la zona de trabajo de ser necesario",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 7,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "ACTITUD HACIA LA SEGURIDAD",
+                "description": "",
+                "order": 1,
+                "questions": [
+                    {
+                        "label": "1. Se ha confeccionado el ATS o ERNT antes de comenzar la tarea",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 8,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. El personal que desarrolla la tarea se encuentra en el ATS o ERNT",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 9,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Las medidas registradas en el ATS o ERNT son aplicadas en el área de trabajo.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 10,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Existe una coordinación en las tareas que se efectúan",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 11,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Se ha delimitado la zona de trabajo de ser necesario",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 12,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Se realiza una buena manipulación de las cargas manuales",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 13,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "7. Se observa una actitud proactiva hacia la seguridad durante el desarrollo de la tarea.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 14,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "8. El personal cuenta con los EPP necesarios para la tarea",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 15,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "9. Los EPP se encuentran en buen estado",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 16,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR TAREAS SUPERPUESTAS:",
+                "description": "",
+                "order": 2,
+                "questions": [
+                    {
+                        "label": "1. Hay comunicación entre los distintos frentes de trabajo.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 17,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR MOVIMIENTO DE EQUIPOS:",
+                "description": "",
+                "order": 3,
+                "questions": [
+                    {
+                        "label": "1. Se respeta la velocidad de circulación",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 18,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Las maniobras son pausadas y coordinadas",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 19,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Se respeta la distancias de proximidad entre los trabajadores y el equipo en movimiento",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 20,
+                        "is_required": false,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. El equipo realiza las tareas según lo establecido por el fabricante (peso que carga el equipo, ángulo máximo de trabajo, etc.)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 21,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Los accesorios o complementos del equipo se encuentran en buen estado.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 22,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Los accesorios\/complementos del equipo se utilizan según lo establecido por el fabricante",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 23,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR CARGA SUSPENDIDA",
+                "description": "",
+                "order": 4,
+                "questions": [
+                    {
+                        "label": "1. Se encuentra delimitada la zona de trabajo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 24,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. El operario que manipula la carga se encuentra habilitado para tal fin",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 25,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Existe personal debajo o próximo a la carga.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 26,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Existe buena comunicación entre el operario de la carga y el banderillero (de ser necesario)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 27,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Los implementos o accesorios se encuentran en buen estado y son adecuados para la carga que se manipula.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 28,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. El equipo que manipula la carga se encuentra en buen estado",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 29,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "DE EXISTIR TAREAS ESPECIALES (TRABAJOS EN CALIENTE, EXCAVACIONES, ESPACIOS CONFINADOS, ETC.)",
+                "description": "",
+                "order": 5,
+                "questions": [
+                    {
+                        "label": "1. Se encuentra delimitada la zona de trabajo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 30,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Se aplican las medidas de control necesarias",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 31,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Se cuenta con los elementos de seguridad especiales para tal fin",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 32,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            }
+        ],
+        "questions": []
+    },
+    {
+        "title": "CARTELERIA ",
+        "description": "Instrumento de verificación diseñado para auditar la presencia, estado y legibilidad de la señalética de seguridad en el establecimiento. Asegura que la cartelería informativa, preventiva, prohibitiva y de emergencia cumpla con las normativas vigentes de comunicación visual de riesgos.",
+        "registry_code": "EP – REG 002",
+        "is_active": true,
+        "category_id": 1,
+        "subcategory_id": 2,
+        "sections": [
+            {
+                "title": "Señalizacion de ADVERTENCIA (Verificar la presencia de señales en)",
+                "description": "",
+                "order": 0,
+                "questions": [
+                    {
+                        "label": "1. Áreas de riesgo eléctrico",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 0,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Áreas con riesgo de caída",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 1,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Uso de maquinaria peligrosa",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 2,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Sustancias químicas peligrosas",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 3,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Altas temperaturas o superficies calientes",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 4,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Peligro biológicos",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 5,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "Señalización de OBLIGACIÓN (Verificar la presencia de señales en)",
+                "description": "",
+                "order": 1,
+                "questions": [
+                    {
+                        "label": "1. Uso obligatorio de EPP",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 6,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Uso obligatorio de calzado de seguridad",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 7,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Uso de protección auditiva",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 8,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Uso de guantes",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 9,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Uso de gafas de seguridad",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 10,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Uso de arnés de seguridad",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 11,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "7. Uso de protección facial",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 12,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "Señalización de PROHIBICIÓN (Verificar la presencia de señales en)",
+                "description": "",
+                "order": 2,
+                "questions": [
+                    {
+                        "label": "1. Prohibido fumar",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 13,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Prohibido el acceso a personal no autorizado",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 14,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Prohibido el contacto directo con máquinas",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 15,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Prohibido el ingreso con alimentos o bebidas",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 16,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Prohibido correr en áreas de trabajo",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 17,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Prohibido depositar residuos en lugares no autorizados",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 18,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "7. Prohibido el ingreso sin EPP",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 19,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "Señalización INFORMATIVA (Verificar la presencia de señales en)",
+                "description": "",
+                "order": 3,
+                "questions": [
+                    {
+                        "label": "1. Planos de evacuación",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 20,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Salidas",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 21,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Salidas de emergencia",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 22,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Riesgo eléctrico",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 23,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Procedimientos de seguridad",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 24,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "Señalización EQUIPOS DE EXTINCIÓN Y EVACUACIÓN (Verificar la presencia de señales en)",
+                "description": "",
+                "order": 4,
+                "questions": [
+                    {
+                        "label": "1. Extintores portátiles",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 25,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Hidrantes o bocas de incendio",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 26,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Botiquines de primeros auxilios",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 27,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Rutas de evacuación",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 28,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Puntos de encuentro",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 29,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "Revisión general",
+                "description": "",
+                "order": 5,
+                "questions": [
+                    {
+                        "label": "1. Colores y pictogramas según normativa vigente (IRAM 10005)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 30,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Ubicación visible y a una altura adecuada.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 31,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Material resistente al desgaste, intemperie y corrosión.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 32,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Puntos de encuentro señalizados",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 33,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Señales deterioradas o desactualizadas.",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 34,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Buena iluminación o visibilidad en condiciones normales y de emergencia.\t",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 35,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            }
+        ],
+        "questions": []
+    },
+    {
+        "title": "SISTEMA GLOBALMENTE ARMONIZADO",
+        "description": "Instrumento de control normativo para la gestión integral de sustancias químicas. Permite auditar el cumplimiento del Sistema Globalmente Armonizado (SGA) mediante la verificación de etiquetado, disponibilidad de Fichas de Datos de Seguridad (HDS\/MSDS), compatibilidad en el almacenamiento y eficacia de los elementos de control y protección ante riesgos químicos",
+        "registry_code": "EP – REG 003",
+        "is_active": true,
+        "category_id": 1,
+        "subcategory_id": 3,
+        "sections": [
+            {
+                "title": "IDENTIFICACIÓN Y ETIQUETADO",
+                "description": "",
+                "order": 0,
+                "questions": [
+                    {
+                        "label": "1. ¿Todos los envases cuentan con etiquetas visibles y legibles?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 0,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. Nombre del producto químico (denominación exacta) en envases y depósito",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 1,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. Identificación del proveedor (fabricante, importador, distribuidor)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 2,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. Pictogramas de peligro según el SGA",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 3,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. Palabra de advertencia (\"Peligro\" o \"Atención\")",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 4,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. Indicaciones de peligro (frases H)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 5,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "7. Consejos de prudencia (frases P)",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 6,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "8. ¿Las etiquetas están en el idioma local?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 7,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "FICHA DE SEGURIDAD",
+                "description": "",
+                "order": 1,
+                "questions": [
+                    {
+                        "label": "1. ¿Cada producto químico tiene una HDS disponible?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 8,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. ¿La HDS está actualizada (máximo 5 años desde la emisión)?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 9,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. ¿La HDS cumple con los 16 apartados obligatorios del SGA?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 10,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "ALMACENAMIENTO Y MANIPULACIÓN",
+                "description": "",
+                "order": 2,
+                "questions": [
+                    {
+                        "label": "1. ¿Los productos químicos están almacenados en un área adecuada y señalizada?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 11,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. ¿Los envases están cerrados correctamente y en buen estado?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 12,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. ¿Hay separación entre productos incompatibles según las HDS?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 13,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. ¿Hay un control de temperatura y humedad en el área de almacenamiento (si aplica)?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 14,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "5. ¿Están disponibles los elementos de contención para derrames (bandejas, absorbentes)?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 15,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "6. ¿El lugar de almacenamiento cuenta con ventilación adecuada?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "No Cumple",
+                            "Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 16,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            },
+            {
+                "title": "ELEMENTOS DE PROTECCIÓN",
+                "description": "",
+                "order": 3,
+                "questions": [
+                    {
+                        "label": "1. ¿Se han identificado los EPP necesarios para cada producto químico?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 17,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "2. ¿El personal utiliza los EPP recomendados según la HDS?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 18,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "3. ¿Los EPP están en buen estado y disponibles en cantidad suficiente?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 19,
+                        "is_required": true,
+                        "help_text": ""
+                    },
+                    {
+                        "label": "4. ¿Existe en el sector lavaojos?",
+                        "type": "radio",
+                        "options": [
+                            "No Aplica",
+                            "Cumple",
+                            "No Cumple"
+                        ],
+                        "failure_values": [
+                            "No Cumple"
+                        ],
+                        "min_value": null,
+                        "max_value": null,
+                        "order": 20,
+                        "is_required": true,
+                        "help_text": ""
+                    }
+                ]
+            }
+        ],
+        "questions": []
+    }
+]

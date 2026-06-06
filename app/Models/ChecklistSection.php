@@ -12,11 +12,11 @@ class ChecklistSection extends Model
         'dynamic_checklist_id',
         'title',
         'description',
-        'order'
+        'order',
     ];
 
     protected $casts = [
-        'order' => 'integer'
+        'order' => 'integer',
     ];
 
     public function checklist(): BelongsTo

@@ -1,3 +1,6 @@
+@php
+    $primaryColor = $branding['primary'] ?? '#1e1e2d';
+@endphp
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -37,13 +40,18 @@
         .logo { max-width: 250px; margin-bottom: 30px; }
         .cover h1 { 
             font-size: 36px; 
-            color: #F69239; 
             text-transform: uppercase; 
             margin: 0; 
             letter-spacing: 2px; 
         }
         .cover h2 { font-size: 18px; color: #B5B5C3; margin: 10px 0; font-weight: normal; }
         
+        /* Clases de branding dinamicas - Usamos PHP echo para evitar errores de parseo de IDE con Blade */
+        .text-primary { color: <?php echo $primaryColor; ?>; }
+        .border-primary-bottom { border-bottom: 2px solid <?php echo $primaryColor; ?>; }
+        .border-primary-left { border-left: 4px solid <?php echo $primaryColor; ?>; }
+        .border-primary-top-thick { border-top: 10px solid <?php echo $primaryColor; ?>; }
+
         .cover-info-table { 
             margin: 80px auto 0; 
             width: 70%; 
@@ -65,7 +73,7 @@
         }
 
         /* Header y Footer */
-        .header { border-bottom: 2px solid #F69239; margin-bottom: 20px; padding-bottom: 10px; width: 100%; }
+        .header { margin-bottom: 20px; padding-bottom: 10px; width: 100%; }
         .header-title { font-size: 12px; font-weight: bold; text-transform: uppercase; }
         .header-meta { float: right; font-size: 9px; color: #7e8299; }
         
@@ -87,7 +95,6 @@
         .section-header { 
             background: #f4f4f7; 
             padding: 8px 12px; 
-            border-left: 4px solid #F69239; 
             margin-bottom: 10px; 
         }
         .section-header h3 { margin: 0; font-size: 10px; text-transform: uppercase; color: #1e1e2d; }
@@ -102,7 +109,7 @@
             text-align: center; 
             width: 25%;
         }
-        .kpi-val { font-size: 20px; font-weight: bold; color: #F69239; display: block; }
+        .kpi-val { font-size: 20px; font-weight: bold; display: block; }
         .kpi-label { font-size: 7px; text-transform: uppercase; color: #7e8299; font-weight: bold; }
 
         /* Tablas */
@@ -138,15 +145,14 @@
     {{-- 1. PORTADA --}}
     <div class="cover">
         <div class="cover-content">
-            @php $logoPath = public_path('images/logo_ep_viejo.jpg'); @endphp
-            @if(file_exists($logoPath))
-                <img src="{{ $logoPath }}" class="logo">
+            @if(file_exists($branding['logo'] ?? ''))
+                <img src="{{ $branding['logo'] }}" class="logo">
             @else
-                <div style="font-size: 40px; font-weight: bold; color: #F69239; margin-bottom: 40px;">EP SALUD Y SEGURIDAD</div>
+                <div class="text-primary" style="font-size: 40px; font-weight: bold; margin-bottom: 40px;">{{ $branding['name'] ?? 'EP SALUD Y SEGURIDAD' }}</div>
             @endif
             
-            <h1>INFORME DE GESTIÓN</h1>
-            <h2>{{ strtoupper(\Carbon\Carbon::parse($report->periodo)->translatedFormat('F Y')) }}</h2>
+            <h1 class="text-primary">INFORME DE GESTIÓN</h1>
+            <h2>{{ strtoupper($report->formatted_period) }}</h2>
             
             <table class="cover-info-table">
                 <tr>
@@ -169,36 +175,112 @@
 
     {{-- 2. RESUMEN Y VISITAS --}}
     <div class="content-wrapper">
-        <div class="header">
+        <div class="header border-primary-bottom">
             <span class="header-meta">REPORTE #{{ $report->id }} | {{ date('d/m/Y') }}</span>
             <span class="header-title">Resumen de Actividades</span>
         </div>
 
         <table class="kpi-table">
             <tr>
-                <td class="kpi-box"><span class="kpi-val">{{ count($data['visits']) }}</span><span class="kpi-label">Visitas</span></td>
-                <td class="kpi-box"><span class="kpi-val">{{ count($data['checklists']) }}</span><span class="kpi-label">Controles</span></td>
-                <td class="kpi-box"><span class="kpi-val">{{ count($data['trainings']) }}</span><span class="kpi-label">Formación</span></td>
-                <td class="kpi-box"><span class="kpi-val" style="color:#f64e60;">{{ count($data['hallazgos']) }}</span><span class="kpi-label">Hallazgos</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['visits']) }}</span><span class="kpi-label">Visitas</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['checklists']) }}</span><span class="kpi-label">Controles</span></td>
+                <td class="kpi-box"><span class="kpi-val text-primary">{{ count($data['trainings']) }}</span><span class="kpi-label">Formación</span></td>
+                <td class="kpi-box">
+                    <span class="kpi-val" style="color:<?php echo $primaryColor; ?>;">{{ $data['annual_plan_status']['percentage'] ?? 0 }}%</span>
+                    <span class="kpi-label">Cumplimiento Plan</span>
+                </td>
             </tr>
         </table>
 
+        {{-- NUEVA SECCIÓN: PLAN ANUAL PACTADO --}}
         <div class="section">
-            <div class="section-header"><h3>1. Cronograma de Visitas Técnicas</h3></div>
+            <div class="section-header border-primary-left"><h3>Cumplimiento del Plan Anual (Pactado)</h3></div>
+            <div style="background: #fcfcfd; padding: 15px; border: 1px solid #ebedf3; border-radius: 6px; margin-bottom: 15px;">
+                <div style="font-size: 9px; font-weight: bold; margin-bottom: 5px; color: #7e8299; text-transform: uppercase;">Estado de Ejecución Contractual:</div>
+                <div style="width: 100%; background: #ebedf3; height: 12px; border-radius: 6px; position: relative; overflow: hidden;">
+                    <div style="width: {{ $data['annual_plan_status']['percentage'] ?? 0 }}%; height: 100%; background: <?php echo $primaryColor; ?>;"></div>
+                </div>
+                <div style="margin-top: 5px; font-size: 8px; color: #1e1e2d;">
+                    <strong>{{ $data['annual_plan_status']['achieved'] }}</strong> actividades completadas de <strong>{{ $data['annual_plan_status']['total_targets'] }}</strong> programadas para este periodo.
+                </div>
+            </div>
+
+            @php
+                $categoryLabels = [
+                    'Inspección' => 'Controles y Checklists Normativos',
+                    'Capacitación' => 'Formación y Capacitación Técnica',
+                    'Informe' => 'Informes y Gestión Administrativa'
+                ];
+                $programmedByCat = collect($data['annual_plan_status']['programmed'] ?? [])->groupBy('category');
+            @endphp
+
+            @foreach($categoryLabels as $catKey => $label)
+                @if($programmedByCat->has($catKey))
+                    <div style="background: #fcfcfd; padding: 6px 10px; margin-top: 15px; margin-bottom: 8px; border-left: 3px solid <?php echo $primaryColor; ?>;">
+                        <span style="font-size: 8px; font-weight: bold; color: #1e1e2d; text-transform: uppercase; letter-spacing: 1px;">{{ $label }}</span>
+                    </div>
+                    <table style="font-size: 10px; margin-bottom: 15px;">
+                        <thead>
+                            <tr>
+                                <th style="width: 12%; text-align: left;">Código</th>
+                                <th style="width: 50%; text-align: left;">Actividad Programada</th>
+                                <th style="width: 12%; text-align: left;">Mes</th>
+                                <th style="width: 26%; text-align: center;">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($programmedByCat->get($catKey) as $prog)
+                                <tr>
+                                    <td style="color: #b5b5c3; font-weight: bold; border-bottom: 1px solid #f4f4f7;">{{ $prog['code'] ?? 'N/A' }}</td>
+                                    <td style="border-bottom: 1px solid #f4f4f7; padding-bottom: 5px; padding-top: 5px;">
+                                        <strong>{{ $prog['activity'] }}</strong>
+                                        @if($prog['description'])
+                                            <div style="font-size: 8px; color: #7e8299; font-style: italic; margin-top: 2px; line-height: 1.2;">{{ $prog['description'] }}</div>
+                                        @endif
+                                    </td>
+                                    <td style="text-transform: uppercase; border-bottom: 1px solid #f4f4f7;">{{ $prog['month'] }}</td>
+                                    <td style="text-align: center; border-bottom: 1px solid #f4f4f7;">
+                                        @if($prog['status'] === 'completed')
+                                            <span class="badge badge-success" style="font-size: 7px; padding: 2px 6px;">COMPLETADO</span>
+                                        @else
+                                            <span class="badge" style="background: #f4f4f7; color: #b5b5c3; font-size: 7px; padding: 2px 6px;">PENDIENTE</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endif
+            @endforeach
+        </div>
+
+        <div class="section">
+            <div class="section-header border-primary-left"><h3>1. Cronograma de Visitas Técnicas</h3></div>
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 15%">Fecha</th>
-                        <th style="width: 20%">Referencia</th>
+                        <th style="width: 25%">Fecha</th>
                         <th>Observaciones de Campo</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($data['visits'] as $visit)
                         <tr>
-                            <td><strong>{{ $visit->visit_date->format('d/m/Y') }}</strong></td>
-                            <td style="color: #7e8299;">{{ $visit->code ?? 'VIS-'.$visit->id }}</td>
-                            <td>{{ $visit->general_observations ?: 'Sin observaciones' }}</td>
+                            <td style="vertical-align: top;">
+                                <strong>{{ $visit->visit_date->format('d/m/Y') }}</strong><br>
+                                <span style="font-size: 7px; color: #b5b5c3;">Técnico: {{ $visit->user->nombres }}</span>
+                            </td>
+                            <td>
+                                <div style="margin-bottom: 5px;">{{ $visit->general_observations ?: 'Sin observaciones' }}</div>
+                                @if($visit->checklistCompletions->count() > 0)
+                                    <div style="font-size: 7px; color: <?php echo $primaryColor; ?>; font-weight: bold; margin-top: 5px; text-transform: uppercase;">Procedimientos:</div>
+                                    <div style="font-size: 7px; color: #7e8299;">
+                                        @foreach($visit->checklistCompletions as $index => $comp)
+                                            • {{ $comp->assignment->checklist->title ?? 'Inspección técnica' }}{{ $index < $visit->checklistCompletions->count() - 1 ? '' : '' }}<br>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -212,25 +294,10 @@
         </div>
 
         <div class="section no-break">
-            <div class="section-header"><h3>2. Controles Operativos (Checklists)</h3></div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Auditoría / Inspección</th>
-                        <th style="width: 20%">Fecha</th>
-                        <th style="width: 15%; text-align: center;">Estado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($data['checklists'] as $ch)
-                        <tr>
-                            <td>{{ $ch->assignment->checklist->title ?? 'Checklist Técnico' }}</td>
-                            <td>{{ \Carbon\Carbon::parse($ch->completed_at)->format('d/m/Y H:i') }}</td>
-                            <td style="text-align: center;"><span class="badge badge-success">Finalizado</span></td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <div class="section-header border-primary-left"><h3>2. Protocolos e Inspecciones (Trabajos Extra / Fuera de Contrato)</h3></div>
+            <div style="font-size: 8px; color: #7e8299; font-style: italic;">
+                No se registraron inspecciones fuera de contrato en este periodo.
+            </div>
             @if($report->observaciones_checklists)
                 <div class="obs-container">
                     <div class="observation-label">Análisis de Inspecciones:</div>
@@ -244,27 +311,71 @@
 
     {{-- 3. CAPACITACIÓN Y RIESGOS --}}
     <div class="content-wrapper">
-        <div class="header">
+        <div class="header border-primary-bottom">
             <span class="header-meta">{{ $report->sede->nombre_sede }}</span>
             <span class="header-title">Formación y Gestión de Riesgos</span>
         </div>
 
         <div class="section">
-            <div class="section-header"><h3>3. Capacitación del Personal</h3></div>
+            <div class="section-header border-primary-left"><h3>3. Capacitación del Personal</h3></div>
             <table>
                 <thead>
                     <tr>
-                        <th>Tema Desarrollado</th>
+                        <th style="width: 35%">Tema Desarrollado</th>
                         <th style="text-align: center; width: 15%">Asistentes</th>
-                        <th>Notas del Instructor</th>
+                        <th style="width: 50%">Notas e Instructor / Registro de Firmas</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($data['trainings'] as $tr)
                         <tr>
-                            <td><strong>{{ $tr->title }}</strong></td>
-                            <td style="text-align: center;">{{ $tr->attendees_count }}</td>
-                            <td>{{ $tr->notes ?: '-' }}</td>
+                            <td>
+                                <strong>{{ $tr->title }}</strong>
+                                @if($tr->description)
+                                    <div style="font-size: 7px; color: #7e8299; margin-top: 3px; font-style: italic; line-height: 1.2;">{{ $tr->description }}</div>
+                                @endif
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
+                                <span style="font-size: 12px; font-weight: bold; color: <?php echo $primaryColor; ?>;">{{ $tr->attendees_count }}</span>
+                            </td>
+                            <td>
+                                <div style="margin-bottom: 6px;">{{ $tr->notes ?: 'Sin observaciones específicas registradas por el instructor.' }}</div>
+                                
+                                @if($tr->attendances && $tr->attendances->count() > 0)
+                                    <div style="margin-top: 6px; border-top: 1px dashed #ebedf3; padding-top: 5px;">
+                                        <div style="font-size: 7px; color: #7e8299; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">Asistentes Certificados:</div>
+                                        <table style="width: 100%; margin: 0; border: none; border-collapse: collapse;">
+                                            <tbody>
+                                                @foreach($tr->attendances as $att)
+                                                    <tr style="background: transparent !important;">
+                                                        <td style="border: none; padding: 2px 0; font-size: 8px; width: 65%;">
+                                                            • <strong>{{ $att->employee_name }}</strong> 
+                                                            @if($att->dni)
+                                                                <span style="color: #7e8299; font-size: 7px;">(DNI: {{ $att->dni }})</span>
+                                                            @endif
+                                                        </td>
+                                                        <td style="border: none; padding: 2px 0; text-align: right; width: 35%;">
+                                                            @if($att->signature)
+                                                                @if(str_starts_with($att->signature, 'data:image'))
+                                                                    <img src="{{ $att->signature }}" style="height: 16px; max-width: 90px; object-fit: contain; vertical-align: middle; filter: grayscale(100%);">
+                                                                @elseif(file_exists(public_path('storage/' . $att->signature)))
+                                                                    <img src="{{ public_path('storage/' . $att->signature) }}" style="height: 16px; max-width: 90px; object-fit: contain; vertical-align: middle;">
+                                                                @else
+                                                                    <span style="font-size: 6px; color: #1bc5bd; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Firmado</span>
+                                                                @endif
+                                                            @else
+                                                                <span style="font-size: 6px; color: #ffa800; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Sin Firma</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div style="font-size: 7px; color: #ffa800; font-style: italic; margin-top: 4px;">Sin firmas de asistentes registradas en esta capacitación.</div>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -278,81 +389,7 @@
         </div>
 
         <div class="section">
-            <div class="section-header"><h3>4. Análisis de Riesgos (ISO 31000)</h3></div>
-            @if($data['risk_matrix'])
-                <div style="margin-bottom: 15px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #F69239;">
-                    <span style="font-size: 11px; font-weight: bold; color: #1e1e2d;">{{ $data['risk_matrix']->title }}</span><br>
-                    <span style="font-size: 8px; color: #64748b;">ÁREA: {{ $data['risk_matrix']->area }} | PROCESO: {{ $data['risk_matrix']->process }}</span>
-                </div>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 35%">Peligro / Riesgo</th>
-                            <th style="width: 20%">Tipo</th>
-                            <th>Consecuencia / Daño</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($data['risk_matrix']->risks->take(12) as $risk)
-                            <tr>
-                                <td><strong>{{ $risk->hazard }}</strong></td>
-                                <td>{{ $risk->type }}</td>
-                                <td style="color: #565674; font-style: italic;">{{ $risk->consequence }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="3" style="text-align: center;">No hay riesgos definidos.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            @endif
-
-            @if($report->observaciones_matriz)
-                <div class="obs-container">
-                    <div class="observation-label">Evolución del Riesgo:</div>
-                    <div class="observation-box">{{ $report->observaciones_matriz }}</div>
-                </div>
-            @endif
-
-            <div class="no-break" style="text-align: center; margin-top: 20px;">
-                <div class="observation-label" style="margin-bottom: 10px;">Mapa de Calor de la Sede</div>
-                <table style="width: auto; margin: 0 auto; border-collapse: separate; border-spacing: 2px; border: none;">
-                    @foreach($data['heatmap'] as $s => $probabilities)
-                        <tr>
-                            <td style="border:none; font-size: 8px; vertical-align: middle; padding-right: 5px;">S{{ $s }}</td>
-                            @foreach($probabilities as $p => $count)
-                                @php
-                                    $score = $s * $p;
-                                    $bgColor = $score >= 17 ? '#f64e60' : ($score >= 10 ? '#ffa800' : ($score >= 5 ? '#ffcd13' : '#1bc5bd'));
-                                    $opacity = $count == 0 ? '0.2' : '1';
-                                @endphp
-                                <td style="width: 50px; height: 50px; background-color: {{ $bgColor }}; color: white; text-align: center; vertical-align: middle; font-size: 16px; font-weight: bold; border-radius: 4px; opacity: {{ $opacity }}; border: none;">
-                                    {{ $count ?: '' }}
-                                </td>
-                            @endforeach
-                        </tr>
-                    @endforeach
-                    <tr>
-                        <td style="border: none;"></td>
-                        @for($i=1; $i<=5; $i++)
-                            <td style="border: none; text-align: center; font-size: 8px; color: #b5b5c3; padding-top: 5px;">P{{ $i }}</td>
-                        @endfor
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="page-break"></div>
-
-    {{-- 4. HALLAZGOS E INCIDENTES --}}
-    <div class="content-wrapper">
-        <div class="header">
-            <span class="header-meta">Seguridad Operativa</span>
-            <span class="header-title">5. Hallazgos e Incidentes</span>
-        </div>
-
-        <div class="section">
+            <div class="section-header border-primary-left"><h3>4. Análisis Operativo: Hallazgos e Incidentes</h3></div>
             <table>
                 <thead>
                     <tr>
@@ -369,6 +406,16 @@
                                         <td style="border: none; border-bottom: 1px solid #ebedf3; padding: 10px;">
                                             <div style="font-weight: bold;">{{ $hal->titulo }} <span class="badge {{ $hal->criticidad == 'Alta' ? 'badge-danger' : 'badge-warning' }}">{{ $hal->criticidad }}</span></div>
                                             <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $hal->descripcion }}</div>
+                                            @if(count($hal->fotos ?? []) > 0)
+                                                <div style="margin-top: 5px;">
+                                                    @foreach($hal->fotos as $foto)
+                                                        @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
+                                                        @if(file_exists($path))
+                                                            <img src="{{ $path }}" style="width: 80px; height: 80px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -381,9 +428,19 @@
                                 @forelse($data['incidentes'] as $inc)
                                     <tr>
                                         <td style="border: none; border-bottom: 1px solid #ebedf3; padding: 10px;">
-                                            <div style="font-weight: bold;">{{ $inc->tipo_evento }}</div>
-                                            <div style="color: #f64e60; font-size: 8px; margin-top: 2px;">FECHA: {{ \Carbon\Carbon::parse($inc->fecha_hora)->format('d/m/Y') }}</div>
+                                            <div style="font-weight: bold;">{{ strtoupper(str_replace('_', ' ', $inc->tipo)) }}</div>
+                                            <div style="color: #f64e60; font-size: 8px; margin-top: 2px;">FECHA: {{ \Carbon\Carbon::parse($inc->fecha_ocurrencia)->format('d/m/Y') }}</div>
                                             <div style="color: #7e8299; font-size: 8px; margin-top: 3px;">{{ $inc->descripcion }}</div>
+                                            @if(count($inc->fotos ?? []) > 0)
+                                                <div style="margin-top: 5px;">
+                                                    @foreach($inc->fotos as $foto)
+                                                        @php $path = public_path('storage/' . $foto->ruta_archivo); @endphp
+                                                        @if(file_exists($path))
+                                                            <img src="{{ $path }}" style="width: 80px; height: 80px; border-radius: 3px; margin-right: 2px; object-fit: cover;">
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
@@ -403,10 +460,10 @@
             @endif
         </div>
 
-        {{-- SECCIÓN 6: CONCLUSIÓN --}}
+        {{-- SECCIÓN 5: CONCLUSIÓN --}}
         <div class="section" style="margin-top: 50px;">
-            <div style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; border-top: 10px solid #F69239; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-                <h3 style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; color: #F69239; letter-spacing: 1px;">6. Resumen Ejecutivo Final</h3>
+            <div class="border-primary-top-thick" style="background: #1e1e2d; color: white; padding: 30px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <h3 class="text-primary" style="margin: 0 0 15px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 1px;">5. Resumen Ejecutivo Final</h3>
                 <div style="font-size: 12px; line-height: 1.8; color: #e2e8f0;">
                     {{ $report->resumen_ejecutivo ?: 'No se registró una conclusión final detallada para este periodo.' }}
                 </div>
@@ -415,9 +472,17 @@
 
         <div style="position: absolute; bottom: 50px; left: 0; right: 0; text-align: center;">
             <div style="width: 250px; margin: 0 auto; border-top: 1px solid #1e1e2d; padding-top: 15px;">
-                <div style="font-weight: bold; font-size: 12px;">{{ strtoupper($report->tecnico->nombres) }} {{ strtoupper($report->tecnico->apellidos) }}</div>
-                <div style="font-size: 10px; color: #7e8299; margin-top: 5px;">Técnico Responsable HyS</div>
-                <div style="font-size: 9px; color: #b5b5c3;">XamaSafe Reporting System</div>
+                @if(isset($report->datos_anexo['firma_tecnico']) && $report->datos_anexo['firma_tecnico'])
+                    <img src="{{ $report->datos_anexo['firma_tecnico'] }}" style="width: 140px; height: 60px; margin: 0 auto 5px auto; display: block; object-fit: contain;">
+                @elseif($report->tecnico->firma && file_exists(public_path('storage/' . $report->tecnico->firma)))
+                    <img src="{{ public_path('storage/' . $report->tecnico->firma) }}" style="width: 140px; height: 60px; margin: 0 auto 5px auto; display: block; object-fit: contain;">
+                @else
+                    <div style="height: 40px;"></div> {{-- Espacio para firma en blanco --}}
+                @endif
+
+                <div style="font-weight: bold; font-size: 11px;">{{ strtoupper($report->tecnico->nombres) }} {{ strtoupper($report->tecnico->apellidos) }}</div>
+                <div style="font-size: 9px; color: #7e8299; margin-top: 3px;">Técnico Responsable HyS</div>
+                <div style="font-size: 8px; color: #b5b5c3;">XamaSafe Reporting System</div>
             </div>
         </div>
     </div>
@@ -426,6 +491,7 @@
         <div style="float: left;">XamaSafe v2.0 | {{ $report->sede->nombre_sede }}</div>
         <div style="float: right;" class="page-number"></div>
         <div class="clear"></div>
+    </div>
     </div>
 </body>
 </html>

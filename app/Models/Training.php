@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Training extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'empresa_id',
         'sede_id',
@@ -23,10 +26,22 @@ class Training extends Model
         'dynamic_checklist_id',
     ];
 
+    public const STATUS_PENDING = 'pending';
+
+    public const STATUS_COMPLETED = 'completed';
+
     protected $casts = [
         'date' => 'datetime',
         'is_template' => 'boolean',
     ];
+
+    /**
+     * Scope para capacitaciones completadas
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', self::STATUS_COMPLETED);
+    }
 
     public function dynamicChecklist()
     {
@@ -57,7 +72,7 @@ class Training extends Model
     {
         return $this->hasMany(\App\Models\TrainingAttendance::class);
     }
-    
+
     // Ejecuciones de esta capacitación en visitas
     public function visitTrainings()
     {

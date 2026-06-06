@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('ruta_archivo');
             $table->string('descripcion')->nullable();
             $table->timestamps();
-            
+
             $table->index('hallazgo_id');
         });
     }

@@ -65,32 +65,81 @@
             $checklist = $completion->assignment->checklist;
             $sections = $checklist->sections->keyBy('id');
             
-            // Mapear respuestas a secciones si es posible
-            // (Nota: formatted_responses puede no tener question_id si es legacy, 
-            // pero para nuevas inspecciones sí lo tiene)
+            // Detectar si hay al menos una observación con contenido
+            $hasObservations = collect($responses)->contains(fn($r) => !empty(trim($r['observation'] ?? '')));
+
+    <style>
+        .checklist-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .th-base {
+            padding: 12px 15px;
+            font-size: 9pt;
+            color: #475569;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .tr-even {
+            background-color: #f9fafb;
+        }
+        .td-base {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+        .question-label {
+            font-size: 9pt;
+            color: #1e293b;
+            font-weight: 500;
+        }
+        /* Clases para anchos dinamicos - Puras para evitar errores de IDE */
+        .col-point-obs { width: 60%; text-align: left; }
+        .col-point-no-obs { width: 80%; text-align: left; }
+        .col-compliance-obs { width: 15%; text-align: center; }
+        .col-compliance-no-obs { width: 20%; text-align: center; }
+        .col-obs { width: 25%; text-align: left; }
+    </style>
+
+    {{-- 2. Preguntas y Respuestas --}}
+    <div style="margin-top: 20px;">
+        @php
+            $responses = $completion->formatted_responses;
+            // Si el checklist tiene secciones, intentamos agrupar
+            $checklist = $completion->assignment->checklist;
+            
+            // Detectar si hay al menos una observación con contenido
+            $hasObservations = collect($responses)->contains(fn($r) => !empty(trim($r['observation'] ?? '')));
         @endphp
 
-        <table style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+        <table class="checklist-table">
             <thead>
                 <tr style="background-color: #f8fafc;">
-                    <th style="padding: 12px 15px; text-align: left; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: 60%;">Punto de Control</th>
-                    <th style="padding: 12px 15px; text-align: center; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: 15%;">Cumplimiento</th>
-                    <th style="padding: 12px 15px; text-align: left; font-size: 9pt; color: #475569; border-bottom: 2px solid #e2e8f0; width: 25%;">Observaciones</th>
+                    <th class="th-base {{ $hasObservations ? 'col-point-obs' : 'col-point-no-obs' }}">Punto de Control</th>
+                    <th class="th-base {{ $hasObservations ? 'col-compliance-obs' : 'col-compliance-no-obs' }}">Cumplimiento</th>
+                    @if($hasObservations)
+                        <th class="th-base col-obs">Observaciones</th>
+                    @endif
                 </tr>
             </thead>
             <tbody>
                 @foreach($responses as $resp)
                     @php
-                        $val = strtolower((string)($resp['value'] ?? ''));
+                        $rawVal = $resp['value'] ?? '';
+                        $valStr = is_array($rawVal) ? implode(', ', $rawVal) : (string)$rawVal;
+                        $val = strtolower($valStr);
                         $isFailure = in_array($val, ['no', 'no cumple']);
                     @endphp
-                    <tr style="{{ $loop->even ? 'background-color: #f9fafb;' : '' }}">
-                        <td style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
-                            <div style="font-size: 9pt; color: #1e293b; font-weight: 500;">
+                    <tr class="{{ $loop->even ? 'tr-even' : '' }}">
+                        <td class="td-base">
+                            <div class="question-label">
                                 {{ $resp['question_label'] ?? 'Sin etiqueta' }}
                             </div>
                         </td>
-                        <td style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; text-align: center; vertical-align: top;">
+                        <td class="td-base" style="text-align: center;">
                             @if($isFailure)
                                 <span style="color: #b91c1c; font-weight: bold; text-transform: uppercase; font-size: 8pt; background-color: #fef2f2; padding: 2px 6px; border-radius: 4px; border: 1px solid #fee2e2;">
                                     {{ $resp['value'] ?? '-' }}
@@ -101,11 +150,13 @@
                                 </span>
                             @endif
                         </td>
-                        <td style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
-                            <div style="font-size: 8pt; color: #64748b; line-height: 1.4;">
-                                {{ $resp['observation'] ?? '-' }}
-                            </div>
-                        </td>
+                        @if($hasObservations)
+                            <td style="padding: 12px 15px; border-bottom: 1px solid #f1f5f9; vertical-align: top;">
+                                <div style="font-size: 8pt; color: #64748b; line-height: 1.4;">
+                                    {{ $resp['observation'] ?? '-' }}
+                                </div>
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             </tbody>

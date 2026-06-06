@@ -3,14 +3,11 @@
 namespace App\Services;
 
 use App\Models\ChecklistAssignment;
-use App\Models\Hallazgo;
-use App\Models\Incidente;
 use App\Models\Sede;
 use App\Models\Training;
 use App\Models\User;
 use App\Models\VisitCertificate;
 use App\Models\VisitChecklistCompletion;
-use App\Models\VisitEppDelivery;
 use App\Models\VisitTraining;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +16,7 @@ class VisitService
     /**
      * Iniciar una nueva visita
      */
-    public function startVisit(User $user, Sede $sede): VisitCertificate
+    public function startVisit(User $user, Sede $sede, ?string $visitType = null): VisitCertificate
     {
         return VisitCertificate::create([
             'user_id' => $user->id,
@@ -28,6 +25,7 @@ class VisitService
             'visit_date' => now()->toDateString(),
             'start_time' => now(),
             'status' => 'in_progress',
+            'visit_type' => $visitType,
         ]);
     }
 
@@ -82,53 +80,23 @@ class VisitService
     }
 
     /**
-     * Registrar una entrega de EPP durante la visita
-     */
-    public function deliverEpp(
-        VisitCertificate $visit,
-        int $employeeId,
-        array $items, // [{item, qty, size}]
-        ?string $signature = null,
-        ?string $notes = null,
-        bool $skipStockDecrement = false
-    ): VisitEppDelivery {
-        return DB::transaction(function () use ($visit, $employeeId, $items, $signature, $notes, $skipStockDecrement) {
-            $delivery = VisitEppDelivery::create([
-                'visit_certificate_id' => $visit->id,
-                'employee_id' => $employeeId,
-                'epp_items' => $items,
-                'employee_signature' => $signature,
-                'notes' => $notes,
-            ]);
-
-            // Descontar stock para cada item entregado (si no se pide omitirlo)
-            if (!$skipStockDecrement) {
-                foreach ($items as $itemData) {
-                    if (isset($itemData['item_id'])) {
-                        $item = \App\Models\EppItem::find($itemData['item_id']);
-                        if ($item) {
-                            $item->decrement('stock_actual', $itemData['qty'] ?? 1);
-                        }
-                    }
-                }
-            }
-
-            return $delivery;
-        });
-    }
-
-    /**
      * Finalizar la visita y generar constancia
      */
     public function finalizeVisit(
         VisitCertificate $visit,
         ?string $observations,
-        ?string $signature
+        ?string $signature,
+        ?string $responsibleName = null,
+        ?string $emailResponsable = null,
+        ?string $signatureSkipReason = null
     ): VisitCertificate {
         $visit->update([
             'end_time' => now(),
             'general_observations' => $observations,
             'signature' => $signature,
+            'responsible_name' => $responsibleName,
+            'email_responsable' => $emailResponsable,
+            'signature_skip_reason' => $signatureSkipReason,
             'status' => 'signed',
         ]);
 

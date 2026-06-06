@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use App\Models\Risk;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Facades\Auth;
 
 class Hallazgo extends Model
 {
@@ -27,7 +27,6 @@ class Hallazgo extends Model
         'fecha_resolucion',
         'origen_type',
         'origen_id',
-        'risk_id',
         'visit_certificate_id',
         'checklist_completion_id',
         'question_id',
@@ -45,15 +44,22 @@ class Hallazgo extends Model
 
     // Niveles de criticidad
     public const CRITICIDAD_BAJO = 'bajo';
+
     public const CRITICIDAD_MEDIO = 'medio';
+
     public const CRITICIDAD_ALTO = 'alto';
+
     public const CRITICIDAD_CRITICO = 'critico';
 
     // Estados del hallazgo
     public const ESTADO_PENDIENTE = 'pendiente';
+
     public const ESTADO_EN_PROCESO = 'en_proceso';
+
     public const ESTADO_RESUELTO = 'resuelto';
+
     public const ESTADO_VERIFICADO = 'verificado';
+
     public const ESTADO_CERRADO = 'cerrado';
 
     // ============================================
@@ -83,14 +89,6 @@ class Hallazgo extends Model
     public function origen(): MorphTo
     {
         return $this->morphTo();
-    }
-
-    /**
-     * Riesgo asociado en la matriz de riesgos (opcional)
-     */
-    public function risk(): BelongsTo
-    {
-        return $this->belongsTo(Risk::class);
     }
 
     /**
@@ -154,7 +152,7 @@ class Hallazgo extends Model
      */
     public function getVisitCounterAttribute(): int
     {
-        if (!$this->visit_certificate_id) {
+        if (! $this->visit_certificate_id) {
             return 1;
         }
 
@@ -257,12 +255,12 @@ class Hallazgo extends Model
      */
     public function estaVencido(): bool
     {
-        if (!$this->plazo_correccion) {
+        if (! $this->plazo_correccion) {
             return false;
         }
 
-        return $this->plazo_correccion->isPast() 
-            && !in_array($this->estado, [self::ESTADO_RESUELTO, self::ESTADO_CERRADO]);
+        return $this->plazo_correccion->isPast()
+            && ! in_array($this->estado, [self::ESTADO_RESUELTO, self::ESTADO_CERRADO]);
     }
 
     /**
@@ -278,7 +276,7 @@ class Hallazgo extends Model
      */
     public function getColorCriticidad(): string
     {
-        return match($this->criticidad) {
+        return match ($this->criticidad) {
             self::CRITICIDAD_CRITICO => 'red',
             self::CRITICIDAD_ALTO => 'orange',
             self::CRITICIDAD_MEDIO => 'yellow',
@@ -292,7 +290,7 @@ class Hallazgo extends Model
      */
     public function getColorEstado(): string
     {
-        return match($this->estado) {
+        return match ($this->estado) {
             self::ESTADO_CERRADO => 'green',
             self::ESTADO_VERIFICADO => 'blue',
             self::ESTADO_RESUELTO => 'cyan',
@@ -308,7 +306,7 @@ class Hallazgo extends Model
     public function agregarSeguimiento(string $estadoNuevo, string $comentario, ?int $userId = null): HallazgoSeguimiento
     {
         $seguimiento = $this->seguimientos()->create([
-            'user_id' => $userId ?? auth()->id(),
+            'user_id' => $userId ?? Auth::id(),
             'estado_anterior' => $this->estado,
             'estado_nuevo' => $estadoNuevo,
             'comentario' => $comentario,
@@ -319,7 +317,7 @@ class Hallazgo extends Model
         $this->update(['estado' => $estadoNuevo]);
 
         // Si se marca como resuelto, guardar fecha de resolución
-        if ($estadoNuevo === self::ESTADO_RESUELTO && !$this->fecha_resolucion) {
+        if ($estadoNuevo === self::ESTADO_RESUELTO && ! $this->fecha_resolucion) {
             $this->update(['fecha_resolucion' => now()]);
         }
 
