@@ -25,6 +25,7 @@ class ProfileController extends Controller
                 'email' => $user->email,
                 'telefono' => $user->telefono,
                 'matricula' => $user->matricula,
+                'n_doc' => $user->n_doc,
                 'rol' => $user->rol,
                 'firma' => $user->firma,
                 'firma_temp' => $user->firma_temp,
@@ -85,7 +86,7 @@ class ProfileController extends Controller
         $request->validate([
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:50',
+            'telefono' => ['nullable', 'string', 'max:50', \Illuminate\Validation\Rule::unique('users')->ignore($user->id)],
         ]);
 
         $user->update([

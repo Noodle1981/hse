@@ -43,7 +43,7 @@ export default function Index({ visits, filters, activeVisit }) {
                                 </div>
                                 <div>
                                     <h2 className="text-xl font-black uppercase italic tracking-widest text-white">Visita en curso detectada</h2>
-                                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest italic mt-1">Sede: {activeVisit.sede.nombre_sede} — Iniciada: {new Date(activeVisit.start_time).toLocaleTimeString()}</p>
+                                    <p className="text-[10px] font-black text-orange-400 uppercase tracking-widest italic mt-1">Sede: {activeVisit?.sede?.nombre_sede || 'Sede Desconocida'} — Iniciada: {activeVisit?.start_time ? new Date(activeVisit.start_time).toLocaleTimeString() : ''}</p>
                                 </div>
                             </div>
                             <Link href={route('gestor.operations.visits.show', activeVisit.id)} className="relative z-10 px-10 py-5 bg-orange-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl hover:brightness-110 active:scale-95">Reanudar Despliegue</Link>

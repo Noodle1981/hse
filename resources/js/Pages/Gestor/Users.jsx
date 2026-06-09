@@ -34,6 +34,7 @@ export default function Index({ users, filters }) {
         rol: 'tecnico',
         matricula: '',
         telefono: '',
+        n_doc: '',
         estado: 'activo',
     });
 
@@ -83,6 +84,7 @@ export default function Index({ users, filters }) {
             rol: user.rol,
             matricula: user.matricula || '',
             telefono: user.telefono || '',
+            n_doc: user.n_doc || '',
             estado: user.estado,
         });
         setShowForm(true);
@@ -227,6 +229,12 @@ export default function Index({ users, filters }) {
                                             {form.errors.telefono && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.telefono}</span>}
                                         </div>
                                         <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nº Documento (Opcional)</label>
+                                            <input id="n_doc" name="n_doc" type="text" value={form.data.n_doc} onChange={e => form.setData('n_doc', e.target.value)} 
+                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
+                                            {form.errors.n_doc && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.n_doc}</span>}
+                                        </div>
+                                        <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Estado</label>
                                             <select id="estado" name="estado" value={form.data.estado} onChange={e => form.setData('estado', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
                                                 <option value="activo">ACTIVO</option>
@@ -282,6 +290,7 @@ export default function Index({ users, filters }) {
                                             </td>
                                             <td className="px-6 py-6">
                                                 <div className="text-[11px] font-bold text-white/40 italic group-hover/row:text-white/60 transition-colors">{user.email}</div>
+                                                {user.n_doc && <div className="text-[9px] font-bold text-[#F69239]/50 uppercase tracking-wider mt-1">DNI: {user.n_doc}</div>}
                                             </td>
                                             <td className="px-6 py-6 text-center">
                                                 <RoleBadge role={user.rol} />

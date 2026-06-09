@@ -178,6 +178,7 @@ class AdministrationController extends Controller
             'rol' => 'required|in:gestor,tecnico',
             'matricula' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($editingId)],
             'telefono' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($editingId)],
+            'n_doc' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($editingId)],
             'estado' => 'required|in:activo,inactivo',
         ];
 
@@ -187,7 +188,11 @@ class AdministrationController extends Controller
 
         $request->validate($rules);
 
-        $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'matricula', 'telefono', 'estado']);
+        $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'matricula', 'telefono', 'n_doc', 'estado']);
+
+        if (array_key_exists('n_doc', $data) && trim($data['n_doc'] ?? '') === '') {
+            $data['n_doc'] = null;
+        }
 
         if (! $currentUser->isSuperAdmin()) {
             $data['consultora_id'] = $currentUser->consultora_id;

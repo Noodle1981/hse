@@ -111,7 +111,8 @@ class VisitService
      */
     public function getActiveVisit(User $user): ?VisitCertificate
     {
-        return VisitCertificate::where('user_id', $user->id)
+        return VisitCertificate::with('sede')
+            ->where('user_id', $user->id)
             ->where('status', 'in_progress')
             ->latest()
             ->first();
