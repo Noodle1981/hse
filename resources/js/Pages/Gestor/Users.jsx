@@ -120,7 +120,7 @@ export default function Index({ users, filters }) {
             <Head title="Gestión de Usuarios" />
 
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-[#F69239]/30">
-                <div className="max-w-[95rem] mx-auto space-y-8 animate-fade-in">
+                <div className="max-w-[95rem] mx-auto space-y-12 animate-fade-in">
                     
                     {/* AUDITORÍA DE FIRMAS PENDIENTES */}
                     <PendingSignaturesList />
