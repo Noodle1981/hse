@@ -51,7 +51,7 @@ export default function Index({ visits, filters, activeVisit }) {
                     )}
 
                     {/* FILTROS TÁCTICOS */}
-                    <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[2.5rem] border border-white/5 p-6 shadow-2xl relative overflow-hidden animate-fade-in-down">
+                    <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden animate-fade-in-down">
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-orange-500/30 to-transparent"></div>
                         
                         <div className="flex flex-col lg:flex-row gap-6 justify-between items-center relative z-10">
