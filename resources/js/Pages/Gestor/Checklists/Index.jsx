@@ -69,7 +69,7 @@ export default function Index({ checklists, categories, filters }) {
                         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end relative z-10">
                             
                             {/* Buscador */}
-                            <div className="md:col-span-5 relative group">
+                            <div className="md:col-span-4 relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-orange-500 uppercase tracking-[0.3em] italic z-10">Buscador de Checklists</span>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none text-white/20 group-focus-within:text-orange-500">
@@ -92,6 +92,7 @@ export default function Index({ checklists, categories, filters }) {
                                     value={categoryFilter}
                                     onChange={e => setCategoryFilter(e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase"
+                                    title="Seleccione una categoría"
                                 >
                                     <option value="">TODAS LAS CATEGORÍAS</option>
                                     {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
@@ -105,6 +106,7 @@ export default function Index({ checklists, categories, filters }) {
                                     value={statusFilter}
                                     onChange={e => setStatusFilter(e.target.value)}
                                     className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500/50 transition-all [color-scheme:dark] appearance-none cursor-pointer italic uppercase"
+                                    title="Seleccione un estado"
                                 >
                                     <option value="all">TODOS</option>
                                     <option value="active">ACTIVOS</option>
@@ -112,11 +114,19 @@ export default function Index({ checklists, categories, filters }) {
                                 </select>
                             </div>
 
-                            {/* Botón Nuevo */}
-                            <div className="md:col-span-2">
+                            {/* Botones de Acción */}
+                            <div className="md:col-span-3 flex gap-3">
+                                <Link 
+                                    href={route('gestor.categories.index')} 
+                                    className="flex-1 flex h-14 bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:border-white/20 active:scale-95 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic transition-all items-center justify-center gap-2 shadow-lg"
+                                    title="Administrar Categorías y Subcategorías"
+                                >
+                                    <svg className="w-5 h-5 text-[#F69239]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2zM9 5h6"/></svg>
+                                    <span>Categorías</span>
+                                </Link>
                                 <Link 
                                     href={route('gestor.checklists.create')} 
-                                    className="flex h-14 px-6 bg-orange-600 text-white hover:brightness-110 active:scale-95 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic transition-all items-center justify-center gap-3 shadow-[0_0_25px_rgba(246,146,57,0.3)] group/btn"
+                                    className="flex-1 flex h-14 bg-orange-600 text-white hover:brightness-110 active:scale-95 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic transition-all items-center justify-center gap-2 shadow-[0_0_25px_rgba(246,146,57,0.3)] group/btn"
                                 >
                                     <svg className="w-5 h-5 group-hover:rotate-90 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M12 4v16m8-8H4"/></svg>
                                     <span>Nuevo</span>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Subcategory;
 use App\Models\ChecklistSection;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicQuestion;
@@ -100,9 +101,16 @@ class ChecklistController extends Controller
      */
     public function create()
     {
+        $categories = Category::active()
+            ->with(['subcategories' => function ($query) {
+                $query->where('is_active', true)->orderBy('order');
+            }])
+            ->orderBy('order')
+            ->get();
+
         return Inertia::render('Gestor/Checklists/Builder', [
             'checklist' => null,
-            'categories' => Category::active()->with('subcategories')->orderBy('order')->get(),
+            'categories' => $categories,
         ]);
     }
 
@@ -113,9 +121,42 @@ class ChecklistController extends Controller
     {
         $checklist = DynamicChecklist::with(['questions', 'sections'])->findOrFail($id);
 
+        // Cargar categorías activas con sus subcategorías activas
+        $categories = Category::active()
+            ->with(['subcategories' => function ($query) {
+                $query->where('is_active', true)->orderBy('order');
+            }])
+            ->orderBy('order')
+            ->get();
+
+        // Si el checklist tiene categoría y esta no está en el listado de activas, incluirla
+        if ($checklist->category_id) {
+            $currentCategory = Category::find($checklist->category_id);
+            if ($currentCategory && !$categories->contains('id', $currentCategory->id)) {
+                $categories->push($currentCategory);
+            }
+        }
+
+        // Asegurarnos de que si el checklist tiene una subcategoría, esta se cargue dentro de su categoría
+        if ($checklist->subcategory_id) {
+            $currentSubcategory = Subcategory::find($checklist->subcategory_id);
+            if ($currentSubcategory) {
+                // Buscar la categoría del checklist en la colección
+                $parentCat = $categories->firstWhere('id', $checklist->category_id);
+                if ($parentCat) {
+                    // Si no tiene cargada la relación subcategories o no contiene la subcategoría actual, inyectarla
+                    if (!$parentCat->relationLoaded('subcategories')) {
+                        $parentCat->setRelation('subcategories', collect([$currentSubcategory]));
+                    } elseif (!$parentCat->subcategories->contains('id', $currentSubcategory->id)) {
+                        $parentCat->subcategories->push($currentSubcategory);
+                    }
+                }
+            }
+        }
+
         return Inertia::render('Gestor/Checklists/Builder', [
             'checklist' => $checklist,
-            'categories' => Category::active()->with('subcategories')->orderBy('order')->get(),
+            'categories' => $categories,
         ]);
     }
 

@@ -43,7 +43,7 @@ export default function Hub({ consultoraName }) {
                     </div>
 
                     {/* Operational Modules Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
                         
                         {/* Usuarios Module */}
                         <ModuleCard 
@@ -85,6 +85,20 @@ export default function Hub({ consultoraName }) {
                             shadow="shadow-[0_0_30px_rgba(59,130,246,0.2)]"
                             buttonText="RECURSOS CLIENTE"
                             buttonTheme="text-blue-500 bg-blue-500/10 border-blue-500/20 shadow-blue-500/20"
+                        />
+
+                        {/* Categorías Module */}
+                        <ModuleCard 
+                            href={route('gestor.categories.index')}
+                            title="Categorías"
+                            description="CLASIFICACIÓN DE CHECKLISTS Y CONFIGURACIÓN DE PROTOCOLOS"
+                            icon={<IconCategories />}
+                            gradient="from-orange-500/20 to-orange-900/40"
+                            accentColor="text-orange-400"
+                            borderHover="group-hover/card:bg-orange-500"
+                            shadow="shadow-[0_0_30px_rgba(246,146,57,0.2)]"
+                            buttonText="ADMINISTRAR MATRICES"
+                            buttonTheme="text-orange-500 bg-orange-500/10 border-orange-500/20 shadow-orange-500/20"
                         />
                     </div>
 
@@ -149,5 +163,11 @@ const IconTechnicians = () => (
 const IconCompanies = () => (
     <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+    </svg>
+);
+
+const IconCategories = () => (
+    <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2zM9 5h6"/>
     </svg>
 );
