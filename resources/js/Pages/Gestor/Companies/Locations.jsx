@@ -37,6 +37,8 @@ export default function Locations({ empresa, locations, provincias, availableUse
         hora_cierre: '',
         es_roster_24_7: false,
         radio_tolerancia_metros: 500,
+        latitud: '',
+        longitud: '',
     });
 
     const updateFilters = () => {
@@ -91,6 +93,8 @@ export default function Locations({ empresa, locations, provincias, availableUse
             hora_cierre: location.hora_cierre || '',
             es_roster_24_7: !!location.es_roster_24_7,
             radio_tolerancia_metros: location.radio_tolerancia_metros ?? 500,
+            latitud: location.latitud || '',
+            longitud: location.longitud || '',
         });
         setShowForm(true);
     };
@@ -208,7 +212,18 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                             </td>
                                             <td className="px-6 py-6">
                                                 <div className="text-[11px] font-bold text-white/40 italic mb-1 group-hover/row:text-white/60 transition-colors uppercase leading-none">{sede.direccion}</div>
-                                                <div className="text-[9px] font-black text-emerald-400/40 italic leading-none uppercase">{sede.localidad}, {sede.provincia?.nombre}</div>
+                                                <div className="text-[9px] font-black text-emerald-400/40 italic leading-none uppercase mb-1.5">{sede.localidad}, {sede.provincia?.nombre}</div>
+                                                {sede.latitud && sede.longitud ? (
+                                                    <div className="text-[8px] font-black text-emerald-500/60 uppercase tracking-widest leading-none italic flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                                                        GPS: {sede.latitud}, {sede.longitud} ({sede.radio_tolerancia_metros}m)
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-[8px] font-black text-red-500/40 uppercase tracking-widest leading-none italic flex items-center gap-1.5">
+                                                        <span className="w-1.5 h-1.5 bg-red-500/50 rounded-full"></span>
+                                                        SIN GPS CONFIGURADO
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-6 py-6 text-center">
                                                 <button onClick={() => { setSelectedLocation(sede); setShowUserModal(true); }} className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest italic border transition-all ${sede.users.length > 0 ? 'text-blue-400 border-blue-500/20 bg-blue-500/10' : 'text-white/10 border-white/5 bg-white/5 hover:border-blue-500/20 hover:text-blue-400'}`}>
@@ -393,9 +408,33 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                     )}
 
                                     {/* Tolerancia GPS - Siempre visible para el módulo Proof of Presence */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Radio Tolerancia GPS (Metros)</label>
+                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Latitud GPS</label>
+                                            <input 
+                                                type="number" 
+                                                step="any"
+                                                value={form.data.latitud} 
+                                                onChange={e => form.setData('latitud', e.target.value)} 
+                                                placeholder="Ej: -31.372506"
+                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark]"
+                                            />
+                                            {form.errors.latitud && <span className="text-red-500 text-[9px] font-black italic ml-2 mt-1 block">{form.errors.latitud}</span>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Longitud GPS</label>
+                                            <input 
+                                                type="number" 
+                                                step="any"
+                                                value={form.data.longitud} 
+                                                onChange={e => form.setData('longitud', e.target.value)} 
+                                                placeholder="Ej: -64.182416"
+                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark]"
+                                            />
+                                            {form.errors.longitud && <span className="text-red-500 text-[9px] font-black italic ml-2 mt-1 block">{form.errors.longitud}</span>}
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Radio Tolerancia (Metros)</label>
                                             <input 
                                                 type="number" 
                                                 min="0"
@@ -403,10 +442,11 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                                 onChange={e => form.setData('radio_tolerancia_metros', parseInt(e.target.value) || 0)} 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"
                                             />
+                                            {form.errors.radio_tolerancia_metros && <span className="text-red-500 text-[9px] font-black italic ml-2 mt-1 block">{form.errors.radio_tolerancia_metros}</span>}
                                         </div>
-                                        <div className="flex items-center text-[9px] font-bold text-white/20 uppercase tracking-widest italic pt-6 pl-4">
-                                            💡 Módulo Proof of Presence: Rango espacial de tolerancia configurado para verificar check-in y checkout de campo.
-                                        </div>
+                                    </div>
+                                    <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest italic pl-2 pt-2">
+                                        💡 Módulo Proof of Presence: Coordenadas geográficas y rango de tolerancia en metros para verificar el inicio y fin de visitas de campo.
                                     </div>
                                 </div>
                             </div>
