@@ -200,7 +200,25 @@ class AdministrationController extends Controller
             $rules['password'] = 'required|string|min:6';
         }
 
-        $request->validate($rules);
+        $messages = [
+            'nombres.required' => 'El nombre es obligatorio.',
+            'apellidos.required' => 'El apellido es obligatorio.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe ser una dirección válida.',
+            'email.unique' => 'Este correo electrónico ya está registrado.',
+            'rol.required' => 'El rol es obligatorio.',
+            'rol.in' => 'El rol seleccionado no es válido.',
+            'matricula.required' => 'La matrícula es obligatoria.',
+            'matricula.unique' => 'Esta matrícula ya está registrada.',
+            'telefono.required' => 'El teléfono es obligatorio.',
+            'telefono.unique' => 'Este teléfono ya está registrado.',
+            'n_doc.unique' => 'Este número de documento ya está registrado.',
+            'estado.required' => 'El estado es obligatorio.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 6 caracteres.',
+        ];
+
+        $request->validate($rules, $messages);
 
         $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'matricula', 'telefono', 'n_doc', 'estado']);
 

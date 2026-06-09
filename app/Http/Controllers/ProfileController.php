@@ -91,6 +91,10 @@ class ProfileController extends Controller
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
             'telefono' => ['nullable', 'string', 'max:50', \Illuminate\Validation\Rule::unique('users')->ignore($user->id)],
+        ], [
+            'nombres.required' => 'El nombre es obligatorio.',
+            'apellidos.required' => 'El apellido es obligatorio.',
+            'telefono.unique' => 'Este teléfono ya está registrado por otro usuario.',
         ]);
 
         $user->update([
