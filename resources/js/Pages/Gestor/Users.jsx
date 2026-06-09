@@ -199,7 +199,7 @@ export default function Index({ users, filters }) {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Corporativo</label>
-                                            <input id="email" name="email" type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value)} required 
+                                            <input id="email" name="email" type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value.toLowerCase())} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
                                             {form.errors.email && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.email}</span>}
                                         </div>
@@ -218,7 +218,7 @@ export default function Index({ users, filters }) {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Matrícula ID</label>
-                                            <input id="matricula" name="matricula" type="text" value={form.data.matricula} onChange={e => form.setData('matricula', e.target.value)} required 
+                                            <input id="matricula" name="matricula" type="text" value={form.data.matricula} onChange={e => form.setData('matricula', e.target.value.toUpperCase())} required 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
                                             {form.errors.matricula && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.matricula}</span>}
                                         </div>
@@ -230,7 +230,7 @@ export default function Index({ users, filters }) {
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nº Documento (Opcional)</label>
-                                            <input id="n_doc" name="n_doc" type="text" value={form.data.n_doc} onChange={e => form.setData('n_doc', e.target.value)} 
+                                            <input id="n_doc" name="n_doc" type="text" value={form.data.n_doc} onChange={e => form.setData('n_doc', e.target.value.toUpperCase())} 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
                                             {form.errors.n_doc && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.n_doc}</span>}
                                         </div>

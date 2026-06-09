@@ -83,6 +83,10 @@ class ProfileController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        if ($request->has('telefono')) {
+            $request->merge(['telefono' => trim($request->telefono)]);
+        }
+
         $request->validate([
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',

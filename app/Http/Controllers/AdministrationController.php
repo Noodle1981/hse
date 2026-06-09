@@ -171,6 +171,20 @@ class AdministrationController extends Controller
         $currentUser = Auth::user();
         $editingId = $request->input('id');
 
+        // Normalizar campos para asegurar unicidad case-insensitive
+        if ($request->has('email')) {
+            $request->merge(['email' => strtolower(trim($request->email))]);
+        }
+        if ($request->has('matricula')) {
+            $request->merge(['matricula' => strtoupper(trim($request->matricula))]);
+        }
+        if ($request->has('n_doc')) {
+            $request->merge(['n_doc' => $request->n_doc ? strtoupper(trim($request->n_doc)) : null]);
+        }
+        if ($request->has('telefono')) {
+            $request->merge(['telefono' => trim($request->telefono)]);
+        }
+
         $rules = [
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
