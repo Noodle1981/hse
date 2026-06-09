@@ -200,7 +200,7 @@ export default function Index({ users, filters }) {
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Corporativo</label>
                                             <input id="email" name="email" type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value.toLowerCase())} required 
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
+                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all lowercase"/>
                                             {form.errors.email && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.email}</span>}
                                         </div>
                                         <div className="space-y-2">
