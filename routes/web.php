@@ -58,6 +58,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/perfil', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/perfil/signature', [ProfileController::class, 'updateSignature'])->name('profile.signature');
+    Route::post('/perfil/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
 
     /*
     |--------------------------------------------------------------------------

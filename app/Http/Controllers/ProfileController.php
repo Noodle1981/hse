@@ -30,6 +30,7 @@ class ProfileController extends Controller
                 'firma' => $user->firma,
                 'firma_temp' => $user->firma_temp,
                 'firma_status' => $user->firma_status,
+                'foto' => $user->foto,
             ],
         ]);
     }
@@ -128,5 +129,118 @@ class ProfileController extends Controller
         ]);
 
         return back()->with('password_message', 'Contraseña actualizada exitosamente.');
+    }
+
+    /**
+     * Update the user's profile photo.
+     */
+    public function updatePhoto(Request $request)
+    {
+        $request->validate([
+            'foto' => 'required|image|max:15360', // max 15MB to allow heavy mobile photos
+        ], [
+            'foto.required' => 'La foto es obligatoria.',
+            'foto.image' => 'El archivo debe ser una imagen válida.',
+            'foto.max' => 'La imagen no debe superar los 15 MB.',
+        ]);
+
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        if ($request->hasFile('foto')) {
+            $path = $this->compressAndSaveImage($request->file('foto'));
+
+            if ($path) {
+                // Delete old photo if exists
+                if ($user->foto) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->foto);
+                }
+
+                $user->update([
+                    'foto' => $path,
+                ]);
+
+                return back()->with('message', 'Foto de perfil actualizada correctamente.');
+            }
+        }
+
+        return back()->with('error', 'Error al procesar la imagen.');
+    }
+
+    /**
+     * Compress and save the profile photo.
+     */
+    private function compressAndSaveImage($file)
+    {
+        $maxSize = 400; // maximum width/height
+        $quality = 70;  // compression quality
+
+        // Get original dimensions and type
+        list($width, $height, $type) = getimagesize($file->getRealPath());
+
+        // Create image resource based on type
+        switch ($type) {
+            case IMAGETYPE_JPEG:
+                $srcImage = @imagecreatefromjpeg($file->getRealPath());
+                break;
+            case IMAGETYPE_PNG:
+                $srcImage = @imagecreatefrompng($file->getRealPath());
+                break;
+            case IMAGETYPE_WEBP:
+                $srcImage = @imagecreatefromwebp($file->getRealPath());
+                break;
+            default:
+                return null;
+        }
+
+        if (!$srcImage) {
+            return null;
+        }
+
+        // Calculate new dimensions (proportional resize)
+        $newWidth = $width;
+        $newHeight = $height;
+
+        if ($width > $maxSize || $height > $maxSize) {
+            if ($width > $height) {
+                $newWidth = $maxSize;
+                $newHeight = (int)($height * ($maxSize / $width));
+            } else {
+                $newHeight = $maxSize;
+                $newWidth = (int)($width * ($maxSize / $height));
+            }
+        }
+
+        // Create canvas for the new image
+        $dstImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Preserve transparency for PNG and WebP
+        if ($type === IMAGETYPE_PNG || $type === IMAGETYPE_WEBP) {
+            imagealphablending($dstImage, false);
+            imagesavealpha($dstImage, true);
+            $transparent = imagecolorallocatealpha($dstImage, 255, 255, 255, 127);
+            imagefilledrectangle($dstImage, 0, 0, $newWidth, $newHeight, $transparent);
+        }
+
+        // Resize
+        imagecopyresampled($dstImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+
+        // Generate a unique file path
+        $filename = 'profile_photos/' . uniqid('photo_') . '.webp';
+        $fullPath = storage_path('app/public/' . $filename);
+
+        // Create directories if they do not exist
+        if (!file_exists(dirname($fullPath))) {
+            @mkdir(dirname($fullPath), 0755, true);
+        }
+
+        // Save as WebP for optimal compression
+        @imagewebp($dstImage, $fullPath, $quality);
+
+        // Free memory
+        imagedestroy($srcImage);
+        imagedestroy($dstImage);
+
+        return $filename;
     }
 }

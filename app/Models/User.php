@@ -26,6 +26,7 @@ class User extends Authenticatable
         'consultora_id',
         'nombres',
         'apellidos',
+        'foto',
         'email',
         'password',
         'genero',

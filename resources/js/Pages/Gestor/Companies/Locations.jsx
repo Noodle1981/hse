@@ -1,6 +1,88 @@
 import { router, Head, Link, useForm, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+function TimeSelect({ value, onChange, options, placeholder }) {
+    const [isOpen, setIsOpen] = useState(false);
+    const containerRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (containerRef.current && !containerRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        if (isOpen && value) {
+            const container = containerRef.current?.querySelector('.options-list');
+            const activeItem = container?.querySelector('[data-selected="true"]');
+            if (container && activeItem) {
+                container.scrollTop = activeItem.offsetTop - container.clientHeight / 2 + activeItem.clientHeight / 2;
+            }
+        }
+    }, [isOpen, value]);
+
+    return (
+        <div ref={containerRef} className="w-1/2 relative">
+            <button
+                type="button"
+                onClick={() => setIsOpen(!isOpen)}
+                className="w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all italic text-center cursor-pointer flex items-center justify-between"
+            >
+                <span className="mx-auto pl-4">{value || placeholder}</span>
+                <svg className={`w-4 h-4 text-white/40 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 right-0 mt-2 bg-[#16162a]/95 backdrop-blur-md border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                    <div className="options-list max-h-48 overflow-y-auto custom-scrollbar py-2">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                onChange('');
+                                setIsOpen(false);
+                            }}
+                            className={`w-full px-4 py-2 text-center text-xs font-black uppercase italic tracking-wider transition-colors ${
+                                !value 
+                                    ? 'bg-[#F69239]/20 text-[#F69239]' 
+                                    : 'text-white/40 hover:bg-white/5 hover:text-white'
+                            }`}
+                        >
+                            {placeholder}
+                        </button>
+                        {options.map(opt => {
+                            const isSelected = value === opt;
+                            return (
+                                <button
+                                    key={opt}
+                                    type="button"
+                                    data-selected={isSelected}
+                                    onClick={() => {
+                                        onChange(opt);
+                                        setIsOpen(false);
+                                    }}
+                                    className={`w-full px-4 py-2 text-center text-sm font-bold transition-colors ${
+                                        isSelected 
+                                            ? 'bg-[#F69239] text-white' 
+                                            : 'text-white hover:bg-[#F69239]/20 hover:text-[#F69239]'
+                                    }`}
+                                >
+                                    {opt}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function Locations({ empresa, locations, provincias, availableUsers, filters }) {
     const { auth, flash } = usePage().props;
@@ -126,6 +208,34 @@ export default function Locations({ empresa, locations, provincias, availableUse
     const handleRestore = (id) => {
         router.post(route('gestor.companies.locations.restore', id));
     };
+
+    const parseTime = (timeStr) => {
+        if (!timeStr) return { hour: '', minute: '' };
+        const parts = timeStr.split(':');
+        return {
+            hour: parts[0] || '',
+            minute: parts[1] || ''
+        };
+    };
+
+    const handleTimeChange = (field, type, value) => {
+        const currentVal = form.data[field] || '';
+        const { hour, minute } = parseTime(currentVal);
+        
+        let newHour = type === 'hour' ? value : hour;
+        let newMinute = type === 'minute' ? value : minute;
+        
+        if (!newHour && !newMinute) {
+            form.setData(field, '');
+        } else {
+            newHour = newHour || '08';
+            newMinute = newMinute || '00';
+            form.setData(field, `${newHour}:${newMinute}`);
+        }
+    };
+
+    const hoursList = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+    const minutesList = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 
     return (
         <AuthenticatedLayout title="Unidades de Campo">
@@ -270,36 +380,36 @@ export default function Locations({ empresa, locations, provincias, availableUse
                         <form onSubmit={submit} className="relative z-10 space-y-8 max-h-[70vh] overflow-y-auto pr-4 custom-scrollbar">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nombre de Sede</label>
+                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-4 block mb-2">Nombre de Sede</label>
                                     <input id="nombre_sede" name="nombre_sede" type="text" value={form.data.nombre_sede} onChange={e => form.setData('nombre_sede', e.target.value)} required 
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Dirección</label>
+                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-4 block mb-2">Dirección</label>
                                     <input id="direccion" name="direccion" type="text" value={form.data.direccion} onChange={e => form.setData('direccion', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Localidad</label>
+                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-4 block mb-2">Localidad</label>
                                     <input id="localidad" name="localidad" type="text" value={form.data.localidad} onChange={e => form.setData('localidad', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Provincia</label>
+                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-4 block mb-2">Provincia</label>
                                     <select id="provincia_id" name="provincia_id" value={form.data.provincia_id} onChange={e => form.setData('provincia_id', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark] italic uppercase">
                                         <option value="">SELECCIONE PROVINCIA...</option>
                                         {provincias.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Teléfono Sede</label>
+                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-4 block mb-2">Teléfono Sede</label>
                                     <input id="telefono" name="telefono" type="text" value={form.data.telefono} onChange={e => form.setData('telefono', e.target.value)}
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
                                 </div>
                                 <div className="space-y-2">
-                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Sede</label>
+                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-4 block mb-2">Email Sede</label>
                                     <input id="correo" name="correo" type="email" value={form.data.correo} onChange={e => form.setData('correo', e.target.value)}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all uppercase"/>
+                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all"/>
                                 </div>
                             </div>
 
@@ -354,7 +464,7 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                             {/* Selector de Días Operativos (Píldoras Tácticas) */}
                                             <div className="space-y-3">
-                                                <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Días de Operación Ordinaria</label>
+                                                <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-2 block mb-2">Días de Operación Ordinaria</label>
                                                 <div className="flex flex-wrap gap-2">
                                                     {['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'].map(day => {
                                                         const isSelected = form.data.dias_operativos.includes(day);
@@ -382,26 +492,43 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                                     })}
                                                 </div>
                                             </div>
-
                                             {/* Horas de apertura y cierre */}
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
-                                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Apertura</label>
-                                                    <input 
-                                                        type="time" 
-                                                        value={form.data.hora_apertura || ''} 
-                                                        onChange={e => form.setData('hora_apertura', e.target.value)} 
-                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark] italic"
-                                                    />
+                                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-2 block mb-2">Apertura</label>
+                                                    <div className="flex items-center gap-2">
+                                                        <TimeSelect 
+                                                            value={parseTime(form.data.hora_apertura).hour}
+                                                            onChange={val => handleTimeChange('hora_apertura', 'hour', val)}
+                                                            options={hoursList}
+                                                            placeholder="HH"
+                                                        />
+                                                        <span className="text-white/40 font-bold">:</span>
+                                                        <TimeSelect 
+                                                            value={parseTime(form.data.hora_apertura).minute}
+                                                            onChange={val => handleTimeChange('hora_apertura', 'minute', val)}
+                                                            options={minutesList}
+                                                            placeholder="MM"
+                                                        />
+                                                    </div>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Cierre</label>
-                                                    <input 
-                                                        type="time" 
-                                                        value={form.data.hora_cierre || ''} 
-                                                        onChange={e => form.setData('hora_cierre', e.target.value)} 
-                                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-sm font-bold text-white focus:ring-2 focus:ring-emerald-500 transition-all [color-scheme:dark] italic"
-                                                    />
+                                                    <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-2 block mb-2">Cierre</label>
+                                                    <div className="flex items-center gap-2">
+                                                        <TimeSelect 
+                                                            value={parseTime(form.data.hora_cierre).hour}
+                                                            onChange={val => handleTimeChange('hora_cierre', 'hour', val)}
+                                                            options={hoursList}
+                                                            placeholder="HH"
+                                                        />
+                                                        <span className="text-white/40 font-bold">:</span>
+                                                        <TimeSelect 
+                                                            value={parseTime(form.data.hora_cierre).minute}
+                                                            onChange={val => handleTimeChange('hora_cierre', 'minute', val)}
+                                                            options={minutesList}
+                                                            placeholder="MM"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -410,7 +537,7 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                     {/* Tolerancia GPS - Siempre visible para el módulo Proof of Presence */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-white/5">
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Latitud GPS</label>
+                                            <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-2 block mb-2">Latitud GPS</label>
                                             <input 
                                                 type="number" 
                                                 step="any"
@@ -422,7 +549,7 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                             {form.errors.latitud && <span className="text-red-500 text-[9px] font-black italic ml-2 mt-1 block">{form.errors.latitud}</span>}
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Longitud GPS</label>
+                                            <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-2 block mb-2">Longitud GPS</label>
                                             <input 
                                                 type="number" 
                                                 step="any"
@@ -434,7 +561,7 @@ export default function Locations({ empresa, locations, provincias, availableUse
                                             {form.errors.longitud && <span className="text-red-500 text-[9px] font-black italic ml-2 mt-1 block">{form.errors.longitud}</span>}
                                         </div>
                                         <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-2">Radio Tolerancia (Metros)</label>
+                                            <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-2 block mb-2">Radio Tolerancia (Metros)</label>
                                             <input 
                                                 type="number" 
                                                 min="0"
@@ -529,10 +656,10 @@ export default function Locations({ empresa, locations, provincias, availableUse
                 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
                 @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-                .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(246,146,57,0.1); border-radius: 10px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(246,146,57,0.3); }
+                .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(246,146,57,0.75); border-radius: 10px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #F69239; }
             `}</style>
         </AuthenticatedLayout>
     );

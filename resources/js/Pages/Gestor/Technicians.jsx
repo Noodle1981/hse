@@ -96,7 +96,30 @@ export default function Index({ technicians, companies, filters }) {
     };
 
     return (
-        <AuthenticatedLayout title="Escuadrón">
+        <AuthenticatedLayout 
+            title="Escuadrón"
+            header={
+                <div className="flex items-center gap-4">
+                    <Link 
+                        href={route('gestor.administration.hub')} 
+                        className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-[#F69239]/10 hover:border-[#F69239]/30 text-white/60 hover:text-white transition-all group/back shadow-lg"
+                        title="Volver al Panel de Administración"
+                    >
+                        <svg className="w-5 h-5 transform group-hover/back:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                    <div className="flex flex-col">
+                        <h1 className="text-xs font-black text-indigo-400 uppercase tracking-widest italic leading-none mb-1">
+                            Administración
+                        </h1>
+                        <h2 className="text-sm font-bold text-white uppercase tracking-tight leading-none italic">
+                            Control de Escuadrón (Técnicos)
+                        </h2>
+                    </div>
+                </div>
+            }
+        >
             <Head title="Gestión de Técnicos" />
 
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-[#F69239]/30">

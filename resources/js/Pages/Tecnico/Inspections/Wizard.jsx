@@ -120,10 +120,23 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                 <div className="max-w-4xl mx-auto space-y-8 animate-fade-in-up">
                     
                     {/* HUD Title & Sync Badge */}
-                    <div className="text-center space-y-3">
-                        <h1 className="text-xl font-black italic uppercase tracking-tight text-white/90">{checklist.title}</h1>
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-full text-[10px] font-black uppercase tracking-widest italic text-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.1)]">
-                            <span className="animate-pulse">⌚</span> Tiempo Real (Sync Servidor)
+                    <div className="flex items-center gap-4 relative">
+                        <Link 
+                            href={['gestor', 'super_admin', 'administrador', 'admin'].includes(user.rol) 
+                                ? route('gestor.checklists.index') 
+                                : route('tecnico.checklists.tasks.index')
+                            } 
+                            className="absolute left-0 w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white/40 hover:text-white transition-all z-10"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </Link>
+                        <div className="text-center flex-1 space-y-3">
+                            <h1 className="text-xl font-black italic uppercase tracking-tight text-white/90 pl-12 pr-12">{checklist.title}</h1>
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-full text-[10px] font-black uppercase tracking-widest italic text-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.1)]">
+                                <span className="animate-pulse">⌚</span> Tiempo Real (Sync Servidor)
+                            </div>
                         </div>
                     </div>
 

@@ -36,6 +36,7 @@ export default function Index({ users, filters }) {
         telefono: '',
         n_doc: '',
         estado: 'activo',
+        foto: '',
     });
 
     // Sincronizar búsqueda y filtros con el servidor
@@ -86,6 +87,7 @@ export default function Index({ users, filters }) {
             telefono: user.telefono || '',
             n_doc: user.n_doc || '',
             estado: user.estado,
+            foto: user.foto || '',
         });
         setShowForm(true);
     };
@@ -116,7 +118,30 @@ export default function Index({ users, filters }) {
     };
 
     return (
-        <AuthenticatedLayout title="Matriz Identidades">
+        <AuthenticatedLayout 
+            title="Matriz Identidades"
+            header={
+                <div className="flex items-center gap-4">
+                    <Link 
+                        href={route('gestor.administration.hub')} 
+                        className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-[#F69239]/10 hover:border-[#F69239]/30 text-white/60 hover:text-white transition-all group/back shadow-lg"
+                        title="Volver al Panel de Administración"
+                    >
+                        <svg className="w-5 h-5 transform group-hover/back:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </Link>
+                    <div className="flex flex-col">
+                        <h1 className="text-xs font-black text-ep-primary uppercase tracking-widest italic leading-none mb-1">
+                            Administración
+                        </h1>
+                        <h2 className="text-sm font-bold text-white uppercase tracking-tight leading-none italic">
+                            Matriz de Usuarios
+                        </h2>
+                    </div>
+                </div>
+            }
+        >
             <Head title="Gestión de Usuarios" />
 
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-[#F69239]/30">
@@ -184,6 +209,18 @@ export default function Index({ users, filters }) {
                                 </h3>
                                 
                                 <form onSubmit={submit} className="relative z-10 space-y-8">
+                                    {form.data.foto && (
+                                        <div className="flex items-center gap-3 bg-white/5 border border-white/5 p-3 rounded-2xl max-w-sm animate-fade-in">
+                                            <div className="w-12 h-12 rounded-xl border border-[#F69239]/30 overflow-hidden shrink-0">
+                                                <img src={`/storage/${form.data.foto}`} alt="Foto de Perfil" className="w-full h-full object-cover" />
+                                            </div>
+                                            <div>
+                                                <span className="text-[8px] font-black text-[#F69239] uppercase tracking-widest block italic mb-0.5">Identidad Digital</span>
+                                                <span className="text-xs font-bold text-white uppercase italic">{form.data.nombres} {form.data.apellidos}</span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nombres</label>

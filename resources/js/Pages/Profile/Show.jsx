@@ -90,6 +90,28 @@ export default function Show() {
         });
     };
 
+    const handlePhotoChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 15 * 1024 * 1024) {
+            alert('La imagen no debe superar los 15 MB.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('foto', file);
+
+        router.post(route('profile.photo'), formData, {
+            preserveScroll: true,
+            forceFormData: true,
+            onSuccess: () => {},
+            onError: (err) => {
+                alert(err.foto || 'Error al procesar y subir la foto.');
+            }
+        });
+    };
+
     const isBaseAdmin = ['gestor', 'super_admin', 'administrador', 'admin'].includes(user.rol);
     const isGestorActive = user.active_role === 'gestor' || user.active_role === 'super_admin';
     const isTecnicoActive = user.active_role === 'tecnico';
@@ -123,8 +145,29 @@ export default function Show() {
                                     <div className="absolute inset-0 bg-gradient-to-b from-[#F69239]/5 to-transparent pointer-events-none"></div>
 
                                     <div className="relative">
-                                        <div className="w-24 h-24 bg-[#F69239]/10 rounded-[2rem] border border-[#F69239]/20 mx-auto flex items-center justify-center text-[#F69239] text-3xl font-black shadow-inner mb-3 rotate-3 group-hover:rotate-0 transition-all duration-700">
-                                            {user_data.nombres?.charAt(0) || 'U'}
+                                        <div className="relative w-24 h-24 mx-auto mb-3 group/avatar">
+                                            <div className="w-24 h-24 bg-[#F69239]/10 rounded-[2rem] border border-[#F69239]/20 flex items-center justify-center text-[#F69239] text-3xl font-black shadow-inner overflow-hidden rotate-3 group-hover/avatar:rotate-0 transition-all duration-700">
+                                                {user_data.foto ? (
+                                                    <img src={`/storage/${user_data.foto}`} alt="Foto de Perfil" className="w-full h-full object-cover animate-fade-in" />
+                                                ) : (
+                                                    user_data.nombres?.charAt(0) || 'U'
+                                                )}
+                                            </div>
+                                            {/* Upload Overlay */}
+                                            <label htmlFor="foto-upload" className="absolute inset-0 rounded-[2rem] bg-black/75 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-300 z-10 border border-[#F69239]/50 shadow-inner">
+                                                <svg className="w-5 h-5 text-[#F69239]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                <span className="text-[7px] font-black text-white uppercase tracking-widest mt-1">Cargar Foto</span>
+                                                <input 
+                                                    id="foto-upload" 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="sr-only" 
+                                                    onChange={handlePhotoChange} 
+                                                />
+                                            </label>
                                         </div>
                                         <h3 className="text-xl font-black text-white italic uppercase tracking-tight">
                                             {user_data.nombres} {user_data.apellidos}
