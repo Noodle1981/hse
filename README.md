@@ -104,6 +104,32 @@ Accede a: **http://localhost:8000/login**
 
 ---
 
+## 🌐 Despliegue y Producción
+
+Al subir el proyecto al servidor, ten en cuenta los siguientes requerimientos para que el guardado de firmas y la subida de fotos (perfil, hallazgos, incidentes) funcionen correctamente:
+
+### 1. Enlace Simbólico de Almacenamiento
+Laravel almacena los archivos subidos en una carpeta privada por seguridad. Es obligatorio crear el enlace público ejecutando en la terminal del servidor:
+```bash
+php artisan storage:link
+```
+
+### 2. Archivos y Carpetas a Transferir
+Si necesitas migrar la base de datos local y las imágenes subidas al servidor:
+- **Base de Datos:** Copia el archivo `database/database.sqlite`.
+- **Archivos/Imágenes subidos:** Copia toda la carpeta `storage/app/public` (aquí se guardan las subcarpetas `hallazgos/`, `incidentes/` y `signatures/`).
+
+### 3. Configuración del Servidor PHP (`php.ini`)
+Las cámaras de los teléfonos móviles modernos toman fotografías de alta resolución que suelen pesar entre **3 MB y 10 MB**. Si la configuración de PHP en tu servidor limita las subidas (por defecto suele ser de 2 MB), el servidor rechazará las peticiones del celular y causará errores en la aplicación.
+
+Asegúrate de configurar las siguientes directivas en el archivo **`php.ini`** de tu servidor:
+```ini
+upload_max_filesize = 20M
+post_max_size = 20M
+```
+
+---
+
 ## 👤 Usuarios Demo
 
 ### Administrador (Acceso completo)
