@@ -121,7 +121,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                                 <NavItem href={safeRoute('admin.dashboard')} active={isActive('admin.dashboard')} open={sidebarOpen || mobileMenuOpen} icon={<IconDashboard />} label="Dashboard Global" />
                                 <NavItem href={safeRoute('admin.consultants.index')} active={isActive('admin.consultants.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconCompanies />} label="Consultoras" />
                                 {user?.is_super_admin && (
-                                    <NavItem href={safeRoute('admin.staff.index')} active={isActive('admin.staff.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconStaff />} label="Personal Global" />
+                                    <NavItem href={safeRoute('admin.staff.index')} active={isActive('admin.staff.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconStaff />} label="Personal / Staff" />
                                 )}
                             </>
                         )}
