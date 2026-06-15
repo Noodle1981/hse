@@ -336,7 +336,7 @@ class AdministrationController extends Controller
     {
         $this->ensureSuperAdminOrVendedor();
 
-        $from = $request->query('from', now()->startOfMonth()->format('Y-m-d'));
+        $from = $request->query('from', now()->subMonths(1)->startOfMonth()->format('Y-m-d'));
         $to = $request->query('to', now()->endOfMonth()->format('Y-m-d'));
         $consultoraId = $request->query('consultora_id', 'all');
 
@@ -364,7 +364,7 @@ class AdministrationController extends Controller
             $masterReportsCount = MasterReport::whereHas('sede.empresa', function ($q) use ($consultora) {
                 $q->where('consultora_id', $consultora->id);
             })->whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
-              ->where('master_reports.estado', 'finalizado')->count();
+              ->whereIn('master_reports.estado', ['finalizado', 'aprobado'])->count();
 
             $companies = Empresa::where('consultora_id', $consultora->id)
                 ->with('consultora')
@@ -380,7 +380,7 @@ class AdministrationController extends Controller
                     },
                     'informes' => function ($q) use ($from, $to) {
                         $q->whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
-                          ->where('master_reports.estado', 'finalizado');
+                          ->whereIn('master_reports.estado', ['finalizado', 'aprobado']);
                     }
                 ])
                 ->orderBy('nombre')
@@ -399,7 +399,7 @@ class AdministrationController extends Controller
               ->where('trainings.status', 'completed')->count();
 
             $masterReportsCount = MasterReport::whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
-              ->where('master_reports.estado', 'finalizado')->count();
+              ->whereIn('master_reports.estado', ['finalizado', 'aprobado'])->count();
 
             $companies = Empresa::with('consultora')
                 ->withCount([
@@ -414,7 +414,7 @@ class AdministrationController extends Controller
                     },
                     'informes' => function ($q) use ($from, $to) {
                         $q->whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
-                          ->where('master_reports.estado', 'finalizado');
+                          ->whereIn('master_reports.estado', ['finalizado', 'aprobado']);
                     }
                 ])
                 ->orderBy('nombre')
