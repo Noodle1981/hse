@@ -43,7 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         /** @var \App\Models\User $user */
         $user = \Illuminate\Support\Facades\Auth::user();
-        if ($user->isSuperAdmin()) {
+        if ($user->isGlobalUser()) {
             return redirect()->route('admin.dashboard');
         }
         if ($user->isTechnician()) {

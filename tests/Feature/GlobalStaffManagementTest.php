@@ -208,4 +208,36 @@ class GlobalStaffManagementTest extends TestCase
         $this->expectException(\Exception::class);
         $log->delete();
     }
+
+    /** @test */
+    public function vendedor_and_super_admin_redirect_to_admin_dashboard()
+    {
+        // 1. Vendedor
+        $vendedor = User::create([
+            'nombres' => 'Juan',
+            'apellidos' => 'Vendedor',
+            'email' => 'juan@vendedor.com',
+            'password' => bcrypt('password'),
+            'rol' => 'vendedor',
+            'estado' => 'activo',
+            'consultora_id' => null,
+        ]);
+
+        $response = $this->actingAs($vendedor)->get(route('dashboard'));
+        $response->assertRedirect(route('admin.dashboard'));
+
+        // 2. Super Admin
+        $superAdmin = User::create([
+            'nombres' => 'Super',
+            'apellidos' => 'Admin',
+            'email' => 'super@admin.com',
+            'password' => bcrypt('password'),
+            'rol' => 'super_admin',
+            'estado' => 'activo',
+            'consultora_id' => null,
+        ]);
+
+        $response = $this->actingAs($superAdmin)->get(route('dashboard'));
+        $response->assertRedirect(route('admin.dashboard'));
+    }
 }
