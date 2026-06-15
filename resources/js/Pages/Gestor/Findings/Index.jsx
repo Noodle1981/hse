@@ -201,18 +201,18 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                     {/* MASTER TABLE: MATRIZ FORENSE (REPLICA LEGACY) */}
                     <div className="bg-[#16162a]/60 backdrop-blur-md rounded-3xl sm:rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
-                        
-                        <div className="overflow-x-auto custom-scrollbar-horizontal">
-                            <table className="w-full border-collapse min-w-[1100px]">
+                                       {/* VISTA DESKTOP (TABLA) */}
+                        <div className="hidden lg:block overflow-x-auto custom-scrollbar">
+                            <table className="w-full border-collapse min-w-[950px]">
                                 <thead>
                                     <tr className="bg-black/20 text-left">
-                                        <th className="px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic">Hallazgo</th>
-                                        <th className="px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic">Sede</th>
-                                        <th className="px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Riesgo</th>
-                                        <th className="px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Status</th>
-                                        <th className="px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Plazo</th>
-                                        <th className="px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Docs</th>
-                                        <th className="px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-right">Comandos</th>
+                                        <th className="px-4 lg:px-6 xl:px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic">Hallazgo</th>
+                                        <th className="px-4 lg:px-6 xl:px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic">Sede</th>
+                                        <th className="px-4 lg:px-6 xl:px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Riesgo</th>
+                                        <th className="px-4 lg:px-6 xl:px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Status</th>
+                                        <th className="px-4 lg:px-6 xl:px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Plazo</th>
+                                        <th className="px-4 lg:px-6 xl:px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-center">Docs</th>
+                                        <th className="px-4 lg:px-6 xl:px-8 py-6 uppercase tracking-[0.3em] text-[10px] font-black text-white/20 italic text-right">Comandos</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
@@ -232,7 +232,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                                     )}
                                     {findings.data.map(finding => (
                                         <tr key={finding.id} className={`group/row hover:bg-white/5 transition-all duration-500 relative ${finding.is_overdue ? 'bg-red-500/5' : ''}`}>
-                                            <td className="px-8 py-8">
+                                            <td className="px-4 lg:px-6 xl:px-8 py-6 lg:py-8">
                                                 <div className="text-sm font-black text-white italic uppercase tracking-tight leading-tight mb-1 group-hover/row:text-indigo-400 transition-colors">
                                                     {finding.titulo}
                                                 </div>
@@ -243,7 +243,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                                                     <div className="text-[9px] font-black text-indigo-400/60 mt-2 uppercase italic tracking-widest leading-none">📍 {finding.ubicacion_especifica}</div>
                                                 )}
                                             </td>
-                                            <td className="px-8 py-8">
+                                            <td className="px-4 lg:px-6 xl:px-8 py-6 lg:py-8">
                                                 <div className="text-[10px] font-black text-white/60 italic uppercase tracking-tight leading-none">
                                                     {finding.sede?.nombre_sede || 'GLOBAL'}
                                                 </div>
@@ -251,18 +251,18 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                                                     {finding.sede?.empresa?.nombre || '-'}
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-8 text-center">
+                                            <td className="px-4 lg:px-6 xl:px-8 py-6 lg:py-8 text-center">
                                                 <CriticidadBadge criticidad={finding.criticidad} />
                                             </td>
-                                            <td className="px-8 py-8 text-center">
+                                            <td className="px-4 lg:px-6 xl:px-8 py-6 lg:py-8 text-center">
                                                 <StatusBadge status={finding.estado} />
                                             </td>
-                                            <td className="px-8 py-8 text-center">
+                                            <td className="px-4 lg:px-6 xl:px-8 py-6 lg:py-8 text-center">
                                                 <div className={`text-[10px] font-black italic ${finding.is_overdue ? 'text-red-500 animate-pulse' : 'text-white/60'}`}>
                                                     {finding.plazo_correccion ? new Date(finding.plazo_correccion).toLocaleDateString() : '-'}
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-8 text-center">
+                                            <td className="px-4 lg:px-6 xl:px-8 py-6 lg:py-8 text-center">
                                                 <div className="flex justify-center items-center gap-4">
                                                     {finding.fotos_count > 0 && (
                                                         <div className="flex items-center gap-1.5" title={`${finding.fotos_count} Fotos`}>
@@ -278,7 +278,7 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                                                     )}
                                                 </div>
                                             </td>
-                                            <td className="px-8 py-8 text-right">
+                                            <td className="px-4 lg:px-6 xl:px-8 py-6 lg:py-8 text-right">
                                                 <div className="flex justify-end gap-3 transition-all duration-500">
                                                     <Link href={route(auth?.user?.rol?.toLowerCase() === 'tecnico' || auth?.user?.rol?.toLowerCase() === 'técnico' ? 'tecnico.hallazgos.show' : 'gestor.hallazgos.show', finding.id)} className="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95" title="Auditar">
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -294,8 +294,86 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                             </table>
                         </div>
 
+                        {/* VISTA MOBILE (TARJETAS) */}
+                        <div className="lg:hidden block p-4 sm:p-6 space-y-6">
+                            {findings.data.length === 0 && (
+                                <div className="py-20 text-center">
+                                    <div className="flex flex-col items-center opacity-10">
+                                        <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" strokeWidth="1"/></svg>
+                                        <span className="text-[10px] font-black uppercase italic tracking-[0.4em]">Sin Hallazgos</span>
+                                    </div>
+                                </div>
+                            )}
+                            {findings.data.map(finding => (
+                                <div key={finding.id} className={`bg-[#16162a]/60 border border-white/5 rounded-3xl p-5 space-y-4 group/card relative ${finding.is_overdue ? 'bg-red-500/5 border-red-500/10' : ''}`}>
+                                    <div className="flex justify-between items-start gap-4">
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-black text-white italic uppercase tracking-tight leading-tight group-hover/card:text-indigo-400 transition-colors">{finding.titulo}</span>
+                                            {finding.ubicacion_especifica && (
+                                                <span className="text-[9px] font-black text-indigo-400/60 mt-1 uppercase italic tracking-widest leading-none">📍 {finding.ubicacion_especifica}</span>
+                                            )}
+                                        </div>
+                                        <CriticidadBadge criticidad={finding.criticidad} />
+                                    </div>
+
+                                    <p className="text-[11px] font-bold text-white/40 italic leading-relaxed">
+                                        {finding.descripcion}
+                                    </p>
+
+                                    <div className="pt-3 border-t border-white/5 space-y-1">
+                                        <div className="text-[10px] font-black text-white/60 italic uppercase tracking-tight leading-none">
+                                            {finding.sede?.nombre_sede || 'GLOBAL'}
+                                        </div>
+                                        <div className="text-[8px] font-bold text-white/20 italic uppercase leading-none">
+                                            {finding.sede?.empresa?.nombre || '-'}
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-3 border-t border-white/5 grid grid-cols-2 gap-3 items-center">
+                                        <div className="flex flex-col gap-1">
+                                            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest italic">Estado</span>
+                                            <div className="flex"><StatusBadge status={finding.estado} /></div>
+                                        </div>
+                                        <div className="flex flex-col gap-1 items-end">
+                                            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest italic">Plazo</span>
+                                            <span className={`text-[10px] font-black italic ${finding.is_overdue ? 'text-red-500 animate-pulse' : 'text-white/60'}`}>
+                                                {finding.plazo_correccion ? new Date(finding.plazo_correccion).toLocaleDateString() : '-'}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3">
+                                            {finding.fotos_count > 0 && (
+                                                <div className="flex items-center gap-1.5" title={`${finding.fotos_count} Fotos`}>
+                                                    <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                    <span className="text-[10px] font-black text-indigo-400 leading-none">{finding.fotos_count}</span>
+                                                </div>
+                                            )}
+                                            {finding.seguimientos_count > 0 && (
+                                                <div className="flex items-center gap-1.5" title={`${finding.seguimientos_count} Seguimientos`}>
+                                                    <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                                    <span className="text-[10px] font-black text-emerald-400 leading-none">{finding.seguimientos_count}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="flex gap-2">
+                                            <Link href={route(auth?.user?.rol?.toLowerCase() === 'tecnico' || auth?.user?.rol?.toLowerCase() === 'técnico' ? 'tecnico.hallazgos.show' : 'gestor.hallazgos.show', finding.id)} className="h-10 px-4 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-95 text-[10px] font-black uppercase tracking-wider italic" title="Auditar">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                Auditar
+                                            </Link>
+                                            <a href={route('gestor.hallazgos.pdf', finding.id)} target="_blank" className="h-10 w-10 bg-white/5 border border-white/10 text-white/40 hover:bg-white/20 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg active:scale-95" title="Reporte PDF" rel="noreferrer">
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
                         {/* PAGINACIÓN TÁCTICA */}
-                        <div className="px-10 py-8 border-t border-white/5 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-6 font-black italic">
+                        <div className="px-4 lg:px-6 xl:px-8 py-6 border-t border-white/5 bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-6 font-black italic">
                             <div className="text-[10px] text-white/20 uppercase tracking-[0.5em]">
                                 INVESTIGATION OPS • FORENSIC v2.0
                             </div>
@@ -322,6 +400,30 @@ export default function Index({ findings, filters, kpis = {}, sedes = [], tecnic
                 @keyframes fade-in-down { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes fade-in-up { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+                /* Custom Scrollbar for XamaSafe tables */
+                .custom-scrollbar {
+                    scrollbar-width: thin;
+                    scrollbar-color: rgba(99, 102, 241, 0.4) rgba(255, 255, 255, 0.02);
+                }
+                .custom-scrollbar::-webkit-scrollbar {
+                    height: 8px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: rgba(255, 255, 255, 0.02);
+                    border-radius: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(99, 102, 241, 0.3);
+                    border-radius: 4px;
+                    border: 2px solid transparent;
+                    background-clip: padding-box;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(99, 102, 241, 0.6);
+                    border: 2px solid transparent;
+                    background-clip: padding-box;
+                }
             `}</style>
         </AuthenticatedLayout>
     );

@@ -110,14 +110,15 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 
 ### 4.7. Control y Gestión de Firmas Digitales y Aprobación Segura
 * **Tipología de Firmas del Sistema:**
-  * **Firma Tipo A (Firma de Perfil / Identidad Permanente):**
-    * **Definición:** Es la firma oficial y permanente que identifica a un Técnico o Usuario en el sistema.
-    * **Flujo de Captura:** Se realiza desde la pantalla de Perfil (`/perfil`) usando un canvas de dibujo React.
-    * **Almacenamiento Físico:** Al subirla, el backend decodifica la cadena Base64, genera un archivo físico `.png` y lo almacena en `storage/app/public/signatures/` con un nombre único aleatorio para preservar el historial legal. En la base de datos se guarda la ruta relativa al archivo (no el Base64) en el campo `users.firma`.
-    * **Auditoría Obligatoria:** No se aplica inmediatamente. Pasa a estado pendiente (`firma_status = 'pending'`) y se guarda temporalmente en `firma_temp`.
+  * **Firma Tipo A (Firma de Perfil / Identidad Permanente / Instructor Especialista):**
+    * **Definición:** Es la firma oficial y permanente que identifica a un Técnico, Usuario o Instructor Especialista en el sistema.
+    * **Flujo de Captura:** Se realiza desde la pantalla de Perfil o el canvas de finalización usando un canvas de dibujo React. El frontend transmite la firma temporalmente como un string Base64 URL (`data:image/png;base64,...`).
+    * **Almacenamiento Físico (Optimización Storage vs Base64):** El backend (e.g. `TrainingController` o `ProfileController`) intercepta el string Base64, lo decodifica de forma segura y lo guarda físicamente como un archivo `.png` en el disco público de la aplicación (`Storage::disk('public')->put('signatures/filename.png', $data)`).
+    * **Persistencia Ligera en Base de Datos:** En las tablas (`users.firma`, `visit_certificates.instructor_signature`), solo se almacena la ruta relativa (ej. `signatures/instructor_xxxx.png`). Esto previene el crecimiento desmedido de las filas de texto largo (`TEXT`/`LONGTEXT`) y mantiene las consultas optimizadas.
+    * **Auditoría Obligatoria (Técnicos):** Para técnicos, no se aplica inmediatamente. Pasa a estado pendiente (`firma_status = 'pending'`) y se guarda temporalmente en `firma_temp`.
   * **Firma Tipo B (Firma Transaccional / De Visita o Planilla):**
-    * **Definición:** Firma única, temporal y dinámica capturada en caliente para certificar un evento específico (asistencia a capacitación, cierre de checklist, o constancia de visita).
-    * **Almacenamiento:** Mapeadas como Base64 serializadas o strings codificados en caliente asociados de forma directa a registros de la base de datos (como la firma del cliente al cerrar una constancia, o las firmas de los operarios en la tabla `training_attendances`).
+    * **Definición:** Firma única, temporal y dinámica capturada en caliente para certificar un evento específico (asistencia a capacitación, firma de supervisor de visita).
+    * **Almacenamiento:** Mapeadas como Base64 serializadas o strings codificados asociados de forma directa a campos específicos de la base de datos (como la firma del cliente al cerrar una constancia, o las firmas de los operarios en la tabla `training_attendances`).
 
 * **Política de Firma Pendiente (Auditoría de Identidad):**
   * Cuando un Técnico actualiza su firma digital desde su panel de Perfil (`/perfil`), esta entra en estado de aprobación pendiente (`firma_status = 'pending'`) y la firma propuesta se almacena en la ruta temporal `firma_temp`.
@@ -175,10 +176,30 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 ## 5. Requisitos de Experiencia de Usuario y Diseño (Aesthetics)
 Para garantizar la consistencia en el stack **React + Inertia + Tailwind CSS v4**, se deben respetar las siguientes directrices estéticas:
 
+### 5.1. Directrices Visuales y Core HUD
 1. **Inmersión Oscura:** El lienzo principal debe usar un fondo `#11111D` sólido con tarjetas y contenedores en `#1E1E2D` (con gradientes internos sutiles).
 2. **Micro-interacciones en Botones (Tactical Pill):** Los botones deben contar con efectos hover dinámicos, shimmer degradado y escala reducida en clic (`active:scale-95`).
 3. **Firma Digital Clara:** Las firmas digitalizadas por el técnico deben renderizarse con contraste invertido (`brightness-0 invert opacity-90`) en la interfaz oscura para simular un HUD técnico sin perder legibilidad al imprimir reportes.
 4. **Cargas Transparentes (Loading States):** Spinner técnicos con animación de "escaneo de datos" HUD infinita al procesar documentos o cargar recursos en segundo plano.
+
+### 5.2. 🎨 Identidad Visual y Colores por Pilar
+Es obligatorio mantener la coherencia cromática y el diseño de marca para cada pilar del sistema:
+1. **Inspecciones / Checklists:** Se representan estrictamente con la gama de color **Naranja Técnico / Naranja** (usando clases de Tailwind como `ep-primary`, `orange-500`, `amber-500`, etc.).
+2. **Capacitaciones / Educación:** Se representan con la gama de color **Azul / Indigo** (usando clases como `blue-500`, `indigo-500`).
+3. **Informes / Reportes:** Se representan con la gama de color **Rojo / Esmeralda / Amarillo** según su tipo específico de incidente/hallazgo/bitácora.
+
+Todo elemento interactivo, formulario, pestaña, selector, badge o scrollbar relacionado a checklists debe utilizar sin excepciones su color asignado (Naranja).
+
+### 5.3. 📱 Pautas de Responsividad y Navegación Adaptativa
+Para evitar que las tablas anchas comprometan la navegación en notebooks convencionales y dispositivos móviles:
+1. **Márgenes del Contenedor:** Ajustar de forma responsiva (`p-4 sm:p-6 lg:p-8 xl:p-12`) para optimizar el espacio útil en laptops.
+2. **Paddings de Celdas y Ancho de Tabla:** Rediseñar rellenos de celdas a valores compactos (`px-4 lg:px-6 xl:px-8 py-6 lg:py-8`) para reducir la huella horizontal de la tabla y ajustarse a laptops comunes sin desbordar.
+3. **Transición a Tarjetas Táctiles (Breakpoint < 1024px):** Todo listado tabular complejo debe cambiar a una vista de tarjetas verticales autoexplicativas e interactivas al bajar del breakpoint de `1024px` (`lg` en Tailwind). Las tablas anchas quedan ocultas (`lg:block hidden`) y las tarjetas toman el foco (`lg:hidden block`).
+4. **Scrollbars de Marca Estilizados (`.custom-scrollbar`):** El contenedor horizontal de tablas desbordables (`overflow-x-auto`) debe llevar la clase `.custom-scrollbar` con estilos específicos que representen su pilar correspondiente:
+   - *Inspecciones / Checklists / Matriz:* Scrollbar Naranja XamaSafe (`rgba(246, 146, 57, 0.3)`).
+   - *Capacitaciones / Educación:* Scrollbar Índigo (`rgba(99, 102, 241, 0.3)`).
+   - *Incidentes / Emergencias:* Scrollbar Rojo (`rgba(239, 68, 68, 0.3)`).
+5. **Columna Fija Adaptable en Matrices (Annual Contract):** En vistas matriciales complejas, la primera columna fija (nombres de actividad) debe adaptar su tamaño de forma dinámica (`w-[140px] sm:w-[220px] md:w-[300px]`) y reducir sus paddings en móviles para permitir espacio suficiente a las columnas deslizables de los meses.
 
 ---
 

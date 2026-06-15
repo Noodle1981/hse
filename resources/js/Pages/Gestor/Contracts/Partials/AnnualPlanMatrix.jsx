@@ -144,7 +144,7 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
             <table className="w-full border-collapse table-fixed min-w-[1200px]">
                 <thead>
                     <tr className="bg-black/40 border-b border-white/5">
-                        <th className="sticky left-0 z-20 bg-[#141421] px-8 py-8 text-left w-[300px] shadow-[10px_0_20px_rgba(0,0,0,0.4)]">
+                        <th className="sticky left-0 z-20 bg-[#141421] px-4 md:px-8 py-8 text-left w-[140px] sm:w-[220px] md:w-[300px] shadow-[10px_0_20px_rgba(0,0,0,0.4)]">
                             <span className="text-[10px] font-black text-ep-primary uppercase tracking-[0.3em] italic">Actividad / Punto de Control</span>
                         </th>
                         {Object.entries(dynamicMonths).map(([key, info]) => (
@@ -160,7 +160,7 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                 <tbody className="divide-y divide-white/[0.02]">
                     {plans.map((plan) => (
                         <tr key={plan.id} className="group/row hover:bg-white/[0.02] transition-colors">
-                            <td className="sticky left-0 z-10 bg-[#141421] px-8 py-6 border-r border-white/5 shadow-[10px_0_20px_rgba(0,0,0,0.4)]">
+                            <td className="sticky left-0 z-10 bg-[#141421] px-4 md:px-8 py-4 md:py-6 border-r border-white/5 shadow-[10px_0_20px_rgba(0,0,0,0.4)]">
                                 <div className="flex items-center gap-4">
                                     <div className={`w-1 h-6 rounded-full shrink-0 
                                         ${plan.category === 'Inspección' ? 'bg-orange-500' : 
@@ -624,10 +624,10 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
             </div>
         )}
         <style dangerouslySetInnerHTML={{ __html: `
-            .custom-scrollbar::-webkit-scrollbar { height: 6px; }
-            .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); }
-            .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
-            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.1); }
+            .custom-scrollbar::-webkit-scrollbar { height: 8px; width: 8px; }
+            .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 4px; }
+            .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(246, 146, 57, 0.3); border-radius: 4px; border: 2px solid transparent; background-clip: padding-box; }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(246, 146, 57, 0.6); border: 2px solid transparent; background-clip: padding-box; }
             .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
             .animate-scale-up { animation: scale-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
             @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }

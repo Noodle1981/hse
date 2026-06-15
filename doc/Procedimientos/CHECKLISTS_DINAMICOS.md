@@ -1,4 +1,4 @@
-# 📝 Manual de Usuario: Auditorías e Inspecciones (v1.5)
+# 📝 Manual de Usuario: Auditorías e Inspecciones (v2.2)
 
 Este manual explica cómo construir formularios de control y realizar inspecciones técnicas en campo utilizando el motor de **Checklists Dinámicos** de **XamaSafe**.
 
@@ -9,54 +9,52 @@ El sistema permite digitalizar cualquier tipo de inspección técnica, eliminand
 
 ---
 
+## 🎨 Identidad Visual (Pilar Inspecciones)
+Todos los componentes interactivos, botones de acción, sliders, tabs y barras de progreso asociados a las auditorías y checklists utilizan estrictamente el color **Naranja Técnico / Naranja** (usando clases como `ep-primary`, `orange-500`, `amber-500`, etc.).
+
+---
+
 ## 👤 Roles y Responsabilidades
 
 | Rol | Acción |
 |---|---|
-| **Gestor (Administrador)** | Crear "Plantillas de Checklist", gestionar puntos de control y asignar inspecciones a sedes permanentes. |
-| **Técnico de Campo** | Completar el "Paso a Paso" de la inspección, registrar desvíos y adjuntar evidencias. |
+| **Gestor (Administrador)** | Crear "Plantillas de Checklist", configurar secciones y preguntas con reglas de fallas automáticas (`failure_logic`), y asignar coberturas mensuales. |
+| **Técnico de Campo** | Buscar y auto-asignarse plantillas, responder el wizard interactivo en campo, y firmar. |
 
 ---
 
 ## 🚀 Guía Paso a Paso
 
-### 1. Construcción del Formulario (Solo Gestores)
-Para crear una nueva herramienta de control:
+### 1. Construcción del Formulario y Lógica de Falla (Gestores)
 1. Dirígete a **Configuración > Catálogo de Checklists**.
-2. Pulsa en **"Crear Plantilla"**.
-3. Define los **Puntos de Control**:
-    - Agrega preguntas claras (ej: "¿El extintor está cargado?").
-    - Selecciona el tipo de respuesta: *Si/No*, *Numérico*, o *Texto Libre*.
-4. Guarda la plantilla. Ahora estará lista para ser usada en cualquier visita.
+2. Define las secciones (`ChecklistSection`) y agrega las preguntas (`DynamicQuestion`).
+3. **Reglas de Falla Automáticas:**
+   - **failure_values:** Determina qué respuestas constituyen no-conformidades (ej. "No", "Malo").
+   - **failure_logic:** Configura si falla si se marca cualquiera (`fail_if_selected`) o si falta alguna en multiselección (`fail_if_missing`).
+   - **Rangos Numéricos:** Si es un campo numérico, determina límites `min_value` y `max_value` que disparan la falla automáticamente fuera del rango.
 
-### 2. Ejecución de la Inspección (Técnico)
-Durante la visita técnica:
-1. Accede a la **Visita en Progreso**.
-2. En la sección de Auditorías, selecciona el checklist correspondiente.
-3. Se abrirá el **Wizard de Inspección**:
-    - Responde a cada punto de control.
-    - Si detectas un incumplimiento, marca el estado como **"No Cumple"**.
-    - El sistema te pedirá automáticamente una **Observación** y la opción de registrar un **Hallazgo** asociado.
-4. Una vez completado el 100% de los puntos, pulsa **"Finalizar Inspección"**.
+### 2. Ejecución y Blindaje en Caliente (Técnicos)
+Durante la visita técnica presencial:
+1. En **Mis Asignaciones (Misiones)**, selecciona el checklist correspondiente o pulsa `[+] Inspeccionar` para buscar con el filtro jerárquico de Categorías y Subcategorías.
+2. Completa los puntos de control en el **Wizard de Inspección**.
+3. **HUD Sync Badge (Seguridad SRE):** En la cabecera del wizard, verás un badge que pulsa en naranja técnico: `"⌚ Tiempo Real (Sync Servidor)"`.
+4. **Blindaje e Inmutabilidad de Tiempos:** Al finalizar la inspección, el backend Laravel descarta de forma absoluta cualquier marca de tiempo enviada por el navegador (evitando fraudes horariales) y escribe el timestamp `now()` del servidor. Cualquier manipulación sospechosa genera un `Log::warning()` con la IP y datos del técnico.
+5. **Counter Badges HUD:** Para inspecciones continuas y masivas de activos, verás badges flotantes en las esquinas (`absolute -top-3 -right-3`) indicando el número de inspecciones activas en caliente.
 
----
-
-## 🎨 Interfaz Táctica
-- **Modo Glassmorphism**: Los formularios se presentan en capas de cristal para no perder de vista el contexto de la visita.
-- **Micro-animaciones**: Verás una barra de progreso sutil que se llena a medida que completas el checklist.
-- **Feedback Inmediato**: Los ítems con falla resaltan con un sutil brillo rojo técnica (`glow-text-red`).
+### 3. Métricas y Bóveda (Visualización)
+1. Al volver al historial, la celda **"Checklists"** detalla la proporción del ratio de éxitos (`Exitosos: X/Y` en verde si pasaron, o en rojo con el icono `⚠️` si falló algún control) y el porcentaje de cumplimiento normativo destacado con sombra de texto glow (`glow-text`).
 
 ---
 
 ## 💡 Tips de Eficiencia
-- **Auto-asignación**: Si estás en una planta y decides hacer un control que no estaba planeado, usa la opción **"Agregar Checklist ad-hoc"** para elegir del catálogo sobre la marcha.
-- **Historial Quick-View**: Puedes consultar cómo se respondió este mismo checklist en la visita anterior pulsando el icono de reloj junto a la pregunta.
+- **Filtros en Cascada:** El buscador te permite filtrar instantáneamente por texto, categoría y subcategoría.
+- **Scrollbar Naranja:** Las tablas e historiales de visitas emplean un scrollbar naranja translúcido (`.custom-scrollbar`) que te advierte la capacidad de deslizamiento horizontal sin arruinar la interfaz.
 
 ---
 
 ## 📝 Resolución de Problemas
-- **¿Puedo editar una inspección terminada?** No, una vez que la inspección se cierra, los datos quedan sellados para garantizar la integridad de la auditoría. Si hubo un error, debe registrarse una nota aclaratoria en la observación general de la visita.
-- **No aparece el checklist que busco**: Asegúrate de que el Gestor haya asignado la plantilla a la sede o que esté marcada como "Global" en el catálogo.
+- **¿Qué pasa si modifico la fecha en mi celular?** El sistema lo detectará como un intento de bypass de horario, lo ignorará forzando la hora del servidor y registrará el evento en el log de auditoría SRE.
+- **Una inspección no-conformante no se ve roja:** Si se detectó una no-conformidad, la fila de la inspección lucirá un badge de fallo en rojo neón con el icono de advertencia.
 
 ---
-*Manual actualizado para XamaSafe v1.5 | Terminal Táctica Design*
+*Manual actualizado para XamaSafe v2.2 | Terminal Táctica Design*

@@ -121,4 +121,13 @@ Para evitar la incertidumbre durante procesos pesados (PDF, cálculos):
 ## Reglas de Oro
 1. **Contraste Invertido en Firmas**: Imágenes de firmas oscuras deben tener filtro `brightness-0 invert opacity-90`.
 2. **Resplandores (Glow)**: Usar `glow-text-red` o `glow-text-orange` (con text-shadow en CSS) para estados críticos.
-3. **Inmersión Móvil**: Priorizar el uso de tarjetas (`cards`) modulares sobre tablas horizontales en pantallas pequeñas.
+3. **Inmersión Móvil & Notebooks**:
+   - Priorizar el uso de tarjetas (`cards`) modulares sobre tablas horizontales en pantallas con ancho inferior a `1024px` (`lg:hidden block` para tarjetas, `lg:block hidden` para tablas).
+   - Minimizar la huella horizontal mediante paddings compactos (`px-4 lg:px-6 xl:px-8 py-6 lg:py-8`) y márgenes fluidos (`p-4 sm:p-6 lg:p-8 xl:p-12`) para notebooks de 13 y 15 pulgadas.
+   - Matrices complejas deben usar anchos de columna fija responsivos y dinámicos (ej. `w-[140px] sm:w-[220px] md:w-[300px]`) con relleno reducido en móviles.
+4. **Coherencia Cromática por Pilar**:
+   - *Inspecciones / Checklists / Matriz:* Gama **Naranja Técnico** (`ep-primary`, `orange-500`, `amber-500`).
+   - *Capacitaciones / Educación:* Gama **Azul / Índigo** (`blue-500`, `indigo-500`).
+   - *Informes / Reportes:* Gama **Rojo / Esmeralda / Amarillo** según criticidad de incidente/hallazgo.
+5. **Scrollbars de Marca**: Las tablas horizontales desbordables (`overflow-x-auto`) deben tener la clase `.custom-scrollbar` definida en `app.css` aplicando el color translúcido del pilar correspondiente para guiar sutil pero claramente al usuario sobre el deslizamiento horizontal disponible.
+

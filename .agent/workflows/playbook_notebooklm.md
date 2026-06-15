@@ -216,14 +216,18 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   * Cambiar de `{id}` a `{inspection}` o `{finding}` garantiza que la base de datos se consulte en tiempo de resolución de la ruta, retornando datos 100% consistentes y previniendo crashes en la renderización React.
 
 ### 3.7. Firma Digital de Instructores Especialistas y Almacenamiento Optimizado (Base64 a PNG)
-* **Propósito:** Optimizar el almacenamiento de firmas electrónicas y habilitar el rol de Instructor Externo / Especialista en las capacitaciones.
+* **Propósito:** Optimizar el almacenamiento de firmas electrónicas, habilitar el rol de Instructor Externo / Especialista en las capacitaciones, y evitar el "bloat" de base de datos.
+* **Regla de Optimización de Firmas (Storage vs Base64):**
+  - **Captura en Frontend:** El frontend (React canvas) transmite la firma de forma temporal como una cadena de datos Base64 URL (`data:image/png;base64,...`).
+  - **Decodificación en Backend:** El controlador (`TrainingController` o `ProfileController`) intercepta el string, extrae la cabecera de datos, lo decodifica de forma segura y lo guarda como un archivo físico `.png` en el disco público de la aplicación (`Storage::disk('public')->put('signatures/filename.png', $data)`).
+  - **Persistencia Ligera:** En la base de datos (`visit_certificates.instructor_signature` o `users.firma`), solo se almacena la ruta relativa (ej. `signatures/instructor_xxxx.png`). Esto previene el crecimiento desmedido de las filas de texto largo (`TEXT`/`LONGTEXT`) y mantiene las consultas optimizadas.
 * **Mecanismo Operativo (Frontend):**
-  * La finalización de la charla en `Session.jsx` expone un switch táctil glowing (`bg-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.3)]`) para "¿Instructor Externo / Especialista?".
-  * Al activarse, se despliega un panel translúcido de Glassmorphism con un input obligatorio para el nombre (`trainer_name`) y un lienzo de `SignaturePad` con trazos color naranja técnico inyectados mediante React, con filtro inverso `brightness-0 invert opacity-90` para legibilidad.
+  - La finalización de la charla en `Session.jsx` expone un switch táctil glowing (`bg-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.3)]`) para "¿Instructor Externo / Especialista?".
+  - Al activarse, se despliega un panel translúcido de Glassmorphism con un input obligatorio para el nombre (`trainer_name`) y un lienzo de `SignaturePad` con trazos color naranja técnico inyectados mediante React, con filtro inverso `brightness-0 invert opacity-90` para legibilidad.
 * **Mecanismo de Guardado Físico (Backend):**
-  * La firma no se persiste en formato Base64 en la base de datos para evitar "bloat". El controlador `TrainingController` decodifica la cadena, genera un archivo físico `.png` y lo almacena en `Storage::disk('public')->put('signatures/...', $data)`.
-  * La base de datos (`visit_certificates.instructor_signature`) solo guarda la ruta relativa al archivo (ej. `signatures/instructor_xxxx.png`), y el campo `visit_certificates.instructor_signature_date` almacena el timestamp de la firma.
-  * Si aplica, se actualiza `trainings.trainer_name`.
+  - La firma no se persiste en formato Base64 en la base de datos para evitar "bloat". El controlador decodifica la cadena, genera un archivo físico `.png` y lo almacena en `Storage::disk('public')->put('signatures/...', $data)`.
+  - La base de datos (`visit_certificates.instructor_signature`) solo guarda la ruta relativa al archivo, y el campo `visit_certificates.instructor_signature_date` almacena el timestamp de la firma.
+  - Si aplica, se actualiza `trainings.trainer_name`.
 
 ### 3.8. Blindaje de Fechas e Inmutabilidad (SRE Security & HUD Sync Badge)
 * **Propósito:** Prevenir el fraude de horarios o alteración malintencionada de marcas de tiempo en la finalización de checklists mediante el bloqueo absoluto de entradas de tiempo desde el cliente.
@@ -288,6 +292,22 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   - La vista `Edit.jsx` (Consultoras) presenta una pestaña de **"Auditoría"** que renderiza una línea de tiempo táctica de cambios de accesos, mostrando de forma descriptiva el diff visual (ej. *Licencias Técnicos: 10 ➔ 15*) y el nombre del usuario global autor.
 * **Pruebas de Trazabilidad:**
   - La suite de pruebas en `GlobalStaffManagementTest.php` valida el aislamiento de rutas de staff global/vendedores, la inmutabilidad de la tabla `audit_logs` y la generación automática de los logs ante inserciones/actualizaciones en consultoras.
+
+### 3.12. Estándares de Responsividad, Scrollbars de Marca y Destructuración Segura
+* **Propósito:** Ofrecer una experiencia táctica de primer nivel (HUD) en cualquier dispositivo, garantizando que el personal técnico en faenas y portátiles medianas navegue cómodamente sin colapsos de UI.
+* **Directrices Técnicas:**
+  - **Breakpoint Táctil Cards (Límite < 1024px):** Para pantallas inferiores a `1024px` (`lg` en Tailwind), las tablas complejas se ocultan (`lg:block hidden`) y la información se despliega verticalmente mediante tarjetas táctiles (`lg:hidden block`).
+  - **Scrollbar de Marca (`.custom-scrollbar`):** Definido globalmente en `resources/css/app.css`. Los envoltorios de tablas (`overflow-x-auto`) deben tener la clase `.custom-scrollbar` con los colores del pilar asignado:
+    - *Checklists / Inspecciones / Matrices:* Naranja técnico (`rgba(246, 146, 57, 0.3)`).
+    - *Educación / Capacitaciones / Hallazgos:* Índigo técnico (`rgba(99, 102, 241, 0.3)`).
+    - *Reportes / Incidentes / Bitácoras:* Rojo técnico (`rgba(239, 68, 68, 0.3)`).
+  - **Columna Fija Adaptable en Matrices (Annual Contract):** Las columnas fijas en tablas anchas no deben ocluir el resto de la pantalla en dispositivos móviles. Su ancho debe ser dinámico (`w-[140px] sm:w-[220px] md:w-[300px]`) con paddings de celda compactos en resoluciones bajas.
+  - **Destructuración Segura de Propiedades (`auth`):** En todas las páginas y componentes React resueltos mediante Inertia, cuando se requiera validar roles de usuario o condicionales de rutas, se debe usar `usePage` para destructurar la propiedad `auth` de forma segura:
+    ```javascript
+    const { auth } = usePage().props;
+    ```
+    Esto previene errores de referencia nula en entornos de producción.
+  - **Depuración de Activos Obsoletos:** Se eliminaron las capturas obsoletas `cap1.png`, `cap2.png` y `cap3.png` para mantener limpio el almacenamiento del proyecto, dado que ya no son referenciadas por la landing page en React (`Welcome.jsx`).
 
 ---
 

@@ -1,11 +1,16 @@
-# 📚 Manual de Usuario: Sistema de Capacitaciones (v1.5)
+# 📚 Manual de Usuario: Sistema de Capacitaciones (v2.2)
 
-Este manual describe el flujo de trabajo para la programación, dictado y registro de capacitaciones dentro de **XamaSafe**, utilizando la interfaz **Terminal Táctica**.
+Este manual describe el flujo de trabajo para la programación, dictado y registro de capacitaciones dentro de **XamaSafe**, utilizando la interfaz de la **Terminal Táctica**.
 
 ---
 
 ## 🎯 Visión General
-El módulo de capacitaciones permite a los Gestores programar sesiones de formación y a los Técnicos registrar la asistencia en tiempo real desde el campo, generando certificados PDF legales de forma automática.
+El módulo de capacitaciones permite a los Gestores planificar la formación anual y a los Técnicos registrar la ejecución y asistencia en tiempo real desde el campo, generando certificados PDF legales firmados electrónicamente.
+
+---
+
+## 🎨 Identidad Visual (Pilar Educación)
+Todas las pantallas y elementos interactivos del módulo de capacitación se representan estrictamente con la gama de color **Azul / Índigo** (`blue-500`, `indigo-500`). Si ves componentes con acentos azules o índigos, corresponden al pilar de Educación.
 
 ---
 
@@ -13,52 +18,45 @@ El módulo de capacitaciones permite a los Gestores programar sesiones de formac
 
 | Rol | Acción |
 |---|---|
-| **Gestor (Administrador)** | Programar capacitaciones, gestionar plantillas y descargar certificados consolidados. |
-| **Técnico de Campo** | Acceder a la capacitación asignada, tomar asistencia con firma digital y cerrar el registro. |
+| **Gestor (Administrador)** | Diseñar el Plan Anual, programar capacitaciones, auditar asistencias mediante el acordeón de grilla y descargar PDFs de constancias. |
+| **Técnico de Campo** | Iniciar la sesión de capacitación heredada del plan o iniciar una capacitación ad-hoc en vivo, registrar firmas de asistentes y firmar como Instructor. |
 
 ---
 
 ## 🚀 Guía Paso a Paso
 
-### 1. Programación (Solo Gestores)
-Para iniciar un nuevo ciclo de formación:
-1. Navega a la sección **Capacitaciones** desde el menú principal.
-2. Pulsa el botón **"Nueva Capacitación"** (identificado con el estilo *Tactical Pill* naranja).
-3. Selecciona la **Empresa** y la **Sede** correspondiente.
-4. Define si la capacitación será **Presencial** (en planta) o **Virtual**.
-5. Asigna un **Técnico Responsable** para que la visualice en su dashboard.
-6. Guarda la sesión. Verás que queda en estado `Programada` con un panel de estilo *Glassmorphism*.
+### 1. Planificación Anual (Solo Gestores)
+1. Navega a **Contrato Anual (PPD)**.
+2. Agrega o edita una actividad de capacitación, configurando:
+   - **Duración Estimada:** Selector de tiempos fijos (5m, 10m, 15m, 30m, 45m, 1h, 1:30h, 2h, 3h).
+   - **Modalidad:** Presencial, Virtual o Híbrida.
+   - **Multi-Instructor:** Switch para habilitar co-instructores adicionales.
 
-### 2. Toma de Asistencia (En Campo)
-El Técnico responsable debe seguir estos pasos durante la sesión:
-1. Busca la capacitación en el panel de **Tareas del Día**.
-2. Presiona el botón de **"Registro de Asistencia"**.
-3. Verás el **Attendance Tracker** táctico.
-4. Por cada asistente:
-    - Ingresa el **Nombre Completo**.
-    - Ingresa el **DNI** (validación automática).
-    - Solicita al asistente que firme en el **Digital Signature Pad**.
-    - *Tip Táctico*: La firma utiliza un trazo blanco de alta visibilidad sobre fondo oscuro para asegurar claridad.
-5. Pulsa **"Guardar Asistente"**. El contador se actualizará automáticamente.
+### 2. Toma de Asistencia y Ejecución (Técnico en Campo)
+El Técnico inicia la capacitación desde su visita presencial:
+1. En **Mis Asignaciones (Educación)**, visualiza las capacitaciones sugeridas del mes o pulsa `[+] Iniciar Capacitación` para una charla ad-hoc.
+2. Al iniciar, el sistema hereda la duración y modalidad del plan anual.
+3. Ingresa los datos de los asistentes (Nombre, Puesto y DNI obligatorio) y toma su firma en pantalla en el **Signature Pad**.
+4. **Finalización y Firma de Instructor (Optimización Storage vs Base64):**
+   - El Técnico (o Instructor Especialista) firma para cerrar la capacitación.
+   - **Optimización de Base de Datos:** La firma se captura temporalmente como Base64 en el frontend, pero el backend la decodifica de forma segura y la guarda como un archivo físico `.png` en el storage público (`signatures/`). En la base de datos solo se persiste el path relativo, evitando el crecimiento desmedido de las filas.
 
-### 3. Cierre y Certificación
-Una vez finalizada la sesión:
-1. Verifica que la lista de asistentes sea correcta en la tabla de alta fidelidad.
-2. Pulsa el botón **"Generar Certificado PDF"**.
-3. El sistema integrará el branding de la consultora y todas las firmas capturadas en un documento legal inviolable.
+### 3. Cierre y Visualización (Gestor)
+1. La capacitación se da por finalizada y el estado pasa a `completed`.
+2. **Acordeón Táctico de Alta Escala:** En la consola de capacitaciones del Gestor, al presionar `Ver Asistentes (X)` se despliega un sub-acordeón con una tabla minimalista de alta legibilidad (Nombre, Puesto, DNI), lo que evita la saturación visual ante grupos numerosos de más de 30 personas.
+3. El Gestor pulsa **"Descargar PDF"** para generar el certificado en caliente con las firmas incrustadas y detalles agregados.
 
 ---
 
 ## 💡 Tips Tácticos
-- **Persistencia de Datos**: Si pierdes conexión en medio del registro, el *Attendance Tracker* mantiene los datos cargados en el navegador para evitar pérdidas.
-- **Validación Anti-duplicados**: El sistema impedirá registrar dos veces el mismo DNI en una misma sesión.
-- **Modo Tablet**: La interfaz está optimizada para ser usada con el pulgar mientras caminas por la planta.
+- **Buscador en Caliente:** Para capacitaciones libres ad-hoc, el técnico cuenta con un buscador reactivo de texto y filtros en cascada de categorías y subcategorías con glows de acento índigo.
+- **Herencia Automática:** Las modalidades y duraciones estimadas se auto-configuran desde el plan anual para agilizar la carga del técnico.
 
 ---
 
 ## 📝 Resolución de Problemas
-- **¿Qué pasa si un asistente no tiene DNI a mano?** Debe proporcionarlo verbalmente, ya que es un campo requerido para la validez legal del certificado.
-- **La firma no se ve clara**: Utiliza el botón **"Limpiar"** y repite el trazo. Asegúrate de presionar el stylus o dedo con firmeza en el pad.
+- **¿Cómo se visualiza la firma del instructor externa?** Si se activa el switch de "Instructor Externo", se captura el nombre del especialista e ingresa al flujo de firma física guardada.
+- **La firma del Técnico no aparece:** El sistema jala automáticamente la firma de perfil aprobada del técnico firmante, asegurando total consistencia legal sin trazos manuales repetitivos.
 
 ---
-*Manual actualizado para XamaSafe v1.5 | Terminal Táctica Design*
+*Manual actualizado para XamaSafe v2.2 | Terminal Táctica Design*

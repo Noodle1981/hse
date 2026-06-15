@@ -33,13 +33,15 @@ export default function Login() {
 
                     {/* Logo + Marca */}
                     <div className="flex flex-col items-center mb-8">
-                        <div className="w-20 h-20 bg-white p-2 rounded-2xl shadow-2xl shadow-[#F69239]/20 flex items-center justify-center mb-4 ring-2 ring-[#F69239]/30">
-                            <img src={branding.logo} alt="XamaSafe" className="max-h-full w-auto object-contain" />
+                        <div className="w-16 h-16 flex items-center justify-center rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg shadow-ep-primary/20 mb-4">
+                            <img src="/images/logo.svg" alt="XamaSafe Logo" className="w-full h-full object-contain scale-[1.3]" />
                         </div>
-                        <h1 className="text-3xl font-black text-white uppercase italic tracking-tighter">XamaSafe</h1>
-                        <p className="text-yellow-400 font-bold uppercase italic tracking-[0.25em] text-[10px] mt-1 opacity-80">
-                            {branding.name}
-                        </p>
+                        <span className="font-black text-2xl md:text-3xl tracking-tighter italic leading-none text-white">
+                            Xama<span className="text-ep-primary">Safe</span>
+                        </span>
+                        <span className="text-[8px] font-black text-white/50 uppercase tracking-[0.4em] italic mt-2 leading-none">
+                            Ecosystem Core
+                        </span>
                     </div>
 
                     {/* Formulario */}
@@ -152,8 +154,8 @@ export default function Login() {
                         </form>
                     </div>
 
-                    <p className="text-center text-xs text-gray-600 mt-6">
-                        XamaSafe — Sistema de Gestión de Seguridad © {new Date().getFullYear()}
+                    <p className="text-center text-xs text-gray-500 mt-6 opacity-80">
+                        XamaSafe — Sistema de Gestión de Seguridad © {new Date().getFullYear()} • Versión 1.0.0
                     </p>
                 </div>
             </div>
