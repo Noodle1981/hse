@@ -1,0 +1,237 @@
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+<meta charset="utf-8">
+<title>Caso de Uso: Logística en Alta Montaña</title>
+<!--[if gte mso 9]>
+<xml>
+<w:WordDocument>
+<w:View>Print</w:View>
+<w:Zoom>100</w:Zoom>
+<w:DoNotOptimizeForBrowser/>
+</w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: #2D3748;
+    line-height: 1.6;
+    margin: 40px;
+    background-color: #FFFFFF;
+}
+h1 {
+    color: #E28028; /* Naranja Marca */
+    font-size: 24pt;
+    font-weight: bold;
+    border-bottom: 3px solid #E28028;
+    padding-bottom: 8px;
+    margin-bottom: 20px;
+}
+h2 {
+    color: #1A202C;
+    font-size: 16pt;
+    font-weight: bold;
+    margin-top: 30px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 4px;
+}
+h3 {
+    color: #4A5568;
+    font-size: 12pt;
+    font-weight: bold;
+    margin-top: 18px;
+    margin-bottom: 6px;
+}
+p, li {
+    font-size: 11pt;
+    margin-bottom: 8px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+th {
+    background-color: #E28028;
+    color: #FFFFFF;
+    font-weight: bold;
+    text-align: left;
+    padding: 10px;
+    border: 1px solid #C86C1E;
+    font-size: 11pt;
+}
+td {
+    padding: 10px;
+    border: 1px solid #CBD5E0;
+    font-size: 10pt;
+    vertical-align: top;
+}
+tr:nth-child(even) td {
+    background-color: #F7FAFC;
+}
+.badge {
+    background-color: #ED8936;
+    color: #FFFFFF;
+    padding: 2px 6px;
+    font-size: 9pt;
+    font-weight: bold;
+    border-radius: 3px;
+}
+.badge-danger {
+    background-color: #E53E3E;
+}
+.badge-success {
+    background-color: #38A169;
+}
+.info-box {
+    background-color: #F7FAFC;
+    border-left: 4px solid #E28028;
+    padding: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+}
+.footer {
+    margin-top: 50px;
+    border-top: 1px solid #E2E8F0;
+    padding-top: 10px;
+    font-size: 9pt;
+    color: #718096;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<h1>🏔️ Caso de Uso: Habilitación de Tránsito y Logística en Alta Montaña</h1>
+<p>Este documento contiene el escenario operacional estructurado para el módulo de checklists de <strong>XamaSafe</strong> en faenas mineras y ambientes de alta complejidad cordillerana.</p>
+
+<div class="info-box">
+    <strong>Documento Oficial de Configuración Técnica</strong><br>
+    Este caso de uso integra la parametrización de Roster Minero 24/7, validación GPS con geofencing por Haversine y control horario automatizado en el servidor.
+</div>
+
+<h2>🏢 1. Entidades del Caso de Uso</h2>
+
+<h3>A. Empresa Cliente</h3>
+<ul>
+    <li><strong>Razón Social:</strong> Minera del Sol S.A. Compañía de Oro y Plata</li>
+    <li><strong>CUIT:</strong> 30-77777777-7</li>
+    <li><strong>Rubro Principal:</strong> Explotación Minera e Ingeniería Extractiva de Metales Preciosos</li>
+</ul>
+
+<h3>B. Sede Operativa (Sitio Físico)</h3>
+<ul>
+    <li><strong>Nombre de la Sede:</strong> Campamento Veladero (Alta Montaña)</li>
+    <li><strong>Ubicación Geográfica:</strong> Cordillera de los Andes, Departamento Iglesia, Provincia de San Juan, Argentina.</li>
+    <li><strong>Altitud Operativa:</strong> ~4,100 metros sobre el nivel del mar (msnm).</li>
+    <li><strong>Parámetros de Localización (Geofencing GPS):</strong>
+        <ul>
+            <li><strong>Coordenadas Base:</strong> Latitud <span class="badge">-29.3562</span>, Longitud <span class="badge">-69.8978</span></li>
+            <li><strong>Radio de Tolerancia:</strong> <span class="badge">1,000 metros</span> (configuración extendida para corregir desviaciones por nubosidad, topografía de montaña y retransmisión satelital).</li>
+        </ul>
+    </li>
+    <li><strong>Régimen Horario (Roster Minero):</strong> <span class="badge">es_roster_24_7 = Activo (True)</span>. Permite el check-in de visitas del técnico las 24 horas del día, incluyendo feriados, fines de semana y guardias nocturnas continuas.</li>
+    <li><strong>Superintendente Responsable de Sede:</strong> Ing. Juan Carlos Albarracín (Superintendente de Seguridad y Salud Ocupacional).</li>
+</ul>
+
+<h3>C. Personal Técnico Asignado</h3>
+<ul>
+    <li><strong>Inspector de Higiene y Seguridad:</strong> Técnico EP (<code>tecnico@app.com</code>).</li>
+    <li><strong>Habilitaciones Especiales:</strong> Licencia especial de manejo 4x4 en climas extremos, certificado psicofísico para trabajo en altura e inducción de supervivencia invernal.</li>
+</ul>
+
+<h2>📋 2. Estructura del Checklist (Planilla de Control)</h2>
+<ul>
+    <li><strong>Nombre del Checklist:</strong> Logística en Alta Montaña</li>
+    <li><strong>Código del Formulario:</strong> <code>CK-LOG-AM-01</code></li>
+    <li><strong>Categoría / Subcategoría:</strong> Inspecciones Especiales / Alta Montaña</li>
+</ul>
+
+<table>
+    <thead>
+        <tr>
+            <th>Sección</th>
+            <th>Punto de Control (Pregunta)</th>
+            <th>Tipo de Input</th>
+            <th>Lógica / Valores de Falla</th>
+            <th>Indicaciones al Técnico</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>Sección 1: Personal y Supervivencia</strong></td>
+            <td>¿Todo el personal cuenta con EPP de abrigo extremo (térmico) y de montaña?</td>
+            <td>Selección (Sí / No)</td>
+            <td><span class="badge badge-danger">Falla si es "No"</span></td>
+            <td>Verificar campera de pluma de alta montaña, guantes de abrigo y calzado rígido de montaña.</td>
+        </tr>
+        <tr>
+            <td><strong>Sección 1: Personal y Supervivencia</strong></td>
+            <td>¿Se dispone de equipo de oxígeno portátil y botiquín de trauma completo?</td>
+            <td>Selección (Sí / No)</td>
+            <td><span class="badge badge-danger">Falla si es "No"</span></td>
+            <td>Comprobar carga de manómetro en tanques de oxígeno portátil y fecha de vencimiento.</td>
+        </tr>
+        <tr>
+            <td><strong>Sección 1: Personal y Supervivencia</strong></td>
+            <td>¿Se cuenta con equipo de comunicación satelital (InReach/Iridium) activo?</td>
+            <td>Selección (Sí / No)</td>
+            <td><span class="badge badge-danger">Falla si es "No"</span></td>
+            <td>Realizar un ping de prueba antes de salir del área de cobertura celular base.</td>
+        </tr>
+        <tr>
+            <td><strong>Sección 2: Vehículos y Provisiones</strong></td>
+            <td>¿El vehículo posee cadenas para hielo/nieve homologadas?</td>
+            <td>Selección (Sí / No)</td>
+            <td><span class="badge badge-danger">Falla si es "No"</span></td>
+            <td>Comprobar eslabones de cadena y dimensiones acordes al rodado.</td>
+        </tr>
+        <tr>
+            <td><strong>Sección 2: Vehículos y Provisiones</strong></td>
+            <td>¿Nivel de combustible al 100% y aditivo anticongelante verificado?</td>
+            <td>Selección (Sí / No)</td>
+            <td><span class="badge badge-danger">Falla si es "No"</span></td>
+            <td>Verificar el aditivo en radiador para temperaturas inferiores a -25°C.</td>
+        </tr>
+        <tr>
+            <td><strong>Sección 2: Vehículos y Provisiones</strong></td>
+            <td>¿Se dispone de raciones de supervivencia y agua para 72 horas?</td>
+            <td>Selección (Sí / No)</td>
+            <td><span class="badge badge-danger">Falla si es "No"</span></td>
+            <td>Provisiones estimadas por cantidad de tripulantes autorizados en el remito de ruta.</td>
+        </tr>
+        <tr>
+            <td><strong>Sección 3: Factores Ambientales</strong></td>
+            <td>Temperatura ambiente en grados Celsius (°C):</td>
+            <td>Numérico</td>
+            <td><span class="badge badge-danger">Falla fuera de rango (-40°C a 40°C)</span></td>
+            <td>Registrar el valor del sensor exterior del vehículo.</td>
+        </tr>
+        <tr>
+            <td><strong>Sección 3: Factores Ambientales</strong></td>
+            <td>¿Pronóstico meteorológico favorable para el tránsito por el periodo solicitado?</td>
+            <td>Selección (Sí / No)</td>
+            <td><span class="badge badge-danger">Falla si es "No"</span></td>
+            <td>Revisar reportes de viento blanco o nevadas copiosas en cordillera.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>🔄 3. Flujo del Proceso en la Aplicación</h2>
+<ol>
+    <li><strong>Planificación de la Meta:</strong> El Gestor configura la cobertura de auditoría en la matriz de planificación anual (PPD) para el período correspondiente de la sede minera.</li>
+    <li><strong>Apertura de la Visita (Check-in GPS):</strong> Al arribar al yacimiento, el técnico pulsa <strong>"Iniciar Visita"</strong>. La aplicación captura el GPS del móvil y comprueba la distancia contra el punto base de la sede. Al confirmarse que está dentro del rango de 1000m en Roster 24/7, la visita se declara <code>in_progress</code>.</li>
+    <li><strong>Ejecución del Llenado:</strong> El técnico responde las preguntas en la visual HUD en negro profundo y naranja técnico. Las respuestas de falla levantan observaciones automáticas y desvíos críticos.</li>
+    <li><strong>Sincronización SRE (Blindaje de Horarios):</strong> Al dar por finalizada la tarea, el servidor Laravel descarta las horas locales del cliente, forzando la marca de tiempo <code>now()</code> del servidor de base de datos para impedir fraudes o alteraciones horarias retrospectivas.</li>
+    <li><strong>Cierre y Firma:</strong> El Superintendente Ing. Albarracín realiza la firma táctica en la pantalla táctil de la tablet para firmar la constancia, generando el PDF final de la visita.</li>
+</ol>
+
+<div class="footer">
+    XamaSafe — Sistema de Gestión de Seguridad e Inspecciones Tácticas © 2026<br>
+    Versión 2.2.0 | Formato Compatible con Microsoft Word (.doc)
+</div>
+
+</body>
+</html>
