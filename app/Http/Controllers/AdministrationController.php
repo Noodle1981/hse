@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Models\Consultora;
 use Inertia\Inertia;
 
 class AdministrationController extends Controller
@@ -220,6 +221,37 @@ class AdministrationController extends Controller
 
         $request->validate($rules, $messages);
 
+        $consultoraId = !$currentUser->isSuperAdmin() ? $currentUser->consultora_id : ($request->input('consultora_id') ?? ($editingId ? User::find($editingId)?->consultora_id : null));
+
+        if ($consultoraId && $request->input('estado') === 'activo') {
+            $consultora = Consultora::findOrFail($consultoraId);
+            $rol = $request->input('rol');
+
+            if ($rol === 'tecnico') {
+                $count = User::where('consultora_id', $consultoraId)
+                    ->whereIn('rol', ['tecnico', 'technician'])
+                    ->where('estado', 'activo')
+                    ->when($editingId, function ($q) use ($editingId) {
+                        $q->where('id', '!=', $editingId);
+                    })
+                    ->count();
+                if ($count >= $consultora->max_tecnicos) {
+                    return back()->withErrors(['rol' => 'Se ha alcanzado el límite de técnicos activos (' . $consultora->max_tecnicos . ') para esta consultora.']);
+                }
+            } elseif ($rol === 'gestor') {
+                $count = User::where('consultora_id', $consultoraId)
+                    ->whereIn('rol', ['gestor', 'administrador'])
+                    ->where('estado', 'activo')
+                    ->when($editingId, function ($q) use ($editingId) {
+                        $q->where('id', '!=', $editingId);
+                    })
+                    ->count();
+                if ($count >= $consultora->max_gestores) {
+                    return back()->withErrors(['rol' => 'Se ha alcanzado el límite de gestores activos (' . $consultora->max_gestores . ') para esta consultora.']);
+                }
+            }
+        }
+
         $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'matricula', 'telefono', 'n_doc', 'estado']);
 
         if (array_key_exists('n_doc', $data) && trim($data['n_doc'] ?? '') === '') {
@@ -265,13 +297,31 @@ class AdministrationController extends Controller
         return back()->with('message', 'Usuario dado de baja exitosamente.');
     }
 
-    /**
-     * Restore soft deleted user.
-     */
     public function restoreUser($id)
     {
         $user = User::withTrashed()->findOrFail($id);
         $this->ensureTenancy($user);
+
+        if ($user->consultora_id) {
+            $consultora = Consultora::findOrFail($user->consultora_id);
+            if ($user->rol === 'tecnico' || $user->rol === 'technician') {
+                $activeCount = User::where('consultora_id', $user->consultora_id)
+                    ->whereIn('rol', ['tecnico', 'technician'])
+                    ->where('estado', 'activo')
+                    ->count();
+                if ($activeCount >= $consultora->max_tecnicos) {
+                    return back()->with('error', 'No se puede restaurar el usuario: Límite de técnicos excedido.');
+                }
+            } elseif ($user->rol === 'gestor' || $user->rol === 'administrador') {
+                $activeCount = User::where('consultora_id', $user->consultora_id)
+                    ->whereIn('rol', ['gestor', 'administrador'])
+                    ->where('estado', 'activo')
+                    ->count();
+                if ($activeCount >= $consultora->max_gestores) {
+                    return back()->with('error', 'No se puede restaurar el usuario: Límite de gestores excedido.');
+                }
+            }
+        }
 
         $user->restore();
         $user->update(['estado' => 'activo']);
@@ -284,44 +334,114 @@ class AdministrationController extends Controller
      */
     public function dashboard(Request $request)
     {
-        $this->ensureSuperAdmin();
+        $this->ensureSuperAdminOrVendedor();
 
         $from = $request->query('from', now()->startOfMonth()->format('Y-m-d'));
         $to = $request->query('to', now()->endOfMonth()->format('Y-m-d'));
+        $consultoraId = $request->query('consultora_id', 'all');
 
-        // KPIs
+        // Obtener listado de consultoras para el filtro
+        $consultants = Consultora::orderBy('nombre')->get(['id', 'nombre']);
+
+        if ($consultoraId && $consultoraId !== 'all') {
+            $consultora = Consultora::findOrFail($consultoraId);
+            $consultoraName = $consultora->nombre;
+
+            $empresasCount = $consultora->empresas()->count();
+            $gestoresCount = User::where('consultora_id', $consultora->id)->where('rol', 'gestor')->count();
+            $tecnicosCount = User::where('consultora_id', $consultora->id)->where('rol', 'tecnico')->count();
+            
+            $inspectionsCount = DynamicInspection::whereHas('sede.empresa', function ($q) use ($consultora) {
+                $q->where('consultora_id', $consultora->id);
+            })->whereBetween('dynamic_inspections.completed_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+              ->where('dynamic_inspections.status', 'completed')->count();
+
+            $trainingsCount = Training::whereHas('empresa', function ($q) use ($consultora) {
+                $q->where('consultora_id', $consultora->id);
+            })->whereBetween('trainings.date', [$from . ' 00:00:00', $to . ' 23:59:59'])
+              ->where('trainings.status', 'completed')->count();
+
+            $masterReportsCount = MasterReport::whereHas('sede.empresa', function ($q) use ($consultora) {
+                $q->where('consultora_id', $consultora->id);
+            })->whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+              ->where('master_reports.estado', 'finalizado')->count();
+
+            $companies = Empresa::where('consultora_id', $consultora->id)
+                ->with('consultora')
+                ->withCount([
+                    'sedes',
+                    'inspecciones' => function ($q) use ($from, $to) {
+                        $q->whereBetween('dynamic_inspections.completed_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+                          ->where('dynamic_inspections.status', 'completed');
+                    },
+                    'trainings' => function ($q) use ($from, $to) {
+                        $q->whereBetween('trainings.date', [$from . ' 00:00:00', $to . ' 23:59:59'])
+                          ->where('trainings.status', 'completed');
+                    },
+                    'informes' => function ($q) use ($from, $to) {
+                        $q->whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+                          ->where('master_reports.estado', 'finalizado');
+                    }
+                ])
+                ->orderBy('nombre')
+                ->get();
+        } else {
+            $consultoraName = 'Todas las Consultoras';
+
+            $empresasCount = Empresa::count();
+            $gestoresCount = User::where('rol', 'gestor')->count();
+            $tecnicosCount = User::where('rol', 'tecnico')->count();
+
+            $inspectionsCount = DynamicInspection::whereBetween('dynamic_inspections.completed_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+              ->where('dynamic_inspections.status', 'completed')->count();
+
+            $trainingsCount = Training::whereBetween('trainings.date', [$from . ' 00:00:00', $to . ' 23:59:59'])
+              ->where('trainings.status', 'completed')->count();
+
+            $masterReportsCount = MasterReport::whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+              ->where('master_reports.estado', 'finalizado')->count();
+
+            $companies = Empresa::with('consultora')
+                ->withCount([
+                    'sedes',
+                    'inspecciones' => function ($q) use ($from, $to) {
+                        $q->whereBetween('dynamic_inspections.completed_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+                          ->where('dynamic_inspections.status', 'completed');
+                    },
+                    'trainings' => function ($q) use ($from, $to) {
+                        $q->whereBetween('trainings.date', [$from . ' 00:00:00', $to . ' 23:59:59'])
+                          ->where('trainings.status', 'completed');
+                    },
+                    'informes' => function ($q) use ($from, $to) {
+                        $q->whereBetween('master_reports.created_at', [$from . ' 00:00:00', $to . ' 23:59:59'])
+                          ->where('master_reports.estado', 'finalizado');
+                    }
+                ])
+                ->orderBy('nombre')
+                ->get();
+        }
+
+        $checklistsTemplatesCount = \App\Models\DynamicChecklist::count();
+
         $kpis = [
-            'inspections' => DynamicInspection::whereBetween('completed_at', [$from, $to])->completed()->count(),
-            'findings' => Hallazgo::whereBetween('fecha_deteccion', [$from, $to])->count(),
-            'incidents' => Incidente::whereBetween('fecha_ocurrencia', [$from, $to])->count(),
-            'trainings' => Training::whereBetween('date', [$from, $to])->completed()->count(),
-            'critical_findings' => Hallazgo::where('criticidad', 'critico')->where('estado', '!=', 'cerrado')->count(),
-            'pending_assignments' => ChecklistAssignment::where('status', 'pending')->count(),
-        ];
-
-        // Recent Activity (Merged feed)
-        $recentActivity = $this->getRecentActivity();
-
-        // Rankings
-        $rankings = [
-            'top_technicians' => User::where('rol', 'tecnico')
-                ->withCount(['checklists' => fn ($q) => $q->where('status', 'completed')])
-                ->orderByDesc('checklists_count')
-                ->take(5)
-                ->get(),
-            'top_companies_incidents' => Empresa::withCount('incidentes')
-                ->orderByDesc('incidentes_count')
-                ->take(5)
-                ->get(),
+            'empresas_count' => $empresasCount,
+            'gestores_count' => $gestoresCount,
+            'tecnicos_count' => $tecnicosCount,
+            'checklists_templates_count' => $checklistsTemplatesCount,
+            'inspections_count' => $inspectionsCount,
+            'trainings_count' => $trainingsCount,
+            'master_reports_count' => $masterReportsCount,
         ];
 
         return Inertia::render('Admin/Dashboard', [
+            'consultoraName' => $consultoraName,
+            'consultants' => $consultants,
             'kpis' => $kpis,
-            'recentActivity' => $recentActivity,
-            'rankings' => $rankings,
+            'companies' => $companies,
             'filters' => [
                 'from' => $from,
                 'to' => $to,
+                'consultora_id' => $consultoraId,
             ],
         ]);
     }
@@ -609,6 +729,15 @@ class AdministrationController extends Controller
         }
     }
 
+    private function ensureSuperAdminOrVendedor()
+    {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+        if (! ($user->isSuperAdmin() || $user->isVendedor())) {
+            abort(403, 'Acceso restringido a Súper Administradores o Vendedores.');
+        }
+    }
+
     private function ensureTenancy(User $user)
     {
         /** @var \App\Models\User $currentUser */
@@ -616,5 +745,441 @@ class AdministrationController extends Controller
         if (! $currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
             abort(403, 'Acceso no autorizado.');
         }
+    }
+
+    /**
+     * List all consultoras (paginated).
+     */
+    public function consultantsIndex()
+    {
+        $this->ensureSuperAdminOrVendedor();
+        $consultants = Consultora::withCount([
+            'users as tecnicos_count' => function ($query) {
+                $query->whereIn('rol', ['tecnico', 'technician'])->where('estado', 'activo');
+            },
+            'users as gestores_count' => function ($query) {
+                $query->whereIn('rol', ['gestor', 'administrador'])->where('estado', 'activo');
+            },
+            'empresas'
+        ])->paginate(10);
+
+        return Inertia::render('Admin/Consultants/Index', [
+            'consultants' => $consultants
+        ]);
+    }
+
+    /**
+     * Show form to create a consultora.
+     */
+    public function consultantsCreate()
+    {
+        $this->ensureSuperAdminOrVendedor();
+        return Inertia::render('Admin/Consultants/Edit', [
+            'consultant' => null
+        ]);
+    }
+
+    /**
+     * Store a new consultora.
+     */
+    public function consultantsStore(Request $request)
+    {
+        $this->ensureSuperAdminOrVendedor();
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'cuit' => 'required|string|max:20|unique:consultoras,cuit',
+            'max_tecnicos' => 'required|integer|min:1',
+            'max_gestores' => 'required|integer|min:1',
+            'max_empresas' => 'required|integer|min:1',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+            'fiscal_address' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:100',
+            'locality' => 'nullable|string|max:100',
+            'estado_suscripcion' => 'required|string|in:activa,morosa,baja',
+            'color_primary' => 'required|string|size:7',
+            'color_secondary' => 'required|string|size:7',
+            'color_accent' => 'required|string|size:7',
+            'logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+        ]);
+
+        $data = $request->only([
+            'nombre', 'cuit', 'max_tecnicos', 'max_gestores', 'max_empresas', 'email', 'phone', 
+            'description', 'fiscal_address', 'province', 'locality',
+            'estado_suscripcion', 'color_primary', 'color_secondary', 'color_accent'
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos/consultoras', 'public');
+            $data['logo_path'] = $path;
+        }
+
+        Consultora::create($data);
+
+        return redirect()->route('admin.consultants.index')->with('message', 'Consultora creada exitosamente.');
+    }
+
+    /**
+     * Edit a consultora.
+     */
+    public function consultantsEdit(Consultora $consultant)
+    {
+        $this->ensureSuperAdminOrVendedor();
+
+        $logs = $consultant->suscripcionLogs()
+            ->with('user:id,nombres,apellidos,email')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $formattedLogs = [];
+        $count = count($logs);
+        for ($i = 0; $i < $count; $i++) {
+            $current = $logs[$i];
+            $startDate = $current->created_at;
+            $endDate = ($i > 0) ? $logs[$i - 1]->created_at : now();
+            
+            $duration = $startDate->diffForHumans($endDate, [
+                'parts' => 2,
+                'join' => true,
+                'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE
+            ]);
+
+            $formattedLogs[] = [
+                'id' => $current->id,
+                'estado_anterior' => $current->estado_anterior,
+                'estado_nuevo' => $current->estado_nuevo,
+                'created_at' => $current->created_at ? $current->created_at->toISOString() : null,
+                'created_at_formatted' => $current->created_at ? $current->created_at->format('d/m/Y H:i') : 'N/A',
+                'user' => $current->user ? [
+                    'name' => $current->user->nombres . ' ' . $current->user->apellidos,
+                    'email' => $current->user->email,
+                ] : null,
+                'duration' => $duration,
+                'is_current' => ($i == 0),
+            ];
+        }
+
+        if ($count === 0) {
+            $createdAt = $consultant->created_at ?? now();
+            $duration = $createdAt->diffForHumans(now(), [
+                'parts' => 2,
+                'join' => true,
+                'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE
+            ]);
+            $formattedLogs[] = [
+                'id' => 0,
+                'estado_anterior' => null,
+                'estado_nuevo' => $consultant->estado_suscripcion ?? 'activa',
+                'created_at' => $createdAt->toISOString(),
+                'created_at_formatted' => $createdAt->format('d/m/Y H:i'),
+                'user' => null,
+                'duration' => $duration,
+                'is_current' => true,
+            ];
+        }
+
+        // Recuperar y formatear los audit_logs
+        $auditLogs = \App\Models\AuditLog::where('target_type', Consultora::class)
+            ->where('target_id', $consultant->id)
+            ->with('user:id,nombres,apellidos,email,rol')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $formattedAuditLogs = [];
+        $auditCount = count($auditLogs);
+        for ($i = 0; $i < $auditCount; $i++) {
+            $current = $auditLogs[$i];
+            $startDate = $current->created_at;
+            $endDate = ($i > 0) ? $auditLogs[$i - 1]->created_at : now();
+            
+            $duration = $startDate ? $startDate->diffForHumans($endDate, [
+                'parts' => 2,
+                'join' => true,
+                'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE
+            ]) : 'N/A';
+
+            $formattedAuditLogs[] = [
+                'id' => $current->id,
+                'action' => $current->action,
+                'payload' => $current->payload,
+                'created_at' => $current->created_at ? $current->created_at->toISOString() : null,
+                'created_at_formatted' => $current->created_at ? $current->created_at->format('d/m/Y H:i') : 'N/A',
+                'user' => $current->user ? [
+                    'name' => $current->user->nombres . ' ' . $current->user->apellidos,
+                    'email' => $current->user->email,
+                    'rol' => $current->user->rol,
+                ] : null,
+                'duration' => $duration,
+                'is_current' => ($i == 0),
+            ];
+        }
+
+        return Inertia::render('Admin/Consultants/Edit', [
+            'consultant' => [
+                'id' => $consultant->id,
+                'nombre' => $consultant->nombre,
+                'cuit' => $consultant->cuit,
+                'max_tecnicos' => $consultant->max_tecnicos,
+                'max_gestores' => $consultant->max_gestores ?? 2,
+                'max_empresas' => $consultant->max_empresas ?? 5,
+                'description' => $consultant->description,
+                'fiscal_address' => $consultant->fiscal_address,
+                'province' => $consultant->province,
+                'locality' => $consultant->locality,
+                'estado_suscripcion' => $consultant->estado_suscripcion ?? 'activa',
+                'email' => $consultant->email,
+                'phone' => $consultant->phone,
+                'color_primary' => $consultant->color_primary ?? '#1e40af',
+                'color_secondary' => $consultant->color_secondary ?? '#6b7280',
+                'color_accent' => $consultant->color_accent ?? '#16a34a',
+                'logo_path' => $consultant->logo_path ? asset('storage/' . $consultant->logo_path) : null,
+            ],
+            'suscripcion_logs' => $formattedLogs,
+            'audit_logs' => $formattedAuditLogs
+        ]);
+    }
+
+    /**
+     * Update a consultora.
+     */
+    public function consultantsUpdate(Request $request, Consultora $consultant)
+    {
+        $this->ensureSuperAdminOrVendedor();
+        $request->validate([
+            'nombre' => 'required|string|max:255',
+            'cuit' => 'required|string|max:20|unique:consultoras,cuit,' . $consultant->id,
+            'max_tecnicos' => 'required|integer|min:1',
+            'max_gestores' => 'required|integer|min:1',
+            'max_empresas' => 'required|integer|min:1',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+            'fiscal_address' => 'nullable|string|max:255',
+            'province' => 'nullable|string|max:100',
+            'locality' => 'nullable|string|max:100',
+            'estado_suscripcion' => 'required|string|in:activa,morosa,baja',
+            'color_primary' => 'required|string|size:7',
+            'color_secondary' => 'required|string|size:7',
+            'color_accent' => 'required|string|size:7',
+            'logo' => 'nullable|image|mimes:png,jpg,jpeg,svg|max:2048',
+        ]);
+
+        $data = $request->only([
+            'nombre', 'cuit', 'max_tecnicos', 'max_gestores', 'max_empresas', 'email', 'phone', 
+            'description', 'fiscal_address', 'province', 'locality',
+            'estado_suscripcion', 'color_primary', 'color_secondary', 'color_accent'
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos/consultoras', 'public');
+            $data['logo_path'] = $path;
+        }
+
+        $consultant->update($data);
+
+        return redirect()->route('admin.consultants.index')->with('message', 'Consultora actualizada exitosamente.');
+    }
+
+    /**
+     * Destroy a consultora.
+     */
+    public function consultantsDestroy(Consultora $consultant)
+    {
+        $this->ensureSuperAdmin();
+        
+        // Prevent deleting the main consultora if it's the only one or linked to active users
+        if ($consultant->users()->count() > 0) {
+            return back()->with('error', 'No se puede eliminar una consultora con usuarios activos.');
+        }
+
+        $consultant->delete();
+
+        return redirect()->route('admin.consultants.index')->with('message', 'Consultora eliminada exitosamente.');
+    }
+
+    /**
+     * List all users of a consultora.
+     */
+    public function consultantUsersIndex(Consultora $consultant)
+    {
+        $this->ensureSuperAdmin();
+        $users = $consultant->users()->get();
+
+        return Inertia::render('Admin/Consultants/Users', [
+            'consultant' => $consultant,
+            'users' => $users
+        ]);
+    }
+
+    /**
+     * Create or update a user for a consultora.
+     */
+    public function consultantUsersSave(Request $request, Consultora $consultant)
+    {
+        $this->ensureSuperAdmin();
+        $userId = $request->input('id');
+
+        $rules = [
+            'nombres' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $userId,
+            'rol' => 'required|string|in:gestor,tecnico',
+            'estado' => 'required|string|in:activo,inactivo',
+        ];
+
+        if (!$userId) {
+            $rules['password'] = 'required|string|min:8';
+        } else {
+            $rules['password'] = 'nullable|string|min:8';
+        }
+
+        $request->validate($rules);
+
+        if ($request->input('estado') === 'activo') {
+            $rol = $request->input('rol');
+            if ($rol === 'tecnico') {
+                $count = User::where('consultora_id', $consultant->id)
+                    ->whereIn('rol', ['tecnico', 'technician'])
+                    ->where('estado', 'activo')
+                    ->when($userId, function ($q) use ($userId) {
+                        $q->where('id', '!=', $userId);
+                    })
+                    ->count();
+                if ($count >= $consultant->max_tecnicos) {
+                    return back()->withErrors(['rol' => 'Se ha alcanzado el límite de técnicos activos (' . $consultant->max_tecnicos . ') para esta consultora.']);
+                }
+            } elseif ($rol === 'gestor') {
+                $count = User::where('consultora_id', $consultant->id)
+                    ->whereIn('rol', ['gestor', 'administrador'])
+                    ->where('estado', 'activo')
+                    ->when($userId, function ($q) use ($userId) {
+                        $q->where('id', '!=', $userId);
+                    })
+                    ->count();
+                if ($count >= $consultant->max_gestores) {
+                    return back()->withErrors(['rol' => 'Se ha alcanzado el límite de gestores activos (' . $consultant->max_gestores . ') para esta consultora.']);
+                }
+            }
+        }
+
+        $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'estado']);
+        $data['consultora_id'] = $consultant->id;
+
+        if ($request->input('password')) {
+            $data['password'] = Hash::make($request->input('password'));
+        }
+
+        if ($userId) {
+            $user = User::findOrFail($userId);
+            $user->update($data);
+            $message = 'Usuario actualizado exitosamente.';
+        } else {
+            User::create($data);
+            $message = 'Usuario creado exitosamente.';
+        }
+
+        return redirect()->route('admin.consultants.users.index', $consultant->id)->with('message', $message);
+    }
+
+    /**
+     * Destroy a user.
+     */
+    public function consultantUsersDestroy(Consultora $consultant, User $user)
+    {
+        $this->ensureSuperAdmin();
+        
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'No puedes eliminar tu propio usuario.');
+        }
+
+        if ($user->rol === User::ROLE_TECNICO) {
+            return back()->with('error', 'No puedes dar de baja a un usuario con rol Técnico desde la súper administración.');
+        }
+
+        $user->update(['estado' => 'inactivo']);
+        $user->delete();
+
+        return redirect()->route('admin.consultants.users.index', $consultant->id)->with('message', 'Usuario dado de baja exitosamente.');
+    }
+
+    /**
+     * CRUD de Personal Global (Gestión de Staff)
+     */
+    public function globalStaffIndex(Request $request)
+    {
+        $this->ensureSuperAdmin();
+        $query = User::query()
+            ->whereNull('consultora_id')
+            ->whereIn('rol', [User::ROLE_SUPER_ADMIN, User::ROLE_VENDEDOR]);
+
+        if ($request->search) {
+            $query->where(function ($q) use ($request) {
+                $q->where('nombres', 'like', "%{$request->search}%")
+                    ->orWhere('apellidos', 'like', "%{$request->search}%")
+                    ->orWhere('email', 'like', "%{$request->search}%");
+            });
+        }
+
+        $staff = $query->orderBy('apellidos')->orderBy('nombres')->paginate(10)->withQueryString();
+
+        return Inertia::render('Admin/Staff/Index', [
+            'staff' => $staff,
+            'filters' => $request->only(['search']),
+        ]);
+    }
+
+    public function globalStaffSave(Request $request)
+    {
+        $this->ensureSuperAdmin();
+        $userId = $request->input('id');
+
+        $rules = [
+            'nombres' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email,' . $userId,
+            'rol' => 'required|string|in:super_admin,vendedor',
+            'estado' => 'required|string|in:activo,inactivo',
+        ];
+
+        if (!$userId) {
+            $rules['password'] = 'required|string|min:8';
+        } else {
+            $rules['password'] = 'nullable|string|min:8';
+        }
+
+        $request->validate($rules);
+
+        $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'estado']);
+        $data['consultora_id'] = null; // Personal global
+
+        if ($request->input('password')) {
+            $data['password'] = Hash::make($request->input('password'));
+        }
+
+        if ($userId) {
+            $user = User::findOrFail($userId);
+            $user->update($data);
+            $message = 'Miembro del staff global actualizado exitosamente.';
+        } else {
+            User::create($data);
+            $message = 'Miembro del staff global creado exitosamente.';
+        }
+
+        return redirect()->route('admin.staff.index')->with('message', $message);
+    }
+
+    public function globalStaffDestroy(User $user)
+    {
+        $this->ensureSuperAdmin();
+
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'No puedes dar de baja tu propio usuario.');
+        }
+
+        $user->update(['estado' => 'inactivo']);
+        $user->delete();
+
+        return redirect()->route('admin.staff.index')->with('message', 'Miembro del staff global dado de baja exitosamente.');
     }
 }

@@ -112,7 +112,7 @@ export default function Show() {
         });
     };
 
-    const isBaseAdmin = ['gestor', 'super_admin', 'administrador', 'admin'].includes(user.rol);
+    const isBaseAdmin = ['gestor', 'administrador', 'admin'].includes(user.rol) && !user.is_super_admin && user.rol !== 'super_admin';
     const isGestorActive = user.active_role === 'gestor' || user.active_role === 'super_admin';
     const isTecnicoActive = user.active_role === 'tecnico';
 
@@ -166,14 +166,14 @@ export default function Show() {
                                                     accept="image/*" 
                                                     className="sr-only" 
                                                     onChange={handlePhotoChange} 
-                                                />
+                                                    />
                                             </label>
                                         </div>
                                         <h3 className="text-xl font-black text-white italic uppercase tracking-tight">
                                             {user_data.nombres} {user_data.apellidos}
                                         </h3>
                                         <p className="text-[9px] font-black text-[#F69239] uppercase tracking-[0.3em] italic mt-1">
-                                            {user.rol === 'gestor' ? 'Gestor de Seguridad' : (user.rol === 'tecnico' ? 'Especialista en Campo' : 'System Admin')}
+                                            {(user.rol === 'super_admin' || user.is_super_admin) ? 'Súper Administrador' : (user.rol === 'tecnico' ? 'Especialista en Campo' : 'Gestor de Seguridad')}
                                         </p>
                                     </div>
 

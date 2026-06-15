@@ -61,7 +61,9 @@ export default function AuthenticatedLayout({ children, title, header }) {
                 <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 overflow-hidden flex-shrink-0">
                     <Link href={safeRoute('dashboard')} className="flex items-center space-x-3 group">
                         <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg border border-white/10 group-hover:scale-105 transition-transform duration-300">
-                            {branding?.logo ? (
+                            {(user?.is_super_admin || user?.is_vendedor) ? (
+                                <img src="/images/logo.png" alt="Logo XamaSafe" className="max-h-full w-auto object-contain" />
+                            ) : branding?.logo ? (
                                 <img src={branding.logo} alt="Logo" className="max-h-full w-auto object-contain" />
                             ) : (
                                 <div className="w-6 h-6 bg-ep-primary rounded-sm shadow-inner" />
@@ -70,8 +72,8 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         {(sidebarOpen || mobileMenuOpen) && (
                             <div className="flex flex-col">
                                 <span className="text-white font-black uppercase italic tracking-tighter text-lg leading-none">XamaSafe</span>
-                                <span className="text-yellow-400 font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]" title={branding?.name || 'EP'}>
-                                    {branding?.name || 'EQUIPO PREVENTIVO'}
+                                <span className="text-yellow-400 font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]" title={(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EP')}>
+                                    {(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EQUIPO PREVENTIVO')}
                                 </span>
                             </div>
                         )}
@@ -102,7 +104,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         )}
 
                         {/* ── ADMIN / GESTOR ── */}
-                        {user?.is_admin && (
+                        {user?.is_admin && !user?.is_super_admin && (
                             <>
                                 <NavItem href={safeRoute('gestor.operations.visits.index')} active={isActive('gestor.operations.visits.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconLocation />} label="Control de Visitas" />
                                 <NavItem href={safeRoute('gestor.inspections.index')} active={isActive('gestor.inspections.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconClock />} label="Historial de Inspecciones" />
@@ -113,30 +115,45 @@ export default function AuthenticatedLayout({ children, title, header }) {
                             </>
                         )}
 
+                        {/* ── SUPER ADMIN y VENDEDOR ── */}
+                        {(user?.is_super_admin || user?.is_vendedor) && (
+                            <>
+                                <NavItem href={safeRoute('admin.dashboard')} active={isActive('admin.dashboard')} open={sidebarOpen || mobileMenuOpen} icon={<IconDashboard />} label="Dashboard Global" />
+                                <NavItem href={safeRoute('admin.consultants.index')} active={isActive('admin.consultants.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconCompanies />} label="Consultoras" />
+                                {user?.is_super_admin && (
+                                    <NavItem href={safeRoute('admin.staff.index')} active={isActive('admin.staff.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconStaff />} label="Personal Global" />
+                                )}
+                            </>
+                        )}
+
                         {/* Informe Maestro */}
-                        <NavItem
-                            href={safeRoute('master-reports.index')}
-                            active={isActive('master-reports.*')}
-                            open={sidebarOpen || mobileMenuOpen}
-                            icon={<IconDoc />}
-                            label="Informe Maestro"
-                        />
+                        {!user?.is_global_user && (
+                            <NavItem
+                                href={safeRoute('master-reports.index')}
+                                active={isActive('master-reports.*')}
+                                open={sidebarOpen || mobileMenuOpen}
+                                icon={<IconDoc />}
+                                label="Informe Maestro"
+                            />
+                        )}
 
                         {/* Contrato Anual */}
-                        <NavItem
-                            href={safeRoute('annual-contract.index')}
-                            active={isActive('annual-contract.*')}
-                            open={sidebarOpen || mobileMenuOpen}
-                            icon={<IconContract />}
-                            label="Contrato Anual"
-                        />
+                        {!user?.is_global_user && (
+                            <NavItem
+                                href={safeRoute('annual-contract.index')}
+                                active={isActive('annual-contract.*')}
+                                open={sidebarOpen || mobileMenuOpen}
+                                icon={<IconContract />}
+                                label="Contrato Anual"
+                            />
+                        )}
 
-                        {user?.is_admin && (
+                        {user?.is_admin && !user?.is_global_user && (
                             <NavItem href={safeRoute('gestor.administration.hub')} active={isActive('gestor.administration.hub', 'gestor.users.*', 'gestor.technicians.*', 'gestor.companies.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconSettings />} label="Administración" />
                         )}
 
-                        {/* Dashboard (solo no técnicos) */}
-                        {!user?.is_technician && (
+                        {/* Dashboard (solo no técnicos y no super admins) */}
+                        {!user?.is_technician && !user?.is_global_user && (
                             <NavItem href={safeRoute('dashboard')} active={isActive('dashboard')} open={sidebarOpen || mobileMenuOpen} icon={<IconDashboard />} label="Dashboard" />
                         )}
 
@@ -197,7 +214,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                     {/* Lado derecho: role switcher + usuario */}
                     <div className="flex items-center space-x-3 md:space-x-6">
                         {/* Role Switcher */}
-                        {(user?.rol === 'gestor' || user?.rol === 'super_admin') && (
+                        {(user?.rol === 'gestor' && !user?.is_super_admin && user?.rol !== 'super_admin') && (
                             user?.active_role === 'tecnico' ? (
                                 <Link
                                     href={safeRoute('switch-role', 'gestor')}
@@ -226,7 +243,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                             <div className="hidden sm:flex flex-col items-end mr-1">
                                 <span className="text-xs font-black text-white uppercase italic tracking-wide">{user?.nombres || 'Usuario'}</span>
                                 <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                    {user?.active_role === 'tecnico' ? 'Modo Técnico' : 'Gestor'}
+                                    {(user?.is_super_admin || user?.rol === 'super_admin') ? 'Súper Admin' : user?.is_vendedor ? 'Vendedor' : (user?.active_role === 'tecnico' ? 'Modo Técnico' : 'Gestor')}
                                 </span>
                             </div>
                             <div className="w-8 h-8 sm:w-9 sm:h-9 bg-[#F69239] rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-black shadow-sm ring-2 ring-white/10">
@@ -289,3 +306,6 @@ const IconContract = () => <svg fill="none" stroke="currentColor" viewBox="0 0 2
 const IconSettings = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>;
 const IconDashboard= () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>;
 const IconUser     = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>;
+const IconCompanies = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>;
+const IconStaff     = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>;
+

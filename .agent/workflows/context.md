@@ -101,6 +101,9 @@ ep-back/
 
 | Tabla | Propósito | Campos Clave |
 |-------|-----------|--------------|
+| `audit_logs` | Registro de auditoría inmutable de cambios de accesos | `id`, `user_id`, `action`, `target_type`, `target_id`, `payload` |
+| `consultoras` | Empresas consultoras de HyS que agrupan usuarios y clientes | `id`, `nombre`, `cuit`, `max_tecnicos`, `max_gestores`, `max_empresas`, `estado_suscripcion` |
+| `consultora_suscripcion_logs` | Historial de transiciones de estado de suscripción de consultoras | `id`, `consultora_id`, `estado_anterior`, `estado_nuevo`, `user_id` |
 | `checklists` | Plantillas de checklist | `id`, `title`, `description`, `category`, `is_active` |
 | `questions` | Preguntas dinámicas | `id`, `checklist_id`, `label`, `type`, `options`, `order`, `is_required` |
 | `inspections` | Ejecuciones/llenados | `id`, `checklist_id`, `user_id`, `completed_at`, `notes` |
@@ -130,9 +133,27 @@ ep-back/
 - ✅ Form Requests independientes para la validación de peticiones.
 - ✅ Eager Loading (`with()`) en Eloquent para evitar consultas N+1.
 - ✅ **Flujo de Aprobación de Firma Digital (Auditoría):** Los cambios de firma digital del técnico entran en estado `pending` en `firma_status` y se guardan temporalmente en `firma_temp`. Los Gestores auditan y aprueban o rechazan el cambio físicamente a través de la consola de usuarios (`Users.jsx`).
+- ✅ **Separación de Roles Globales (`super_admin` vs `vendedor`):**
+  - **Súper Administrador (`super_admin`):** control absoluto. Gestiona el personal global (CRUD de staff global), puede eliminar consultoras, y administra el personal interno de las consultoras.
+  - **Vendedor (`vendedor`):** rol comercial y de soporte. Administra consultoras (dar de alta, editar información/branding/colores, configurar límites de licencias de técnicos, gestores y empresas, y estado de suscripción). **Restringido:** bloqueado de eliminar consultoras, de ver/modificar personal de consultoras, y de la consola de staff global (recibe `403` HTTP y elementos ocultos en la UI).
+  - **Helpers en modelo `User`:** se añaden constantes de rol y helpers (`isVendedor()`, `isGlobalUser()`) y se protegen las rutas en `routes/web.php` de forma segmentada.
+- ✅ **Auditoría Inmutable (Audit Log):**
+  - Registra de forma automática e inalterable qué usuario global (`super_admin` o `vendedor`) modificó los límites o suscripciones de una consultora.
+  - El modelo `AuditLog` está blindado a nivel de base de datos interceptando los eventos Eloquent `updating` y `deleting` para lanzar excepciones.
+  - Las transacciones se disparan automáticamente usando eventos Laravel (`ClientAccessModified`) y oyentes (`LogClientAccess`) vinculados en `AppServiceProvider`.
+- ✅ **Aislamiento de Súper Administración:** Las rutas de súper administración se protegen con middleware `role:super_admin,vendedor` o `role:super_admin` según la jerarquía, e invocan `$this->ensureSuperAdminOrVendedor()` o `$this->ensureSuperAdmin()` en `AdministrationController` para convalidar el rol en backend.
 - ✅ Retornar respuestas nativas de Inertia: `return Inertia::render('Componente', [...]);`.
  
 ### Frontend (React 19 & Inertia)
+- ✅ **Menú Lateral para Usuarios Globales (`super_admin` / `vendedor`):**
+  - El layout `AuthenticatedLayout.jsx` evalúa la pertenencia global (`user.rol`) para renderizar un menú administrativo minimalista.
+  - Para `super_admin`, incluye: "Dashboard Global", "Consultoras", y "Personal Global" (ABM de staff global).
+  - Para `vendedor`, incluye: "Dashboard Global" y "Consultoras", agregando un distintivo de marca "Panel Vendedor" en la barra lateral, y ocultando las rutas de administración de personal global.
+- ✅ **Línea de Tiempo de Auditoría (Edit.jsx):**
+  - En la vista de edición de Consultoras (`Edit.jsx`), se integra una pestaña de **"Auditoría"** que renderiza una línea de tiempo táctica de cambios de accesos.
+  - Cada entrada calcula la diferencia visual de los límites (técnicos, gestores, empresas y estado de suscripción) indicando los valores anteriores y nuevos, y el usuario autor de la modificación.
+- ✅ **ABM de Staff Global (Index.jsx en Admin/Staff):**
+  - Interfaz premium en modo oscuro que permite a los súper administradores gestionar el staff interno, crear nuevos usuarios de soporte, darlos de baja o blanquear sus contraseñas.
 - ✅ **Diseño HUD Táctico y Modular:** Componentes HUD oscuros premium, modularizados y reutilizables. El modal `ActionSelector` es el estándar para paneles de comandos y acciones spontaneous.
 - ✅ **HUD Sync Badge (Naranja Técnico):** El asistente de checklists (`Wizard.jsx`) debe mostrar arriba de la barra de progreso un badge centrado `"⌚ Tiempo Real (Sync Servidor)"` en Naranja Técnico para indicar la inmutabilidad de la fecha en tiempo real.
 - ✅ **Validación Táctica con Firmas de Perfil (Wizard.jsx):** La sección 5 del wizard lee la firma de perfil (`report.tecnico.firma`) del técnico de forma inmutable, presentándola con filtro inverso de color (`brightness-0 invert opacity-90`) y un glow esmeralda de aprobación. Si falta la firma, bloquea el envío y despliega un Glassmorphic Alert Box con enlace a su Perfil.

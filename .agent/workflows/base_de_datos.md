@@ -61,6 +61,23 @@ El sistema cuenta con las siguientes entidades principales:
 
 ---
 
+## Tabla: `audit_logs`
+
+| Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
+|---|---|---|---|---|
+| `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `user_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
+| `action` | `varchar` | No ❌ | *ninguno* |  |
+| `target_type` | `varchar` | No ❌ | *ninguno* |  |
+| `target_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `payload` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
+| `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
+
+### 🔗 Relaciones (Foreign Keys)
+- `user_id` → vincula con `users`(`id`) (con onDelete set null)
+
+---
+
 ## Tabla: `capacitacion_presencials`
 
 | Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
@@ -221,6 +238,8 @@ El sistema cuenta con las siguientes entidades principales:
 | `nombre` | `varchar` | No ❌ | *ninguno* |  |
 | `cuit` | `varchar` | No ❌ | *ninguno* |  |
 | `max_tecnicos` | `INTEGER` | No ❌ | `'5'` |  |
+| `max_gestores` | `INTEGER` | No ❌ | `'2'` |  |
+| `max_empresas` | `INTEGER` | No ❌ | `'5'` |  |
 | `config` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
@@ -230,6 +249,7 @@ El sistema cuenta con las siguientes entidades principales:
 | `phone` | `varchar` | Sí ✅ | *ninguno* |  |
 | `province` | `varchar` | Sí ✅ | *ninguno* |  |
 | `locality` | `varchar` | Sí ✅ | *ninguno* |  |
+| `estado_suscripcion` | `varchar` | No ❌ | `'activa'` |  |
 | `logo_path` | `varchar` | Sí ✅ | *ninguno* |  |
 | `color_primary` | `varchar` | No ❌ | `'#1e40af'` |  |
 | `color_secondary` | `varchar` | No ❌ | `'#6b7280'` |  |
@@ -237,6 +257,23 @@ El sistema cuenta con las siguientes entidades principales:
 
 ### 🗂️ Índices
 - `consultoras_cuit_unique` (Único)
+
+---
+
+## Tabla: `consultora_suscripcion_logs`
+
+| Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
+|---|---|---|---|---|
+| `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `consultora_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `estado_anterior` | `varchar` | Sí ✅ | *ninguno* |  |
+| `estado_nuevo` | `varchar` | No ❌ | *ninguno* |  |
+| `user_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
+| `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
+
+### 🔗 Relaciones (Foreign Keys)
+- `consultora_id` → vincula con `consultoras`(`id`) (con onDelete cascade)
+- `user_id` → vincula con `users`(`id`) (con onDelete set null)
 
 ---
 
@@ -860,7 +897,7 @@ solicitado → en_redaccion → finalizado → aprobado
 | `genero` | `varchar` | Sí ✅ | *ninguno* |  |
 | `telefono` | `varchar` | Sí ✅ | *ninguno* |  |
 | `n_doc` | `varchar` | Sí ✅ | *ninguno* |  |
-| `rol` | `varchar` | Sí ✅ | *ninguno* |  |
+| `rol` | `varchar` | Sí ✅ | *ninguno* | rol del usuario (`super_admin`, `vendedor`, `gestor`, `tecnico`, `cliente`) |
 | `matricula` | `varchar` | Sí ✅ | *ninguno* |  |
 | `estado` | `tinyint(1)` | No ❌ | `'1'` |  |
 | `firma` | `varchar` | Sí ✅ | *ninguno* |  |

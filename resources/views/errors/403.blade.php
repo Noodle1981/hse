@@ -15,7 +15,7 @@
             <!-- Message -->
             <h2 class="text-3xl font-semibold text-gray-800 mb-4">Acceso Denegado</h2>
             <p class="text-gray-600 mb-8">
-                No tienes permiso para acceder a esta página.
+                {{ $exception->getMessage() ?: 'No tienes permiso para acceder a esta página.' }}
             </p>
             
             <!-- Icon -->

@@ -25,7 +25,9 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 
 | Rol de Usuario | Descripción | Objetivos Clave |
 |----------------|-------------|-----------------|
-| **Gestor (Administrador / Consultor)** | Administra el sistema desde su laptop/escritorio. | Configurar checklists, supervisar el rendimiento de los técnicos en tiempo real, gestionar clientes/sedes, emitir reportes anuales de contratos y descargar PDFs consolidados. |
+| **Súper Administrador (`super_admin`)** | Posee privilegios globales absolutos del sistema. | Dar de alta/baja consultoras, configurar límites máximos de licencias, y gestionar el personal global (súper admins y vendedores). |
+| **Vendedor (`vendedor`)** | Rol global de ventas y soporte comercial. | Administrar límites de licencias, altas y estado de suscripción de consultoras, sin acceso a borrado o gestión de personal. |
+| **Gestor (Administrador / Consultor)** | Administra el sistema de una consultora específica. | Configurar checklists, supervisar técnicos en tiempo real, gestionar clientes/sedes, emitir reportes anuales de contratos y descargar PDFs consolidados. |
 | **Técnico (Inspector de Terreno)** | Opera en campo utilizando dispositivos móviles o tablets. | Registrar visitas, certificar presencia mediante coordenadas GPS, completar checklists interactivos con firmas digitales y capturar hallazgos con registro fotográfico. |
 | **Cliente Corporativo (Lector)** | Visualiza e inspecciona el estado de sus sedes. | Consultar las constancias de visitas, ver estadísticas de cumplimiento y descargar certificados oficiales de seguridad y capacitaciones. |
 
@@ -129,10 +131,10 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Erradicación Absoluta de Firmas Manuales (Canvas):** No se permite en absoluto el trazo manual en pantalla dentro del Informe Maestro. El sistema adopta como fuente de verdad única e inmutable la **Firma Tipo A (Rúbrica de Perfil)** cargada en el perfil del técnico certificante (`report.tecnico.firma`).
 * **Máquina de 5 Estados del Informe Maestro (Backend-Driven):**
   El campo `accion` es calculado **exclusivamente en el backend** (`OperationController.php`) y transmitido al frontend. El frontend `MyAssignments.jsx` solo renderiza basándose en este campo. La lógica es:
-  1. **`ejecutar`** — No existe ningún `MasterReport` para esta sede en el periodo seleccionado. Se muestra el botón naranja "+ EJECUTAR".
-  2. **`reanudar`** — Existe un informe con `estado = 'en_redaccion'` sin observaciones de revisión. Se muestra el enlace índigo "REANUDAR" al Wizard de edición.
+  1. **`ejecutar`** — No existe ningún `MasterReport` para esta sede en el periodo seleccionado. Se muestra el botón amarillo "+ EJECUTAR".
+  2. **`reanudar`** — Existe un informe con `estado = 'en_redaccion'` sin observaciones de revisión. Se muestra el enlace amarillo sutil "REANUDAR" al Wizard de edición.
   3. **`corregir`** — Existe un informe con `estado = 'en_redaccion'` Y `observacion_revision` no nulo (devuelto por el gestor). Se muestra el enlace rojo pulsante "⚠ CORREGIR" con sombra de alerta neón.
-  4. **`pendiente`** — El informe está en `estado = 'finalizado'` (enviado al gestor). Se muestra un badge ámbar de solo lectura "⏳ PENDIENTE GESTOR" sin ningún botón de acción.
+  4. **`pendiente`** — El informe está en `estado = 'finalizado'` (enviado al gestor). Se muestra un badge amarillo sutil de solo lectura "⏳ PENDIENTE GESTOR" sin ningún botón de acción.
   5. **`aprobado`** — El informe tiene `estado = 'aprobado'`. Se muestra el enlace emerald "✅ VER INFORME" hacia `GET /master-reports/{id}`.
   **Regla de Unicidad:** Solo puede existir un informe por periodo (`YYYY-MM`) por sede+técnico. El backend busca por el campo `periodo` (no por `created_at`) para detectar el informe existente.
 * **Consola de Redacción Wizard y Validación Táctica:**
@@ -148,14 +150,25 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
   - **Listado Detallado de Charla:** El PDF expande la columna de asistencia listando Nombre, DNI y firma de cada asistente.
 * **Bóveda de Informes (Gestor Index):**
   - El botón "SOLICITAR INFORME MAESTRO" fue eliminado del header. Los informes se crean exclusivamente desde el plan mensual del técnico.
-  - La paleta de estados en el Index usa: Ámbar = PENDIENTE (finalizado), Emerald = APROBADO, Naranja = EN REDACCIÓN, Amarillo = SOLICITADO.
+  - La paleta de estados en el Index usa: Amarillo = PENDIENTE (finalizado), Emerald = APROBADO, Amarillo Sutil = EN REDACCIÓN, Amarillo Brillante = SOLICITADO.
   - Un técnico con informe `aprobado` solo ve "DESCARGAR PDF APROBADO". Un gestor con informe `aprobado` solo ve "PDF FINAL". Ninguno puede editar un informe ya aprobado.
 * **Flujo Seguro de Revisión y Aprobación de Gestores**:
   - **Botonera de Acción Flotante Global**: Barra táctica inteligente que evalúa rol y estado para renderizar:
     - *Aprobado*: Badge inmutable verde esmeralda "INFORME APROBADO Y REGISTRADO".
     - *Gestor + Finalizado*: Botones "APROBAR INFORME MAESTRO" y "OBSERVAR & PEDIR REVISIÓN".
     - *Técnico + Redactando*: Botones "GUARDAR BORRADOR" y "GENERAR INFORME FINAL".
-    - *Otros (Lectura)*: Badge pulsante índigo "MODO LECTURA ACTIVO".
+    - *Otros (Lectura)*: Badge pulsante gris/zinc "MODO LECTURA ACTIVO".
+
+### 4.9. Módulo de Súper Administración y Ventas (Gestión Global, Roles y Auditoría de Accesos)
+* **Separación de Responsabilidades y Roles Globales**:
+  - **Súper Administrador (`super_admin`)**: posee privilegios globales totales. Exclusivo para eliminar consultoras, administrar personal de consultoras y gestionar el staff global (crear, editar, blanquear contraseñas y desactivar súper administradores y vendedores). Su sidebar muestra "Dashboard Global", "Consultoras" y "Personal Global".
+  - **Vendedor (`vendedor`)**: rol global orientado a ventas y soporte. Comparte el dashboard de consultoras, permitiendo dar de alta, configurar límites (gestores, técnicos, empresas) y cambiar el estado de suscripción de las consultoras. **Restringido**: no tiene acceso al borrado de consultoras, a la administración de usuarios internos de clientes, ni a la gestión global de staff. Su sidebar muestra "Dashboard Global" y "Consultoras".
+* **Gestión de Consultoras Máster (CRUD):** Creación y edición de las entidades consultoras que agrupan a técnicos y empresas, permitiendo definir su CUIT, nombre, email, teléfono, dirección, estado de suscripción y límites máximos de licencias (técnicos, gestores, empresas).
+* **Personalización de Branding y Marca:** Control de la identidad visual de cada consultora a través del formulario de edición. Permite cargar logotipos a almacenamiento persistente y seleccionar colores corporativos (Primario, Secundario, Acento) con color pickers nativos.
+* **Control de Operadores y Staff (Activación/Suspensión):** Listado y gestión del staff de cada consultora (restringido a súper administradores).
+* **Gestión de Personal Global:** Panel exclusivo de Súper Administradores para dar de alta, modificar y cambiar el estado de otros administradores y vendedores globales.
+* **Registro de Auditoría Inmutable (Audit Log)**:
+  - Sistema de registro automático e inalterable que captura qué usuario (Súper Admin o Vendedor) realizó cambios de límites o suscripción en cada consultora y el diff exacto de campos. El modelo tiene bloqueados los métodos de modificación y eliminación para máxima fiabilidad. Muestra una línea de tiempo detallada con las diferencias en los campos modificados en la vista de edición.
 
 ---
 

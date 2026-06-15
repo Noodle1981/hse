@@ -16,9 +16,9 @@
         $empresa = $sede ? $sede->empresa : null;
         
         $primaryColor = $empresa->primary_color ?? '#F69239';
-        $logoPath = $consultora?->logo_path ?? null;
+        $logoPath = $user?->isSuperAdmin() ? null : ($consultora?->logo_path ?? null);
         $brandingLogo = $logoPath ? asset('storage/' . $logoPath) : asset('images/logo.png');
-        $brandingName = $consultora?->nombre ?? 'EP - EQUIPO PREVENTIVO';
+        $brandingName = $user?->isSuperAdmin() ? 'Panel Súper Usuario' : ($consultora?->nombre ?? 'EP - EQUIPO PREVENTIVO');
     @endphp
 
     <style>
@@ -509,7 +509,7 @@
                                     {{ auth()->user()->nombres }}
                                 </span>
                                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
-                                    {{ session('active_role') === 'tecnico' ? 'Modo Técnico' : 'Gestor' }}
+                                    {{ auth()->user()->rol === 'super_admin' ? 'Súper Admin' : (session('active_role') === 'tecnico' ? 'Modo Técnico' : 'Gestor') }}
                                 </span>
                             </div>
                             <div class="w-8 h-8 sm:w-9 sm:h-9 bg-ep-primary rounded-full flex items-center justify-center text-white text-xs sm:text-sm font-black shadow-sm ring-2 ring-white/10">

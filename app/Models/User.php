@@ -111,6 +111,8 @@ class User extends Authenticatable
 
     public const ROLE_TECNICO = 'tecnico';
 
+    public const ROLE_VENDEDOR = 'vendedor';
+
     /**
      * Normaliza un nombre de rol a su valor estándar interno.
      */
@@ -131,7 +133,7 @@ class User extends Authenticatable
 
     /**
      * Parsea recursivamente y aplana cualquier representación de roles a un array plano de strings.
-     * Soporta strings simples, separados por comas, pipes (|), y arrays (incluso anidados).
+     * Soporta strings simples, separados por comas, pipes (|), y arrays (incluso an animados).
      */
     private function parseRoles(string|array $roles): array
     {
@@ -180,7 +182,17 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole(self::ROLE_SUPER_ADMIN);
+        return $this->rol === self::ROLE_SUPER_ADMIN;
+    }
+
+    public function isVendedor(): bool
+    {
+        return $this->rol === self::ROLE_VENDEDOR;
+    }
+
+    public function isGlobalUser(): bool
+    {
+        return $this->isSuperAdmin() || $this->isVendedor();
     }
 
     public function isGestor(): bool

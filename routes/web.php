@@ -344,13 +344,38 @@ Route::middleware(['auth'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | Rutas SUPER ADMIN (Prefijo: /admin)
+    | Rutas SUPER ADMIN y VENDEDOR (Prefijo: /admin)
     |--------------------------------------------------------------------------
-    | Reservado para la gestión global de consultoras y monitoreo del ecosistema.
+    | Reservado para la gestión global de consultoras y personal de soporte/ventas.
     */
-    Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin'])->group(function () {
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,vendedor'])->group(function () {
         Route::get('/dashboard', [AdministrationController::class, 'dashboard'])->name('dashboard');
-        // TODO: Migrar Consultants admin a React
+        
+        // Consultoras Management (Lectura, creación y edición compartida)
+        Route::prefix('consultants')->name('consultants.')->group(function () {
+            Route::get('/', [AdministrationController::class, 'consultantsIndex'])->name('index');
+            Route::get('/create', [AdministrationController::class, 'consultantsCreate'])->name('create');
+            Route::post('/store', [AdministrationController::class, 'consultantsStore'])->name('store');
+            Route::get('/{consultant}/edit', [AdministrationController::class, 'consultantsEdit'])->name('edit');
+            Route::post('/{consultant}/update', [AdministrationController::class, 'consultantsUpdate'])->name('update');
+
+            // Acciones destructivas y gestión de staff interno restringidas a super_admin
+            Route::middleware(['role:super_admin'])->group(function () {
+                Route::delete('/{consultant}', [AdministrationController::class, 'consultantsDestroy'])->name('destroy');
+                
+                // Staff/Users Management per Consultora
+                Route::get('/{consultant}/users', [AdministrationController::class, 'consultantUsersIndex'])->name('users.index');
+                Route::post('/{consultant}/users/save', [AdministrationController::class, 'consultantUsersSave'])->name('users.save');
+                Route::delete('/{consultant}/users/{user}', [AdministrationController::class, 'consultantUsersDestroy'])->name('users.destroy');
+            });
+        });
+
+        // CRUD de Personal Global (Restringido a super_admin)
+        Route::middleware(['role:super_admin'])->group(function () {
+            Route::get('/staff', [AdministrationController::class, 'globalStaffIndex'])->name('staff.index');
+            Route::post('/staff/save', [AdministrationController::class, 'globalStaffSave'])->name('staff.save');
+            Route::delete('/staff/{user}', [AdministrationController::class, 'globalStaffDestroy'])->name('staff.destroy');
+        });
     });
 
     // Logout

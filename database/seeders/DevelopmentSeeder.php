@@ -53,6 +53,19 @@ class DevelopmentSeeder extends Seeder
             ]
         );
 
+        // Vendedor
+        User::updateOrCreate(
+            ['email' => 'vendedor@app.com'],
+            [
+                'nombres' => 'Vendedor',
+                'apellidos' => 'XamaSafe',
+                'rol' => 'vendedor',
+                'password' => Hash::make('password'),
+                'estado' => 'activo',
+                'consultora_id' => null, // Vendedor es global
+            ]
+        );
+
         // Gestor (Administrador de Consultora)
         $gestor = User::updateOrCreate(
             ['email' => 'gestor@app.com'],

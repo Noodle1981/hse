@@ -62,6 +62,28 @@ El sistema opera bajo un esquema estricto de multi-tenancy y control de accesos 
   * Monitorear el progreso y la asistencia de su personal a las capacitaciones.
 * **Límite Técnico:** Restringido bajo lógica de multi-tenancy. Solo visualiza información relacionada a sus propias Sedes y Empresas (definido mediante políticas de Laravel).
 
+### 1.4. Súper Administrador (Administrador Global del Sistema)
+* **Objetivo:** Administrar con control total y privilegios globales absolutos el SaaS de XamaSafe, la infraestructura de consultoras, la gestión del staff administrativo global, y la eliminación de cuentas.
+* **Responsabilidades:**
+  - Crear, editar, listar y eliminar consultoras de Higiene y Seguridad (`Consultora`).
+  - Configurar límites de licencias de técnicos (`max_tecnicos`), gestores (`max_gestores`) y empresas (`max_empresas`) por consultora.
+  - Personalizar el branding corporativo de cada consultora (logotipo y colores de acento primario, secundario y de relieve) mediante la interfaz gráfica en React.
+  - Administrar el staff de operadores y técnicos de cada consultora, pudiendo cambiar su estado para inhabilitar accesos del personal en tiempo real.
+  - Gestionar el personal administrativo global (CRUD de Súper Administradores y Vendedores), incluyendo la creación de nuevas cuentas, la baja/desactivación y el blanqueo de contraseñas.
+* **Páginas React / Inertia asociadas:**
+  - Directorio `resources/js/Pages/Admin/Consultants/*` (Index, Edit, Users).
+  - Directorio `resources/js/Pages/Admin/Staff/*` (Index.jsx - Gestión de Personal Global).
+
+### 1.5. Vendedor (Soporte Comercial Global)
+* **Objetivo:** Administrar y dar soporte comercial a las consultoras en el onboarding y licenciamiento, con privilegios administrativos globales restringidos.
+* **Responsabilidades:**
+  - Crear, editar y listar consultoras de Higiene y Seguridad (`Consultora`).
+  - Configurar límites de licencias (`max_tecnicos`, `max_gestores`, `max_empresas`) y gestionar el estado de suscripción de cada consultora (`estado_suscripcion` a `activa`, `morosa` o `baja`).
+  - Personalizar el branding corporativo de cada consultora (logotipo y colores corporativos).
+  - **Restricciones de seguridad:** no puede eliminar consultoras, no tiene acceso a la gestión de personal de consultoras (usuarios gestores/técnicos) ni a la gestión global de staff (recibe `403 Forbidden` en el backend y los elementos se ocultan visualmente en el sidebar/vistas).
+* **Páginas React / Inertia asociadas:**
+  - Directorio `resources/js/Pages/Admin/Consultants/*` (Index, Edit).
+
 ---
 
 ## 2. 🔄 EL CICLO DE VIDA OPERATIVO: Flujo de Principio a Fin
@@ -102,10 +124,10 @@ El flujo operativo comercial y técnico de XamaSafe sigue un ciclo continuo e in
    El Técnico inicia el Wizard de **Reportes Maestros** desde la pestaña "Métricas" en `MyAssignments.jsx`. El motor compara la data con el `AnnualPlan`, calcula el cumplimiento, y agrupa desvíos/capacitaciones.
    - **Máquina de 5 Estados (Backend-Driven):**
      El campo `accion` lo calcula el backend (`OperationController.php`) buscando el `MasterReport` por `periodo` (YYYY-MM) + `sede_id` + `user_id`, y lo transmite al frontend. El frontend `MyAssignments.jsx` solo renderiza en base a este campo:
-     1. **`ejecutar`** → No existe informe para ese periodo. Botón naranja "+ EJECUTAR".
-     2. **`reanudar`** → `estado = 'en_redaccion'`, sin observación. Enlace índigo "REANUDAR" al Wizard.
+     1. **`ejecutar`** → No existe informe para ese periodo. Botón amarillo "+ EJECUTAR".
+     2. **`reanudar`** → `estado = 'en_redaccion'`, sin observación. Enlace amarillo sutil "REANUDAR" al Wizard.
      3. **`corregir`** → `estado = 'en_redaccion'` + `observacion_revision` no nulo. Enlace rojo pulsante "⚠ CORREGIR".
-     4. **`pendiente`** → `estado = 'finalizado'`. Badge ámbar solo-lectura "⏳ PENDIENTE GESTOR".
+     4. **`pendiente`** → `estado = 'finalizado'`. Badge amarillo solo-lectura "⏳ PENDIENTE GESTOR".
      5. **`aprobado`** → `estado = 'aprobado'`. Enlace emerald "✅ VER INFORME" hacia `GET /master-reports/{id}`.
    - **Regla de Unicidad:** Un técnico solo puede tener un informe por `periodo` (YYYY-MM) y `sede`. El backend previene la creación de duplicados.
    - **El Ciclo de Revisión y Aprobación (Gestor)**:
@@ -252,6 +274,20 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
 * **Filtro Estricto de Falsos Ad-Hoc:**
   - Las repeticiones o múltiples ejecuciones de checklists/capacitaciones programadas en el `AnnualPlan` para el periodo actual no deben listarse como "Ad-Hoc / Fuera de Plan". 
   - La lógica en `aggregatePeriodData` obtiene todas las actividades del plan anual y valida los checklists/trainings excedentes (los no asignados como completados principales de la meta). Si un excedente coincide en código, ID de plantilla o título con lo planificado, se descarta del listado Ad-Hoc. Solo se reportan como "Inspecciones Técnicas No Rutinarias" aquellas actividades completamente espontáneas e imprevistas.
+
+### 3.11. Gestión Global, Roles Globales y Auditoría de Accesos
+* **Propósito:** Separar responsabilidades comerciales y globales de administración, y garantizar trazabilidad inalterable de los cambios en los límites de licenciamiento y estados de suscripción de los clientes.
+* **Operación de Roles Globales:**
+  - El sistema cuenta con dos roles a nivel global: `super_admin` (privilegios totales de infraestructura) y `vendedor` (privilegios de ventas y soporte comercial, con restricciones de eliminación y gestión de personal global).
+  - Los endpoints de CRUD de Staff Global (`admin/staff/*`) y eliminación de consultoras se restringen estrictamente mediante middleware al rol `super_admin`.
+* **Registro de Auditoría (Audit Log) Inmutable:**
+  - **Tabla `audit_logs`:** registra el diff de límites y suscripciones modificadas en cada consultora. Guarda el `user_id` de quien modificó, `action` ('create' / 'update'), `target_type`, `target_id` y `payload` (JSON con el diff de cambios `old` y `new`).
+  - **Inmutabilidad del Log:** El modelo `AuditLog` intercepta los eventos Eloquent `updating` y `deleting` para arrojar una `Exception`, bloqueando cualquier modificación o borrado de auditoría en la base de datos.
+  - **Tabla `consultora_suscripcion_logs`:** registra las transiciones históricas de estados de suscripción (`estado_anterior`, `estado_nuevo`) para auditoría comercial rápida.
+* **Visualización de Auditoría en Frontend:**
+  - La vista `Edit.jsx` (Consultoras) presenta una pestaña de **"Auditoría"** que renderiza una línea de tiempo táctica de cambios de accesos, mostrando de forma descriptiva el diff visual (ej. *Licencias Técnicos: 10 ➔ 15*) y el nombre del usuario global autor.
+* **Pruebas de Trazabilidad:**
+  - La suite de pruebas en `GlobalStaffManagementTest.php` valida el aislamiento de rutas de staff global/vendedores, la inmutabilidad de la tabla `audit_logs` y la generación automática de los logs ante inserciones/actualizaciones en consultoras.
 
 ---
 

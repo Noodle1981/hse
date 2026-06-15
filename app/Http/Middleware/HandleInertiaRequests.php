@@ -47,6 +47,8 @@ class HandleInertiaRequests extends Middleware
                     'is_admin' => $user->isAdmin(),
                     'is_technician' => $user->isTechnician(),
                     'is_super_admin' => $user->isSuperAdmin(),
+                    'is_vendedor' => $user->isVendedor(),
+                    'is_global_user' => $user->isGlobalUser(),
                     'signature' => $user->signature ? (str_starts_with($user->signature, 'data:image') ? $user->signature : asset('storage/'.$user->signature)) : null,
                 ] : null,
             ],

@@ -17,8 +17,8 @@ class SwitchRoleController extends Controller
         $user = Auth::user();
 
         // Validar que el usuario tenga permiso para alternar
-        // Solo Gestores y Super Admins pueden alternar a modo Técnico
-        if (! $user || ! ($user->rol === User::ROLE_GESTOR || $user->rol === User::ROLE_SUPER_ADMIN)) {
+        // Solo Gestores pueden alternar a modo Técnico
+        if (! $user || $user->rol !== User::ROLE_GESTOR) {
             abort(403, 'No tienes permisos para alternar roles.');
         }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Consultora;
 use App\Models\Empresa;
 use App\Models\Provincia;
 use App\Models\Sede;
@@ -83,7 +84,7 @@ class CompanyController extends Controller
     {
         /** @var \App\Models\User $currentUser */
         $currentUser = Auth::user();
-        $consultoraId = $currentUser->consultora_id;
+        $consultoraId = !$currentUser->isSuperAdmin() ? $currentUser->consultora_id : ($request->input('consultora_id') ?? ($request->input('id') ? Empresa::find($request->input('id'))?->consultora_id : null));
         $id = $request->input('id');
 
         $request->validate([
@@ -101,6 +102,14 @@ class CompanyController extends Controller
             'primary_color' => 'nullable|string|max:7',
             'logo' => 'nullable|image|max:2048',
         ]);
+
+        if (!$id && $consultoraId) {
+            $consultora = Consultora::findOrFail($consultoraId);
+            $count = Empresa::where('consultora_id', $consultoraId)->count();
+            if ($count >= $consultora->max_empresas) {
+                return back()->withErrors(['nombre' => 'Se ha alcanzado el límite de empresas clientes (' . $consultora->max_empresas . ') para esta consultora.']);
+            }
+        }
 
         $data = $request->only(['nombre', 'razon_social', 'cuit', 'direccion', 'email', 'primary_color']);
 
@@ -143,6 +152,15 @@ class CompanyController extends Controller
     {
         $company = Empresa::withTrashed()->findOrFail($id);
         $this->ensureTenancy($company);
+
+        if ($company->consultora_id) {
+            $consultora = Consultora::findOrFail($company->consultora_id);
+            $count = Empresa::where('consultora_id', $company->consultora_id)->count();
+            if ($count >= $consultora->max_empresas) {
+                return back()->with('error', 'No se puede restaurar la empresa: Límite de empresas excedido.');
+            }
+        }
+
         $company->restore();
 
         return back()->with('message', 'Empresa restaurada exitosamente.');
