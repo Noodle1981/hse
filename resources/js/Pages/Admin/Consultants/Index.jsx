@@ -93,6 +93,20 @@ export default function Index({ auth, consultants }) {
                                                             <span className="text-[8px] font-black text-white/20 uppercase tracking-widest italic">CUIT</span>
                                                             <span className="text-xs font-black text-indigo-300 italic tracking-wider">{c.cuit}</span>
                                                         </div>
+                                                        <span className="text-white/10 hidden sm:inline">|</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[8px] font-black text-white/20 uppercase tracking-widest italic">Alta</span>
+                                                            <span className="text-xs font-black text-indigo-100/60 italic tracking-wider">
+                                                                {new Date(c.created_at).toLocaleDateString('es-AR')}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-white/10 hidden sm:inline">|</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[8px] font-black text-white/20 uppercase tracking-widest italic">Creador</span>
+                                                            <span className="text-xs font-black text-indigo-100/60 italic tracking-wider">
+                                                                {c.suscripcion_logs?.[0]?.user?.full_name || c.suscripcion_logs?.[0]?.user?.name || 'Súper Administrador'}
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

@@ -753,7 +753,9 @@ class AdministrationController extends Controller
     public function consultantsIndex()
     {
         $this->ensureSuperAdminOrVendedor();
-        $consultants = Consultora::withCount([
+        $consultants = Consultora::with(['suscripcionLogs' => function ($query) {
+            $query->whereNull('estado_anterior')->with('user');
+        }])->withCount([
             'users as tecnicos_count' => function ($query) {
                 $query->whereIn('rol', ['tecnico', 'technician'])->where('estado', 'activo');
             },
