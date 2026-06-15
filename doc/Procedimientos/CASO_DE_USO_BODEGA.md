@@ -63,46 +63,46 @@ graph TD
 
 #### Sección 1: Espacios Confinados (Tanques y Vasijas de Fermentación)
 1. **¿Se realiza medición de gases (oxígeno y anhídrido carbónico) antes del ingreso de operarios a limpiar tanques o piletas de fermentación?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
-   - *Ayuda:* **Peligro Extremo:** La fermentación de la uva produce grandes volúmenes de dióxido de carbono (anhídrido carbónico), un gas asfixiante invisible conocido en bodegas como "el gas de las piletas".
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
+   - Ayuda: **Peligro Extremo:** La fermentación de la uva produce grandes volúmenes de dióxido de carbono (anhídrido carbónico), un gas asfixiante invisible conocido en bodegas como "el gas de las piletas".
 2. **¿El personal cuenta con arnés, cuerda de vida y un vigía externo activo permanentemente al ingresar a las vasijas?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
 
 #### Sección 2: Fraccionamiento y Líneas de Embotellado
 3. **¿Se encuentran operativas las guardas físicas de seguridad y los sensores de parada de emergencia en las cintas transportadoras y máquinas tapadoras/etiquetadoras?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
-   - *Ayuda:* Evita atrapamientos y lesiones mecánicas con botellas de vidrio en movimiento rápido.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
+   - Ayuda: Evita atrapamientos y lesiones mecánicas con botellas de vidrio en movimiento rápido.
 4. **¿El nivel de ruido en la sala de embotellado se encuentra por debajo de 85 dB o se utiliza la protección auditiva correspondiente?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
 
 #### Sección 3: Control Químico y Sanitización
 5. **¿Se encuentran correctamente rotulados e identificados los productos químicos de limpieza (soda cáustica, ácido nítrico, metabisulfito) en el pañol químico?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
 6. **Concentración de Anhídrido Sulfuroso (SO2) libre registrado en laboratorio para el fraccionamiento (ppm):**
-   - *Tipo:* `number` (Rango: `20` a `50`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* Falla automáticamente si el valor está fuera del rango establecido (20 ppm a 50 ppm).
-   - *Ayuda:* El metabisulfito de potasio protege al vino de la oxidación y bacterias, pero concentraciones excesivas son tóxicas y fuera de norma de exportación INV.
+   - Tipo: Numérico (Rango: 20 a 50)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: si el valor está fuera del rango establecido (20 a 50)
+   - Ayuda: El metabisulfito de potasio protege al vino de la oxidación y bacterias, pero concentraciones excesivas son tóxicas y fuera de norma de exportación INV.
 
 #### Sección 4: Elementos de Emergencia
 7. **¿Las estaciones lavaojos y duchas de seguridad próximas al sector de dosificación química y limpieza de piletas se encuentran despejadas y operativas?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
 8. **¿Se dispone de equipos autónomos de respiración accesibles en la sala de tanques para casos de fugas accidentales de gases?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
 
 ---
 

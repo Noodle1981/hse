@@ -64,49 +64,49 @@ graph TD
 
 #### Sección 1: EPP y Protecciones Individuales
 1. **¿Todo el personal en obra utiliza casco de seguridad, calzado con puntera de acero y chaleco reflectivo?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
-   - *Ayuda:* Verificar el uso obligatorio de arnés y elementos auxiliares.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
+   - Ayuda: Verificar el uso obligatorio de arnés y elementos auxiliares.
 2. **¿Los operarios que realizan trabajos en altura (> 2 metros) utilizan arnés anticaídas de cuerpo completo acoplado a línea de vida independiente?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
-   - *Ayuda:* Prohibido amarrarse a caños de andamios sueltos.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
+   - Ayuda: Prohibido amarrarse a caños de andamios sueltos.
 
 #### Sección 2: Protecciones Colectivas y Andamios
 3. **¿Los andamios tubulares de trabajo cuentan con tablones metálicos trabados, barandas perimetrales dobles y rodapiés?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
-   - *Ayuda:* Exigir nivelación de bases mediante husillos roscados y anclaje a estructura sólida.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
+   - Ayuda: Exigir nivelación de bases mediante husillos roscados y anclaje a estructura sólida.
 4. **¿Se encuentran señalizadas y valladas las zonas de excavación, huecos de ascensor y sectores con riesgo de caída de objetos?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
 
 #### Sección 3: Riesgo Eléctrico y Maquinaria
 5. **¿Los tableros eléctricos provisorios de obra poseen disyuntor diferencial, llaves térmicas y puesta a tierra operativa?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
-   - *Ayuda:* Comprobar que las tomas de corriente posean la tapa correspondiente y el gabinete esté cerrado bajo llave.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
+   - Ayuda: Comprobar que las tomas de corriente posean la tapa correspondiente y el gabinete esté cerrado bajo llave.
 6. **¿Las herramientas eléctricas manuales (amoladoras, rotomartillos) poseen sus protecciones de resguardo y cables sin empalmes expuestos?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
 
 #### Sección 4: Condiciones Ambientales e Higiene
 7. **Velocidad del viento registrada en nudos (Kts) para trabajos en altura:**
-   - *Tipo:* `number` (Rango: `0` a `25`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* Falla automáticamente si supera los `22 nudos` (Kts).
-   - *Ayuda:* **Alerta Viento Zonda:** Típico viento cálido y extremadamente seco de San Juan, con ráfagas severas que incrementan el riesgo de caídas en altura. Suspender tareas en andamios colgantes o techos si la velocidad es de alarma.
+   - Tipo: Numérico (Rango: 0 a 25)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: si supera los 22 nudos (Kts)
+   - Ayuda: **Alerta Viento Zonda:** Típico viento cálido y extremadamente seco de San Juan, con ráfagas severas que incrementan el riesgo de caídas en altura. Suspender tareas en andamios colgantes o techos si la velocidad es de alarma.
 8. **¿Se dispone de agua potable fresca y sanitarios químicos limpios en cantidad adecuada?**
-   - *Tipo:* `select` (Opciones: `["Sí", "No"]`)
-   - *Restricción:* Obligatorio.
-   - *Lógica de Falla:* `fail_if_selected` con valor de falla `["No"]`.
-   - *Ayuda:* **Verano Sanjuanino:** Las temperaturas superan los 40°C. La hidratación constante es obligatoria para prevenir golpes de calor en obra.
+   - Tipo: Selección (Opciones: Sí, No)
+   - Restricción: Obligatorio.
+   - Lógica de Falla: en respuesta No
+   - Ayuda: **Verano Sanjuanino:** Las temperaturas superan los 40°C. La hidratación constante es obligatoria para prevenir golpes de calor en obra.
 
 ---
 
