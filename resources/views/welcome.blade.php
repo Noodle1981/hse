@@ -300,6 +300,11 @@
                                 WhatsApp: +54 9 2644 55-3442
                             </a>
                         </li>
+                        <li>
+                            <a href="mailto:consultas@grupoxamanen.com.ar" class="hover:text-ep-primary transition-colors lowercase">
+                                consultas@grupoxamanen.com.ar
+                            </a>
+                        </li>
                         <li>Privacidad</li>
                     </ul>
                 </div>

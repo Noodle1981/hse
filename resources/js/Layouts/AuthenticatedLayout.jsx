@@ -71,7 +71,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         </div>
                         {(sidebarOpen || mobileMenuOpen) && (
                             <div className="flex flex-col">
-                                <span className="text-white font-black uppercase italic tracking-tighter text-lg leading-none truncate max-w-[140px]" title={(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EP')}>
+                                <span className="text-white font-black uppercase italic tracking-tighter text-sm leading-none truncate max-w-[150px]" title={(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EP')}>
                                     {(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EQUIPO PREVENTIVO')}
                                 </span>
                                 <span className="font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]">
