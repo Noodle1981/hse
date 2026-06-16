@@ -28,8 +28,7 @@
                     <div class="absolute inset-0 bg-white/20 translate-y-12 group-hover:translate-y-0 transition-transform z-20"></div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-black text-lg md:text-xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
-                    <span class="text-[7px] md:text-[8px] font-black text-white/50 uppercase tracking-[0.4em] italic mt-1 leading-none">Ecosystem Core</span>
+                    <span class="font-black text-xl md:text-2xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
                 </div>
             </div>
             
@@ -278,7 +277,7 @@
                             <img src="{{ asset('images/logo.svg') }}" alt="Industrias Xamanen Logo" class="w-full h-full object-contain scale-[1.3] relative z-10">
                         </div>
                         <div class="flex flex-col select-none">
-                            <span class="font-black text-lg md:text-xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
+                            <span class="font-black text-xl md:text-2xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
                         </div>
                     </div>
                     <p class="text-white/50 text-xs font-bold uppercase tracking-widest italic max-w-sm leading-relaxed">REDEFINIENDO LA PREVENCIÓN ESTRATÉGICA MEDIANTE TECNOLOGÍA, DATOS Y TRAZABILIDAD SEllADA DESDE 2026.</p>

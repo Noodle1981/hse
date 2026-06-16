@@ -36,11 +36,8 @@ export default function Login() {
                         <div className="w-16 h-16 flex items-center justify-center rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg shadow-ep-primary/20 mb-4">
                             <img src="/images/logo.svg" alt="Industrias Xamanen Logo" className="w-full h-full object-contain scale-[1.3]" />
                         </div>
-                        <span className="font-black text-2xl md:text-3xl tracking-tighter italic leading-none text-white">
+                        <span className="font-black text-3xl md:text-4xl tracking-tighter italic leading-none text-white">
                             Industrias <span className="text-ep-primary">Xamanen</span>
-                        </span>
-                        <span className="text-[8px] font-black text-white/50 uppercase tracking-[0.4em] italic mt-2 leading-none">
-                            Ecosystem Core
                         </span>
                     </div>
 
