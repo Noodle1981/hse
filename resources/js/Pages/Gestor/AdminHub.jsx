@@ -105,7 +105,7 @@ export default function Hub({ consultoraName }) {
                     {/* Footer Message */}
                     <div className="text-center pt-8 animate-fade-in">
                         <p className="text-[9px] font-black text-white/5 uppercase tracking-[0.8em] italic leading-relaxed">
-                            XamaSafe Ecosystem Core • Global Administration Matrix • Pro-Efficiency HUD
+                            Industrias Xamanen Ecosystem Core • Global Administration Matrix • Pro-Efficiency HUD
                         </p>
                     </div>
                 </div>

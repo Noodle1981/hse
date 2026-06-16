@@ -334,7 +334,7 @@ export default function Dashboard({ auth, kpis, efficiency, recentEvents, compan
                                     <span className="text-[8px] font-black text-white/10 uppercase tracking-[0.2em]">Kernel v5.0.1</span>
                                 </div>
                             </div>
-                            <span className="text-[9px] font-bold text-white/5 uppercase italic tracking-[0.4em]">XamaSafe Intelligence Terminal</span>
+                            <span className="text-[9px] font-bold text-white/5 uppercase italic tracking-[0.4em]">Industrias Xamanen Intelligence Terminal</span>
                         </div>
                     </div>
                        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-8 xl:gap-12">

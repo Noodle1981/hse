@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="XamaSafe es la plataforma inteligente para la gestión de higiene y seguridad industrial v2.0. Digitaliza checklists dinámicos aplicables a cualquier política de control, visitas de campo e informes maestros con trazabilidad real.">
-    <title>XamaSafe | Inteligencia en Higiene y Seguridad Laboral</title>
+    <meta name="description" content="Industrias Xamanen es la plataforma inteligente para la gestión de higiene y seguridad industrial v2.0. Digitaliza checklists dinámicos aplicables a cualquier política de control, visitas de campo e informes maestros con trazabilidad real.">
+    <title>Industrias Xamanen | Inteligencia en Higiene y Seguridad Laboral</title>
     <link rel="icon" type="image/x-icon" href="{{ asset('images/XamaSafe.ico') }}">
     @vite(['resources/css/app.css'])
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -24,11 +24,11 @@
         <div class="max-w-[95rem] mx-auto flex justify-between items-center bg-ep-dark/60 backdrop-blur-xl border border-white/5 px-4 py-3 md:px-8 md:py-4 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl">
             <div class="flex items-center gap-2 md:gap-4 group cursor-pointer">
                 <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-all duration-500 shadow-lg shadow-ep-primary/20 relative overflow-hidden">
-                    <img src="{{ asset('images/logo.svg') }}" alt="XamaSafe Logo" class="w-full h-full object-contain scale-[1.3] relative z-10">
+                    <img src="{{ asset('images/logo.svg') }}" alt="Industrias Xamanen Logo" class="w-full h-full object-contain scale-[1.3] relative z-10">
                     <div class="absolute inset-0 bg-white/20 translate-y-12 group-hover:translate-y-0 transition-transform z-20"></div>
                 </div>
                 <div class="flex flex-col">
-                    <span class="font-black text-lg md:text-xl tracking-tighter italic leading-none">Xama<span class="text-ep-primary">Safe</span></span>
+                    <span class="font-black text-lg md:text-xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
                     <span class="text-[7px] md:text-[8px] font-black text-white/50 uppercase tracking-[0.4em] italic mt-1 leading-none">Ecosystem Core</span>
                 </div>
             </div>
@@ -203,7 +203,7 @@
         <div class="max-w-[95rem] mx-auto px-6 md:px-10 relative z-10">
             <div class="text-center mb-20 md:mb-32">
                 <h2 class="text-[10px] font-black text-ep-primary tracking-[0.6em] uppercase italic mb-4">Flow Operativo</h2>
-                <h3 class="text-3xl sm:text-4xl md:text-5xl font-black italic tracking-tighter uppercase">EL CICLO <span class="text-white/40">XAMASAFE</span></h3>
+                <h3 class="text-3xl sm:text-4xl md:text-5xl font-black italic tracking-tighter uppercase">EL CICLO <span class="text-white/40">INDUSTRIAS XAMANEN</span></h3>
             </div>
             
             <div class="grid md:grid-cols-3 gap-12 md:gap-16 relative">
@@ -256,7 +256,7 @@
                         <a href="{{ route('login') }}" class="inline-flex bg-ep-dark text-white px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-2xl">
                             Activar Acceso Plataforma
                         </a>
-                        <a href="https://wa.me/5492644553442?text=Hola!%20Me%20interesa%20obtener%20más%20información%20sobre%20XamaSafe" target="_blank" class="inline-flex bg-ep-dark/15 border border-ep-dark/30 hover:bg-ep-dark/25 text-ep-dark px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-xl items-center gap-2">
+                        <a href="https://wa.me/5492644553442?text=Hola!%20Me%20interesa%20obtener%20más%20información%20sobre%20Industrias%20Xamanen" target="_blank" class="inline-flex bg-ep-dark/15 border border-ep-dark/30 hover:bg-ep-dark/25 text-ep-dark px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-xl items-center gap-2">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.451L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.528 2.015 14.07 1 11.5 1c-5.438 0-9.863 4.373-9.867 9.801-.001 1.73.473 3.41 1.37 4.887L1.88 20.66l4.767-1.506z"/></svg>
                             WhatsApp: +54 9 2644 55-3442
                         </a>
@@ -275,9 +275,11 @@
                 <div class="col-span-1 md:col-span-2">
                     <div class="flex items-center gap-4 mb-6 md:mb-8">
                         <div class="w-10 h-10 flex items-center justify-center relative overflow-hidden">
-                            <img src="{{ asset('images/logo.svg') }}" alt="XamaSafe Logo" class="w-full h-full object-contain scale-[1.3] relative z-10">
+                            <img src="{{ asset('images/logo.svg') }}" alt="Industrias Xamanen Logo" class="w-full h-full object-contain scale-[1.3] relative z-10">
                         </div>
-                        <span class="font-black text-2xl tracking-tighter italic">Xama<span class="text-ep-primary">Safe</span></span>
+                        <div class="flex flex-col select-none">
+                            <span class="font-black text-lg md:text-xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
+                        </div>
                     </div>
                     <p class="text-white/50 text-xs font-bold uppercase tracking-widest italic max-w-sm leading-relaxed">REDEFINIENDO LA PREVENCIÓN ESTRATÉGICA MEDIANTE TECNOLOGÍA, DATOS Y TRAZABILIDAD SEllADA DESDE 2026.</p>
                 </div>
@@ -305,7 +307,7 @@
             </div>
             
             <div class="flex flex-col md:flex-row justify-between items-center gap-8 pt-12 border-t border-white/5">
-                <p class="text-[9px] font-black text-white/40 uppercase tracking-[0.5em] italic text-center md:text-left">&copy; 2026 XamaSafe Ecosystem • Engineered for Prevention Experts</p>
+                <p class="text-[9px] font-black text-white/40 uppercase tracking-[0.5em] italic text-center md:text-left">&copy; 2026 Industrias Xamanen Ecosystem • Engineered for Prevention Experts</p>
                 <div class="flex flex-col sm:flex-row gap-4 sm:gap-10 items-center">
                     <div class="flex items-center gap-2">
                         <span class="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></span>

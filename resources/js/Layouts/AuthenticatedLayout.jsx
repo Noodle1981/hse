@@ -62,7 +62,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                     <Link href={safeRoute('dashboard')} className="flex items-center space-x-3 group">
                         <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg border border-white/10 group-hover:scale-105 transition-transform duration-300">
                             {(user?.is_super_admin || user?.is_vendedor) ? (
-                                <img src="/images/logo.png" alt="Logo XamaSafe" className="max-h-full w-auto object-contain" />
+                                <img src="/images/logo.png" alt="Logo Industrias Xamanen" className="max-h-full w-auto object-contain" />
                             ) : branding?.logo ? (
                                 <img src={branding.logo} alt="Logo" className="max-h-full w-auto object-contain" />
                             ) : (
@@ -71,9 +71,11 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         </div>
                         {(sidebarOpen || mobileMenuOpen) && (
                             <div className="flex flex-col">
-                                <span className="text-white font-black uppercase italic tracking-tighter text-lg leading-none">XamaSafe</span>
-                                <span className="text-yellow-400 font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]" title={(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EP')}>
+                                <span className="text-white font-black uppercase italic tracking-tighter text-lg leading-none truncate max-w-[140px]" title={(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EP')}>
                                     {(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EQUIPO PREVENTIVO')}
+                                </span>
+                                <span className="font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]">
+                                    <span className="text-white">Industrias</span> <span className="text-ep-primary">Xamanen</span>
                                 </span>
                             </div>
                         )}
@@ -173,7 +175,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         {(sidebarOpen || mobileMenuOpen) && <span className="text-sm font-medium">Cerrar Sesión</span>}
                     </button>
                     {(sidebarOpen || mobileMenuOpen) && (
-                        <div className="text-xs text-gray-600 text-center mt-3">XamaSafe v2.0</div>
+                        <div className="text-xs text-gray-600 text-center mt-3">Industrias Xamanen v2.0</div>
                     )}
                 </div>
             </aside>
@@ -206,7 +208,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                             header
                         ) : (
                             <h1 className="text-sm sm:text-xl font-black text-ep-primary tracking-tight uppercase italic truncate max-w-[150px] sm:max-w-none">
-                                {title ?? 'XamaSafe'}
+                                {title ?? 'Industrias Xamanen'}
                             </h1>
                         )}
                     </div>

@@ -7,8 +7,8 @@ import '../css/app.css';
 window.route = route;
 
 createInertiaApp({
-    // Nombre de la pestaña del browser: "Login | XamaSafe"
-    title: (title) => `${title} | XamaSafe`,
+    // Nombre de la pestaña del browser: "Login | Industrias Xamanen"
+    title: (title) => `${title} | Industrias Xamanen`,
 
     // Resuelve automáticamente Pages/Auth/Login.jsx, Pages/Visits/InProgress.jsx, etc.
     resolve: (name) =>
@@ -22,6 +22,6 @@ createInertiaApp({
     },
 
     progress: {
-        color: '#F69239', // Color naranja de la marca XamaSafe
+        color: '#F69239', // Color naranja de la marca Industrias Xamanen
     },
 });
