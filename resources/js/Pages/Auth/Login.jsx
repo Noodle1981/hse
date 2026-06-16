@@ -37,7 +37,7 @@ export default function Login() {
                             <img src="/images/logo.svg" alt="Industrias Xamanen Logo" className="w-full h-full object-contain scale-[1.3]" />
                         </div>
                         <span className="font-black text-3xl md:text-4xl tracking-tighter italic leading-none text-white">
-                            Industrias <span className="text-ep-primary">Xamanen</span>
+                            Xama<span className="text-[#F69239]">Safe</span>
                         </span>
                     </div>
 
@@ -152,7 +152,7 @@ export default function Login() {
                     </div>
 
                     <p className="text-center text-xs text-gray-500 mt-6 opacity-80">
-                        Industrias Xamanen — Sistema de Gestión de Seguridad © {new Date().getFullYear()} • Versión 1.0.0
+                        XamaSafe — Sistema de Gestión de Seguridad © {new Date().getFullYear()} • Versión 1.0.0
                     </p>
                 </div>
             </div>
