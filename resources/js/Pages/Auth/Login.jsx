@@ -33,12 +33,15 @@ export default function Login() {
 
                     {/* Logo + Marca */}
                     <div className="flex flex-col items-center mb-8">
-                        <div className="w-16 h-16 flex items-center justify-center rotate-3 hover:rotate-0 transition-transform duration-500 shadow-lg shadow-ep-primary/20 mb-4">
-                            <img src="/images/logo.svg" alt="Industrias Xamanen Logo" className="w-full h-full object-contain scale-[1.3]" />
+                        <div className="w-48 h-48 flex items-center justify-center relative mb-4">
+                            {/* Efecto de resplandor naranja de fondo */}
+                            <div className="absolute w-36 h-36 bg-[#F69239]/30 rounded-full blur-2xl animate-pulse pointer-events-none" />
+                            <img 
+                                src="/images/Logo_login.png" 
+                                alt="Industrias Xamanen Logo" 
+                                className="w-full h-full object-contain relative z-10" 
+                            />
                         </div>
-                        <span className="font-black text-3xl md:text-4xl tracking-tighter italic leading-none text-white">
-                            Xama<span className="text-[#F69239]">Safe</span>
-                        </span>
                     </div>
 
                     {/* Formulario */}
@@ -152,7 +155,7 @@ export default function Login() {
                     </div>
 
                     <p className="text-center text-xs text-gray-500 mt-6 opacity-80">
-                        XamaSafe — Sistema de Gestión de Seguridad © {new Date().getFullYear()} • Versión 1.0.0
+                        Sistema de Gestión de Seguridad © {new Date().getFullYear()} • Versión 1.0.0
                     </p>
                 </div>
             </div>

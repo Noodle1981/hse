@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Industrias Xamanen es la plataforma inteligente para la gestión de higiene y seguridad industrial v2.0. Digitaliza checklists dinámicos aplicables a cualquier política de control, visitas de campo e informes maestros con trazabilidad real.">
-    <title>Industrias Xamanen | Inteligencia en Higiene y Seguridad Laboral</title>
-    <link rel="icon" type="image/x-icon" href="{{ asset('images/XamaSafe.ico') }}">
+    <meta name="description" content="XamaSafe es la plataforma inteligente para la gestión de higiene y seguridad industrial v2.0. Digitaliza checklists dinámicos aplicables a cualquier política de control, visitas de campo e informes maestros con trazabilidad real.">
+    <title>XamaSafe | Inteligencia en Higiene y Seguridad Laboral</title>
+    <link rel="icon" type="image/x-icon" href="{{ asset('images/ico.ico') }}">
     @vite(['resources/css/app.css'])
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
@@ -53,14 +53,8 @@
     <!-- Nav HUD -->
     <nav class="fixed w-full z-50 top-0 px-4 py-4 md:px-6 md:py-6">
         <div class="max-w-[95rem] mx-auto flex justify-between items-center bg-ep-dark/60 backdrop-blur-xl border border-white/5 px-4 py-3 md:px-8 md:py-4 rounded-[1.5rem] md:rounded-[2rem] shadow-2xl">
-            <div class="flex items-center gap-2 md:gap-4 group cursor-pointer">
-                <div class="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-all duration-500 shadow-lg shadow-ep-primary/20 relative overflow-hidden">
-                    <img src="{{ asset('images/logo.svg') }}" alt="Industrias Xamanen Logo" class="w-full h-full object-contain scale-[1.3] relative z-10">
-                    <div class="absolute inset-0 bg-white/20 translate-y-12 group-hover:translate-y-0 transition-transform z-20"></div>
-                </div>
-                <div class="flex flex-col">
-                    <span class="font-black text-xl md:text-2xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
-                </div>
+            <div class="flex items-center group cursor-pointer">
+                <img src="{{ asset('images/logo_.png') }}" alt="Logo" class="h-16 md:h-20 w-auto object-contain invert hue-rotate-180">
             </div>
 
             <div class="hidden md:flex items-center gap-12 text-[10px] font-black uppercase tracking-widest italic text-white/60">
@@ -289,6 +283,9 @@
                         <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-ep-dark rounded-full blur-[100px] group-hover:blur-[80px] transition-all duration-1000"></div>
 
                         <div class="relative z-10">
+                            <div class="flex justify-center mb-8 sm:mb-12">
+                                <img src="{{ asset('images/Logo_login.png') }}" alt="Logo XamaSafe" class="h-20 sm:h-28 md:h-36 w-auto object-contain brightness-0 opacity-90">
+                            </div>
                             <h2 class="text-3xl sm:text-5xl md:text-7xl font-black text-ep-dark italic tracking-tighter uppercase leading-none mb-6 md:mb-10">ELEVA EL ESTÁNDAR DE <br>TU CONSULTORA.</h2>
                             <p class="text-ep-dark/85 text-sm sm:text-base md:text-lg font-black uppercase tracking-widest italic mb-8 md:mb-12 max-w-2xl mx-auto">ÚNETE A LA TRANSFORMACIÓN DIGITAL DE LA SEGURIDAD INDUSTRIAL. CONTROL TOTAL, CUMPLIMIENTO GARANTIZADO.</p>
                             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -316,13 +313,8 @@
         <div class="max-w-[95rem] mx-auto px-6 md:px-10">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-20 mb-12 md:mb-24">
                 <div class="col-span-1 md:col-span-2">
-                    <div class="flex items-center gap-4 mb-6 md:mb-8">
-                        <div class="w-10 h-10 flex items-center justify-center relative overflow-hidden">
-                            <img src="{{ asset('images/logo.svg') }}" alt="Industrias Xamanen Logo" class="w-full h-full object-contain scale-[1.3] relative z-10">
-                        </div>
-                        <div class="flex flex-col select-none">
-                            <span class="font-black text-xl md:text-2xl tracking-tighter italic leading-none">Industrias <span class="text-ep-primary">Xamanen</span></span>
-                        </div>
+                    <div class="flex items-center mb-6 md:mb-8">
+                        <img src="{{ asset('images/logo_.png') }}" alt="Logo" class="h-16 md:h-20 w-auto object-contain invert hue-rotate-180">
                     </div>
                     <p class="text-white/50 text-xs font-bold uppercase tracking-widest italic max-w-sm leading-relaxed">REDEFINIENDO LA PREVENCIÓN ESTRATÉGICA MEDIANTE TECNOLOGÍA, DATOS Y TRAZABILIDAD SEllADA DESDE 2026.</p>
                 </div>
@@ -355,7 +347,7 @@
             </div>
 
             <div class="flex flex-col md:flex-row justify-between items-center gap-8 pt-12 border-t border-white/5">
-                <p class="text-[9px] font-black text-white/40 uppercase tracking-[0.5em] italic text-center md:text-left">&copy; 2026 Industrias Xamanen Ecosystem • Engineered for Prevention Experts</p>
+                <p class="text-[9px] font-black text-white/40 uppercase tracking-[0.5em] italic text-center md:text-left">&copy; 2026 XamaSafe Ecosystem • Engineered for Prevention Experts</p>
                 <div class="flex flex-col sm:flex-row gap-4 sm:gap-10 items-center">
                     <div class="flex items-center gap-2">
                         <span class="w-1 h-1 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_#10b981]"></span>

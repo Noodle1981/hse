@@ -7,8 +7,8 @@ import '../css/app.css';
 window.route = route;
 
 createInertiaApp({
-    // Nombre de la pestaña del browser: "Login | Industrias Xamanen"
-    title: (title) => `${title} | Industrias Xamanen`,
+    // Nombre de la pestaña del browser: "Login | XamaSafe"
+    title: (title) => `${title} | XamaSafe`,
 
     // Resuelve automáticamente Pages/Auth/Login.jsx, Pages/Visits/InProgress.jsx, etc.
     resolve: (name) =>

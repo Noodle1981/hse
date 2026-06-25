@@ -3,9 +3,10 @@ import { usePage, Link, router } from '@inertiajs/react';
 import { route } from 'ziggy-js';
 
 export default function AuthenticatedLayout({ children, title, header }) {
-    // Cache-breaker: v2.0.2 - Extreme hardening
-    const { auth = {}, branding = {}, flash = {} } = usePage().props;
+    const { props, url } = usePage();
+    const { auth = {}, branding = {}, flash = {} } = props;
     const user = auth?.user || {};
+    const isAdminView = url.startsWith('/admin');
 
     const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -60,9 +61,11 @@ export default function AuthenticatedLayout({ children, title, header }) {
                 {/* Marca / Logo */}
                 <div className="h-16 flex items-center justify-between px-4 border-b border-white/10 overflow-hidden flex-shrink-0">
                     <Link href={safeRoute('dashboard')} className="flex items-center space-x-3 group">
-                        <div className="w-10 h-10 bg-white p-1 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg border border-white/10 group-hover:scale-105 transition-transform duration-300">
-                            {(user?.is_super_admin || user?.is_vendedor) ? (
-                                <img src="/images/logo.png" alt="Logo Industrias Xamanen" className="max-h-full w-auto object-contain" />
+                        <div className="w-10 h-10 bg-[#151528] p-1 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg border border-white/10 group-hover:scale-105 transition-transform duration-300">
+                            {isAdminView ? (
+                                <img src="/images/Logo_login.png" alt="Logo" className="max-h-full w-auto object-contain" />
+                            ) : (user?.is_super_admin || user?.is_vendedor) ? (
+                                <img src="/images/Logo_login.png" alt="Logo Industrias Xamanen" className="max-h-full w-auto object-contain" />
                             ) : branding?.logo ? (
                                 <img src={branding.logo} alt="Logo" className="max-h-full w-auto object-contain" />
                             ) : (
@@ -74,9 +77,15 @@ export default function AuthenticatedLayout({ children, title, header }) {
                                 <span className="text-white font-black uppercase italic tracking-tighter text-sm leading-none truncate max-w-[150px]" title={(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EP')}>
                                     {(user?.is_super_admin || user?.rol === 'super_admin') ? 'Panel Súper Usuario' : user?.is_vendedor ? 'Panel Vendedor' : (branding?.name || 'EQUIPO PREVENTIVO')}
                                 </span>
-                                <span className="font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]">
-                                    <span className="text-white">Industrias</span> <span className="text-ep-primary">Xamanen</span>
-                                </span>
+                                {isAdminView ? (
+                                    <span className="font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]">
+                                        <span className="text-white">Industrias</span> <span className="text-ep-primary">Xamanen</span>
+                                    </span>
+                                ) : (
+                                    <span className="font-bold uppercase italic tracking-[0.2em] text-[8px] mt-1 truncate max-w-[140px]">
+                                        <span className="text-white">Xama</span><span className="text-ep-primary">Safe</span>
+                                    </span>
+                                )}
                             </div>
                         )}
                     </Link>
@@ -175,7 +184,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         {(sidebarOpen || mobileMenuOpen) && <span className="text-sm font-medium">Cerrar Sesión</span>}
                     </button>
                     {(sidebarOpen || mobileMenuOpen) && (
-                        <div className="text-xs text-gray-600 text-center mt-3">Industrias Xamanen v2.0</div>
+                        <div className="text-xs text-gray-600 text-center mt-3">XamaSafe v2.0</div>
                     )}
                 </div>
             </aside>
@@ -208,7 +217,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                             header
                         ) : (
                             <h1 className="text-sm sm:text-xl font-black text-ep-primary tracking-tight uppercase italic truncate max-w-[150px] sm:max-w-none">
-                                {title ?? 'Industrias Xamanen'}
+                                {title ?? 'XamaSafe'}
                             </h1>
                         )}
                     </div>
