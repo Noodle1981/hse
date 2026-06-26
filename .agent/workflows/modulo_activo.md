@@ -147,3 +147,30 @@ ORDER BY ins.created_at ASC;
 
 * **Aislamiento Multi-Rubro:** Al abstraer la entidad como "Activos" y utilizar especificaciones dinámicas (`metadata`), la misma plataforma sirve para que una empresa de transporte gestione "Camionetas", y una de alimentación controle "Cámaras de Frío", compartiendo el mismo código base.
 * **Control de Mantenimientos:** Permite implementar lógica que compare la metadata actual (ej: kilometraje reportado) contra umbrales de mantenimiento predefinidos, gatillando alertas automáticas de servicio o revisiones mecánicas antes de que ocurra un fallo.
+
+---
+
+## 6. Factibilidad de Identificación por Códigos QR (Objetos y Personal)
+
+Para acelerar la captura de datos en terreno y asegurar la veracidad de la información, se propone la integración de lectura nativa de códigos QR.
+
+### 6.1 Identificación de Objetos y Equipos (Activos Físicos)
+* **El Método:** Cada activo físico (camionetas, autoelevadores, salas de compresores, matafuegos) dispondrá de una etiqueta de alta resistencia con un código QR único.
+* **Flujo de Escaneo (Cámara Móvil):**
+  1. El técnico abre la app móvil y pulsa "Escanear QR del Activo".
+  2. Al escanear la etiqueta, el sistema resuelve la URL codificada (ej: `https://xamasafe.com/scan/asset/{uuid}`) en la base de datos local o remota.
+  3. De forma automática, se levanta el checklist correspondiente al tipo de activo (`asset_type_id`) y se asocia la inspección a `asset_id`.
+  4. Se bloquean los inputs manuales de identificación para evitar digitaciones erróneas de patentes, números de chasis o series.
+
+### 6.2 Identificación y Auditoría de Personal
+* **El Método:** Cada operario, conductor o técnico contará con una credencial digital (dentro de la app) o física con su código QR de identificación de usuario/empleado (`user_id`).
+* **Casos de Uso Operativos:**
+  1. **Registro de Capacitaciones:** El capacitador o supervisor puede iniciar una capacitación (`VisitTraining`) y registrar la asistencia simplemente escaneando la credencial QR de cada empleado. Esto inyecta de forma masiva los nombres y DNIs en la base de datos.
+  2. **Auditoría de EPP (Inspecciones al Personal):** Al auditar el estado de arneses, cascos o botas de un operario, el inspector escanea el QR de la credencial del empleado. La inspección queda vinculada directamente a la persona, permitiendo analizar tendencias de faltas de seguridad por individuo.
+  3. **Firma Rápida en Terreno:** Sustituye la firma táctil clásica por una validación QR de "Presencia del Supervisor", donde el supervisor de obra presenta su QR frente al celular del técnico para firmar de forma inmutable y con validación geográfica por GPS.
+
+### 6.3 Ventajas Clave para el Cliente
+* **Cero Errores Manuales:** Se eliminan por completo los registros falsos o mal redactados (patentes mal escritas, DNIs con números de más).
+* **Velocidad de Operación:** Reducción del tiempo de inicio de un checklist o toma de asistencia de 2 minutos a menos de 5 segundos.
+* **Seguridad SRE (Prueba de Presencia):** Se garantiza que el técnico estuvo físicamente frente al objeto o a la persona auditada, brindando un estándar de control superior para el cliente corporativo.
+

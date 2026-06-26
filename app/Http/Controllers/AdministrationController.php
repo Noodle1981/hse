@@ -455,14 +455,17 @@ class AdministrationController extends Controller
         $user = Auth::user();
         $consultoraId = $user->consultora_id;
 
-        $from = $request->query('from', now()->startOfMonth()->format('Y-m-d'));
-        $to = $request->query('to', now()->endOfMonth()->format('Y-m-d'));
+        $fromRaw = $request->query('from', now()->startOfMonth()->format('Y-m-d'));
+        $toRaw = $request->query('to', now()->endOfMonth()->format('Y-m-d'));
+
+        $from = \Carbon\Carbon::parse($fromRaw)->startOfDay();
+        $to = \Carbon\Carbon::parse($toRaw)->endOfDay();
 
         // global KPIs (Filtered by consultora)
         $kpis = [
             'total_companies' => Empresa::where('consultora_id', $consultoraId)->count(),
             'total_inspections' => DynamicInspection::whereBetween('completed_at', [$from, $to])
-                ->whereHas('user', fn ($q) => $q->where('consultora_id', $consultoraId))
+                ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
                 ->completed()
                 ->count(),
             'total_findings' => Hallazgo::whereBetween('fecha_deteccion', [$from, $to])
@@ -473,17 +476,17 @@ class AdministrationController extends Controller
                 ->count(),
             'total_reports' => MasterReport::whereBetween('updated_at', [$from, $to])
                 ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-                ->where('estado', 'finalizado')
+                ->whereIn('estado', ['finalizado', 'aprobado'])
                 ->count(),
         ];
 
         // Intelligence Matrix: Companies with metrics
         $companies = Empresa::where('consultora_id', $consultoraId)
             ->withCount([
-                'inspecciones' => fn ($q) => $q->whereBetween('completed_at', [$from, $to])->completed(),
-                'hallazgos' => fn ($q) => $q->whereBetween('fecha_deteccion', [$from, $to]),
-                'incidentes' => fn ($q) => $q->whereBetween('fecha_ocurrencia', [$from, $to]),
-                'informes' => fn ($q) => $q->where('estado', 'finalizado'),
+                'inspecciones' => fn ($q) => $q->whereBetween('dynamic_inspections.completed_at', [$from, $to])->completed(),
+                'hallazgos' => fn ($q) => $q->whereBetween('hallazgos.fecha_deteccion', [$from, $to]),
+                'incidentes' => fn ($q) => $q->whereBetween('incidentes.fecha_ocurrencia', [$from, $to]),
+                'informes' => fn ($q) => $q->whereBetween('master_reports.updated_at', [$from, $to])->whereIn('master_reports.estado', ['finalizado', 'aprobado']),
                 'checklistAssignments as active_assignments_count',
                 'sedes as sedes_con_plan_count' => fn ($q) => $q->whereHas('annualPlans', fn ($p) => $p->where('year', now()->year)),
             ])
@@ -491,7 +494,7 @@ class AdministrationController extends Controller
             ->get();
 
         // Efficiency (Plan vs Done)
-        $efficiency = $this->calculateConsultoraEfficiency($consultoraId);
+        $efficiency = $this->calculateConsultoraEfficiency($consultoraId, $from);
 
         // Tactical Terminal (Unified Activity Log)
         $recentEvents = $this->getTacticalTerminalEvents($consultoraId);
@@ -564,8 +567,8 @@ class AdministrationController extends Controller
             'recentEvents' => $recentEvents,
             'hoursTracking' => $hoursTracking,
             'filters' => [
-                'from' => $from,
-                'to' => $to,
+                'from' => $fromRaw,
+                'to' => $toRaw,
             ],
         ]);
     }
@@ -576,7 +579,7 @@ class AdministrationController extends Controller
 
         // 1. Inspections
         $inspections = DynamicInspection::with(['checklist', 'user', 'sede.empresa'])
-            ->whereHas('user', fn ($q) => $q->where('consultora_id', $consultoraId))
+            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->completed()
             ->latest('completed_at')
             ->limit($limit)
@@ -620,7 +623,7 @@ class AdministrationController extends Controller
         // 4. Reportes
         $reports = MasterReport::with(['sede.empresa'])
             ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-            ->where('estado', 'finalizado')
+            ->whereIn('estado', ['finalizado', 'aprobado'])
             ->latest('updated_at')
             ->limit($limit)
             ->get()
@@ -642,16 +645,17 @@ class AdministrationController extends Controller
             ->values();
     }
 
-    private function calculateConsultoraEfficiency($consultoraId)
+    private function calculateConsultoraEfficiency($consultoraId, $from = null)
     {
-        $year = now()->year;
-        $month = now()->month;
+        $date = $from ?? now();
+        $year = $date->year;
+        $month = $date->month;
 
         $totalPlanned = AnnualPlan::whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->where('scheduled_months', 'like', "%{$year}-".str_pad($month, 2, '0', STR_PAD_LEFT).'%')
             ->count();
 
-        $totalDone = DynamicInspection::whereHas('user', fn ($q) => $q->where('consultora_id', $consultoraId))
+        $totalDone = DynamicInspection::whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
             ->whereYear('completed_at', $year)
             ->whereMonth('completed_at', $month)
             ->completed()

@@ -101,12 +101,14 @@ ep-back/
 
 | Tabla | Propósito | Campos Clave |
 |-------|-----------|--------------|
+| `asset_types` | Tipos de activos y categorías de equipamiento | `id`, `name`, `category_id` |
+| `assets` | Ficha del activo físico con identificador/QR único y metadata dinámica | `id`, `empresa_id`, `sede_id`, `asset_type_id`, `name`, `identifier`, `status`, `metadata` |
 | `audit_logs` | Registro de auditoría inmutable de cambios de accesos | `id`, `user_id`, `action`, `target_type`, `target_id`, `payload` |
 | `consultoras` | Empresas consultoras de HyS que agrupan usuarios y clientes | `id`, `nombre`, `cuit`, `max_tecnicos`, `max_gestores`, `max_empresas`, `estado_suscripcion` |
 | `consultora_suscripcion_logs` | Historial de transiciones de estado de suscripción de consultoras | `id`, `consultora_id`, `estado_anterior`, `estado_nuevo`, `user_id` |
 | `checklists` | Plantillas de checklist | `id`, `title`, `description`, `category`, `is_active` |
-| `questions` | Preguntas dinámicas | `id`, `checklist_id`, `label`, `type`, `options`, `order`, `is_required` |
-| `inspections` | Ejecuciones/llenados | `id`, `checklist_id`, `user_id`, `completed_at`, `notes` |
+| `questions` | Preguntas dinámicas | `id`, `checklist_id`, `label`, `type`, `options`, `order`, `is_required`, `vincular_a_metadata` |
+| `inspections` | Ejecuciones/llenados | `id`, `checklist_id`, `user_id`, `asset_id`, `completed_at`, `notes` |
 | `answers` | Respuestas específicas | `id`, `inspection_id`, `question_id`, `value` |
 | `sedes` | Plantas físicas y control de jornada | `id`, `empresa_id`, `nombre_sede`, `dias_operativos` (JSON), `hora_apertura`, `hora_cierre`, `es_roster_24_7`, `radio_tolerancia_metros` |
 | `visit_certificates` | Constancias de visita, geolocalización y auditoría horaria | `id`, `sede_id`, `user_id`, `start_time`, `end_time`, `horas_gabinete_estimadas`, `checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng`, `gps_verified` |
@@ -120,6 +122,7 @@ ep-back/
 ## ✅ Buenas Prácticas
 
 ### Backend (Laravel 12)
+- ✅ **Módulo de Activos Genérico y Metadata Dinámica (EAV/JSON):** Para soportar múltiples rubros (Transporte, Seguridad, Alimentación), el sistema modela el equipamiento de forma abstracta (`assets` y `asset_types`) y guarda los atributos específicos en un campo JSON `metadata`. Al finalizar una inspección, un Listener (`SyncAssetMetadata`) intercepta las respuestas cuyas preguntas estén enlazadas mediante `vincular_a_metadata` (ej: `kilometraje`) y actualiza automáticamente la ficha del activo en caliente.
 - ✅ **Manejo de Roles Robusto:** Toda validación de roles en la plataforma (rutas, plantillas, policies) debe apoyarse en la lógica unificada del modelo `User::hasRole()`. Evitar splitting manual ad-hoc en controladores o middleware.
 - ✅ **Nombres de Parámetros de Ruta Coincidentes:** Para que la vinculación implícita de modelos (Route Model Binding) de Laravel funcione de forma transparente, el comodín de la ruta (ej. `{inspection}`) debe coincidir exactamente con el nombre de la variable inyectada en el controlador (ej. `DynamicInspection $inspection`). Evitar usar `{id}` genérico si se tipa el modelo, para prevenir inyecciones de modelos vacíos en el frontend.
 - ✅ **Hardening en Informes Maestros (`MasterReport`):** El controlador `MasterReportController` debe usar Route Model Binding nativo `{masterReport}`. Se inyectan FormRequests estrictos (`StoreMasterReportRequest` y `UpdateMasterReportRequest`) para validar y sanitizar el payload (excluyendo campos sensibles del sistema mediante `safeData()` o `validatedWithSafeTime()`). Se debe llamar obligatoriamente a la política del framework `$this->authorize('update', $masterReport)` para asegurar multi-tenancy.

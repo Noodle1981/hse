@@ -308,6 +308,11 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
     ```
     Esto previene errores de referencia nula en entornos de producción.
   - **Depuración de Activos Obsoletos:** Se eliminaron las capturas obsoletas `cap1.png`, `cap2.png` y `cap3.png` para mantener limpio el almacenamiento del proyecto, dado que ya no son referenciadas por la landing page en React (`Welcome.jsx`).
+  - **Módulo de Activos y Trazabilidad con Identificación por Códigos QR:**
+    * **Desacoplamiento Temático (Activo Genérico):** Los checklists no guardan datos de equipos fijos en su esquema relacional. Se vinculan a un `Asset` de forma dinámica, permitiendo que la misma estructura sirva a empresas de logística (camionetas) y alimentación (frigoríficos).
+    * **Escaneo QR de Activos:** La cámara móvil lee el QR del activo, resuelve su ficha y tipo (`asset_type_id`), e inicia de inmediato el checklist preventivo correspondiente, bloqueando entradas manuales para evitar errores de digitación de patentes o códigos de barra.
+    * **Trazabilidad Longitudinal:** Preguntas del form builder enlazadas mediante `vincular_a_metadata` actualizan el JSON `metadata` del activo (ej: kilometraje del vehículo) de forma automatizada al finalizar la inspección.
+    * **Identificación y Asistencia de Personal por QR:** Los empleados presentan su credencial digital/física QR. Escaneándola, el capacitador registra asistencias instantáneas en `VisitTraining` sin tipeos manuales, inyectando nombre y DNI a `training_attendances` en 5 segundos. Permite auditorías de EPP nominales y firma inmutable de supervisores con validación GPS de cercanía.
 
 ---
 

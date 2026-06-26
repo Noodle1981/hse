@@ -12,6 +12,8 @@ El sistema cuenta con las siguientes entidades principales:
 - **Capacitaciones y Empleados**: Control de firmas, asistencias y personal (`employees`, `trainings`, `training_attendances`).
 - **Seguridad en Campo**: Incidentes, hallazgos, fotos y certificados de visitas (`incidentes`, `hallazgos`, `hallazgo_seguimientos`, `hallazgo_fotos`, `visit_certificates`).
 - **Planificación**: Plan Anual de HyS (`annual_plans`).
+- **Activos y Trazabilidad**: Tipos de activos e inventario físico (`asset_types`, `assets`).
+
 
 ### 🖋️ Gestión y Representación de Firmas en Base de Datos
 * **Firma Tipo A (Firma de Perfil / Identidad Permanente):**
@@ -58,6 +60,44 @@ El sistema cuenta con las siguientes entidades principales:
 ### 🔗 Relaciones (Foreign Keys)
 - `checklist_id` → vincula con `dynamic_checklists`(`id`)
 - `sede_id` → vincula con `sedes`(`id`)
+
+---
+
+## Tabla: `asset_types`
+
+| Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
+|---|---|---|---|---|
+| `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `name` | `varchar` | No ❌ | *ninguno* |  |
+| `category_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
+| `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
+
+### 🔗 Relaciones (Foreign Keys)
+- `category_id` → vincula con `categories`(`id`)
+
+---
+
+## Tabla: `assets`
+
+| Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
+|---|---|---|---|---|
+| `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `empresa_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `sede_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `asset_type_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `name` | `varchar` | No ❌ | *ninguno* |  |
+| `identifier` | `varchar` | No ❌ | *ninguno* |  |
+| `status` | `varchar` | No ❌ | `'operativo'` |  |
+| `metadata` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
+| `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
+| `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
+| `deleted_at` | `datetime` | Sí ✅ | *ninguno* |  |
+
+### 🔗 Relaciones (Foreign Keys)
+- `empresa_id` → vincula con `empresas`(`id`)
+- `sede_id` → vincula con `sedes`(`id`)
+- `asset_type_id` → vincula con `asset_types`(`id`)
 
 ---
 
@@ -344,14 +384,17 @@ El sistema cuenta con las siguientes entidades principales:
 | `supervisor_signature` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `technician_signature` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `result` | `varchar` | Sí ✅ | *ninguno* |  |
+| `asset_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
 
 ### 🔗 Relaciones (Foreign Keys)
+- `asset_id` → vincula con `assets`(`id`)
 - `checklist_assignment_id` → vincula con `checklist_assignments`(`id`)
 - `sede_id` → vincula con `sedes`(`id`)
 - `dynamic_checklist_id` → vincula con `dynamic_checklists`(`id`)
 - `user_id` → vincula con `users`(`id`)
 
 ### 🗂️ Índices
+- `dynamic_inspections_asset_id_index`
 - `dynamic_inspections_status_index`
 - `dynamic_inspections_dynamic_checklist_id_user_id_index`
 - `dynamic_inspections_completed_at_index`
@@ -377,12 +420,14 @@ El sistema cuenta con las siguientes entidades principales:
 | `max_value` | `numeric` | Sí ✅ | *ninguno* |  |
 | `failure_values` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `failure_logic` | `varchar` | No ❌ | `'fail_if_selected'` |  |
+| `vincular_a_metadata` | `varchar` | Sí ✅ | *ninguno* |  |
 
 ### 🔗 Relaciones (Foreign Keys)
 - `section_id` → vincula con `checklist_sections`(`id`)
 - `dynamic_checklist_id` → vincula con `dynamic_checklists`(`id`)
 
 ### 🗂️ Índices
+- `dynamic_questions_vincular_a_metadata_index`
 - `dynamic_questions_section_id_index`
 - `dynamic_questions_dynamic_checklist_id_order_index`
 

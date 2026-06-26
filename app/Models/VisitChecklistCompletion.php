@@ -48,6 +48,34 @@ class VisitChecklistCompletion extends Model
     public function getFormattedResponsesAttribute()
     {
         $responses = $this->responses ?? [];
+
+        // Si la completación tiene una asignación y una inspección de checklist asociada,
+        // intentamos recuperar sus respuestas directamente desde la base de datos relacional.
+        $assignment = $this->assignment;
+        if ($assignment) {
+            $inspection = $assignment->inspection;
+            if ($inspection && $inspection->status !== 'completed') {
+                $completed = \App\Models\DynamicInspection::where('checklist_assignment_id', $assignment->id)
+                    ->where('status', 'completed')
+                    ->latest('id')
+                    ->first();
+                if ($completed) {
+                    $inspection = $completed;
+                }
+            }
+            if ($inspection) {
+                $inspection->loadMissing('answers.question');
+                return $inspection->answers->map(function ($answer) {
+                    return [
+                        'question_id' => $answer->dynamic_question_id,
+                        'question_label' => $answer->question ? $answer->question->label : 'Punto de Control',
+                        'value' => $answer->value,
+                        'observation' => $answer->observation,
+                    ];
+                })->toArray();
+            }
+        }
+
         if (empty($responses)) {
             return [];
         }

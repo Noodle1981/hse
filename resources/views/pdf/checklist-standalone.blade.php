@@ -129,6 +129,12 @@
                 @foreach($responses as $resp)
                     @php
                         $rawVal = $resp['value'] ?? '';
+                        if (is_string($rawVal) && (str_starts_with($rawVal, '[') || str_starts_with($rawVal, '{'))) {
+                            $decoded = json_decode($rawVal, true);
+                            if (json_last_error() === JSON_ERROR_NONE) {
+                                $rawVal = $decoded;
+                            }
+                        }
                         $valStr = is_array($rawVal) ? implode(', ', $rawVal) : (string)$rawVal;
                         $val = strtolower($valStr);
                         $isFailure = in_array($val, ['no', 'no cumple']);
@@ -142,11 +148,11 @@
                         <td class="td-base" style="text-align: center;">
                             @if($isFailure)
                                 <span style="color: #b91c1c; font-weight: bold; text-transform: uppercase; font-size: 8pt; background-color: #fef2f2; padding: 2px 6px; border-radius: 4px; border: 1px solid #fee2e2;">
-                                    {{ $resp['value'] ?? '-' }}
+                                    {{ $valStr ?: '-' }}
                                 </span>
                             @else
                                 <span style="color: #15803d; font-weight: bold; text-transform: uppercase; font-size: 8pt; background-color: #f0fdf4; padding: 2px 6px; border-radius: 4px; border: 1px solid #dcfce7;">
-                                    {{ $resp['value'] ?? '-' }}
+                                    {{ $valStr ?: '-' }}
                                 </span>
                             @endif
                         </td>

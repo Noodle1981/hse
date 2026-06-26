@@ -171,6 +171,15 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Registro de Auditoría Inmutable (Audit Log)**:
   - Sistema de registro automático e inalterable que captura qué usuario (Súper Admin o Vendedor) realizó cambios de límites o suscripción en cada consultora y el diff exacto de campos. El modelo tiene bloqueados los métodos de modificación y eliminación para máxima fiabilidad. Muestra una línea de tiempo detallada con las diferencias en los campos modificados en la vista de edición.
 
+### 4.10. Módulo Universal de Activos y Trazabilidad Dinámica con Códigos QR
+* **Inventariado y Ficha de Activos (`Asset`)**: Abstracción universal para registrar equipamiento físico (`assets`) clasificado por tipos (`asset_types`) y asociado a una Sede. Admite atributos fijos (nombre, identificador único/patente, estado) y dinámicos guardados en formato JSON (`metadata`) para soportar múltiples industrias sin alterar el esquema físico de base de datos.
+* **Trazabilidad en Inspección**: Vinculación opcional de cualquier checklist dinámico a un activo específico (`dynamic_inspections.asset_id`). Las preguntas del checklist pueden marcarse para actualizar automáticamente campos específicos en la metadata del activo al finalizar la inspección (ej: actualizar el kilometraje o el último conductor).
+* **Identificación por Códigos QR (Objetos y Equipos)**: Lectura nativa de códigos QR para activos. El escaneo redirige a la URL única del activo, inicia automáticamente el checklist adecuado pre-asociado y bloquea entradas manuales para erradicar errores de digitación de patentes o códigos.
+* **Identificación y Asistencia de Personal por QR**: Cada empleado dispone de una credencial QR que permite:
+  - **Registro de asistencia instantáneo** en capacitaciones escaneando la credencial desde la cámara del técnico.
+  - **Auditoría de EPP (Equipos de Protección Personal)** asociada directamente a la persona.
+  - **Firma presencial rápida de supervisor** presentando su credencial QR frente al móvil del técnico, integrando validación GPS de cercanía.
+
 ---
 
 ## 5. Requisitos de Experiencia de Usuario y Diseño (Aesthetics)

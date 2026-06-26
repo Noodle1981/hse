@@ -195,6 +195,12 @@
                         @foreach($completion->formatted_responses as $resp)
                             @php 
                                 $rawVal = $resp['value'] ?? '';
+                                if (is_string($rawVal) && (str_starts_with($rawVal, '[') || str_starts_with($rawVal, '{'))) {
+                                    $decoded = json_decode($rawVal, true);
+                                    if (json_last_error() === JSON_ERROR_NONE) {
+                                        $rawVal = $decoded;
+                                    }
+                                }
                                 $valStr = is_array($rawVal) ? implode(', ', $rawVal) : (string)$rawVal;
                                 $val = strtolower($valStr); 
                                 $isFailure = in_array($val, ['no', 'no cumple']);
@@ -213,7 +219,7 @@
                                 </td>
                                 <td @class(['bg-failure' => $isFailure]) style="width: 80px; text-align: center; vertical-align: middle; border-bottom: 1px solid #edf2f7;">
                                     <span class="pill {{ $isSuccess ? 'pill-success' : ($isFailure ? 'pill-danger' : 'pill-info') }}" style="display: inline-block; min-width: 60px;">
-                                        {{ strtoupper($val) ?: 'PENDIENTE' }}
+                                        {{ strtoupper($valStr) ?: 'PENDIENTE' }}
                                     </span>
                                 </td>
                             </tr>
