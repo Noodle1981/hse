@@ -80,9 +80,12 @@ $table->foreignId('asset_id')->nullable()->constrained('assets')->nullOnDelete()
 ### B2 — Modelos Eloquent
 **`app/Models/Asset.php`** — nuevo:
 ```php
+// SRE: Usar UUID como primary key para evitar enumeración (IDOR) en la V2
+$table->uuid('id')->primary();
+// ...
 fillable: empresa_id, sede_id, asset_type_id, name, identifier, status, metadata
 casts:    metadata => 'array'
-traits:   SoftDeletes
+traits:   SoftDeletes, HasUuids
 relaciones: belongsTo(Sede), belongsTo(Empresa), belongsTo(AssetType), hasMany(DynamicInspection)
 ```
 
@@ -121,15 +124,17 @@ Asset::observe(AssetObserver::class);
 **`InspectionController::save()` o en el Listener:**
 - Si inspección falla y tiene `asset_id` → `assets.status = 'fuera_de_servicio'`
 - Registrar en `audit_logs` con `action = 'auto_status_change'`
+> SRE: El estado `fuera_de_servicio` automático SOLO ocurre por fallas reportadas en inspección, no por cálculo de fechas.
 
 ### B8 — Job de Alertas ⭐ CRÍTICO PARA CLIENTE MATAFUEGOS
 **`app/Console/Commands/CheckAssetAlerts.php`** — nuevo:
 - `php artisan assets:check-alerts`
 - Iterar activos activos con `status != 'fuera_de_servicio'`
 - Leer `assetType.metadata_schema` → buscar campos con `alert_days` o `alert_threshold`
-- `type=date` + días restantes ≤ `alert_days` → crear Finding automático
-- `type=number` + valor ≥ `alert_threshold` → crear Finding automático
+- `type=date` + días restantes ≤ `alert_days` → crear Finding automático (estado: "alerta")
+- `type=number` + valor ≥ `alert_threshold` → crear Finding automático (estado: "alerta")
 - No duplicar: verificar si ya existe Finding abierto del mismo tipo
+> SRE: Este Job NO cambia el estado del activo a `fuera_de_servicio`. Solo levanta el hallazgo para revisión manual.
 
 **`app/Console/Kernel.php`:**
 ```php
@@ -180,7 +185,8 @@ Route::prefix('activos')->name('gestor.assets.')->group(function () {
 - Si el checklist tiene `asset_type_id` o la sede tiene activos → pasar lista al prop
 
 **`resources/js/Pages/Tecnico/Inspections/Wizard.jsx`:**
-- Paso 0: selector de activo con buscador reactivo
+- Paso 0: selector de activo con buscador predictivo estricto (no permite input libre, evita datos sucios)
+- Preparar shell/UI para el botón de escanear QR (que dirá "Próximamente" hasta la v2.0)
 - Si no hay activos vinculables → saltar automáticamente
 - Incluir `asset_id` en el payload de guardado
 

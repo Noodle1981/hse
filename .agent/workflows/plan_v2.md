@@ -91,14 +91,16 @@ Route::get('/activos/reporte/pdf', [AssetReportController::class, 'exportPdf'])-
 // Generar token firmado al crear/editar activo
 public function generatePublicUrl(Asset $asset): string
 {
-    return URL::signedRoute('asset.public.show', ['token' => encrypt($asset->id)]);
+    // SRE: $asset->id ya es UUID desde v1.0, más la firma de Laravel = 100% IDOR proof
+    return URL::signedRoute('asset.public.show', ['uuid' => $asset->id]);
 }
 
 // Resolver el token y mostrar la ficha
-public function show(string $token): Response
+public function show(string $uuid): Response
+// SRE: Validar middleware 'signed' en la ruta.
 // Sin login requerido
 // Solo lectura: metadata actual, estado, timeline de inspecciones
-// No expone IDs internos ni info de otras empresas
+// No expone IDs numéricos internos ni info de otras empresas
 ```
 
 **`resources/js/Pages/Public/AssetCard.jsx`** — nuevo (página pública):
@@ -111,8 +113,8 @@ public function show(string $token): Response
 **Ruta:**
 ```php
 // Sin middleware auth
-Route::get('/activos/publico/{token}', [AssetPublicController::class, 'show'])
-     ->name('asset.public.show');
+Route::get('/activos/publico/{uuid}', [AssetPublicController::class, 'show'])
+     ->name('asset.public.show')->middleware('signed');
 ```
 
 **Cómo llega el cliente a esta URL:**
