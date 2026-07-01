@@ -313,6 +313,19 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
     * **Escaneo QR de Activos:** La cámara móvil lee el QR del activo, resuelve su ficha y tipo (`asset_type_id`), e inicia de inmediato el checklist preventivo correspondiente, bloqueando entradas manuales para evitar errores de digitación de patentes o códigos de barra.
     * **Trazabilidad Longitudinal:** Preguntas del form builder enlazadas mediante `vincular_a_metadata` actualizan el JSON `metadata` del activo (ej: kilometraje del vehículo) de forma automatizada al finalizar la inspección.
     * **Identificación y Asistencia de Personal por QR:** Los empleados presentan su credencial digital/física QR. Escaneándola, el capacitador registra asistencias instantáneas en `VisitTraining` sin tipeos manuales, inyectando nombre y DNI a `training_attendances` en 5 segundos. Permite auditorías de EPP nominales y firma inmutable de supervisores con validación GPS de cercanía.
+  - **Intercepción Visual y Auto-completado por Falla Crítica en Asistente (`Wizard.jsx`):**
+    * **Bloqueo Inteligente en Wizard:** Al intentar pasar de sección, el sistema detecta si alguna respuesta es considerada una no-conformidad crítica (comparando contra `failure_values` mediante `failure_logic`).
+    * **Modal HUD de Intercepción:** Muestra un modal Glassmorphism táctico con dos opciones: continuar con la inspección o rechazar y finalizar.
+    * **Llenado en Cascada Automatizado:** Si se selecciona "Rechazar y Finalizar", el frontend auto-completa el resto de preguntas de secciones futuras con la leyenda de auditoría `"No evaluado por falla crítica"` y salta directamente al cierre e ingreso de firmas del checklist.
+  - **Flujos Contextuales en Visitas Activas (Hallazgos e Incidentes):**
+    * **Consistencia de Ubicación:** Al reportar hallazgos o incidentes críticos desde una visita activa, el selector se bloquea y se transforma en una tarjeta visual inmutable ("📍 Fijo por Visita") para prevenir que el técnico ingrese información en sedes equivocadas.
+    * **Redirección de Retorno:** Al guardar con éxito el formulario, el técnico es redirigido directamente a la pantalla de la visita activa en progreso (`tecnico.visits.in-progress`) para asegurar la continuidad de su jornada de trabajo.
+  - **Soporte de Inputs Temporales Avanzados (Checklists):**
+    * **Hora y Fecha/Hora combinadas:** Campos dinámicos con inputs nativos para `time` y `datetime-local` adaptados a mobile.
+    * **Asistencia Táctil Rápida:** Botones de un toque ("🕒 Hora Actual" / "📅 Ahora") que inyectan de forma inmediata la fecha y hora locales del dispositivo del técnico sin tipeo manual.
+  - **UX de Evidencia Fotográfica Acumulativa:**
+    * **Carga Secuencial:** Permite subir múltiples fotos de forma secuencial sin que una nueva selección borre los archivos ya seleccionados.
+    * **Remoción en Previsualización:** Cada miniatura de foto de evidencia incluye un botón rojo flotante "✕" para removerla individualmente antes de la persistencia física en el backend.
 
 ---
 

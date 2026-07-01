@@ -36,7 +36,12 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 ## 4. Módulos y Requisitos Funcionales
 
 ### 4.1. Core Engine: Checklists Dinámicos e Inspecciones
-* **Generación de Plantillas:** Permite a los Gestores definir plantillas de checklists con categorías y tipos de preguntas variados (texto, numérico, opción múltiple, booleano, adjunto de fotos).
+* **Generación de Plantillas:** Permite a los Gestores definir plantillas de checklists con categorías y tipos de preguntas variados (texto, numérico, opción múltiple, booleano, adjunto de fotos, fecha, hora (`time`), y fecha/hora combinadas (`datetime`)).
+* **Asistente de Llenado con Soporte Temporal Avanzado:** En la ejecución del checklist, el técnico dispone de campos con inputs nativos y elegantes para los tipos **Hora (`time`)** y **Fecha/Hora (`datetime`)**. Incluye botones de llenado rápido táctico ("🕒 Hora Actual" y "📅 Ahora") que capturan la hora y fecha locales del dispositivo con un solo toque.
+* **Intercepción Visual por Falla Crítica (SRE Shield):** Para garantizar el cumplimiento de normativas de seguridad estrictas, el Wizard evalúa en caliente si alguna respuesta de la sección actual se encuentra en los `failure_values` configurados al presionar "Siguiente Sección". Ante un desvío crítico detectado:
+  - Se despliega un modal HUD estilo Glassmorphism con un indicador de advertencia rojo animado y dos caminos.
+  - **Continuar Inspección:** Cierra el modal y permite continuar evaluando los puntos restantes de la auditoría.
+  - **Rechazar y Finalizar:** Dispara un flujo de auto-llenado automático que recorre las preguntas sin responder de secciones posteriores y las completa con la leyenda de auditoría `"No evaluado por falla crítica"`, saltando inmediatamente al paso final de Firmas y observaciones para un cierre inmediato.
 * **Consola de Técnico Unificada en 3 Pilares (`MyAssignments.jsx`):** Rediseño completo de la interfaz de tareas en un panel dinámico estructurado en tres áreas de acción:
   1. **Misiones (Inspecciones):** Gestión de checklists preventivos y regulatorios. Muestra un KPI de checklists asignados vs completados, tasa de éxito y cumplimiento normativo.
   2. **Educación (Capacitaciones):** Charlas express y capacitaciones con registro de firmas e identificación de asistentes (DNI).
@@ -81,7 +86,16 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Simplificación y Delegación de Middleware (`CheckRole`):** Reducción de la lógica de acoplamiento en el middleware de ruta. Toda solicitud de roles de las rutas de Laravel se delega directamente a `User::hasRole()`, garantizando consistencia arquitectónica bidireccional (Rutas de Middleware vs Políticas de Controladores).
 
 ### 4.4. Módulo de Hallazgos e Incidentes
-* **Reporte Rápido:** Durante una inspección, el técnico puede levantar un "Hallazgo" adjuntando una descripción del incidente, criticidad (Baja, Media, Alta, Crítica) y evidencia fotográfica.
+* **Reporte Rápido y Sede Contextual:** Durante una visita activa, el técnico puede levantar un "Hallazgo" o "Incidente" al vuelo. Si se reporta dentro del contexto de una visita activa (`visit_id` presente):
+  - El selector manual de Sede se bloquea y se reemplaza por un componente visual de solo lectura de gama premium ("📍 Fijo por Visita") que previene errores humanos al asociar el desvío.
+  - Al completar la creación, el sistema redirige automáticamente al técnico de regreso a la consola de su visita activa en progreso (`tecnico.visits.in-progress`).
+* **UX Optimizado para Captura de Evidencias (Hallazgos):**
+  - **Eliminación de la Fecha de Detección:** Se omitió el campo visual de fecha de detección del formulario del técnico. El backend se encarga de inyectar automáticamente el timestamp actual (`now()`) para reducir la carga cognitiva en campo.
+  - **Carga de Fotos Acumulativa y Preselección:** El input de evidencia fotográfica acumula fotos secuencialmente (una por una). Cada miniatura previsualizada incorpora un botón rojo "✕" para permitir la remoción de imágenes antes del guardado.
+  - **Legibilidad:** Todas las etiquetas (labels) de los formularios se estructuraron en bloques independientes verticales en lugar de estar pegadas a los inputs para máxima legibilidad móvil.
+* **Incidentes Críticos y Ajuste Estético:**
+  - **Campos Numéricos Compactos:** Los campos numéricos "Personas Afectadas" y "Días Perdidos Estimados" se redujeron a un ancho estético centrado (`w-32`) para evitar distorsiones visuales en tablets y dispositivos de campo.
+* **Gestión de Estados para Técnicos:** Se habilitó el método `update` en el backend y el modal de modificación de estado en la UI de detalle para que los Técnicos puedan actualizar de forma ágil el avance del hallazgo reportado.
 * **Plan de Acción:** Los gestores y clientes pueden visualizar los hallazgos abiertos, definir planes de acción correctiva y marcar la resolución del problema con una foto de "después".
 
 ### 4.5. Módulo de Formación (Capacitaciones)
