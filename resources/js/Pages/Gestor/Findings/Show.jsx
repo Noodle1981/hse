@@ -1,8 +1,10 @@
-import { Head, useForm, Link } from '@inertiajs/react';
+import { Head, useForm, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
 import { useState } from 'react';
 
 export default function Show({ finding }) {
+    const { auth } = usePage().props;
+    
     const { data, setData, post, processing, reset } = useForm({
         estado_nuevo: finding.estado,
         comentario: '',
@@ -10,9 +12,13 @@ export default function Show({ finding }) {
 
     const [showUpdateModal, setShowUpdateModal] = useState(false);
 
+    const isTecnico = auth?.user?.rol === 'tecnico' || auth?.user?.rol === 'Técnico';
+    const updateRoute = isTecnico ? 'tecnico.hallazgos.update' : 'gestor.hallazgos.update';
+    const backRoute = isTecnico ? 'tecnico.hallazgos.index' : 'gestor.hallazgos.index';
+
     const submitUpdate = (e) => {
         e.preventDefault();
-        post(route('gestor.hallazgos.update', finding.id), {
+        post(route(updateRoute, finding.id), {
             onSuccess: () => {
                 setShowUpdateModal(false);
                 reset('comentario');
@@ -42,7 +48,7 @@ export default function Show({ finding }) {
                         <div className={`absolute inset-x-0 top-0 h-1.5 ${finding.criticidad === 'critico' ? 'bg-red-600' : 'bg-orange-500'}`}></div>
                         
                         <div className="flex items-center gap-8">
-                            <Link href={route('gestor.hallazgos.index')} className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/20 hover:text-white transition-all">
+                            <Link href={route(backRoute)} className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/20 hover:text-white transition-all">
                                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7"/></svg>
                             </Link>
                             <div>

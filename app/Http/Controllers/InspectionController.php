@@ -30,9 +30,7 @@ class InspectionController extends Controller
      */
     public function wizard(Request $request, $checklist_id, $assignmentId = null)
     {
-        $checklist = DynamicChecklist::with(['sections.questions', 'questions' => function ($q) {
-            $q->whereNull('section_id');
-        }])->findOrFail($checklist_id);
+        $checklist = DynamicChecklist::with(['sections.questions'])->findOrFail($checklist_id);
 
         $assignmentId = $assignmentId ?: $request->query('assignment');
         $visitId = $request->query('visit_id');

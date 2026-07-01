@@ -174,6 +174,55 @@ class ChecklistController extends Controller
             'questions' => 'required|array|min:1',
         ]);
 
+        // 1. Si no se proveen secciones, auto-generamos la sección base "Inspección General"
+        $sectionsInput = $request->input('sections', []);
+        if (empty($sectionsInput)) {
+            $sectionsInput = [
+                [
+                    'id' => null,
+                    'tempId' => 'default_section_temp',
+                    'title' => 'Inspección General',
+                    'description' => 'Preguntas generales del checklist.',
+                ]
+            ];
+            
+            $questionsInput = $request->input('questions', []);
+            foreach ($questionsInput as &$q) {
+                if (empty($q['section_id']) && empty($q['section_tempId'])) {
+                    $q['section_tempId'] = 'default_section_temp';
+                }
+            }
+            unset($q);
+            $request->merge([
+                'sections' => $sectionsInput,
+                'questions' => $questionsInput,
+            ]);
+        }
+
+        // 2. Hardening de Validación: Validar que cada pregunta esté asignada a una sección válida del request o base de datos
+        $sections = $request->input('sections', []);
+        $sectionTempIds = collect($sections)->pluck('tempId')->filter()->toArray();
+        $sectionIds = collect($sections)->pluck('id')->filter()->toArray();
+
+        foreach ($request->input('questions', []) as $index => $q) {
+            $hasValidSection = false;
+            
+            if (!empty($q['section_tempId']) && in_array($q['section_tempId'], $sectionTempIds)) {
+                $hasValidSection = true;
+            }
+            
+            if (!empty($q['section_id']) && (in_array($q['section_id'], $sectionIds) || ChecklistSection::where('id', $q['section_id'])->exists())) {
+                $hasValidSection = true;
+            }
+
+            if (!$hasValidSection) {
+                return back()->withErrors([
+                    "questions" => "La pregunta '" . ($q['label'] ?? "N# " . ($index + 1)) . "' debe pertenecer a una sección válida del checklist."
+                ])->withInput();
+            }
+        }
+
+        // 3. Persistencia de Datos
         $data = $request->only(['title', 'description', 'category_id', 'subcategory_id', 'registry_code', 'is_active']);
         $data['is_draft'] = false;
 
@@ -235,7 +284,7 @@ class ChecklistController extends Controller
      */
     public function emulate(DynamicChecklist $checklist)
     {
-        $checklist->load(['sections.questions', 'questions' => fn ($q) => $q->whereNull('section_id')]);
+        $checklist->load(['sections.questions']);
 
         return Inertia::render('Tecnico/Inspections/Wizard', [
             'checklist' => $checklist,

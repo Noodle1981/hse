@@ -2,11 +2,11 @@ import { Head, useForm, usePage, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
 import { useState } from 'react';
 
-export default function Create({ sedes, visit_id }) {
+export default function Create({ sedes, visit_id, initial_sede_id }) {
     const { auth } = usePage().props;
     
-    // Si viene de una visita, pre-seleccionar la sede
-    const initialSede = visit_id ? sedes.find(s => s.id === parseInt(visit_id))?.id : '';
+    // Si viene de una visita, pre-seleccionar la sede usando el ID resuelto desde la visita
+    const initialSede = initial_sede_id || '';
 
     const { data, setData, post, processing, errors } = useForm({
         titulo: '',
@@ -23,12 +23,27 @@ export default function Create({ sedes, visit_id }) {
     const [previews, setPreviews] = useState([]);
 
     const handleFileChange = (e) => {
-        const files = Array.from(e.target.files);
-        setData('fotos', files);
+        const newFiles = Array.from(e.target.files);
+        if (newFiles.length === 0) return;
 
-        // Generar previews
-        const newPreviews = files.map(file => URL.createObjectURL(file));
-        setPreviews(newPreviews);
+        // Acumular archivos en useForm
+        const updatedFiles = [...data.fotos, ...newFiles];
+        setData('fotos', updatedFiles);
+
+        // Acumular previews
+        const newPreviews = newFiles.map(file => URL.createObjectURL(file));
+        setPreviews(prev => [...prev, ...newPreviews]);
+    };
+
+    const removeFoto = (index) => {
+        const updatedFiles = data.fotos.filter((_, idx) => idx !== index);
+        setData('fotos', updatedFiles);
+
+        if (previews[index]) {
+            URL.revokeObjectURL(previews[index]);
+        }
+        const updatedPreviews = previews.filter((_, idx) => idx !== index);
+        setPreviews(updatedPreviews);
     };
 
     const submit = (e) => {
@@ -66,56 +81,73 @@ export default function Create({ sedes, visit_id }) {
                         {/* PASO 1: DEFINICIÓN Y ORIGEN */}
                         {currentStep === 1 && (
                             <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[3rem] border border-white/5 p-10 shadow-2xl space-y-10 animate-fade-in">
-                                <div className="space-y-8">
-                                    <div className="relative group">
-                                        <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Sede o Instalación</span>
-                                        <select id="field_8" name="field_8" 
-                                            value={data.sede_id}
-                                            onChange={e => setData('sede_id', e.target.value)}
-                                            disabled={!!visit_id}
-                                            required
-                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-lg font-black text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark] italic uppercase"
-                                        >
-                                            <option value="">SELECCIONE UBICACIÓN...</option>
-                                            {sedes.map(s => (
-                                                <option key={s.id} value={s.id}>{s.nombre_sede} ({s.empresa?.nombre_fantasia})</option>
-                                            ))}
-                                        </select>
-                                    </div>
+                                 <div className="space-y-8">
+                                     {visit_id ? (
+                                         <div className="space-y-3 group">
+                                             <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
+                                                 Sede de la Visita Activa
+                                             </label>
+                                             <div className="w-full bg-red-500/5 border border-red-500/20 rounded-2xl px-6 py-5 flex items-center justify-between shadow-[inset_0_0_20px_rgba(239,68,68,0.05)]">
+                                                 <div>
+                                                     <div className="text-lg font-black text-white italic uppercase tracking-tight">
+                                                         {sedes.find(s => s.id === parseInt(data.sede_id))?.nombre_sede || 'Sede Seleccionada'}
+                                                     </div>
+                                                     <div className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.2em] italic mt-1">
+                                                         {sedes.find(s => s.id === parseInt(data.sede_id))?.empresa?.nombre_fantasia || 'Empresa'}
+                                                     </div>
+                                                 </div>
+                                                 <span className="px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-full text-[8px] font-black text-red-400 uppercase tracking-widest italic animate-pulse">
+                                                     📍 Fijo por Visita
+                                                 </span>
+                                             </div>
+                                             <input type="hidden" name="sede_id" value={data.sede_id} />
+                                         </div>
+                                     ) : (
+                                         <div className="space-y-3 group">
+                                             <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
+                                                 Sede o Instalación
+                                             </label>
+                                             <select id="field_8" name="field_8" 
+                                                 value={data.sede_id}
+                                                 onChange={e => setData('sede_id', e.target.value)}
+                                                 required
+                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-lg font-black text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark] italic uppercase"
+                                             >
+                                                 <option value="">SELECCIONE UBICACIÓN...</option>
+                                                 {sedes.map(s => (
+                                                     <option key={s.id} value={s.id}>{s.nombre_sede} ({s.empresa?.nombre_fantasia})</option>
+                                                 ))}
+                                             </select>
+                                         </div>
+                                     )}
 
-                                    <div className="relative group">
-                                        <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Título de la Desviación</span>
-                                        <input id="field_7" name="field_7" 
-                                            type="text" 
-                                            value={data.titulo}
-                                            onChange={e => setData('titulo', e.target.value)}
-                                            required
-                                            className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-xl font-black text-white focus:ring-2 focus:ring-red-500/50 transition-all uppercase placeholder-white/5 italic"
-                                            placeholder="EJ: FALTA DE SEÑALIZACIÓN EN SALIDA DE EMERGENCIA..."
-                                        />
-                                    </div>
+                                     <div className="space-y-3 group">
+                                         <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
+                                             Título de la Desviación
+                                         </label>
+                                         <input id="field_7" name="field_7" 
+                                             type="text" 
+                                             value={data.titulo}
+                                             onChange={e => setData('titulo', e.target.value)}
+                                             required
+                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-xl font-black text-white focus:ring-2 focus:ring-red-500/50 transition-all uppercase placeholder-white/5 italic"
+                                             placeholder="EJ: FALTA DE SEÑALIZACIÓN EN SALIDA DE EMERGENCIA..."
+                                         />
+                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="relative group">
-                                            <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Ubicación Específica (Tag)</span>
-                                            <input id="field_6" name="field_6" 
-                                                type="text" 
-                                                value={data.ubicacion_especifica}
-                                                onChange={e => setData('ubicacion_especifica', e.target.value)}
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500/50 transition-all uppercase italic"
-                                                placeholder="EJ: PLANTA BAJA / PASILLO B..."
-                                            />
-                                        </div>
-                                        <div className="relative group">
-                                            <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Fecha de Detección</span>
-                                            <input id="field_5" name="field_5" 
-                                                type="date" 
-                                                defaultValue={new Date().toISOString().split('T')[0]}
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-red-500/50 transition-all [color-scheme:dark]"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                                     <div className="space-y-3 group">
+                                         <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
+                                             Ubicación Específica (Tag / Sector)
+                                         </label>
+                                         <input id="field_6" name="field_6" 
+                                             type="text" 
+                                             value={data.ubicacion_especifica}
+                                             onChange={e => setData('ubicacion_especifica', e.target.value)}
+                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-lg font-black text-white focus:ring-2 focus:ring-red-500/50 transition-all uppercase placeholder-white/5 italic"
+                                             placeholder="EJ: PLANTA BAJA / PASILLO B / SECTOR DE CALDERAS..."
+                                         />
+                                     </div>
+                                 </div>
 
                                 <div className="pt-6 flex justify-end">
                                     <button 
@@ -134,8 +166,10 @@ export default function Create({ sedes, visit_id }) {
                         {currentStep === 2 && (
                             <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[3rem] border border-white/5 p-10 shadow-2xl space-y-10 animate-fade-in">
                                 <div className="space-y-8">
-                                    <div className="relative group">
-                                        <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Descripción Técnica del Hallazgo</span>
+                                    <div className="space-y-3 group">
+                                        <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
+                                            Descripción Técnica del Hallazgo
+                                        </label>
                                         <textarea id="field_4" name="field_4" 
                                             value={data.descripcion}
                                             onChange={e => setData('descripcion', e.target.value)}
@@ -147,8 +181,10 @@ export default function Create({ sedes, visit_id }) {
                                     </div>
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                        <div className="relative group">
-                                            <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Nivel de Criticidad</span>
+                                        <div className="space-y-3 group">
+                                            <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
+                                                Nivel de Criticidad
+                                            </label>
                                             <select id="field_3" name="field_3" 
                                                 value={data.criticidad}
                                                 onChange={e => setData('criticidad', e.target.value)}
@@ -160,8 +196,10 @@ export default function Create({ sedes, visit_id }) {
                                                 <option value="critico" className="text-red-500">🔴 CRÍTICO (Peligro Inminente)</option>
                                             </select>
                                         </div>
-                                        <div className="relative group">
-                                            <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-red-500 uppercase tracking-[0.3em] italic z-10">Plazo Límite de Corrección</span>
+                                        <div className="space-y-3 group">
+                                            <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
+                                                Plazo Límite de Corrección
+                                            </label>
                                             <input id="field_2" name="field_2" 
                                                 type="date" 
                                                 value={data.plazo_correccion}
@@ -208,8 +246,16 @@ export default function Create({ sedes, visit_id }) {
                                     {previews.length > 0 && (
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-fade-in">
                                             {previews.map((url, i) => (
-                                                <div key={i} className="aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/40">
+                                                <div key={i} className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 bg-black/40 group">
                                                     <img src={url} className="w-full h-full object-cover" alt={`Preview ${i}`} />
+                                                    <button 
+                                                        type="button"
+                                                        onClick={() => removeFoto(i)}
+                                                        className="absolute top-2 right-2 w-8 h-8 rounded-xl bg-red-600/90 text-white flex items-center justify-center text-[10px] font-black shadow-lg hover:bg-red-500 hover:scale-110 active:scale-95 transition-all z-20"
+                                                        title="Eliminar foto"
+                                                    >
+                                                        ✕
+                                                    </button>
                                                 </div>
                                             ))}
                                         </div>

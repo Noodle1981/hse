@@ -88,9 +88,18 @@ class IncidenteController extends Controller
             ? $user->sedes()->with('empresa')->get()
             : Sede::with('empresa')->orderBy('nombre_sede')->get();
 
+        $initialSedeId = null;
+        if ($request->visit_id) {
+            $visit = \App\Models\VisitCertificate::find($request->visit_id);
+            if ($visit) {
+                $initialSedeId = $visit->sede_id;
+            }
+        }
+
         return Inertia::render('Tecnico/Incidents/Create', [
             'sedes' => $sedes,
             'visit_id' => $request->visit_id,
+            'initial_sede_id' => $initialSedeId,
         ]);
     }
 
@@ -110,6 +119,7 @@ class IncidenteController extends Controller
             'personas_afectadas' => 'required|integer|min:0',
             'dias_perdidos' => 'nullable|integer|min:0',
             'fotos.*' => 'nullable|image|max:5120',
+            'visit_certificate_id' => 'nullable|exists:visit_certificates,id',
         ]);
 
         return DB::transaction(function () use ($request) {
@@ -130,9 +140,16 @@ class IncidenteController extends Controller
                 }
             }
 
-            $redirect = $request->visit_certificate_id
-                ? route('tecnico.operations.visits.show', $request->visit_certificate_id)
-                : route('gestor.incidentes.index');
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+
+            if ($user->isTechnician()) {
+                $redirect = $request->visit_certificate_id
+                    ? route('tecnico.visits.in-progress', $request->visit_certificate_id)
+                    : route('tecnico.checklists.tasks.index');
+            } else {
+                $redirect = route('gestor.incidentes.index');
+            }
 
             return redirect($redirect)->with('message', 'Incidente reportado exitosamente.');
         });

@@ -49,6 +49,8 @@ class DynamicQuestion extends Model
         'checkbox',
         'number',
         'date',
+        'time',
+        'datetime',
         'signature',
     ];
 

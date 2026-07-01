@@ -320,6 +320,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/reportar', [FindingController::class, 'create'])->name('create');
             Route::post('/', [FindingController::class, 'store'])->name('store');
             Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
+            Route::post('/{finding}/update', [FindingController::class, 'addUpdate'])->name('update');
             Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
             Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });

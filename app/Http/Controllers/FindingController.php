@@ -105,9 +105,18 @@ class FindingController extends Controller
             ? $user->sedes()->with('empresa')->get()
             : Sede::with('empresa')->orderBy('nombre_sede')->get();
 
+        $initialSedeId = null;
+        if ($request->visit_id) {
+            $visit = \App\Models\VisitCertificate::find($request->visit_id);
+            if ($visit) {
+                $initialSedeId = $visit->sede_id;
+            }
+        }
+
         return Inertia::render('Tecnico/Findings/Create', [
             'sedes' => $sedes,
             'visit_id' => $request->visit_id, // Contexto opcional de visita
+            'initial_sede_id' => $initialSedeId,
         ]);
     }
 
@@ -158,6 +167,11 @@ class FindingController extends Controller
             /** @var \App\Models\User $user */
             $user = Auth::user();
             $routePrefix = $user->isTechnician() ? 'tecnico.hallazgos' : 'gestor.hallazgos';
+
+            if ($user->isTechnician() && $hallazgo->visit_certificate_id) {
+                return redirect()->route('tecnico.visits.in-progress', $hallazgo->visit_certificate_id)
+                    ->with('message', 'Hallazgo registrado con éxito.');
+            }
 
             return redirect()->route($routePrefix.'.show', $hallazgo->id)
                 ->with('message', 'Hallazgo registrado y certificado táctocamente.');

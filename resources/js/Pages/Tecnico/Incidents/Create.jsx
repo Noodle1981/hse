@@ -2,13 +2,15 @@ import { Head, useForm, router, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
 import { useState, useRef } from 'react';
 
-export default function Create({ sedes, visit_id }) {
+export default function Create({ sedes, visit_id, initial_sede_id }) {
+    const initialSede = initial_sede_id || '';
+
     const { data, setData, post, processing, errors } = useForm({
         titulo: '',
         tipo: 'incidente',
         gravedad: 'leve',
         fecha_ocurrencia: new Date().toISOString().split('T')[0],
-        sede_id: '',
+        sede_id: initialSede,
         descripcion: '',
         medidas_tomadas: '',
         personas_afectadas: 0,
@@ -87,23 +89,43 @@ export default function Create({ sedes, visit_id }) {
                                     {errors.titulo && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2 uppercase italic">{errors.titulo}</p>}
                                 </div>
 
-                                <div className="space-y-2">
-                                    <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Sede / Ubicación</label>
-                                    <select id="field_7" name="field_7" 
-                                        value={data.sede_id}
-                                        onChange={e => setData('sede_id', e.target.value)}
-                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-600 transition-all uppercase italic [color-scheme:dark]"
-                                        required
-                                    >
-                                        <option value="">SELECCIONAR SEDE...</option>
-                                        {sedes.map(s => (
-                                            <option key={s.id} value={s.id}>{s.nombre_sede} ({s.empresa?.nombre})</option>
-                                        ))}
-                                    </select>
-                                    {errors.sede_id && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2 uppercase italic">{errors.sede_id}</p>}
-                                </div>
+                                {visit_id ? (
+                                    <div className="md:col-span-2 space-y-2 group">
+                                        <label className="text-[10px] font-black text-red-500 uppercase tracking-[0.3em] italic block ml-2">Sede de la Visita Activa</label>
+                                        <div className="w-full bg-red-600/5 border border-red-600/20 rounded-2xl px-6 py-4 flex items-center justify-between shadow-[inset_0_0_20px_rgba(220,38,38,0.05)]">
+                                            <div>
+                                                <div className="text-sm font-black text-white italic uppercase tracking-tight">
+                                                    {sedes.find(s => s.id === parseInt(data.sede_id))?.nombre_sede || 'Sede Seleccionada'}
+                                                </div>
+                                                <div className="text-[9px] font-black text-red-400/60 uppercase tracking-[0.2em] italic mt-1">
+                                                    {sedes.find(s => s.id === parseInt(data.sede_id))?.empresa?.nombre || 'Empresa'}
+                                                </div>
+                                            </div>
+                                            <span className="px-3 py-1 bg-red-600/10 border border-red-600/20 rounded-full text-[8px] font-black text-red-400 uppercase tracking-widest italic animate-pulse">
+                                                📍 Fijo por Visita
+                                            </span>
+                                        </div>
+                                        <input type="hidden" name="sede_id" value={data.sede_id} />
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Sede / Ubicación</label>
+                                        <select id="field_7" name="field_7" 
+                                            value={data.sede_id}
+                                            onChange={e => setData('sede_id', e.target.value)}
+                                            className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-600 transition-all uppercase italic [color-scheme:dark]"
+                                            required
+                                        >
+                                            <option value="">SELECCIONAR SEDE...</option>
+                                            {sedes.map(s => (
+                                                <option key={s.id} value={s.id}>{s.nombre_sede} ({s.empresa?.nombre})</option>
+                                            ))}
+                                        </select>
+                                        {errors.sede_id && <p className="text-red-500 text-[10px] font-bold mt-1 ml-2 uppercase italic">{errors.sede_id}</p>}
+                                    </div>
+                                )}
 
-                                <div className="space-y-2">
+                                <div className="space-y-2 md:col-span-2">
                                     <label className="text-[10px] font-black text-white/30 uppercase tracking-[0.3em] italic ml-2">Fecha del Evento</label>
                                     <input id="field_6" name="field_6" 
                                         type="date" 
@@ -197,7 +219,7 @@ export default function Create({ sedes, visit_id }) {
                                         min="0"
                                         value={data.personas_afectadas}
                                         onChange={e => setData('personas_afectadas', e.target.value)}
-                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-600 transition-all italic"
+                                        className="w-32 bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-600 transition-all italic text-center"
                                         required
                                     />
                                 </div>
@@ -208,7 +230,7 @@ export default function Create({ sedes, visit_id }) {
                                         min="0"
                                         value={data.dias_perdidos}
                                         onChange={e => setData('dias_perdidos', e.target.value)}
-                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-600 transition-all italic"
+                                        className="w-32 bg-black/40 border border-white/5 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-red-600 transition-all italic text-center"
                                     />
                                 </div>
                             </div>

@@ -20,7 +20,10 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
     const user = auth.user;
     console.log("DEBUG - User in Wizard props:", user);
     const [currentStep, setCurrentStep] = useState(0);
+    const [showFailureModal, setShowFailureModal] = useState(false);
+    const [pendingNextStep, setPendingNextStep] = useState(null);
     const sections = checklist.sections || [];
+    const totalQuestions = sections.reduce((acc, sec) => acc + (sec.questions?.length || 0), 0);
     const totalSteps = sections.length + 2; // Intro + Secciones + Finalización
 
     // Detectar por URL si estamos en el contexto de técnico (más confiable que comparar strings de rol)
@@ -59,9 +62,79 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
         });
     };
 
+    /**
+     * Evalúa si alguna pregunta de la sección actual ha fallado.
+     */
+    const sectionHasFailure = (sectionIndex) => {
+        const section = sections[sectionIndex];
+        if (!section) return false;
+        return section.questions?.some(q => {
+            const answer = form.data.answers[q.id];
+            if (answer === undefined || answer === null || answer === '') return false;
+            const fv = toArray(q.failure_values);
+            if (fv.length === 0) return false;
+            const logic = q.failure_logic ?? 'fail_if_selected';
+            if (logic === 'fail_if_missing') {
+                const selected = Array.isArray(answer) ? answer : (answer ? [answer] : []);
+                return fv.some(req => !selected.includes(req));
+            } else {
+                const selected = Array.isArray(answer) ? answer : [answer];
+                return selected.some(val => fv.includes(val));
+            }
+        }) ?? false;
+    };
+
     const nextStep = () => {
-        if (currentStep < totalSteps - 1) {
-            setCurrentStep(currentStep + 1);
+        const nextStepIndex = currentStep + 1;
+        if (nextStepIndex >= totalSteps) return;
+
+        // Estamos saliendo de una sección de preguntas (pasos 1 a sections.length)
+        const sectionIndex = currentStep - 1; // paso 1 = sección 0
+        if (sectionIndex >= 0 && sectionIndex < sections.length) {
+            if (sectionHasFailure(sectionIndex)) {
+                setPendingNextStep(nextStepIndex);
+                setShowFailureModal(true);
+                return;
+            }
+        }
+
+        setCurrentStep(nextStepIndex);
+        window.scrollTo(0, 0);
+    };
+
+    /**
+     * Auto-llena todas las preguntas restantes con leyenda de auditoría
+     * y salta directo al paso final (firma).
+     */
+    const handleRejectAndFinish = () => {
+        const AUDIT_VALUE = 'No evaluado por falla crítica';
+        const currentSectionIndex = currentStep - 1;
+        const newAnswers = { ...form.data.answers };
+
+        // Completar preguntas de secciones POSTERIORES a la actual
+        sections.forEach((sec, secIdx) => {
+            if (secIdx > currentSectionIndex) {
+                sec.questions?.forEach(q => {
+                    if (newAnswers[q.id] === undefined || newAnswers[q.id] === null || newAnswers[q.id] === '') {
+                        newAnswers[q.id] = AUDIT_VALUE;
+                    }
+                });
+            }
+        });
+
+        form.setData('answers', newAnswers);
+        setShowFailureModal(false);
+        setPendingNextStep(null);
+        // Saltar al último paso (firma)
+        setCurrentStep(totalSteps - 1);
+        window.scrollTo(0, 0);
+    };
+
+    const handleContinueInspection = () => {
+        setShowFailureModal(false);
+        if (pendingNextStep !== null) {
+            setCurrentStep(pendingNextStep);
+            setPendingNextStep(null);
             window.scrollTo(0, 0);
         }
     };
@@ -168,7 +241,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                     </div>
                                     <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-center">
                                         <div className="text-[8px] font-black text-white/20 uppercase tracking-widest mb-1">Preguntas</div>
-                                        <div className="text-xl font-black italic text-white">{checklist.questions?.length || 0}</div>
+                                        <div className="text-xl font-black italic text-white">{totalQuestions}</div>
                                     </div>
                                 </div>
                                 <div className="pt-10">
@@ -201,12 +274,12 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             
                                             {/* Renderizado de tipos de pregunta */}
                                             {q.type === 'text' && (
-                                                <input id={`answer_\${q.id}`} name={`answer_\${q.id}`} type="text" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-full bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-lg font-black uppercase transition-all"/>
+                                                <input id={`answer_${q.id}`} name={`answer_${q.id}`} type="text" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-full bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-lg font-black uppercase transition-all"/>
                                             )}
 
                                             {q.type === 'number' && (
                                                 <div className="flex items-center gap-4">
-                                                    <input id={`answer_\${q.id}`} name={`answer_\${q.id}`} type="number" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-48 bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-2xl font-black transition-all"/>
+                                                    <input id={`answer_${q.id}`} name={`answer_${q.id}`} type="number" value={form.data.answers[q.id] || ''} onChange={e => handleAnswerChange(q.id, e.target.value)} className="w-48 bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 text-2xl font-black transition-all"/>
                                                     <span className="text-[10px] font-black text-white/20 uppercase italic">Unidades / Valor</span>
                                                 </div>
                                             )}
@@ -247,17 +320,62 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
 
                                             {q.type === 'date' && (
                                                 <div className="flex items-center gap-4">
-                                                    <input id={`answer_\${q.id}`} name={`answer_\${q.id}`} 
+                                                    <input id={`answer_${q.id}`} name={`answer_${q.id}`} 
                                                         type="date" 
                                                         value={form.data.answers[q.id] || ''} 
                                                         onChange={e => handleAnswerChange(q.id, e.target.value)} 
-                                                        className="bg-black/40 border-b-2 border-white/10 text-white focus:border-orange-500 outline-none py-3 px-4 text-lg font-black transition-all rounded-xl [color-scheme:dark]"
+                                                        className="bg-black/40 border border-white/10 text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none py-4 px-6 text-lg font-black transition-all rounded-[1.5rem] [color-scheme:dark] w-full max-w-xs"
                                                     />
                                                 </div>
                                             )}
 
+                                            {q.type === 'time' && (
+                                                <div className="flex items-center gap-4">
+                                                    <input id={`answer_${q.id}`} name={`answer_${q.id}`} 
+                                                        type="time" 
+                                                        value={form.data.answers[q.id] || ''} 
+                                                        onChange={e => handleAnswerChange(q.id, e.target.value)} 
+                                                        className="bg-black/40 border border-white/10 text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none py-4 px-6 text-lg font-black transition-all rounded-[1.5rem] [color-scheme:dark] w-full max-w-xs"
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            const now = new Date();
+                                                            const timeStr = now.toTimeString().split(' ')[0].substring(0, 5);
+                                                            handleAnswerChange(q.id, timeStr);
+                                                        }}
+                                                        className="px-6 py-4 bg-orange-600/10 border border-orange-600/20 text-orange-500 rounded-[1.5rem] text-[10px] font-black uppercase tracking-wider italic hover:bg-orange-600 hover:text-white transition-all active:scale-95"
+                                                    >
+                                                        🕒 Hora Actual
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {q.type === 'datetime' && (
+                                                <div className="flex items-center gap-4">
+                                                    <input id={`answer_${q.id}`} name={`answer_${q.id}`} 
+                                                        type="datetime-local" 
+                                                        value={form.data.answers[q.id] || ''} 
+                                                        onChange={e => handleAnswerChange(q.id, e.target.value)} 
+                                                        className="bg-black/40 border border-white/10 text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 outline-none py-4 px-6 text-lg font-black transition-all rounded-[1.5rem] [color-scheme:dark] w-full max-w-xs"
+                                                    />
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            const now = new Date();
+                                                            const tzOffset = now.getTimezoneOffset() * 60000;
+                                                            const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
+                                                            handleAnswerChange(q.id, localISOTime);
+                                                        }}
+                                                        className="px-6 py-4 bg-orange-600/10 border border-orange-600/20 text-orange-500 rounded-[1.5rem] text-[10px] font-black uppercase tracking-wider italic hover:bg-orange-600 hover:text-white transition-all active:scale-95"
+                                                    >
+                                                        📅 Ahora
+                                                    </button>
+                                                </div>
+                                            )}
+
                                             {q.type === 'textarea' && (
-                                                <textarea id={`answer_\${q.id}`} name={`answer_\${q.id}`} 
+                                                <textarea id={`answer_${q.id}`} name={`answer_${q.id}`} 
                                                     value={form.data.answers[q.id] || ''} 
                                                     onChange={e => handleAnswerChange(q.id, e.target.value)} 
                                                     rows="3"
@@ -432,6 +550,83 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                 @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
                 @keyframes fade-in-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
             `}</style>
+
+            {/* ══════════════════════════════════════════════════
+                MODAL DE INTERCEPCIÓN POR FALLA CRÍTICA
+                Spec: promtSre.md — Sección 2 & 3
+                ══════════════════════════════════════════════════ */}
+            {showFailureModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 animate-fade-in">
+                    {/* Backdrop oscuro */}
+                    <div className="absolute inset-0 bg-[#0a0a15]/80 backdrop-blur-xl" />
+
+                    {/* Panel glassmorphism */}
+                    <div className="relative w-full max-w-lg bg-[#1a1a2e]/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
+                        {/* Línea roja superior */}
+                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+
+                        <div className="p-10 space-y-8 text-center">
+                            {/* Icono de alerta animado */}
+                            <div className="flex justify-center">
+                                <div className="relative h-20 w-20 flex items-center justify-center">
+                                    <div className="absolute inset-0 rounded-full border-2 border-red-500/20 border-t-red-500 animate-spin" />
+                                    <div className="h-14 w-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400 shadow-inner rotate-3">
+                                        <svg className="w-7 h-7 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                    </div>
+                                    <div className="absolute -top-1 -right-1">
+                                        <span className="flex h-3 w-3">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Título */}
+                            <div className="space-y-3">
+                                <h2 className="text-xs font-black text-red-400 uppercase tracking-[0.4em] italic"
+                                    style={{ textShadow: '0 0 20px rgba(239,68,68,0.5)' }}>
+                                    ⚠️ Desvío Detectado
+                                </h2>
+                                <p className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic leading-relaxed">
+                                    Se ha registrado una falla crítica en esta sección.<br />
+                                    ¿Desea suspender y rechazar el activo ahora,<br />o continuar evaluando el resto de los puntos?
+                                </p>
+                            </div>
+
+                            {/* Barra de escaneo HUD */}
+                            <div className="h-px w-full bg-red-500/20 rounded-full overflow-hidden relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/40 to-transparent w-1/2 animate-scan" />
+                            </div>
+
+                            {/* Botones de acción */}
+                            <div className="flex flex-col gap-4 pt-2">
+                                {/* Botón Rechazar — Tactical Pill rojo */}
+                                <button
+                                    type="button"
+                                    onClick={handleRejectAndFinish}
+                                    className="w-full px-6 py-4 bg-red-500/20 text-red-400 border border-red-500/50 rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all active:scale-95 animate-pulse hover:animate-none hover:bg-red-500 hover:text-white relative overflow-hidden group"
+                                    style={{ boxShadow: '0 0 15px rgba(239,68,68,0.3)' }}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                    🚫 Rechazar y Finalizar
+                                </button>
+
+                                {/* Botón Continuar — neutro */}
+                                <button
+                                    type="button"
+                                    onClick={handleContinueInspection}
+                                    className="w-full px-6 py-4 bg-white/5 text-white hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all active:scale-95"
+                                >
+                                    Continuar Inspección
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AuthenticatedLayout>
     );
 }

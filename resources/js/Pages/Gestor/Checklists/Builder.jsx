@@ -59,13 +59,19 @@ export default function Builder({ checklist, categories }) {
         subcategory_id: checklist?.subcategory_id || '',
         registry_code: checklist?.registry_code || '',
         is_active: checklist ? checklist.is_active : true,
-        useSections: checklist?.sections?.length > 0,
-        sections: checklist?.sections?.map(s => ({
+        sections: (checklist?.sections && checklist.sections.length > 0) ? checklist.sections.map(s => ({
             id: s.id,
             tempId: null,
             title: s.title,
             description: s.description || '',
-        })) || [],
+        })) : [
+            {
+                id: null,
+                tempId: 'temp_default_section',
+                title: 'Inspección General',
+                description: 'Sección principal para las preguntas.',
+            }
+        ],
         questions: checklist?.questions?.map(q => {
             let parsedOptions = [];
             if (Array.isArray(q.options)) parsedOptions = q.options;
@@ -276,33 +282,16 @@ export default function Builder({ checklist, categories }) {
                                 <div className="h-px w-32 bg-white/5"></div>
                             </div>
                             <div className="flex gap-4">
-                                <button type="button" onClick={() => form.setData('useSections', !form.data.useSections)} className={`px-6 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest italic border transition-all ${form.data.useSections ? 'bg-orange-500/20 border-orange-500 text-orange-400' : 'bg-white/5 border-white/5 text-white/10 hover:text-white'}`}>
-                                    {form.data.useSections ? 'Deshabilitar Secciones' : 'Habilitar Secciones'}
+                                <button type="button" onClick={addSection} className="px-8 py-3 bg-orange-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg hover:brightness-110">
+                                    Inyectar Sección
                                 </button>
-                                <button type="button" onClick={() => addQuestion()} className="px-6 py-3 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest italic text-white hover:bg-white/10 transition-all flex items-center gap-2">
-                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeWidth="3"/></svg>
-                                    Pregunta Suelta
-                                </button>
-                                {form.data.useSections && (
-                                    <button type="button" onClick={addSection} className="px-8 py-3 bg-orange-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic transition-all shadow-lg hover:brightness-110">
-                                        Inyectar Sección
-                                    </button>
-                                )}
                             </div>
                         </div>
 
                         {/* LISTADO DE SECCIONES Y PREGUNTAS */}
                         <div className="space-y-12 pb-32">
-                            {/* Preguntas sin sección */}
-                            <div className="space-y-4">
-                                {form.data.questions.filter(q => !q.section_id && !q.section_tempId).map((question, i) => {
-                                    const realIndex = form.data.questions.indexOf(question);
-                                    return <QuestionItem key={realIndex} index={realIndex} question={question} update={updateQuestion} remove={removeQuestion} move={moveQuestion} />;
-                                })}
-                            </div>
-
                             {/* Bloques de Secciones */}
-                            {form.data.useSections && form.data.sections.map((section, sectionIndex) => (
+                            {form.data.sections.map((section, sectionIndex) => (
                                 <div key={section.tempId || section.id} className="bg-[#16162a]/60 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden animate-fade-in-up">
                                     <div className="bg-white/5 px-8 py-6 flex items-center justify-between">
                                         <div className="flex-1 flex gap-6 items-center">
@@ -472,6 +461,8 @@ function QuestionItem({ index, question, update, remove, move }) {
                                 <option value="checkbox">Opción Múltiple (Check)</option>
                                 <option value="number">Numérico</option>
                                 <option value="date">Fecha / Calendario</option>
+                                <option value="time">Hora</option>
+                                <option value="datetime">Fecha y Hora</option>
                             </select>
                         </div>
                         <div className="flex flex-col gap-1.5">
