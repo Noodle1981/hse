@@ -191,7 +191,7 @@ Route::prefix('activos')->name('gestor.assets.')->group(function () {
 
 ---
 
-## MODULO C - Identificacion por Codigo QR
+## MODULO C - Identificacion por Codigo QR [OPTATIVO]
 
 **Objetivo:** Leer QR de activos para iniciar inspecciones y leer QR de empleados para asistencia de capacitaciones.
 
@@ -262,7 +262,7 @@ SPRINT 3 (Activos Frontend ~ 8h)
  B7: Paso 0 en Wizard (seleccion de activo)
  B6: Rutas en web.php
 
-SPRINT 4 (QR ~ 6h)
+SPRINT 4 (QR ~ 6h) [OPTATIVO - activar con FEATURE_QR_SCANNING=true]
  C1: npm install html5-qrcode
  C2: QrScannerModal.jsx
  C3: QrController + rutas /scan/*
