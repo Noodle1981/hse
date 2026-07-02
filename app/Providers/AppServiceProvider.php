@@ -6,7 +6,11 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use App\Events\ClientAccessModified;
+use App\Events\InspectionCompleted;
 use App\Listeners\LogClientAccess;
+use App\Listeners\SyncAssetMetadata;
+use App\Models\Asset;
+use App\Observers\AssetObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,5 +34,12 @@ class AppServiceProvider extends ServiceProvider
             ClientAccessModified::class,
             LogClientAccess::class
         );
+
+        Event::listen(
+            InspectionCompleted::class,
+            SyncAssetMetadata::class
+        );
+
+        Asset::observe(AssetObserver::class);
     }
 }

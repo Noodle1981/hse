@@ -476,6 +476,8 @@ class OperationController extends Controller
             'duration' => 'nullable',
             'description' => 'nullable|string',
             'modality' => 'nullable|string|in:presencial,virtual',
+            'checkin_lat' => 'nullable|numeric',
+            'checkin_lng' => 'nullable|numeric',
         ]);
 
         /** @var \App\Models\User $user */
@@ -496,7 +498,13 @@ class OperationController extends Controller
         if (! $activeVisit) {
             $sede = \App\Models\Sede::findOrFail($request->sede_id);
             $visitType = $request->type === 'training' ? 'training' : 'checklist';
-            $activeVisit = $this->visitService->startVisit($user, $sede, $visitType);
+            $activeVisit = $this->visitService->startVisit(
+                $user,
+                $sede,
+                $visitType,
+                $request->filled('checkin_lat') ? (float) $request->checkin_lat : null,
+                $request->filled('checkin_lng') ? (float) $request->checkin_lng : null
+            );
         }
 
         if ($request->source === 'adhoc') {
@@ -697,12 +705,19 @@ class OperationController extends Controller
     {
         $request->validate([
             'sede_id' => 'required|exists:sedes,id',
+            'checkin_lat' => 'nullable|numeric',
+            'checkin_lng' => 'nullable|numeric',
         ]);
 
         $sede = Sede::findOrFail($request->sede_id);
 
-        // El servicio maneja la lógica de si ya hay una activa o no
-        $visit = $this->visitService->startVisit(Auth::user(), $sede);
+        $visit = $this->visitService->startVisit(
+            Auth::user(),
+            $sede,
+            null,
+            $request->filled('checkin_lat') ? (float) $request->checkin_lat : null,
+            $request->filled('checkin_lng') ? (float) $request->checkin_lng : null
+        );
 
         return redirect()->route('gestor.operations.visits.show', $visit->id)
             ->with('message', 'Visita iniciada. Sincronizando zona de despliegue...');
@@ -875,6 +890,8 @@ class OperationController extends Controller
                 'responsible_name' => 'required|string',
                 'signature' => 'required_without:signature_skip_reason|nullable|string',
                 'signature_skip_reason' => 'required_if:signature_unavailable,true|nullable|string',
+                'checkout_lat' => 'nullable|numeric',
+                'checkout_lng' => 'nullable|numeric',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Illuminate\Support\Facades\Log::warning('Fallo de validación al finalizar visita', [
@@ -889,7 +906,9 @@ class OperationController extends Controller
             $request->signature,
             $request->responsible_name,
             $request->email_responsable,
-            $request->signature_skip_reason
+            $request->signature_skip_reason,
+            $request->filled('checkout_lat') ? (float) $request->checkout_lat : null,
+            $request->filled('checkout_lng') ? (float) $request->checkout_lng : null
         );
 
         // Redirigir según el contexto (Técnico o Gestor/Admin)
@@ -899,6 +918,31 @@ class OperationController extends Controller
 
         return redirect()->route($redirectRoute)
             ->with('message', '¡Visita finalizada y certificada exitosamente!');
+    }
+
+    /**
+     * Checkout explícito / actualización de geolocalización de salida.
+     */
+    public function checkout(Request $request, VisitCertificate $visit)
+    {
+        $request->validate([
+            'checkout_lat' => 'nullable|numeric',
+            'checkout_lng' => 'nullable|numeric',
+        ]);
+
+        if ($request->filled('checkout_lat') && $request->filled('checkout_lng')) {
+            $visit->checkout_lat = (float) $request->checkout_lat;
+            $visit->checkout_lng = (float) $request->checkout_lng;
+            $visit->loadMissing('sede');
+            $this->visitService->timeTrackingService->verifyGpsPresence($visit);
+            $visit->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'gps_verified' => $visit->gps_verified,
+            'message' => 'Geolocalización de salida procesada correctamente.',
+        ]);
     }
 
     /**

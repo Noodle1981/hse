@@ -122,6 +122,25 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
     4. **Confirmar & Iniciar:** Botón final para inyectar la capacitación de forma inmediata.
   - **Almacenamiento de Modalidad:** La modalidad se guarda directamente en la columna `type` de la tabla `trainings` (como `'presencial'` o `'virtual'`) logrando consistencia con el diseño de base de datos y su correcta visualización en el reporte PDF.
 
+### 4.6. Módulo Universal de Activos y Trazabilidad Dinámica
+* **Consola de Mando y Bóveda de Activos (`AssetController`):**
+  - Gestión integral de inventario técnico (Matafuegos, Redes de Agua, Autoelevadores, Vehículos, Tableros Eléctricos) organizada por Empresa, Sede y Tipo de Activo.
+  - Asignación de identificadores unívocos **UUID (v4)** en base de datos para prevenir vulnerabilidades IDOR y enumeración de recursos.
+  - KPIs en tiempo real (Operativos 🟢, En Alerta 🟡, Fuera de Servicio 🔴) y filtrado predictivo multi-tenancy.
+* **Schema-Driven Metadata (`AssetType`):**
+  - Los Gestores definen en `asset_types.metadata_schema` campos dinámicos JSON (`type`, `label`, `alert_days`, `alert_threshold`).
+  - Renderizado automático de formularios de creación y edición según el esquema parametrizado.
+* **Integración con el Wizard de Inspección (Paso 0 - Trazabilidad):**
+  - El técnico debe seleccionar el **Activo Objeto de Inspección** mediante un buscador predictivo o lectura de código QR/Patente antes de responder el checklist.
+  - Persistencia del vínculo `dynamic_inspections.asset_id`.
+* **Sincronización Automática y Motor de Transición de Estados (`SyncAssetMetadata`):**
+  - Mapeo de respuestas del checklist a los atributos del activo (`dynamic_questions.vincular_a_metadata`).
+  - Ante una inspección con resultado `Fail`, la bomba de estado transiciona automáticamente el activo a **"Fuera de Servicio"** (`fuera_de_servicio`).
+  - Audit log inmutable de cambios en `audit_logs` vía `AssetObserver`.
+* **Motor de Alertas y Hallazgos Automáticos (`CheckAssetAlerts`):**
+  - Comando `php artisan assets:check-alerts` programado diariamente.
+  - Evalúa vencimientos de fechas (`alert_days`) y umbrales numéricos (`alert_threshold`), creando hallazgos de criticidad alta sin duplicación.
+
 ### 4.7. Control y Gestión de Firmas Digitales y Aprobación Segura
 * **Tipología de Firmas del Sistema:**
   * **Firma Tipo A (Firma de Perfil / Identidad Permanente / Instructor Especialista):**

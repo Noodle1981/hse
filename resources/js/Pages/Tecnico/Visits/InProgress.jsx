@@ -94,11 +94,32 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
         }
     };
 
-    const handleFinalize = (e) => {
+    const handleFinalize = async (e) => {
         e.preventDefault();
         
+        let checkout_lat = null;
+        let checkout_lng = null;
+
+        if (typeof window !== 'undefined' && navigator.geolocation) {
+            try {
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 4000,
+                        maximumAge: 0,
+                    });
+                });
+                checkout_lat = position.coords.latitude;
+                checkout_lng = position.coords.longitude;
+            } catch (err) {
+                console.warn('Geolocation capture for checkout failed/bypassed:', err);
+            }
+        }
+
         finalizeForm.transform((data) => ({
             ...data,
+            checkout_lat,
+            checkout_lng,
             signature: !data.signature_unavailable && signaturePad.current 
                 ? signaturePad.current.toDataURL() 
                 : '',
@@ -109,8 +130,6 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
             preserveScroll: true
         });
     };
-
-
 
     return (
         <AuthenticatedLayout title="Bóveda Operativa (MODO ACCIÓN)">
@@ -130,7 +149,27 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                             </h2>
                         </div>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4">
+                        {/* GPS STATUS BADGE */}
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-black/30 backdrop-blur-md">
+                            {visit.gps_verified === true ? (
+                                <>
+                                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span className="text-[9px] font-black text-emerald-400 tracking-wider uppercase italic">GPS Verificado</span>
+                                </>
+                            ) : visit.gps_verified === false ? (
+                                <>
+                                    <span className="h-2.5 w-2.5 rounded-full bg-red-500 animate-pulse"></span>
+                                    <span className="text-[9px] font-black text-red-400 tracking-wider uppercase italic">GPS Fuera de Rango</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span className="h-2.5 w-2.5 rounded-full bg-gray-500"></span>
+                                    <span className="text-[9px] font-black text-gray-400 tracking-wider uppercase italic">GPS Pendiente</span>
+                                </>
+                            )}
+                        </div>
+
                         <div className="hidden sm:flex flex-col items-end">
                             <span className="text-[9px] font-black text-white/20 uppercase tracking-widest italic leading-none mb-1">Efector Asignado</span>
                             <span className="text-[11px] font-black text-indigo-100 uppercase italic leading-none">{user.name}</span>

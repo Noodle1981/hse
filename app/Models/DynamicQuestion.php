@@ -24,6 +24,7 @@ class DynamicQuestion extends Model
         'order',
         'is_required',
         'help_text',
+        'vincular_a_metadata',
     ];
 
     public const LOGIC_FAIL_IF_SELECTED = 'fail_if_selected';

@@ -13,12 +13,24 @@ use Illuminate\Support\Facades\DB;
 
 class VisitService
 {
+    protected TimeTrackingService $timeTrackingService;
+
+    public function __construct(TimeTrackingService $timeTrackingService)
+    {
+        $this->timeTrackingService = $timeTrackingService;
+    }
+
     /**
      * Iniciar una nueva visita
      */
-    public function startVisit(User $user, Sede $sede, ?string $visitType = null): VisitCertificate
-    {
-        return VisitCertificate::create([
+    public function startVisit(
+        User $user,
+        Sede $sede,
+        ?string $visitType = null,
+        ?float $checkinLat = null,
+        ?float $checkinLng = null
+    ): VisitCertificate {
+        $visit = VisitCertificate::create([
             'user_id' => $user->id,
             'sede_id' => $sede->id,
             'empresa_id' => $sede->empresa_id,
@@ -26,7 +38,15 @@ class VisitService
             'start_time' => now(),
             'status' => 'in_progress',
             'visit_type' => $visitType,
+            'checkin_lat' => $checkinLat,
+            'checkin_lng' => $checkinLng,
         ]);
+
+        $visit->setRelation('sede', $sede);
+        $this->timeTrackingService->verifyGpsPresence($visit);
+        $visit->save();
+
+        return $visit;
     }
 
     /**
@@ -88,9 +108,11 @@ class VisitService
         ?string $signature,
         ?string $responsibleName = null,
         ?string $emailResponsable = null,
-        ?string $signatureSkipReason = null
+        ?string $signatureSkipReason = null,
+        ?float $checkoutLat = null,
+        ?float $checkoutLng = null
     ): VisitCertificate {
-        $visit->update([
+        $visit->fill([
             'end_time' => now(),
             'general_observations' => $observations,
             'signature' => $signature,
@@ -100,8 +122,16 @@ class VisitService
             'status' => 'signed',
         ]);
 
-        // Aquí se podría disparar un evento para generar PDF o notificar
-        // event(new VisitCompleted($visit));
+        if ($checkoutLat !== null) {
+            $visit->checkout_lat = $checkoutLat;
+        }
+        if ($checkoutLng !== null) {
+            $visit->checkout_lng = $checkoutLng;
+        }
+
+        $visit->loadMissing('sede');
+        $this->timeTrackingService->verifyGpsPresence($visit);
+        $visit->save();
 
         return $visit;
     }

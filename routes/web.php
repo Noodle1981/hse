@@ -237,6 +237,26 @@ Route::middleware(['auth'])->group(function () {
                 Route::post('/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
             });
         });
+
+        // Módulo Universal de Activos
+        Route::prefix('activos')->name('assets.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\AssetController::class, 'index'])->name('index');
+            Route::get('/crear', [\App\Http\Controllers\AssetController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\AssetController::class, 'store'])->name('store');
+            Route::get('/{asset}', [\App\Http\Controllers\AssetController::class, 'show'])->name('show');
+            Route::get('/{asset}/editar', [\App\Http\Controllers\AssetController::class, 'edit'])->name('edit');
+            Route::put('/{asset}', [\App\Http\Controllers\AssetController::class, 'update'])->name('update');
+            Route::delete('/{asset}', [\App\Http\Controllers\AssetController::class, 'destroy'])->name('destroy');
+        });
+
+        // Tipos de Activos & Metadata Schema Builder
+        Route::prefix('tipos-activos')->name('asset-types.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\AssetTypeController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\AssetTypeController::class, 'store'])->name('store');
+            Route::delete('/{assetType}', [\App\Http\Controllers\AssetTypeController::class, 'destroy'])->name('destroy');
+            // Importar campos de metadata desde un checklist existente
+            Route::get('/import-checklist/{checklist}', [\App\Http\Controllers\AssetTypeController::class, 'importFromChecklist'])->name('import-checklist');
+        });
     });
 
     /*
@@ -285,12 +305,12 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
         });
 
-        // Visitas (React)
-        Route::prefix('visits')->name('visits.')->group(function () {
-            Route::get('/', [OperationController::class, 'myVisits'])->name('index'); // Mis Visitas (Same as Assignments for now or specialized)
-            Route::get('/in-progress/{visit}', [OperationController::class, 'show'])->name('in-progress');
-            Route::post('/in-progress/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
-            Route::post('/in-progress/{visit}/assign-suggested', [OperationController::class, 'assignSuggestedTask'])->name('assign-suggested');
+            Route::prefix('visits')->name('visits.')->group(function () {
+                Route::get('/', [OperationController::class, 'myVisits'])->name('index'); // Mis Visitas (Same as Assignments for now or specialized)
+                Route::get('/in-progress/{visit}', [OperationController::class, 'show'])->name('in-progress');
+                Route::post('/in-progress/{visit}/checkout', [OperationController::class, 'checkout'])->name('checkout');
+                Route::post('/in-progress/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
+                Route::post('/in-progress/{visit}/assign-suggested', [OperationController::class, 'assignSuggestedTask'])->name('assign-suggested');
             Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
             Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
             Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');

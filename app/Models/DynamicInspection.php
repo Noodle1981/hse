@@ -14,6 +14,7 @@ class DynamicInspection extends Model
     protected $fillable = [
         'dynamic_checklist_id',
         'user_id',
+        'asset_id',
         'sede_id',
         'checklist_assignment_id',
         'completed_at',
@@ -28,6 +29,14 @@ class DynamicInspection extends Model
     protected $casts = [
         'completed_at' => 'datetime',
     ];
+
+    /**
+     * El activo asociado a esta inspección (si aplica)
+     */
+    public function asset(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class);
+    }
 
     /**
      * Estados posibles de una inspección

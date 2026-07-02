@@ -15,13 +15,16 @@ function toArray(val) {
     return [];
 }
 
-export default function Wizard({ checklist, assignment = {}, inspection = {}, visitId = null, initialAnswers = {}, isEmulation = false }) {
+export default function Wizard({ checklist, assignment = {}, inspection = {}, visitId = null, initialAnswers = {}, assets = [], isEmulation = false }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
     console.log("DEBUG - User in Wizard props:", user);
     const [currentStep, setCurrentStep] = useState(0);
     const [showFailureModal, setShowFailureModal] = useState(false);
     const [pendingNextStep, setPendingNextStep] = useState(null);
+    const [selectedAssetId, setSelectedAssetId] = useState(inspection.asset_id || '');
+    const [assetSearch, setAssetSearch] = useState('');
+
     const sections = checklist.sections || [];
     const totalQuestions = sections.reduce((acc, sec) => acc + (sec.questions?.length || 0), 0);
     const totalSteps = sections.length + 2; // Intro + Secciones + Finalización
@@ -38,7 +41,18 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
         supervisor_signature: '',
         technician_signature: '',
         visit_id: visitId,
+        asset_id: inspection.asset_id || '',
     });
+
+    const filteredAssets = (assets || []).filter(a =>
+        a.name.toLowerCase().includes(assetSearch.toLowerCase()) ||
+        a.identifier.toLowerCase().includes(assetSearch.toLowerCase())
+    );
+
+    const handleSelectAsset = (assetId) => {
+        setSelectedAssetId(assetId);
+        form.setData('asset_id', assetId);
+    };
 
     // Manejo de Firmas
     const supervisorSigRef = useRef(null);
@@ -88,6 +102,12 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
         const nextStepIndex = currentStep + 1;
         if (nextStepIndex >= totalSteps) return;
 
+        // Validar selección de activo en el paso inicial
+        if (currentStep === 0 && !selectedAssetId) {
+            alert('Por favor, seleccione un activo para continuar.');
+            return;
+        }
+
         // Estamos saliendo de una sección de preguntas (pasos 1 a sections.length)
         const sectionIndex = currentStep - 1; // paso 1 = sección 0
         if (sectionIndex >= 0 && sectionIndex < sections.length) {
@@ -96,6 +116,20 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                 setShowFailureModal(true);
                 return;
             }
+        }
+
+        // Guardar progreso automáticamente
+        if (!isEmulation) {
+            router.post(
+                route(saveRoute, { id: checklist.id, inspection: inspection.id }),
+                {
+                    answers: form.data.answers,
+                    notes: form.data.notes,
+                    visit_id: visitId,
+                    asset_id: selectedAssetId,
+                },
+                { preserveScroll: true, preserveState: true }
+            );
         }
 
         setCurrentStep(nextStepIndex);
@@ -244,6 +278,51 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                         <div className="text-xl font-black italic text-white">{totalQuestions}</div>
                                     </div>
                                 </div>
+
+                                {assets && assets.length > 0 && (
+                                    <div className="pt-4 max-w-lg mx-auto text-left space-y-3 bg-black/30 p-6 rounded-3xl border border-white/10">
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-[10px] font-black text-orange-400 uppercase tracking-widest italic">
+                                                Seleccionar Activo Objeto de Inspección *
+                                            </label>
+                                            <span className="text-[9px] font-bold text-white/30 italic">Paso 0 - Trazabilidad</span>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            value={assetSearch}
+                                            onChange={e => setAssetSearch(e.target.value)}
+                                            placeholder="Buscar por nombre o QR / Patente..."
+                                            className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white placeholder-white/20 focus:outline-none focus:border-orange-500"
+                                        />
+                                        <div className="max-h-48 overflow-y-auto space-y-2 pr-1">
+                                            {filteredAssets.length === 0 ? (
+                                                <p className="text-xs text-white/30 italic py-2 text-center">No hay activos que coincidan con la búsqueda.</p>
+                                            ) : (
+                                                filteredAssets.map(ast => (
+                                                    <div
+                                                        key={ast.id}
+                                                        onClick={() => handleSelectAsset(ast.id)}
+                                                        className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
+                                                            selectedAssetId === ast.id
+                                                                ? 'bg-orange-500/10 border-orange-500 text-white shadow-lg'
+                                                                : 'bg-white/5 border-white/5 text-white/70 hover:bg-white/10'
+                                                        }`}
+                                                    >
+                                                        <div>
+                                                            <div className="font-bold text-xs uppercase italic">{ast.name}</div>
+                                                            <div className="text-[10px] font-mono text-orange-400">QR: {ast.identifier}</div>
+                                                        </div>
+                                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                                                            ast.status === 'operativo' ? 'bg-emerald-500/20 text-emerald-400' : (ast.status === 'alerta' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400')
+                                                        }`}>
+                                                            {ast.status}
+                                                        </span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="pt-10">
                                     <button onClick={nextStep} className="px-16 py-6 bg-orange-600 text-white rounded-[2.5rem] text-xs font-black uppercase tracking-[0.2em] italic shadow-2xl shadow-orange-600/20 hover:brightness-110 active:scale-95 transition-all">Iniciar Protocolo</button>
                                 </div>

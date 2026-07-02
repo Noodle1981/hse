@@ -200,26 +200,6 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
     * Botón de descarga de PDF individual.
   * **Paginación Robustecida:** El controlador backend (`InspectionController.php`) realiza una paginación manual por grupos vía `LengthAwarePaginator`, garantizando la correcta compatibilidad de los filtros interactivos.
 
-### 3.5. Sistema de Roles Ultra-Robusto (Fix Definitivo)
-* **Propósito:** Prevenir errores recurrentes de autorización (403 Acceso Denegado) provocados por disparidades en la especificación de nombres de roles (plurales, acentos, separadores por coma o barra) entre rutas, políticas y vistas.
-* **Funcionamiento Unificado:**
-  * Toda la lógica de parseo reside en `User::parseRoles(string|array $roles)` de forma recursiva.
-  * Resuelve automáticamente strings planos (`'Técnico'`), delimitados por comas (`'tecnico,gestor'`), delimitados por pipes (`'tecnico|gestor'`), arrays y arrays anidados (`['gestor', 'tecnico,Socio']`).
-  * Normaliza de forma bidireccional los nombres legados (`Administrador`, `socio`, `Técnico`, `tecnicos`) a sus equivalentes lógicos internos (`gestor` o `tecnico`), haciendo que el motor sea a prueba de fallos en producción.
-  * El middleware `CheckRole` se simplifica delegando toda la matriz de variádicos directamente al modelo `User::hasRole()`.
-
-### 3.6. Enlace de Modelos en Rutas (Route Model Binding)
-* **Propósito:** Evitar la inyección accidental de instancias de modelo vacías (con `id: null`) al frontend, lo que causa fallas críticas en los generadores de rutas de Javascript (como Ziggy JS).
-* **Operación:**
-  * Laravel realiza la inyección automática cruzando el nombre del comodín de la ruta con la variable tipada en el controlador.
-  * **Regla Estricta:** Si el método en el controlador tipa un modelo (ej. `public function show(DynamicInspection $inspection)`), el comodín de la ruta en `routes/web.php` **debe llamarse exactamente `{inspection}`** y no `{id}`.
-  * Cambiar de `{id}` a `{inspection}` o `{finding}` garantiza que la base de datos se consulte en tiempo de resolución de la ruta, retornando datos 100% consistentes y previniendo crashes en la renderización React.
-
-### 3.7. Firma Digital de Instructores Especialistas y Almacenamiento Optimizado (Base64 a PNG)
-* **Propósito:** Optimizar el almacenamiento de firmas electrónicas, habilitar el rol de Instructor Externo / Especialista en las capacitaciones, y evitar el "bloat" de base de datos.
-* **Regla de Optimización de Firmas (Storage vs Base64):**
-  - **Captura en Frontend:** El frontend (React canvas) transmite la firma de forma temporal como una cadena de datos Base64 URL (`data:image/png;base64,...`).
-  - **Decodificación en Backend:** El controlador (`TrainingController` o `ProfileController`) intercepta el string, extrae la cabecera de datos, lo decodifica de forma segura y lo guarda como un archivo físico `.png` en el disco público de la aplicación (`Storage::disk('public')->put('signatures/filename.png', $data)`).
   - **Persistencia Ligera:** En la base de datos (`visit_certificates.instructor_signature` o `users.firma`), solo se almacena la ruta relativa (ej. `signatures/instructor_xxxx.png`). Esto previene el crecimiento desmedido de las filas de texto largo (`TEXT`/`LONGTEXT`) y mantiene las consultas optimizadas.
 * **Mecanismo Operativo (Frontend):**
   - La finalización de la charla en `Session.jsx` expone un switch táctil glowing (`bg-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.3)]`) para "¿Instructor Externo / Especialista?".
@@ -256,6 +236,16 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
      * **Aprobar:** Copia físicamente la firma temporal a una ruta permanente aleatoria única para mantener el historial forense inmutable, actualiza `users.firma` con esta ruta, limpia `firma_temp` y setea `firma_status = 'approved'`.
      * **Rechazar:** Elimina físicamente el archivo temporal en el storage y marca `firma_status = 'rejected'`, habilitando al técnico a reintentar y mostrando una advertencia de rechazo en su perfil.
   4. **Visor de Firmas Oficiales:** Se habilita un botón de "ojito" en cada fila del usuario en la matriz de identidades para que el Gestor previsualice con un modal de alta gama Glassmorphic la firma activa y aprobada actual.
+
+### 3.11. Módulo Universal de Activos y Trazabilidad Dinámica (Asset Engine)
+* **Propósito:** Ofrecer un inventario técnico unificado (Matafuegos, Redes de Agua, Autoelevadores, Vehículos) con metadata dinámica por rubro y alertas automatizadas.
+* **Arquitectura:**
+  - **`AssetType` (Esquema de Metadata):** Los Gestores configuran esquemas JSON (`metadata_schema`) especificando atributos (`label`, `type`, `alert_days`, `alert_threshold`). Los formularios en React (`Create.jsx` / `Edit.jsx`) dibujan los inputs de forma automatizada (*Schema-Driven*).
+  - **`Asset` (Inventario & UUIDs):** Asignación de claves primarias **UUID (v4)** (`HasUuids`) para mitigar vulnerabilidades SRE (anti-IDOR y prevención de enumeración de recursos).
+  - **Wizard Paso 0 (Trazabilidad Táctica):** Antes de responder el checklist, el técnico debe seleccionar en el Paso 0 el activo objeto de inspección (filtrando por nombre o QR/Patente), asociando `dynamic_inspections.asset_id`.
+  - **Bomba de Estado y Sync (`SyncAssetMetadata`):** Mapea respuestas del checklist marcadas en `dynamic_questions.vincular_a_metadata` directamente a la ficha del activo. Si la inspección resulta fallida (`Fail`), transiciona automáticamente el estado del activo a **"Fuera de Servicio"** (`fuera_de_servicio`).
+  - **Audit Trail Inmutable (`AssetObserver`):** Todos los cambios de estado y metadata se persisten de forma inmutable en `audit_logs`.
+  - **Engine de Alertas Automatizado (`CheckAssetAlerts`):** Proceso programado (`php artisan assets:check-alerts`) que evalúa vencimientos de fechas (`alert_days`) y umbrales numéricos (`alert_threshold`), creando hallazgos de alta criticidad en `hallazgos` sin generar duplicados.
 
 ### 3.10. Validación Táctica de Informes Maestros y Hardening Backend (SRE Audit)
 * **Propósito:** Prevenir la manipulación maliciosa de reportes consolidados (inyección de identificadores) y asegurar la autenticidad del documento sin depender de firmas manuales canvas.

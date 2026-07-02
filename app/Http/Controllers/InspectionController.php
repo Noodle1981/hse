@@ -86,12 +86,23 @@ class InspectionController extends Controller
         // Cargar respuestas existentes
         $answers = $inspection->answers()->pluck('value', 'dynamic_question_id');
 
+        $sedeId = $inspection->sede_id ?? ($assignment ? $assignment->sede_id : null);
+        if (! $sedeId && $visitId) {
+            $visit = VisitCertificate::find($visitId);
+            $sedeId = $visit?->sede_id;
+        }
+
+        $assets = $sedeId
+            ? Asset::where('sede_id', $sedeId)->get(['id', 'name', 'identifier', 'asset_type_id', 'status'])
+            : [];
+
         return Inertia::render('Tecnico/Inspections/Wizard', [
             'checklist' => $checklist,
             'assignment' => $assignment,
             'inspection' => $inspection,
             'visitId' => $visitId,
             'initialAnswers' => $answers,
+            'assets' => $assets,
         ]);
     }
 
@@ -110,8 +121,7 @@ class InspectionController extends Controller
         DB::transaction(function () use ($request, $inspection) {
             $answers = $request->input('answers', []);
 
-            // Optimización: Eliminar respuestas previas y reinsertar en lote (o updateOrCreate optimizado)
-            // Por simplicidad y asegurar unicidad sin depender de constraints únicas de BD, limpiamos y reinsertamos
+            // Optimización: Eliminar respuestas previas y reinsertar en lote
             $inspection->answers()->delete();
 
             if (! empty($answers)) {
@@ -128,7 +138,11 @@ class InspectionController extends Controller
                 DynamicAnswer::insert($batchData);
             }
 
-            $inspection->update(['notes' => $request->input('notes')]);
+            $updateData = ['notes' => $request->input('notes')];
+            if ($request->filled('asset_id')) {
+                $updateData['asset_id'] = $request->input('asset_id');
+            }
+            $inspection->update($updateData);
         });
 
         return back()->with('message', 'Progreso sincronizado.');
@@ -190,6 +204,8 @@ class InspectionController extends Controller
                 'technician_signature' => $technicianSignaturePath,
                 'result' => $inspection->evaluateResult(),
             ]);
+
+            \App\Events\InspectionCompleted::dispatch($inspection);
 
             if ($inspection->checklist_assignment_id) {
                 $assignment = ChecklistAssignment::find($inspection->checklist_assignment_id);

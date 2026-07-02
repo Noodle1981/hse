@@ -271,6 +271,7 @@ class ChecklistController extends Controller
                 'failure_logic' => $q['failure_logic'] ?? 'fail_if_selected',
                 'help_text' => $q['help_text'] ?? null,
                 'is_required' => $q['is_required'] ?? false,
+                'vincular_a_metadata' => $q['vincular_a_metadata'] ?? null,
                 'order' => $index,
             ]);
         }

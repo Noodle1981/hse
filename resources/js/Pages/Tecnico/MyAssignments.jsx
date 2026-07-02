@@ -91,27 +91,53 @@ export default function MyAssignments({
         }, { preserveState: true, preserveScroll: true });
     };
 
+    const getGpsCoordinates = () => {
+        return new Promise((resolve) => {
+            if (typeof window === 'undefined' || !navigator.geolocation) {
+                resolve(null);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        checkin_lat: position.coords.latitude,
+                        checkin_lng: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.warn('GPS geolocation not acquired:', error);
+                    resolve(null);
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        });
+    };
+
     // Quick execute planned task
-    const handleExecute = (item) => {
+    const handleExecute = async (item) => {
+        const coords = await getGpsCoordinates();
         router.post(safeRoute('tecnico.checklists.execute'), {
             type: item.type,
             id: item.id,
             source: item.source,
-            sede_id: item.sede_id
+            sede_id: item.sede_id,
+            ...(coords || {})
         }, {
             onSuccess: () => setModalOpen(false)
         });
     };
 
     // Quick execute adhoc/free task
-    const handleExecuteAdhoc = (type, templateId, extraData = {}) => {
+    const handleExecuteAdhoc = async (type, templateId, extraData = {}) => {
         if (!selectedSedeId) return;
+        const coords = await getGpsCoordinates();
         router.post(safeRoute('tecnico.checklists.execute'), {
             type,
             id: templateId,
             source: 'adhoc',
             sede_id: selectedSedeId,
-            ...extraData
+            ...extraData,
+            ...(coords || {})
         }, {
             onSuccess: () => {
                 setModalOpen(false);

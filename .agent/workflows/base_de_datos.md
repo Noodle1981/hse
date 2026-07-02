@@ -68,12 +68,17 @@ El sistema cuenta con las siguientes entidades principales:
 | Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
 |---|---|---|---|---|
 | `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `empresa_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
+| `category_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
 | `name` | `varchar` | No ❌ | *ninguno* |  |
-| `category_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `description` | `text` | Sí ✅ | *ninguno* |  |
+| `metadata_schema` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
+| `notification_emails` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
 
 ### 🔗 Relaciones (Foreign Keys)
+- `empresa_id` → vincula con `empresas`(`id`)
 - `category_id` → vincula con `categories`(`id`)
 
 ---
@@ -82,12 +87,12 @@ El sistema cuenta con las siguientes entidades principales:
 
 | Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
 |---|---|---|---|---|
-| `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `id` | `CHAR(36)` / `UUID` | No ❌ | *autogenerado HasUuids* | 🔑 PK |
 | `empresa_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `sede_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `asset_type_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `name` | `varchar` | No ❌ | *ninguno* |  |
-| `identifier` | `varchar` | No ❌ | *ninguno* |  |
+| `identifier` | `varchar` | No ❌ | *ninguno* (index) |  |
 | `status` | `varchar` | No ❌ | `'operativo'` |  |
 | `metadata` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
@@ -384,7 +389,7 @@ El sistema cuenta con las siguientes entidades principales:
 | `supervisor_signature` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `technician_signature` | `TEXT` | Sí ✅ | *ninguno* |  |
 | `result` | `varchar` | Sí ✅ | *ninguno* |  |
-| `asset_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
+| `asset_id` | `CHAR(36)` / `UUID` | Sí ✅ | *ninguno* |  |
 
 ### 🔗 Relaciones (Foreign Keys)
 - `asset_id` → vincula con `assets`(`id`)
@@ -413,6 +418,7 @@ El sistema cuenta con las siguientes entidades principales:
 | `order` | `INTEGER` | No ❌ | `'0'` |  |
 | `is_required` | `tinyint(1)` | No ❌ | `'0'` |  |
 | `help_text` | `TEXT` | Sí ✅ | *ninguno* |  |
+| `vincular_a_metadata` | `varchar` | Sí ✅ | *ninguno* (index) |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `section_id` | `INTEGER` | Sí ✅ | *ninguno* |  |

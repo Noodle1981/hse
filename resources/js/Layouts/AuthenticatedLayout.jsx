@@ -117,6 +117,7 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         {/* ── ADMIN / GESTOR ── */}
                         {user?.is_admin && !user?.is_super_admin && (
                             <>
+                                <NavItem href={safeRoute('gestor.assets.index')} active={isActive('gestor.assets.*', 'gestor.asset-types.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconAssets />} label="Activos y Equipamiento" />
                                 <NavItem href={safeRoute('gestor.operations.visits.index')} active={isActive('gestor.operations.visits.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconLocation />} label="Control de Visitas" />
                                 <NavItem href={safeRoute('gestor.inspections.index')} active={isActive('gestor.inspections.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconClock />} label="Historial de Inspecciones" />
                                 <NavItem href={safeRoute('gestor.checklists.index')} active={isActive('gestor.checklists.*', 'gestor.categories.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconDoc />} label="Plantillas de Checklist" />
@@ -319,4 +320,5 @@ const IconDashboard= () => <svg fill="none" stroke="currentColor" viewBox="0 0 2
 const IconUser     = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>;
 const IconCompanies = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>;
 const IconStaff     = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>;
+const IconAssets    = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>;
 

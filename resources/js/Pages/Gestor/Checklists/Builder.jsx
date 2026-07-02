@@ -450,9 +450,9 @@ function QuestionItem({ index, question, update, remove, move }) {
                         </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="flex flex-col gap-1.5">
-        <label htmlFor={`question_type_${index}`} className="pl-3 text-[7px] font-black text-orange-400/40 uppercase tracking-[0.3em] italic">Tipo de Respuesta</label>
+                            <label htmlFor={`question_type_${index}`} className="pl-3 text-[7px] font-black text-orange-400/40 uppercase tracking-[0.3em] italic">Tipo de Respuesta</label>
                             <select id={`question_type_${index}`} name={`question_type_${index}`} value={question.type} onChange={e => update(index, 'type', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-xs font-bold text-white focus:ring-1 focus:ring-orange-500 transition-all [color-scheme:dark] italic uppercase">
                                 <option value="text">Texto Corto</option>
                                 <option value="textarea">Texto Extendido</option>
@@ -466,8 +466,12 @@ function QuestionItem({ index, question, update, remove, move }) {
                             </select>
                         </div>
                         <div className="flex flex-col gap-1.5">
-        <label htmlFor={`question_help_${index}`} className="pl-3 text-[7px] font-black text-orange-400/40 uppercase tracking-[0.3em] italic">Ayuda al Operador</label>
-                            <input id={`question_help_${index}`} name={`question_help_${index}`} type="text" value={question.help_text} onChange={e => update(index, 'help_text', e.target.value)} placeholder="GUÍA RÁPIDA..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[10px] font-bold text-white/60 focus:ring-1 focus:ring-orange-500 transition-all uppercase placeholder-white/5"/>
+                            <label htmlFor={`question_help_${index}`} className="pl-3 text-[7px] font-black text-orange-400/40 uppercase tracking-[0.3em] italic">Ayuda al Operador</label>
+                            <input id={`question_help_${index}`} name={`question_help_${index}`} type="text" value={question.help_text || ''} onChange={e => update(index, 'help_text', e.target.value)} placeholder="GUÍA RÁPIDA..." className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-[10px] font-bold text-white/60 focus:ring-1 focus:ring-orange-500 transition-all uppercase placeholder-white/5"/>
+                        </div>
+                        <div className="flex flex-col gap-1.5">
+                            <label htmlFor={`question_metadata_${index}`} className="pl-3 text-[7px] font-black text-indigo-400 uppercase tracking-[0.3em] italic">Vincular a Metadata Activo</label>
+                            <input id={`question_metadata_${index}`} name={`question_metadata_${index}`} type="text" value={question.vincular_a_metadata || ''} onChange={e => update(index, 'vincular_a_metadata', e.target.value)} placeholder="Ej: presion, vencimiento..." className="w-full bg-black/40 border border-indigo-500/30 rounded-xl px-4 py-3 text-[10px] font-mono font-bold text-indigo-300 focus:ring-1 focus:ring-indigo-500 transition-all placeholder-white/10"/>
                         </div>
                         <div className="flex items-center gap-4 bg-black/20 px-6 py-2 rounded-xl border border-white/5">
                             <label className="inline-flex items-center cursor-pointer group">

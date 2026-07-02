@@ -101,23 +101,54 @@ class TimeTrackingService
     }
 
     /**
-     * Valida de forma preliminar la presencia GPS del técnico.
-     * En el futuro, este método usará calculateHaversineDistance para verificar que las
-     * coordenadas de checkin y checkout estén dentro del radio de tolerancia de la Sede.
+     * Valida la presencia GPS del técnico comparando coordenadas con la Sede.
      */
     public function verifyGpsPresence(VisitCertificate $visit): bool
     {
-        // TODO: Implementar validación cruzando con las coordenadas de la sede:
-        // $sede = $visit->sede;
-        // if ($visit->checkin_lat && $visit->checkin_lng && $sede->latitud && $sede->longitud) {
-        //     $distance = $this->calculateHaversineDistance(
-        //         (float)$visit->checkin_lat, (float)$visit->checkin_lng,
-        //         (float)$sede->latitud, (float)$sede->longitud
-        //     );
-        //     return $distance <= $sede->radio_tolerancia_metros;
-        // }
+        $sede = $visit->sede;
+        if (! $sede) {
+            return true;
+        }
 
-        return true;
+        $isVerified = true;
+        $tolerance = $sede->radio_tolerancia_metros ?? 500;
+
+        if ($visit->checkin_lat !== null && $visit->checkin_lng !== null && $sede->latitud !== null && $sede->longitud !== null) {
+            $checkinDistance = $this->calculateHaversineDistance(
+                (float) $visit->checkin_lat,
+                (float) $visit->checkin_lng,
+                (float) $sede->latitud,
+                (float) $sede->longitud
+            );
+
+            if ($checkinDistance > $tolerance) {
+                \Illuminate\Support\Facades\Log::warning("GPS Check-in fuera de tolerancia para la visita #{$visit->id}", [
+                    'checkin_distance' => $checkinDistance,
+                    'tolerance' => $tolerance,
+                ]);
+                $isVerified = false;
+            }
+        }
+
+        if ($visit->checkout_lat !== null && $visit->checkout_lng !== null && $sede->latitud !== null && $sede->longitud !== null) {
+            $checkoutDistance = $this->calculateHaversineDistance(
+                (float) $visit->checkout_lat,
+                (float) $visit->checkout_lng,
+                (float) $sede->latitud,
+                (float) $sede->longitud
+            );
+
+            if ($checkoutDistance > $tolerance) {
+                \Illuminate\Support\Facades\Log::warning("GPS Check-out fuera de tolerancia para la visita #{$visit->id}", [
+                    'checkout_distance' => $checkoutDistance,
+                    'tolerance' => $tolerance,
+                ]);
+                $isVerified = false;
+            }
+        }
+
+        $visit->gps_verified = $isVerified;
+        return $isVerified;
     }
 
     /**
@@ -125,7 +156,7 @@ class TimeTrackingService
      *
      * @return float Distancia en metros
      */
-    private function calculateHaversineDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
+    public function calculateHaversineDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
     {
         $earthRadius = 6371000.0; // metros
 

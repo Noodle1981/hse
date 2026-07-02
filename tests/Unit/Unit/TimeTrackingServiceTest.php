@@ -128,4 +128,47 @@ class TimeTrackingServiceTest extends TestCase
         $isValid = $this->service->verifyWorkingHours($sede, $mondayNightCheckin);
         $this->assertFalse($isValid);
     }
+
+    /**
+     * Test calculateHaversineDistance returns accurate distance in meters.
+     */
+    public function test_calculate_haversine_distance(): void
+    {
+        // Obelisco Buenos Aires (-34.6037, -58.3816) to Plaza de Mayo (-34.6083, -58.3712) ~ 1.08 km
+        $distance = $this->service->calculateHaversineDistance(-34.6037, -58.3816, -34.6083, -58.3712);
+        $this->assertGreaterThan(900, $distance);
+        $this->assertLessThan(1200, $distance);
+    }
+
+    /**
+     * Test verifyGpsPresence flags verified true when within tolerance and false when outside.
+     */
+    public function test_verify_gps_presence(): void
+    {
+        $sede = new Sede([
+            'latitud' => -34.6037,
+            'longitud' => -58.3816,
+            'radio_tolerancia_metros' => 500,
+        ]);
+
+        // Visit inside 500m radius (~100m away)
+        $insideVisit = new VisitCertificate([
+            'checkin_lat' => -34.6040,
+            'checkin_lng' => -58.3816,
+        ]);
+        $insideVisit->setRelation('sede', $sede);
+
+        $this->assertTrue($this->service->verifyGpsPresence($insideVisit));
+        $this->assertTrue($insideVisit->gps_verified);
+
+        // Visit outside 500m radius (~1000m away)
+        $outsideVisit = new VisitCertificate([
+            'checkin_lat' => -34.6120,
+            'checkin_lng' => -58.3816,
+        ]);
+        $outsideVisit->setRelation('sede', $sede);
+
+        $this->assertFalse($this->service->verifyGpsPresence($outsideVisit));
+        $this->assertFalse($outsideVisit->gps_verified);
+    }
 }
