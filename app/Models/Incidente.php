@@ -13,6 +13,7 @@ class Incidente extends Model
     protected $fillable = [
         'hallazgo_id',
         'sede_id',
+        'asset_id',
         'user_id',
         'tipo',
         'gravedad',
@@ -244,5 +245,10 @@ class Incidente extends Model
         }
 
         return ($diasPerdidos * 1000000) / $horasTrabajadas;
+    }
+
+    public function asset(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class);
     }
 }

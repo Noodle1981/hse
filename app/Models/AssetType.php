@@ -15,11 +15,13 @@ class AssetType extends Model
         'name',
         'description',
         'metadata_schema',
+        'photo_schema',
         'notification_emails',
     ];
 
     protected $casts = [
         'metadata_schema' => 'array',
+        'photo_schema' => 'array',
         'notification_emails' => 'array',
     ];
 

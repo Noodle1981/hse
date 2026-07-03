@@ -23,6 +23,11 @@ export default function Edit({ asset, empresas = [], sedes = [], assetTypes = []
             : sedes;
     }, [data.empresa_id, sedes]);
 
+    const editFields = useMemo(() => {
+        if (!selectedType || !selectedType.metadata_schema) return [];
+        return selectedType.metadata_schema.filter(field => !!field.show_in_create || (data.metadata && data.metadata[field.name] !== undefined && data.metadata[field.name] !== ''));
+    }, [selectedType, data.metadata]);
+
     const handleMetadataChange = (key, value) => {
         setData('metadata', {
             ...data.metadata,
@@ -171,15 +176,15 @@ export default function Edit({ asset, empresas = [], sedes = [], assetTypes = []
                         </div>
 
                         {/* METADATA DINÁMICA */}
-                        {selectedType && selectedType.metadata_schema && selectedType.metadata_schema.length > 0 && (
+                        {editFields.length > 0 && (
                             <div className="p-6 bg-black/30 border border-white/10 rounded-2xl space-y-4">
                                 <div className="flex items-center justify-between border-b border-white/5 pb-2">
                                     <h3 className="text-xs font-black text-orange-400 uppercase tracking-wider italic">
-                                        Campos de Metadata Dinámica ({selectedType.name})
+                                        Campos de Metadata ({selectedType.name})
                                     </h3>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {selectedType.metadata_schema.map((field) => (
+                                    {editFields.map((field) => (
                                         <div key={field.name}>
                                             <label className="block text-[10px] font-bold text-white/60 uppercase mb-1">
                                                 {field.label || field.name}

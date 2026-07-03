@@ -8,6 +8,7 @@ use App\Models\Empresa;
 use App\Models\Sede;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class AssetController extends Controller
@@ -115,18 +116,64 @@ class AssetController extends Controller
     }
 
     /**
-     * Almacenar un nuevo activo.
+     * Almacenar uno o varios activos.
      */
     public function store(Request $request)
     {
+        // Soporta guardado masivo en lote (varios activos en la misma petición)
+        if ($request->has('items') && is_array($request->items)) {
+            $request->validate([
+                'empresa_id' => 'required|exists:empresas,id',
+                'sede_id' => 'required|exists:sedes,id',
+                'asset_type_id' => 'required|exists:asset_types,id',
+                'items' => 'required|array|min:1',
+                'items.*.name' => 'required|string|max:255',
+                'items.*.identifier' => 'required|string|max:255|distinct|unique:assets,identifier',
+                'items.*.status' => 'required|in:operativo,alerta,fuera_de_servicio',
+                'items.*.metadata' => 'nullable|array',
+            ], [
+                'items.*.identifier.distinct' => 'El identificador :value está repetido dentro del mismo formulario.',
+                'items.*.identifier.unique' => 'El identificador :value ya está registrado en el sistema.',
+            ]);
+
+            $createdCount = 0;
+            $firstAsset = null;
+
+            foreach ($request->items as $item) {
+                $asset = Asset::create([
+                    'empresa_id' => $request->empresa_id,
+                    'sede_id' => $request->sede_id,
+                    'asset_type_id' => $request->asset_type_id,
+                    'name' => $item['name'],
+                    'identifier' => $item['identifier'],
+                    'status' => $item['status'] ?? 'operativo',
+                    'metadata' => $item['metadata'] ?? [],
+                ]);
+
+                if (! $firstAsset) {
+                    $firstAsset = $asset;
+                }
+                $createdCount++;
+            }
+
+            $msg = $createdCount === 1
+                ? "Activo '{$firstAsset->name}' registrado correctamente."
+                : "Se registraron {$createdCount} activos correctamente.";
+
+            return redirect()->route('gestor.assets.index')->with('message', $msg);
+        }
+
+        // Guardado tradicional de un solo activo
         $request->validate([
             'empresa_id' => 'required|exists:empresas,id',
             'sede_id' => 'required|exists:sedes,id',
             'asset_type_id' => 'required|exists:asset_types,id',
             'name' => 'required|string|max:255',
-            'identifier' => 'required|string|max:255',
+            'identifier' => 'required|string|max:255|unique:assets,identifier',
             'status' => 'required|in:operativo,alerta,fuera_de_servicio',
             'metadata' => 'nullable|array',
+        ], [
+            'identifier.unique' => 'El identificador ya está registrado en el sistema.',
         ]);
 
         $asset = Asset::create([
@@ -144,7 +191,7 @@ class AssetController extends Controller
     }
 
     /**
-     * Ficha técnica del activo.
+     * Ficha técnica del activo con expediente fotográfico y timeline.
      */
     public function show(Asset $asset)
     {
@@ -152,11 +199,84 @@ class AssetController extends Controller
             'sede.empresa',
             'assetType',
             'dynamicInspections' => function ($q) {
-                $q->with(['checklist', 'user'])->latest('completed_at')->take(10);
+                $q->with(['checklist', 'user', 'answers.question'])->latest('completed_at')->take(15);
+            },
+            'incidentes' => function ($q) {
+                $q->with(['user', 'fotos'])->latest('fecha_ocurrencia')->take(10);
             },
         ]);
 
+        // Compilar timeline visual de hallazgos e incidentes
+        $evidences = [];
+
+        // 1. Evidencias de inspecciones
+        foreach ($asset->dynamicInspections as $insp) {
+            if ($insp->result === 'Fail' || ! empty($insp->observaciones)) {
+                $evidences[] = [
+                    'id' => 'insp_' . $insp->id,
+                    'type' => 'inspection',
+                    'title' => 'Inspección: ' . ($insp->checklist?->title ?? 'Checklist'),
+                    'status' => $insp->result,
+                    'date' => $insp->completed_at ? $insp->completed_at->format('d/m/Y H:i') : 'N/D',
+                    'user' => $insp->user?->name ?? 'Técnico',
+                    'description' => $insp->observaciones ?? 'Inspección realizada.',
+                    'photos' => [],
+                ];
+            }
+        }
+
+        // 2. Evidencias de incidentes/siniestros
+        foreach ($asset->incidentes as $inc) {
+            $incPhotos = $inc->fotos ? $inc->fotos->pluck('foto_url')->toArray() : [];
+            $evidences[] = [
+                'id' => 'inc_' . $inc->id,
+                'type' => 'incident',
+                'title' => 'Incidente: ' . ($inc->titulo ?? 'Siniestro registrado'),
+                'status' => strtoupper($inc->gravedad ?? 'Incidente'),
+                'date' => $inc->fecha_ocurrencia ? $inc->fecha_ocurrencia->format('d/m/Y H:i') : 'N/D',
+                'user' => $inc->user?->name ?? 'Usuario',
+                'description' => $inc->descripcion ?? 'Reporte de incidente.',
+                'photos' => $incPhotos,
+            ];
+        }
+
         return Inertia::render('Gestor/Assets/Show', [
+            'asset' => $asset,
+            'evidences' => $evidences,
+        ]);
+    }
+
+    /**
+     * Cargar/actualizar foto de identificación del activo.
+     */
+    public function uploadPhoto(Request $request, Asset $asset)
+    {
+        $request->validate([
+            'photo_key' => 'required|string|max:255',
+            'photo' => 'required|image|max:15360', // Máx 15MB
+        ]);
+
+        $file = $request->file('photo');
+        $key = $request->input('photo_key');
+        $path = $file->store("assets/{$asset->id}", 'public');
+
+        $photos = $asset->photos ?? [];
+        $photos[$key] = Storage::url($path);
+
+        $asset->photos = $photos;
+        $asset->save();
+
+        return redirect()->back()->with('message', 'Foto guardada correctamente en la ficha del activo.');
+    }
+
+    /**
+     * Exportar ficha de activo e historial a formato PDF / Imprimible.
+     */
+    public function exportPdf(Asset $asset)
+    {
+        $asset->load(['sede.empresa', 'assetType', 'dynamicInspections.checklist', 'incidentes.fotos']);
+
+        return view('pdf.asset-report', [
             'asset' => $asset,
         ]);
     }

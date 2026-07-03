@@ -23,10 +23,12 @@ class Asset extends Model
         'identifier',
         'status',
         'metadata',
+        'photos',
     ];
 
     protected $casts = [
         'metadata' => 'array',
+        'photos' => 'array',
     ];
 
     public function empresa()
@@ -47,5 +49,10 @@ class Asset extends Model
     public function dynamicInspections()
     {
         return $this->hasMany(DynamicInspection::class);
+    }
+
+    public function incidentes()
+    {
+        return $this->hasMany(Incidente::class);
     }
 }

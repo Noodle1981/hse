@@ -21,6 +21,7 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
         category_id: '',
         description: '',
         metadata_schema: [],
+        photo_schema: [],
     });
 
     const openCreateModal = () => {
@@ -36,6 +37,9 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
             category_id: '',
             description: '',
             metadata_schema: [],
+            photo_schema: [
+                { key: 'foto_principal', label: 'Foto Principal / Vista General', required: true },
+            ],
         });
         setShowModal(true);
     };
@@ -53,6 +57,9 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
             category_id: type.category_id || '',
             description: type.description || '',
             metadata_schema: type.metadata_schema || [],
+            photo_schema: type.photo_schema || [
+                { key: 'foto_principal', label: 'Foto Principal / Vista General', required: true },
+            ],
         });
         setShowModal(true);
     };
@@ -80,7 +87,7 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
     const addField = () => {
         form.setData('metadata_schema', [
             ...form.data.metadata_schema,
-            { name: '', label: '', type: 'text', alert_days: '', alert_threshold: '' },
+            { name: '', label: '', type: 'text', show_in_create: false, alert_days: '', alert_threshold: '' },
         ]);
     };
 
@@ -94,6 +101,25 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
         const updated = [...form.data.metadata_schema];
         updated.splice(index, 1);
         form.setData('metadata_schema', updated);
+    };
+
+    const addPhotoField = () => {
+        form.setData('photo_schema', [
+            ...(form.data.photo_schema || []),
+            { key: '', label: '', required: false },
+        ]);
+    };
+
+    const updatePhotoField = (index, key, value) => {
+        const updated = [...(form.data.photo_schema || [])];
+        updated[index][key] = value;
+        form.setData('photo_schema', updated);
+    };
+
+    const removePhotoField = (index) => {
+        const updated = [...(form.data.photo_schema || [])];
+        updated.splice(index, 1);
+        form.setData('photo_schema', updated);
     };
 
     /**
@@ -219,7 +245,8 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                             {type.metadata_schema && type.metadata_schema.length > 0 ? (
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {type.metadata_schema.map((f, i) => (
-                                                        <span key={i} title={`Clave: ${f.name}`} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] text-gray-300 font-mono cursor-help">
+                                                        <span key={i} title={`Clave: ${f.name}`} className={`px-2.5 py-1 border rounded-lg text-[10px] font-mono cursor-help ${f.show_in_create ? 'bg-orange-500/10 border-orange-500/30 text-orange-300 font-bold' : 'bg-white/5 border-white/10 text-gray-300'}`}>
+                                                            {f.show_in_create && <span className="mr-1 text-[9px]">📌 Alta |</span>}
                                                             <strong className="text-white">{f.label || f.name}</strong>
                                                             <span className="ml-1 text-white/30">
                                                                 {f.type === 'date'
@@ -464,6 +491,15 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                                             className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
                                                             required
                                                         />
+                                                        <label className="flex items-center gap-1.5 cursor-pointer mt-1.5 select-none">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={!!field.show_in_create}
+                                                                onChange={e => updateField(index, 'show_in_create', e.target.checked)}
+                                                                className="rounded border-white/20 bg-black/50 text-orange-500 focus:ring-orange-500 h-3 w-3"
+                                                            />
+                                                            <span className="text-[9px] font-bold text-orange-400">📌 Solicitar al crear activo</span>
+                                                        </label>
                                                     </div>
                                                     <div>
                                                         <label className="block text-[8px] font-black text-white/30 uppercase">Tipo de Dato</label>

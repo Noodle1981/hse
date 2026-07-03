@@ -45,18 +45,9 @@ class ContractController extends Controller
             $q->where('rol', 'tecnico');
         }])->find($sedeId);
 
-        // 2. Parámetros de Planificación
-        $contractStart = $request->query('contract_start', date('Y-m'));
+        // 2. Parámetros de Planificación (Por defecto inicia en el mes presente Y-m)
+        $contractStart = $request->query('contract_start', now()->format('Y-m'));
         $contractDuration = (int) $request->query('duration', 12);
-
-        // Si no se pasó inicio, intentar detectar del último plan
-        if (! $request->has('contract_start') && $sedeId) {
-            $latestPlan = AnnualPlan::where('sede_id', $sedeId)->latest('id')->first();
-            if ($latestPlan && $latestPlan->period_start) {
-                $contractStart = $latestPlan->period_start->format('Y-m');
-                $contractDuration = (int) $latestPlan->period_start->diffInMonths($latestPlan->period_end) + 1;
-            }
-        }
 
         // 3. Generación de Meses Dinámicos
         $dynamicMonths = [];

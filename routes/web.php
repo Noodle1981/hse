@@ -244,6 +244,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/crear', [\App\Http\Controllers\AssetController::class, 'create'])->name('create');
             Route::post('/', [\App\Http\Controllers\AssetController::class, 'store'])->name('store');
             Route::get('/{asset}', [\App\Http\Controllers\AssetController::class, 'show'])->name('show');
+            Route::post('/{asset}/foto', [\App\Http\Controllers\AssetController::class, 'uploadPhoto'])->name('upload-photo');
+            Route::get('/{asset}/pdf', [\App\Http\Controllers\AssetController::class, 'exportPdf'])->name('export-pdf');
             Route::get('/{asset}/editar', [\App\Http\Controllers\AssetController::class, 'edit'])->name('edit');
             Route::put('/{asset}', [\App\Http\Controllers\AssetController::class, 'update'])->name('update');
             Route::delete('/{asset}', [\App\Http\Controllers\AssetController::class, 'destroy'])->name('destroy');

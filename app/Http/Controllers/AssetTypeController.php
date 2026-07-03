@@ -72,10 +72,15 @@ class AssetTypeController extends Controller
             'metadata_schema.*.name' => 'required|string|max:255',
             'metadata_schema.*.label' => 'required|string|max:255',
             'metadata_schema.*.type' => 'required|in:text,number,date',
+            'metadata_schema.*.show_in_create' => 'nullable|boolean',
             'metadata_schema.*.alert_days' => 'nullable|integer|min:0',
             'metadata_schema.*.alert_threshold' => 'nullable|numeric',
             'metadata_schema.*.alert_interval' => 'nullable|numeric|min:0',
             'metadata_schema.*.alert_message' => 'nullable|string|max:500',
+            'photo_schema' => 'nullable|array',
+            'photo_schema.*.key' => 'required|string|max:255',
+            'photo_schema.*.label' => 'required|string|max:255',
+            'photo_schema.*.required' => 'nullable|boolean',
         ]);
 
         $data = [
@@ -84,6 +89,7 @@ class AssetTypeController extends Controller
             'category_id' => $request->category_id,
             'description' => $request->description,
             'metadata_schema' => $request->metadata_schema ?? [],
+            'photo_schema' => $request->photo_schema ?? [],
         ];
 
         if ($request->id) {
@@ -131,6 +137,7 @@ class AssetTypeController extends Controller
                 'name'            => $keyName,
                 'label'           => $q->label,
                 'type'            => $metaType,
+                'show_in_create'  => false,
                 'alert_days'      => ($metaType === 'date' && $isExpirationDate) ? 30 : null,
                 'alert_threshold' => null,
                 '_imported'       => true,
