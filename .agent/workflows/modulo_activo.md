@@ -33,18 +33,21 @@ Define las categorías de equipamiento que los clientes manejan.
 * `id` (INTEGER, PK)
 * `name` (VARCHAR) -> *Ej: "Vehículo Minero", "Autoelevador", "Frigorífico", "Matafuegos"*
 * `category_id` (INTEGER, FK) -> *Vínculo con el pilar de categorías de XamaSafe*
+* `metadata_schema` (JSON) -> *Esquema dinámico de atributos y alertas (`show_in_create`, `alert_days`)*
+* `photo_schema` (JSON) -> *Configuración de fotos requeridas por ranura (ej. 4 para camionetas, 2 para extintores)*
 * `created_at` / `updated_at` (DATETIME)
 
 ### Tabla: `assets` (Ficha del Activo)
 Registra el activo físico real en la sede correspondiente.
-* `id` (INTEGER, PK)
+* `id` (CHAR(36) UUID, PK) -> *Clave primaria UUID (v4) anti-IDOR*
 * `empresa_id` (INTEGER, FK) -> *Garantiza aislamiento estricto (Multitenancy)*
 * `sede_id` (INTEGER, FK)
 * `asset_type_id` (INTEGER, FK)
 * `name` (VARCHAR) -> *Ej: "Camioneta Hilux Toyota", "Frigorífico Principal"*
 * `identifier` (VARCHAR) -> *Patente, Nro. de Chasis, Código de Barras o QR (Único por cliente)*
-* `status` (VARCHAR) -> *'operativo', 'mantenimiento_preventivo', 'fuera_de_servicio'*
+* `status` (VARCHAR) -> *'operativo', 'alerta', 'fuera_de_servicio'*
 * `metadata` (JSON) -> *Datos dinámicos de estado: `{"kilometraje": 125000, "ultimo_chofer": "Juan Perez"}`*
+* `photos` (JSON) -> *Expediente fotográfico base: `{"foto_frontal": "/storage/assets/xxx.webp"}`*
 * `created_at` / `updated_at` / `deleted_at` (DATETIME)
 
 ### Tabla: `dynamic_inspections` (Modificación)

@@ -73,6 +73,7 @@ El sistema cuenta con las siguientes entidades principales:
 | `name` | `varchar` | No ❌ | *ninguno* |  |
 | `description` | `text` | Sí ✅ | *ninguno* |  |
 | `metadata_schema` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
+| `photo_schema` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `notification_emails` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
@@ -95,6 +96,7 @@ El sistema cuenta con las siguientes entidades principales:
 | `identifier` | `varchar` | No ❌ | *ninguno* (index) |  |
 | `status` | `varchar` | No ❌ | `'operativo'` |  |
 | `metadata` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
+| `photos` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `deleted_at` | `datetime` | Sí ✅ | *ninguno* |  |
@@ -642,6 +644,7 @@ El sistema cuenta con las siguientes entidades principales:
 - `hallazgo_id` → vincula con `hallazgos`(`id`)
 - `sede_id` → vincula con `sedes`(`id`)
 - `user_id` → vincula con `users`(`id`)
+- `asset_id` → vincula con `assets`(`id`) (con onDelete null)
 
 ### 🗂️ Índices
 - `incidentes_tipo_gravedad_index`

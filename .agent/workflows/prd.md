@@ -127,9 +127,19 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
   - Gestión integral de inventario técnico (Matafuegos, Redes de Agua, Autoelevadores, Vehículos, Tableros Eléctricos) organizada por Empresa, Sede y Tipo de Activo.
   - Asignación de identificadores unívocos **UUID (v4)** en base de datos para prevenir vulnerabilidades IDOR y enumeración de recursos.
   - KPIs en tiempo real (Operativos 🟢, En Alerta 🟡, Fuera de Servicio 🔴) y filtrado predictivo multi-tenancy.
-* **Schema-Driven Metadata (`AssetType`):**
-  - Los Gestores definen en `asset_types.metadata_schema` campos dinámicos JSON (`type`, `label`, `alert_days`, `alert_threshold`).
-  - Renderizado automático de formularios de creación y edición según el esquema parametrizado.
+* **Alta Dinámica Multi-Activo con Validación Anti-Duplicados (`Create.jsx`):**
+  - Carga ágil en lote de múltiples activos en un solo paso con auto-incremento inteligente de identificadores (ej. `MF001` -> `MF002` -> `MF003`).
+  - Validación de duplicados en tiempo real (frontend con bordes de alerta e impedimento de envío) y en backend (`distinct` y `unique:assets,identifier`).
+* **Schema-Driven Metadata y Filtrado de Alta (`AssetType`):**
+  - Los Gestores definen en `asset_types.metadata_schema` campos dinámicos JSON (`type`, `label`, `show_in_create`, `alert_days`, `alert_threshold`).
+  - Flag `show_in_create` permite solicitar solo los campos de identificación críticos durante el alta rápida.
+* **Configurador de Expediente Fotográfico por Categoría (`photo_schema`):**
+  - Parametrización en `asset_types.photo_schema` de las fotos base requeridas por categoría (ej. 4 fotos para Camionetas, 2 para Extintores).
+* **Consola de Ficha Técnica, Timeline Multimedia y Evidencias (`Show.jsx`):**
+  - Expediente fotográfico con carga/actualización directa por ranura en `storage/app/public/assets/{id}/`.
+  - Galería de evidencias de inspecciones, hallazgos y siniestros reportados por los técnicos con visor Lightbox modal en pantalla completa.
+* **Exportación a PDF en Formato A4 Estándar (`asset-report.blade.php`):**
+  - Generación de informes ejecutivos A4 con marca de agua, Código QR, mosaico de fotos e historial de inspecciones.
 * **Integración con el Wizard de Inspección (Paso 0 - Trazabilidad):**
   - El técnico debe seleccionar el **Activo Objeto de Inspección** mediante un buscador predictivo o lectura de código QR/Patente antes de responder el checklist.
   - Persistencia del vínculo `dynamic_inspections.asset_id`.
