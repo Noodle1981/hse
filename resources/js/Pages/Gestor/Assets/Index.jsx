@@ -40,7 +40,7 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
     }, [search, empresaId, sedeId, assetTypeId, status]);
 
     const handleDelete = (asset) => {
-        if (confirm(`¿Eliminar activo ${asset.name} (${asset.identifier})?`)) {
+        if (confirm(`¿Dar de baja el activo ${asset.name} (${asset.identifier})?`)) {
             router.delete(route('gestor.assets.destroy', asset.id));
         }
     };
@@ -49,7 +49,8 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
         ? sedes.filter(s => s.empresa_id.toString() === empresaId.toString())
         : sedes;
 
-    const getStatusBadge = (st) => {
+    const getStatusBadge = (asset) => {
+        const st = asset.status;
         switch (st) {
             case 'operativo':
                 return (
@@ -60,10 +61,50 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                 );
             case 'alerta':
                 return (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                        Alerta
-                    </span>
+                    <div className="relative inline-block group/tooltip">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 cursor-help">
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            Alerta
+                        </span>
+                        
+                        {asset.hallazgos && asset.hallazgos.length > 0 && (
+                            <div className="absolute left-1/2 top-full mt-2 -translate-x-1/2 w-64 bg-[#141426] border border-amber-500/30 p-4 rounded-2xl shadow-2xl text-[10px] text-indigo-100 hidden group-hover/tooltip:block z-50 pointer-events-none transition-all">
+                                <div className="absolute top-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#141426] border-l border-t border-amber-500/30 rotate-45" />
+                                <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2 border-b border-white/5 pb-1">⚠️ DETALLES DE ALERTA</span>
+                                <div className="space-y-2">
+                                    {asset.hallazgos.map(h => {
+                                        let desc = h.descripcion || '';
+                                        let label = h.titulo.split(' - ')[1] || 'Alerta';
+                                        if (label === 'fecha_de_proxima_carga_vencimiento') {
+                                            label = 'Vencimiento Carga';
+                                        } else if (label === 'vencimiento_prueba_hidraulica') {
+                                            label = 'Prueba Hidráulica';
+                                        } else {
+                                            label = label.replace(/_/g, ' ').toUpperCase();
+                                        }
+
+                                        let valor = '';
+                                        let dias = '';
+                                        const valMatch = desc.match(/Valor:\s*(\S+)/i);
+                                        const daysMatch = desc.match(/vence en\s*(\d+\s*días)/i);
+                                        
+                                        if (valMatch) valor = valMatch[1];
+                                        if (daysMatch) dias = daysMatch[1];
+
+                                        return (
+                                            <div key={h.id} className="space-y-0.5 border-b border-white/5 pb-1.5 last:border-0 last:pb-0 text-left">
+                                                <span className="text-[9px] font-black text-white/60 block uppercase tracking-wide">{label}</span>
+                                                <div className="flex justify-between font-mono text-[9px] text-amber-300">
+                                                    <span>Vence: {valor ? valor : 'N/D'}</span>
+                                                    <span className="font-bold text-red-400">({dias ? dias : 'Vencido'})</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 );
             case 'fuera_de_servicio':
                 return (
@@ -216,14 +257,13 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                                         <th className="p-4">Tipo</th>
                                         <th className="p-4">Sede / Empresa</th>
                                         <th className="p-4">Estado</th>
-                                        <th className="p-4">Metadata</th>
                                         <th className="p-4 pr-6 text-right">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-white/5 text-xs">
                                     {assets.data.length === 0 ? (
                                         <tr>
-                                            <td colSpan="6" className="p-12 text-center text-white/30 text-xs uppercase tracking-widest italic">
+                                            <td colSpan="5" className="p-12 text-center text-white/30 text-xs uppercase tracking-widest italic">
                                                 No se encontraron activos registrados con los filtros aplicados.
                                             </td>
                                         </tr>
@@ -243,21 +283,8 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                                                     <div className="text-white font-bold">{asset.sede?.nombre_sede}</div>
                                                     <div className="text-[10px] text-white/40">{asset.sede?.empresa?.nombre}</div>
                                                 </td>
-                                                <td className="p-4">
-                                                    {getStatusBadge(asset.status)}
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex flex-wrap gap-1 max-w-xs">
-                                                        {asset.metadata && Object.keys(asset.metadata).length > 0 ? (
-                                                            Object.entries(asset.metadata).slice(0, 3).map(([k, v]) => (
-                                                                <span key={k} className="px-2 py-0.5 bg-black/40 border border-white/10 rounded text-[9px] text-gray-300">
-                                                                    <strong className="text-orange-400">{k}:</strong> {String(v)}
-                                                                </span>
-                                                            ))
-                                                        ) : (
-                                                            <span className="text-[10px] text-white/20 italic">Sin datos</span>
-                                                        )}
-                                                    </div>
+                                                <td className="p-4 relative hover:z-30">
+                                                    {getStatusBadge(asset)}
                                                 </td>
                                                 <td className="p-4 pr-6 text-right space-x-2">
                                                     <Link
@@ -276,7 +303,7 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                                                         onClick={() => handleDelete(asset)}
                                                         className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all"
                                                     >
-                                                        Borrar
+                                                        Dar de Baja
                                                     </button>
                                                 </td>
                                             </tr>

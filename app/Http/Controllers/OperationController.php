@@ -754,7 +754,7 @@ class OperationController extends Controller
         $visit->load([
             'sede.empresa',
             'checklistCompletions.assignment.checklist',
-            'checklistCompletions.assignment.inspection',
+            'checklistCompletions.assignment.inspection.asset',
             'trainings.training.attendances',
             'hallazgos',
             'incidentes',

@@ -15,7 +15,7 @@ function toArray(val) {
     return [];
 }
 
-export default function Wizard({ checklist, assignment = {}, inspection = {}, visitId = null, initialAnswers = {}, assets = [], isEmulation = false }) {
+export default function Wizard({ checklist, assignment = {}, inspection = {}, visitId = null, initialAnswers = {}, assets = [], isEmulation = false, inspectedAssetIds = [] }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
     console.log("DEBUG - User in Wizard props:", user);
@@ -24,6 +24,8 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
     const [pendingNextStep, setPendingNextStep] = useState(null);
     const [selectedAssetId, setSelectedAssetId] = useState(inspection.asset_id || '');
     const [assetSearch, setAssetSearch] = useState('');
+    const [showReinspectModal, setShowReinspectModal] = useState(false);
+    const [pendingAssetId, setPendingAssetId] = useState(null);
 
     const sections = checklist.sections || [];
     const totalQuestions = sections.reduce((acc, sec) => acc + (sec.questions?.length || 0), 0);
@@ -50,8 +52,60 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
     );
 
     const handleSelectAsset = (assetId) => {
-        setSelectedAssetId(assetId);
-        form.setData('asset_id', assetId);
+        const newValue = selectedAssetId === assetId ? '' : assetId;
+        
+        // Show reinspect warning if asset has already been audited in the current visit
+        const isInspected = (inspectedAssetIds || []).includes(assetId);
+        if (newValue && isInspected) {
+            setPendingAssetId(newValue);
+            setShowReinspectModal(true);
+            return;
+        }
+
+        executeSelectAsset(newValue);
+    };
+
+    const executeSelectAsset = (newValue) => {
+        setSelectedAssetId(newValue);
+        
+        const updatedData = {
+            ...form.data,
+            asset_id: newValue,
+        };
+        
+        const newAnswers = { ...form.data.answers };
+        let hasChanges = false;
+        
+        if (newValue) {
+            const selectedAsset = (assets || []).find(a => a.id === newValue);
+            const metadata = (selectedAsset && selectedAsset.metadata) ? selectedAsset.metadata : {};
+            
+            sections.forEach(sec => {
+                (sec.questions || []).forEach(q => {
+                    if (q.vincular_a_metadata) {
+                        const metadataValue = metadata[q.vincular_a_metadata];
+                        newAnswers[q.id] = (metadataValue !== undefined && metadataValue !== null) ? metadataValue : '';
+                        hasChanges = true;
+                    }
+                });
+            });
+        } else {
+            // Clear all metadata-linked fields when deselecting
+            sections.forEach(sec => {
+                (sec.questions || []).forEach(q => {
+                    if (q.vincular_a_metadata) {
+                        newAnswers[q.id] = '';
+                        hasChanges = true;
+                    }
+                });
+            });
+        }
+        
+        if (hasChanges) {
+            updatedData.answers = newAnswers;
+        }
+        
+        form.setData(updatedData);
     };
 
     // Manejo de Firmas
@@ -102,11 +156,6 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
         const nextStepIndex = currentStep + 1;
         if (nextStepIndex >= totalSteps) return;
 
-        // Validar selección de activo en el paso inicial
-        if (currentStep === 0 && !selectedAssetId) {
-            alert('Por favor, seleccione un activo para continuar.');
-            return;
-        }
 
         // Estamos saliendo de una sección de preguntas (pasos 1 a sections.length)
         const sectionIndex = currentStep - 1; // paso 1 = sección 0
@@ -241,8 +290,28 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                         </Link>
                         <div className="text-center flex-1 space-y-3">
                             <h1 className="text-xl font-black italic uppercase tracking-tight text-white/90 pl-12 pr-12">{checklist.title}</h1>
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-full text-[10px] font-black uppercase tracking-widest italic text-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.1)]">
-                                <span className="animate-pulse">⌚</span> Tiempo Real (Sync Servidor)
+                            <div className="flex flex-wrap items-center justify-center gap-2">
+                                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-500/5 border border-orange-500/20 rounded-full text-[10px] font-black uppercase tracking-widest italic text-orange-500 shadow-[0_0_15px_rgba(246,146,57,0.1)]">
+                                    <span className="animate-pulse">⌚</span> Tiempo Real (Sync Servidor)
+                                </div>
+                                {(() => {
+                                    const selectedAsset = (assets || []).find(a => a.id === selectedAssetId);
+                                    if (selectedAsset) {
+                                        return (
+                                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-widest italic text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.15)] animate-fade-in">
+                                                <span>🔗</span> Activo: {selectedAsset.name} ({selectedAsset.identifier})
+                                            </div>
+                                        );
+                                    }
+                                    if (assets && assets.length > 0) {
+                                        return (
+                                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/5 border border-amber-500/20 rounded-full text-[10px] font-black uppercase tracking-widest italic text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)] animate-fade-in">
+                                                <span>📦</span> Trazabilidad de Activos
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })()}
                             </div>
                         </div>
                     </div>
@@ -298,27 +367,37 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             {filteredAssets.length === 0 ? (
                                                 <p className="text-xs text-white/30 italic py-2 text-center">No hay activos que coincidan con la búsqueda.</p>
                                             ) : (
-                                                filteredAssets.map(ast => (
-                                                    <div
-                                                        key={ast.id}
-                                                        onClick={() => handleSelectAsset(ast.id)}
-                                                        className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
-                                                            selectedAssetId === ast.id
-                                                                ? 'bg-orange-500/10 border-orange-500 text-white shadow-lg'
-                                                                : 'bg-white/5 border-white/5 text-white/70 hover:bg-white/10'
-                                                        }`}
-                                                    >
-                                                        <div>
-                                                            <div className="font-bold text-xs uppercase italic">{ast.name}</div>
-                                                            <div className="text-[10px] font-mono text-orange-400">QR: {ast.identifier}</div>
+                                                filteredAssets.map(ast => {
+                                                    const isInspected = (inspectedAssetIds || []).includes(ast.id);
+                                                    return (
+                                                        <div
+                                                            key={ast.id}
+                                                            onClick={() => handleSelectAsset(ast.id)}
+                                                            className={`p-3 rounded-xl border cursor-pointer flex items-center justify-between transition-all ${
+                                                                selectedAssetId === ast.id
+                                                                    ? 'bg-orange-500/10 border-orange-500 text-white shadow-lg'
+                                                                    : 'bg-white/5 border-white/5 text-white/70 hover:bg-white/10'
+                                                            }`}
+                                                        >
+                                                            <div>
+                                                                <div className="font-bold text-xs uppercase italic flex items-center gap-2">
+                                                                    {ast.name}
+                                                                    {isInspected && (
+                                                                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[8px] font-black uppercase tracking-wider">
+                                                                            ✓ Auditado
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                                <div className="text-[10px] font-mono text-orange-400">QR: {ast.identifier}</div>
+                                                            </div>
+                                                            <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
+                                                                ast.status === 'operativo' ? 'bg-emerald-500/20 text-emerald-400' : (ast.status === 'alerta' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400')
+                                                            }`}>
+                                                                {ast.status}
+                                                            </span>
                                                         </div>
-                                                        <span className={`px-2 py-0.5 rounded text-[9px] font-black uppercase ${
-                                                            ast.status === 'operativo' ? 'bg-emerald-500/20 text-emerald-400' : (ast.status === 'alerta' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400')
-                                                        }`}>
-                                                            {ast.status}
-                                                        </span>
-                                                    </div>
-                                                ))
+                                                    );
+                                                })
                                             )}
                                         </div>
                                     </div>
@@ -700,6 +779,87 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                     className="w-full px-6 py-4 bg-white/5 text-white hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all active:scale-95"
                                 >
                                     Continuar Inspección
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showReinspectModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-6 animate-fade-in">
+                    {/* Backdrop oscuro */}
+                    <div className="absolute inset-0 bg-[#0a0a15]/80 backdrop-blur-xl" />
+
+                    {/* Panel glassmorphism */}
+                    <div className="relative w-full max-w-lg bg-[#1a1a2e]/80 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden">
+                        {/* Línea amarilla superior */}
+                        <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent" />
+
+                        <div className="p-10 space-y-8 text-center">
+                            {/* Icono de advertencia animado */}
+                            <div className="flex justify-center">
+                                <div className="relative h-20 w-20 flex items-center justify-center">
+                                    <div className="absolute inset-0 rounded-full border-2 border-amber-500/20 border-t-amber-500 animate-spin" />
+                                    <div className="h-14 w-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner rotate-3">
+                                        <svg className="w-7 h-7 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    </div>
+                                    <div className="absolute -top-1 -right-1">
+                                        <span className="flex h-3 w-3">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75" />
+                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500" />
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Título */}
+                            <div className="space-y-3">
+                                <h2 className="text-xs font-black text-amber-400 uppercase tracking-[0.4em] italic"
+                                    style={{ textShadow: '0 0 20px rgba(245,158,11,0.5)' }}>
+                                    ⚠️ Activo ya Auditado
+                                </h2>
+                                <p className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic leading-relaxed">
+                                    Este activo ya fue auditado en la visita actual.<br />
+                                    Si continúas, generarás un nuevo reporte de inspección independiente para este equipo.<br /><br />
+                                    ¿Deseas volver a auditarlo?
+                                </p>
+                            </div>
+
+                            {/* Barra de escaneo HUD */}
+                            <div className="h-px w-full bg-amber-500/20 rounded-full overflow-hidden relative">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/40 to-transparent w-1/2 animate-scan" />
+                            </div>
+
+                            {/* Botones de acción */}
+                            <div className="flex flex-col gap-4 pt-2">
+                                {/* Botón Volver a auditar */}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        executeSelectAsset(pendingAssetId);
+                                        setShowReinspectModal(false);
+                                        setPendingAssetId(null);
+                                    }}
+                                    className="w-full px-6 py-4 bg-amber-500/20 text-amber-400 border border-amber-500/50 rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all active:scale-95 hover:bg-amber-500 hover:text-white relative overflow-hidden group"
+                                    style={{ boxShadow: '0 0 15px rgba(245,158,11,0.3)' }}
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                    ✓ Sí, volver a auditar
+                                </button>
+
+                                {/* Botón Cancelar */}
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setShowReinspectModal(false);
+                                        setPendingAssetId(null);
+                                    }}
+                                    className="w-full px-6 py-4 bg-white/5 text-white hover:bg-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all active:scale-95"
+                                >
+                                    Cancelar
                                 </button>
                             </div>
                         </div>

@@ -28,7 +28,9 @@ class AssetController extends Controller
         $assignedEmpresaIds = $empresaQuery->pluck('id')->toArray();
 
         $query = Asset::query()
-            ->with(['sede.empresa', 'assetType'])
+            ->with(['sede.empresa', 'assetType', 'hallazgos' => function ($q) {
+                $q->whereIn('estado', ['pendiente', 'en_proceso']);
+            }])
             ->whereIn('empresa_id', $assignedEmpresaIds);
 
         if ($request->search) {
@@ -203,6 +205,9 @@ class AssetController extends Controller
             },
             'incidentes' => function ($q) {
                 $q->with(['user', 'fotos'])->latest('fecha_ocurrencia')->take(10);
+            },
+            'hallazgos' => function ($q) {
+                $q->whereIn('estado', ['pendiente', 'en_proceso']);
             },
         ]);
 

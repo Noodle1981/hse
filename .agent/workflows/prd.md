@@ -143,13 +143,17 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Integración con el Wizard de Inspección (Paso 0 - Trazabilidad):**
   - El técnico debe seleccionar el **Activo Objeto de Inspección** mediante un buscador predictivo o lectura de código QR/Patente antes de responder el checklist.
   - Persistencia del vínculo `dynamic_inspections.asset_id`.
+  - **Badge Dinámico de Cabecera:** Muestra un badge de vinculación dinámico en el Wizard según el activo seleccionado.
+  - **Advertencia de Re-inspección (Modal Ámbar):** Si el técnico intenta seleccionar un activo que ya fue auditado en la visita actual (estado `✓ Auditado`), el sistema detiene la selección inmediata y muestra un modal de confirmación táctico premium en color ámbar/dorado advirtiendo sobre la duplicación legal del reporte.
 * **Sincronización Automática y Motor de Transición de Estados (`SyncAssetMetadata`):**
   - Mapeo de respuestas del checklist a los atributos del activo (`dynamic_questions.vincular_a_metadata`).
   - Ante una inspección con resultado `Fail`, la bomba de estado transiciona automáticamente el activo a **"Fuera de Servicio"** (`fuera_de_servicio`).
   - Audit log inmutable de cambios en `audit_logs` vía `AssetObserver`.
 * **Motor de Alertas y Hallazgos Automáticos (`CheckAssetAlerts`):**
-  - Comando `php artisan assets:check-alerts` programado diariamente.
-  - Evalúa vencimientos de fechas (`alert_days`) y umbrales numéricos (`alert_threshold`), creando hallazgos de criticidad alta sin duplicación.
+  - Comando `php artisan assets:check-alerts` programado en el scheduler.
+  - Evalúa vencimientos de fechas (`alert_days`) y umbrales numéricos (`alert_threshold`), creando hallazgos de criticidad alta sin duplicación, y **sincroniza en caliente el estado del activo a `'alerta'`** en la base de datos si hay anomalías pendientes.
+  - **Hover Tooltip de Detalles en Index:** Al pasar el mouse sobre el estado "Alerta" del activo en la tabla general, se despliega hacia abajo (`top-full mt-2`) un tooltip oscuro premium detallando cada campo que causó la alerta (ej: "Vencimiento Carga" o "Prueba Hidráulica") con la fecha exacta y días restantes, ocultando campos técnicos redundantes.
+  - **Baja Lógica y Preservación Histórica (Soft Deletes):** El borrado de activos realiza una baja lógica (`SoftDeletes`). El botón en el listado se denomina "Dar de Baja". Para garantizar que el historial legal de inspecciones e incidentes pasados de un activo de baja no quede huérfano, las relaciones de modelos cargan los activos incluyendo registros eliminados (`->withTrashed()`).
 
 ### 4.7. Control y Gestión de Firmas Digitales y Aprobación Segura
 * **Tipología de Firmas del Sistema:**

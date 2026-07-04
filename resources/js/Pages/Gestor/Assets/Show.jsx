@@ -105,6 +105,45 @@ export default function Show({ asset, evidences = [] }) {
                         </div>
                     </div>
 
+                    {/* ALERTAS ACTIVAS DETALLADAS */}
+                    {asset.hallazgos && asset.hallazgos.length > 0 && (
+                        <div className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-[2rem] shadow-2xl space-y-4 animate-fade-in-down">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center animate-pulse">
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h3 className="text-xs font-black text-amber-400 uppercase tracking-[0.2em] italic">Alertas y Vencimientos Detectados</h3>
+                                    <p className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.1em] italic">Este equipo requiere atención debido a las siguientes alertas del sistema:</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {asset.hallazgos.map(h => {
+                                    let cleanDesc = h.descripcion || '';
+                                    if (cleanDesc.includes('[Detalles del Activo]')) {
+                                        cleanDesc = cleanDesc.split('[Detalles del Activo]')[0].trim();
+                                    }
+                                    return (
+                                        <div key={h.id} className="p-4 bg-black/40 border border-white/5 rounded-2xl space-y-2">
+                                            <span className="text-[10px] font-black text-white/50 uppercase tracking-wider block">
+                                                🚨 {h.titulo.replace('Alerta: ', '')}
+                                            </span>
+                                            <p className="text-xs text-white font-medium leading-relaxed">
+                                                {cleanDesc}
+                                            </p>
+                                            <div className="flex justify-between items-center text-[10px] text-white/30 pt-1 border-t border-white/5 font-mono">
+                                                <span>Detección: {new Date(h.fecha_deteccion).toLocaleDateString()}</span>
+                                                <span className="text-amber-500 font-bold uppercase italic">Criticidad: {h.criticidad}</span>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
                     {/* DETALLES GENERALES */}
                     <div className="bg-[#16162a] p-6 rounded-[2rem] border border-white/5 shadow-xl space-y-4">
                         <h2 className="text-xs font-black text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">Información de Ubicación y Clasificación</h2>

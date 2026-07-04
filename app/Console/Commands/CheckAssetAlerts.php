@@ -45,6 +45,8 @@ class CheckAssetAlerts extends Command
                 continue;
             }
 
+            $hasActiveAlert = false;
+
             foreach ($schema as $field) {
                 $fieldName = $field['name'] ?? null;
                 $fieldType = $field['type'] ?? 'text';
@@ -100,6 +102,7 @@ class CheckAssetAlerts extends Command
                 }
 
                 if ($shouldAlert) {
+                    $hasActiveAlert = true;
                     $fieldLabel = $field['label'] ?? $fieldName;
                     $customMsg  = ! empty($field['alert_message']) ? trim($field['alert_message']) : null;
                     
@@ -153,6 +156,19 @@ class CheckAssetAlerts extends Command
                             'estado' => Hallazgo::ESTADO_RESUELTO,
                             'fecha_resolucion' => now(),
                         ]);
+                }
+            }
+
+            // Sincronizar el estado del activo en base a si tiene alertas activas (sin pisar fuera_de_servicio)
+            if ($hasActiveAlert) {
+                if ($asset->status === 'operativo') {
+                    $asset->update(['status' => 'alerta']);
+                    $this->line("Activo '{$asset->name}' ({$asset->identifier}) marcado en estado ALERTA.");
+                }
+            } else {
+                if ($asset->status === 'alerta') {
+                    $asset->update(['status' => 'operativo']);
+                    $this->line("Activo '{$asset->name}' ({$asset->identifier}) restablecido a estado OPERATIVO.");
                 }
             }
         }

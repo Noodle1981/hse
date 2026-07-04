@@ -11,7 +11,6 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
     const [minutes, setMinutes] = useState(0);
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const [showAutoAssignModal, setShowAutoAssignModal] = useState(false);
-    const [isExceeded, setIsExceeded] = useState(false);
     const [dismissedAlert, setDismissedAlert] = useState(false);
     const [showActionSelector, setShowActionSelector] = useState(false);
 
@@ -51,16 +50,64 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
             const now = new Date();
             const diff = Math.floor((now - start) / 1000 / 60); // minutos
             setMinutes(diff);
-            // Alerta a los 30 minutos (Threshold legacy)
-            if (diff >= 30 && !dismissedAlert) {
-                setIsExceeded(true);
-            }
         };
 
         updateTimer();
-        const interval = setInterval(updateTimer, 30000); // Cada 30 segs como en legacy
+        const interval = setInterval(updateTimer, 60000); // Cada 1 minuto (60 segs)
         return () => clearInterval(interval);
-    }, [visit.start_time, dismissedAlert]);
+    }, [visit.start_time]);
+
+    // Cálculo dinámico de alertas de cierre de la Sede
+    const alertState = useMemo(() => {
+        if (dismissedAlert) return null;
+        
+        // Si no hay horario de cierre o es 24/7, usamos la alerta legacy de 4 horas de duración máxima
+        if (!visit.sede?.hora_cierre || visit.sede.es_roster_24_7) {
+            // Alerta si la visita dura más de 4 horas (240 minutos)
+            if (minutes >= 240) {
+                return {
+                    type: 'duration_exceeded',
+                    title: 'Jornada Prolongada',
+                    message: `La visita actual excede las 4 horas de duración (${Math.floor(minutes / 60)}H ${minutes % 60}MIN).`,
+                    isRed: true
+                };
+            }
+            return null;
+        }
+
+        const closingTimeStr = visit.sede.hora_cierre; // ej. "16:00:00" o "16:00"
+        const parts = closingTimeStr.split(':');
+        if (parts.length < 2) return null;
+
+        const now = new Date();
+        const closingDate = new Date();
+        closingDate.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+
+        const diffMs = closingDate - now;
+        const diffMinutes = Math.floor(diffMs / 1000 / 60);
+
+        // Caso 1: Ya se superó la hora de cierre de la sede
+        if (diffMinutes <= 0) {
+            return {
+                type: 'cierre_excedido',
+                title: 'Jornada Excedida (Sede Cerrada)',
+                message: `La sede cerró a las ${parts[0]}:${parts[1]} HS. Operación en curso fuera de horario.`,
+                isRed: true
+            };
+        }
+
+        // Caso 2: Falta 1 hora o menos para el cierre de la sede
+        if (diffMinutes <= 60) {
+            return {
+                type: 'cierre_proximo',
+                title: 'Cierre de Sede Próximo',
+                message: `La sede cierra en ${diffMinutes} minutos (a las ${parts[0]}:${parts[1]} HS).`,
+                isRed: false
+            };
+        }
+
+        return null;
+    }, [visit.sede, minutes, dismissedAlert]);
 
     // FORMULARIO DE FINALIZACIÓN (MODAL CIERRE)
     const finalizeForm = useForm({
@@ -180,21 +227,40 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                 <div className="px-4 sm:px-6 lg:px-8 py-8">
                     <div className="max-w-[95rem] mx-auto space-y-10 animate-fade-in">
 
-                        {/* ALERTA DE TIEMPO LÍMITE (PORTADO DE LEGACY) */}
-                        {isExceeded && (
-                            <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-[2rem] shadow-2xl flex items-center justify-between group animate-fade-in-down">
+                        {/* ALERTA DE TIEMPO LÍMITE (DINÁMICA POR HORARIO DE SEDE) */}
+                        {alertState && (
+                            <div className={`${
+                                alertState.isRed 
+                                    ? 'bg-red-500/10 border-red-500/20 shadow-red-500/5' 
+                                    : 'bg-amber-500/10 border-amber-500/20 shadow-amber-500/5'
+                            } border p-6 rounded-[2rem] shadow-2xl flex items-center justify-between group animate-fade-in-down`}>
                                 <div className="flex items-center gap-6">
-                                    <div className="h-12 w-12 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-500 flex items-center justify-center animate-pulse">
-                                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                    <div className={`h-12 w-12 rounded-2xl border flex items-center justify-center animate-pulse ${
+                                        alertState.isRed
+                                            ? 'bg-red-500/20 border-red-500/30 text-red-500'
+                                            : 'bg-amber-500/20 border-amber-500/30 text-amber-500'
+                                    }`}>
+                                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
                                     </div>
                                     <div>
-                                        <p className="text-white text-xs font-black uppercase tracking-[0.2em] italic mb-1">Alerta de <span className="text-red-500">Tiempo Límite</span></p>
-                                        <p className="text-indigo-100/60 text-[10px] font-black uppercase italic tracking-widest">
-                                            Jornada excedida: {Math.floor(minutes / 60)}H {minutes % 60}MIN
+                                        <p className={`text-xs font-black uppercase tracking-[0.2em] italic mb-1 ${
+                                            alertState.isRed ? 'text-red-500' : 'text-amber-500'
+                                        }`}>
+                                            {alertState.title}
+                                        </p>
+                                        <p className="text-indigo-100/60 text-[10px] font-black uppercase italic tracking-widest leading-relaxed">
+                                            {alertState.message}
                                         </p>
                                     </div>
                                 </div>
-                                <button onClick={() => { setIsExceeded(false); setDismissedAlert(true); }} className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic border border-white/5 transition-all">Ignorar</button>
+                                <button 
+                                    onClick={() => setDismissedAlert(true)} 
+                                    className="px-6 py-2 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white rounded-xl text-[9px] font-black uppercase tracking-widest italic border border-white/5 transition-all"
+                                >
+                                    Ignorar
+                                </button>
                             </div>
                         )}
 
@@ -294,7 +360,7 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                                                         <span className="px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic">{timeStr} HS</span>
                                                                     </div>
                                                                     
-                                                                    <div className="flex items-center gap-2">
+                                                                    <div className="flex flex-wrap items-center gap-2">
                                                                         <span className={`text-[9px] font-black uppercase tracking-widest italic ${
                                                                             task.type === 'inspection' 
                                                                                 ? (task.failures.failed > 0 ? 'text-rose-500/60' : 'text-orange-500/60') 
@@ -312,6 +378,15 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                                                                         : 'bg-orange-500/10 border border-orange-500/20 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.1)]'
                                                                                 }`}>
                                                                                     {task.failures.failed > 0 ? `${task.failures.failed} Fallas` : 'Sin Fallas'}
+                                                                                </span>
+                                                                            </>
+                                                                        )}
+
+                                                                        {task.type === 'inspection' && task.detail?.assignment?.inspection?.asset && (
+                                                                            <>
+                                                                                <span className="h-1 w-1 rounded-full bg-white/20"></span>
+                                                                                <span className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest italic bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)] flex items-center gap-1">
+                                                                                    <span>📦</span> {task.detail.assignment.inspection.asset.identifier} ({task.detail.assignment.inspection.asset.name})
                                                                                 </span>
                                                                             </>
                                                                         )}

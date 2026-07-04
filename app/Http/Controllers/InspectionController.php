@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreChecklistCompletionRequest;
+use App\Models\Asset;
 use App\Models\ChecklistAssignment;
 use App\Models\DynamicAnswer;
 use App\Models\DynamicChecklist;
@@ -57,6 +58,15 @@ class InspectionController extends Controller
             $assignment = ChecklistAssignment::where('id', $assignmentId)
                 ->where('user_id', Auth::id())
                 ->firstOrFail();
+
+            if ($assignment->status === 'completed') {
+                $redirect = $visitId
+                    ? route('tecnico.visits.in-progress', $visitId)
+                    : route('tecnico.checklists.tasks.index');
+
+                return redirect($redirect)->with('error', 'Esta asignación ya ha sido completada.');
+            }
+
             $assignment->update(['status' => 'in_progress']);
         }
 
@@ -93,8 +103,21 @@ class InspectionController extends Controller
         }
 
         $assets = $sedeId
-            ? Asset::where('sede_id', $sedeId)->get(['id', 'name', 'identifier', 'asset_type_id', 'status'])
+            ? Asset::where('sede_id', $sedeId)->get(['id', 'name', 'identifier', 'asset_type_id', 'status', 'metadata'])
             : [];
+
+        $inspectedAssetIds = [];
+        if ($visitId) {
+            $completedAssignmentIds = \App\Models\VisitChecklistCompletion::where('visit_certificate_id', $visitId)
+                ->pluck('checklist_assignment_id')
+                ->toArray();
+
+            $inspectedAssetIds = \App\Models\DynamicInspection::whereIn('checklist_assignment_id', $completedAssignmentIds)
+                ->where('status', 'completed')
+                ->whereNotNull('asset_id')
+                ->pluck('asset_id')
+                ->toArray();
+        }
 
         return Inertia::render('Tecnico/Inspections/Wizard', [
             'checklist' => $checklist,
@@ -103,6 +126,7 @@ class InspectionController extends Controller
             'visitId' => $visitId,
             'initialAnswers' => $answers,
             'assets' => $assets,
+            'inspectedAssetIds' => $inspectedAssetIds,
         ]);
     }
 

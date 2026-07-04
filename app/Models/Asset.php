@@ -55,4 +55,9 @@ class Asset extends Model
     {
         return $this->hasMany(Incidente::class);
     }
+
+    public function hallazgos()
+    {
+        return $this->morphMany(Hallazgo::class, 'origen');
+    }
 }

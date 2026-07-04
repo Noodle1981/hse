@@ -156,20 +156,30 @@ export default function Edit({ asset, empresas = [], sedes = [], assetTypes = []
                             </div>
                         </div>
 
+                        {/* NOTA DE CUMPLIMIENTO / SEGURIDAD ÉTICA */}
+                        <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-2xl text-[10px] font-black uppercase tracking-widest italic text-orange-400 flex items-center gap-3">
+                            <svg className="w-5 h-5 shrink-0 animate-pulse text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            <span>
+                                Por motivos de trazabilidad y ética de Higiene y Seguridad, el Estado Operativo y los campos de Metadata son de solo lectura. Únicamente se actualizan mediante las inspecciones y checklists firmados en campo.
+                            </span>
+                        </div>
+
                         {/* ESTADO */}
                         <div>
                             <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 italic">Estado *</label>
                             <div className="flex gap-4">
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="status" value="operativo" checked={data.status === 'operativo'} onChange={e => setData('status', e.target.value)} className="text-emerald-500" />
+                                <label className="flex items-center gap-2 cursor-not-allowed opacity-60">
+                                    <input type="radio" name="status" value="operativo" checked={data.status === 'operativo'} disabled className="text-emerald-500/50 cursor-not-allowed" />
                                     <span className="text-xs font-bold text-emerald-400">Operativo</span>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="status" value="alerta" checked={data.status === 'alerta'} onChange={e => setData('status', e.target.value)} className="text-amber-500" />
+                                <label className="flex items-center gap-2 cursor-not-allowed opacity-60">
+                                    <input type="radio" name="status" value="alerta" checked={data.status === 'alerta'} disabled className="text-amber-500/50 cursor-not-allowed" />
                                     <span className="text-xs font-bold text-amber-400">En Alerta</span>
                                 </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                    <input type="radio" name="status" value="fuera_de_servicio" checked={data.status === 'fuera_de_servicio'} onChange={e => setData('status', e.target.value)} className="text-red-500" />
+                                <label className="flex items-center gap-2 cursor-not-allowed opacity-60">
+                                    <input type="radio" name="status" value="fuera_de_servicio" checked={data.status === 'fuera_de_servicio'} disabled className="text-red-500/50 cursor-not-allowed" />
                                     <span className="text-xs font-bold text-red-400">Fuera de Servicio</span>
                                 </label>
                             </div>
@@ -186,17 +196,17 @@ export default function Edit({ asset, empresas = [], sedes = [], assetTypes = []
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     {editFields.map((field) => (
                                         <div key={field.name}>
-                                            <label className="block text-[10px] font-bold text-white/60 uppercase mb-1">
+                                            <label className="block text-[10px] font-bold text-white/40 uppercase mb-1">
                                                 {field.label || field.name}
-                                                {field.alert_days && <span className="ml-2 text-[9px] text-amber-400">(Alerta ≤ {field.alert_days}d)</span>}
-                                                {field.alert_threshold && <span className="ml-2 text-[9px] text-amber-400">(Alerta ≥ {field.alert_threshold})</span>}
+                                                {field.alert_days && <span className="ml-2 text-[9px] text-amber-400/50">(Alerta ≤ {field.alert_days}d)</span>}
+                                                {field.alert_threshold && <span className="ml-2 text-[9px] text-amber-400/50">(Alerta ≥ {field.alert_threshold})</span>}
                                             </label>
                                             <input
                                                 type={field.type === 'number' ? 'number' : (field.type === 'date' ? 'date' : 'text')}
                                                 step={field.type === 'number' ? 'any' : undefined}
                                                 value={data.metadata[field.name] || ''}
-                                                onChange={e => handleMetadataChange(field.name, e.target.value)}
-                                                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                                                disabled
+                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-white/50 cursor-not-allowed focus:outline-none"
                                             />
                                         </div>
                                     ))}
