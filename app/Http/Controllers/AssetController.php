@@ -28,7 +28,7 @@ class AssetController extends Controller
         $assignedEmpresaIds = $empresaQuery->pluck('id')->toArray();
 
         $query = Asset::query()
-            ->with(['sede.empresa', 'assetType', 'hallazgos' => function ($q) {
+            ->with(['sede.empresa', 'assetType.category.checklists', 'hallazgos' => function ($q) {
                 $q->whereIn('estado', ['pendiente', 'en_proceso']);
             }])
             ->whereIn('empresa_id', $assignedEmpresaIds);

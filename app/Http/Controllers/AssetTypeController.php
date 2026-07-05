@@ -40,7 +40,7 @@ class AssetTypeController extends Controller
         $categories = Category::where('is_active', true)
             ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('order')])
             ->orderBy('order')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'color', 'icon']);
 
         $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']);
 
