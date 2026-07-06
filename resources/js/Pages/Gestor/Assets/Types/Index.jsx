@@ -315,7 +315,7 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                     {/* MODAL CONFIGURADOR */}
                     {/* ══════════════════════════════════════════ */}
                     {showModal && (
-                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
+                        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-start justify-center p-4 z-50 overflow-y-auto">
                             <div className="bg-[#16162a] border border-white/10 rounded-[2.5rem] p-8 max-w-3xl w-full space-y-6 shadow-2xl my-8">
 
                                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
@@ -611,8 +611,6 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                                         ) : (
                                                             <input type="text" disabled placeholder="N/A" className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white/20" />
                                                         )}
-                                                    </div>
-                                                    <div className="text-right">
                                                         <button
                                                             type="button"
                                                             onClick={() => removeField(index)}
@@ -621,6 +619,135 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                                             Quitar
                                                         </button>
                                                     </div>
+
+                                                    {/* REGLAS DE MANTENIMIENTO SRE */}
+                                                    {(field.type === 'number' || field.type === 'date') && (
+                                                        <div className="col-span-1 sm:col-span-5 pt-2 border-t border-white/5 space-y-3">
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-[10px] font-black text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
+                                                                    🔧 Reglas de Mantenimiento Preventivo (SRE)
+                                                                </span>
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => {
+                                                                        const rules = field.maintenance_rules || [];
+                                                                        const updatedSchema = [...form.data.metadata_schema];
+                                                                        updatedSchema[index] = {
+                                                                            ...field,
+                                                                            maintenance_rules: [
+                                                                                ...rules,
+                                                                                { nombre: '', frecuencia: '', margen_pre_alerta: '', checklist_resolucion_id: '' }
+                                                                            ]
+                                                                        };
+                                                                        form.setData('metadata_schema', updatedSchema);
+                                                                    }}
+                                                                    className="px-2.5 py-1 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 rounded-lg text-[9px] font-black uppercase transition-all"
+                                                                >
+                                                                    ➕ Agregar Regla
+                                                                </button>
+                                                            </div>
+
+                                                            {/* Listado de reglas */}
+                                                            <div className="space-y-2">
+                                                                {(field.maintenance_rules || []).map((rule, ruleIndex) => (
+                                                                    <div key={ruleIndex} className="p-3 bg-black/40 rounded-xl border border-white/5 grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
+                                                                        <div>
+                                                                            <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Nombre de la Regla</label>
+                                                                            <input
+                                                                                type="text"
+                                                                                value={rule.nombre || ''}
+                                                                                onChange={e => {
+                                                                                    const updatedSchema = [...form.data.metadata_schema];
+                                                                                    const rules = [...(field.maintenance_rules || [])];
+                                                                                    rules[ruleIndex].nombre = e.target.value;
+                                                                                    updatedSchema[index].maintenance_rules = rules;
+                                                                                    form.setData('metadata_schema', updatedSchema);
+                                                                                }}
+                                                                                placeholder="Ej: Cambio de Aceite"
+                                                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
+                                                                                required
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">
+                                                                                {field.type === 'date' ? 'Días Vencimiento' : 'Frecuencia / Intervalo'}
+                                                                            </label>
+                                                                            <input
+                                                                                type="number"
+                                                                                value={rule.frecuencia || ''}
+                                                                                onChange={e => {
+                                                                                    const updatedSchema = [...form.data.metadata_schema];
+                                                                                    const rules = [...(field.maintenance_rules || [])];
+                                                                                    rules[ruleIndex].frecuencia = e.target.value;
+                                                                                    updatedSchema[index].maintenance_rules = rules;
+                                                                                    form.setData('metadata_schema', updatedSchema);
+                                                                                }}
+                                                                                placeholder={field.type === 'date' ? "Ej: 365 días" : "Ej: 15000 km"}
+                                                                                title="Ciclo Infinito: Se repite automáticamente cada vez que se alcanza esta distancia/tiempo"
+                                                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
+                                                                                required
+                                                                            />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Margen Pre-Alerta</label>
+                                                                            <input
+                                                                                type="number"
+                                                                                value={rule.margen_pre_alerta || ''}
+                                                                                onChange={e => {
+                                                                                    const updatedSchema = [...form.data.metadata_schema];
+                                                                                    const rules = [...(field.maintenance_rules || [])];
+                                                                                    rules[ruleIndex].margen_pre_alerta = e.target.value;
+                                                                                    updatedSchema[index].maintenance_rules = rules;
+                                                                                    form.setData('metadata_schema', updatedSchema);
+                                                                                }}
+                                                                                placeholder={field.type === 'date' ? "Ej: 30 días" : "Ej: 1000 km"}
+                                                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
+                                                                            />
+                                                                        </div>
+                                                                        <div className="flex gap-2 items-end">
+                                                                            <div className="flex-1">
+                                                                                <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Checklist de Resolución</label>
+                                                                                <select
+                                                                                    value={rule.checklist_resolucion_id || ''}
+                                                                                    onChange={e => {
+                                                                                        const updatedSchema = [...form.data.metadata_schema];
+                                                                                        const rules = [...(field.maintenance_rules || [])];
+                                                                                        rules[ruleIndex].checklist_resolucion_id = e.target.value;
+                                                                                        updatedSchema[index].maintenance_rules = rules;
+                                                                                        form.setData('metadata_schema', updatedSchema);
+                                                                                    }}
+                                                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
+                                                                                    required
+                                                                                >
+                                                                                    <option value="">— Seleccionar —</option>
+                                                                                    {checklists.map(c => (
+                                                                                        <option key={c.id} value={c.id}>{c.title}</option>
+                                                                                    ))}
+                                                                                </select>
+                                                                            </div>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => {
+                                                                                    const updatedSchema = [...form.data.metadata_schema];
+                                                                                    const rules = [...(field.maintenance_rules || [])];
+                                                                                    rules.splice(ruleIndex, 1);
+                                                                                    updatedSchema[index].maintenance_rules = rules;
+                                                                                    form.setData('metadata_schema', updatedSchema);
+                                                                                }}
+                                                                                className="px-2 py-1.5 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/20 rounded-lg text-[10px] font-black uppercase transition-all"
+                                                                                title="Quitar Regla"
+                                                                            >
+                                                                                ✕
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                                {(field.maintenance_rules || []).length === 0 && (
+                                                                    <p className="text-[10px] text-white/30 italic">Sin reglas de mantenimiento de ciclo infinito configuradas para esta métrica.</p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
 
                                                     {/* MENSAJE DE ALERTA PERSONALIZADO (Si tiene alerta de fecha o umbral) */}
                                                     {(field.alert_days || field.type === 'number') && (

@@ -31,9 +31,7 @@ class CheckAssetAlerts extends Command
     {
         $this->info('Iniciando verificación de alertas de activos...');
 
-        $assets = Asset::with('assetType')
-            ->where('status', '!=', 'fuera_de_servicio')
-            ->get();
+        $assets = Asset::with('assetType')->get();
 
         $alertsCreated = 0;
 
@@ -46,6 +44,8 @@ class CheckAssetAlerts extends Command
             }
 
             $hasActiveAlert = false;
+            $hasCriticalSreAlert = false;
+            $hasWarningSreAlert = false;
 
             foreach ($schema as $field) {
                 $fieldName = $field['name'] ?? null;
@@ -55,11 +55,77 @@ class CheckAssetAlerts extends Command
                 }
 
                 $val = $metadata[$fieldName];
+                $fieldLabel = $field['label'] ?? $fieldName;
+
+                // 1. EVALUAR REGLAS SRE (Nuevas reglas múltiples)
+                $rules = $field['maintenance_rules'] ?? [];
+                if (! empty($rules) && is_array($rules)) {
+                    foreach ($rules as $rule) {
+                        $ruleName = $rule['nombre'] ?? '';
+                        $frecuencia = isset($rule['frecuencia']) ? (float)$rule['frecuencia'] : null;
+                        $margen = isset($rule['margen_pre_alerta']) && is_numeric($rule['margen_pre_alerta']) ? (float)$rule['margen_pre_alerta'] : 0;
+                        $checklistResolucionId = $rule['checklist_resolucion_id'] ?? null;
+
+                        if (!$ruleName || !$frecuencia || !$checklistResolucionId) {
+                            continue;
+                        }
+
+                        $isCritico = false;
+                        $isPreAlerta = false;
+                        $alertReason = '';
+
+                        if ($fieldType === 'number' && is_numeric($val)) {
+                            $numVal = (float)$val;
+                            $nextTargetKey = 'proximo_' . $fieldName . '_' . \Illuminate\Support\Str::slug($ruleName);
+                            $targetVal = isset($metadata[$nextTargetKey]) && is_numeric($metadata[$nextTargetKey])
+                                ? (float)$metadata[$nextTargetKey]
+                                : $frecuencia;
+
+                            if ($numVal >= $targetVal) {
+                                $isCritico = true;
+                                $alertReason = "Métrica '{$fieldLabel}' ({$numVal}) alcanzó/superó el límite crítico de {$targetVal} para la regla SRE '{$ruleName}'";
+                            } elseif ($numVal >= ($targetVal - $margen)) {
+                                $isPreAlerta = true;
+                                $alertReason = "Métrica '{$fieldLabel}' ({$numVal}) está próxima al límite crítico de {$targetVal} (Margen: {$margen}) para la regla SRE '{$ruleName}'";
+                            }
+                        } elseif ($fieldType === 'date' && !empty($val)) {
+                            try {
+                                $dueDate = Carbon::parse($val);
+                                $daysRemaining = (int) now()->startOfDay()->diffInDays($dueDate->startOfDay(), false);
+
+                                if ($daysRemaining <= 0) {
+                                    $isCritico = true;
+                                    $alertReason = "Fecha '{$fieldLabel}' venció hace " . abs($daysRemaining) . " días (límite: 0 días) para la regla SRE '{$ruleName}'";
+                                } elseif ($daysRemaining <= $margen) {
+                                    $isPreAlerta = true;
+                                    $alertReason = "Fecha '{$fieldLabel}' vence en {$daysRemaining} días (margen alerta: {$margen} días) para la regla SRE '{$ruleName}'";
+                                }
+                            } catch (\Exception $e) {
+                                Log::warning("No se pudo parsear fecha '{$val}' para regla SRE de activo {$asset->id}: ".$e->getMessage());
+                            }
+                        }
+
+                        if ($isCritico) {
+                            $hasCriticalSreAlert = true;
+                            $title = "SRE Alerta Crítica: {$asset->name} - {$ruleName}";
+                            $this->createFindingAndAssignment($asset, $rule, $title, $alertReason);
+                            $alertsCreated++;
+                        } elseif ($isPreAlerta) {
+                            $hasWarningSreAlert = true;
+                            $title = "SRE Alerta Crítica: {$asset->name} - {$ruleName}";
+                            $this->resolveFindingAndAssignment($asset, $rule, $title);
+                        } else {
+                            $title = "SRE Alerta Crítica: {$asset->name} - {$ruleName}";
+                            $this->resolveFindingAndAssignment($asset, $rule, $title);
+                        }
+                    }
+                }
+
+                // 2. EVALUAR REGLAS ANTIGUAS/SIMPLES
                 $shouldAlert = false;
                 $alertReason = '';
 
-                // Regla para Tipo Fecha (vencimientos)
-                if ($fieldType === 'date' && ! empty($field['alert_days']) && ! empty($val)) {
+                if ($fieldType === 'date' && ! empty($field['alert_days']) && ! empty($val) && empty($rules)) {
                     try {
                         $dueDate = Carbon::parse($val);
                         $daysRemaining = (int) now()->startOfDay()->diffInDays($dueDate->startOfDay(), false);
@@ -74,11 +140,9 @@ class CheckAssetAlerts extends Command
                     }
                 }
 
-                // Regla para Tipo Número (umbrales fijos o intervalos recurrentes de kilometraje/horas)
-                if ($fieldType === 'number' && is_numeric($val)) {
+                if ($fieldType === 'number' && is_numeric($val) && empty($rules)) {
                     $numVal = (float) $val;
 
-                    // 1. Umbral Fijo
                     if (isset($field['alert_threshold']) && is_numeric($field['alert_threshold'])) {
                         $threshold = (float) $field['alert_threshold'];
                         if ($numVal >= $threshold) {
@@ -87,7 +151,6 @@ class CheckAssetAlerts extends Command
                         }
                     }
 
-                    // 2. Intervalo Recurrente (ej: cada 15.000 km)
                     if (! empty($field['alert_interval']) && is_numeric($field['alert_interval'])) {
                         $nextTargetKey = 'proximo_' . $fieldName;
                         $targetKm = isset($metadata[$nextTargetKey]) && is_numeric($metadata[$nextTargetKey])
@@ -103,11 +166,9 @@ class CheckAssetAlerts extends Command
 
                 if ($shouldAlert) {
                     $hasActiveAlert = true;
-                    $fieldLabel = $field['label'] ?? $fieldName;
                     $customMsg  = ! empty($field['alert_message']) ? trim($field['alert_message']) : null;
                     
                     $title = "Alerta: {$asset->name} ({$asset->identifier}) - {$fieldName}";
-
                     $sedeNombre    = $asset->sede?->nombre ?? 'Sede General';
                     $empresaNombre = $asset->empresa?->nombre ?? 'Empresa';
 
@@ -117,7 +178,6 @@ class CheckAssetAlerts extends Command
                         $fullDescription = "{$alertReason}\n\n[Detalles del Activo]\n• Activo: {$asset->name} (Código/QR: {$asset->identifier})\n• Ubicación: Sede {$sedeNombre} ({$empresaNombre})";
                     }
 
-                    // Evitar duplicados: verificar si ya existe un hallazgo pendiente o en proceso para este activo y título
                     $existing = Hallazgo::where('origen_type', Asset::class)
                         ->where('origen_id', $asset->id)
                         ->where('titulo', $title)
@@ -143,24 +203,29 @@ class CheckAssetAlerts extends Command
                         ]);
 
                         $alertsCreated++;
-                        $this->line("Hallazgo creado para activo {$asset->name}: {$fullDescription}");
                     }
                 } else {
-                    // Auto-resolver hallazgos pendientes si el activo renovó su fecha o corrigió su métrica
-                    $title = "Alerta: {$asset->name} ({$asset->identifier}) - {$fieldName}";
-                    Hallazgo::where('origen_type', Asset::class)
-                        ->where('origen_id', $asset->id)
-                        ->where('titulo', $title)
-                        ->whereIn('estado', [Hallazgo::ESTADO_PENDIENTE, Hallazgo::ESTADO_EN_PROCESO])
-                        ->update([
-                            'estado' => Hallazgo::ESTADO_RESUELTO,
-                            'fecha_resolucion' => now(),
-                        ]);
+                    if (empty($rules)) {
+                        $title = "Alerta: {$asset->name} ({$asset->identifier}) - {$fieldName}";
+                        Hallazgo::where('origen_type', Asset::class)
+                            ->where('origen_id', $asset->id)
+                            ->where('titulo', $title)
+                            ->whereIn('estado', [Hallazgo::ESTADO_PENDIENTE, Hallazgo::ESTADO_EN_PROCESO])
+                            ->update([
+                                'estado' => Hallazgo::ESTADO_RESUELTO,
+                                'fecha_resolucion' => now(),
+                            ]);
+                    }
                 }
             }
 
-            // Sincronizar el estado del activo en base a si tiene alertas activas (sin pisar fuera_de_servicio)
-            if ($hasActiveAlert) {
+            // Sincronizar el estado del activo en base a las alertas encontradas (prioridad crítico SRE > advertencia SRE > alerta antigua)
+            if ($hasCriticalSreAlert) {
+                if ($asset->status !== 'fuera_de_servicio') {
+                    $asset->update(['status' => 'fuera_de_servicio']);
+                    $this->line("Activo '{$asset->name}' ({$asset->identifier}) marcado FUERA DE SERVICIO.");
+                }
+            } elseif ($hasWarningSreAlert || $hasActiveAlert) {
                 if ($asset->status === 'operativo') {
                     $asset->update(['status' => 'alerta']);
                     $this->line("Activo '{$asset->name}' ({$asset->identifier}) marcado en estado ALERTA.");
@@ -169,6 +234,18 @@ class CheckAssetAlerts extends Command
                 if ($asset->status === 'alerta') {
                     $asset->update(['status' => 'operativo']);
                     $this->line("Activo '{$asset->name}' ({$asset->identifier}) restablecido a estado OPERATIVO.");
+                } elseif ($asset->status === 'fuera_de_servicio') {
+                    $hasSreRules = false;
+                    foreach ($schema as $f) {
+                        if (!empty($f['maintenance_rules'])) {
+                            $hasSreRules = true;
+                            break;
+                        }
+                    }
+                    if ($hasSreRules) {
+                        $asset->update(['status' => 'operativo']);
+                        $this->line("Activo '{$asset->name}' ({$asset->identifier}) restablecido a estado OPERATIVO por SRE.");
+                    }
                 }
             }
         }
@@ -176,5 +253,82 @@ class CheckAssetAlerts extends Command
         $this->info("Verificación finalizada. {$alertsCreated} hallazgo(s) generado(s).");
 
         return self::SUCCESS;
+    }
+
+    private function createFindingAndAssignment(Asset $asset, array $rule, string $title, string $alertReason)
+    {
+        $ruleName = $rule['nombre'];
+        $checklistResolucionId = $rule['checklist_resolucion_id'];
+
+        $sedeNombre    = $asset->sede?->nombre ?? 'Sede General';
+        $empresaNombre = $asset->empresa?->nombre ?? 'Empresa';
+
+        $fullDescription = "Mantenimiento Crítico SRE Requerido para {$ruleName}.\n\n[Detalles del Activo]\n• Activo: {$asset->name} (Código/QR: {$asset->identifier})\n• Ubicación: Sede {$sedeNombre} ({$empresaNombre})\n• Razón: {$alertReason}";
+
+        $existingFinding = Hallazgo::where('origen_type', Asset::class)
+            ->where('origen_id', $asset->id)
+            ->where('titulo', $title)
+            ->whereIn('estado', [Hallazgo::ESTADO_PENDIENTE, Hallazgo::ESTADO_EN_PROCESO])
+            ->exists();
+
+        $systemUserId = \Illuminate\Support\Facades\Auth::id()
+            ?? $asset->sede?->users()->first()?->id
+            ?? \App\Models\User::first()?->id
+            ?? 1;
+
+        if (!$existingFinding) {
+            Hallazgo::create([
+                'sede_id' => $asset->sede_id,
+                'user_id' => $systemUserId,
+                'titulo' => $title,
+                'descripcion' => $fullDescription,
+                'criticidad' => Hallazgo::CRITICIDAD_ALTO,
+                'estado' => Hallazgo::ESTADO_PENDIENTE,
+                'fecha_deteccion' => now(),
+                'origen_type' => Asset::class,
+                'origen_id' => $asset->id,
+            ]);
+            $this->line("Hallazgo SRE creado para activo {$asset->name}: {$ruleName}");
+        }
+
+        $existingAssignment = \App\Models\ChecklistAssignment::where('asset_id', $asset->id)
+            ->where('dynamic_checklist_id', $checklistResolucionId)
+            ->where('status', '!=', 'completed')
+            ->exists();
+
+        if (!$existingAssignment) {
+            \App\Models\ChecklistAssignment::create([
+                'dynamic_checklist_id' => $checklistResolucionId,
+                'asset_id' => $asset->id,
+                'user_id' => $systemUserId,
+                'sede_id' => $asset->sede_id,
+                'empresa_id' => $asset->empresa_id,
+                'status' => 'pending',
+                'notes' => "Orden de trabajo SRE autogenerada por alerta crítica en regla: {$ruleName}",
+                'due_date' => now(),
+            ]);
+            $this->line("Orden de trabajo SRE asignada para activo {$asset->name}: Checklist ID {$checklistResolucionId}");
+        }
+    }
+
+    private function resolveFindingAndAssignment(Asset $asset, array $rule, string $title)
+    {
+        $checklistResolucionId = $rule['checklist_resolucion_id'];
+
+        Hallazgo::where('origen_type', Asset::class)
+            ->where('origen_id', $asset->id)
+            ->where('titulo', $title)
+            ->whereIn('estado', [Hallazgo::ESTADO_PENDIENTE, Hallazgo::ESTADO_EN_PROCESO])
+            ->update([
+                'estado' => Hallazgo::ESTADO_RESUELTO,
+                'fecha_resolucion' => now(),
+            ]);
+
+        \App\Models\ChecklistAssignment::where('asset_id', $asset->id)
+            ->where('dynamic_checklist_id', $checklistResolucionId)
+            ->where('status', '!=', 'completed')
+            ->update([
+                'status' => 'completed',
+            ]);
     }
 }

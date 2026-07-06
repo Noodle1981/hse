@@ -103,7 +103,7 @@ class InspectionController extends Controller
         }
 
         $assets = $sedeId
-            ? Asset::where('sede_id', $sedeId)->get(['id', 'name', 'identifier', 'asset_type_id', 'status', 'metadata'])
+            ? Asset::where('sede_id', $sedeId)->with('assetType')->get()
             : [];
 
         $inspectedAssetIds = [];
@@ -164,7 +164,29 @@ class InspectionController extends Controller
 
             $updateData = ['notes' => $request->input('notes')];
             if ($request->filled('asset_id')) {
-                $updateData['asset_id'] = $request->input('asset_id');
+                $assetId = $request->input('asset_id');
+                $asset = \App\Models\Asset::with('assetType')->find($assetId);
+
+                if ($asset && $asset->status === 'fuera_de_servicio') {
+                    $schema = $asset->assetType?->metadata_schema ?? [];
+                    $isResolvingChecklist = false;
+                    foreach ($schema as $field) {
+                        $rules = $field['maintenance_rules'] ?? [];
+                        foreach ($rules as $rule) {
+                            if (isset($rule['checklist_resolucion_id']) && (int)$rule['checklist_resolucion_id'] === (int)$inspection->dynamic_checklist_id) {
+                                $isResolvingChecklist = true;
+                                break 2;
+                            }
+                        }
+                    }
+
+                    if (!$isResolvingChecklist) {
+                        throw \Illuminate\Validation\ValidationException::withMessages([
+                            'asset_id' => 'ACCESO DENEGADO: El equipo se encuentra Fuera de Servicio por Mantenimiento Vencido.'
+                        ]);
+                    }
+                }
+                $updateData['asset_id'] = $assetId;
             }
             $inspection->update($updateData);
         });

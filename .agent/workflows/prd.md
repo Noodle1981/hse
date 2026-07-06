@@ -145,15 +145,21 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
   - Persistencia del vínculo `dynamic_inspections.asset_id`.
   - **Badge Dinámico de Cabecera:** Muestra un badge de vinculación dinámico en el Wizard según el activo seleccionado.
   - **Advertencia de Re-inspección (Modal Ámbar):** Si el técnico intenta seleccionar un activo que ya fue auditado en la visita actual (estado `✓ Auditado`), el sistema detiene la selección inmediata y muestra un modal de confirmación táctico premium en color ámbar/dorado advirtiendo sobre la duplicación legal del reporte.
-* **Sincronización Automática y Motor de Transición de Estados (`SyncAssetMetadata`):**
+* **Sincronización Automática, Resolución SRE y Reset de Ciclos (`SyncAssetMetadata`):**
   - Mapeo de respuestas del checklist a los atributos del activo (`dynamic_questions.vincular_a_metadata`).
   - Ante una inspección con resultado `Fail`, la bomba de estado transiciona automáticamente el activo a **"Fuera de Servicio"** (`fuera_de_servicio`).
+  - **Resolución SRE de Ciclo Infinito:** Si la inspección corresponde al checklist de resolución configurado para una regla SRE, al finalizarse se recalcula automáticamente la próxima meta del atributo (`proximo_val = valor_actual + frecuencia`), se marca la asignación correctiva (`ChecklistAssignment`) como completada y se auto-resuelve el hallazgo crítico abierto.
   - Audit log inmutable de cambios en `audit_logs` vía `AssetObserver`.
-* **Motor de Alertas y Hallazgos Automáticos (`CheckAssetAlerts`):**
+* **Motor de Mantenimiento Autónomo y Alertas SRE (`CheckAssetAlerts`):**
   - Comando `php artisan assets:check-alerts` programado en el scheduler.
-  - Evalúa vencimientos de fechas (`alert_days`) y umbrales numéricos (`alert_threshold`), creando hallazgos de criticidad alta sin duplicación, y **sincroniza en caliente el estado del activo a `'alerta'`** en la base de datos si hay anomalías pendientes.
+  - Evalúa vencimientos de fechas (`alert_days`) y umbrales numéricos (`alert_threshold`) en las reglas tradicionales y en las **múltiples reglas SRE de ciclo infinito** configuradas en la ficha técnica.
+  - **Pre-Alerta (Warning):** Si una métrica o fecha entra dentro del `margen_pre_alerta`, el activo pasa al estado `alerta` (amarillo).
+  - **Crítico (Lockout):** Si el valor supera la frecuencia de servicio de cualquier regla SRE, el activo pasa a `fuera_de_servicio` (rojo). Se genera automáticamente un `Hallazgo` crítico y se **auto-asigna una orden de trabajo correctiva (`ChecklistAssignment`)** vinculando al activo físico con el checklist de resolución idóneo.
   - **Hover Tooltip de Detalles en Index:** Al pasar el mouse sobre el estado "Alerta" del activo en la tabla general, se despliega hacia abajo (`top-full mt-2`) un tooltip oscuro premium detallando cada campo que causó la alerta (ej: "Vencimiento Carga" o "Prueba Hidráulica") con la fecha exacta y días restantes, ocultando campos técnicos redundantes.
   - **Baja Lógica y Preservación Histórica (Soft Deletes):** El borrado de activos realiza una baja lógica (`SoftDeletes`). El botón en el listado se denomina "Dar de Baja". Para garantizar que el historial legal de inspecciones e incidentes pasados de un activo de baja no quede huérfano, las relaciones de modelos cargan los activos incluyendo registros eliminados (`->withTrashed()`).
+* **Bloqueo Operativo en Terreno (Interlock):**
+  - **Validación de Bloqueo (Backend):** Si un activo se encuentra `fuera_de_servicio`, el backend en `InspectionController.php` bloquea cualquier intento de guardar o completar inspecciones comunes en dicho activo, lanzando un error de validación a menos que el checklist ejecutado sea su checklist resolutor predefinido.
+  - **Bloqueo en Interfaz (Frontend):** En el asistente de inspecciones (`Wizard.jsx`), si el técnico selecciona un activo inhabilitado (`fuera_de_servicio`), se deniega el acceso y se despliega un banner de error rojo crítico: *"ACCESO DENEGADO: El equipo se encuentra Fuera de Servicio por Mantenimiento Vencido"*.
 
 ### 4.7. Control y Gestión de Firmas Digitales y Aprobación Segura
 * **Tipología de Firmas del Sistema:**

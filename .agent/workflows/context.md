@@ -110,6 +110,7 @@ ep-back/
 | `questions` | Preguntas dinámicas | `id`, `checklist_id`, `label`, `type`, `options`, `order`, `is_required`, `vincular_a_metadata` |
 | `inspections` | Ejecuciones/llenados | `id`, `checklist_id`, `user_id`, `asset_id`, `completed_at`, `notes` |
 | `answers` | Respuestas específicas | `id`, `inspection_id`, `question_id`, `value` |
+| `checklist_assignments` | Órdenes de trabajo técnicas (correctivas o preventivas) asignadas | `id`, `dynamic_checklist_id`, `asset_id`, `user_id`, `status`, `due_date` |
 | `sedes` | Plantas físicas y control de jornada | `id`, `empresa_id`, `nombre_sede`, `dias_operativos` (JSON), `hora_apertura`, `hora_cierre`, `es_roster_24_7`, `radio_tolerancia_metros` |
 | `visit_certificates` | Constancias de visita, geolocalización y auditoría horaria | `id`, `sede_id`, `user_id`, `start_time`, `end_time`, `horas_gabinete_estimadas`, `checkin_lat`, `checkin_lng`, `checkout_lat`, `checkout_lng`, `gps_verified` |
 | `trainings` | Sesiones e instancias de capacitación | `id`, `empresa_id`, `sede_id`, `dynamic_checklist_id`, `title`, `description`, `type` (presencial/virtual), `date`, `duration`, `status` |
@@ -123,6 +124,11 @@ ep-back/
 
 ### Backend (Laravel 12)
 - ✅ **Módulo de Activos Genérico, Metadata Dinámica y Expediente Fotográfico:** Para soportar múltiples rubros (Transporte, Seguridad, Alimentación), el sistema modela el equipamiento de forma abstracta (`assets` y `asset_types`) y guarda los atributos específicos en un campo JSON `metadata` y su expediente de fotos en `photos`. Permite configurar esquemas de fotos por categoría (`photo_schema`), alta dinámica multi-activo con prevención de identificadores duplicados (`show_in_create`, `distinct`), galería de evidencias de siniestros (`incidentes.asset_id`) y exportación a PDF A4. 
+- ✅ **Motor de Mantenimiento Autónomo, Asignación Automática y Bloqueo Operativo (Interlock SRE):**
+  - **Constructor SRE:** Permite a los gestores configurar múltiples reglas preventivas de ciclo infinito por atributo del tipo de activo (frecuencia, margen de pre-alerta y checklist de resolución).
+  - **Asignación Correctiva:** Al superar la frecuencia límite, el activo cambia a `fuera_de_servicio`, abre un hallazgo crítico y auto-asigna la orden de trabajo (`ChecklistAssignment` enlazada vía `asset_id`).
+  - **Bloqueo Terreno (Interlock):** Si un activo se encuentra `fuera_de_servicio`, se bloquea cualquier inspección regular en el backend (`InspectionController.php`) y se despliega un banner de error rojo crítico en la interfaz (`Wizard.jsx`), a menos que la inspección ejecute su checklist de resolución asignado.
+  - **Auto-Resolución y Reset:** Al completar con éxito el checklist resolutor, `SyncAssetMetadata` recalcula el próximo objetivo (`proximo_val = lectura_actual + frecuencia`), cierra el hallazgo, completa la orden técnica y devuelve el activo a `operativo`.
   - **Sincronización de Metadata:** Al finalizar una inspección, un Listener (`SyncAssetMetadata`) intercepta las respuestas cuyas preguntas estén enlazadas mediante `vincular_a_metadata` (ej: `kilometraje`) y actualiza automáticamente la ficha del activo en caliente.
   - **Advertencia de Re-inspección (Modal Ámbar):** Si el técnico intenta seleccionar un activo que ya fue auditado en la visita actual (estado `✓ Auditado`), el Wizard Paso 0 detiene la selección inmediata y despliega un modal de confirmación táctico premium en color ámbar/dorado para advertir sobre la duplicación legal del reporte.
   - **Hover Tooltip de Alertas en Index:** Al pasar el mouse sobre el estado "Alerta" del activo en la tabla general del gestor, se despliega hacia abajo (`top-full mt-2`) un tooltip oscuro premium detallando cada campo que causó la alerta (ej: "Vencimiento Carga" o "Prueba Hidráulica") con la fecha exacta y días restantes, ocultando campos técnicos redundantes.

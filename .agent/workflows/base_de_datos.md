@@ -214,6 +214,7 @@ El sistema cuenta con las siguientes entidades principales:
 |---|---|---|---|---|
 | `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
 | `dynamic_checklist_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `asset_id` | `CHAR(36)` / `UUID` | Sí ✅ | *ninguno* |  |
 | `user_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `sede_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `empresa_id` | `INTEGER` | No ❌ | *ninguno* |  |
@@ -229,11 +230,13 @@ El sistema cuenta con las siguientes entidades principales:
 - `sede_id` → vincula con `sedes`(`id`)
 - `user_id` → vincula con `users`(`id`)
 - `dynamic_checklist_id` → vincula con `dynamic_checklists`(`id`)
+- `asset_id` → vincula con `assets`(`id`) (con onDelete cascade)
 
 ### 🗂️ Índices
 - `checklist_assignments_due_date_index`
 - `checklist_assignments_status_index`
 - `checklist_assignments_empresa_id_sede_id_index`
+- `checklist_assignments_asset_id_index`
 
 ---
 

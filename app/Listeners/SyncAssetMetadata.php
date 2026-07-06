@@ -16,6 +16,7 @@ class SyncAssetMetadata
         if (! $asset) {
             return;
         }
+        $asset->load('assetType');
 
         $metadata = $asset->metadata ?? [];
         $hasChanges = false;
@@ -32,10 +33,48 @@ class SyncAssetMetadata
                 // Si el esquema define un intervalo recurrente (ej: cada 15.000 km), calculamos el próximo objetivo
                 $schema = $asset->assetType?->metadata_schema ?? [];
                 foreach ($schema as $field) {
-                    if (($field['name'] ?? null) === $metricKey && ! empty($field['alert_interval']) && is_numeric($val)) {
-                        $interval = (float) $field['alert_interval'];
-                        $metadata['proximo_' . $metricKey] = (float) $val + $interval;
-                        Log::info("Calculado próximo objetivo de {$metricKey} para activo {$asset->id}: " . ($val + $interval));
+                    if (($field['name'] ?? null) === $metricKey) {
+                        // 1. Reglas SRE
+                        $rules = $field['maintenance_rules'] ?? [];
+                        if (! empty($rules) && is_array($rules)) {
+                            foreach ($rules as $rule) {
+                                if (isset($rule['checklist_resolucion_id']) && (int)$rule['checklist_resolucion_id'] === (int)$inspection->dynamic_checklist_id) {
+                                    $ruleName = $rule['nombre'];
+                                    $frecuencia = (float)$rule['frecuencia'];
+                                    $nextTargetKey = 'proximo_' . $metricKey . '_' . \Illuminate\Support\Str::slug($ruleName);
+                                    
+                                    if (($field['type'] ?? 'number') === 'number' && is_numeric($val)) {
+                                        $metadata[$nextTargetKey] = (float)$val + $frecuencia;
+                                    } elseif (($field['type'] ?? '') === 'date' && !empty($val)) {
+                                        try {
+                                            $metadata[$nextTargetKey] = \Carbon\Carbon::parse($val)->addDays((int)$frecuencia)->toDateString();
+                                        } catch (\Exception $e) {
+                                            Log::warning("No se pudo calcular proxima fecha para activo {$asset->id}: ".$e->getMessage());
+                                        }
+                                    }
+                                    
+                                    Log::info("SRE: Calculado próximo objetivo de regla '{$ruleName}' para activo {$asset->id}: " . ($metadata[$nextTargetKey] ?? 'error'));
+
+                                    // Auto-resolver la orden de trabajo (ChecklistAssignment)
+                                    if ($inspection->checklist_assignment_id) {
+                                        \App\Models\ChecklistAssignment::where('id', $inspection->checklist_assignment_id)
+                                            ->update(['status' => 'completed']);
+                                    } else {
+                                        \App\Models\ChecklistAssignment::where('asset_id', $asset->id)
+                                            ->where('dynamic_checklist_id', $inspection->dynamic_checklist_id)
+                                            ->where('status', '!=', 'completed')
+                                            ->update(['status' => 'completed']);
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Regla antigua simple
+                        if (! empty($field['alert_interval']) && is_numeric($val)) {
+                            $interval = (float) $field['alert_interval'];
+                            $metadata['proximo_' . $metricKey] = (float) $val + $interval;
+                            Log::info("Calculado próximo objetivo de {$metricKey} para activo {$asset->id}: " . ($val + $interval));
+                        }
                     }
                 }
             }

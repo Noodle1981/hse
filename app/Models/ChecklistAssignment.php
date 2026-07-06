@@ -9,6 +9,7 @@ class ChecklistAssignment extends Model
 {
     protected $fillable = [
         'dynamic_checklist_id',
+        'asset_id',
         'user_id',
         'sede_id',
         'empresa_id',
@@ -26,6 +27,11 @@ class ChecklistAssignment extends Model
     public function checklist(): BelongsTo
     {
         return $this->belongsTo(DynamicChecklist::class, 'dynamic_checklist_id');
+    }
+
+    public function asset(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class);
     }
 
     public function user(): BelongsTo

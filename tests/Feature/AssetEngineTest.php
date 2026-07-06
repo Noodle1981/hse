@@ -244,4 +244,139 @@ class AssetEngineTest extends TestCase
         $deleteResponse->assertRedirect(route('gestor.assets.index'));
         $this->assertSoftDeleted($asset);
     }
+
+    public function test_sre_preventive_maintenance_flow(): void
+    {
+        $gestor = User::factory()->create(['rol' => 'Gestor']);
+        $tecnico = User::factory()->create(['rol' => 'Tecnico']);
+        $this->sede->users()->attach($tecnico);
+
+        // 1. Crear Checklist de Resolución
+        $resolvingChecklist = DynamicChecklist::create([
+            'title' => 'Cambio de Aceite Taller',
+            'is_active' => true,
+        ]);
+
+        $resolvingQuestion = DynamicQuestion::create([
+            'dynamic_checklist_id' => $resolvingChecklist->id,
+            'label' => 'Nuevo Kilometraje de Aceite',
+            'type' => 'number',
+            'vincular_a_metadata' => 'kilometraje',
+        ]);
+
+        // 2. Crear AssetType con regla SRE
+        $assetTypeSre = AssetType::create([
+            'empresa_id' => $this->empresa->id,
+            'name' => 'Camioneta Hilux',
+            'description' => 'Flota vehicular minera',
+            'metadata_schema' => [
+                [
+                    'name' => 'kilometraje',
+                    'label' => 'Kilometraje Actual',
+                    'type' => 'number',
+                    'maintenance_rules' => [
+                        [
+                            'nombre' => 'Cambio de Aceite',
+                            'frecuencia' => 15000,
+                            'margen_pre_alerta' => 1000,
+                            'checklist_resolucion_id' => $resolvingChecklist->id,
+                        ]
+                    ]
+                ]
+            ],
+        ]);
+
+        // 3. Crear Activo
+        $asset = Asset::create([
+            'empresa_id' => $this->empresa->id,
+            'sede_id' => $this->sede->id,
+            'asset_type_id' => $assetTypeSre->id,
+            'name' => 'Toyota Hilux #12',
+            'identifier' => 'TH-012',
+            'status' => 'operativo',
+            'metadata' => [
+                'kilometraje' => 0,
+            ],
+        ]);
+
+        // --- Escenario A: Pre-Alerta ---
+        $asset->update(['metadata' => ['kilometraje' => 14200]]);
+        Artisan::call('assets:check-alerts');
+
+        $asset->refresh();
+        $this->assertEquals('alerta', $asset->status);
+
+        // --- Escenario B: Crítico & Bloqueo ---
+        $asset->update(['metadata' => ['kilometraje' => 15100]]);
+        Artisan::call('assets:check-alerts');
+
+        $asset->refresh();
+        $this->assertEquals('fuera_de_servicio', $asset->status);
+
+        $hallazgo = Hallazgo::where('origen_type', Asset::class)
+            ->where('origen_id', $asset->id)
+            ->where('estado', Hallazgo::ESTADO_PENDIENTE)
+            ->first();
+        $this->assertNotNull($hallazgo);
+        $this->assertStringContainsString('Cambio de Aceite', $hallazgo->titulo);
+
+        $assignment = \App\Models\ChecklistAssignment::where('asset_id', $asset->id)
+            ->where('dynamic_checklist_id', $resolvingChecklist->id)
+            ->where('status', 'pending')
+            ->first();
+        $this->assertNotNull($assignment);
+
+        $regularChecklist = DynamicChecklist::create([
+            'title' => 'Inspección Diaria Regular',
+            'is_active' => true,
+        ]);
+        $regularInspection = DynamicInspection::create([
+            'dynamic_checklist_id' => $regularChecklist->id,
+            'user_id' => $tecnico->id,
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($tecnico);
+        $response = $this->post(route('tecnico.checklists.wizard.save', ['id' => $regularChecklist->id, 'inspection' => $regularInspection->id]), [
+            'asset_id' => $asset->id,
+            'answers' => [],
+        ]);
+        $response->assertSessionHasErrors(['asset_id']);
+
+        // --- Escenario C: Resolución del Mantenimiento ---
+        $resolvingInspection = DynamicInspection::create([
+            'dynamic_checklist_id' => $resolvingChecklist->id,
+            'user_id' => $tecnico->id,
+            'checklist_assignment_id' => $assignment->id,
+            'asset_id' => $asset->id,
+            'status' => 'draft',
+        ]);
+
+        $resolvingAnswer = DynamicAnswer::create([
+            'dynamic_inspection_id' => $resolvingInspection->id,
+            'dynamic_question_id' => $resolvingQuestion->id,
+            'value' => 15150,
+        ]);
+
+        $completeResponse = $this->post(route('tecnico.checklists.wizard.complete', [
+            'id' => $resolvingChecklist->id,
+            'inspection' => $resolvingInspection->id,
+        ]), [
+            'notes' => 'Cambio de aceite y filtros realizado con éxito',
+            'supervisor_name' => 'Supervisor Test',
+            'supervisor_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+            'technician_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+            'answers' => [
+                $resolvingQuestion->id => 15150
+            ]
+        ]);
+
+        $completeResponse->assertRedirect();
+
+        $asset->refresh();
+        $this->assertEquals('operativo', $asset->status);
+        $this->assertEquals(30150, $asset->metadata['proximo_kilometraje_cambio-de-aceite']);
+        $this->assertEquals(Hallazgo::ESTADO_RESUELTO, $hallazgo->fresh()->estado);
+        $this->assertEquals('completed', $assignment->fresh()->status);
+    }
 }

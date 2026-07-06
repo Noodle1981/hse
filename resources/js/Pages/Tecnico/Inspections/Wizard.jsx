@@ -26,6 +26,7 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
     const [assetSearch, setAssetSearch] = useState('');
     const [showReinspectModal, setShowReinspectModal] = useState(false);
     const [pendingAssetId, setPendingAssetId] = useState(null);
+    const [sreBlockError, setSreBlockError] = useState(null);
 
     const sections = checklist.sections || [];
     const totalQuestions = sections.reduce((acc, sec) => acc + (sec.questions?.length || 0), 0);
@@ -54,6 +55,30 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
     const handleSelectAsset = (assetId) => {
         const newValue = selectedAssetId === assetId ? '' : assetId;
         
+        if (newValue) {
+            const selectedAsset = (assets || []).find(a => a.id === assetId);
+            if (selectedAsset && selectedAsset.status === 'fuera_de_servicio') {
+                const schema = selectedAsset.asset_type?.metadata_schema || [];
+                let isResolving = false;
+                schema.forEach(field => {
+                    const rules = field.maintenance_rules || [];
+                    rules.forEach(rule => {
+                        if (String(rule.checklist_resolucion_id) === String(checklist.id)) {
+                            isResolving = true;
+                        }
+                    });
+                });
+
+                if (!isResolving) {
+                    setSreBlockError("ACCESO DENEGADO: El equipo se encuentra Fuera de Servicio por Mantenimiento Vencido.");
+                    return;
+                }
+            }
+        }
+
+        // Clear SRE block error on successful selection or deselect
+        setSreBlockError(null);
+
         // Show reinspect warning if asset has already been audited in the current visit
         const isInspected = (inspectedAssetIds || []).includes(assetId);
         if (newValue && isInspected) {
@@ -356,6 +381,13 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                                             </label>
                                             <span className="text-[9px] font-bold text-white/30 italic">Paso 0 - Trazabilidad</span>
                                         </div>
+
+                                        {(sreBlockError || form.errors.asset_id) && (
+                                            <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 rounded-2xl p-4 animate-fade-in">
+                                                <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                                <p className="text-[10px] font-black text-red-400 uppercase tracking-widest italic">{sreBlockError || form.errors.asset_id}</p>
+                                            </div>
+                                        )}
                                         <input
                                             type="text"
                                             value={assetSearch}
