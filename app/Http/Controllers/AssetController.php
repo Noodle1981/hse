@@ -72,7 +72,20 @@ class AssetController extends Controller
             'fuera_de_servicio' => (clone $statsBase)->where('status', 'fuera_de_servicio')->count(),
         ];
 
-        $assets = $query->latest('created_at')->paginate(15)->withQueryString();
+        $viewMode = $request->input('view_mode', 'grouped');
+
+        if ($viewMode === 'grouped') {
+            $assetsData = $query->latest('created_at')->get();
+            $assets = [
+                'data' => $assetsData,
+                'total' => $assetsData->count(),
+                'from' => 1,
+                'to' => $assetsData->count(),
+                'links' => [],
+            ];
+        } else {
+            $assets = $query->latest('created_at')->paginate(15)->withQueryString();
+        }
 
         $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']);
         $sedes = Sede::whereIn('empresa_id', $assignedEmpresaIds)->get(['id', 'nombre_sede', 'empresa_id']);
@@ -83,7 +96,7 @@ class AssetController extends Controller
         return Inertia::render('Gestor/Assets/Index', [
             'assets' => $assets,
             'kpis' => $kpis,
-            'filters' => $request->only(['search', 'empresa_id', 'sede_id', 'asset_type_id', 'status']),
+            'filters' => $request->only(['search', 'empresa_id', 'sede_id', 'asset_type_id', 'status', 'view_mode']),
             'empresas' => $empresas,
             'sedes' => $sedes,
             'assetTypes' => $assetTypes,

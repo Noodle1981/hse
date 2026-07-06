@@ -1,6 +1,6 @@
 import { router, Head, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const ICONS = {
     'shield-check': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />',
@@ -30,6 +30,7 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
     const [sedeId, setSedeId] = useState(filters.sede_id || '');
     const [assetTypeId, setAssetTypeId] = useState(filters.asset_type_id || '');
     const [status, setStatus] = useState(filters.status || 'all');
+    const [viewMode, setViewMode] = useState(filters.view_mode || 'grouped');
 
     const updateFilters = () => {
         router.get(route('gestor.assets.index'), {
@@ -38,6 +39,7 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
             sede_id: sedeId,
             asset_type_id: assetTypeId,
             status,
+            view_mode: viewMode,
         }, {
             preserveState: true,
             replace: true,
@@ -51,13 +53,14 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                 empresaId !== (filters.empresa_id || '') ||
                 sedeId !== (filters.sede_id || '') ||
                 assetTypeId !== (filters.asset_type_id || '') ||
-                status !== (filters.status || 'all')
+                status !== (filters.status || 'all') ||
+                viewMode !== (filters.view_mode || 'grouped')
             ) {
                 updateFilters();
             }
         }, 400);
         return () => clearTimeout(timeout);
-    }, [search, empresaId, sedeId, assetTypeId, status]);
+    }, [search, empresaId, sedeId, assetTypeId, status, viewMode]);
 
     const handleDelete = (asset) => {
         if (confirm(`¿Dar de baja el activo ${asset.name} (${asset.identifier})?`)) {
@@ -68,6 +71,93 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
     const availableSedes = empresaId
         ? sedes.filter(s => s.empresa_id.toString() === empresaId.toString())
         : sedes;
+
+    // Estado para registrar qué grupos están expandidos (por defecto el primero expandido)
+    const [expandedGroups, setExpandedGroups] = useState({ 'first-run': true });
+
+    // Estado para mostrar el modal de información de un checklist
+    const [infoChecklist, setInfoChecklist] = useState(null);
+
+    const toggleGroup = (id) => {
+        setExpandedGroups(prev => {
+            const next = { ...prev };
+            if (next['first-run']) {
+                delete next['first-run'];
+                // Inicializar todos como colapsados excepto el clickeado
+            }
+            next[id] = !next[id];
+            return next;
+        });
+    };
+
+    // Agrupación de activos por checklist en memoria
+    const groupedAssets = useMemo(() => {
+        if (viewMode !== 'grouped') return [];
+
+        const groups = {}; // id -> { checklist, assets }
+        const noChecklist = [];
+
+        assets.data.forEach(asset => {
+            const checklists = asset.asset_type?.category?.checklists || [];
+            if (checklists.length === 0) {
+                noChecklist.push(asset);
+            } else {
+                checklists.forEach(c => {
+                    if (!groups[c.id]) {
+                        groups[c.id] = {
+                            id: c.id,
+                            title: c.title,
+                            description: c.description,
+                            registry_code: c.registry_code,
+                            category: asset.asset_type.category,
+                            assets: [],
+                        };
+                    }
+                    groups[c.id].assets.push(asset);
+                });
+            }
+        });
+
+        const list = Object.values(groups);
+        
+        if (noChecklist.length > 0) {
+            list.push({
+                id: 'no-checklist',
+                title: 'Activos sin Checklist Asociado',
+                description: 'Estos activos no están vinculados a ninguna plantilla de inspección.',
+                registry_code: null,
+                category: null,
+                assets: noChecklist,
+            });
+        }
+
+        // Por defecto, expandir el primer grupo si es la primera vez que se renderiza y hay grupos
+        if (expandedGroups['first-run'] && list.length > 0) {
+            setExpandedGroups({ [list[0].id]: true });
+        }
+
+        return list;
+    }, [assets.data, viewMode]);
+
+    const toggleAllGroups = (expand) => {
+        const newExpanded = {};
+        if (expand) {
+            groupedAssets.forEach(g => {
+                newExpanded[g.id] = true;
+            });
+        }
+        setExpandedGroups(newExpanded);
+    };
+
+    const getGroupKpis = (groupAssets) => {
+        const stats = { total: groupAssets.length, operativo: 0, alerta: 0, fuera_de_servicio: 0 };
+        groupAssets.forEach(a => {
+            if (a.status === 'operativo') stats.operativo++;
+            else if (a.status === 'alerta') stats.alerta++;
+            else if (a.status === 'fuera_de_servicio') stats.fuera_de_servicio++;
+        });
+        return stats;
+    };
 
     const getStatusBadge = (asset) => {
         const st = asset.status;
@@ -150,11 +240,28 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                 <div className="max-w-7xl mx-auto space-y-8">
                     
                     {/* HEADER */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#16162a] p-6 rounded-[2rem] border border-white/5 shadow-2xl">
+                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 bg-[#16162a] p-6 rounded-[2rem] border border-white/5 shadow-2xl">
                         <div>
                             <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] italic">Módulo de Trazabilidad</span>
                             <h1 className="text-2xl font-black text-white uppercase tracking-tight italic">Activos y Equipamiento</h1>
                         </div>
+                        
+                        {/* Selector de modo de vista tipo pastilla HUD */}
+                        <div className="flex bg-black/40 border border-white/10 p-1 rounded-xl items-center self-start lg:self-center">
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`px-4 py-2.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${viewMode === 'list' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                            >
+                                📋 Lista Plana
+                            </button>
+                            <button
+                                onClick={() => setViewMode('grouped')}
+                                className={`px-4 py-2.5 text-[10px] font-black uppercase tracking-wider rounded-lg transition-all cursor-pointer ${viewMode === 'grouped' ? 'bg-gradient-to-r from-orange-500 to-amber-600 text-white shadow-lg' : 'text-white/40 hover:text-white/70'}`}
+                            >
+                                🗂️ Agrupado por Checklist
+                            </button>
+                        </div>
+
                         <div className="flex flex-wrap gap-3">
                             <Link
                                 href={route('gestor.asset-types.index')}
@@ -267,116 +374,384 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                         </div>
                     </div>
 
-                    {/* TABLA DE ACTIVOS */}
-                    <div className="bg-[#16162a] rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-black/20 border-b border-white/5 text-[9px] font-black text-white/30 uppercase tracking-widest">
-                                        <th className="p-4 pl-6">Activo / Identificador</th>
-                                        <th className="p-4">Tipo</th>
-                                        <th className="p-4">Sede / Empresa</th>
-                                        <th className="p-4">Estado</th>
-                                        <th className="p-4 pr-6 text-right">Acciones</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5 text-xs">
-                                    {assets.data.length === 0 ? (
-                                        <tr>
-                                            <td colSpan="5" className="p-12 text-center text-white/30 text-xs uppercase tracking-widest italic">
-                                                No se encontraron activos registrados con los filtros aplicados.
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        assets.data.map(asset => (
-                                            <tr key={asset.id} className="hover:bg-white/[0.02] transition-colors">
-                                                <td className="p-4 pl-6">
-                                                    <div className="font-bold text-white uppercase italic">{asset.name}</div>
-                                                    <div className="text-[10px] text-orange-400 font-mono tracking-wider">QR/ID: {asset.identifier}</div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="flex flex-col gap-2">
-                                                        <div className="flex items-center gap-2">
-                                                            {asset.asset_type?.category && (
-                                                                <div className="w-6 h-6 rounded-lg flex items-center justify-center border transition-all text-xs flex-shrink-0" style={{ backgroundColor: `${asset.asset_type.category.color}15`, borderColor: `${asset.asset_type.category.color}40`, color: asset.asset_type.category.color }} title={`Categoría: ${asset.asset_type.category.name}`}>
-                                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: ICONS[asset.asset_type.category.icon] || ICONS['tag'] }} />
-                                                                </div>
-                                                            )}
-                                                            <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-indigo-200 uppercase tracking-wide">
-                                                                {asset.asset_type?.name || 'Genérico'}
-                                                            </span>
-                                                        </div>
-                                                        
-                                                        {/* Checklists asociados */}
-                                                        {asset.asset_type?.category?.checklists && asset.asset_type.category.checklists.length > 0 ? (
-                                                            <div className="flex flex-col gap-0.5 pl-1">
-                                                                <span className="text-[7px] font-black text-white/20 uppercase tracking-widest italic">Checklists asociados</span>
-                                                                <div className="flex flex-wrap gap-x-2 gap-y-1">
-                                                                    {asset.asset_type.category.checklists.map(c => (
-                                                                        <span key={c.id} className="inline-flex items-center gap-1 text-[9px] text-white/50 font-bold hover:text-orange-400 transition-colors uppercase italic">
-                                                                            📋 {c.title}
-                                                                        </span>
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        ) : (
-                                                            <span className="text-[8px] text-white/20 italic pl-1">Sin checklists asociados</span>
-                                                        )}
+                     {/* TABLA DE ACTIVOS CONDICIONAL */}
+                    {viewMode === 'grouped' ? (
+                        <div className="space-y-6">
+                            {/* Controles de expansión masiva */}
+                            <div className="flex justify-end gap-2 text-[10px] font-black uppercase tracking-wider">
+                                <button
+                                    onClick={() => toggleAllGroups(true)}
+                                    className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all text-white/60 hover:text-white cursor-pointer"
+                                >
+                                    ➕ Expandir Todos
+                                </button>
+                                <button
+                                    onClick={() => toggleAllGroups(false)}
+                                    className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg hover:bg-white/10 transition-all text-white/60 hover:text-white cursor-pointer"
+                                >
+                                    ➖ Colapsar Todos
+                                </button>
+                            </div>
+
+                            {groupedAssets.length === 0 ? (
+                                <div className="bg-[#16162a] p-12 rounded-[2rem] border border-white/5 text-center text-white/30 text-xs uppercase tracking-widest italic">
+                                    No se encontraron activos registrados con los filtros aplicados.
+                                </div>
+                            ) : (
+                                groupedAssets.map(group => {
+                                    const isExpanded = !!expandedGroups[group.id];
+                                    const stats = getGroupKpis(group.assets);
+                                    
+                                    return (
+                                        <div 
+                                            key={group.id} 
+                                            className="bg-[#16162d] rounded-[2rem] border border-white/5 overflow-hidden shadow-xl transition-all"
+                                        >
+                                            {/* Cabecera del Acordeón */}
+                                            <div 
+                                                onClick={() => toggleGroup(group.id)}
+                                                className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer hover:bg-white/[0.02] transition-colors select-none"
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    {/* Icono de Categoría */}
+                                                    <div 
+                                                        className="h-12 w-12 rounded-2xl bg-white/5 border flex items-center justify-center shadow-inner flex-shrink-0 transition-transform duration-300"
+                                                        style={{ 
+                                                            borderColor: group.category ? `${group.category.color}40` : 'rgba(255,255,255,0.1)',
+                                                            color: group.category ? group.category.color : '#a5b4fc'
+                                                        }}
+                                                    >
+                                                        <svg 
+                                                            className="w-6 h-6" 
+                                                            fill="none" 
+                                                            stroke="currentColor" 
+                                                            viewBox="0 0 24 24" 
+                                                            strokeWidth="2" 
+                                                            dangerouslySetInnerHTML={{ 
+                                                                __html: group.category ? (ICONS[group.category.icon] || ICONS['tag']) : ICONS['doc'] 
+                                                            }} 
+                                                        />
                                                     </div>
-                                                </td>
-                                                <td className="p-4">
-                                                    <div className="text-white font-bold">{asset.sede?.nombre_sede}</div>
-                                                    <div className="text-[10px] text-white/40">{asset.sede?.empresa?.nombre}</div>
-                                                </td>
-                                                <td className="p-4 relative hover:z-30">
-                                                    {getStatusBadge(asset)}
-                                                </td>
-                                                <td className="p-4 pr-6 text-right space-x-2">
-                                                    <Link
-                                                        href={route('gestor.assets.show', asset.id)}
-                                                        className="px-3 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500/20 transition-all"
-                                                    >
-                                                        Ficha
-                                                    </Link>
-                                                    <Link
-                                                        href={route('gestor.assets.edit', asset.id)}
-                                                        className="px-3 py-1.5 bg-white/5 text-white/70 border border-white/10 rounded-xl text-[10px] font-black uppercase hover:bg-white/10 transition-all"
-                                                    >
-                                                        Editar
-                                                    </Link>
-                                                    <button
-                                                        onClick={() => handleDelete(asset)}
-                                                        className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all"
-                                                    >
-                                                        Dar de Baja
-                                                    </button>
+                                                    
+                                                    <div>
+                                                        <div className="flex flex-wrap items-center gap-2">
+                                                            <h3 className="text-sm font-black text-white uppercase tracking-wider italic">
+                                                                {group.title}
+                                                            </h3>
+                                                            {group.registry_code && (
+                                                                <span className="px-2 py-0.5 bg-black/40 border border-white/10 rounded-md text-[8px] font-mono text-orange-400 uppercase tracking-widest">
+                                                                    {group.registry_code}
+                                                                </span>
+                                                            )}
+                                                            {/* Lupa para visualizar información completa del checklist en modal */}
+                                                            {group.id !== 'no-checklist' && (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setInfoChecklist(group);
+                                                                    }}
+                                                                    className="w-5 h-5 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 text-indigo-300 hover:bg-white/10 hover:text-white transition-all cursor-pointer"
+                                                                    title="Ver especificación del checklist"
+                                                                >
+                                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.603 10.603z" />
+                                                                    </svg>
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                        <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider font-medium line-clamp-1 max-w-[200px] sm:max-w-md lg:max-w-xl">
+                                                            {group.description || 'Sin descripción disponible.'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Contadores y Estado */}
+                                                <div className="flex flex-wrap items-center gap-4 md:self-center self-end">
+                                                    {/* Total Badge */}
+                                                    <div className="bg-black/30 px-3 py-1.5 rounded-xl border border-white/5 flex items-center gap-2">
+                                                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Activos:</span>
+                                                        <span className="text-xs font-black text-indigo-300 italic">{stats.total}</span>
+                                                    </div>
+
+                                                    {/* Semáforo de Estado de Salud de Activos (HUD) */}
+                                                    <div className="flex items-center gap-1 bg-black/30 p-1 rounded-full border border-white/5">
+                                                        {/* Operativos (Verde) */}
+                                                        <div 
+                                                            className="w-6 h-6 rounded-full bg-emerald-500 text-black font-black text-[10px] flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+                                                            title={`${stats.operativo} Operativos`}
+                                                        >
+                                                            {stats.operativo}
+                                                        </div>
+                                                        {/* En Alerta (Amarillo) */}
+                                                        <div 
+                                                            className="w-6 h-6 rounded-full bg-amber-500 text-black font-black text-[10px] flex items-center justify-center shadow-[0_0_10px_rgba(245,158,11,0.4)]"
+                                                            title={`${stats.alerta} en Alerta`}
+                                                        >
+                                                            {stats.alerta}
+                                                        </div>
+                                                        {/* Fuera de Servicio (Rojo) */}
+                                                        <div 
+                                                            className="w-6 h-6 rounded-full bg-red-500 text-white font-black text-[10px] flex items-center justify-center shadow-[0_0_10px_rgba(239,68,68,0.4)]"
+                                                            title={`${stats.fuera_de_servicio} Fuera de Servicio`}
+                                                        >
+                                                            {stats.fuera_de_servicio}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Chevron Indicator */}
+                                                    <div className="text-white/40 hover:text-white transition-colors ml-2">
+                                                        <svg 
+                                                            className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                                                            fill="none" 
+                                                            stroke="currentColor" 
+                                                            viewBox="0 0 24 24" 
+                                                            strokeWidth="2.5"
+                                                        >
+                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Contenido Desplegable (Tabla de Activos) */}
+                                            {isExpanded && (
+                                                <div className="border-t border-white/5 bg-black/10 overflow-x-auto custom-scrollbar">
+                                                    <table className="w-full text-left border-collapse">
+                                                        <thead>
+                                                            <tr className="bg-black/40 border-b border-white/5 text-[9px] font-black text-orange-500 uppercase tracking-widest italic">
+                                                                <th className="p-3 pl-6">Activo / Identificador</th>
+                                                                <th className="p-3">Tipo de Activo</th>
+                                                                <th className="p-3">Sede / Empresa</th>
+                                                                <th className="p-3">Estado</th>
+                                                                <th className="p-3 pr-6 text-right">Acciones</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-white/5 text-xs">
+                                                            {group.assets.map(asset => (
+                                                                <tr key={asset.id} className="hover:bg-white/[0.01] transition-colors">
+                                                                    <td className="p-3 pl-6">
+                                                                        <div className="font-bold text-white uppercase italic">{asset.name}</div>
+                                                                        <div className="text-[10px] text-orange-400 font-mono tracking-wider">QR/ID: {asset.identifier}</div>
+                                                                    </td>
+                                                                    <td className="p-3">
+                                                                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-indigo-200 uppercase tracking-wide">
+                                                                            {asset.asset_type?.name || 'Genérico'}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="p-3">
+                                                                        <div className="text-white font-bold">{asset.sede?.nombre_sede}</div>
+                                                                        <div className="text-[10px] text-white/40">{asset.sede?.empresa?.nombre}</div>
+                                                                    </td>
+                                                                    <td className="p-3 relative hover:z-30">
+                                                                        {getStatusBadge(asset)}
+                                                                    </td>
+                                                                    <td className="p-3 pr-6 text-right space-x-2">
+                                                                        <Link
+                                                                            href={route('gestor.assets.show', asset.id)}
+                                                                            className="px-3 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500/20 transition-all inline-block"
+                                                                        >
+                                                                            Ficha
+                                                                        </Link>
+                                                                        <Link
+                                                                            href={route('gestor.assets.edit', asset.id)}
+                                                                            className="px-3 py-1.5 bg-white/5 text-white/70 border border-white/10 rounded-xl text-[10px] font-black uppercase hover:bg-white/10 transition-all inline-block"
+                                                                        >
+                                                                            Editar
+                                                                        </Link>
+                                                                        <button
+                                                                            onClick={() => handleDelete(asset)}
+                                                                            className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all cursor-pointer inline-block"
+                                                                        >
+                                                                            Dar de Baja
+                                                                        </button>
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    ) : (
+                        <div className="bg-[#16162a] rounded-[2rem] border border-white/5 overflow-hidden shadow-2xl">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-black/20 border-b border-white/5 text-[9px] font-black text-white/30 uppercase tracking-widest">
+                                            <th className="p-4 pl-6">Activo / Identificador</th>
+                                            <th className="p-4">Tipo</th>
+                                            <th className="p-4">Sede / Empresa</th>
+                                            <th className="p-4">Estado</th>
+                                            <th className="p-4 pr-6 text-right">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5 text-xs">
+                                        {assets.data.length === 0 ? (
+                                            <tr>
+                                                <td colSpan="5" className="p-12 text-center text-white/30 text-xs uppercase tracking-widest italic">
+                                                    No se encontraron activos registrados con los filtros aplicados.
                                                 </td>
                                             </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                        ) : (
+                                            assets.data.map(asset => (
+                                                <tr key={asset.id} className="hover:bg-white/[0.02] transition-colors">
+                                                    <td className="p-4 pl-6">
+                                                        <div className="font-bold text-white uppercase italic">{asset.name}</div>
+                                                        <div className="text-[10px] text-orange-400 font-mono tracking-wider">QR/ID: {asset.identifier}</div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="flex flex-col gap-2">
+                                                            <div className="flex items-center gap-2">
+                                                                {asset.asset_type?.category && (
+                                                                    <div className="w-6 h-6 rounded-lg flex items-center justify-center border transition-all text-xs flex-shrink-0" style={{ backgroundColor: `${asset.asset_type.category.color}15`, borderColor: `${asset.asset_type.category.color}40`, color: asset.asset_type.category.color }} title={`Categoría: ${asset.asset_type.category.name}`}>
+                                                                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" dangerouslySetInnerHTML={{ __html: ICONS[asset.asset_type.category.icon] || ICONS['tag'] }} />
+                                                                    </div>
+                                                                )}
+                                                                <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-indigo-200 uppercase tracking-wide">
+                                                                    {asset.asset_type?.name || 'Genérico'}
+                                                                </span>
+                                                            </div>
+                                                            
+                                                            {/* Checklists asociados */}
+                                                            {asset.asset_type?.category?.checklists && asset.asset_type.category.checklists.length > 0 ? (
+                                                                <div className="flex flex-col gap-0.5 pl-1">
+                                                                    <span className="text-[7px] font-black text-white/20 uppercase tracking-widest italic">Checklists asociados</span>
+                                                                    <div className="flex flex-wrap gap-x-2 gap-y-1">
+                                                                        {asset.asset_type.category.checklists.map(c => (
+                                                                            <span key={c.id} className="inline-flex items-center gap-1 text-[9px] text-white/50 font-bold hover:text-orange-400 transition-colors uppercase italic">
+                                                                                📋 {c.title}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-[8px] text-white/20 italic pl-1">Sin checklists asociados</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="p-4">
+                                                        <div className="text-white font-bold">{asset.sede?.nombre_sede}</div>
+                                                        <div className="text-[10px] text-white/40">{asset.sede?.empresa?.nombre}</div>
+                                                    </td>
+                                                    <td className="p-4 relative hover:z-30">
+                                                        {getStatusBadge(asset)}
+                                                    </td>
+                                                    <td className="p-4 pr-6 text-right space-x-2">
+                                                        <Link
+                                                            href={route('gestor.assets.show', asset.id)}
+                                                            className="px-3 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500/20 transition-all"
+                                                        >
+                                                            Ficha
+                                                        </Link>
+                                                        <Link
+                                                            href={route('gestor.assets.edit', asset.id)}
+                                                            className="px-3 py-1.5 bg-white/5 text-white/70 border border-white/10 rounded-xl text-[10px] font-black uppercase hover:bg-white/10 transition-all"
+                                                        >
+                                                            Editar
+                                                        </Link>
+                                                        <button
+                                                            onClick={() => handleDelete(asset)}
+                                                            className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all"
+                                                        >
+                                                            Dar de Baja
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
 
-                        {/* PAGINACIÓN */}
-                        {assets.links && assets.links.length > 3 && (
-                            <div className="p-4 bg-black/20 border-t border-white/5 flex items-center justify-between">
-                                <div className="text-[10px] text-white/40 uppercase font-bold">
-                                    Mostrando {assets.from} a {assets.to} de {assets.total} activos
+                            {/* PAGINACIÓN */}
+                            {assets.links && assets.links.length > 3 && (
+                                <div className="p-4 bg-black/20 border-t border-white/5 flex items-center justify-between">
+                                    <div className="text-[10px] text-white/40 uppercase font-bold">
+                                        Mostrando {assets.from} a {assets.to} de {assets.total} activos
+                                    </div>
+                                    <div className="flex gap-1">
+                                        {assets.links.map((link, i) => (
+                                            <Link
+                                                key={i}
+                                                href={link.url || '#'}
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                                className={`px-3 py-1 rounded-lg text-xs font-bold ${link.active ? 'bg-orange-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="flex gap-1">
-                                    {assets.links.map((link, i) => (
-                                        <Link
-                                            key={i}
-                                            href={link.url || '#'}
-                                            dangerouslySetInnerHTML={{ __html: link.label }}
-                                            className={`px-3 py-1 rounded-lg text-xs font-bold ${link.active ? 'bg-orange-500 text-white' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+                            )}
+                        </div>
+                    )}
+
+                    {/* MODAL INFORMATIVO DETALLADO (ESPECIFICACIÓN DEL CHECKLIST) */}
+                    {infoChecklist && (
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn" onClick={() => setInfoChecklist(null)}>
+                            <div 
+                                className="bg-[#16162d] border border-white/10 w-full max-w-lg rounded-[2.5rem] shadow-2xl relative overflow-hidden p-8"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                {/* Header del Modal */}
+                                <div className="flex items-center gap-4 mb-6">
+                                    <div 
+                                        className="h-12 w-12 rounded-2xl bg-white/5 border flex items-center justify-center shadow-inner flex-shrink-0"
+                                        style={{ 
+                                            borderColor: infoChecklist.category ? `${infoChecklist.category.color}40` : 'rgba(255,255,255,0.1)',
+                                            color: infoChecklist.category ? infoChecklist.category.color : '#a5b4fc'
+                                        }}
+                                    >
+                                        <svg 
+                                            className="w-6 h-6" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            viewBox="0 0 24 24" 
+                                            strokeWidth="2" 
+                                            dangerouslySetInnerHTML={{ 
+                                                __html: infoChecklist.category ? (ICONS[infoChecklist.category.icon] || ICONS['tag']) : ICONS['doc'] 
+                                            }} 
                                         />
-                                    ))}
+                                    </div>
+                                    <div>
+                                        <span className="text-[9px] font-black text-orange-500 uppercase tracking-[0.3em] italic">Especificación Técnica</span>
+                                        <h2 className="text-lg font-black text-white uppercase tracking-tight italic">
+                                            {infoChecklist.title}
+                                        </h2>
+                                    </div>
+                                </div>
+
+                                {/* Detalles del Checklist */}
+                                <div className="space-y-4 mb-8">
+                                    {infoChecklist.registry_code && (
+                                        <div className="bg-black/30 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Código Normativo:</span>
+                                            <span className="text-xs font-mono font-bold text-orange-400">{infoChecklist.registry_code}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-1.5">
+                                        <span className="text-[9px] font-black text-white/30 uppercase tracking-widest block">Descripción del Protocolo:</span>
+                                        <div className="bg-black/20 p-4 rounded-2xl border border-white/5 text-xs text-indigo-200 font-medium leading-relaxed max-h-60 overflow-y-auto custom-scrollbar">
+                                            {infoChecklist.description || 'Este checklist no cuenta con una descripción detallada registrada.'}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer / Cierre */}
+                                <div className="flex justify-end">
+                                    <button
+                                        onClick={() => setInfoChecklist(null)}
+                                        className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg cursor-pointer"
+                                    >
+                                        Entendido
+                                    </button>
                                 </div>
                             </div>
-                        )}
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AuthenticatedLayout>
