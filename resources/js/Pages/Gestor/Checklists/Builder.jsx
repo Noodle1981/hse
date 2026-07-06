@@ -85,6 +85,18 @@ export default function Builder({ checklist, categories }) {
                 try { parsedFailures = JSON.parse(q.failure_values) || []; } catch(e) { parsedFailures = []; }
             }
 
+            const hasSections = checklist?.sections && checklist.sections.length > 0;
+            let sectionId = q.section_id;
+            let sectionTempId = null;
+
+            if (!sectionId) {
+                if (hasSections) {
+                    sectionId = checklist.sections[0].id;
+                } else {
+                    sectionTempId = 'temp_default_section';
+                }
+            }
+
             return {
                 id: q.id,
                 label: q.label,
@@ -96,8 +108,8 @@ export default function Builder({ checklist, categories }) {
                 failure_logic: q.failure_logic || 'fail_if_selected',
                 is_required: q.is_required === 1 || q.is_required === true,
                 help_text: q.help_text || '',
-                section_id: q.section_id,
-                section_tempId: null,
+                section_id: sectionId,
+                section_tempId: sectionTempId,
             };
         }) || [],
     });
@@ -203,6 +215,21 @@ export default function Builder({ checklist, categories }) {
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-orange-500/30">
                 <form onSubmit={submit} className="max-w-[100rem] mx-auto space-y-8">
                     
+                    {/* ERRORES DE VALIDACIÓN GENERALES */}
+                    {Object.keys(form.errors).length > 0 && (
+                        <div className="bg-red-500/10 border border-red-500/30 text-red-500 p-6 rounded-[2rem] animate-fade-in-down">
+                            <h4 className="font-black uppercase tracking-widest text-[10px] mb-2 italic flex items-center gap-2">
+                                <span className="w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+                                ⚠️ Se detectaron errores de validación:
+                            </h4>
+                            <ul className="list-disc pl-6 text-xs font-bold space-y-1 italic uppercase">
+                                {Object.entries(form.errors).map(([key, value]) => (
+                                    <li key={key}>{value}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                    
                     {/* HUB DE CONFIGURACIÓN BASE */}
                     <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[3rem] border border-white/5 p-10 shadow-2xl relative overflow-hidden animate-fade-in-down">
                         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent"></div>
@@ -218,28 +245,31 @@ export default function Builder({ checklist, categories }) {
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="flex flex-col gap-1.5">
-        <label htmlFor="title" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Título de Checklist</label>
+                                        <label htmlFor="title" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Título de Checklist</label>
                                         <input id="title" name="title" type="text" value={form.data.title} onChange={e => form.setData('title', e.target.value)} required 
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all uppercase"/>
+                                        {form.errors.title && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.title}</span>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
-        <label htmlFor="registry_code" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Código Registral</label>
+                                        <label htmlFor="registry_code" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Código Registral</label>
                                         <input id="registry_code" name="registry_code" type="text" value={form.data.registry_code} onChange={e => form.setData('registry_code', e.target.value)} 
                                             className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all uppercase"/>
+                                        {form.errors.registry_code && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.registry_code}</span>}
                                     </div>
                                 </div>
 
                                 <div className="flex flex-col gap-1.5">
-        <label htmlFor="description" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Alcance / Descripción</label>
+                                    <label htmlFor="description" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Alcance / Descripción</label>
                                     <textarea id="description" name="description" value={form.data.description} onChange={e => form.setData('description', e.target.value)} rows="2"
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all uppercase"></textarea>
+                                    {form.errors.description && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.description}</span>}
                                 </div>
                             </div>
 
                             <div className="lg:w-80 space-y-6">
                                 <div className="bg-white/5 rounded-[2.5rem] p-8 border border-white/5 space-y-6">
                                     <div className="flex flex-col gap-1.5">
-        <label htmlFor="category_id" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Clasificación Principal</label>
+                                        <label htmlFor="category_id" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Clasificación Principal</label>
                                         <div className="flex gap-2">
                                             <select id="category_id" name="category_id" value={form.data.category_id} onChange={e => form.setData('category_id', e.target.value)} 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all [color-scheme:dark] italic uppercase">
@@ -248,9 +278,10 @@ export default function Builder({ checklist, categories }) {
                                             </select>
                                             <button type="button" onClick={() => setShowCategoryModal(true)} className="px-4 bg-orange-600 text-white rounded-2xl font-black text-lg hover:brightness-110 active:scale-95 transition-all shadow-[0_0_15px_rgba(246,146,57,0.3)] flex items-center justify-center">+</button>
                                         </div>
+                                        {form.errors.category_id && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.category_id}</span>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
-        <label htmlFor="subcategory_id" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Sub-Clasificación</label>
+                                        <label htmlFor="subcategory_id" className="pl-3 text-[8px] font-black text-orange-400 uppercase tracking-[0.3em] italic">Sub-Clasificación</label>
                                         <div className="flex gap-2">
                                             <select id="subcategory_id" name="subcategory_id" value={form.data.subcategory_id} onChange={e => form.setData('subcategory_id', e.target.value)} 
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-xs font-bold text-white focus:ring-2 focus:ring-orange-500/50 transition-all [color-scheme:dark] italic uppercase"
@@ -260,6 +291,7 @@ export default function Builder({ checklist, categories }) {
                                             </select>
                                             <button type="button" onClick={() => form.data.category_id ? setShowSubcategoryModal(true) : alert('Seleccione una categoría primero')} className={`px-4 text-white rounded-2xl font-black text-lg transition-all flex items-center justify-center ${form.data.category_id ? 'bg-orange-600 hover:brightness-110 active:scale-95 shadow-[0_0_15px_rgba(246,146,57,0.3)]' : 'bg-white/10 cursor-not-allowed text-white/30'}`}>+</button>
                                         </div>
+                                        {form.errors.subcategory_id && <span className="text-red-500 text-[9px] font-black italic ml-4 mt-1 block">{form.errors.subcategory_id}</span>}
                                     </div>
 
                                     <div className="flex items-center gap-4 bg-black/20 px-6 py-4 rounded-2xl border border-white/5">
