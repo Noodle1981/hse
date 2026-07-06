@@ -215,7 +215,7 @@ El sistema cuenta con las siguientes entidades principales:
 | `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
 | `dynamic_checklist_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `asset_id` | `CHAR(36)` / `UUID` | Sí ✅ | *ninguno* |  |
-| `user_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `user_id` | `INTEGER` | Sí ✅ | *ninguno* | Permite asignaciones a nivel de sede sin dueño (ej: SRE autogeneradas) |
 | `sede_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `empresa_id` | `INTEGER` | No ❌ | *ninguno* |  |
 | `frequency` | `varchar` | No ❌ | `'once'` |  |
