@@ -73,8 +73,11 @@ class OperationController extends Controller
 
         // 1️⃣ Manual / Automatic Assignments (Checklists) - LOAD ALL FOR GROUPING
         $assignmentsQuery = ChecklistAssignment::with(['checklist.categoryRelation', 'checklist.questions', 'sede.empresa'])
-            ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
+            ->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhereNull('user_id');
+            })
             ->whereMonth('due_date', $selectedMonth)
             ->whereYear('due_date', $now->year);
 

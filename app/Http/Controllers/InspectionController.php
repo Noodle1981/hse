@@ -56,8 +56,18 @@ class InspectionController extends Controller
         $assignment = null;
         if ($assignmentId) {
             $assignment = ChecklistAssignment::where('id', $assignmentId)
-                ->where('user_id', Auth::id())
+                ->where(function ($q) {
+                    $q->where('user_id', Auth::id())
+                      ->orWhereNull('user_id');
+                })
                 ->firstOrFail();
+
+            // Validar que el técnico tenga acceso a esta sede
+            /** @var \App\Models\User $user */
+            $user = Auth::user();
+            if (!$user->isSuperAdmin() && !$user->sedes()->where('sedes.id', $assignment->sede_id)->exists()) {
+                abort(403, 'No tienes permiso para operar en esta sede.');
+            }
 
             if ($assignment->status === 'completed') {
                 $redirect = $visitId
@@ -67,7 +77,10 @@ class InspectionController extends Controller
                 return redirect($redirect)->with('error', 'Esta asignación ya ha sido completada.');
             }
 
-            $assignment->update(['status' => 'in_progress']);
+            $assignment->update([
+                'status' => 'in_progress',
+                'user_id' => Auth::id() // Auto-asignar al técnico que la inicia
+            ]);
         }
 
         // Buscar o crear borrador de inspección específico para esta asignación

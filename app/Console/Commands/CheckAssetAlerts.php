@@ -295,12 +295,11 @@ class CheckAssetAlerts extends Command
             ->where('dynamic_checklist_id', $checklistResolucionId)
             ->where('status', '!=', 'completed')
             ->exists();
-
         if (!$existingAssignment) {
             \App\Models\ChecklistAssignment::create([
                 'dynamic_checklist_id' => $checklistResolucionId,
                 'asset_id' => $asset->id,
-                'user_id' => $systemUserId,
+                'user_id' => null,
                 'sede_id' => $asset->sede_id,
                 'empresa_id' => $asset->empresa_id,
                 'status' => 'pending',
