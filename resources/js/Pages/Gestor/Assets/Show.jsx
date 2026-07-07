@@ -2,11 +2,166 @@ import { Head, Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
 import { useState } from 'react';
 
+const parseAlertFinding = (h) => {
+    const desc = h.descripcion || '';
+    const titulo = h.titulo || '';
+    
+    const isSre = titulo.includes('SRE') || desc.includes('SRE') || desc.includes('Mantenimiento Crítico SRE');
+    
+    let ruleName = '';
+    if (titulo.includes(' - ')) {
+        ruleName = titulo.split(' - ').slice(1).join(' - ').trim();
+    } else {
+        ruleName = titulo.replace('Alerta:', '').replace('SRE Alerta Crítica:', '').trim();
+    }
+    
+    if (ruleName === 'fecha_de_proxima_carga_vencimiento') {
+        ruleName = 'Vencimiento Carga';
+    } else if (ruleName === 'vencimiento_prueba_hidraulica') {
+        ruleName = 'Prueba Hidráulica';
+    } else {
+        ruleName = ruleName.replace(/_/g, ' ');
+    }
+    
+    ruleName = ruleName.charAt(0).toUpperCase() + ruleName.slice(1);
+
+    let reason = '';
+    
+    const razonMatch = desc.match(/• Razón:\s*(.+)/i);
+    const metricaMatch = desc.match(/• Métrica \/ Condición:\s*(.+)/i);
+    
+    if (razonMatch) {
+        reason = razonMatch[1].trim();
+    } else if (metricaMatch) {
+        reason = metricaMatch[1].trim();
+    } else {
+        if (desc.includes('[Detalles del Activo]')) {
+            reason = desc.split('[Detalles del Activo]')[0].trim();
+        } else {
+            reason = desc.trim();
+        }
+    }
+    
+    return {
+        isSre,
+        ruleName,
+        reason,
+        fechaDeteccion: h.fecha_deteccion,
+        criticidad: h.criticidad || 'alto',
+        id: h.id
+    };
+};
+
+const getAssetHallazgosWithVirtual = (asset) => {
+    const dbHallazgos = asset.hallazgos || [];
+    const findingsList = [...dbHallazgos];
+    
+    const schema = asset.asset_type?.metadata_schema || [];
+    const metadata = asset.metadata || {};
+    
+    const existingRuleNames = dbHallazgos.map(h => {
+        if (h.titulo.includes(' - ')) {
+            return h.titulo.split(' - ').slice(1).join(' - ').trim().toLowerCase();
+        }
+        return h.titulo.toLowerCase();
+    });
+
+    const getSlug = (str) => {
+        return str
+            .toLowerCase()
+            .replace(/[^a-z0-9 -]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    };
+
+    schema.forEach(field => {
+        const fieldName = field.name;
+        const fieldType = field.type || 'text';
+        const fieldLabel = field.label || fieldName;
+        
+        if (!fieldName || metadata[fieldName] === undefined || metadata[fieldName] === null || metadata[fieldName] === '') {
+            return;
+        }
+        
+        const val = metadata[fieldName];
+        const rules = field.maintenance_rules || [];
+        
+        rules.forEach(rule => {
+            const ruleName = rule.nombre || '';
+            const frecuencia = rule.frecuencia !== undefined ? parseFloat(rule.frecuencia) : null;
+            const margen = rule.margen_pre_alerta !== undefined ? parseFloat(rule.margen_pre_alerta) : 0;
+            
+            if (!ruleName || !frecuencia) {
+                return;
+            }
+            
+            if (existingRuleNames.includes(ruleName.toLowerCase())) {
+                return;
+            }
+            
+            let isCritico = false;
+            let isPreAlerta = false;
+            let alertReason = '';
+            
+            if (fieldType === 'number' && !isNaN(parseFloat(val))) {
+                const numVal = parseFloat(val);
+                const nextTargetKey = `proximo_${fieldName}_${getSlug(ruleName)}`;
+                const targetVal = (metadata[nextTargetKey] !== undefined && !isNaN(parseFloat(metadata[nextTargetKey])))
+                    ? parseFloat(metadata[nextTargetKey])
+                    : frecuencia;
+                    
+                if (numVal >= targetVal) {
+                    isCritico = true;
+                    alertReason = `Métrica '${fieldLabel}' (${numVal}) alcanzó/superó el límite crítico de ${targetVal} para la regla SRE '${ruleName}'`;
+                } else if (numVal >= (targetVal - margen)) {
+                    isPreAlerta = true;
+                    alertReason = `Métrica '${fieldLabel}' (${numVal}) está próxima al límite crítico de ${targetVal} (Margen: ${margen}) para la regla SRE '${ruleName}'`;
+                }
+            } else if (fieldType === 'date' && val) {
+                try {
+                    const dueDate = new Date(val + 'T00:00:00');
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    dueDate.setHours(0,0,0,0);
+                    
+                    const diffTime = dueDate.getTime() - today.getTime();
+                    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (daysRemaining <= 0) {
+                        isCritico = true;
+                        alertReason = `Fecha '${fieldLabel}' venció hace ${Math.abs(daysRemaining)} días (límite: 0 días) para la regla SRE '${ruleName}'`;
+                    } else if (daysRemaining <= margen) {
+                        isPreAlerta = true;
+                        alertReason = `Fecha '${fieldLabel}' vence en ${daysRemaining} días (margen alerta: ${margen} días) para la regla SRE '${ruleName}'`;
+                    }
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+            
+            if (isCritico || isPreAlerta) {
+                findingsList.push({
+                    id: `virtual_${fieldName}_${getSlug(ruleName)}`,
+                    titulo: `SRE Alerta Crítica: ${asset.name} - ${ruleName}`,
+                    descripcion: `Mantenimiento Crítico SRE Requerido para ${ruleName}.\n\n[Detalles del Activo]\n• Activo: ${asset.name}\n• Razón: ${alertReason}`,
+                    criticidad: isCritico ? 'critico' : 'medio',
+                    estado: 'pendiente',
+                    fecha_deteccion: new Date().toISOString(),
+                    is_virtual: true
+                });
+            }
+        });
+    });
+    
+    return findingsList;
+};
+
 export default function Show({ asset, evidences = [] }) {
     const { flash } = usePage().props;
     const [activeTab, setActiveTab] = useState('photos'); // 'photos' | 'evidences' | 'inspections'
     const [uploadingKey, setUploadingKey] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
+    const hallazgos = getAssetHallazgosWithVirtual(asset);
 
     const photoSlots = asset.asset_type?.photo_schema && asset.asset_type.photo_schema.length > 0
         ? asset.asset_type.photo_schema
@@ -106,7 +261,7 @@ export default function Show({ asset, evidences = [] }) {
                     </div>
 
                     {/* ALERTAS ACTIVAS DETALLADAS */}
-                    {asset.hallazgos && asset.hallazgos.length > 0 && (
+                    {hallazgos && hallazgos.length > 0 && (
                         <div className="bg-amber-500/10 border border-amber-500/20 p-6 rounded-[2rem] shadow-2xl space-y-4 animate-fade-in-down">
                             <div className="flex items-center gap-3">
                                 <div className="h-10 w-10 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center animate-pulse">
@@ -120,22 +275,38 @@ export default function Show({ asset, evidences = [] }) {
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {asset.hallazgos.map(h => {
-                                    let cleanDesc = h.descripcion || '';
-                                    if (cleanDesc.includes('[Detalles del Activo]')) {
-                                        cleanDesc = cleanDesc.split('[Detalles del Activo]')[0].trim();
-                                    }
+                                {hallazgos.map(h => {
+                                    const alertInfo = parseAlertFinding(h);
                                     return (
-                                        <div key={h.id} className="p-4 bg-black/40 border border-white/5 rounded-2xl space-y-2">
-                                            <span className="text-[10px] font-black text-white/50 uppercase tracking-wider block">
-                                                🚨 {h.titulo.replace('Alerta: ', '')}
-                                            </span>
-                                            <p className="text-xs text-white font-medium leading-relaxed">
-                                                {cleanDesc}
+                                        <div key={h.id} className="p-5 bg-black/40 border border-white/5 rounded-2xl space-y-3 relative overflow-hidden group">
+                                            {/* Glow effect on hover */}
+                                            <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/[0.02] to-amber-500/0 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                            
+                                            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-wider ${
+                                                        alertInfo.isSre 
+                                                            ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' 
+                                                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                                                    }`}>
+                                                        {alertInfo.isSre ? 'Regla SRE' : 'Alerta'}
+                                                    </span>
+                                                    <span className="text-xs font-black text-white uppercase italic tracking-wide">
+                                                        {alertInfo.ruleName}
+                                                    </span>
+                                                </div>
+                                                <span className="text-[10px] text-amber-500 font-bold uppercase italic font-mono">
+                                                    {h.criticidad}
+                                                </span>
+                                            </div>
+                                            
+                                            <p className="text-xs text-indigo-100/90 leading-relaxed font-medium">
+                                                {alertInfo.reason}
                                             </p>
-                                            <div className="flex justify-between items-center text-[10px] text-white/30 pt-1 border-t border-white/5 font-mono">
-                                                <span>Detección: {new Date(h.fecha_deteccion).toLocaleDateString()}</span>
-                                                <span className="text-amber-500 font-bold uppercase italic">Criticidad: {h.criticidad}</span>
+                                            
+                                            <div className="flex justify-between items-center text-[9px] text-white/30 pt-2 border-t border-white/5 font-mono">
+                                                <span>Detección: {new Date(h.fecha_deteccion).toLocaleDateString()} {new Date(h.fecha_deteccion).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                                                <span>Origen: Sistema Automático</span>
                                             </div>
                                         </div>
                                     );

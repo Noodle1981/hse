@@ -53,6 +53,160 @@ const ICONS = {
     'bandera': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21V3m0 2.25h13.5a.75.75 0 01.54 1.275L14.25 9.75l2.79 3.225a.75.75 0 01-.54 1.275H3" />',
 };
 
+const parseAlertFinding = (h) => {
+    const desc = h.descripcion || '';
+    const titulo = h.titulo || '';
+    
+    const isSre = titulo.includes('SRE') || desc.includes('SRE') || desc.includes('Mantenimiento Crítico SRE');
+    
+    let ruleName = '';
+    if (titulo.includes(' - ')) {
+        ruleName = titulo.split(' - ').slice(1).join(' - ').trim();
+    } else {
+        ruleName = titulo.replace('Alerta:', '').replace('SRE Alerta Crítica:', '').trim();
+    }
+    
+    if (ruleName === 'fecha_de_proxima_carga_vencimiento') {
+        ruleName = 'Vencimiento Carga';
+    } else if (ruleName === 'vencimiento_prueba_hidraulica') {
+        ruleName = 'Prueba Hidráulica';
+    } else {
+        ruleName = ruleName.replace(/_/g, ' ');
+    }
+    
+    ruleName = ruleName.charAt(0).toUpperCase() + ruleName.slice(1);
+
+    let reason = '';
+    
+    const razonMatch = desc.match(/• Razón:\s*(.+)/i);
+    const metricaMatch = desc.match(/• Métrica \/ Condición:\s*(.+)/i);
+    
+    if (razonMatch) {
+        reason = razonMatch[1].trim();
+    } else if (metricaMatch) {
+        reason = metricaMatch[1].trim();
+    } else {
+        if (desc.includes('[Detalles del Activo]')) {
+            reason = desc.split('[Detalles del Activo]')[0].trim();
+        } else {
+            reason = desc.trim();
+        }
+    }
+    
+    return {
+        isSre,
+        ruleName,
+        reason,
+        fechaDeteccion: h.fecha_deteccion,
+        criticidad: h.criticidad || 'alto',
+        id: h.id
+    };
+};
+
+const getAssetHallazgosWithVirtual = (asset) => {
+    const dbHallazgos = asset.hallazgos || [];
+    const findingsList = [...dbHallazgos];
+    
+    const schema = asset.asset_type?.metadata_schema || [];
+    const metadata = asset.metadata || {};
+    
+    const existingRuleNames = dbHallazgos.map(h => {
+        if (h.titulo.includes(' - ')) {
+            return h.titulo.split(' - ').slice(1).join(' - ').trim().toLowerCase();
+        }
+        return h.titulo.toLowerCase();
+    });
+
+    const getSlug = (str) => {
+        return str
+            .toLowerCase()
+            .replace(/[^a-z0-9 -]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-');
+    };
+
+    schema.forEach(field => {
+        const fieldName = field.name;
+        const fieldType = field.type || 'text';
+        const fieldLabel = field.label || fieldName;
+        
+        if (!fieldName || metadata[fieldName] === undefined || metadata[fieldName] === null || metadata[fieldName] === '') {
+            return;
+        }
+        
+        const val = metadata[fieldName];
+        const rules = field.maintenance_rules || [];
+        
+        rules.forEach(rule => {
+            const ruleName = rule.nombre || '';
+            const frecuencia = rule.frecuencia !== undefined ? parseFloat(rule.frecuencia) : null;
+            const margen = rule.margen_pre_alerta !== undefined ? parseFloat(rule.margen_pre_alerta) : 0;
+            
+            if (!ruleName || !frecuencia) {
+                return;
+            }
+            
+            if (existingRuleNames.includes(ruleName.toLowerCase())) {
+                return;
+            }
+            
+            let isCritico = false;
+            let isPreAlerta = false;
+            let alertReason = '';
+            
+            if (fieldType === 'number' && !isNaN(parseFloat(val))) {
+                const numVal = parseFloat(val);
+                const nextTargetKey = `proximo_${fieldName}_${getSlug(ruleName)}`;
+                const targetVal = (metadata[nextTargetKey] !== undefined && !isNaN(parseFloat(metadata[nextTargetKey])))
+                    ? parseFloat(metadata[nextTargetKey])
+                    : frecuencia;
+                    
+                if (numVal >= targetVal) {
+                    isCritico = true;
+                    alertReason = `Métrica '${fieldLabel}' (${numVal}) alcanzó/superó el límite crítico de ${targetVal} para la regla SRE '${ruleName}'`;
+                } else if (numVal >= (targetVal - margen)) {
+                    isPreAlerta = true;
+                    alertReason = `Métrica '${fieldLabel}' (${numVal}) está próxima al límite crítico de ${targetVal} (Margen: ${margen}) para la regla SRE '${ruleName}'`;
+                }
+            } else if (fieldType === 'date' && val) {
+                try {
+                    const dueDate = new Date(val + 'T00:00:00');
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    dueDate.setHours(0,0,0,0);
+                    
+                    const diffTime = dueDate.getTime() - today.getTime();
+                    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (daysRemaining <= 0) {
+                        isCritico = true;
+                        alertReason = `Fecha '${fieldLabel}' venció hace ${Math.abs(daysRemaining)} días (límite: 0 días) para la regla SRE '${ruleName}'`;
+                    } else if (daysRemaining <= margen) {
+                        isPreAlerta = true;
+                        alertReason = `Fecha '${fieldLabel}' vence en ${daysRemaining} días (margen alerta: ${margen} días) para la regla SRE '${ruleName}'`;
+                    }
+                } catch (e) {
+                    console.warn(e);
+                }
+            }
+            
+            if (isCritico || isPreAlerta) {
+                findingsList.push({
+                    id: `virtual_${fieldName}_${getSlug(ruleName)}`,
+                    titulo: `SRE Alerta Crítica: ${asset.name} - ${ruleName}`,
+                    descripcion: `Mantenimiento Crítico SRE Requerido para ${ruleName}.\n\n[Detalles del Activo]\n• Activo: ${asset.name}\n• Razón: ${alertReason}`,
+                    criticidad: isCritico ? 'critico' : 'medio',
+                    estado: 'pendiente',
+                    fecha_deteccion: new Date().toISOString(),
+                    is_virtual: true
+                });
+            }
+        });
+    });
+    
+    return findingsList;
+};
+
 export default function Index({ assets, kpis, filters, empresas = [], sedes = [], assetTypes = [] }) {
     const { flash } = usePage().props;
 
@@ -192,6 +346,7 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
 
     const getStatusBadge = (asset) => {
         const st = asset.status;
+        const hallazgos = getAssetHallazgosWithVirtual(asset);
         switch (st) {
             case 'operativo':
                 return (
@@ -208,37 +363,28 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                             Alerta
                         </span>
                         
-                        {asset.hallazgos && asset.hallazgos.length > 0 && (
-                            <div className="absolute left-1/2 top-full mt-2 -translate-x-1/2 w-64 bg-[#141426] border border-amber-500/30 p-4 rounded-2xl shadow-2xl text-[10px] text-indigo-100 hidden group-hover/tooltip:block z-50 pointer-events-none transition-all">
+                        {hallazgos && hallazgos.length > 0 && (
+                            <div className="absolute left-1/2 top-full mt-2 -translate-x-1/2 w-72 bg-[#141426] border border-amber-500/30 p-4 rounded-2xl shadow-2xl text-[10px] text-indigo-100 hidden group-hover/tooltip:block z-50 pointer-events-none transition-all">
                                 <div className="absolute top-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#141426] border-l border-t border-amber-500/30 rotate-45" />
                                 <span className="text-[10px] font-black text-amber-400 uppercase tracking-widest block mb-2 border-b border-white/5 pb-1">⚠️ DETALLES DE ALERTA</span>
-                                <div className="space-y-2">
-                                    {asset.hallazgos.map(h => {
-                                        let desc = h.descripcion || '';
-                                        let label = h.titulo.split(' - ')[1] || 'Alerta';
-                                        if (label === 'fecha_de_proxima_carga_vencimiento') {
-                                            label = 'Vencimiento Carga';
-                                        } else if (label === 'vencimiento_prueba_hidraulica') {
-                                            label = 'Prueba Hidráulica';
-                                        } else {
-                                            label = label.replace(/_/g, ' ').toUpperCase();
-                                        }
-
-                                        let valor = '';
-                                        let dias = '';
-                                        const valMatch = desc.match(/Valor:\s*(\S+)/i);
-                                        const daysMatch = desc.match(/vence en\s*(\d+\s*días)/i);
-                                        
-                                        if (valMatch) valor = valMatch[1];
-                                        if (daysMatch) dias = daysMatch[1];
-
+                                <div className="space-y-2.5">
+                                    {hallazgos.map(h => {
+                                        const alertInfo = parseAlertFinding(h);
                                         return (
-                                            <div key={h.id} className="space-y-0.5 border-b border-white/5 pb-1.5 last:border-0 last:pb-0 text-left">
-                                                <span className="text-[9px] font-black text-white/60 block uppercase tracking-wide">{label}</span>
-                                                <div className="flex justify-between font-mono text-[9px] text-amber-300">
-                                                    <span>Vence: {valor ? valor : 'N/D'}</span>
-                                                    <span className="font-bold text-red-400">({dias ? dias : 'Vencido'})</span>
+                                            <div key={h.id} className="space-y-1 border-b border-white/5 pb-2 last:border-0 last:pb-0 text-left">
+                                                <div className="flex items-center gap-1.5">
+                                                    {alertInfo.isSre && (
+                                                        <span className="px-1.5 py-0.2 rounded text-[7px] font-black bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase tracking-wider font-mono">
+                                                            SRE
+                                                        </span>
+                                                    )}
+                                                    <span className="text-[9px] font-black text-amber-400 block uppercase tracking-wide">
+                                                        {alertInfo.ruleName}
+                                                    </span>
                                                 </div>
+                                                <p className="text-[9px] text-white/70 leading-relaxed font-sans font-medium">
+                                                    {alertInfo.reason}
+                                                </p>
                                             </div>
                                         );
                                     })}
@@ -249,10 +395,41 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                 );
             case 'fuera_de_servicio':
                 return (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20">
-                        <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                        Fuera de Servicio
-                    </span>
+                    <div className="relative inline-block group/tooltip">
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 cursor-help">
+                            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                            Fuera de Servicio
+                        </span>
+                        
+                        {hallazgos && hallazgos.length > 0 && (
+                            <div className="absolute left-1/2 top-full mt-2 -translate-x-1/2 w-72 bg-[#141426] border border-red-500/30 p-4 rounded-2xl shadow-2xl text-[10px] text-indigo-100 hidden group-hover/tooltip:block z-50 pointer-events-none transition-all">
+                                <div className="absolute top-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-[#141426] border-l border-t border-red-500/30 rotate-45" />
+                                <span className="text-[10px] font-black text-red-400 uppercase tracking-widest block mb-2 border-b border-white/5 pb-1">🚨 DETALLES DE BLOQUEO SRE</span>
+                                <div className="space-y-2.5">
+                                    {hallazgos.map(h => {
+                                        const alertInfo = parseAlertFinding(h);
+                                        return (
+                                            <div key={h.id} className="space-y-1 border-b border-white/5 pb-2 last:border-0 last:pb-0 text-left">
+                                                <div className="flex items-center gap-1.5">
+                                                    {alertInfo.isSre && (
+                                                        <span className="px-1.5 py-0.2 rounded text-[7px] font-black bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 uppercase tracking-wider font-mono">
+                                                            SRE
+                                                        </span>
+                                                    )}
+                                                    <span className="text-[9px] font-black text-red-400 block uppercase tracking-wide">
+                                                        {alertInfo.ruleName}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[9px] text-white/70 leading-relaxed font-sans font-medium">
+                                                    {alertInfo.reason}
+                                                </p>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 );
             default:
                 return (
@@ -296,7 +473,7 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                         <div className="flex flex-wrap gap-3">
                             <Link
                                 href={route('gestor.asset-types.index')}
-                                className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-white/5 border border-white/10 text-white font-bold text-xs uppercase tracking-wider rounded-xl hover:bg-white/10 transition-all active:scale-95"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-amber-500/20 hover:brightness-110 transition-all active:scale-95"
                             >
                                 🔗 Vincular Checklists
                             </Link>

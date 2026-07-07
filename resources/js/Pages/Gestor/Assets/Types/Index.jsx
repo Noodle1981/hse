@@ -63,6 +63,14 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
     const [filterSubcategoryId, setFilterSubcategoryId] = useState('');
     const [importChecklistId, setImportChecklistId] = useState('');
     const [importError, setImportError] = useState('');
+    const [expandedAttributes, setExpandedAttributes] = useState({});
+
+    const toggleAttributes = (typeId) => {
+        setExpandedAttributes(prev => ({
+            ...prev,
+            [typeId]: !prev[typeId]
+        }));
+    };
 
     const form = useForm({
         id: null,
@@ -197,17 +205,12 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                 return;
             }
 
-            // Fusionar: solo agregar campos cuya clave no exista ya
-            const existingKeys = form.data.metadata_schema.map(f => f.name);
-            const newFields = data.fields.filter(f => !existingKeys.includes(f.name));
-            const merged = [...form.data.metadata_schema, ...newFields];
+            // Mantener solo atributos creados manualmente, limpiando los importados del checklist anterior
+            const manualFields = form.data.metadata_schema.filter(f => !f._imported);
+            const merged = [...manualFields, ...data.fields];
             form.setData('metadata_schema', merged);
 
-            if (newFields.length === 0) {
-                setImportError(`Todos los campos del checklist ya estaban cargados (${data.fields.length} campos coincidentes).`);
-            } else {
-                setImportError('');
-            }
+            setImportError('');
         } catch (e) {
             setImportError('No se pudo conectar con el servidor. Verificá tu sesión.');
         }
@@ -240,9 +243,11 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                     {/* HEADER */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#16162a] p-6 rounded-[2rem] border border-white/5 shadow-2xl">
                         <div>
-                            <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] italic">Configuración de Inventario</span>
-                            <h1 className="text-2xl font-black text-white uppercase italic">Tipos de Activos y Atributos</h1>
-                            <p className="text-xs text-white/40 mt-1">Definí la ficha técnica de cada categoría de activo. Podés importar los atributos desde un checklist ya configurado.</p>
+                            <span className="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] italic">Configuración de Inventario de Checklist Dinámicos</span>
+                            <h1 className="text-2xl font-black text-white uppercase italic">Tipos de Checklist Dinámicos y Atributos</h1>
+                            <p className="text-sm text-white mt-1.5">
+                                Definí la ficha técnica de cada categoría de activo asociando a un Checklists previamente creado. Podés importar los atributos desde un checklist ya configurado y definir indices y reglas de atributos.
+                            </p>
                         </div>
                         <div className="flex gap-3">
                             <button
@@ -250,7 +255,7 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                 className="px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg hover:brightness-110 transition-all active:scale-95 flex items-center gap-2"
                             >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4"/></svg>
-                                Nuevo Tipo de Activo
+                                Nuevo tipo de Checklist Dinámico
                             </button>
                             <Link
                                 href={route('gestor.assets.index')}
@@ -276,11 +281,11 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                             <p className="text-xs mt-1">Creá uno y vinculalo a un checklist para importar sus atributos automáticamente.</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="flex flex-col gap-4">
                             {assetTypes.map(type => (
-                                <div key={type.id} className="bg-[#16162a] p-6 rounded-[2rem] border border-white/5 shadow-xl space-y-4 flex flex-col justify-between hover:border-orange-500/20 transition-all">
-                                    <div>
-                                        <div className="flex items-center justify-between mb-2">
+                                <div key={type.id} className="bg-[#16162a] p-6 rounded-[2rem] border border-white/5 shadow-xl hover:border-orange-500/20 transition-all flex flex-col gap-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                        <div className="flex items-center gap-3">
                                             <h3 className="text-base font-black text-white uppercase italic">{type.name}</h3>
                                             {type.category ? (
                                                 <div className="flex items-center gap-1.5">
@@ -297,45 +302,84 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                                 </span>
                                             )}
                                         </div>
-                                        {type.description && <p className="text-xs text-white/40 mb-4">{type.description}</p>}
-
-                                        <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-2">
-                                            <span className="text-[9px] font-black text-orange-400 uppercase tracking-widest block">
-                                                Atributos de Ficha Técnica ({type.metadata_schema?.length || 0})
-                                            </span>
-                                            {type.metadata_schema && type.metadata_schema.length > 0 ? (
-                                                <div className="flex flex-wrap gap-1.5">
-                                                    {type.metadata_schema.map((f, i) => (
-                                                        <span key={i} title={`Clave: ${f.name}`} className={`px-2.5 py-1 border rounded-lg text-[10px] font-mono cursor-help ${f.show_in_create ? 'bg-orange-500/10 border-orange-500/30 text-orange-300 font-bold' : 'bg-white/5 border-white/10 text-gray-300'}`}>
-                                                            {f.show_in_create && <span className="mr-1 text-[9px]">📌 Alta |</span>}
-                                                            <strong className="text-white">{f.label || f.name}</strong>
-                                                            <span className="ml-1 text-white/30">
-                                                                {f.type === 'date'
-                                                                    ? (f.alert_days ? '🔔 Vencimiento' : '🗓️ Fecha Info')
-                                                                    : (f.type === 'number' ? '🔢' : '📝')}
-                                                            </span>
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <p className="text-[10px] text-white/30 italic">Sin atributos definidos.</p>
-                                            )}
+                                        
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => openEditModal(type)}
+                                                className="px-3 py-1.5 bg-white/5 text-white/70 border border-white/10 rounded-xl text-[10px] font-black uppercase hover:bg-white/10 transition-all cursor-pointer"
+                                            >
+                                                Editar Atributos
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(type)}
+                                                className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all cursor-pointer"
+                                            >
+                                                Eliminar
+                                            </button>
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-end gap-2 pt-4 border-t border-white/5">
+                                    {type.description && <p className="text-xs text-white/40">{type.description}</p>}
+
+                                    <div className="bg-black/30 p-4 rounded-xl border border-white/5 space-y-2">
                                         <button
-                                            onClick={() => openEditModal(type)}
-                                            className="px-3 py-1.5 bg-white/5 text-white/70 border border-white/10 rounded-xl text-[10px] font-black uppercase hover:bg-white/10 transition-all"
+                                            type="button"
+                                            onClick={() => toggleAttributes(type.id)}
+                                            className="w-full flex items-center justify-between text-[9px] font-black text-orange-400 uppercase tracking-widest hover:text-orange-300 transition-colors focus:outline-none cursor-pointer"
                                         >
-                                            Editar Atributos
+                                            <span>Atributos de Ficha Técnica ({type.metadata_schema?.length || 0})</span>
+                                            <svg 
+                                                className={`w-3.5 h-3.5 transition-transform duration-200 ${expandedAttributes[type.id] ? 'rotate-180' : ''}`}
+                                                fill="none" 
+                                                stroke="currentColor" 
+                                                viewBox="0 0 24 24" 
+                                                strokeWidth="2.5"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                                            </svg>
                                         </button>
-                                        <button
-                                            onClick={() => handleDelete(type)}
-                                            className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all"
-                                        >
-                                            Eliminar
-                                        </button>
+                                        
+                                        {expandedAttributes[type.id] && (
+                                            <div className="pt-2 animate-fadeIn">
+                                                {type.metadata_schema && type.metadata_schema.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-1.5">
+                                                        {type.metadata_schema.map((f, i) => {
+                                                            const isConditional = (f.maintenance_rules && f.maintenance_rules.length > 0) || f.alert_days || f.alert_threshold || f.alert_interval;
+                                                            const isCreate = f.show_in_create;
+                                                            const isSre = f.maintenance_rules && f.maintenance_rules.length > 0;
+                                                            
+                                                            let badgeClass = "bg-white/5 border-white/10 text-gray-300 hover:border-white/20";
+                                                            if (isConditional) {
+                                                                badgeClass = "bg-amber-500/10 border-amber-500/30 text-amber-300 font-bold hover:bg-amber-500/15";
+                                                            } else if (isCreate) {
+                                                                badgeClass = "bg-blue-500/10 border-blue-500/30 text-blue-300 font-bold hover:bg-blue-500/15";
+                                                            }
+                                                            
+                                                            return (
+                                                                <span key={i} title={`Clave: ${f.name}`} className={`px-2.5 py-1 border rounded-lg text-[10px] font-mono cursor-help transition-all duration-200 ${badgeClass}`}>
+                                                                    {isCreate && <span className="mr-1 text-[9px] text-blue-400 font-bold">📌 Alta</span>}
+                                                                    {isCreate && isConditional && <span className="mx-1 text-white/20">|</span>}
+                                                                    {isConditional && (
+                                                                        <span className="mr-1 text-[9px] text-amber-400 font-bold">
+                                                                            {isSre ? '⚡ Regla SRE' : '🔔 Alerta'}
+                                                                        </span>
+                                                                    )}
+                                                                    {((isCreate || isConditional) && <span className="mx-1 text-white/20">|</span>)}
+                                                                    <strong className="text-white">{f.label || f.name}</strong>
+                                                                    <span className="ml-1 text-white/30">
+                                                                        {f.type === 'date'
+                                                                            ? '🗓️'
+                                                                            : (f.type === 'number' ? '🔢' : '📝')}
+                                                                    </span>
+                                                                </span>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-[10px] text-white/30 italic">Sin atributos definidos.</p>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -352,7 +396,7 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
                                     <div>
                                         <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest italic">
-                                            {editingType ? 'Editar Tipo de Activo' : 'Nuevo Tipo de Activo'}
+                                            {editingType ? 'Editar Tipo de Activo' : 'Nuevo tipo de Checklist Dinámico'}
                                         </span>
                                         <h2 className="text-xl font-black text-white uppercase italic">
                                             {editingType ? editingType.name : 'Configurar Ficha Técnica'}
@@ -362,7 +406,7 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                 </div>
 
                                 <form onSubmit={handleSubmit} className="space-y-6">
-                                    {/* ASOCIAR CHECKLIST Y CARGAR ATRIBUTOS */}
+                                    {/* ASOCIAR CHECKLIST Y CONFIGURAR ATRIBUTOS */}
                                     <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-2xl p-5 space-y-4">
                                         <div className="flex items-start gap-3">
                                             {/* Ícono Técnico según visual.md */}
@@ -372,8 +416,8 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                                 </svg>
                                             </div>
                                             <div>
-                                                <h4 className="text-xs font-black text-indigo-300 uppercase tracking-wider">Asociar Checklist y Cargar Atributos</h4>
-                                                <p className="text-[10px] text-white/40 mt-0.5">
+                                                <h4 className="text-xs font-black text-indigo-300 uppercase tracking-wider">Asociar Checklist y configurar Atributos</h4>
+                                                <p className="text-xs text-white mt-0.5">
                                                     Seleccioná la categoría, subcategoría y el checklist. El nombre del tipo de activo se auto-asignará a partir del checklist seleccionado.
                                                 </p>
                                             </div>
@@ -508,295 +552,347 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                     </div>
 
                                     {/* ─────────────────────────────────────────── */}
-                                    {/* LISTA DE ATRIBUTOS (EDITABLE) */}
+                                    {/* LISTA DE ATRIBUTOS (ESTILO CHECKLIST) */}
                                     {/* ─────────────────────────────────────────── */}
-                                    <div className="bg-black/40 p-6 rounded-2xl border border-white/10 space-y-4">
-                                        <div className="flex items-center justify-between">
+                                    <div className="space-y-3">
+                                        <div className="flex items-center justify-between px-1">
                                             <div>
-                                                <h4 className="text-xs font-black text-orange-400 uppercase tracking-wider italic">Atributos de Ficha Técnica</h4>
-                                                <p className="text-[10px] text-white/40">Los campos importados se marcan con 🔗. Podés editarlos o agregar más manualmente.</p>
+                                                <h4 className="text-xs font-black text-orange-400 uppercase tracking-wider italic">
+                                                    Preguntas / Atributos de Ficha Técnica
+                                                </h4>
+                                                <p className="text-[10px] text-white/30 mt-0.5">
+                                                    Los campos importados se marcan con 🔗. Podés editarlos o agregar más manualmente.
+                                                </p>
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={addField}
-                                                className="px-3 py-1.5 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-xl text-[10px] font-black uppercase hover:bg-orange-500 hover:text-white transition-all"
+                                                className="h-9 px-5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white rounded-xl text-[8px] font-black uppercase tracking-widest italic transition-all cursor-pointer flex-shrink-0"
                                             >
-                                                + Agregar Manual
+                                                Anclar Atributo
                                             </button>
                                         </div>
 
-                                        <div className="space-y-3">
-                                            {form.data.metadata_schema.map((field, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={`p-4 rounded-xl grid grid-cols-1 sm:grid-cols-5 gap-3 items-center border transition-all ${
-                                                        field._imported
-                                                            ? 'bg-indigo-500/5 border-indigo-500/20'
-                                                            : 'bg-white/5 border-white/10'
-                                                    }`}
-                                                >
-                                                    <div>
-                                                        <label className="block text-[8px] font-black text-white/30 uppercase">
-                                                            {field._imported ? '🔗 Clave (de Checklist)' : 'Clave / ID'}
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            value={field.name}
-                                                            onChange={e => updateField(index, 'name', e.target.value)}
-                                                            placeholder="ej: presion"
-                                                            className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-orange-300 font-mono focus:outline-none focus:border-orange-500"
-                                                            required
-                                                        />
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[8px] font-black text-white/30 uppercase">Etiqueta visible</label>
-                                                        <input
-                                                            type="text"
-                                                            value={field.label}
-                                                            onChange={e => updateField(index, 'label', e.target.value)}
-                                                            placeholder="ej: Presión (PSI)"
-                                                            className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
-                                                            required
-                                                        />
-                                                        <label className="flex items-center gap-1.5 cursor-pointer mt-1.5 select-none">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={!!field.show_in_create}
-                                                                onChange={e => updateField(index, 'show_in_create', e.target.checked)}
-                                                                className="rounded border-white/20 bg-black/50 text-orange-500 focus:ring-orange-500 h-3 w-3"
-                                                            />
-                                                            <span className="text-[9px] font-bold text-orange-400">📌 Solicitar al crear activo</span>
-                                                        </label>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[8px] font-black text-white/30 uppercase">Tipo de Dato</label>
-                                                        <select
-                                                            value={
-                                                                field.type === 'date'
-                                                                    ? (field.alert_days ? 'date_alert' : 'date_info')
-                                                                    : (field.type || 'text')
-                                                            }
-                                                            onChange={e => {
-                                                                const val = e.target.value;
-                                                                const updated = [...form.data.metadata_schema];
-                                                                if (val === 'date_alert') {
-                                                                    updated[index].type = 'date';
-                                                                    if (!updated[index].alert_days) updated[index].alert_days = 30;
-                                                                } else if (val === 'date_info') {
-                                                                    updated[index].type = 'date';
-                                                                    updated[index].alert_days = '';
-                                                                } else {
-                                                                    updated[index].type = val;
-                                                                    updated[index].alert_days = '';
-                                                                    updated[index].alert_threshold = '';
-                                                                }
-                                                                form.setData('metadata_schema', updated);
-                                                            }}
-                                                            className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
-                                                        >
-                                                            <option value="text">Texto (Alfanumérico)</option>
-                                                            <option value="number">Número (Métrica)</option>
-                                                            <option value="date_alert">🔔 Fecha Vencimiento (Con Alerta)</option>
-                                                            <option value="date_info">🗓️ Fecha Informativa (Sin Alerta)</option>
-                                                        </select>
-                                                    </div>
-                                                    <div>
-                                                        <label className="block text-[8px] font-black text-white/30 uppercase">
-                                                            {field.type === 'date'
-                                                                ? (field.alert_days ? 'Días Alerta Venc.' : 'Alerta Desactivada')
-                                                                : (field.type === 'number' ? 'Umbral / Frecuencia (KM/Horas)' : 'N/A')}
-                                                        </label>
-                                                        {field.type === 'date' ? (
-                                                            field.alert_days ? (
-                                                                <input
-                                                                    type="number"
-                                                                    value={field.alert_days || ''}
-                                                                    onChange={e => updateField(index, 'alert_days', e.target.value)}
-                                                                    placeholder="ej: 30"
-                                                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-amber-300 focus:outline-none focus:border-orange-500"
-                                                                />
-                                                            ) : (
-                                                                <input type="text" disabled placeholder="Sin alerta" className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white/30 italic" />
-                                                            )
-                                                        ) : field.type === 'number' ? (
-                                                            <div className="flex gap-1.5">
-                                                                <input
-                                                                    type="number"
-                                                                    step="any"
-                                                                    value={field.alert_threshold || ''}
-                                                                    onChange={e => updateField(index, 'alert_threshold', e.target.value)}
-                                                                    placeholder="Fijo (150k)"
-                                                                    title="Umbral fijo absoluto"
-                                                                    className="w-1/2 bg-black/50 border border-white/10 rounded-lg px-2 py-1.5 text-[11px] text-amber-300 focus:outline-none focus:border-orange-500"
-                                                                />
-                                                                <input
-                                                                    type="number"
-                                                                    step="any"
-                                                                    value={field.alert_interval || ''}
-                                                                    onChange={e => updateField(index, 'alert_interval', e.target.value)}
-                                                                    placeholder="+Frec. (15k)"
-                                                                    title="Intervalo recurrente (ej: cada 15.000 km)"
-                                                                    className="w-1/2 bg-black/50 border border-indigo-500/30 rounded-lg px-2 py-1.5 text-[11px] text-indigo-300 focus:outline-none focus:border-indigo-400"
-                                                                />
-                                                            </div>
-                                                        ) : (
-                                                            <input type="text" disabled placeholder="N/A" className="w-full bg-black/20 border border-white/5 rounded-lg px-3 py-1.5 text-xs text-white/20" />
-                                                        )}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => removeField(index)}
-                                                            className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg text-[10px] font-black uppercase hover:bg-red-500 hover:text-white transition-all"
-                                                        >
-                                                            Quitar
-                                                        </button>
-                                                    </div>
+                                        <div className="space-y-3 pb-2">
+                                            {form.data.metadata_schema.map((field, index) => {
+                                                const typeLabel = field.type === 'date'
+                                                    ? (field.alert_days ? '🔔 Fecha Venc.' : '🗓️ Fecha Info')
+                                                    : field.type === 'number' ? '🔢 Número' : '📝 Texto';
 
-                                                    {/* REGLAS DE MANTENIMIENTO SRE */}
-                                                    {(field.type === 'number' || field.type === 'date') && (
-                                                        <div className="col-span-1 sm:col-span-5 pt-2 border-t border-white/5 space-y-3">
-                                                            <div className="flex items-center justify-between">
-                                                                <span className="text-[10px] font-black text-indigo-300 uppercase tracking-wider flex items-center gap-1.5">
-                                                                    🔧 Reglas de Mantenimiento Preventivo (SRE)
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => {
-                                                                        const rules = field.maintenance_rules || [];
-                                                                        const updatedSchema = [...form.data.metadata_schema];
-                                                                        updatedSchema[index] = {
-                                                                            ...field,
-                                                                            maintenance_rules: [
-                                                                                ...rules,
-                                                                                { nombre: '', frecuencia: '', margen_pre_alerta: '', checklist_resolucion_id: '' }
-                                                                            ]
-                                                                        };
-                                                                        form.setData('metadata_schema', updatedSchema);
-                                                                    }}
-                                                                    className="px-2.5 py-1 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 rounded-lg text-[9px] font-black uppercase transition-all"
-                                                                >
-                                                                    ➕ Agregar Regla
-                                                                </button>
+                                                const typeColor = field.type === 'date'
+                                                    ? (field.alert_days ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20')
+                                                    : field.type === 'number' ? 'text-cyan-400 bg-cyan-500/10 border-cyan-500/20'
+                                                    : 'text-white/50 bg-white/5 border-white/10';
+
+                                                const hasSreRules = field.maintenance_rules && field.maintenance_rules.length > 0;
+
+                                                return (
+                                                    <div
+                                                        key={index}
+                                                        className={`rounded-[1.5rem] border overflow-hidden transition-all ${
+                                                            field._imported
+                                                                ? 'bg-indigo-500/5 border-indigo-500/20'
+                                                                : 'bg-black/30 border-white/10'
+                                                        }`}
+                                                    >
+                                                        {/* CABECERA DE LA PREGUNTA */}
+                                                        <div className="flex items-center gap-4 px-6 py-4">
+                                                            {/* Número de orden */}
+                                                            <div className="w-8 h-8 rounded-xl bg-orange-500/20 flex items-center justify-center text-[11px] font-black text-orange-400 italic border border-orange-500/20 flex-shrink-0">
+                                                                {index + 1}
                                                             </div>
 
-                                                            {/* Listado de reglas */}
-                                                            <div className="space-y-2">
-                                                                {(field.maintenance_rules || []).map((rule, ruleIndex) => (
-                                                                    <div key={ruleIndex} className="p-3 bg-black/40 rounded-xl border border-white/5 grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
-                                                                        <div>
-                                                                            <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Nombre de la Regla</label>
+                                                            {/* Label editable o texto estático si es importado */}
+                                                            <div className="flex-1">
+                                                                {field._imported ? (
+                                                                    <div>
+                                                                        <div className="text-sm font-black text-white/95 italic uppercase select-none">
+                                                                            {field.label}
+                                                                        </div>
+                                                                        <div className="flex items-center gap-1 mt-0.5 select-none">
+                                                                           <span className="text-[8px] text-white/30 font-mono uppercase">Clave:</span>
+                                                                           <span className="text-[9px] font-mono text-orange-400/80">{field.name}</span>
+                                                                       </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <div>
+                                                                        <input
+                                                                            type="text"
+                                                                            value={field.label}
+                                                                            onChange={e => updateField(index, 'label', e.target.value)}
+                                                                            placeholder="Nombre del atributo manual..."
+                                                                            className="w-full bg-transparent border-none text-sm font-black text-white italic uppercase focus:ring-0 p-0 placeholder-white/20"
+                                                                            required
+                                                                        />
+                                                                        <div className="flex items-center gap-2 mt-1">
+                                                                            <span className="text-[8px] text-white/30 font-mono uppercase">ID:</span>
                                                                             <input
                                                                                 type="text"
-                                                                                value={rule.nombre || ''}
-                                                                                onChange={e => {
-                                                                                    const updatedSchema = [...form.data.metadata_schema];
-                                                                                    const rules = [...(field.maintenance_rules || [])];
-                                                                                    rules[ruleIndex].nombre = e.target.value;
-                                                                                    updatedSchema[index].maintenance_rules = rules;
-                                                                                    form.setData('metadata_schema', updatedSchema);
-                                                                                }}
-                                                                                placeholder="Ej: Cambio de Aceite"
-                                                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
+                                                                                value={field.name}
+                                                                                onChange={e => updateField(index, 'name', e.target.value)}
+                                                                                placeholder="clave_interna"
+                                                                                className="bg-transparent border-none text-[9px] font-mono text-orange-400/60 focus:ring-0 p-0 placeholder-white/20 w-40"
                                                                                 required
                                                                             />
-                                                                        </div>
-                                                                        <div>
-                                                                            <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">
-                                                                                {field.type === 'date' ? 'Días Vencimiento' : 'Frecuencia / Intervalo'}
-                                                                            </label>
-                                                                            <input
-                                                                                type="number"
-                                                                                value={rule.frecuencia || ''}
-                                                                                onChange={e => {
-                                                                                    const updatedSchema = [...form.data.metadata_schema];
-                                                                                    const rules = [...(field.maintenance_rules || [])];
-                                                                                    rules[ruleIndex].frecuencia = e.target.value;
-                                                                                    updatedSchema[index].maintenance_rules = rules;
-                                                                                    form.setData('metadata_schema', updatedSchema);
-                                                                                }}
-                                                                                placeholder={field.type === 'date' ? "Ej: 365 días" : "Ej: 15000 km"}
-                                                                                title="Ciclo Infinito: Se repite automáticamente cada vez que se alcanza esta distancia/tiempo"
-                                                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
-                                                                                required
-                                                                            />
-                                                                        </div>
-                                                                        <div>
-                                                                            <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Margen Pre-Alerta</label>
-                                                                            <input
-                                                                                type="number"
-                                                                                value={rule.margen_pre_alerta || ''}
-                                                                                onChange={e => {
-                                                                                    const updatedSchema = [...form.data.metadata_schema];
-                                                                                    const rules = [...(field.maintenance_rules || [])];
-                                                                                    rules[ruleIndex].margen_pre_alerta = e.target.value;
-                                                                                    updatedSchema[index].maintenance_rules = rules;
-                                                                                    form.setData('metadata_schema', updatedSchema);
-                                                                                }}
-                                                                                placeholder={field.type === 'date' ? "Ej: 30 días" : "Ej: 1000 km"}
-                                                                                className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
-                                                                            />
-                                                                        </div>
-                                                                        <div className="flex gap-2 items-end">
-                                                                            <div className="flex-1">
-                                                                                <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Checklist de Resolución</label>
-                                                                                <select
-                                                                                    value={rule.checklist_resolucion_id || ''}
-                                                                                    onChange={e => {
-                                                                                        const updatedSchema = [...form.data.metadata_schema];
-                                                                                        const rules = [...(field.maintenance_rules || [])];
-                                                                                        rules[ruleIndex].checklist_resolucion_id = e.target.value;
-                                                                                        updatedSchema[index].maintenance_rules = rules;
-                                                                                        form.setData('metadata_schema', updatedSchema);
-                                                                                    }}
-                                                                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-2.5 py-1 text-[11px] text-white focus:outline-none focus:border-indigo-500"
-                                                                                    required
-                                                                                >
-                                                                                    <option value="">— Seleccionar —</option>
-                                                                                    {checklists.map(c => (
-                                                                                        <option key={c.id} value={c.id}>{c.title}</option>
-                                                                                    ))}
-                                                                                </select>
-                                                                            </div>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => {
-                                                                                    const updatedSchema = [...form.data.metadata_schema];
-                                                                                    const rules = [...(field.maintenance_rules || [])];
-                                                                                    rules.splice(ruleIndex, 1);
-                                                                                    updatedSchema[index].maintenance_rules = rules;
-                                                                                    form.setData('metadata_schema', updatedSchema);
-                                                                                }}
-                                                                                className="px-2 py-1.5 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/20 rounded-lg text-[10px] font-black uppercase transition-all"
-                                                                                title="Quitar Regla"
-                                                                            >
-                                                                                ✕
-                                                                            </button>
                                                                         </div>
                                                                     </div>
-                                                                ))}
-                                                                {(field.maintenance_rules || []).length === 0 && (
-                                                                    <p className="text-[10px] text-white/30 italic">Sin reglas de mantenimiento de ciclo infinito configuradas para esta métrica.</p>
                                                                 )}
                                                             </div>
-                                                        </div>
-                                                    )}
 
-                                                    {/* MENSAJE DE ALERTA PERSONALIZADO (Si tiene alerta de fecha o umbral) */}
-                                                    {(field.alert_days || field.type === 'number') && (
-                                                        <div className="col-span-1 sm:col-span-5 pt-1">
-                                                            <input
-                                                                type="text"
-                                                                value={field.alert_message || ''}
-                                                                onChange={e => updateField(index, 'alert_message', e.target.value)}
-                                                                placeholder="💬 Mensaje de Alerta Personalizado (ej: Este activo debe someterse a revisión periódica de aceite / prueba hidráulica)"
-                                                                className="w-full bg-black/40 border border-amber-500/20 rounded-lg px-3 py-1.5 text-[11px] text-amber-200 placeholder-white/20 focus:outline-none focus:border-amber-500/50 italic"
-                                                            />
+                                                            {/* Tipo de dato como badge */}
+                                                            <select
+                                                                value={
+                                                                    field.type === 'date'
+                                                                        ? (field.alert_days ? 'date_alert' : 'date_info')
+                                                                        : (field.type || 'text')
+                                                                }
+                                                                onChange={e => {
+                                                                    const val = e.target.value;
+                                                                    const updated = [...form.data.metadata_schema];
+                                                                    if (val === 'date_alert') {
+                                                                        updated[index].type = 'date';
+                                                                        if (!updated[index].alert_days) updated[index].alert_days = 30;
+                                                                    } else if (val === 'date_info') {
+                                                                        updated[index].type = 'date';
+                                                                        updated[index].alert_days = '';
+                                                                    } else {
+                                                                        updated[index].type = val;
+                                                                        updated[index].alert_days = '';
+                                                                        updated[index].alert_threshold = '';
+                                                                    }
+                                                                    form.setData('metadata_schema', updated);
+                                                                }}
+                                                                className={`border rounded-xl px-3 py-1.5 text-[9px] font-black uppercase tracking-wider focus:outline-none cursor-pointer [color-scheme:dark] ${typeColor}`}
+                                                            >
+                                                                <option value="text" className="bg-[#16162a] text-white">📝 Texto</option>
+                                                                <option value="number" className="bg-[#16162a] text-white">🔢 Número</option>
+                                                                <option value="date_alert" className="bg-[#16162a] text-white">🔔 Fecha Venc.</option>
+                                                                <option value="date_info" className="bg-[#16162a] text-white">🗓️ Fecha Info</option>
+                                                            </select>
+
+                                                            {/* Badge Alta */}
+                                                            <label className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={!!field.show_in_create}
+                                                                    onChange={e => updateField(index, 'show_in_create', e.target.checked)}
+                                                                    className="rounded border-white/20 bg-black/50 text-blue-500 focus:ring-blue-500 h-3.5 w-3.5"
+                                                                />
+                                                                <span className={`text-[9px] font-black uppercase tracking-wider ${field.show_in_create ? 'text-blue-400' : 'text-white/30'}`}>
+                                                                    📌 Alta
+                                                                </span>
+                                                            </label>
+
+                                                            {/* Quitar */}
+                                                            {!field._imported && (
+                                                                <button
+                                                                    type="button"
+                                                                    onClick={() => removeField(index)}
+                                                                    className="h-7 w-7 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 rounded-lg flex items-center justify-center transition-all flex-shrink-0"
+                                                                    title="Quitar atributo"
+                                                                >
+                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeWidth="2.5" strokeLinecap="round"/></svg>
+                                                                </button>
+                                                            )}
                                                         </div>
-                                                    )}
-                                                </div>
-                                            ))}
+
+                                                        {/* CONFIGURACIÓN CONDICIONAL: días de alerta / umbral */}
+                                                        {(field.alert_days || field.type === 'number') && (
+                                                            <div className="px-6 pb-4 flex flex-wrap items-center gap-3 border-t border-white/5 pt-3">
+                                                                {field.type === 'date' && field.alert_days && (
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="text-[9px] font-black text-amber-400 uppercase tracking-wider">Alerta a los</span>
+                                                                        <input
+                                                                            type="number"
+                                                                            value={field.alert_days || ''}
+                                                                            onChange={e => updateField(index, 'alert_days', e.target.value)}
+                                                                            placeholder="30"
+                                                                            className="w-20 bg-black/50 border border-amber-500/20 rounded-lg px-2 py-1 text-xs text-amber-300 font-mono focus:outline-none focus:border-amber-500"
+                                                                        />
+                                                                        <span className="text-[9px] text-white/30">días antes del vencimiento</span>
+                                                                    </div>
+                                                                )}
+                                                                {field.type === 'number' && (
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        <span className="text-[9px] font-black text-cyan-400 uppercase tracking-wider">Umbral fijo:</span>
+                                                                        <input
+                                                                            type="number"
+                                                                            step="any"
+                                                                            value={field.alert_threshold || ''}
+                                                                            onChange={e => updateField(index, 'alert_threshold', e.target.value)}
+                                                                            placeholder="Ej: 150000"
+                                                                            className="w-28 bg-black/50 border border-cyan-500/20 rounded-lg px-2 py-1 text-xs text-cyan-300 font-mono focus:outline-none focus:border-cyan-500"
+                                                                        />
+                                                                        <span className="text-[9px] text-white/30">/ Frecuencia recurrente:</span>
+                                                                        <input
+                                                                            type="number"
+                                                                            step="any"
+                                                                            value={field.alert_interval || ''}
+                                                                            onChange={e => updateField(index, 'alert_interval', e.target.value)}
+                                                                            placeholder="Ej: 15000"
+                                                                            className="w-28 bg-black/50 border border-indigo-500/20 rounded-lg px-2 py-1 text-xs text-indigo-300 font-mono focus:outline-none focus:border-indigo-500"
+                                                                        />
+                                                                    </div>
+                                                                )}
+                                                                {/* Mensaje personalizado */}
+                                                                <input
+                                                                    type="text"
+                                                                    value={field.alert_message || ''}
+                                                                    onChange={e => updateField(index, 'alert_message', e.target.value)}
+                                                                    placeholder="💬 Mensaje de alerta personalizado (opcional)..."
+                                                                    className="flex-1 min-w-48 bg-black/40 border border-amber-500/10 rounded-lg px-3 py-1.5 text-[11px] text-amber-200 placeholder-white/20 focus:outline-none focus:border-amber-500/40 italic"
+                                                                />
+                                                            </div>
+                                                        )}
+
+                                                        {/* REGLAS SRE — solo para campos date/number */}
+                                                        {(field.type === 'number' || field.type === 'date') && (
+                                                            <div className="border-t border-white/5">
+                                                                <div className="px-6 py-3 flex items-center justify-between bg-indigo-500/5">
+                                                                    <span className="text-[9px] font-black text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+                                                                        ⚡ Reglas SRE
+                                                                        {hasSreRules && (
+                                                                            <span className="px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-[8px]">
+                                                                                {field.maintenance_rules.length} regla{field.maintenance_rules.length !== 1 ? 's' : ''}
+                                                                            </span>
+                                                                        )}
+                                                                    </span>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            const rules = field.maintenance_rules || [];
+                                                                            const updatedSchema = [...form.data.metadata_schema];
+                                                                            updatedSchema[index] = {
+                                                                                ...field,
+                                                                                maintenance_rules: [
+                                                                                    ...rules,
+                                                                                    { nombre: '', frecuencia: '', margen_pre_alerta: '', checklist_resolucion_id: '' }
+                                                                                ]
+                                                                            };
+                                                                            form.setData('metadata_schema', updatedSchema);
+                                                                        }}
+                                                                        className="px-3 py-1 bg-indigo-500/20 hover:bg-indigo-500/40 text-indigo-300 border border-indigo-500/30 rounded-lg text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer"
+                                                                    >
+                                                                        + Agregar Regla
+                                                                    </button>
+                                                                </div>
+
+                                                                {(field.maintenance_rules || []).length > 0 && (
+                                                                    <div className="px-6 pb-4 space-y-3 pt-3">
+                                                                        {(field.maintenance_rules || []).map((rule, ruleIndex) => (
+                                                                            <div key={ruleIndex} className="bg-black/40 rounded-2xl border border-indigo-500/10 p-4 space-y-3">
+                                                                                <div className="flex items-center gap-3 flex-wrap">
+                                                                                    {/* Nombre de la regla */}
+                                                                                    <div className="flex-1 min-w-40">
+                                                                                        <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Nombre de la Regla</label>
+                                                                                        <input
+                                                                                            type="text"
+                                                                                            value={rule.nombre || ''}
+                                                                                            onChange={e => {
+                                                                                                const updatedSchema = [...form.data.metadata_schema];
+                                                                                                const rules = [...(field.maintenance_rules || [])];
+                                                                                                rules[ruleIndex].nombre = e.target.value;
+                                                                                                updatedSchema[index].maintenance_rules = rules;
+                                                                                                form.setData('metadata_schema', updatedSchema);
+                                                                                            }}
+                                                                                            placeholder="Ej: Cambio de Aceite"
+                                                                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                                                                            required
+                                                                                        />
+                                                                                    </div>
+                                                                                    {/* Frecuencia */}
+                                                                                    <div className="w-36">
+                                                                                        <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">
+                                                                                            {field.type === 'date' ? 'Cada (días)' : 'Frecuencia (km/h)'}
+                                                                                        </label>
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            value={rule.frecuencia || ''}
+                                                                                            onChange={e => {
+                                                                                                const updatedSchema = [...form.data.metadata_schema];
+                                                                                                const rules = [...(field.maintenance_rules || [])];
+                                                                                                rules[ruleIndex].frecuencia = e.target.value;
+                                                                                                updatedSchema[index].maintenance_rules = rules;
+                                                                                                form.setData('metadata_schema', updatedSchema);
+                                                                                            }}
+                                                                                            placeholder={field.type === 'date' ? "365" : "15000"}
+                                                                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                                                                            required
+                                                                                        />
+                                                                                    </div>
+                                                                                    {/* Margen pre-alerta */}
+                                                                                    <div className="w-36">
+                                                                                        <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Margen Pre-Alerta</label>
+                                                                                        <input
+                                                                                            type="number"
+                                                                                            value={rule.margen_pre_alerta || ''}
+                                                                                            onChange={e => {
+                                                                                                const updatedSchema = [...form.data.metadata_schema];
+                                                                                                const rules = [...(field.maintenance_rules || [])];
+                                                                                                rules[ruleIndex].margen_pre_alerta = e.target.value;
+                                                                                                updatedSchema[index].maintenance_rules = rules;
+                                                                                                form.setData('metadata_schema', updatedSchema);
+                                                                                            }}
+                                                                                            placeholder={field.type === 'date' ? "30 días" : "1000"}
+                                                                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                                                                        />
+                                                                                    </div>
+                                                                                    {/* Checklist de resolución */}
+                                                                                    <div className="flex-1 min-w-44">
+                                                                                        <label className="block text-[8px] font-black text-white/30 uppercase mb-0.5">Checklist de Resolución</label>
+                                                                                        <select
+                                                                                            value={rule.checklist_resolucion_id || ''}
+                                                                                            onChange={e => {
+                                                                                                const updatedSchema = [...form.data.metadata_schema];
+                                                                                                const rules = [...(field.maintenance_rules || [])];
+                                                                                                rules[ruleIndex].checklist_resolucion_id = e.target.value;
+                                                                                                updatedSchema[index].maintenance_rules = rules;
+                                                                                                form.setData('metadata_schema', updatedSchema);
+                                                                                            }}
+                                                                                            className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500"
+                                                                                            required
+                                                                                        >
+                                                                                            <option value="">— Seleccionar Checklist —</option>
+                                                                                            {checklists.map(c => (
+                                                                                                <option key={c.id} value={c.id}>{c.title}</option>
+                                                                                            ))}
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    {/* Quitar regla */}
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        onClick={() => {
+                                                                                            const updatedSchema = [...form.data.metadata_schema];
+                                                                                            const rules = [...(field.maintenance_rules || [])];
+                                                                                            rules.splice(ruleIndex, 1);
+                                                                                            updatedSchema[index].maintenance_rules = rules;
+                                                                                            form.setData('metadata_schema', updatedSchema);
+                                                                                        }}
+                                                                                        className="h-8 w-8 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/20 rounded-xl flex items-center justify-center transition-all flex-shrink-0 cursor-pointer self-end"
+                                                                                        title="Quitar regla"
+                                                                                    >
+                                                                                        ✕
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+
+                                                                {(field.maintenance_rules || []).length === 0 && (
+                                                                    <p className="px-6 py-3 text-[10px] text-white/20 italic">
+                                                                        Sin reglas SRE configuradas para esta métrica.
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
                                             {form.data.metadata_schema.length === 0 && (
-                                                <div className="text-center py-8 text-white/30">
-                                                    <p className="text-xs italic">Sin atributos aún. Importá desde un checklist o agregá uno manualmente.</p>
+                                                <div className="text-center py-12 text-white/20 border border-dashed border-white/10 rounded-[2rem]">
+                                                    <p className="text-2xl mb-2">📋</p>
+                                                    <p className="text-xs italic">Sin atributos aún. Importá desde un checklist o anclá uno manualmente.</p>
                                                 </div>
                                             )}
                                         </div>

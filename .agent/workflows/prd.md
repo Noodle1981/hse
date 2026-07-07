@@ -6,9 +6,9 @@ description: Documento de Requisitos de Producto (PRD) para XamaSafe
 
 ## 1. Control del Documento
 * **Nombre del Producto:** XamaSafe
-* **Versión del PRD:** v2.2 (Stack React + Inertia.js)
+* **Versión del PRD:** v2.3 (Stack React + Inertia.js)
 * **Estado:** Activo / En Desarrollo
-* **Última Actualización:** 4 Junio 2026
+* **Última Actualización:** 7 Julio 2026
 * **Tecnología Core:** Laravel 12 + Inertia.js (React 19) + Tailwind CSS v4 + SQLite/MySQL + Ziggy JS
 
 ---
@@ -130,9 +130,10 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Alta Dinámica Multi-Activo con Validación Anti-Duplicados (`Create.jsx`):**
   - Carga ágil en lote de múltiples activos en un solo paso con auto-incremento inteligente de identificadores (ej. `MF001` -> `MF002` -> `MF003`).
   - Validación de duplicados en tiempo real (frontend con bordes de alerta e impedimento de envío) y en backend (`distinct` y `unique:assets,identifier`).
-* **Schema-Driven Metadata y Filtrado de Alta (`AssetType`):**
+* **Schema-Driven Metadata y Filtrado de Alta (`AssetType` / Tipos de Checklist Dinámicos):**
   - Los Gestores definen en `asset_types.metadata_schema` campos dinámicos JSON (`type`, `label`, `show_in_create`, `alert_days`, `alert_threshold`).
   - Flag `show_in_create` permite solicitar solo los campos de identificación críticos durante el alta rápida.
+  - **Ámbito de Empresa (No de Sede):** El `AssetType` pertenece a la empresa (`empresa_id`), siendo una plantilla compartida globalmente por todas las sedes de esa empresa. Los activos individuales (`Asset`) son los que se asocian a una `sede_id` específica. Esto garantiza que un tipo (ej: "Protección Contra Incendios") sea reutilizable por todas las sedes sin conflictos.
 * **Configurador de Expediente Fotográfico por Categoría (`photo_schema`):**
   - Parametrización en `asset_types.photo_schema` de las fotos base requeridas por categoría (ej. 4 fotos para Camionetas, 2 para Extintores).
 * **Consola de Ficha Técnica, Timeline Multimedia y Evidencias (`Show.jsx`):**
@@ -233,6 +234,23 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
   - **Auditoría de EPP (Equipos de Protección Personal)** asociada directamente a la persona.
   - **Firma presencial rápida de supervisor** presentando su credencial QR frente al móvil del técnico, integrando validación GPS de cercanía.
 
+### 4.11. Configurador de Tipos de Checklist Dinámicos (`Types/Index.jsx`)
+* **Concepto:** El `AssetType` se renombra conceptualmente como **"Tipo de Checklist Dinámico"** en la interfaz de usuario. No es un tipo de activo físico en sentido clásico, sino un **unificador de atributos de ficha técnica** asociado a un checklist operativo existente.
+* **Asociación de Checklist (Importación de Atributos):**
+  - El gestor selecciona Categoría → Subcategoría → Checklist específico.
+  - Al presionar **"Configurar Atributos"**, el sistema importa las preguntas marcadas con `vincular_a_metadata` del checklist seleccionado como atributos de la ficha técnica del activo.
+  - **Reemplazo Exclusivo (No Acumulativo):** Si se cambia el checklist asociado y se reimportan atributos, el sistema limpia automáticamente los atributos importados del checklist anterior, conservando únicamente los campos creados manualmente por el gestor. Esto evita la acumulación de conjuntos de preguntas de múltiples checklists.
+* **Inmutabilidad de Atributos de Checklist:**
+  - Los atributos importados desde un checklist (`field._imported = true`) son de **solo lectura** en el configurador. El gestor no puede modificar su etiqueta, clave interna ni eliminarlos individualmente.
+  - Tampoco se muestra el botón de borrado (✕) para estos atributos, protegiendo la trazabilidad histórica de PDFs e informes generados con esa estructura.
+  - **Regla de Oro:** Los checklists son documentos controlados (equivalente a ISO 9001/45001). Si se requiere corregir un checklist, se debe crear una nueva versión del mismo y re-importar el tipo de activo de forma deliberada.
+* **Atributos Manuales:**
+  - El gestor puede agregar atributos propios del tipo de activo (independientes del checklist), definiendo etiqueta, clave interna (`name`), tipo de dato y reglas SRE.
+  - Estos atributos sí son editables y pueden eliminarse.
+* **Tipos de Atributos Soportados:** `text` (Texto), `number` (Número), `date` con `alert_days` (Fecha Vencimiento con Alerta), `date` sin alerta (Fecha Informativa).
+* **Ámbito:** El `AssetType` pertenece a la `empresa_id`, siendo una plantilla compartida por todas las sedes de esa empresa. Los activos individuales (`Asset`) son los que se asocian a una `sede_id` específica. El checklist original puede seguir usándose normalmente en inspecciones de cualquier sede sin conflictos.
+* **Selector de Tipo con Esquema Dark:** El `<select>` de tipo de dato utiliza `[color-scheme:dark]` y fondos sólidos en las opciones (`bg-[#16162a]`) para respetar la estética premium oscura en todos los navegadores.
+
 ---
 
 ## 5. Requisitos de Experiencia de Usuario y Diseño (Aesthetics)
@@ -274,5 +292,6 @@ Para evitar que las tablas anchas comprometan la navegación en notebooks conven
 ---
 
 *Documento creado: 20 Mayo 2026*  
+*Última actualización: 7 Julio 2026 — v2.3: Módulo Tipos de Checklist Dinámicos, política de versionado de checklists, UI configurador schema-driven*  
 *Propiedad del Proyecto XamaSafe*  
 *Bajo especificaciones del Stack Inertia-React en la rama `feature-inertia-react`*  

@@ -276,10 +276,9 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
 * **Optimización y Eager Loading en Exportación PDF:**
   - El controlador ejecuta **Eager Loading** (`trainings.attendances`) al compilar los datos para la plantilla Blade, reduciendo a cero el problema N+1 de consultas en base de datos.
   - El PDF final lista cada charla del periodo, incorporando en la columna de registro de firmas la lista completa de asistentes reales normalizados en base de datos con su Nombre, DNI y firma transaccional real.
-  - Se corrige la visualización de la columna de incidentes mapeando directamente a `$inc->tipo` en lugar de la columna inexistente `$inc->tipo_evento`.
 * **Filtro Estricto de Falsos Ad-Hoc:**
-  - Las repeticiones o múltiples ejecuciones de checklists/capacitaciones programadas en el `AnnualPlan` para el periodo actual no deben listarse como "Ad-Hoc / Fuera de Plan". 
-  - La lógica en `aggregatePeriodData` obtiene todas las actividades del plan anual y valida los checklists/trainings excedentes (los no asignados como completados principales de la meta). Si un excedente coincide en código, ID de plantilla o título con lo planificado, se descarta del listado Ad-Hoc. Solo se reportan como "Inspecciones Técnicas No Rutinarias" aquellas actividades completamente espontáneas e imprevistas.
+  - Las repeticiones o múltiples ejecuciones de checklists/capacitaciones programadas en el `AnnualPlan` para el periodo actual no deben listarse como "Ad-Hoc / Fuera de Plan".
+  - La lógica en `aggregatePeriodData` descarta del listado Ad-Hoc cualquier actividad que coincida en código, ID de plantilla o título con lo planificado. Solo se reportan las actividades completamente espontáneas e imprevistas como "Inspecciones Técnicas No Rutinarias".
 
 ### 3.11. Gestión Global, Roles Globales y Auditoría de Accesos
 * **Propósito:** Separar responsabilidades comerciales y globales de administración, y garantizar trazabilidad inalterable de los cambios en los límites de licenciamiento y estados de suscripción de los clientes.
@@ -291,9 +290,32 @@ Un checklist dinámico sigue la jerarquía relacional de base de datos:
   - **Inmutabilidad del Log:** El modelo `AuditLog` intercepta los eventos Eloquent `updating` y `deleting` para arrojar una `Exception`, bloqueando cualquier modificación o borrado de auditoría en la base de datos.
   - **Tabla `consultora_suscripcion_logs`:** registra las transiciones históricas de estados de suscripción (`estado_anterior`, `estado_nuevo`) para auditoría comercial rápida.
 * **Visualización de Auditoría en Frontend:**
-  - La vista `Edit.jsx` (Consultoras) presenta una pestaña de **"Auditoría"** que renderiza una línea de tiempo táctica de cambios de accesos, mostrando de forma descriptiva el diff visual (ej. *Licencias Técnicos: 10 ➔ 15*) y el nombre del usuario global autor.
+  - La vista `Edit.jsx` (Consultoras) presenta una pestaña de **"Auditoría"** que renderiza una línea de tiempo táctica de cambios de accesos, mostrando de forma descriptiva el diff visual (ej. *Licencias Técnicos: 10 → 15*) y el nombre del usuario global autor.
 * **Pruebas de Trazabilidad:**
   - La suite de pruebas en `GlobalStaffManagementTest.php` valida el aislamiento de rutas de staff global/vendedores, la inmutabilidad de la tabla `audit_logs` y la generación automática de los logs ante inserciones/actualizaciones en consultoras.
+
+### 3.13. Configurador de Tipos de Checklist Dinámicos (`Types/Index.jsx`)
+* **Concepto Clave:** El `AssetType` es un **unificador de atributos de ficha técnica**, no un tipo físico clásico. En la UI se denomina "Tipo de Checklist Dinámico" y permite crear la ficha técnica de un activo asociando las preguntas de un checklist operativo existente.
+* **Flujo Operativo:**
+  1. El gestor crea un nuevo tipo ("Nuevo tipo de Checklist Dinámico").
+  2. Selecciona Categoría → Subcategoría → Checklist específico en cascada.
+  3. Presiona **"Configurar Atributos"**: el sistema consulta `/gestor/asset-types/import-checklist/{id}` y trae las preguntas con `vincular_a_metadata` del checklist.
+  4. Los atributos importados se muestran como tarjetas de solo lectura (inmutables). Los atributos manuales son editables y eliminables.
+  5. Puede agregar atributos manuales propios del tipo de activo con tipos: `text`, `number`, `date_alert` (fecha con alerta en días), `date_info` (fecha informativa).
+  6. Cada atributo puede tener **Reglas SRE** (frecuencia, margen de pre-alerta, checklist resolutor).
+* **Reglas de Inmutabilidad (`field._imported`):**
+  - Campos con `_imported: true`: etiqueta y clave son de solo lectura, sin botón de borrado.
+  - Campos sin `_imported`: completamente editables y eliminables.
+  - Al re-importar un checklist diferente: los campos `_imported` anteriores se borran automáticamente y se reemplazan por los del nuevo checklist. Los campos manuales se conservan.
+* **Política de Versionado (Regla de Oro):**
+  - Los checklists son documentos controlados (análogo a normas ISO 9001/45001).
+  - Si un checklist necesita corrección, se crea una **nueva versión** del checklist y el gestor re-importa el tipo de activo de forma deliberada.
+  - El checklist original sigue funcionando en inspecciones de todas las sedes sin conflicto con el AssetType.
+* **Ámbito Multi-Sede:**
+  - `AssetType` es de `empresa_id` (plantilla compartida a nivel empresa).
+  - `Asset` individual es de `sede_id` (el activo pertenece a una sede).
+  - Dos sedes pueden compartir el mismo tipo sin conflicto. El checklist original puede seguir usándose normalmente en cualquier sede.
+
 
 ### 3.12. Estándares de Responsividad, Scrollbars de Marca y Destructuración Segura
 * **Propósito:** Ofrecer una experiencia táctica de primer nivel (HUD) en cualquier dispositivo, garantizando que el personal técnico en faenas y portátiles medianas navegue cómodamente sin colapsos de UI.
@@ -347,13 +369,14 @@ Utiliza estas estructuras de prompts cuando trabajes en NotebookLM o con asisten
 > - Evita la redundancia de código y modulariza las secciones en subcomponentes funcionales limpios.
 > **Tarea:** Genera el componente React para `[Describir Funcionalidad]`.
 
-### 4.2. Prompt para Lógica del Backend (Laravel 12 Controllers & Services)
-> **Contexto:** Estamos en el backend de XamaSafe en Laravel 12 con PHP 8.2+.
-> **Objetivo:** Crear/Modificar lógica de negocio relacionada con `[Especificar, ej: la Fórmula de Haversine para geolocalización o validación de checklists]`.
-> **Directrices del Código Backend:**
-> - Aplica estrictamente Type Hints en parámetros y Return Types en todos los métodos.
-> - Separa las validaciones complejas de peticiones utilizando clases de validación dedicadas (`FormRequests`).
-> - Previene problemas de rendimiento cargando previamente las relaciones requeridas (`Eager Loading` / `with()`) para mitigar consultas N+1.
-> - Retorna respuestas nativas utilizando el adaptador de Inertia: `return Inertia::render('Path/To/Component', $data);`.
-> - Preserva el aislamiento de inquilinos (multi-tenancy) verificando la autorización con políticas (`this->authorize()`).
-> **Tarea:** Escribe el código PHP limpio y modular para `[Describir tarea técnica]`.
+### 4.3. Prompt para Configuración de Tipos de Checklist Dinámicos
+> **Contexto:** Estamos en `resources/js/Pages/Gestor/Assets/Types/Index.jsx`. Esta pantalla configura los "Tipos de Checklist Dinámicos" (modelo `AssetType`).
+> **Regla crítica de UI:**
+> - Los atributos con `field._imported === true` son de solo lectura: no se muestra input de etiqueta, ni de clave, ni botón de borrado.
+> - Los atributos sin `_imported` son completamente editables.
+> - Al re-importar un checklist, los atributos `_imported` anteriores se borran y se reemplazan por los del nuevo checklist. Los manuales se conservan.
+> **Regla de Política (Documentos Controlados):**
+> Los checklists son documentos controlados (ISO 9001/45001). Si se corrige un checklist, se crea una nueva versión y el gestor re-importa deliberadamente.
+> **Regla de Ámbito:**
+> `AssetType.empresa_id` (nivel empresa, compartido entre sedes). `Asset.sede_id` (nivel sede). No hay conflicto entre sedes que usen el mismo tipo.
+> **Tarea:** `[Describir mejora o corrección en el configurador]`.

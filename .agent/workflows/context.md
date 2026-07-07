@@ -7,7 +7,7 @@ description: Contexto del proyecto XamaSafe (Stack React + Inertia.js)
 ## 🎯 Visión General
 
 **Nombre:** XamaSafe
-**Versión Actual:** V2.1.0.0 (Premium HUD)
+**Versión Actual:** V2.3.0.0 (Premium HUD)
 **Tipo:** Sistema SaaS integral de Higiene y Seguridad
 **Stack:** Laravel 12 + Inertia.js (React 19) + Tailwind CSS v4 + SQLite (dev) + Ziggy JS
 
@@ -101,7 +101,7 @@ ep-back/
 
 | Tabla | Propósito | Campos Clave |
 |-------|-----------|--------------|
-| `asset_types` | Tipos de activos y categorías de equipamiento | `id`, `name`, `category_id` |
+| `asset_types` | Tipos de Checklist Dinámicos: unificadores de atributos de ficha técnica vinculados a un checklist operativo. Ámbito de empresa (no de sede). | `id`, `empresa_id`, `name`, `category_id`, `metadata_schema` (JSON), `photo_schema` (JSON) |
 | `assets` | Ficha del activo físico con identificador/QR único y metadata dinámica | `id`, `empresa_id`, `sede_id`, `asset_type_id`, `name`, `identifier`, `status`, `metadata` |
 | `audit_logs` | Registro de auditoría inmutable de cambios de accesos | `id`, `user_id`, `action`, `target_type`, `target_id`, `payload` |
 | `consultoras` | Empresas consultoras de HyS que agrupan usuarios y clientes | `id`, `nombre`, `cuit`, `max_tecnicos`, `max_gestores`, `max_empresas`, `estado_suscripcion` |
@@ -123,7 +123,14 @@ ep-back/
 ## ✅ Buenas Prácticas
 
 ### Backend (Laravel 12)
-- ✅ **Módulo de Activos Genérico, Metadata Dinámica y Expediente Fotográfico:** Para soportar múltiples rubros (Transporte, Seguridad, Alimentación), el sistema modela el equipamiento de forma abstracta (`assets` y `asset_types`) y guarda los atributos específicos en un campo JSON `metadata` y su expediente de fotos en `photos`. Permite configurar esquemas de fotos por categoría (`photo_schema`), alta dinámica multi-activo con prevención de identificadores duplicados (`show_in_create`, `distinct`), galería de evidencias de siniestros (`incidentes.asset_id`) y exportación a PDF A4. 
+- ✅ **Módulo Genérico de Activos, Metadata Dinámica y Expediente Fotográfico:** Para soportar múltiples rubros (Transporte, Seguridad, Alimentación), el sistema modela el equipamiento de forma abstracta (`assets` y `asset_types`) y guarda los atributos específicos en un campo JSON `metadata` y su expediente de fotos en `photos`. Permite configurar esquemas de fotos por categoría (`photo_schema`), alta dinámica multi-activo con prevención de identificadores duplicados (`show_in_create`, `distinct`), galería de evidencias de siniestros (`incidentes.asset_id`) y exportación a PDF A4.
+- ✅ **Tipos de Checklist Dinámicos (`AssetType`) — Arquitectura y Política:**
+  - El `AssetType` actúa como **unificador de atributos de ficha técnica**, no como un tipo físico de activo. Se asocia a un checklist operativo existente para importar sus preguntas como atributos estructurados del activo.
+  - **Ámbito de Empresa:** Pertenece a `empresa_id`, siendo una plantilla compartida por todas las sedes. El `Asset` individual es el que se asocia a `sede_id`.
+  - **Reemplazo Exclusivo al Re-importar:** Al cambiar el checklist asociado e importar nuevamente, el sistema borra automáticamente los atributos del checklist anterior (`field._imported = true`) y conserva solo los campos creados manualmente.
+  - **Inmutabilidad de Atributos Importados:** Los campos con `_imported: true` son de solo lectura en el configurador. No se puede editar su etiqueta, clave ni eliminarlos. Esto preserva la trazabilidad de PDFs e informes generados con esa estructura.
+  - **Política de Versionado de Checklists (Regla de Oro):** Los checklists son documentos controlados. Si se necesita corregir uno, se crea una nueva versión del checklist y se re-importa el tipo de activo de forma deliberada. El checklist original sigue funcionando normalmente en inspecciones de todas las sedes sin conflictos con el AssetType.
+  - **Selector de Tipo Dark:** El selector de tipo de dato usa `[color-scheme:dark]` + `bg-[#16162a]` en las opciones para respetar la estética premium en todos los navegadores. 
 - ✅ **Motor de Mantenimiento Autónomo, Asignación Automática y Bloqueo Operativo (Interlock SRE):**
   - **Constructor SRE:** Permite a los gestores configurar múltiples reglas preventivas de ciclo infinito por atributo del tipo de activo (frecuencia, margen de pre-alerta y checklist de resolución).
   - **Asignación Correctiva (SRE):** Al superar la frecuencia límite, el activo cambia a `fuera_de_servicio`, abre un hallazgo crítico y auto-asigna la orden de trabajo (`ChecklistAssignment` enlazada vía `asset_id`).
@@ -282,6 +289,6 @@ npm run dev
 
 ---
 
-*Documento actualizado: 4 Junio 2026*
-*Versión del Sistema: V2.2.0.0 Premium (Inertia + React)*
+*Documento actualizado: 7 Julio 2026*
+*Versión del Sistema: V2.3.0.0 Premium (Inertia + React)*
 *Especialidad: Monolito Laravel con UI React táctica y moderna (Tactical Premium Dark)*
