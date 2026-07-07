@@ -42,3 +42,6 @@ yarn-error.log
 /results.txt
 /futuros_fix.md
 /ultraminizacion.md
+
+# Configuración local de agentes (MCP)
+/.agent/mcp_config.json
