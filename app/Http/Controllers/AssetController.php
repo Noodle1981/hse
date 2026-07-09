@@ -224,6 +224,11 @@ class AssetController extends Controller
             },
         ]);
 
+        $metadataLogs = \App\Models\AssetMetadataLog::where('asset_id', $asset->id)
+            ->with(['inspection.checklist', 'changedByUser'])
+            ->latest('created_at')
+            ->get();
+
         // Compilar timeline visual de hallazgos e incidentes
         $evidences = [];
 
@@ -261,6 +266,7 @@ class AssetController extends Controller
         return Inertia::render('Gestor/Assets/Show', [
             'asset' => $asset,
             'evidences' => $evidences,
+            'metadataLogs' => $metadataLogs,
         ]);
     }
 

@@ -84,6 +84,29 @@ El sistema cuenta con las siguientes entidades principales:
 
 ---
 
+## Tabla: `asset_metadata_logs`
+
+| Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
+|---|---|---|---|---|
+| `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `asset_id` | `CHAR(36)` / `UUID` | No ❌ | *ninguno* |  |
+| `dynamic_inspection_id` | `INTEGER` | No ❌ | *ninguno* |  |
+| `field_key` | `varchar` | No ❌ | *ninguno* |  |
+| `old_value` | `TEXT` | Sí ✅ | *ninguno* |  |
+| `new_value` | `TEXT` | Sí ✅ | *ninguno* |  |
+| `changed_by` | `INTEGER` | No ❌ | *ninguno* |  |
+| `created_at` | `timestamp` | No ❌ | `CURRENT_TIMESTAMP` |  |
+
+### 🔗 Relaciones (Foreign Keys)
+- `asset_id` → vincula con `assets`(`id`) (onDelete cascade)
+- `dynamic_inspection_id` → vincula con `dynamic_inspections`(`id`) (onDelete cascade)
+- `changed_by` → vincula con `users`(`id`) (onDelete cascade)
+
+### 🗂️ Índices
+- `asset_metadata_logs_asset_id_field_key_index`
+
+---
+
 ## Tabla: `assets`
 
 | Campo | Tipo | Admite Nulo | Valor por Defecto | PK |

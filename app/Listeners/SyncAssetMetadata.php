@@ -27,6 +27,24 @@ class SyncAssetMetadata
             if ($question && ! empty($question->vincular_a_metadata)) {
                 $metricKey = $question->vincular_a_metadata;
                 $val = $answer->value;
+                
+                $oldVal = isset($metadata[$metricKey]) ? $metadata[$metricKey] : null;
+                
+                // Normalizar a string para comparar
+                $oldValStr = $oldVal !== null ? (is_array($oldVal) ? json_encode($oldVal) : (string)$oldVal) : null;
+                $newValStr = $val !== null ? (is_array($val) ? json_encode($val) : (string)$val) : null;
+
+                if ($oldValStr !== $newValStr) {
+                    \App\Models\AssetMetadataLog::create([
+                        'asset_id' => $asset->id,
+                        'dynamic_inspection_id' => $inspection->id,
+                        'field_key' => $metricKey,
+                        'old_value' => $oldValStr,
+                        'new_value' => $newValStr,
+                        'changed_by' => $inspection->user_id ?? \Illuminate\Support\Facades\Auth::id(),
+                    ]);
+                }
+
                 $metadata[$metricKey] = $val;
                 $hasChanges = true;
 

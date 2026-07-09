@@ -73,6 +73,7 @@ class AssetTypeController extends Controller
             'metadata_schema.*.label' => 'required|string|max:255',
             'metadata_schema.*.type' => 'required|in:text,number,date',
             'metadata_schema.*.show_in_create' => 'nullable|boolean',
+            'metadata_schema.*.role' => 'nullable|string|in:identificador,dato_estatico,dato_con_regla,verificacion',
             'metadata_schema.*.alert_days' => 'nullable|integer|min:0',
             'metadata_schema.*.alert_threshold' => 'nullable|numeric',
             'metadata_schema.*.alert_interval' => 'nullable|numeric|min:0',
@@ -132,12 +133,27 @@ class AssetTypeController extends Controller
 
             // Detectar si es fecha de vencimiento/vigencia para sugerir alerta o dejarla como fecha informativa
             $isExpirationDate = preg_match('/venc|vto|vigenc|proxim|caduc/i', $q->label);
+            $isIdentifier = preg_match('/identif|nro|n°|interno|codigo|patente|matricula/i', $q->label);
+            $isStatic = preg_match('/tipo|modelo|marca|fabricante|capacidad/i', $q->label);
+
+            $role = 'verificacion'; // default
+            $showInCreate = false;
+
+            if ($isIdentifier) {
+                $role = 'identificador';
+                $showInCreate = true;
+            } elseif ($metaType === 'date' && $isExpirationDate) {
+                $role = 'dato_con_regla';
+            } elseif ($isStatic) {
+                $role = 'dato_estatico';
+            }
 
             return [
                 'name'            => $keyName,
                 'label'           => $q->label,
                 'type'            => $metaType,
-                'show_in_create'  => false,
+                'show_in_create'  => $showInCreate,
+                'role'            => $role,
                 'alert_days'      => ($metaType === 'date' && $isExpirationDate) ? 30 : null,
                 'alert_threshold' => null,
                 '_imported'       => true,

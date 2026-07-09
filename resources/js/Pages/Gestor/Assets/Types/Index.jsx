@@ -145,7 +145,7 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
     const addField = () => {
         form.setData('metadata_schema', [
             ...form.data.metadata_schema,
-            { name: '', label: '', type: 'text', show_in_create: false, alert_days: '', alert_threshold: '' },
+            { name: '', label: '', type: 'text', show_in_create: false, role: 'verificacion', alert_days: '', alert_threshold: '' },
         ]);
     };
 
@@ -669,6 +669,33 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                                                 <option value="date_alert" className="bg-[#16162a] text-white">🔔 Fecha Venc.</option>
                                                                 <option value="date_info" className="bg-[#16162a] text-white">🗓️ Fecha Info</option>
                                                             </select>
+
+                                                             {/* Selector de Rol */}
+                                                             <div className="flex items-center gap-1 flex-shrink-0">
+                                                                 <select
+                                                                     value={field.role || 'verificacion'}
+                                                                     onChange={e => {
+                                                                         const newRole = e.target.value;
+                                                                         const updated = [...form.data.metadata_schema];
+                                                                         updated[index].role = newRole;
+                                                                         if (newRole === 'identificador') {
+                                                                             updated[index].show_in_create = true;
+                                                                         }
+                                                                         form.setData('metadata_schema', updated);
+                                                                     }}
+                                                                     className={`border rounded-xl px-2 py-1 text-[9px] font-black uppercase tracking-wider focus:outline-none cursor-pointer [color-scheme:dark] bg-[#16162a] ${
+                                                                         field.role === 'identificador' ? 'border-blue-500/40 text-blue-400' :
+                                                                         field.role === 'dato_estatico' ? 'border-green-500/40 text-green-400' :
+                                                                         field.role === 'dato_con_regla' ? 'border-orange-500/40 text-orange-400' :
+                                                                         'border-white/10 text-white/55'
+                                                                     }`}
+                                                                 >
+                                                                     <option value="identificador">🔵 Identificador</option>
+                                                                     <option value="dato_estatico">🟢 Estático</option>
+                                                                     <option value="dato_con_regla">🟠 Con Regla</option>
+                                                                     <option value="verificacion">⚫ Verificación</option>
+                                                                 </select>
+                                                             </div>
 
                                                             {/* Badge Alta */}
                                                             <label className="flex items-center gap-1.5 cursor-pointer select-none flex-shrink-0">

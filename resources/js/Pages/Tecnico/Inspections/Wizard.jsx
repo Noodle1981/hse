@@ -105,11 +105,45 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
             const selectedAsset = (assets || []).find(a => a.id === newValue);
             const metadata = (selectedAsset && selectedAsset.metadata) ? selectedAsset.metadata : {};
             
+            // Map metadata schema fields for lookup
+            const schemaFields = selectedAsset?.asset_type?.metadata_schema || [];
+            const schemaMap = {};
+            schemaFields.forEach(f => {
+                schemaMap[f.name] = f;
+            });
+            
             sections.forEach(sec => {
                 (sec.questions || []).forEach(q => {
                     if (q.vincular_a_metadata) {
-                        const metadataValue = metadata[q.vincular_a_metadata];
-                        newAnswers[q.id] = (metadataValue !== undefined && metadataValue !== null) ? metadataValue : '';
+                        const fieldSchema = schemaMap[q.vincular_a_metadata];
+                        
+                        // Infer role if not explicitly saved (backward compatibility)
+                        let role = fieldSchema?.role;
+                        if (!role && fieldSchema) {
+                            const label = fieldSchema.label || '';
+                            const isExpirationDate = /venc|vto|vigenc|proxim|caduc/i.test(label);
+                            const isIdentifier = fieldSchema.show_in_create || /identif|nro|n°|interno|codigo|patente|matricula/i.test(label);
+                            const isStatic = /tipo|modelo|marca|fabricante|capacidad/i.test(label);
+                            
+                            if (isIdentifier) {
+                                role = 'identificador';
+                            } else if (fieldSchema.type === 'date' && isExpirationDate) {
+                                role = 'dato_con_regla';
+                            } else if (isStatic) {
+                                role = 'dato_estatico';
+                            } else {
+                                role = 'verificacion';
+                            }
+                        }
+                        
+                        // Pre-fill only if role is identifier, static data, or SRE rule data
+                        if (role && ['identificador', 'dato_estatico', 'dato_con_regla'].includes(role)) {
+                            const metadataValue = metadata[q.vincular_a_metadata];
+                            newAnswers[q.id] = (metadataValue !== undefined && metadataValue !== null) ? metadataValue : '';
+                        } else {
+                            // Verification fields should start empty
+                            newAnswers[q.id] = '';
+                        }
                         hasChanges = true;
                     }
                 });

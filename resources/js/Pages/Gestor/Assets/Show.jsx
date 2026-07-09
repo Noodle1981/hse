@@ -156,7 +156,7 @@ const getAssetHallazgosWithVirtual = (asset) => {
     return findingsList;
 };
 
-export default function Show({ asset, evidences = [] }) {
+export default function Show({ asset, evidences = [], metadataLogs = [] }) {
     const { flash } = usePage().props;
     const [activeTab, setActiveTab] = useState('photos'); // 'photos' | 'evidences' | 'inspections'
     const [uploadingKey, setUploadingKey] = useState(null);
@@ -370,6 +370,16 @@ export default function Show({ asset, evidences = [] }) {
                         >
                             📋 Historial de Inspecciones ({asset.dynamic_inspections?.length || 0})
                         </button>
+                        <button
+                            onClick={() => setActiveTab('metadata_logs')}
+                            className={`px-6 py-3 font-black text-xs uppercase tracking-wider rounded-t-2xl border-t border-x transition-all ${
+                                activeTab === 'metadata_logs'
+                                    ? 'bg-[#16162a] border-emerald-500/30 text-emerald-400'
+                                    : 'bg-black/20 border-transparent text-white/40 hover:text-white'
+                            }`}
+                        >
+                            🕐 Historial de Metadata ({metadataLogs?.length || 0})
+                        </button>
                     </div>
 
                     {/* CONTENIDO PESTAÑA 1: FOTOS DE IDENTIFICACIÓN */}
@@ -511,6 +521,60 @@ export default function Show({ asset, evidences = [] }) {
                                 </div>
                             ) : (
                                 <p className="text-xs text-white/30 italic py-6 text-center">Este activo aún no cuenta con inspecciones vinculadas.</p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* CONTENIDO PESTAÑA 4: HISTORIAL DE METADATA */}
+                    {activeTab === 'metadata_logs' && (
+                        <div className="bg-[#16162a] p-8 rounded-b-[2.5rem] rounded-tr-[2.5rem] border border-white/5 shadow-2xl space-y-6">
+                            <h3 className="text-sm font-black text-emerald-400 uppercase italic">Historial de Cambios de Metadata (Trazabilidad)</h3>
+                            <p className="text-xs text-white/40">Registro auditor inmutable de cada campo de datos que fue actualizado a través de inspecciones.</p>
+
+                            {metadataLogs && metadataLogs.length > 0 ? (
+                                <div className="overflow-x-auto custom-scrollbar">
+                                    <table className="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-white/10 text-white/40 font-bold uppercase tracking-wider">
+                                                <th className="py-3 px-4">Fecha</th>
+                                                <th className="py-3 px-4">Atributo</th>
+                                                <th className="py-3 px-4">Valor Anterior</th>
+                                                <th className="py-3 px-4">Nuevo Valor</th>
+                                                <th className="py-3 px-4">Técnico</th>
+                                                <th className="py-3 px-4">Inspección</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-white/5 text-white/80">
+                                            {metadataLogs.map(log => {
+                                                // Buscar el label amigable en el schema del tipo de activo si existe
+                                                const schemaField = asset.asset_type?.metadata_schema?.find(f => f.name === log.field_key);
+                                                const fieldLabel = schemaField ? schemaField.label : log.field_key;
+
+                                                return (
+                                                    <tr key={log.id} className="hover:bg-white/5 transition-all">
+                                                        <td className="py-3 px-4 font-mono">{log.created_at ? new Date(log.created_at).toLocaleString() : 'N/D'}</td>
+                                                        <td className="py-3 px-4 font-bold text-white">{fieldLabel}</td>
+                                                        <td className="py-3 px-4 font-mono text-white/40">{log.old_value !== null && log.old_value !== '' ? log.old_value : '—'}</td>
+                                                        <td className="py-3 px-4 font-mono text-emerald-400">{log.new_value !== null && log.new_value !== '' ? log.new_value : '—'}</td>
+                                                        <td className="py-3 px-4 font-bold">{log.changed_by_user?.name || log.changed_by?.name || 'Sistema'}</td>
+                                                        <td className="py-3 px-4">
+                                                            {log.inspection ? (
+                                                                <Link 
+                                                                    href={route('tecnico.checklists.fill', [log.inspection.dynamic_checklist_id, log.inspection.checklist_assignment_id])}
+                                                                    className="text-indigo-400 hover:text-indigo-300 underline font-bold"
+                                                                >
+                                                                    #{log.inspection.id} ({log.inspection.checklist?.title || 'Checklist'})
+                                                                </Link>
+                                                            ) : 'N/A'}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <p className="text-xs text-white/30 italic py-6 text-center">No se registran cambios de metadata históricos para este activo.</p>
                             )}
                         </div>
                     )}

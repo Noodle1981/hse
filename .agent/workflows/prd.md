@@ -130,8 +130,13 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Alta Dinámica Multi-Activo con Validación Anti-Duplicados (`Create.jsx`):**
   - Carga ágil en lote de múltiples activos en un solo paso con auto-incremento inteligente de identificadores (ej. `MF001` -> `MF002` -> `MF003`).
   - Validación de duplicados en tiempo real (frontend con bordes de alerta e impedimento de envío) y en backend (`distinct` y `unique:assets,identifier`).
-* **Schema-Driven Metadata y Filtrado de Alta (`AssetType` / Tipos de Checklist Dinámicos):**
-  - Los Gestores definen en `asset_types.metadata_schema` campos dinámicos JSON (`type`, `label`, `show_in_create`, `alert_days`, `alert_threshold`).
+* **Schema-Driven Metadata y Roles de Pre-llenado (`AssetType` / Tipos de Checklist Dinámicos):**
+  - Los Gestores definen en `asset_types.metadata_schema` campos dinámicos JSON (`type`, `label`, `show_in_create`, `role`, `alert_days`, `alert_threshold`).
+  - **Roles de Atributo:** Cada campo de metadata se asocia a un rol para determinar su comportamiento de pre-llenado en el Wizard:
+    1. `identificador` (Identificador único de alta, ej: N° Interno) → Pre-llenado: SÍ.
+    2. `dato_estatico` (Dato técnico permanente, ej: Tipo de Agente) → Pre-llenado: SÍ.
+    3. `dato_con_regla` (Métricas que disparan reglas/fechas SRE, ej: Próxima Carga) → Pre-llenado: SÍ.
+    4. `verificacion` (Preguntas evaluadas en campo, ej: manómetro en zona verde) → Pre-llenado: NO (inicia vacío).
   - Flag `show_in_create` permite solicitar solo los campos de identificación críticos durante el alta rápida.
   - **Ámbito de Empresa (No de Sede):** El `AssetType` pertenece a la empresa (`empresa_id`), siendo una plantilla compartida globalmente por todas las sedes de esa empresa. Los activos individuales (`Asset`) son los que se asocian a una `sede_id` específica. Esto garantiza que un tipo (ej: "Protección Contra Incendios") sea reutilizable por todas las sedes sin conflictos.
 * **Configurador de Expediente Fotográfico por Categoría (`photo_schema`):**
@@ -146,8 +151,9 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
   - Persistencia del vínculo `dynamic_inspections.asset_id`.
   - **Badge Dinámico de Cabecera:** Muestra un badge de vinculación dinámico en el Wizard según el activo seleccionado.
   - **Advertencia de Re-inspección (Modal Ámbar):** Si el técnico intenta seleccionar un activo que ya fue auditado en la visita actual (estado `✓ Auditado`), el sistema detiene la selección inmediata y muestra un modal de confirmación táctico premium en color ámbar/dorado advirtiendo sobre la duplicación legal del reporte.
-* **Sincronización Automática, Resolución SRE y Reset de Ciclos (`SyncAssetMetadata`):**
+* **Sincronización Automática, Log de Cambios y Resolución SRE (`SyncAssetMetadata`):**
   - Mapeo de respuestas del checklist a los atributos del activo (`dynamic_questions.vincular_a_metadata`).
+  - **Trazabilidad y Log Auditor Inmutable (`AssetMetadataLog`):** Al finalizar una inspección, el sistema compara el valor previo del metadato con el nuevo valor enviado en las respuestas. Si hay un cambio, se guarda un registro inalterable en `asset_metadata_logs` (valor anterior, nuevo valor, técnico, inspección y fecha). La ficha de activo en la consola incorpora la pestaña `"🕐 Historial de Metadata"` para consultar este registro auditor.
   - Ante una inspección con resultado `Fail`, la bomba de estado transiciona automáticamente el activo a **"Fuera de Servicio"** (`fuera_de_servicio`).
   - **Resolución SRE de Ciclo Infinito:** Si la inspección corresponde al checklist de resolución configurado para una regla SRE, al finalizarse se recalcula automáticamente la próxima meta del atributo (`proximo_val = valor_actual + frecuencia`), se marca la asignación correctiva (`ChecklistAssignment`) como completada y se auto-resuelve el hallazgo crítico abierto.
   - Audit log inmutable de cambios en `audit_logs` vía `AssetObserver`.

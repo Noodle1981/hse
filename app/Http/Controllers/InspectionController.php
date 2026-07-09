@@ -115,9 +115,35 @@ class InspectionController extends Controller
             $sedeId = $visit?->sede_id;
         }
 
-        $assets = $sedeId
-            ? Asset::where('sede_id', $sedeId)->with('assetType')->get()
-            : [];
+        // Filtrar activos por los AssetTypes vinculados a este checklist.
+        // Un AssetType está vinculado si alguna de sus reglas de mantenimiento
+        // (en metadata_schema[].maintenance_rules[].checklist_resolucion_id) apunta a este checklist.
+        $linkedAssetTypeIds = [];
+        if ($sedeId) {
+            $allAssetTypes = \App\Models\AssetType::all();
+            foreach ($allAssetTypes as $assetType) {
+                $schema = $assetType->metadata_schema ?? [];
+                foreach ($schema as $field) {
+                    foreach ($field['maintenance_rules'] ?? [] as $rule) {
+                        if ((int)($rule['checklist_resolucion_id'] ?? 0) === (int)$checklist->id) {
+                            $linkedAssetTypeIds[] = $assetType->id;
+                            break 2; // Ya encontramos un vínculo para este AssetType
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($sedeId) {
+            $assetQuery = Asset::where('sede_id', $sedeId)->with('assetType');
+            // Si hay tipos de activo vinculados, filtrar; de lo contrario traer todos
+            if (! empty($linkedAssetTypeIds)) {
+                $assetQuery->whereIn('asset_type_id', $linkedAssetTypeIds);
+            }
+            $assets = $assetQuery->get();
+        } else {
+            $assets = [];
+        }
 
         $inspectedAssetIds = [];
         if ($visitId) {
