@@ -84,10 +84,10 @@
                         <span class="leading-none">Xama<span class="text-ep-primary">Safe</span> — SaaS de Seguridad Industrial</span>
                     </span>
                     <h1 class="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white leading-[0.9] mb-8 md:mb-10 italic tracking-tighter">
-                        GESTIÓN CON <br><span class="text-ep-primary glow-text">TRAZABILIDAD</span> <br>REAL.
+                        GESTIÓN DE <br><span class="text-ep-primary glow-text">ACTIVOS</span> Y <br>CUMPLIMIENTO.
                     </h1>
                     <p class="text-white/60 text-sm sm:text-base md:text-lg font-bold max-w-xl mb-8 md:mb-12 leading-relaxed italic uppercase tracking-wide">
-                        DIGITALIZA EL CICLO COMPLETO: VISITAS, CHECKLISTS DINÁMICOS E INFORMES MAESTROS EN SEGUNDOS.
+                        DIGITALIZA EL CICLO COMPLETO: PLAN ANUAL, CHECKLIST, CAPACITACIONES Y ACTIVOS PERSONALIZABLES, GENERACIÓN DE METADATA CON REGLAS Y LOG DE CAMBIOS E INFORMES MAESTROS CON RESPALDO FORENSE.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 md:gap-6">
                         <a href="{{ route('login') }}" class="group bg-ep-primary hover:brightness-110 text-ep-dark px-6 py-4 md:px-10 md:py-5 rounded-[1.5rem] md:rounded-[2rem] font-black text-xs uppercase tracking-widest italic transition-all flex items-center justify-center gap-3 shadow-2xl shadow-ep-primary/20">
@@ -163,9 +163,9 @@
                                     <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
                             </div>
-                            <h4 class="text-2xl md:text-3xl font-black italic mb-4 md:mb-6 uppercase tracking-tighter">Informe Maestro Automático</h4>
+                            <h4 class="text-2xl md:text-3xl font-black italic mb-4 md:mb-6 uppercase tracking-tighter">Informe Maestro e Inteligencia</h4>
                             <p class="text-white/60 text-sm md:text-lg font-bold italic leading-relaxed uppercase tracking-wide max-w-2xl mb-8 md:mb-12">
-                                GENERA REPORTES PROFESIONALES INTEGRANDO VISITAS, HALLAZGOS Y CAPACITACIONES CON UN CLIC. ELIMINA EL 90% DEL TRABAJO DE ESCRITORIO.
+                                CONSOLIDA VISITAS, CAPACITACIONES CON DNI NOMINAL E HISTORIAL DE METADATA VINCULADA EN REPORTES PROFESIONALES CON UN CLIC.
                             </p>
 
                             <!-- Visual representation of data flow -->
@@ -184,9 +184,9 @@
                     <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
                     <div class="relative z-10 flex flex-col h-full justify-between">
                         <div>
-                            <h4 class="text-2xl md:text-3xl font-black italic mb-4 uppercase tracking-tighter text-ep-dark leading-none">Checklists <br>Tácticos</h4>
+                            <h4 class="text-2xl md:text-3xl font-black italic mb-4 uppercase tracking-tighter text-ep-dark leading-none">Checklists <br>Dinámicos</h4>
                             <p class="text-ep-dark/85 font-black text-[10px] md:text-xs uppercase tracking-widest italic leading-relaxed">
-                                INSPECCIONES DINÁMICAS PARA NORMAS HyS, ISO, BPA CON WIZARD OPTIMIZADO PARA CAMPO.
+                                INSPECCIONES GENERALES O VINCULADAS OPCIONALMENTE A LA METADATA DEL ACTIVO. RESPUESTAS QUE ACTUALIZAN LA FICHA TÉCNICA EN CALIENTE A CRITERIO DEL GESTOR.
                             </p>
                         </div>
                         <div class="mt-6 md:mt-12 scale-100 sm:scale-110 translate-x-6 translate-y-6 sm:translate-x-10 sm:translate-y-10 group-hover:translate-x-3 group-hover:translate-y-3 sm:group-hover:translate-x-5 sm:group-hover:translate-y-5 transition-transform duration-700">
@@ -209,8 +209,8 @@
                                 <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </div>
-                        <h4 class="text-lg md:text-xl font-black italic uppercase leading-none">Terminal de Hallazgos</h4>
-                        <p class="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest italic">Evidencia fotográfica y trazabilidad de riesgos.</p>
+                        <h4 class="text-lg md:text-xl font-black italic uppercase leading-none">Unificación de Activos</h4>
+                        <p class="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest italic">Inventario con estados (Operativo, Alerta, Bloqueado) y trazabilidad inmutable de cambios de metadata.</p>
                     </div>
                     <div class="w-24 h-24 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all"></div>
                 </div>
@@ -223,8 +223,8 @@
                                 <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                         </div>
-                        <h4 class="text-lg md:text-xl font-black italic uppercase leading-none">Validación Remota</h4>
-                        <p class="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest italic">Cierre de visitas con firma en pantalla o enlace encriptado.</p>
+                        <h4 class="text-lg md:text-xl font-black italic uppercase leading-none">Roles de Atributos SRE</h4>
+                        <p class="text-[8px] md:text-[10px] font-black text-white/60 uppercase tracking-widest italic">Campos configurados como identificadores, datos estáticos, datos con reglas de control y verificaciones en campo.</p>
                     </div>
                     <div class="w-24 h-24 bg-indigo-500/5 rounded-full blur-2xl group-hover:bg-indigo-500/20 transition-all"></div>
                 </div>
@@ -248,7 +248,7 @@
                             <div class="relative z-10 space-y-4 md:space-y-6">
                                 <h4 class="text-xl md:text-2xl font-black italic uppercase tracking-tight text-white group-hover:text-ep-primary transition-colors">Planificación</h4>
                                 <div class="h-1 w-12 bg-white/10 group-hover:w-24 group-hover:bg-ep-primary transition-all"></div>
-                                <p class="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest italic leading-relaxed">GESTIONA EL CONTRATO ANUAL Y ASIGNA VISITAS A TÉCNICOS INTEGRANDO LA LOGÍSTICA CORPORATIVA.</p>
+                                <p class="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest italic leading-relaxed">PARAMETRIZA EL CONTRATO ANUAL Y LAS REGLAS SRE PARA CÁLCULO AUTÓNOMO DE ALERTAS Y ÓRDENES DE TRABAJO.</p>
                             </div>
                         </div>
 
@@ -257,7 +257,7 @@
                             <div class="relative z-10 space-y-4 md:space-y-6">
                                 <h4 class="text-xl md:text-2xl font-black italic uppercase tracking-tight text-white group-hover:text-ep-primary transition-colors">Ejecución</h4>
                                 <div class="h-1 w-12 bg-white/10 group-hover:w-24 group-hover:bg-ep-primary transition-all"></div>
-                                <p class="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest italic leading-relaxed">OPERACIONES EN CAMPO: CHECKLISTS DINÁMICOS, HALLAZGOS Y REGISTRO FORENSE EN TIEMPO REAL.</p>
+                                <p class="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest italic leading-relaxed">PROOF OF PRESENCE POR GPS, VINCULACIÓN OPCIONAL DE ACTIVOS EN EL WIZARD PASO 0 Y BLOQUEO OPERATIVO AUTOMÁTICO ANTE MANTENIMIENTO VENCIDO.</p>
                             </div>
                         </div>
 
@@ -266,7 +266,7 @@
                             <div class="relative z-10 space-y-4 md:space-y-6">
                                 <h4 class="text-xl md:text-2xl font-black italic uppercase tracking-tight text-white group-hover:text-ep-primary transition-colors">Inteligencia</h4>
                                 <div class="h-1 w-12 bg-white/10 group-hover:w-24 group-hover:bg-ep-primary transition-all"></div>
-                                <p class="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest italic leading-relaxed">CONSOLIDACIÓN AUTOMÁTICA DE DATOS EN INFORMES MAESTROS CON RESPALDO DE TRAZABILIDAD SEllADA.</p>
+                                <p class="text-[10px] md:text-xs font-bold text-white/60 uppercase tracking-widest italic leading-relaxed">CONSOLIDACIÓN DE BÓVEDA DE CERTIFICADOS POR FECHA/SEDE Y LOG INMUTABLE DE HISTORIAL DE CAMBIOS DE METADATA.</p>
                             </div>
                         </div>
                     </div>
@@ -292,7 +292,7 @@
                                 <a href="{{ route('login') }}" class="inline-flex bg-ep-dark text-white px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-2xl">
                                     Activar Acceso a XamaSafe
                                 </a>
-                                <a href="https://wa.me/5492644553442?text=Hola!%20Me%20interesa%20obtener%20más%20información%20sobre%20Industrias%20Xamanen" target="_blank" class="inline-flex bg-ep-dark/15 border border-ep-dark/30 hover:bg-ep-dark/25 text-ep-dark px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-xl items-center gap-2">
+                                <a href="https://wa.me/5492644553442?text=Hola!%20Me%20interesa%20obtener%20más%20información%20sobre%20Industrias%20Xamanen" target="_blank" class="inline-flex bg-ep-dark text-white px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-2xl items-center gap-2">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.451L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.528 2.015 14.07 1 11.5 1c-5.438 0-9.863 4.373-9.867 9.801-.001 1.73.473 3.41 1.37 4.887L1.88 20.66l4.767-1.506z" />
                                     </svg>
