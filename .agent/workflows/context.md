@@ -170,6 +170,8 @@ ep-back/
   - El modelo `AuditLog` está blindado a nivel de base de datos interceptando los eventos Eloquent `updating` y `deleting` para lanzar excepciones.
   - Las transacciones se disparan automáticamente usando eventos Laravel (`ClientAccessModified`) y oyentes (`LogClientAccess`) vinculados en `AppServiceProvider`.
 - ✅ **Aislamiento de Súper Administración:** Las rutas de súper administración se protegen con middleware `role:super_admin,vendedor` o `role:super_admin` según la jerarquía, e invocan `$this->ensureSuperAdminOrVendedor()` o `$this->ensureSuperAdmin()` en `AdministrationController` para convalidar el rol en backend.
+- ✅ **Validación de Jerarquía Multi-tenant en Consultoras:** Para evitar accesos cruzados ilegítimos o manipulados en endpoints parametrizados de operadores, se valida explícitamente en backend (`abort_unless($user->consultora_id === $consultant->id, 403)`) la pertenencia estricta del usuario objetivo a la consultora máster inyectada.
+- ✅ **Lógica de Deshabilitación Unificada (Preservación de Trazabilidad):** Las bajas de personal global y de operadores de consultoras sustituyen el borrado físico (`delete()`) por un cambio lógico de estado (`'inactivo'`). Esto mantiene la integridad de auditorías de inspección, capacitaciones e incidentes históricos relacionados al usuario en la base de datos.
 - ✅ Retornar respuestas nativas de Inertia: `return Inertia::render('Componente', [...]);`.
  
 ### Frontend (React 19 & Inertia)
@@ -181,7 +183,10 @@ ep-back/
   - En la vista de edición de Consultoras (`Edit.jsx`), se integra una pestaña de **"Auditoría"** que renderiza una línea de tiempo táctica de cambios de accesos.
   - Cada entrada calcula la diferencia visual de los límites (técnicos, gestores, empresas y estado de suscripción) indicando los valores anteriores y nuevos, y el usuario autor de la modificación.
 - ✅ **ABM de Staff Global (Index.jsx en Admin/Staff):**
-  - Interfaz premium en modo oscuro que permite a los súper administradores gestionar el staff interno, crear nuevos usuarios de soporte, darlos de baja o blanquear sus contraseñas.
+  - Interfaz premium en modo oscuro que permite a los súper administradores gestionar el staff interno, crear nuevos usuarios de soporte, deshabilitarlos (cambiando a `inactivo` mediante un modal React táctico) o blanquear sus contraseñas.
+- ✅ **Modales de Confirmación Tácticos React (Frontend):**
+  - Reemplazo de las advertencias nativas de JavaScript `confirm()` por modales React premium integrados en `Pages/Admin/Staff/Index.jsx`, `Pages/Admin/Consultants/Index.jsx` y `Pages/Admin/Consultants/Users.jsx`.
+  - Diseñados en base a la paleta premium oscura de XamaSafe (`bg-[#16162a]`, `border-white/10`, efectos glassmorphism `backdrop-blur-md` y botones tácticos estilizados de color rojo/gris).
 - ✅ **Diseño HUD Táctico y Modular:** Componentes HUD oscuros premium, modularizados y reutilizables. El modal `ActionSelector` es el estándar para paneles de comandos y acciones spontaneous.
 - ✅ **HUD Sync Badge (Naranja Técnico):** El asistente de checklists (`Wizard.jsx`) debe mostrar arriba de la barra de progreso un badge centrado `"⌚ Tiempo Real (Sync Servidor)"` en Naranja Técnico para indicar la inmutabilidad de la fecha en tiempo real.
 - ✅ **Intercepción y Auto-completado por Falla Crítica en Asistente (`Wizard.jsx`):** Evaluar en caliente el desvío crítico al navegar entre secciones del checklist. Si el técnico decide "Rechazar y Finalizar", el frontend debe mutar de forma masiva los campos no contestados de secciones posteriores a `"No evaluado por falla crítica"` y saltar al paso de firmas de inmediato para cerrar la auditoría.

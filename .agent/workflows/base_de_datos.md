@@ -979,7 +979,7 @@ solicitado → en_redaccion → finalizado → aprobado
 | `n_doc` | `varchar` | Sí ✅ | *ninguno* |  |
 | `rol` | `varchar` | Sí ✅ | *ninguno* | rol del usuario (`super_admin`, `vendedor`, `gestor`, `tecnico`, `cliente`) |
 | `matricula` | `varchar` | Sí ✅ | *ninguno* |  |
-| `estado` | `tinyint(1)` | No ❌ | `'1'` |  |
+| `estado` | `varchar` | No ❌ | `'activo'` | estado del usuario (`'activo'`, `'inactivo'`). Utilizado para desactivar el acceso del personal (Staff Global y Operadores) de forma permanente/temporal sin borrar el registro, conservando intacto el historial. |
 | `firma` | `varchar` | Sí ✅ | *ninguno* |  |
 | `firma_temp` | `varchar` | Sí ✅ | *ninguno* |  |
 | `firma_status` | `varchar` | No ❌ | `'approved'` |  |

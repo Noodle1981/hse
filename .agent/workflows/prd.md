@@ -6,9 +6,9 @@ description: Documento de Requisitos de Producto (PRD) para XamaSafe
 
 ## 1. Control del Documento
 * **Nombre del Producto:** XamaSafe
-* **Versión del PRD:** v2.3 (Stack React + Inertia.js)
+* **Versión del PRD:** v2.4 (Stack React + Inertia.js)
 * **Estado:** Activo / En Desarrollo
-* **Última Actualización:** 7 Julio 2026
+* **Última Actualización:** 10 Julio 2026
 * **Tecnología Core:** Laravel 12 + Inertia.js (React 19) + Tailwind CSS v4 + SQLite/MySQL + Ziggy JS
 
 ---
@@ -226,10 +226,11 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
   - **Vendedor (`vendedor`)**: rol global orientado a ventas y soporte. Comparte el dashboard de consultoras, permitiendo dar de alta, configurar límites (gestores, técnicos, empresas) y cambiar el estado de suscripción de las consultoras. **Restringido**: no tiene acceso al borrado de consultoras, a la administración de usuarios internos de clientes, ni a la gestión global de staff. Su sidebar muestra "Dashboard Global" y "Consultoras".
 * **Gestión de Consultoras Máster (CRUD):** Creación y edición de las entidades consultoras que agrupan a técnicos y empresas, permitiendo definir su CUIT, nombre, email, teléfono, dirección, estado de suscripción y límites máximos de licencias (técnicos, gestores, empresas).
 * **Personalización de Branding y Marca:** Control de la identidad visual de cada consultora a través del formulario de edición. Permite cargar logotipos a almacenamiento persistente y seleccionar colores corporativos (Primario, Secundario, Acento) con color pickers nativos.
-* **Control de Operadores y Staff (Activación/Suspensión):** Listado y gestión del staff de cada consultora (restringido a súper administradores).
-* **Gestión de Personal Global:** Panel exclusivo de Súper Administradores para dar de alta, modificar y cambiar el estado de otros administradores y vendedores globales.
+* **Control de Operadores y Staff (Activación/Suspensión):** Listado y gestión del staff de cada consultora (restringido a súper administradores). La baja de un operador consiste en su deshabilitación lógica (`estado = 'inactivo'`) para salvaguardar la trazabilidad de inspecciones e histórico transaccional, bloqueando su inicio de sesión de inmediato pero impidiendo la eliminación del registro físico.
+* **Gestión de Personal Global:** Panel exclusivo de Súper Administradores para dar de alta, modificar y suspender a otros administradores y vendedores globales. Al igual que con los operadores de consultoras, se unifica la lógica para que la eliminación tradicional se sustituya por un cambio de estado a `'inactivo'`, previniendo la pérdida de datos históricos y logs de auditoría en el sistema.
 * **Registro de Auditoría Inmutable (Audit Log)**:
   - Sistema de registro automático e inalterable que captura qué usuario (Súper Admin o Vendedor) realizó cambios de límites o suscripción en cada consultora y el diff exacto de campos. El modelo tiene bloqueados los métodos de modificación y eliminación para máxima fiabilidad. Muestra una línea de tiempo detallada con las diferencias en los campos modificados en la vista de edición.
+* **Validación de Jerarquía en Operadores:** Control estricto a nivel de backend en la gestión de personal de consultoras máster. Se valida de forma segura que el operador editado o deshabilitado pertenezca a la consultora inyectada en la ruta, denegando el acceso (`403 Forbidden`) en caso de discrepancias o alteraciones del request.
 
 ### 4.10. Módulo Universal de Activos y Trazabilidad Dinámica con Códigos QR
 * **Inventariado y Ficha de Activos (`Asset`)**: Abstracción universal para registrar equipamiento físico (`assets`) clasificado por tipos (`asset_types`) y asociado a una Sede. Admite atributos fijos (nombre, identificador único/patente, estado) y dinámicos guardados en formato JSON (`metadata`) para soportar múltiples industrias sin alterar el esquema físico de base de datos.

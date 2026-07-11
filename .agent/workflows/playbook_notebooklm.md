@@ -68,8 +68,8 @@ El sistema opera bajo un esquema estricto de multi-tenancy y control de accesos 
   - Crear, editar, listar y eliminar consultoras de Higiene y Seguridad (`Consultora`).
   - Configurar límites de licencias de técnicos (`max_tecnicos`), gestores (`max_gestores`) y empresas (`max_empresas`) por consultora.
   - Personalizar el branding corporativo de cada consultora (logotipo y colores de acento primario, secundario y de relieve) mediante la interfaz gráfica en React.
-  - Administrar el staff de operadores y técnicos de cada consultora, pudiendo cambiar su estado para inhabilitar accesos del personal en tiempo real.
-  - Gestionar el personal administrativo global (CRUD de Súper Administradores y Vendedores), incluyendo la creación de nuevas cuentas, la baja/desactivación y el blanqueo de contraseñas.
+  - Administrar el staff de operadores y técnicos de cada consultora, pudiendo cambiar su estado a `'inactivo'` para deshabilitar su acceso en tiempo real sin eliminar el registro físico (preservando la trazabilidad de inspecciones e informes pasados).
+  - Gestionar el personal administrativo global (Súper Administradores y Vendedores), incluyendo la creación de nuevas cuentas, la deshabilitación de accesos mediante cambio de estado a `'inactivo'`, y el blanqueo de contraseñas de forma segura utilizando modales de confirmación React tácticos.
 * **Páginas React / Inertia asociadas:**
   - Directorio `resources/js/Pages/Admin/Consultants/*` (Index, Edit, Users).
   - Directorio `resources/js/Pages/Admin/Staff/*` (Index.jsx - Gestión de Personal Global).
