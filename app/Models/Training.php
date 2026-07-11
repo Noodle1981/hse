@@ -45,32 +45,32 @@ class Training extends Model
 
     public function dynamicChecklist()
     {
-        return $this->belongsTo(\App\Models\DynamicChecklist::class, 'dynamic_checklist_id');
+        return $this->belongsTo(DynamicChecklist::class, 'dynamic_checklist_id');
     }
 
     public function responsibleUser()
     {
-        return $this->belongsTo(\App\Models\User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function creator()
     {
-        return $this->belongsTo(\App\Models\User::class, 'created_by_user_id');
+        return $this->belongsTo(User::class, 'created_by_user_id');
     }
 
     public function empresa()
     {
-        return $this->belongsTo(\App\Models\Empresa::class);
+        return $this->belongsTo(Empresa::class);
     }
 
     public function sede()
     {
-        return $this->belongsTo(\App\Models\Sede::class);
+        return $this->belongsTo(Sede::class);
     }
 
     public function attendances()
     {
-        return $this->hasMany(\App\Models\TrainingAttendance::class);
+        return $this->hasMany(TrainingAttendance::class);
     }
 
     // Ejecuciones de esta capacitación en visitas

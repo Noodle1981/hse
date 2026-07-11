@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\SedeUser;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SedeUser>
+ * @extends Factory<SedeUser>
  */
 class SedeUserFactory extends Factory
 {

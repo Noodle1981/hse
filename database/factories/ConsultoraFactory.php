@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Consultora;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Consultora>
+ * @extends Factory<Consultora>
  */
 class ConsultoraFactory extends Factory
 {

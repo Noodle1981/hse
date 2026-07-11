@@ -3,8 +3,20 @@
 namespace Database\Seeders\UseCases;
 
 use App\Models\Category;
+use App\Models\ChecklistAssignment;
+use App\Models\DynamicChecklist;
+use App\Models\DynamicInspection;
+use App\Models\Employee;
 use App\Models\Empresa;
+use App\Models\EppDelivery;
+use App\Models\EppItem;
+use App\Models\GeneradorConstancia;
+use App\Models\Risk;
+use App\Models\RiskEvaluation;
+use App\Models\RiskMatrix;
 use App\Models\Sede;
+use App\Models\Training;
+use App\Models\TrainingAttendance;
 use App\Models\User;
 use Database\Seeders\Traits\SeederHelpers;
 use Illuminate\Database\Seeder;
@@ -69,7 +81,7 @@ class SafetyTraceabilitySeeder extends Seeder
             $status = $i < 5 ? 'completed' : 'pending';
 
             // Crear asignación
-            $assignment = \App\Models\ChecklistAssignment::create([
+            $assignment = ChecklistAssignment::create([
                 'dynamic_checklist_id' => $def->id,
                 'user_id' => $this->tecnico->id,
                 'sede_id' => $this->sede->id,
@@ -82,7 +94,7 @@ class SafetyTraceabilitySeeder extends Seeder
 
             if ($status === 'completed') {
                 // Completar la inspección
-                $inspection = \App\Models\DynamicInspection::create([
+                $inspection = DynamicInspection::create([
                     'dynamic_checklist_id' => $def->id,
                     'user_id' => $this->tecnico->id,
                     'sede_id' => $this->sede->id,
@@ -111,7 +123,7 @@ class SafetyTraceabilitySeeder extends Seeder
     private function seedCustomEpp(array $employees): void
     {
         // Crear Items EPP
-        $casco = \App\Models\EppItem::create([
+        $casco = EppItem::create([
             'name' => 'Casco de Seguridad',
             'code' => 'EPP-001',
             'stock' => 50,
@@ -121,7 +133,7 @@ class SafetyTraceabilitySeeder extends Seeder
 
         // 2 Entregadas
         for ($i = 0; $i < 2; $i++) {
-            \App\Models\EppDelivery::create([
+            EppDelivery::create([
                 'epp_item_id' => $casco->id,
                 'employee_id' => $employees[$i]->id,
                 'user_id' => $this->tecnico->id, // Quien entrega
@@ -137,7 +149,7 @@ class SafetyTraceabilitySeeder extends Seeder
         for ($i = 2; $i < 5; $i++) {
             // Usar empleado si existe, sino ciclar
             $emp = $employees[$i % count($employees)];
-            \App\Models\EppDelivery::create([
+            EppDelivery::create([
                 'epp_item_id' => $casco->id,
                 'employee_id' => $emp->id,
                 'user_id' => $this->tecnico->id,
@@ -160,7 +172,7 @@ class SafetyTraceabilitySeeder extends Seeder
         foreach ($topics as $index => $topic) {
             $isCompleted = $index === 0; // La primera completada, la segunda pendiente/futura
 
-            $training = \App\Models\Training::create([
+            $training = Training::create([
                 'title' => $topic,
                 'description' => 'Capacitación técnica obligatoria',
                 'user_id' => $this->tecnico->id, // Instructor
@@ -173,7 +185,7 @@ class SafetyTraceabilitySeeder extends Seeder
             if ($isCompleted) {
                 // Asistencia
                 foreach ($employees as $emp) {
-                    \App\Models\TrainingAttendance::create([
+                    TrainingAttendance::create([
                         'training_id' => $training->id,
                         'employee_id' => $emp->id,
                         'attended' => true,
@@ -190,7 +202,7 @@ class SafetyTraceabilitySeeder extends Seeder
         for ($i = 0; $i < 5; $i++) {
             $date = now()->subDays((5 - $i) * 3); // Espaciadas
 
-            $constancia = \App\Models\GeneradorConstancia::create([
+            $constancia = GeneradorConstancia::create([
                 'user_id' => $this->tecnico->id,
                 'sede_id' => $this->sede->id,
                 'fecha' => $date,
@@ -248,7 +260,7 @@ class SafetyTraceabilitySeeder extends Seeder
     private function seedRiskMatrix(): int
     {
         // Crear matriz básica si no existe
-        $matrix = \App\Models\RiskMatrix::create([
+        $matrix = RiskMatrix::create([
             'user_id' => $this->tecnico->id,
             'sede_id' => $this->sede->id,
             'empresa_id' => $this->sede->empresa_id,
@@ -278,7 +290,7 @@ class SafetyTraceabilitySeeder extends Seeder
         ];
 
         foreach ($riesgosData as $r) {
-            $risk = \App\Models\Risk::create([
+            $risk = Risk::create([
                 'risk_matrix_id' => $matrix->id,
                 'hazard' => $r['hazard'],
                 'type' => $r['type'],
@@ -286,7 +298,7 @@ class SafetyTraceabilitySeeder extends Seeder
             ]);
 
             // Crear evaluación inicial
-            \App\Models\RiskEvaluation::create([
+            RiskEvaluation::create([
                 'risk_id' => $risk->id,
                 'user_id' => $this->tecnico->id,
                 'probability' => $r['probability'],
@@ -305,7 +317,7 @@ class SafetyTraceabilitySeeder extends Seeder
     {
         $hys = Category::where('code', 'hys')->first();
 
-        $c1 = \App\Models\DynamicChecklist::create([
+        $c1 = DynamicChecklist::create([
             'title' => 'Pre-Operacional de Autoelevadores',
             'description' => 'Control diario',
             // 'user_id' => $this->gestor->id, // No existe en fillable
@@ -313,7 +325,7 @@ class SafetyTraceabilitySeeder extends Seeder
             'category_id' => $hys?->id,
         ]);
 
-        $c2 = \App\Models\DynamicChecklist::create([
+        $c2 = DynamicChecklist::create([
             'title' => 'Inspección de Equipos de Altura',
             'description' => 'Verificación mensual',
             // 'user_id' => $this->gestor->id,
@@ -335,7 +347,7 @@ class SafetyTraceabilitySeeder extends Seeder
 
         $employees = [];
         foreach ($data as $d) {
-            $employees[] = \App\Models\Employee::create([
+            $employees[] = Employee::create([
                 'empresa_id' => $this->sede->empresa_id, // Requerido por Employee
                 'sede_id' => $this->sede->id,
                 'name' => $d[0],      // first_name -> name

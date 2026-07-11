@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnnualPlan;
+use App\Models\DynamicChecklist;
+use App\Models\Empresa;
 use App\Models\Sede;
 use App\Models\Training;
+use App\Models\TrainingAttendance;
+use App\Models\User;
 use App\Models\VisitCertificate;
 use App\Models\VisitTraining;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class TrainingController extends Controller
@@ -45,7 +51,7 @@ class TrainingController extends Controller
         return Inertia::render('Gestor/Trainings/Index', [
             'templates' => $templates,
             'history' => $history,
-            'empresas' => \App\Models\Empresa::get(),
+            'empresas' => Empresa::get(),
             'sedes' => $request->empresaFilter ? Sede::where('empresa_id', $request->empresaFilter)->get() : [],
             'filters' => $request->only(['search', 'empresaFilter', 'sedeFilter']),
         ]);
@@ -58,9 +64,9 @@ class TrainingController extends Controller
     {
         return Inertia::render('Gestor/Trainings/Builder', [
             'sedes' => Sede::with('empresa')->get(),
-            'empresas' => \App\Models\Empresa::get(),
-            'tecnicos' => \App\Models\User::where('rol', 'tecnico')->get(),
-            'checklists' => \App\Models\DynamicChecklist::active()->get(),
+            'empresas' => Empresa::get(),
+            'tecnicos' => User::where('rol', 'tecnico')->get(),
+            'checklists' => DynamicChecklist::active()->get(),
         ]);
     }
 
@@ -113,7 +119,7 @@ class TrainingController extends Controller
         $multiTrainer = false;
 
         if ($training && $training->dynamic_checklist_id) {
-            $plan = \App\Models\AnnualPlan::where('sede_id', $visit->sede_id)
+            $plan = AnnualPlan::where('sede_id', $visit->sede_id)
                 ->where('checklist_id', $training->dynamic_checklist_id)
                 ->first();
 
@@ -151,7 +157,7 @@ class TrainingController extends Controller
             'signature' => 'required|string',
         ]);
 
-        \App\Models\TrainingAttendance::create([
+        TrainingAttendance::create([
             'training_id' => $visitTraining->training_id, // NULL if ad-hoc
             'visit_training_id' => $visitTraining->id,
             'employee_name' => $request->name,
@@ -240,7 +246,7 @@ class TrainingController extends Controller
 
             if ($sigData !== false) {
                 $filename = 'signatures/instructor_'.uniqid().'.'.$type;
-                \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $sigData);
+                Storage::disk('public')->put($filename, $sigData);
                 $signaturePath = $filename;
             }
         }

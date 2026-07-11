@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Training;
+use App\Models\VisitTraining;
 use App\Services\BrandingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -14,7 +15,7 @@ class TrainingPDFController extends Controller
         set_time_limit(300);
 
         // 1. Intentar buscar ejecución en la visita (VisitTraining)
-        $visitTraining = \App\Models\VisitTraining::with([
+        $visitTraining = VisitTraining::with([
             'visit.sede.empresa',
             'visit.user',
             'training.responsibleUser',
@@ -62,7 +63,7 @@ class TrainingPDFController extends Controller
         set_time_limit(300);
 
         // 1. Intentar buscar ejecución en la visita (VisitTraining)
-        $visitTraining = \App\Models\VisitTraining::with([
+        $visitTraining = VisitTraining::with([
             'visit.sede.empresa',
             'visit.user',
             'training.responsibleUser',

@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\AssetMetadataLog;
 use App\Models\AssetType;
 use App\Models\Empresa;
 use App\Models\Sede;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -18,7 +20,7 @@ class AssetController extends Controller
      */
     public function index(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $empresaQuery = Empresa::query();
@@ -108,7 +110,7 @@ class AssetController extends Controller
      */
     public function create()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $empresaQuery = Empresa::query();
@@ -224,7 +226,7 @@ class AssetController extends Controller
             },
         ]);
 
-        $metadataLogs = \App\Models\AssetMetadataLog::where('asset_id', $asset->id)
+        $metadataLogs = AssetMetadataLog::where('asset_id', $asset->id)
             ->with(['inspection.checklist', 'changedByUser'])
             ->latest('created_at')
             ->get();
@@ -236,9 +238,9 @@ class AssetController extends Controller
         foreach ($asset->dynamicInspections as $insp) {
             if ($insp->result === 'Fail' || ! empty($insp->observaciones)) {
                 $evidences[] = [
-                    'id' => 'insp_' . $insp->id,
+                    'id' => 'insp_'.$insp->id,
                     'type' => 'inspection',
-                    'title' => 'Inspección: ' . ($insp->checklist?->title ?? 'Checklist'),
+                    'title' => 'Inspección: '.($insp->checklist?->title ?? 'Checklist'),
                     'status' => $insp->result,
                     'date' => $insp->completed_at ? $insp->completed_at->format('d/m/Y H:i') : 'N/D',
                     'user' => $insp->user?->name ?? 'Técnico',
@@ -252,9 +254,9 @@ class AssetController extends Controller
         foreach ($asset->incidentes as $inc) {
             $incPhotos = $inc->fotos ? $inc->fotos->pluck('foto_url')->toArray() : [];
             $evidences[] = [
-                'id' => 'inc_' . $inc->id,
+                'id' => 'inc_'.$inc->id,
                 'type' => 'incident',
-                'title' => 'Incidente: ' . ($inc->titulo ?? 'Siniestro registrado'),
+                'title' => 'Incidente: '.($inc->titulo ?? 'Siniestro registrado'),
                 'status' => strtoupper($inc->gravedad ?? 'Incidente'),
                 'date' => $inc->fecha_ocurrencia ? $inc->fecha_ocurrencia->format('d/m/Y H:i') : 'N/D',
                 'user' => $inc->user?->name ?? 'Usuario',
@@ -310,7 +312,7 @@ class AssetController extends Controller
      */
     public function edit(Asset $asset)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $empresaQuery = Empresa::query();

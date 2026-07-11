@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class MasterReport extends Model
@@ -70,7 +71,7 @@ class MasterReport extends Model
 
         // Por defecto: Mensual
         try {
-            return \Carbon\Carbon::parse($period.'-01')->translatedFormat('F Y');
+            return Carbon::parse($period.'-01')->translatedFormat('F Y');
         } catch (\Exception $e) {
             return $period;
         }

@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Events\ClientAccessModified;
+use Database\Factories\ConsultoraFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Consultora extends Model
 {
-    /** @use HasFactory<\Database\Factories\ConsultoraFactory> */
+    /** @use HasFactory<ConsultoraFactory> */
     use HasFactory;
 
     protected $table = 'consultoras';
@@ -75,7 +77,7 @@ class Consultora extends Model
                 'max_gestores' => ['new' => $consultant->max_gestores],
                 'max_empresas' => ['new' => $consultant->max_empresas],
             ];
-            event(new \App\Events\ClientAccessModified($consultant, 'create', $payload));
+            event(new ClientAccessModified($consultant, 'create', $payload));
         });
 
         static::updating(function ($consultant) {
@@ -97,8 +99,8 @@ class Consultora extends Model
                     ];
                 }
             }
-            if (!empty($changes)) {
-                event(new \App\Events\ClientAccessModified($consultant, 'update', $changes));
+            if (! empty($changes)) {
+                event(new ClientAccessModified($consultant, 'update', $changes));
             }
         });
     }

@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\CapacitacionVirualAsistente;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CapacitacionVirualAsistente>
+ * @extends Factory<CapacitacionVirualAsistente>
  */
 class CapacitacionVirualAsistenteFactory extends Factory
 {

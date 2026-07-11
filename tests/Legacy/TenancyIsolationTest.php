@@ -2,7 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Companies\CompanyBuilder;
 use App\Livewire\Companies\CompanyIndex;
+use App\Livewire\Companies\LocationManager;
+use App\Livewire\Users\UserManager;
 use App\Models\Consultora;
 use App\Models\Empresa;
 use App\Models\User;
@@ -58,7 +61,7 @@ class TenancyIsolationTest extends TestCase
         // Let's verify how CompanyBuilder works. If it uses route binding or internal query.
 
         Livewire::actingAs($adminA)
-            ->test(\App\Livewire\Companies\CompanyBuilder::class, ['id' => $empresaB->id])
+            ->test(CompanyBuilder::class, ['id' => $empresaB->id])
             ->assertStatus(404);
     }
 
@@ -72,7 +75,7 @@ class TenancyIsolationTest extends TestCase
         $userB = User::factory()->inspector()->create(['consultora_id' => $consultoraB->id]);
 
         Livewire::actingAs($adminA)
-            ->test(\App\Livewire\Users\UserManager::class)
+            ->test(UserManager::class)
             ->call('edit', $userB->id)
             ->assertStatus(403);
     }
@@ -87,7 +90,7 @@ class TenancyIsolationTest extends TestCase
         $empresaB = Empresa::factory()->create(['consultora_id' => $consultoraB->id]);
 
         Livewire::actingAs($adminA)
-            ->test(\App\Livewire\Companies\LocationManager::class, ['empresa' => $empresaB])
+            ->test(LocationManager::class, ['empresa' => $empresaB])
             ->assertStatus(403);
     }
 }

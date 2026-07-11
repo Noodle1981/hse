@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Models\Sede;
 use App\Models\VisitCertificate;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class TimeTrackingService
 {
@@ -122,7 +123,7 @@ class TimeTrackingService
             );
 
             if ($checkinDistance > $tolerance) {
-                \Illuminate\Support\Facades\Log::warning("GPS Check-in fuera de tolerancia para la visita #{$visit->id}", [
+                Log::warning("GPS Check-in fuera de tolerancia para la visita #{$visit->id}", [
                     'checkin_distance' => $checkinDistance,
                     'tolerance' => $tolerance,
                 ]);
@@ -139,7 +140,7 @@ class TimeTrackingService
             );
 
             if ($checkoutDistance > $tolerance) {
-                \Illuminate\Support\Facades\Log::warning("GPS Check-out fuera de tolerancia para la visita #{$visit->id}", [
+                Log::warning("GPS Check-out fuera de tolerancia para la visita #{$visit->id}", [
                     'checkout_distance' => $checkoutDistance,
                     'tolerance' => $tolerance,
                 ]);
@@ -148,6 +149,7 @@ class TimeTrackingService
         }
 
         $visit->gps_verified = $isVerified;
+
         return $isVerified;
     }
 

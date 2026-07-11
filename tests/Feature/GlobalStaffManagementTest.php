@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use App\Models\AuditLog;
 use App\Models\Consultora;
 use App\Models\User;
-use App\Models\AuditLog;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class GlobalStaffManagementTest extends TestCase
 {
@@ -66,11 +66,12 @@ class GlobalStaffManagementTest extends TestCase
         $response = $this->delete(route('admin.staff.destroy', $vendedor->id));
         $response->assertRedirect(route('admin.staff.index'));
 
-        // Soft deleted
-        $this->assertSoftDeleted('users', [
+        // No se elimina lógicamente (no soft delete), sino que se desactiva
+        $this->assertDatabaseHas('users', [
             'id' => $vendedor->id,
+            'estado' => 'inactivo',
+            'deleted_at' => null,
         ]);
-        $this->assertEquals('inactivo', $vendedor->fresh()->estado);
     }
 
     /** @test */

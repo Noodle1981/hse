@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DynamicInspection;
 use App\Services\BrandingService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Gate;
 
 class InspectionPDFController extends Controller
 {
@@ -20,7 +21,7 @@ class InspectionPDFController extends Controller
             'answers.question',
         ])->findOrFail($id);
 
-        \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
+        Gate::authorize('view', $inspection);
 
         $branding = BrandingService::forUser($inspection->user);
 
@@ -46,7 +47,7 @@ class InspectionPDFController extends Controller
             'answers.question',
         ])->findOrFail($id);
 
-        \Illuminate\Support\Facades\Gate::authorize('view', $inspection);
+        Gate::authorize('view', $inspection);
 
         $branding = BrandingService::forUser($inspection->user);
 

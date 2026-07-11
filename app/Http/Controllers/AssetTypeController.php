@@ -6,9 +6,10 @@ use App\Models\AssetType;
 use App\Models\Category;
 use App\Models\DynamicChecklist;
 use App\Models\Empresa;
-use App\Models\Subcategory;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AssetTypeController extends Controller
@@ -18,7 +19,7 @@ class AssetTypeController extends Controller
      */
     public function index(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $empresaQuery = Empresa::query();
@@ -50,10 +51,10 @@ class AssetTypeController extends Controller
             ->get(['id', 'title', 'registry_code', 'category_id', 'subcategory_id']);
 
         return Inertia::render('Gestor/Assets/Types/Index', [
-            'assetTypes'  => $assetTypes,
-            'categories'  => $categories,
-            'empresas'    => $empresas,
-            'checklists'  => $checklists,
+            'assetTypes' => $assetTypes,
+            'categories' => $categories,
+            'empresas' => $empresas,
+            'checklists' => $checklists,
         ]);
     }
 
@@ -116,9 +117,9 @@ class AssetTypeController extends Controller
         $fields = $questions->map(function ($q) {
             // Mapear tipo de pregunta → tipo de metadata
             $metaType = match ($q->type) {
-                'number'           => 'number',
+                'number' => 'number',
                 'date', 'datetime' => 'date',
-                default            => 'text',
+                default => 'text',
             };
 
             // Usar vincular_a_metadata o auto-generar uno a partir del label
@@ -149,19 +150,19 @@ class AssetTypeController extends Controller
             }
 
             return [
-                'name'            => $keyName,
-                'label'           => $q->label,
-                'type'            => $metaType,
-                'show_in_create'  => $showInCreate,
-                'role'            => $role,
-                'alert_days'      => ($metaType === 'date' && $isExpirationDate) ? 30 : null,
+                'name' => $keyName,
+                'label' => $q->label,
+                'type' => $metaType,
+                'show_in_create' => $showInCreate,
+                'role' => $role,
+                'alert_days' => ($metaType === 'date' && $isExpirationDate) ? 30 : null,
                 'alert_threshold' => null,
-                '_imported'       => true,
+                '_imported' => true,
             ];
         })
-        ->filter(fn ($f) => ! empty($f['name']))
-        ->unique('name')
-        ->values();
+            ->filter(fn ($f) => ! empty($f['name']))
+            ->unique('name')
+            ->values();
 
         return response()->json(['fields' => $fields]);
     }
@@ -172,9 +173,10 @@ class AssetTypeController extends Controller
     private function generateKeyFromLabel(string $label): string
     {
         $clean = preg_replace('/[^\p{L}\p{N}\s]/u', '', $label);
-        $slug = \Illuminate\Support\Str::slug($clean, '_');
+        $slug = Str::slug($clean, '_');
         $slug = substr($slug, 0, 35);
-        return rtrim($slug, '_') ?: 'atributo_' . uniqid();
+
+        return rtrim($slug, '_') ?: 'atributo_'.uniqid();
     }
 
     /**

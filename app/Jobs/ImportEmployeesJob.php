@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Employee;
+use App\Rules\ValidCuil;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -73,7 +74,7 @@ class ImportEmployeesJob implements ShouldQueue
                                 // Validar CUIL si está presente
                                 if ($cuil) {
                                     $validator = Validator::make(['cuil' => $cuil], [
-                                        'cuil' => [new \App\Rules\ValidCuil],
+                                        'cuil' => [new ValidCuil],
                                     ]);
                                     if ($validator->fails()) {
                                         $errorLog[] = 'Fila '.($index + 2).": CUIL inválido ($cuil).";

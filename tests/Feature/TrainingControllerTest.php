@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Empresa;
 use App\Models\Sede;
 use App\Models\Training;
+use App\Models\TrainingAttendance;
 use App\Models\User;
 use App\Models\VisitCertificate;
 use App\Models\VisitTraining;
@@ -112,7 +113,7 @@ class TrainingControllerTest extends TestCase
     public function a_technician_can_finalize_training_with_external_instructor()
     {
         // Registrar al menos un asistente en la base de datos para la sesión
-        \App\Models\TrainingAttendance::create([
+        TrainingAttendance::create([
             'training_id' => $this->training->id,
             'visit_training_id' => $this->visitTraining->id,
             'employee_name' => 'Test Attendee',

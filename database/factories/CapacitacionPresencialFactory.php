@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\CapacitacionPresencial;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\CapacitacionPresencial>
+ * @extends Factory<CapacitacionPresencial>
  */
 class CapacitacionPresencialFactory extends Factory
 {

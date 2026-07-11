@@ -11,8 +11,11 @@ class ClientAccessModified
     use Dispatchable, SerializesModels;
 
     public $consultant;
+
     public $action;
+
     public $changes;
+
     public $userId;
 
     public function __construct(Consultora $consultant, string $action, array $changes = [], ?int $userId = null)

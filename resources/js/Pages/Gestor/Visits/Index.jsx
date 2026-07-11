@@ -148,6 +148,7 @@ export default function Index({ visits, filters, activeVisit }) {
                                                             <a 
                                                                 href={route('gestor.visits.certificate.preview', visit.id)} 
                                                                 target="_blank"
+                                                                rel="noopener noreferrer"
                                                                 className="h-10 w-10 bg-white/5 border border-white/10 text-white/40 hover:bg-white/10 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg"
                                                                 title="Vista Previa PDF"
                                                             >

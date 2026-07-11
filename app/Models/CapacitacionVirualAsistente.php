@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Database\Factories\CapacitacionVirualAsistenteFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class CapacitacionVirualAsistente extends Model
 {
-    /** @use HasFactory<\Database\Factories\CapacitacionVirualAsistenteFactory> */
+    /** @use HasFactory<CapacitacionVirualAsistenteFactory> */
     use HasFactory;
 
     protected $fillable = [

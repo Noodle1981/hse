@@ -2,11 +2,12 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 use App\Models\Consultora;
-use App\Models\User;
 use App\Models\ConsultoraSuscripcionLog;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Tests\TestCase;
 
 class ConsultantSubscriptionTraceabilityTest extends TestCase
 {
@@ -82,6 +83,7 @@ class ConsultantSubscriptionTraceabilityTest extends TestCase
     /** @test */
     public function consultants_edit_returns_formatted_suscripcion_logs_with_duration()
     {
+        Carbon::setLocale('en');
         $consultora = Consultora::create([
             'nombre' => 'Test Consultora',
             'cuit' => '20123456781',

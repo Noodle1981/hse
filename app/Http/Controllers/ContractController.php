@@ -14,6 +14,7 @@ use App\Models\VisitTraining;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ContractController extends Controller
@@ -133,7 +134,7 @@ class ContractController extends Controller
             }
         }
 
-        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $startDate, $endDate, $scheduled) {
+        DB::transaction(function () use ($request, $startDate, $endDate, $scheduled) {
             AnnualPlan::create([
                 'sede_id' => $request->sede_id,
                 'period_start' => $startDate,

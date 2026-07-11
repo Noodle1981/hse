@@ -6,6 +6,7 @@ use App\Models\Hallazgo;
 use App\Models\HallazgoFoto;
 use App\Models\Sede;
 use App\Models\User;
+use App\Models\VisitCertificate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -107,7 +108,7 @@ class FindingController extends Controller
 
         $initialSedeId = null;
         if ($request->visit_id) {
-            $visit = \App\Models\VisitCertificate::find($request->visit_id);
+            $visit = VisitCertificate::find($request->visit_id);
             if ($visit) {
                 $initialSedeId = $visit->sede_id;
             }
@@ -164,7 +165,7 @@ class FindingController extends Controller
                 'fecha_seguimiento' => now(),
             ]);
 
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
             $routePrefix = $user->isTechnician() ? 'tecnico.hallazgos' : 'gestor.hallazgos';
 
@@ -214,7 +215,7 @@ class FindingController extends Controller
      */
     public function myFindings(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $query = Hallazgo::query()
             ->with(['sede.empresa', 'user'])

@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Models\DynamicQuestion;
 use App\Models\ChecklistSection;
+use App\Models\DynamicQuestion;
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class FixLooseQuestionsCommand extends Command
@@ -35,6 +35,7 @@ class FixLooseQuestionsCommand extends Command
 
         if ($looseQuestions->isEmpty()) {
             $this->info('No se encontraron preguntas sueltas sin sección en la base de datos.');
+
             return self::SUCCESS;
         }
 
@@ -50,9 +51,9 @@ class FixLooseQuestionsCommand extends Command
                     ->where('title', 'Inspección General')
                     ->first();
 
-                if (!$section) {
+                if (! $section) {
                     $this->line("Creando sección 'Inspección General' para el Checklist #{$checklistId}...");
-                    
+
                     // Si ya hay secciones, opcionalmente desplazar su orden
                     ChecklistSection::where('dynamic_checklist_id', $checklistId)
                         ->increment('order');
@@ -66,7 +67,7 @@ class FixLooseQuestionsCommand extends Command
                 }
 
                 $questionIds = $questions->pluck('id')->toArray();
-                $this->line("Asignando " . count($questionIds) . " preguntas al ID de Sección #{$section->id}...");
+                $this->line('Asignando '.count($questionIds)." preguntas al ID de Sección #{$section->id}...");
 
                 DynamicQuestion::whereIn('id', $questionIds)
                     ->update(['section_id' => $section->id]);
@@ -74,6 +75,7 @@ class FixLooseQuestionsCommand extends Command
         });
 
         $this->info('¡Proceso de corrección finalizado con éxito!');
+
         return self::SUCCESS;
     }
 }

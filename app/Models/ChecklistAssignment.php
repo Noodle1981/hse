@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ChecklistAssignment extends Model
 {
@@ -49,12 +50,12 @@ class ChecklistAssignment extends Model
         return $this->belongsTo(Empresa::class);
     }
 
-    public function visitCompletion(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function visitCompletion(): HasOne
     {
         return $this->hasOne(VisitChecklistCompletion::class, 'checklist_assignment_id')->latest('id');
     }
 
-    public function inspection(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function inspection(): HasOne
     {
         return $this->hasOne(DynamicInspection::class, 'checklist_assignment_id')->latest('id');
     }

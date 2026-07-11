@@ -6,7 +6,7 @@ use App\Models\DynamicChecklist;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\DynamicChecklist>
+ * @extends Factory<DynamicChecklist>
  */
 class DynamicChecklistFactory extends Factory
 {

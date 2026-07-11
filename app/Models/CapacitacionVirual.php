@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Database\Factories\CapacitacionVirualFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CapacitacionVirual extends Model
 {
-    /** @use HasFactory<\Database\Factories\CapacitacionVirualFactory> */
+    /** @use HasFactory<CapacitacionVirualFactory> */
     use HasFactory;
 
     protected $fillable = [

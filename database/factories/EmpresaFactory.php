@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Consultora;
+use App\Models\Empresa;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Empresa>
+ * @extends Factory<Empresa>
  */
 class EmpresaFactory extends Factory
 {
@@ -20,7 +22,7 @@ class EmpresaFactory extends Factory
             'nombre' => $this->faker->company(),
             'razon_social' => $this->faker->company().' S.A.',
             'cuit' => $this->faker->unique()->numerify('###########'),
-            'consultora_id' => \App\Models\Consultora::factory(),
+            'consultora_id' => Consultora::factory(),
         ];
     }
 }

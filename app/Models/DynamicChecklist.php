@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DynamicChecklist extends Model
@@ -48,7 +49,7 @@ class DynamicChecklist extends Model
     /**
      * Categoría del checklist
      */
-    public function categoryRelation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function categoryRelation(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
@@ -56,7 +57,7 @@ class DynamicChecklist extends Model
     /**
      * Subcategoría del checklist
      */
-    public function subcategoryRelation(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function subcategoryRelation(): BelongsTo
     {
         return $this->belongsTo(Subcategory::class, 'subcategory_id');
     }

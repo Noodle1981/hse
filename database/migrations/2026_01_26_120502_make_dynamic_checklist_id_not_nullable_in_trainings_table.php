@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\DynamicChecklist;
+use App\Models\Training;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,10 +14,10 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Asignar un checklist por defecto a los registros existentes que tengan NULL
-        $defaultChecklist = \App\Models\DynamicChecklist::active()->first();
+        $defaultChecklist = DynamicChecklist::active()->first();
 
         if ($defaultChecklist) {
-            \App\Models\Training::whereNull('dynamic_checklist_id')
+            Training::whereNull('dynamic_checklist_id')
                 ->update(['dynamic_checklist_id' => $defaultChecklist->id]);
         }
 

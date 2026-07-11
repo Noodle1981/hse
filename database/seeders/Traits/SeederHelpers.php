@@ -4,6 +4,7 @@ namespace Database\Seeders\Traits;
 
 use App\Models\AnnualPlan;
 use App\Models\Category;
+use App\Models\ChecklistAssignment;
 use App\Models\ChecklistSection;
 use App\Models\DynamicAnswer;
 use App\Models\DynamicChecklist;
@@ -334,7 +335,7 @@ trait SeederHelpers
         }
 
         // 2 Asignaciones VENCIDAS (overdue)
-        \App\Models\ChecklistAssignment::create([
+        ChecklistAssignment::create([
             'dynamic_checklist_id' => $checklists[0]->id,
             'user_id' => $tecnico->id,
             'sede_id' => $sede->id,
@@ -345,7 +346,7 @@ trait SeederHelpers
         ]);
 
         if (isset($checklists[1])) {
-            \App\Models\ChecklistAssignment::create([
+            ChecklistAssignment::create([
                 'dynamic_checklist_id' => $checklists[1]->id,
                 'user_id' => $tecnico->id,
                 'sede_id' => $sede->id,
@@ -357,7 +358,7 @@ trait SeederHelpers
         }
 
         // 5 Asignaciones PENDIENTES (futuras)
-        \App\Models\ChecklistAssignment::create([
+        ChecklistAssignment::create([
             'dynamic_checklist_id' => $checklists[0]->id,
             'user_id' => $tecnico->id,
             'sede_id' => $sede->id,
@@ -368,7 +369,7 @@ trait SeederHelpers
         ]);
 
         $thirdIndex = min(2, count($checklists) - 1);
-        \App\Models\ChecklistAssignment::create([
+        ChecklistAssignment::create([
             'dynamic_checklist_id' => $checklists[$thirdIndex]->id,
             'user_id' => $tecnico->id,
             'sede_id' => $sede->id,
@@ -379,7 +380,7 @@ trait SeederHelpers
         ]);
 
         if (isset($checklists[1])) {
-            \App\Models\ChecklistAssignment::create([
+            ChecklistAssignment::create([
                 'dynamic_checklist_id' => $checklists[1]->id,
                 'user_id' => $tecnico->id,
                 'sede_id' => $sede->id,
@@ -390,7 +391,7 @@ trait SeederHelpers
             ]);
         }
 
-        \App\Models\ChecklistAssignment::create([
+        ChecklistAssignment::create([
             'dynamic_checklist_id' => $checklists[0]->id,
             'user_id' => $tecnico->id,
             'sede_id' => $sede->id,
@@ -400,7 +401,7 @@ trait SeederHelpers
             'notes' => 'Inspección de seguimiento',
         ]);
 
-        \App\Models\ChecklistAssignment::create([
+        ChecklistAssignment::create([
             'dynamic_checklist_id' => $checklists[$thirdIndex]->id,
             'user_id' => $tecnico->id,
             'sede_id' => $sede->id,
@@ -427,7 +428,7 @@ trait SeederHelpers
 
             $checklist = $checklists[$i % count($checklists)];
 
-            \App\Models\ChecklistAssignment::create([
+            ChecklistAssignment::create([
                 'dynamic_checklist_id' => $checklist->id,
                 'user_id' => $tecnico->id,
                 'sede_id' => $sede->id,
@@ -490,7 +491,7 @@ trait SeederHelpers
         // 1. Vincular Checklists (Completados)
         foreach ($checklists as $checklist) {
             // Crear una asignación previa para que todo cierre
-            $assignment = \App\Models\ChecklistAssignment::create([
+            $assignment = ChecklistAssignment::create([
                 'dynamic_checklist_id' => $checklist->id,
                 'user_id' => $tecnico->id,
                 'sede_id' => $sede->id,

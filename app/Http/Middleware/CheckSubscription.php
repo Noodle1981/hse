@@ -12,7 +12,7 @@ class CheckSubscription
     {
         $user = $request->user();
 
-        if ($user && !$user->isSuperAdmin() && !$request->routeIs('logout')) {
+        if ($user && ! $user->isSuperAdmin() && ! $request->routeIs('logout')) {
             $consultant = $user->consultora;
             if ($consultant) {
                 if ($consultant->estado_suscripcion === 'morosa') {

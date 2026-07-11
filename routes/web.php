@@ -1,20 +1,30 @@
 <?php
 
 use App\Http\Controllers\AdministrationController;
+use App\Http\Controllers\AssetController;
+use App\Http\Controllers\AssetTypeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChecklistController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\Contracts\AnnualContractReportController;
 use App\Http\Controllers\FindingController;
+use App\Http\Controllers\Hallazgos\HallazgoPDFController;
 use App\Http\Controllers\IncidenteController;
+use App\Http\Controllers\Incidentes\IncidentePDFController;
 use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\InspectionPDFController;
 use App\Http\Controllers\MasterReportController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SignatureApprovalController;
+use App\Http\Controllers\SwitchRoleController;
 use App\Http\Controllers\TrainingController;
+use App\Http\Controllers\TrainingPDFController;
+use App\Http\Controllers\VisitCertificatePDFController;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,8 +51,8 @@ Route::get('/constancia/firmar/{token}', function () {
 Route::middleware(['auth'])->group(function () {
     // Redirect condicional al dashboard correcto
     Route::get('/dashboard', function () {
-        /** @var \App\Models\User $user */
-        $user = \Illuminate\Support\Facades\Auth::user();
+        /** @var User $user */
+        $user = Auth::user();
         if ($user->isGlobalUser()) {
             return redirect()->route('admin.dashboard');
         }
@@ -71,12 +81,12 @@ Route::middleware(['auth'])->group(function () {
 
         // Visitas
         Route::prefix('visits')->name('visits.')->group(function () {
-            Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
-            Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
-            Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
-            Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
-            Route::get('/checklist/{id}/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
-            Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
+            Route::get('/{id}/certificate', [VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/loading', [VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
+            Route::get('/{id}/certificate/download', [VisitCertificatePDFController::class, 'download'])->name('certificate.download');
+            Route::get('/checklist/{id}', [VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/loading', [VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
+            Route::get('/checklist/{id}/download', [VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 
         // Administración
@@ -141,16 +151,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/', [FindingController::class, 'store'])->name('store');
             Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
             Route::post('/{finding}/update', [FindingController::class, 'addUpdate'])->name('update');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
-            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/{id}/pdf', [HallazgoPDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });
 
         // Incidentes (React)
         Route::prefix('incidentes')->name('incidentes.')->group(function () {
             Route::get('/', [IncidenteController::class, 'index'])->name('index');
             Route::get('/{incident}', [IncidenteController::class, 'show'])->name('show');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('pdf');
-            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/{id}/pdf', [IncidentePDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [IncidentePDFController::class, 'preview'])->name('pdf.preview');
         });
 
         // Historial Inspecciones (React)
@@ -214,8 +224,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/', [TrainingController::class, 'store'])->name('store');
             Route::get('/{id}/edit', [TrainingController::class, 'edit'])->name('edit');
             Route::get('/{id}/attendance', [TrainingController::class, 'attendance'])->name('attendance');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
-            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/{id}/pdf', [TrainingPDFController::class, 'download'])->name('pdf.download');
+            Route::get('/{id}/pdf/preview', [TrainingPDFController::class, 'preview'])->name('pdf.preview');
         });
 
         // Personalización de Empresa (TODO: Migrar a React)
@@ -240,24 +250,24 @@ Route::middleware(['auth'])->group(function () {
 
         // Módulo Universal de Activos
         Route::prefix('activos')->name('assets.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\AssetController::class, 'index'])->name('index');
-            Route::get('/crear', [\App\Http\Controllers\AssetController::class, 'create'])->name('create');
-            Route::post('/', [\App\Http\Controllers\AssetController::class, 'store'])->name('store');
-            Route::get('/{asset}', [\App\Http\Controllers\AssetController::class, 'show'])->name('show');
-            Route::post('/{asset}/foto', [\App\Http\Controllers\AssetController::class, 'uploadPhoto'])->name('upload-photo');
-            Route::get('/{asset}/pdf', [\App\Http\Controllers\AssetController::class, 'exportPdf'])->name('export-pdf');
-            Route::get('/{asset}/editar', [\App\Http\Controllers\AssetController::class, 'edit'])->name('edit');
-            Route::put('/{asset}', [\App\Http\Controllers\AssetController::class, 'update'])->name('update');
-            Route::delete('/{asset}', [\App\Http\Controllers\AssetController::class, 'destroy'])->name('destroy');
+            Route::get('/', [AssetController::class, 'index'])->name('index');
+            Route::get('/crear', [AssetController::class, 'create'])->name('create');
+            Route::post('/', [AssetController::class, 'store'])->name('store');
+            Route::get('/{asset}', [AssetController::class, 'show'])->name('show');
+            Route::post('/{asset}/foto', [AssetController::class, 'uploadPhoto'])->name('upload-photo');
+            Route::get('/{asset}/pdf', [AssetController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/{asset}/editar', [AssetController::class, 'edit'])->name('edit');
+            Route::put('/{asset}', [AssetController::class, 'update'])->name('update');
+            Route::delete('/{asset}', [AssetController::class, 'destroy'])->name('destroy');
         });
 
         // Tipos de Activos & Metadata Schema Builder
         Route::prefix('tipos-activos')->name('asset-types.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\AssetTypeController::class, 'index'])->name('index');
-            Route::post('/', [\App\Http\Controllers\AssetTypeController::class, 'store'])->name('store');
-            Route::delete('/{assetType}', [\App\Http\Controllers\AssetTypeController::class, 'destroy'])->name('destroy');
+            Route::get('/', [AssetTypeController::class, 'index'])->name('index');
+            Route::post('/', [AssetTypeController::class, 'store'])->name('store');
+            Route::delete('/{assetType}', [AssetTypeController::class, 'destroy'])->name('destroy');
             // Importar campos de metadata desde un checklist existente
-            Route::get('/import-checklist/{checklist}', [\App\Http\Controllers\AssetTypeController::class, 'importFromChecklist'])->name('import-checklist');
+            Route::get('/import-checklist/{checklist}', [AssetTypeController::class, 'importFromChecklist'])->name('import-checklist');
         });
     });
 
@@ -276,7 +286,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/activity/{id}/date', [ContractController::class, 'updateDate'])->name('date');
             Route::put('/activity/{id}', [ContractController::class, 'update'])->name('update');
             Route::delete('/activity/{id}', [ContractController::class, 'destroy'])->name('destroy');
-            Route::get('/pdf', [\App\Http\Controllers\Contracts\AnnualContractReportController::class, 'export'])->name('pdf');
+            Route::get('/pdf', [AnnualContractReportController::class, 'export'])->name('pdf');
         });
 
         // Informe Maestro
@@ -307,18 +317,18 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/{id}/wizard/complete/{inspection}', [InspectionController::class, 'complete'])->name('wizard.complete');
         });
 
-            Route::prefix('visits')->name('visits.')->group(function () {
-                Route::get('/', [OperationController::class, 'myVisits'])->name('index'); // Mis Visitas (Same as Assignments for now or specialized)
-                Route::get('/in-progress/{visit}', [OperationController::class, 'show'])->name('in-progress');
-                Route::post('/in-progress/{visit}/checkout', [OperationController::class, 'checkout'])->name('checkout');
-                Route::post('/in-progress/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
-                Route::post('/in-progress/{visit}/assign-suggested', [OperationController::class, 'assignSuggestedTask'])->name('assign-suggested');
-            Route::get('/{id}/certificate', [\App\Http\Controllers\VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
-            Route::get('/{id}/certificate/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
-            Route::get('/{id}/certificate/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'download'])->name('certificate.download');
-            Route::get('/checklist/{id}', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
-            Route::get('/checklist/{id}/loading', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
-            Route::get('/checklist/{id}/download', [\App\Http\Controllers\VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
+        Route::prefix('visits')->name('visits.')->group(function () {
+            Route::get('/', [OperationController::class, 'myVisits'])->name('index'); // Mis Visitas (Same as Assignments for now or specialized)
+            Route::get('/in-progress/{visit}', [OperationController::class, 'show'])->name('in-progress');
+            Route::post('/in-progress/{visit}/checkout', [OperationController::class, 'checkout'])->name('checkout');
+            Route::post('/in-progress/{visit}/finalize', [OperationController::class, 'finalize'])->name('finalize');
+            Route::post('/in-progress/{visit}/assign-suggested', [OperationController::class, 'assignSuggestedTask'])->name('assign-suggested');
+            Route::get('/{id}/certificate', [VisitCertificatePDFController::class, 'preview'])->name('certificate.preview');
+            Route::get('/{id}/certificate/loading', [VisitCertificatePDFController::class, 'loading'])->name('certificate.loading');
+            Route::get('/{id}/certificate/download', [VisitCertificatePDFController::class, 'download'])->name('certificate.download');
+            Route::get('/checklist/{id}', [VisitCertificatePDFController::class, 'checklistPreview'])->name('checklist.preview');
+            Route::get('/checklist/{id}/loading', [VisitCertificatePDFController::class, 'checklistLoading'])->name('checklist.loading');
+            Route::get('/checklist/{id}/download', [VisitCertificatePDFController::class, 'checklistDownload'])->name('checklist.download');
         });
 
         // Capacitaciones (Técnico - React)
@@ -326,8 +336,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/', [TrainingController::class, 'index'])->name('index');
             Route::get('/create', [TrainingController::class, 'create'])->name('create');
             Route::get('/{id}/attendance', [TrainingController::class, 'attendance'])->name('attendance');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\TrainingPDFController::class, 'download'])->name('pdf.download');
-            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\TrainingPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/{id}/pdf', [TrainingPDFController::class, 'download'])->name('pdf.download');
+            Route::get('/{id}/pdf/preview', [TrainingPDFController::class, 'preview'])->name('pdf.preview');
             Route::get('/session/{visitTraining}', [TrainingController::class, 'session'])->name('session');
             Route::post('/add-attendee/{visitTraining}', [TrainingController::class, 'addAttendee'])->name('add-attendee');
             Route::post('/remove-attendee/{visitTraining}/{index}', [TrainingController::class, 'removeAttendee'])->name('remove-attendee');
@@ -343,8 +353,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/', [FindingController::class, 'store'])->name('store');
             Route::get('/{finding}', [FindingController::class, 'show'])->name('show');
             Route::post('/{finding}/update', [FindingController::class, 'addUpdate'])->name('update');
-            Route::get('/{id}/pdf', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'download'])->name('pdf');
-            Route::get('/{id}/pdf/preview', [\App\Http\Controllers\Hallazgos\HallazgoPDFController::class, 'preview'])->name('pdf.preview');
+            Route::get('/{id}/pdf', [HallazgoPDFController::class, 'download'])->name('pdf');
+            Route::get('/{id}/pdf/preview', [HallazgoPDFController::class, 'preview'])->name('pdf.preview');
         });
 
         // Historial Inspecciones (Técnico - React)
@@ -360,8 +370,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/incidentes/reportar', [IncidenteController::class, 'create'])->name('incidentes.create');
         Route::get('/incidentes/{incident}', [IncidenteController::class, 'show'])->name('incidentes.show');
         Route::post('/incidentes/store', [IncidenteController::class, 'store'])->name('incidentes.store');
-        Route::get('/incidentes/{id}/pdf', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'download'])->name('incidentes.pdf');
-        Route::get('/incidentes/{id}/pdf/preview', [\App\Http\Controllers\Incidentes\IncidentePDFController::class, 'preview'])->name('incidentes.pdf.preview');
+        Route::get('/incidentes/{id}/pdf', [IncidentePDFController::class, 'download'])->name('incidentes.pdf');
+        Route::get('/incidentes/{id}/pdf/preview', [IncidentePDFController::class, 'preview'])->name('incidentes.pdf.preview');
 
     });
 
@@ -373,7 +383,7 @@ Route::middleware(['auth'])->group(function () {
     */
     Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:super_admin,vendedor'])->group(function () {
         Route::get('/dashboard', [AdministrationController::class, 'dashboard'])->name('dashboard');
-        
+
         // Consultoras Management (Lectura, creación y edición compartida)
         Route::prefix('consultants')->name('consultants.')->group(function () {
             Route::get('/', [AdministrationController::class, 'consultantsIndex'])->name('index');
@@ -385,7 +395,7 @@ Route::middleware(['auth'])->group(function () {
             // Acciones destructivas y gestión de staff interno restringidas a super_admin
             Route::middleware(['role:super_admin'])->group(function () {
                 Route::delete('/{consultant}', [AdministrationController::class, 'consultantsDestroy'])->name('destroy');
-                
+
                 // Staff/Users Management per Consultora
                 Route::get('/{consultant}/users', [AdministrationController::class, 'consultantUsersIndex'])->name('users.index');
                 Route::post('/{consultant}/users/save', [AdministrationController::class, 'consultantUsersSave'])->name('users.save');
@@ -403,7 +413,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Logout
     // Role Switch
-    Route::get('/switch-role/{role}', [\App\Http\Controllers\SwitchRoleController::class, 'switch'])->name('switch-role');
+    Route::get('/switch-role/{role}', [SwitchRoleController::class, 'switch'])->name('switch-role');
 
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

@@ -6,6 +6,7 @@ use App\Events\InspectionCompleted;
 use App\Models\Asset;
 use App\Models\AssetType;
 use App\Models\AuditLog;
+use App\Models\ChecklistAssignment;
 use App\Models\DynamicAnswer;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
@@ -280,9 +281,9 @@ class AssetEngineTest extends TestCase
                             'frecuencia' => 15000,
                             'margen_pre_alerta' => 1000,
                             'checklist_resolucion_id' => $resolvingChecklist->id,
-                        ]
-                    ]
-                ]
+                        ],
+                    ],
+                ],
             ],
         ]);
 
@@ -320,7 +321,7 @@ class AssetEngineTest extends TestCase
         $this->assertNotNull($hallazgo);
         $this->assertStringContainsString('Cambio de Aceite', $hallazgo->titulo);
 
-        $assignment = \App\Models\ChecklistAssignment::where('asset_id', $asset->id)
+        $assignment = ChecklistAssignment::where('asset_id', $asset->id)
             ->where('dynamic_checklist_id', $resolvingChecklist->id)
             ->where('status', 'pending')
             ->first();
@@ -367,8 +368,8 @@ class AssetEngineTest extends TestCase
             'supervisor_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
             'technician_signature' => 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
             'answers' => [
-                $resolvingQuestion->id => 15150
-            ]
+                $resolvingQuestion->id => 15150,
+            ],
         ]);
 
         $completeResponse->assertRedirect();

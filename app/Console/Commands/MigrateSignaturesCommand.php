@@ -2,7 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\DynamicInspection;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class MigrateSignaturesCommand extends Command
 {
@@ -27,14 +30,14 @@ class MigrateSignaturesCommand extends Command
     {
         $this->info('Iniciando migración de firmas de inspecciones...');
 
-        \App\Models\DynamicInspection::whereNotNull('technician_signature')
+        DynamicInspection::whereNotNull('technician_signature')
             ->where('technician_signature', 'like', 'data:image%')
             ->chunk(100, function ($inspections) {
                 foreach ($inspections as $inspection) {
                     $data = $inspection->technician_signature;
                     $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
-                    $fileName = 'signatures/'.\Illuminate\Support\Str::random(40).'.png';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
+                    $fileName = 'signatures/'.Str::random(40).'.png';
+                    Storage::disk('public')->put($fileName, base64_decode($base64));
 
                     $inspection->technician_signature = $fileName;
                     $inspection->save();
@@ -43,14 +46,14 @@ class MigrateSignaturesCommand extends Command
                 }
             });
 
-        \App\Models\DynamicInspection::whereNotNull('supervisor_signature')
+        DynamicInspection::whereNotNull('supervisor_signature')
             ->where('supervisor_signature', 'like', 'data:image%')
             ->chunk(100, function ($inspections) {
                 foreach ($inspections as $inspection) {
                     $data = $inspection->supervisor_signature;
                     $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
-                    $fileName = 'signatures/'.\Illuminate\Support\Str::random(40).'.png';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
+                    $fileName = 'signatures/'.Str::random(40).'.png';
+                    Storage::disk('public')->put($fileName, base64_decode($base64));
 
                     $inspection->supervisor_signature = $fileName;
                     $inspection->save();

@@ -6,6 +6,7 @@ use App\Models\Incidente;
 use App\Models\IncidenteFoto;
 use App\Models\Sede;
 use App\Models\User;
+use App\Models\VisitCertificate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -90,7 +91,7 @@ class IncidenteController extends Controller
 
         $initialSedeId = null;
         if ($request->visit_id) {
-            $visit = \App\Models\VisitCertificate::find($request->visit_id);
+            $visit = VisitCertificate::find($request->visit_id);
             if ($visit) {
                 $initialSedeId = $visit->sede_id;
             }
@@ -140,7 +141,7 @@ class IncidenteController extends Controller
                 }
             }
 
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
 
             if ($user->isTechnician()) {

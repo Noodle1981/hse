@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 
@@ -15,7 +18,7 @@ class ProfileController extends Controller
      */
     public function show()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         return Inertia::render('Profile/Show', [
@@ -44,7 +47,7 @@ class ProfileController extends Controller
             'signature' => 'required|string',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         if ($user->firma_status === 'pending') {
@@ -63,7 +66,7 @@ class ProfileController extends Controller
 
         if ($sigData !== false) {
             $filename = 'signatures/temp_'.$user->id.'_'.time().'.'.$type;
-            \Illuminate\Support\Facades\Storage::disk('public')->put($filename, $sigData);
+            Storage::disk('public')->put($filename, $sigData);
 
             $user->update([
                 'firma_temp' => $filename,
@@ -81,7 +84,7 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         if ($request->has('telefono')) {
@@ -91,7 +94,7 @@ class ProfileController extends Controller
         $request->validate([
             'nombres' => 'required|string|max:255',
             'apellidos' => 'required|string|max:255',
-            'telefono' => ['nullable', 'string', 'max:50', \Illuminate\Validation\Rule::unique('users')->ignore($user->id)],
+            'telefono' => ['nullable', 'string', 'max:50', Rule::unique('users')->ignore($user->id)],
         ], [
             'nombres.required' => 'El nombre es obligatorio.',
             'apellidos.required' => 'El apellido es obligatorio.',
@@ -122,7 +125,7 @@ class ProfileController extends Controller
             'new_password.min' => 'La nueva contraseña debe tener al menos 6 caracteres.',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $user->update([
             'password' => Hash::make($request->new_password),
@@ -144,7 +147,7 @@ class ProfileController extends Controller
             'foto.max' => 'La imagen no debe superar los 15 MB.',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         if ($request->hasFile('foto')) {
@@ -153,7 +156,7 @@ class ProfileController extends Controller
             if ($path) {
                 // Delete old photo if exists
                 if ($user->foto) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->foto);
+                    Storage::disk('public')->delete($user->foto);
                 }
 
                 $user->update([
@@ -176,7 +179,7 @@ class ProfileController extends Controller
         $quality = 70;  // compression quality
 
         // Get original dimensions and type
-        list($width, $height, $type) = getimagesize($file->getRealPath());
+        [$width, $height, $type] = getimagesize($file->getRealPath());
 
         // Create image resource based on type
         switch ($type) {
@@ -193,7 +196,7 @@ class ProfileController extends Controller
                 return null;
         }
 
-        if (!$srcImage) {
+        if (! $srcImage) {
             return null;
         }
 
@@ -204,10 +207,10 @@ class ProfileController extends Controller
         if ($width > $maxSize || $height > $maxSize) {
             if ($width > $height) {
                 $newWidth = $maxSize;
-                $newHeight = (int)($height * ($maxSize / $width));
+                $newHeight = (int) ($height * ($maxSize / $width));
             } else {
                 $newHeight = $maxSize;
-                $newWidth = (int)($width * ($maxSize / $height));
+                $newWidth = (int) ($width * ($maxSize / $height));
             }
         }
 
@@ -226,11 +229,11 @@ class ProfileController extends Controller
         imagecopyresampled($dstImage, $srcImage, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
 
         // Generate a unique file path
-        $filename = 'profile_photos/' . uniqid('photo_') . '.webp';
-        $fullPath = storage_path('app/public/' . $filename);
+        $filename = 'profile_photos/'.uniqid('photo_').'.webp';
+        $fullPath = storage_path('app/public/'.$filename);
 
         // Create directories if they do not exist
-        if (!file_exists(dirname($fullPath))) {
+        if (! file_exists(dirname($fullPath))) {
             @mkdir(dirname($fullPath), 0755, true);
         }
 

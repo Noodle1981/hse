@@ -2,19 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\InspectionCompleted;
 use App\Http\Requests\StoreChecklistCompletionRequest;
 use App\Models\Asset;
+use App\Models\AssetType;
 use App\Models\ChecklistAssignment;
 use App\Models\DynamicAnswer;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
 use App\Models\Empresa;
+use App\Models\Sede;
+use App\Models\User;
 use App\Models\VisitCertificate;
+use App\Models\VisitChecklistCompletion;
 use App\Services\VisitService;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class InspectionController extends Controller
@@ -38,9 +49,9 @@ class InspectionController extends Controller
 
         // Autogenerar asignación al vuelo si estamos dentro de una visita y es ad-hoc (sin asignación previa)
         if (! $assignmentId && $visitId) {
-            $visit = \App\Models\VisitCertificate::find($visitId);
+            $visit = VisitCertificate::find($visitId);
             if ($visit) {
-                $assignment = \App\Models\ChecklistAssignment::create([
+                $assignment = ChecklistAssignment::create([
                     'user_id' => Auth::id(),
                     'sede_id' => $visit->sede_id,
                     'empresa_id' => $visit->empresa_id,
@@ -58,14 +69,14 @@ class InspectionController extends Controller
             $assignment = ChecklistAssignment::where('id', $assignmentId)
                 ->where(function ($q) {
                     $q->where('user_id', Auth::id())
-                      ->orWhereNull('user_id');
+                        ->orWhereNull('user_id');
                 })
                 ->firstOrFail();
 
             // Validar que el técnico tenga acceso a esta sede
-            /** @var \App\Models\User $user */
+            /** @var User $user */
             $user = Auth::user();
-            if (!$user->isSuperAdmin() && !$user->sedes()->where('sedes.id', $assignment->sede_id)->exists()) {
+            if (! $user->isSuperAdmin() && ! $user->sedes()->where('sedes.id', $assignment->sede_id)->exists()) {
                 abort(403, 'No tienes permiso para operar en esta sede.');
             }
 
@@ -79,7 +90,7 @@ class InspectionController extends Controller
 
             $assignment->update([
                 'status' => 'in_progress',
-                'user_id' => Auth::id() // Auto-asignar al técnico que la inicia
+                'user_id' => Auth::id(), // Auto-asignar al técnico que la inicia
             ]);
         }
 
@@ -120,12 +131,12 @@ class InspectionController extends Controller
         // (en metadata_schema[].maintenance_rules[].checklist_resolucion_id) apunta a este checklist.
         $linkedAssetTypeIds = [];
         if ($sedeId) {
-            $allAssetTypes = \App\Models\AssetType::all();
+            $allAssetTypes = AssetType::all();
             foreach ($allAssetTypes as $assetType) {
                 $schema = $assetType->metadata_schema ?? [];
                 foreach ($schema as $field) {
                     foreach ($field['maintenance_rules'] ?? [] as $rule) {
-                        if ((int)($rule['checklist_resolucion_id'] ?? 0) === (int)$checklist->id) {
+                        if ((int) ($rule['checklist_resolucion_id'] ?? 0) === (int) $checklist->id) {
                             $linkedAssetTypeIds[] = $assetType->id;
                             break 2; // Ya encontramos un vínculo para este AssetType
                         }
@@ -147,11 +158,11 @@ class InspectionController extends Controller
 
         $inspectedAssetIds = [];
         if ($visitId) {
-            $completedAssignmentIds = \App\Models\VisitChecklistCompletion::where('visit_certificate_id', $visitId)
+            $completedAssignmentIds = VisitChecklistCompletion::where('visit_certificate_id', $visitId)
                 ->pluck('checklist_assignment_id')
                 ->toArray();
 
-            $inspectedAssetIds = \App\Models\DynamicInspection::whereIn('checklist_assignment_id', $completedAssignmentIds)
+            $inspectedAssetIds = DynamicInspection::whereIn('checklist_assignment_id', $completedAssignmentIds)
                 ->where('status', 'completed')
                 ->whereNotNull('asset_id')
                 ->pluck('asset_id')
@@ -204,7 +215,7 @@ class InspectionController extends Controller
             $updateData = ['notes' => $request->input('notes')];
             if ($request->filled('asset_id')) {
                 $assetId = $request->input('asset_id');
-                $asset = \App\Models\Asset::with('assetType')->find($assetId);
+                $asset = Asset::with('assetType')->find($assetId);
 
                 if ($asset && $asset->status === 'fuera_de_servicio') {
                     $schema = $asset->assetType?->metadata_schema ?? [];
@@ -212,16 +223,16 @@ class InspectionController extends Controller
                     foreach ($schema as $field) {
                         $rules = $field['maintenance_rules'] ?? [];
                         foreach ($rules as $rule) {
-                            if (isset($rule['checklist_resolucion_id']) && (int)$rule['checklist_resolucion_id'] === (int)$inspection->dynamic_checklist_id) {
+                            if (isset($rule['checklist_resolucion_id']) && (int) $rule['checklist_resolucion_id'] === (int) $inspection->dynamic_checklist_id) {
                                 $isResolvingChecklist = true;
                                 break 2;
                             }
                         }
                     }
 
-                    if (!$isResolvingChecklist) {
-                        throw \Illuminate\Validation\ValidationException::withMessages([
-                            'asset_id' => 'ACCESO DENEGADO: El equipo se encuentra Fuera de Servicio por Mantenimiento Vencido.'
+                    if (! $isResolvingChecklist) {
+                        throw ValidationException::withMessages([
+                            'asset_id' => 'ACCESO DENEGADO: El equipo se encuentra Fuera de Servicio por Mantenimiento Vencido.',
                         ]);
                     }
                 }
@@ -233,7 +244,7 @@ class InspectionController extends Controller
         return back()->with('message', 'Progreso sincronizado.');
     }
 
-    public function complete(StoreChecklistCompletionRequest $request, $id, $inspection): \Illuminate\Http\RedirectResponse
+    public function complete(StoreChecklistCompletionRequest $request, $id, $inspection): RedirectResponse
     {
         $inspection = DynamicInspection::findOrFail($inspection);
 
@@ -266,10 +277,10 @@ class InspectionController extends Controller
                 $supervisorSignaturePath = $request->file('supervisor_signature')->store('signatures', 'public');
             } elseif ($request->filled('supervisor_signature')) {
                 $data = $request->input('supervisor_signature');
-                if (\Illuminate\Support\Str::startsWith($data, 'data:image')) {
+                if (Str::startsWith($data, 'data:image')) {
                     $base64 = preg_replace('#^data:image/\w+;base64,#i', '', $data);
-                    $fileName = 'signatures/'.\Illuminate\Support\Str::random(40).'.png';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($fileName, base64_decode($base64));
+                    $fileName = 'signatures/'.Str::random(40).'.png';
+                    Storage::disk('public')->put($fileName, base64_decode($base64));
                     $supervisorSignaturePath = $fileName;
                 } else {
                     $supervisorSignaturePath = $data;
@@ -290,7 +301,7 @@ class InspectionController extends Controller
                 'result' => $inspection->evaluateResult(),
             ]);
 
-            \App\Events\InspectionCompleted::dispatch($inspection);
+            InspectionCompleted::dispatch($inspection);
 
             if ($inspection->checklist_assignment_id) {
                 $assignment = ChecklistAssignment::find($inspection->checklist_assignment_id);
@@ -312,7 +323,7 @@ class InspectionController extends Controller
             }
         });
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $redirect = $request->visit_id
@@ -358,26 +369,26 @@ class InspectionController extends Controller
             ->get();
 
         // Paginación manual para grupos
-        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 15;
         $currentPageItems = $allGroups->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
-        $paginatedGroups = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedGroups = new LengthAwarePaginator(
             $currentPageItems,
             $allGroups->count(),
             $perPage,
             $currentPage,
-            ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
         );
         $paginatedGroups->appends($request->all());
 
         // Mapear y cargar relaciones para el sub-desglose
         $items = $currentPageItems->map(function ($group) {
-            $sede = \App\Models\Sede::with('empresa')->find($group->sede_id);
-            $techUser = \App\Models\User::find($group->user_id);
+            $sede = Sede::with('empresa')->find($group->sede_id);
+            $techUser = User::find($group->user_id);
 
             // Buscar constancia de visita firmada/completada para ese día por ese técnico
-            $visitCertificate = \App\Models\VisitCertificate::where('sede_id', $group->sede_id)
+            $visitCertificate = VisitCertificate::where('sede_id', $group->sede_id)
                 ->where('user_id', $group->user_id)
                 ->whereDate('visit_date', $group->completed_date)
                 ->first();
@@ -410,7 +421,7 @@ class InspectionController extends Controller
 
             return [
                 'completed_date' => $group->completed_date,
-                'completed_date_formatted' => \Carbon\Carbon::parse($group->completed_date)->format('d/m/Y'),
+                'completed_date_formatted' => Carbon::parse($group->completed_date)->format('d/m/Y'),
                 'sede_id' => $group->sede_id,
                 'sede_nombre' => $sede ? $sede->nombre_sede : 'Sede Desconocida',
                 'empresa_nombre' => $sede && $sede->empresa ? $sede->empresa->nombre : 'Empresa Desconocida',
@@ -440,7 +451,7 @@ class InspectionController extends Controller
         $empresas = $empresasQuery->get();
 
         // Obtener listado de técnicos para el filtro
-        $tecnicosQuery = \App\Models\User::where(function ($q) {
+        $tecnicosQuery = User::where(function ($q) {
             $q->where('rol', 'tecnico')->orWhere('rol', 'Técnico');
         });
         if ($user->consultora_id) {
@@ -491,25 +502,25 @@ class InspectionController extends Controller
             ->get();
 
         // Paginación manual para grupos
-        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 15;
         $currentPageItems = $allGroups->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
-        $paginatedGroups = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginatedGroups = new LengthAwarePaginator(
             $currentPageItems,
             $allGroups->count(),
             $perPage,
             $currentPage,
-            ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
+            ['path' => LengthAwarePaginator::resolveCurrentPath()]
         );
         $paginatedGroups->appends($request->all());
 
         // Mapear y cargar relaciones para el sub-desglose
         $items = $currentPageItems->map(function ($group) use ($request) {
-            $sede = \App\Models\Sede::with('empresa')->find($group->sede_id);
+            $sede = Sede::with('empresa')->find($group->sede_id);
 
             // Buscar constancia de visita firmada/completada para ese día
-            $visitCertificate = \App\Models\VisitCertificate::where('sede_id', $group->sede_id)
+            $visitCertificate = VisitCertificate::where('sede_id', $group->sede_id)
                 ->whereDate('visit_date', $group->completed_date)
                 ->first();
 
@@ -545,7 +556,7 @@ class InspectionController extends Controller
 
             return [
                 'completed_date' => $group->completed_date,
-                'completed_date_formatted' => \Carbon\Carbon::parse($group->completed_date)->format('d/m/Y'),
+                'completed_date_formatted' => Carbon::parse($group->completed_date)->format('d/m/Y'),
                 'sede_id' => $group->sede_id,
                 'sede_nombre' => $sede ? $sede->nombre_sede : 'Sede Desconocida',
                 'empresa_nombre' => $sede && $sede->empresa ? $sede->empresa->nombre : 'Empresa Desconocida',
@@ -586,7 +597,7 @@ class InspectionController extends Controller
     {
         $inspection->load(['checklist.sections.questions', 'checklist.questions', 'user', 'sede.empresa', 'answers.question']);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         // Determinar si es Gestor o Técnico para la vista

@@ -2,15 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnnualPlan;
 use App\Models\ChecklistAssignment;
+use App\Models\DynamicChecklist;
+use App\Models\DynamicInspection;
 use App\Models\Empresa;
+use App\Models\Hallazgo;
+use App\Models\MasterReport;
 use App\Models\Sede;
+use App\Models\Training;
 use App\Models\User;
 use App\Models\VisitCertificate;
+use App\Models\VisitTraining;
 use App\Services\VisitService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class OperationController extends Controller
@@ -54,7 +64,7 @@ class OperationController extends Controller
      */
     public function myAssignments(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $now = Carbon::now();
         $selectedMonth = $request->month ?? $now->month;
@@ -76,20 +86,20 @@ class OperationController extends Controller
             ->whereIn('sede_id', $assignedSedeIds)
             ->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
-                  ->orWhereNull('user_id');
+                    ->orWhereNull('user_id');
             })
             ->whereMonth('due_date', $selectedMonth)
             ->whereYear('due_date', $now->year);
 
         // 2️⃣ Trainings
-        $trainingsQuery = \App\Models\Training::with(['sede.empresa', 'dynamicChecklist.categoryRelation'])
+        $trainingsQuery = Training::with(['sede.empresa', 'dynamicChecklist.categoryRelation'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('date', $selectedMonth)
             ->whereYear('date', $now->year);
 
         // 3️⃣ Reports
-        $reportsQuery = \App\Models\MasterReport::with(['sede.empresa'])
+        $reportsQuery = MasterReport::with(['sede.empresa'])
             ->where('user_id', $user->id)
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('created_at', $selectedMonth)
@@ -97,7 +107,7 @@ class OperationController extends Controller
 
         // 4️⃣ Annual Plan Tasks
         $queryMonth = $now->year.'-'.str_pad($selectedMonth, 2, '0', STR_PAD_LEFT);
-        $contractQuery = \App\Models\AnnualPlan::with(['checklist.categoryRelation', 'sede.empresa'])
+        $contractQuery = AnnualPlan::with(['checklist.categoryRelation', 'sede.empresa'])
             ->whereIn('sede_id', $assignedSedeIds)
             ->whereJsonContains('scheduled_months', $queryMonth);
 
@@ -129,7 +139,7 @@ class OperationController extends Controller
         // 5️⃣ Procesamiento de resultados para vista unificada con agrupación para evitar duplicados y mantener registro único
 
         // Fetch all completed inspections for this month to calculate the KPI stats
-        $completedInspectionsAll = \App\Models\DynamicInspection::whereIn('sede_id', $assignedSedeIds)
+        $completedInspectionsAll = DynamicInspection::whereIn('sede_id', $assignedSedeIds)
             ->whereMonth('completed_at', $selectedMonth)
             ->whereYear('completed_at', $now->year)
             ->where('status', 'completed')
@@ -223,7 +233,7 @@ class OperationController extends Controller
             $matchingTrainings = $allTrainings->where('sede_id', $plan->sede_id)
                 ->filter(function ($t) use ($plan) {
                     return ($plan->checklist_id && $t->dynamic_checklist_id == $plan->checklist_id)
-                        || (\Illuminate\Support\Str::slug($t->title) === \Illuminate\Support\Str::slug($plan->activity_name));
+                        || (Str::slug($t->title) === Str::slug($plan->activity_name));
                 });
 
             $status = 'scheduled';
@@ -237,7 +247,7 @@ class OperationController extends Controller
                 }
             }
 
-            $key = $plan->checklist_id ? ('c_'.$plan->checklist_id.'_'.$plan->sede_id) : ('t_'.\Illuminate\Support\Str::slug($plan->activity_name).'_'.$plan->sede_id);
+            $key = $plan->checklist_id ? ('c_'.$plan->checklist_id.'_'.$plan->sede_id) : ('t_'.Str::slug($plan->activity_name).'_'.$plan->sede_id);
 
             $unifiedTrainings->put($key, [
                 'id' => $plan->id,
@@ -255,7 +265,7 @@ class OperationController extends Controller
         }
 
         foreach ($allTrainings as $t) {
-            $key = $t->dynamic_checklist_id ? ('c_'.$t->dynamic_checklist_id.'_'.$t->sede_id) : ('t_'.\Illuminate\Support\Str::slug($t->title).'_'.$t->sede_id);
+            $key = $t->dynamic_checklist_id ? ('c_'.$t->dynamic_checklist_id.'_'.$t->sede_id) : ('t_'.Str::slug($t->title).'_'.$t->sede_id);
             if ($unifiedTrainings->has($key)) {
                 continue;
             }
@@ -284,7 +294,7 @@ class OperationController extends Controller
             // Buscar el informe existente usando el campo `periodo` (YYYY-MM) — dato canónico.
             // El campo `periodo` es lo que el técnico seleccionó al crear el informe,
             // independientemente del mes en que fue creado físicamente (created_at).
-            $matchingReport = \App\Models\MasterReport::where('sede_id', $plan->sede_id)
+            $matchingReport = MasterReport::where('sede_id', $plan->sede_id)
                 ->where('user_id', $user->id)
                 ->where('periodo', $queryMonth)
                 ->orderByDesc('created_at')
@@ -293,7 +303,7 @@ class OperationController extends Controller
             // Fallback: si no hay match por periodo exacto, buscar cualquier informe
             // de esta sede+usuario en el año actual (cubre casos de periodo mal formateado)
             if (! $matchingReport) {
-                $matchingReport = \App\Models\MasterReport::where('sede_id', $plan->sede_id)
+                $matchingReport = MasterReport::where('sede_id', $plan->sede_id)
                     ->where('user_id', $user->id)
                     ->whereYear('created_at', $now->year)
                     ->whereMonth('created_at', $selectedMonth)
@@ -320,7 +330,7 @@ class OperationController extends Controller
                 default => 'scheduled',
             };
 
-            $key = 'r_'.\Illuminate\Support\Str::slug($plan->activity_name).'_'.$plan->sede_id;
+            $key = 'r_'.Str::slug($plan->activity_name).'_'.$plan->sede_id;
 
             $unifiedReports->put($key, [
                 'id' => $plan->id,
@@ -355,7 +365,7 @@ class OperationController extends Controller
                 continue;
             }
 
-            $key = 'r_'.\Illuminate\Support\Str::slug($r->titulo).'_'.$r->sede_id;
+            $key = 'r_'.Str::slug($r->titulo).'_'.$r->sede_id;
             if ($unifiedReports->has($key)) {
                 continue;
             }
@@ -430,8 +440,8 @@ class OperationController extends Controller
         $globalManualTasks = ChecklistAssignment::where('user_id', $user->id)->count();
         $globalManualCompleted = ChecklistAssignment::where('user_id', $user->id)->whereIn('status', ['completed', 'finalizado'])->count();
 
-        $globalTrainings = \App\Models\Training::where('user_id', $user->id)->count();
-        $globalTrainingsCompleted = \App\Models\Training::where('user_id', $user->id)->whereIn('status', ['completed', 'finalizado'])->count();
+        $globalTrainings = Training::where('user_id', $user->id)->count();
+        $globalTrainingsCompleted = Training::where('user_id', $user->id)->whereIn('status', ['completed', 'finalizado'])->count();
 
         $globalTotal = $globalManualTasks + $globalTrainings;
         $globalCompleted = $globalManualCompleted + $globalTrainingsCompleted;
@@ -440,7 +450,7 @@ class OperationController extends Controller
             'total_tasks' => $totalTasks,
             'completed' => $completedTasks,
             'percentage' => $globalTotal > 0 ? round(($globalCompleted / $globalTotal) * 100) : 0,
-            'critical_findings' => \App\Models\Hallazgo::where('inspector_id', $user->id)->where('criticidad', 'alta')->where('estado', '!=', 'resuelto')->count(),
+            'critical_findings' => Hallazgo::where('inspector_id', $user->id)->where('criticidad', 'alta')->where('estado', '!=', 'resuelto')->count(),
         ];
 
         return Inertia::render('Tecnico/MyAssignments', [
@@ -459,8 +469,8 @@ class OperationController extends Controller
             ],
             'empresas' => Empresa::whereIn('id', $assignedEmpresaIds)->get(),
             'sedes' => Sede::whereIn('id', $assignedSedeIds)->get(),
-            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->with(['categoryRelation', 'subcategoryRelation'])->get(),
-            'trainingTemplates' => \App\Models\Training::where('is_template', true)->get(),
+            'checklistTemplates' => DynamicChecklist::where('is_active', 1)->with(['categoryRelation', 'subcategoryRelation'])->get(),
+            'trainingTemplates' => Training::where('is_template', true)->get(),
         ]);
     }
 
@@ -483,7 +493,7 @@ class OperationController extends Controller
             'checkin_lng' => 'nullable|numeric',
         ]);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         $activeVisit = $this->visitService->getActiveVisit($user);
 
@@ -494,12 +504,12 @@ class OperationController extends Controller
 
         // Handle Active Visit Conflicts
         if ($activeVisit && $activeVisit->sede_id != $request->sede_id) {
-            return back()->with('error', 'Ya tienes una visita activa en '.$activeVisit->sede->nombre_sede.'. Finalízala antes de iniciar otra en '.\App\Models\Sede::find($request->sede_id)->nombre_sede.'.');
+            return back()->with('error', 'Ya tienes una visita activa en '.$activeVisit->sede->nombre_sede.'. Finalízala antes de iniciar otra en '.Sede::find($request->sede_id)->nombre_sede.'.');
         }
 
         // Start Visit if none active
         if (! $activeVisit) {
-            $sede = \App\Models\Sede::findOrFail($request->sede_id);
+            $sede = Sede::findOrFail($request->sede_id);
             $visitType = $request->type === 'training' ? 'training' : 'checklist';
             $activeVisit = $this->visitService->startVisit(
                 $user,
@@ -514,7 +524,7 @@ class OperationController extends Controller
             if ($request->type === 'inspection') {
                 $checklistId = $request->id;
 
-                $assignment = \App\Models\ChecklistAssignment::create([
+                $assignment = ChecklistAssignment::create([
                     'user_id' => $user->id,
                     'sede_id' => $request->sede_id,
                     'empresa_id' => $activeVisit->sede->empresa_id,
@@ -535,7 +545,7 @@ class OperationController extends Controller
 
                 $title = $request->title;
                 if ($checklistId && ! $title) {
-                    $checklist = \App\Models\DynamicChecklist::find($checklistId);
+                    $checklist = DynamicChecklist::find($checklistId);
                     if ($checklist) {
                         $title = $checklist->title;
                     }
@@ -546,7 +556,7 @@ class OperationController extends Controller
 
                 $modality = $request->input('modality') === 'virtual' ? 'virtual' : 'presencial';
 
-                $training = \App\Models\Training::create([
+                $training = Training::create([
                     'empresa_id' => $activeVisit->sede->empresa_id,
                     'sede_id' => $request->sede_id,
                     'user_id' => $user->id,
@@ -560,7 +570,7 @@ class OperationController extends Controller
                     'notes' => 'Capacitación ad-hoc iniciada desde Consola',
                 ]);
 
-                $visitTraining = \App\Models\VisitTraining::create([
+                $visitTraining = VisitTraining::create([
                     'visit_certificate_id' => $activeVisit->id,
                     'training_id' => $training->id,
                     'is_adhoc' => true,
@@ -580,17 +590,17 @@ class OperationController extends Controller
             $checklistId = null;
 
             if ($request->source === 'contract') {
-                $plan = \App\Models\AnnualPlan::findOrFail($request->id);
+                $plan = AnnualPlan::findOrFail($request->id);
                 $checklistId = $plan->checklist_id;
 
                 // Logic to find or create the assignment for this plan in this visit
-                $assignment = \App\Models\ChecklistAssignment::where('user_id', $user->id)
+                $assignment = ChecklistAssignment::where('user_id', $user->id)
                     ->where('sede_id', $request->sede_id)
                     ->where('notes', 'LIKE', '%desde Plan Anual #'.$plan->id.'%')
                     ->first();
 
                 if (! $assignment) {
-                    $assignment = \App\Models\ChecklistAssignment::create([
+                    $assignment = ChecklistAssignment::create([
                         'user_id' => $user->id,
                         'sede_id' => $request->sede_id,
                         'empresa_id' => $activeVisit->sede->empresa_id,
@@ -603,7 +613,7 @@ class OperationController extends Controller
                 $assignmentId = $assignment->id;
             } else {
                 // Manual Task
-                $assignment = \App\Models\ChecklistAssignment::findOrFail($request->id);
+                $assignment = ChecklistAssignment::findOrFail($request->id);
                 $assignmentId = $assignment->id;
                 $checklistId = $assignment->dynamic_checklist_id;
             }
@@ -619,15 +629,15 @@ class OperationController extends Controller
             $visitTraining = null;
 
             if ($request->source === 'contract') {
-                $plan = \App\Models\AnnualPlan::findOrFail($request->id);
+                $plan = AnnualPlan::findOrFail($request->id);
 
-                $training = \App\Models\Training::where('user_id', $user->id)
+                $training = Training::where('user_id', $user->id)
                     ->where('sede_id', $request->sede_id)
                     ->where('notes', 'LIKE', '%desde Plan Anual #'.$plan->id.'%')
                     ->first();
 
                 if (! $training) {
-                    $training = \App\Models\Training::create([
+                    $training = Training::create([
                         'empresa_id' => $activeVisit->sede->empresa_id,
                         'sede_id' => $request->sede_id,
                         'user_id' => $user->id,
@@ -643,12 +653,12 @@ class OperationController extends Controller
                     ]);
                 }
 
-                $visitTraining = \App\Models\VisitTraining::where('visit_certificate_id', $activeVisit->id)
+                $visitTraining = VisitTraining::where('visit_certificate_id', $activeVisit->id)
                     ->where('training_id', $training->id)
                     ->first();
 
                 if (! $visitTraining) {
-                    $visitTraining = \App\Models\VisitTraining::create([
+                    $visitTraining = VisitTraining::create([
                         'visit_certificate_id' => $activeVisit->id,
                         'training_id' => $training->id,
                         'is_adhoc' => false,
@@ -660,14 +670,14 @@ class OperationController extends Controller
                 }
             } else {
                 // Manual Task
-                $training = \App\Models\Training::findOrFail($request->id);
+                $training = Training::findOrFail($request->id);
 
-                $visitTraining = \App\Models\VisitTraining::where('visit_certificate_id', $activeVisit->id)
+                $visitTraining = VisitTraining::where('visit_certificate_id', $activeVisit->id)
                     ->where('training_id', $training->id)
                     ->first();
 
                 if (! $visitTraining) {
-                    $visitTraining = \App\Models\VisitTraining::create([
+                    $visitTraining = VisitTraining::create([
                         'visit_certificate_id' => $activeVisit->id,
                         'training_id' => $training->id,
                         'is_adhoc' => true,
@@ -689,7 +699,7 @@ class OperationController extends Controller
      */
     public function create()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         $sedes = $user->isAdmin()
@@ -731,7 +741,7 @@ class OperationController extends Controller
      */
     public function show(VisitCertificate $visit)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
 
         // Seguridad: Solo el técnico asignado o un admin
@@ -741,7 +751,7 @@ class OperationController extends Controller
 
         // Redirección inteligente si la visita es únicamente para una capacitación
         if ($visit->visit_type === 'training') {
-            $visitTraining = \App\Models\VisitTraining::where('visit_certificate_id', $visit->id)->first();
+            $visitTraining = VisitTraining::where('visit_certificate_id', $visit->id)->first();
             if ($visitTraining) {
                 return redirect()->route('tecnico.trainings.session', $visitTraining->id)
                     ->with('info', 'Sesión de capacitación reanudada automáticamente.');
@@ -764,11 +774,11 @@ class OperationController extends Controller
         ]);
 
         // Tareas del Plan Anual para este mes (excluir Informes — son trabajo personal)
-        $now = \Carbon\Carbon::now();
+        $now = Carbon::now();
         $queryMonth = $now->year.'-'.str_pad($now->month, 2, '0', STR_PAD_LEFT);
         $endOfMonth = $now->copy()->endOfMonth()->toDateString();
 
-        $suggestedPlanTasks = \App\Models\AnnualPlan::with(['checklist'])
+        $suggestedPlanTasks = AnnualPlan::with(['checklist'])
             ->where('sede_id', $visit->sede_id)
             ->whereJsonContains('scheduled_months', $queryMonth)
             ->where('category', '!=', 'Informe') // Informes: trabajo personal, no de visita
@@ -785,13 +795,13 @@ class OperationController extends Controller
             });
 
         // Misiones Pendientes para esta Sede (inspecciones ya asignadas, no finalizadas)
-        $pendingAssignments = \App\Models\ChecklistAssignment::with(['checklist'])
+        $pendingAssignments = ChecklistAssignment::with(['checklist'])
             ->where('sede_id', $visit->sede_id)
             ->whereIn('status', ['pending', 'in_progress'])
             ->get();
 
         // Capacitaciones Pendientes para esta Sede (del técnico, no completadas)
-        $pendingTrainings = \App\Models\Training::with(['dynamicChecklist'])
+        $pendingTrainings = Training::with(['dynamicChecklist'])
             ->where('sede_id', $visit->sede_id)
             ->where('user_id', $user->id)
             ->where('status', '!=', 'completed')
@@ -803,8 +813,8 @@ class OperationController extends Controller
             'suggestedPlanTasks' => $suggestedPlanTasks,
             'pendingAssignments' => $pendingAssignments,
             'pendingTrainings' => $pendingTrainings,
-            'templates' => \App\Models\Training::where('is_template', true)->get(),
-            'checklistTemplates' => \App\Models\DynamicChecklist::where('is_active', 1)->with(['categoryRelation', 'subcategoryRelation'])->get(),
+            'templates' => Training::where('is_template', true)->get(),
+            'checklistTemplates' => DynamicChecklist::where('is_active', 1)->with(['categoryRelation', 'subcategoryRelation'])->get(),
         ]);
     }
 
@@ -813,7 +823,7 @@ class OperationController extends Controller
      */
     public function inspections(Request $request)
     {
-        $query = \App\Models\DynamicInspection::query()
+        $query = DynamicInspection::query()
             ->with(['checklist', 'sede', 'user'])
             ->where('status', 'completed')
             ->latest('completed_at');
@@ -835,7 +845,7 @@ class OperationController extends Controller
     /**
      * Show a detailed view of a single inspection.
      */
-    public function showInspection(\App\Models\DynamicInspection $inspection)
+    public function showInspection(DynamicInspection $inspection)
     {
         $inspection->load(['checklist.sections.questions', 'answers', 'sede.empresa', 'user']);
 
@@ -879,9 +889,9 @@ class OperationController extends Controller
      */
     public function finalize(Request $request, VisitCertificate $visit)
     {
-        \Illuminate\Support\Facades\Log::info('Finalizando visita', [
+        Log::info('Finalizando visita', [
             'visit_id' => $visit->id,
-            'user_id' => \Illuminate\Support\Facades\Auth::id(),
+            'user_id' => Auth::id(),
             'has_signature' => ! empty($request->signature),
             'signature_unavailable' => $request->signature_unavailable,
             'payload' => $request->except(['signature']),
@@ -896,8 +906,8 @@ class OperationController extends Controller
                 'checkout_lat' => 'nullable|numeric',
                 'checkout_lng' => 'nullable|numeric',
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Illuminate\Support\Facades\Log::warning('Fallo de validación al finalizar visita', [
+        } catch (ValidationException $e) {
+            Log::warning('Fallo de validación al finalizar visita', [
                 'errors' => $e->errors(),
             ]);
             throw $e;
@@ -957,10 +967,10 @@ class OperationController extends Controller
             'plan_id' => 'required|exists:annual_plans,id',
         ]);
 
-        $plan = \App\Models\AnnualPlan::findOrFail($request->plan_id);
+        $plan = AnnualPlan::findOrFail($request->plan_id);
 
         if ($plan->category === 'Capacitación') {
-            $training = \App\Models\Training::create([
+            $training = Training::create([
                 'empresa_id' => $visit->sede->empresa_id,
                 'sede_id' => $visit->sede_id,
                 'user_id' => $visit->user_id,
@@ -976,7 +986,7 @@ class OperationController extends Controller
             ]);
 
             // Crear el registro de sesión de capacitación en la visita de forma automática
-            $visitTraining = \App\Models\VisitTraining::create([
+            $visitTraining = VisitTraining::create([
                 'visit_certificate_id' => $visit->id,
                 'training_id' => $training->id,
                 'is_adhoc' => false,
@@ -989,8 +999,8 @@ class OperationController extends Controller
             return redirect()->route('tecnico.trainings.session', $visitTraining->id)
                 ->with('message', 'Capacitación iniciada e incorporada a la visita.');
         } else {
-            /** @var \App\Models\ChecklistAssignment $assignment */
-            $assignment = \App\Models\ChecklistAssignment::create([
+            /** @var ChecklistAssignment $assignment */
+            $assignment = ChecklistAssignment::create([
                 'user_id' => $visit->user_id,
                 'sede_id' => $visit->sede_id,
                 'empresa_id' => $visit->sede->empresa_id, // Agregado para cumplir restricción NOT NULL

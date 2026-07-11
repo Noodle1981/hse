@@ -2,15 +2,19 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Event;
 use App\Events\ClientAccessModified;
 use App\Events\InspectionCompleted;
 use App\Listeners\LogClientAccess;
 use App\Listeners\SyncAssetMetadata;
 use App\Models\Asset;
+use App\Models\DynamicInspection;
+use App\Models\MasterReport;
 use App\Observers\AssetObserver;
+use App\Policies\InspectionPolicy;
+use App\Policies\MasterReportPolicy;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -27,8 +31,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(\App\Models\DynamicInspection::class, \App\Policies\InspectionPolicy::class);
-        Gate::policy(\App\Models\MasterReport::class, \App\Policies\MasterReportPolicy::class);
+        Gate::policy(DynamicInspection::class, InspectionPolicy::class);
+        Gate::policy(MasterReport::class, MasterReportPolicy::class);
 
         Event::listen(
             ClientAccessModified::class,

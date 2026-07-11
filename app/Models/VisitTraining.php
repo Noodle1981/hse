@@ -63,7 +63,7 @@ class VisitTraining extends Model
 
         // 3. Buscar en el plan anual si existe un tiempo programado
         if ($this->training && $this->training->dynamic_checklist_id && $this->visit) {
-            $plan = \App\Models\AnnualPlan::where('sede_id', $this->visit->sede_id)
+            $plan = AnnualPlan::where('sede_id', $this->visit->sede_id)
                 ->where('checklist_id', $this->training->dynamic_checklist_id)
                 ->first();
             if ($plan && $plan->duration_minutes > 0) {
@@ -94,7 +94,7 @@ class VisitTraining extends Model
 
     public function attendances()
     {
-        return $this->hasMany(\App\Models\TrainingAttendance::class, 'visit_training_id');
+        return $this->hasMany(TrainingAttendance::class, 'visit_training_id');
     }
 
     public function getAttendeesCountAttribute()

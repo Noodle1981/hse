@@ -16,7 +16,7 @@ class SignatureApprovalController extends Controller
     {
         $this->ensureGestor();
 
-        /** @var \App\Models\User $currentUser */
+        /** @var User $currentUser */
         $currentUser = Auth::user();
 
         $query = User::where('firma_status', 'pending');
@@ -99,7 +99,7 @@ class SignatureApprovalController extends Controller
      */
     private function ensureGestor()
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = Auth::user();
         if (! $user->isAdmin()) {
             abort(403, 'Acceso denegado. Se requieren privilegios de Gestor.');
@@ -111,7 +111,7 @@ class SignatureApprovalController extends Controller
      */
     private function ensureTenancy(User $user)
     {
-        /** @var \App\Models\User $currentUser */
+        /** @var User $currentUser */
         $currentUser = Auth::user();
         if (! $currentUser->isSuperAdmin() && $user->consultora_id !== $currentUser->consultora_id) {
             abort(403, 'Acceso denegado. Inconsistencia de consultora.');

@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\GeneradorConstancia;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\GeneradorConstancia>
+ * @extends Factory<GeneradorConstancia>
  */
 class GeneradorConstanciaFactory extends Factory
 {

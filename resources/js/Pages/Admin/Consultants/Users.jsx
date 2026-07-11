@@ -5,6 +5,8 @@ import { Head, Link, useForm, router } from '@inertiajs/react';
 export default function Users({ auth, consultant, users }) {
     const [showModal, setShowModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+    const [deactivatingUser, setDeactivatingUser] = useState(null);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         id: '',
@@ -55,9 +57,19 @@ export default function Users({ auth, consultant, users }) {
         });
     };
 
-    const deleteUser = (userId) => {
-        if (confirm('¿Está seguro de que desea dar de baja a este usuario?')) {
-            router.delete(route('admin.consultants.users.destroy', [consultant.id, userId]));
+    const openDeactivateModal = (user) => {
+        setDeactivatingUser(user);
+        setShowDeactivateModal(true);
+    };
+
+    const confirmDeactivate = () => {
+        if (deactivatingUser) {
+            router.delete(route('admin.consultants.users.destroy', [consultant.id, deactivatingUser.id]), {
+                onSuccess: () => {
+                    setShowDeactivateModal(false);
+                    setDeactivatingUser(null);
+                }
+            });
         }
     };
 
@@ -173,12 +185,12 @@ export default function Users({ auth, consultant, users }) {
                                                         >
                                                             Configurar
                                                         </button>
-                                                        {u.id !== auth.user.id && u.rol !== 'tecnico' && (
+                                                        {u.id !== auth.user.id && u.rol !== 'tecnico' && u.estado === 'activo' && (
                                                             <button
-                                                                onClick={() => deleteUser(u.id)}
+                                                                onClick={() => openDeactivateModal(u)}
                                                                 className="px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-[9px] font-black uppercase tracking-widest italic rounded-lg border border-red-500/20 hover:border-red-500 transition-all"
                                                             >
-                                                                Dar de Baja
+                                                                Deshabilitar
                                                             </button>
                                                         )}
                                                     </div>
@@ -311,6 +323,55 @@ export default function Users({ auth, consultant, users }) {
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {showDeactivateModal && deactivatingUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+                    <div className="w-full max-w-md bg-[#16162a] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 shadow-2xl relative animate-scale-up">
+                        {/* Close button */}
+                        <button 
+                            onClick={() => setShowDeactivateModal(false)}
+                            className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors text-lg"
+                        >
+                            ✕
+                        </button>
+
+                        <div className="mb-6">
+                            <h3 className="text-xs font-black text-red-500 uppercase tracking-[0.4em] italic mb-1">
+                                Confirmar Acción
+                            </h3>
+                            <h4 className="text-lg font-black text-white uppercase italic tracking-tighter leading-none">
+                                Deshabilitar <span className="text-red-400">Operador</span>
+                            </h4>
+                        </div>
+
+                        <div className="space-y-6">
+                            <p className="text-xs text-indigo-100/70 font-semibold leading-relaxed">
+                                ¿Está seguro de que desea deshabilitar al operador de la consultora <strong className="text-white uppercase italic">{deactivatingUser.apellidos}, {deactivatingUser.nombres}</strong>?
+                            </p>
+                            <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-4 text-[10px] font-bold text-red-400 uppercase tracking-widest italic">
+                                ⚠️ Esta acción revocará el acceso de inicio de sesión de inmediato, pero conservará su historial operativo y de auditoría.
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowDeactivateModal(false)}
+                                    className="px-5 py-3.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all border border-white/5"
+                                >
+                                    Cancelar
+                                </button>
+                                <button 
+                                    type="button"
+                                    onClick={confirmDeactivate}
+                                    className="px-6 py-3.5 bg-red-600 hover:bg-red-500 text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all shadow-lg shadow-red-600/20 active:scale-95"
+                                >
+                                    Deshabilitar
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}

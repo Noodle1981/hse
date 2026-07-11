@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Empresa;
+use App\Models\Sede;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Sede>
+ * @extends Factory<Sede>
  */
 class SedeFactory extends Factory
 {
@@ -17,7 +19,7 @@ class SedeFactory extends Factory
     public function definition(): array
     {
         return [
-            'empresa_id' => \App\Models\Empresa::factory(),
+            'empresa_id' => Empresa::factory(),
             'nombre_sede' => $this->faker->city(),
             'direccion' => $this->faker->address(),
             'correo' => $this->faker->unique()->safeEmail(),

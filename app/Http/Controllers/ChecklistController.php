@@ -3,10 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Subcategory;
 use App\Models\ChecklistSection;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicQuestion;
+use App\Models\Subcategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -132,7 +132,7 @@ class ChecklistController extends Controller
         // Si el checklist tiene categoría y esta no está en el listado de activas, incluirla
         if ($checklist->category_id) {
             $currentCategory = Category::find($checklist->category_id);
-            if ($currentCategory && !$categories->contains('id', $currentCategory->id)) {
+            if ($currentCategory && ! $categories->contains('id', $currentCategory->id)) {
                 $categories->push($currentCategory);
             }
         }
@@ -145,9 +145,9 @@ class ChecklistController extends Controller
                 $parentCat = $categories->firstWhere('id', $checklist->category_id);
                 if ($parentCat) {
                     // Si no tiene cargada la relación subcategories o no contiene la subcategoría actual, inyectarla
-                    if (!$parentCat->relationLoaded('subcategories')) {
+                    if (! $parentCat->relationLoaded('subcategories')) {
                         $parentCat->setRelation('subcategories', collect([$currentSubcategory]));
-                    } elseif (!$parentCat->subcategories->contains('id', $currentSubcategory->id)) {
+                    } elseif (! $parentCat->subcategories->contains('id', $currentSubcategory->id)) {
                         $parentCat->subcategories->push($currentSubcategory);
                     }
                 }
@@ -183,9 +183,9 @@ class ChecklistController extends Controller
                     'tempId' => 'default_section_temp',
                     'title' => 'Inspección General',
                     'description' => 'Preguntas generales del checklist.',
-                ]
+                ],
             ];
-            
+
             $questionsInput = $request->input('questions', []);
             foreach ($questionsInput as &$q) {
                 if (empty($q['section_id']) && empty($q['section_tempId'])) {
@@ -206,18 +206,18 @@ class ChecklistController extends Controller
 
         foreach ($request->input('questions', []) as $index => $q) {
             $hasValidSection = false;
-            
-            if (!empty($q['section_tempId']) && in_array($q['section_tempId'], $sectionTempIds)) {
-                $hasValidSection = true;
-            }
-            
-            if (!empty($q['section_id']) && (in_array($q['section_id'], $sectionIds) || ChecklistSection::where('id', $q['section_id'])->exists())) {
+
+            if (! empty($q['section_tempId']) && in_array($q['section_tempId'], $sectionTempIds)) {
                 $hasValidSection = true;
             }
 
-            if (!$hasValidSection) {
+            if (! empty($q['section_id']) && (in_array($q['section_id'], $sectionIds) || ChecklistSection::where('id', $q['section_id'])->exists())) {
+                $hasValidSection = true;
+            }
+
+            if (! $hasValidSection) {
                 return back()->withErrors([
-                    "questions" => "La pregunta '" . ($q['label'] ?? "N# " . ($index + 1)) . "' debe pertenecer a una sección válida del checklist."
+                    'questions' => "La pregunta '".($q['label'] ?? 'N# '.($index + 1))."' debe pertenecer a una sección válida del checklist.",
                 ])->withInput();
             }
         }

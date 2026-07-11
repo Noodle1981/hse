@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Technician\InspectionWizard;
+use App\Models\ChecklistSection;
 use App\Models\DynamicAnswer;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
@@ -29,7 +31,7 @@ class ChecklistFillerTest extends TestCase
         ]);
 
         // Crear una sección ya que el Wizard la requiere para mostrar preguntas
-        $section = \App\Models\ChecklistSection::create([
+        $section = ChecklistSection::create([
             'dynamic_checklist_id' => $this->checklist->id,
             'title' => 'Datos Generales',
             'order' => 0,
@@ -83,7 +85,7 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+        Livewire::test(InspectionWizard::class, ['id' => $this->checklist->id])
             ->set('currentStep', 1) // Saltar intro a sección 1
             ->set("answers.{$questions[0]->id}", 'Juan Pérez')
             ->set("answers.{$questions[1]->id}", 'Sí')
@@ -93,7 +95,7 @@ class ChecklistFillerTest extends TestCase
             ->set('supervisorSignature', 'data:image/png;base64,123')
             ->set('technicianSignature', 'data:image/png;base64,456')
             ->call('complete')
-            ->assertRedirect(route('tecnico.inspections.show', \App\Models\DynamicInspection::latest()->first()->id));
+            ->assertRedirect(route('tecnico.inspections.show', DynamicInspection::latest()->first()->id));
 
         $this->assertDatabaseHas('dynamic_inspections', [
             'dynamic_checklist_id' => $this->checklist->id,
@@ -111,7 +113,7 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+        Livewire::test(InspectionWizard::class, ['id' => $this->checklist->id])
             ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", '')
             ->set("answers.{$questions[1]->id}", '')
@@ -126,7 +128,7 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+        Livewire::test(InspectionWizard::class, ['id' => $this->checklist->id])
             ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'Juan')
             ->set("answers.{$questions[1]->id}", 'Sí')
@@ -142,7 +144,7 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+        Livewire::test(InspectionWizard::class, ['id' => $this->checklist->id])
             ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'Test')
             ->set("answers.{$questions[1]->id}", 'Sí')
@@ -165,7 +167,7 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->questions;
 
-        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+        Livewire::test(InspectionWizard::class, ['id' => $this->checklist->id])
             ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'María López')
             ->set("answers.{$questions[1]->id}", 'No')
@@ -198,7 +200,7 @@ class ChecklistFillerTest extends TestCase
 
         $questions = $this->checklist->fresh()->questions;
 
-        Livewire::test(\App\Livewire\Technician\InspectionWizard::class, ['id' => $this->checklist->id])
+        Livewire::test(InspectionWizard::class, ['id' => $this->checklist->id])
             ->set('currentStep', 1)
             ->set("answers.{$questions[0]->id}", 'Test')
             ->set("answers.{$questions[1]->id}", 'Sí')

@@ -55,7 +55,7 @@ class VisitChecklistCompletion extends Model
         if ($assignment) {
             $inspection = $assignment->inspection;
             if ($inspection && $inspection->status !== 'completed') {
-                $completed = \App\Models\DynamicInspection::where('checklist_assignment_id', $assignment->id)
+                $completed = DynamicInspection::where('checklist_assignment_id', $assignment->id)
                     ->where('status', 'completed')
                     ->latest('id')
                     ->first();
@@ -65,6 +65,7 @@ class VisitChecklistCompletion extends Model
             }
             if ($inspection) {
                 $inspection->loadMissing('answers.question');
+
                 return $inspection->answers->map(function ($answer) {
                     return [
                         'question_id' => $answer->dynamic_question_id,
@@ -121,7 +122,7 @@ class VisitChecklistCompletion extends Model
         if ($assignment) {
             $inspection = $assignment->inspection;
             if ($inspection && $inspection->status !== 'completed') {
-                $completed = \App\Models\DynamicInspection::where('checklist_assignment_id', $assignment->id)
+                $completed = DynamicInspection::where('checklist_assignment_id', $assignment->id)
                     ->where('status', 'completed')
                     ->latest('id')
                     ->first();

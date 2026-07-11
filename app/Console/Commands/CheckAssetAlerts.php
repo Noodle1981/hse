@@ -3,10 +3,14 @@
 namespace App\Console\Commands;
 
 use App\Models\Asset;
+use App\Models\ChecklistAssignment;
 use App\Models\Hallazgo;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CheckAssetAlerts extends Command
 {
@@ -62,11 +66,11 @@ class CheckAssetAlerts extends Command
                 if (! empty($rules) && is_array($rules)) {
                     foreach ($rules as $rule) {
                         $ruleName = $rule['nombre'] ?? '';
-                        $frecuencia = isset($rule['frecuencia']) ? (float)$rule['frecuencia'] : null;
-                        $margen = isset($rule['margen_pre_alerta']) && is_numeric($rule['margen_pre_alerta']) ? (float)$rule['margen_pre_alerta'] : 0;
+                        $frecuencia = isset($rule['frecuencia']) ? (float) $rule['frecuencia'] : null;
+                        $margen = isset($rule['margen_pre_alerta']) && is_numeric($rule['margen_pre_alerta']) ? (float) $rule['margen_pre_alerta'] : 0;
                         $checklistResolucionId = $rule['checklist_resolucion_id'] ?? null;
 
-                        if (!$ruleName || !$frecuencia || !$checklistResolucionId) {
+                        if (! $ruleName || ! $frecuencia || ! $checklistResolucionId) {
                             continue;
                         }
 
@@ -75,10 +79,10 @@ class CheckAssetAlerts extends Command
                         $alertReason = '';
 
                         if ($fieldType === 'number' && is_numeric($val)) {
-                            $numVal = (float)$val;
-                            $nextTargetKey = 'proximo_' . $fieldName . '_' . \Illuminate\Support\Str::slug($ruleName);
+                            $numVal = (float) $val;
+                            $nextTargetKey = 'proximo_'.$fieldName.'_'.Str::slug($ruleName);
                             $targetVal = isset($metadata[$nextTargetKey]) && is_numeric($metadata[$nextTargetKey])
-                                ? (float)$metadata[$nextTargetKey]
+                                ? (float) $metadata[$nextTargetKey]
                                 : $frecuencia;
 
                             if ($numVal >= $targetVal) {
@@ -88,14 +92,14 @@ class CheckAssetAlerts extends Command
                                 $isPreAlerta = true;
                                 $alertReason = "Métrica '{$fieldLabel}' ({$numVal}) está próxima al límite crítico de {$targetVal} (Margen: {$margen}) para la regla SRE '{$ruleName}'";
                             }
-                        } elseif ($fieldType === 'date' && !empty($val)) {
+                        } elseif ($fieldType === 'date' && ! empty($val)) {
                             try {
                                 $dueDate = Carbon::parse($val);
                                 $daysRemaining = (int) now()->startOfDay()->diffInDays($dueDate->startOfDay(), false);
 
                                 if ($daysRemaining <= 0) {
                                     $isCritico = true;
-                                    $alertReason = "Fecha '{$fieldLabel}' venció hace " . abs($daysRemaining) . " días (límite: 0 días) para la regla SRE '{$ruleName}'";
+                                    $alertReason = "Fecha '{$fieldLabel}' venció hace ".abs($daysRemaining)." días (límite: 0 días) para la regla SRE '{$ruleName}'";
                                 } elseif ($daysRemaining <= $margen) {
                                     $isPreAlerta = true;
                                     $alertReason = "Fecha '{$fieldLabel}' vence en {$daysRemaining} días (margen alerta: {$margen} días) para la regla SRE '{$ruleName}'";
@@ -152,7 +156,7 @@ class CheckAssetAlerts extends Command
                     }
 
                     if (! empty($field['alert_interval']) && is_numeric($field['alert_interval'])) {
-                        $nextTargetKey = 'proximo_' . $fieldName;
+                        $nextTargetKey = 'proximo_'.$fieldName;
                         $targetKm = isset($metadata[$nextTargetKey]) && is_numeric($metadata[$nextTargetKey])
                             ? (float) $metadata[$nextTargetKey]
                             : (float) $field['alert_interval'];
@@ -166,10 +170,10 @@ class CheckAssetAlerts extends Command
 
                 if ($shouldAlert) {
                     $hasActiveAlert = true;
-                    $customMsg  = ! empty($field['alert_message']) ? trim($field['alert_message']) : null;
-                    
+                    $customMsg = ! empty($field['alert_message']) ? trim($field['alert_message']) : null;
+
                     $title = "Alerta: {$asset->name} ({$asset->identifier}) - {$fieldName}";
-                    $sedeNombre    = $asset->sede?->nombre ?? 'Sede General';
+                    $sedeNombre = $asset->sede?->nombre ?? 'Sede General';
                     $empresaNombre = $asset->empresa?->nombre ?? 'Empresa';
 
                     if ($customMsg) {
@@ -185,9 +189,9 @@ class CheckAssetAlerts extends Command
                         ->exists();
 
                     if (! $existing) {
-                        $systemUserId = \Illuminate\Support\Facades\Auth::id()
+                        $systemUserId = Auth::id()
                             ?? $asset->sede?->users()->first()?->id
-                            ?? \App\Models\User::first()?->id
+                            ?? User::first()?->id
                             ?? 1;
 
                         Hallazgo::create([
@@ -237,7 +241,7 @@ class CheckAssetAlerts extends Command
                 } elseif ($asset->status === 'fuera_de_servicio') {
                     $hasSreRules = false;
                     foreach ($schema as $f) {
-                        if (!empty($f['maintenance_rules'])) {
+                        if (! empty($f['maintenance_rules'])) {
                             $hasSreRules = true;
                             break;
                         }
@@ -260,7 +264,7 @@ class CheckAssetAlerts extends Command
         $ruleName = $rule['nombre'];
         $checklistResolucionId = $rule['checklist_resolucion_id'];
 
-        $sedeNombre    = $asset->sede?->nombre ?? 'Sede General';
+        $sedeNombre = $asset->sede?->nombre ?? 'Sede General';
         $empresaNombre = $asset->empresa?->nombre ?? 'Empresa';
 
         $fullDescription = "Mantenimiento Crítico SRE Requerido para {$ruleName}.\n\n[Detalles del Activo]\n• Activo: {$asset->name} (Código/QR: {$asset->identifier})\n• Ubicación: Sede {$sedeNombre} ({$empresaNombre})\n• Razón: {$alertReason}";
@@ -271,12 +275,12 @@ class CheckAssetAlerts extends Command
             ->whereIn('estado', [Hallazgo::ESTADO_PENDIENTE, Hallazgo::ESTADO_EN_PROCESO])
             ->exists();
 
-        $systemUserId = \Illuminate\Support\Facades\Auth::id()
+        $systemUserId = Auth::id()
             ?? $asset->sede?->users()->first()?->id
-            ?? \App\Models\User::first()?->id
+            ?? User::first()?->id
             ?? 1;
 
-        if (!$existingFinding) {
+        if (! $existingFinding) {
             Hallazgo::create([
                 'sede_id' => $asset->sede_id,
                 'user_id' => $systemUserId,
@@ -291,12 +295,12 @@ class CheckAssetAlerts extends Command
             $this->line("Hallazgo SRE creado para activo {$asset->name}: {$ruleName}");
         }
 
-        $existingAssignment = \App\Models\ChecklistAssignment::where('asset_id', $asset->id)
+        $existingAssignment = ChecklistAssignment::where('asset_id', $asset->id)
             ->where('dynamic_checklist_id', $checklistResolucionId)
             ->where('status', '!=', 'completed')
             ->exists();
-        if (!$existingAssignment) {
-            \App\Models\ChecklistAssignment::create([
+        if (! $existingAssignment) {
+            ChecklistAssignment::create([
                 'dynamic_checklist_id' => $checklistResolucionId,
                 'asset_id' => $asset->id,
                 'user_id' => null,
@@ -323,7 +327,7 @@ class CheckAssetAlerts extends Command
                 'fecha_resolucion' => now(),
             ]);
 
-        \App\Models\ChecklistAssignment::where('asset_id', $asset->id)
+        ChecklistAssignment::where('asset_id', $asset->id)
             ->where('dynamic_checklist_id', $checklistResolucionId)
             ->where('status', '!=', 'completed')
             ->update([

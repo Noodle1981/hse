@@ -4,8 +4,13 @@ namespace App\Http\Controllers\Contracts;
 
 use App\Http\Controllers\Controller;
 use App\Models\AnnualPlan;
+use App\Models\DynamicInspection;
+use App\Models\MasterReport;
 use App\Models\Sede;
+use App\Models\Training;
+use App\Models\VisitTraining;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class AnnualContractReportController extends Controller
@@ -17,8 +22,8 @@ class AnnualContractReportController extends Controller
 
         $sede = Sede::with('empresa')->findOrFail($sedeId);
 
-        $startDate = \Carbon\Carbon::create($year, 1, 1)->startOfDay();
-        $endDate = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
+        $startDate = Carbon::create($year, 1, 1)->startOfDay();
+        $endDate = Carbon::create($year, 12, 31)->endOfDay();
 
         $plans = AnnualPlan::where('sede_id', $sedeId)
             ->where(function ($q) use ($startDate, $endDate) {
@@ -40,11 +45,11 @@ class AnnualContractReportController extends Controller
         ];
 
         // --- OPTIMIZATION: PRE-LOAD ALL COMPLIANCE FOR THE YEAR ---
-        $startDate = \Carbon\Carbon::create($year, 1, 1)->startOfDay();
-        $endDate = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
+        $startDate = Carbon::create($year, 1, 1)->startOfDay();
+        $endDate = Carbon::create($year, 12, 31)->endOfDay();
 
         // 1. Inspections
-        $insLookup = \App\Models\DynamicInspection::where('sede_id', $sedeId)
+        $insLookup = DynamicInspection::where('sede_id', $sedeId)
             ->whereBetween('completed_at', [$startDate, $endDate])
             ->where('status', 'completed')
             ->get()
@@ -54,7 +59,7 @@ class AnnualContractReportController extends Controller
         $trainLookup = [];
         $trainChecklistLookup = [];
 
-        \App\Models\Training::where('sede_id', $sedeId)
+        Training::where('sede_id', $sedeId)
             ->whereBetween('date', [$startDate, $endDate])
             ->where('status', 'completed')
             ->get()
@@ -66,7 +71,7 @@ class AnnualContractReportController extends Controller
                 }
             });
 
-        \App\Models\VisitTraining::whereHas('visit', fn ($q) => $q->where('sede_id', $sedeId)->whereBetween('fecha_visita', [$startDate, $endDate]))
+        VisitTraining::whereHas('visit', fn ($q) => $q->where('sede_id', $sedeId)->whereBetween('fecha_visita', [$startDate, $endDate]))
             ->with('training')
             ->get()
             ->each(function ($vt) use (&$trainLookup, &$trainChecklistLookup) {
@@ -78,7 +83,7 @@ class AnnualContractReportController extends Controller
             });
 
         // 3. Reports
-        $repLookup = \App\Models\MasterReport::where('sede_id', $sedeId)
+        $repLookup = MasterReport::where('sede_id', $sedeId)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->get()
             ->groupBy(fn ($r) => str_contains($r->periodo, '-') ? $r->periodo : $r->created_at->format('Y-m'));

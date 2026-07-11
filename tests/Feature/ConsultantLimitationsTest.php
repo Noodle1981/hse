@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Consultora;
+use App\Models\Empresa;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use App\Models\Consultora;
-use App\Models\User;
-use App\Models\Empresa;
 
 class ConsultantLimitationsTest extends TestCase
 {

@@ -19,7 +19,7 @@ class CompanyController extends Controller
      */
     public function index(Request $request)
     {
-        /** @var \App\Models\User $currentUser */
+        /** @var User $currentUser */
         $currentUser = Auth::user();
         $query = Empresa::query();
 
@@ -62,7 +62,7 @@ class CompanyController extends Controller
 
     public function edit($id)
     {
-        /** @var \App\Models\User $currentUser */
+        /** @var User $currentUser */
         $currentUser = Auth::user();
         $query = Empresa::query();
 
@@ -82,9 +82,9 @@ class CompanyController extends Controller
      */
     public function save(Request $request)
     {
-        /** @var \App\Models\User $currentUser */
+        /** @var User $currentUser */
         $currentUser = Auth::user();
-        $consultoraId = !$currentUser->isSuperAdmin() ? $currentUser->consultora_id : ($request->input('consultora_id') ?? ($request->input('id') ? Empresa::find($request->input('id'))?->consultora_id : null));
+        $consultoraId = ! $currentUser->isSuperAdmin() ? $currentUser->consultora_id : ($request->input('consultora_id') ?? ($request->input('id') ? Empresa::find($request->input('id'))?->consultora_id : null));
         $id = $request->input('id');
 
         $request->validate([
@@ -103,11 +103,11 @@ class CompanyController extends Controller
             'logo' => 'nullable|image|max:2048',
         ]);
 
-        if (!$id && $consultoraId) {
+        if (! $id && $consultoraId) {
             $consultora = Consultora::findOrFail($consultoraId);
             $count = Empresa::where('consultora_id', $consultoraId)->count();
             if ($count >= $consultora->max_empresas) {
-                return back()->withErrors(['nombre' => 'Se ha alcanzado el límite de empresas clientes (' . $consultora->max_empresas . ') para esta consultora.']);
+                return back()->withErrors(['nombre' => 'Se ha alcanzado el límite de empresas clientes ('.$consultora->max_empresas.') para esta consultora.']);
             }
         }
 
@@ -295,7 +295,7 @@ class CompanyController extends Controller
 
     private function ensureTenancy(Empresa $empresa)
     {
-        /** @var \App\Models\User $currentUser */
+        /** @var User $currentUser */
         $currentUser = Auth::user();
         if (! $currentUser->isSuperAdmin() && $empresa->consultora_id !== $currentUser->consultora_id) {
             abort(403, 'Acceso no autorizado.');

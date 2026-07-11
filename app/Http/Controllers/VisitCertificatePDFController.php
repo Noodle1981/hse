@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\VisitCertificate;
+use App\Models\VisitChecklistCompletion;
 use App\Services\BrandingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -64,7 +65,7 @@ class VisitCertificatePDFController extends Controller
 
     public function checklistLoading($id)
     {
-        $completion = \App\Models\VisitChecklistCompletion::with(['visit.sede', 'assignment.checklist'])->findOrFail($id);
+        $completion = VisitChecklistCompletion::with(['visit.sede', 'assignment.checklist'])->findOrFail($id);
         $prefix = request()->is('gestor/*') ? 'gestor' : 'tecnico';
 
         return view('pdf.loading', [
@@ -82,7 +83,7 @@ class VisitCertificatePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $completion = \App\Models\VisitChecklistCompletion::with([
+        $completion = VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections',
         ])->findOrFail($id);
@@ -99,7 +100,7 @@ class VisitCertificatePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $completion = \App\Models\VisitChecklistCompletion::with([
+        $completion = VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections',
         ])->findOrFail($id);

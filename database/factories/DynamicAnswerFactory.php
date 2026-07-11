@@ -8,7 +8,7 @@ use App\Models\DynamicQuestion;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\DynamicAnswer>
+ * @extends Factory<DynamicAnswer>
  */
 class DynamicAnswerFactory extends Factory
 {
