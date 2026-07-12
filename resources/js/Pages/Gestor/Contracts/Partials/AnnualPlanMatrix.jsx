@@ -377,12 +377,12 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                             <option key={c.id} value={c.id} className="bg-[#16162a] text-white">{c.title}</option>
                                         ))}
                                     </select>
-                                    {editHasAssetLink && (
+                                    {editForm.data.category === 'Inspección' && editHasAssetLink && (
                                         <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic flex items-center gap-1 mt-1 animate-pulse">
                                             🛡️ Checklist con activos incluidos
                                         </span>
                                     )}
-                                    {selectedEditChecklist && !editHasAssetLink && editForm.data.checklist_id && (
+                                    {editForm.data.category === 'Inspección' && selectedEditChecklist && !editHasAssetLink && editForm.data.checklist_id && (
                                         <span className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic flex items-center gap-1 mt-1">
                                             📋 Checklist sin activos vinculados
                                         </span>

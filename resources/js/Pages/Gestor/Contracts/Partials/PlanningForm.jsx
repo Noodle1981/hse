@@ -95,12 +95,12 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                                 <option key={c.id} value={c.id} className="bg-[#16162a] text-white">{c.title}</option>
                             ))}
                         </select>
-                        {hasAssetLink && (
+                        {data.category === 'Inspección' && hasAssetLink && (
                             <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic flex items-center gap-1 mt-1 animate-pulse">
                                 🛡️ Checklist con activos incluidos
                             </span>
                         )}
-                        {selectedChecklist && !hasAssetLink && data.checklist_id && (
+                        {data.category === 'Inspección' && selectedChecklist && !hasAssetLink && data.checklist_id && (
                             <span className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic flex items-center gap-1 mt-1">
                                 📋 Checklist sin activos vinculados
                             </span>
