@@ -74,9 +74,9 @@ export default function Index({
                                     <select id="field_4" name="field_4" 
                                         value={filters.company_id}
                                         onChange={e => updateFilter({ company_id: e.target.value, sede_id: '' })}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all"
+                                        className="w-full bg-[#16162a] border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all [color-scheme:dark]"
                                     >
-                                        {companies.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                                        {companies.map(c => <option key={c.id} value={c.id} className="bg-[#16162a] text-white">{c.nombre}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -84,10 +84,10 @@ export default function Index({
                                     <select id="field_3" name="field_3" 
                                         value={filters.sede_id}
                                         onChange={e => updateFilter({ sede_id: e.target.value })}
-                                        className="w-full bg-black/40 border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all"
+                                        className="w-full bg-[#16162a] border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all [color-scheme:dark]"
                                     >
-                                        <option value="">Seleccione Sede</option>
-                                        {sedes.map(s => <option key={s.id} value={s.id}>{s.nombre_sede}</option>)}
+                                        <option value="" className="bg-[#16162a] text-white">Seleccione Sede</option>
+                                        {sedes.map(s => <option key={s.id} value={s.id} className="bg-[#16162a] text-white">{s.nombre_sede}</option>)}
                                     </select>
                                 </div>
                             </div>
@@ -110,12 +110,12 @@ export default function Index({
                                         <select id="field_1" name="field_1" 
                                             value={filters.duration}
                                             onChange={e => updateFilter({ duration: e.target.value })}
-                                            className="bg-black/40 border-none rounded-xl px-4 py-2 text-xs font-bold text-white"
+                                            className="bg-[#16162a] border-none rounded-xl px-4 py-2 text-xs font-bold text-white [color-scheme:dark]"
                                         >
-                                            <option value={3}>3 MESES</option>
-                                            <option value={6}>6 MESES</option>
-                                            <option value={12}>12 MESES</option>
-                                            <option value={24}>24 MESES</option>
+                                            <option value={3} className="bg-[#16162a] text-white">3 MESES</option>
+                                            <option value={6} className="bg-[#16162a] text-white">6 MESES</option>
+                                            <option value={12} className="bg-[#16162a] text-white">12 MESES</option>
+                                            <option value={24} className="bg-[#16162a] text-white">24 MESES</option>
                                         </select>
                                     </div>
                                 </div>
