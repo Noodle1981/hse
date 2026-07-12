@@ -49,6 +49,9 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
 
     if (!sedeId) return null;
 
+    const selectedChecklist = checklistOptions.find(c => c.id == data.checklist_id);
+    const hasAssetLink = selectedChecklist && selectedChecklist.has_asset_link > 0;
+
     return (
         <div className="bg-ep-primary/5 p-8 rounded-[2.5rem] border border-ep-primary/20 animate-fade-in relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-8 opacity-5">
@@ -70,11 +73,11 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                         <select id="field_5" name="field_5" 
                             value={data.category}
                             onChange={e => handleCategoryChange(e.target.value)}
-                            className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white focus:ring-ep-primary/50 transition-all italic"
+                            className="w-full bg-[#16162a] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white focus:ring-ep-primary/50 transition-all italic [color-scheme:dark]"
                         >
-                            <option value="Capacitación">CAPACITACIÓN</option>
-                            <option value="Inspección">INSPECCIÓN</option>
-                            <option value="Informe">INFORME TÉCNICO</option>
+                            <option value="Capacitación" className="bg-[#16162a] text-white">CAPACITACIÓN</option>
+                            <option value="Inspección" className="bg-[#16162a] text-white">INSPECCIÓN</option>
+                            <option value="Informe" className="bg-[#16162a] text-white">INFORME TÉCNICO</option>
                         </select>
                     </div>
 
@@ -85,13 +88,23 @@ export default function PlanningForm({ sedeId, contractStart, duration, checklis
                             value={data.checklist_id}
                             onChange={e => handleChecklistChange(e.target.value)}
                             disabled={!['Inspección', 'Capacitación'].includes(data.category)}
-                            className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic disabled:opacity-20 transition-all"
+                            className="w-full bg-[#16162a] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic disabled:opacity-20 transition-all [color-scheme:dark]"
                         >
-                            <option value="">MANUAL / NINGUNO</option>
+                            <option value="" className="bg-[#16162a] text-white">MANUAL / NINGUNO</option>
                             {checklistOptions.map(c => (
-                                <option key={c.id} value={c.id}>{c.title}</option>
+                                <option key={c.id} value={c.id} className="bg-[#16162a] text-white">{c.title}</option>
                             ))}
                         </select>
+                        {hasAssetLink && (
+                            <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic flex items-center gap-1 mt-1 animate-pulse">
+                                🛡️ Checklist con activos incluidos
+                            </span>
+                        )}
+                        {selectedChecklist && !hasAssetLink && data.checklist_id && (
+                            <span className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic flex items-center gap-1 mt-1">
+                                📋 Checklist sin activos vinculados
+                            </span>
+                        )}
                     </div>
 
                     {/* Actividad */}

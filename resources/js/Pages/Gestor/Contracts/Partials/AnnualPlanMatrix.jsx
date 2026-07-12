@@ -50,6 +50,9 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
         multi_trainer: false
     });
 
+    const selectedEditChecklist = checklistOptions.find(c => c.id == editForm.data.checklist_id);
+    const editHasAssetLink = selectedEditChecklist && selectedEditChecklist.has_asset_link > 0;
+
     const openEditModal = (plan) => {
         setPlanToEdit(plan);
         editForm.setData({
@@ -354,11 +357,11 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                     <select 
                                         value={editForm.data.category}
                                         onChange={e => handleCategoryChange(e.target.value)}
-                                        className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white focus:ring-ep-primary/50 transition-all italic"
+                                        className="w-full bg-[#16162a] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white focus:ring-ep-primary/50 transition-all italic [color-scheme:dark]"
                                     >
-                                        <option value="Capacitación">CAPACITACIÓN</option>
-                                        <option value="Inspección">INSPECCIÓN</option>
-                                        <option value="Informe">INFORME TÉCNICO</option>
+                                        <option value="Capacitación" className="bg-[#16162a] text-white">CAPACITACIÓN</option>
+                                        <option value="Inspección" className="bg-[#16162a] text-white">INSPECCIÓN</option>
+                                        <option value="Informe" className="bg-[#16162a] text-white">INFORME TÉCNICO</option>
                                     </select>
                                 </div>
                                 <div className="space-y-2">
@@ -367,13 +370,23 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                         value={editForm.data.checklist_id}
                                         onChange={e => handleChecklistChange(e.target.value)}
                                         disabled={!['Inspección', 'Capacitación'].includes(editForm.data.category)}
-                                        className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic disabled:opacity-20 transition-all"
+                                        className="w-full bg-[#16162a] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic disabled:opacity-20 transition-all [color-scheme:dark]"
                                     >
-                                        <option value="">MANUAL / NINGUNO</option>
+                                        <option value="" className="bg-[#16162a] text-white">MANUAL / NINGUNO</option>
                                         {checklistOptions.map(c => (
-                                            <option key={c.id} value={c.id}>{c.title}</option>
+                                            <option key={c.id} value={c.id} className="bg-[#16162a] text-white">{c.title}</option>
                                         ))}
                                     </select>
+                                    {editHasAssetLink && (
+                                        <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic flex items-center gap-1 mt-1 animate-pulse">
+                                            🛡️ Checklist con activos incluidos
+                                        </span>
+                                    )}
+                                    {selectedEditChecklist && !editHasAssetLink && editForm.data.checklist_id && (
+                                        <span className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic flex items-center gap-1 mt-1">
+                                            📋 Checklist sin activos vinculados
+                                        </span>
+                                    )}
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
                                     <label className="text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic ml-1 block">Descripción de la Actividad</label>
@@ -399,12 +412,12 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                     <select 
                                         value={editForm.data.frequency}
                                         onChange={e => editForm.setData('frequency', e.target.value)}
-                                        className="w-full bg-black/40 border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic focus:ring-ep-primary/50 transition-all"
+                                        className="w-full bg-[#16162a] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic focus:ring-ep-primary/50 transition-all [color-scheme:dark]"
                                     >
-                                        <option value="none">SIN AUTO-PLAN</option>
-                                        <option value="mensual">MENSUAL</option>
-                                        <option value="bimestral">BIMESTRAL</option>
-                                        <option value="trimestral">TRIMESTRAL</option>
+                                        <option value="none" className="bg-[#16162a] text-white">SIN AUTO-PLAN</option>
+                                        <option value="mensual" className="bg-[#16162a] text-white">MENSUAL</option>
+                                        <option value="bimestral" className="bg-[#16162a] text-white">BIMESTRAL</option>
+                                        <option value="trimestral" className="bg-[#16162a] text-white">TRIMESTRAL</option>
                                     </select>
                                 </div>
 

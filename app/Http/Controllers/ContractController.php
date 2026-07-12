@@ -94,7 +94,11 @@ class ContractController extends Controller
                 'duration' => $contractDuration,
                 'category' => $request->category,
             ],
-            'checklistOptions' => DynamicChecklist::select('id', 'title', 'registry_code')->get(),
+            'checklistOptions' => DynamicChecklist::select('id', 'title', 'registry_code')
+                ->withCount(['questions as has_asset_link' => function ($q) {
+                    $q->whereNotNull('vincular_a_metadata')->where('vincular_a_metadata', '!=', '');
+                }])
+                ->get(),
         ]);
     }
 
