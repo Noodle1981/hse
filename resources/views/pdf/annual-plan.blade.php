@@ -72,6 +72,8 @@
         .bg-completed { background-color: #10b981; }
         .bg-pending { background-color: #4f46e5; }
         .bg-overdue { background-color: #ef4444; }
+        .bg-suspended { background-color: #f59e0b; }
+        .bg-cancelled { background-color: #9ca3af; }
         .bg-none { background-color: #f3f4f6; border: 1px solid #e5e7eb; }
         
         .count-badge {
@@ -166,6 +168,10 @@
                                         @if($cnt > 1)
                                             <span class="count-badge">{{ $cnt }}</span>
                                         @endif
+                                    @elseif($status === 'suspended')
+                                        S
+                                    @elseif($status === 'cancelled')
+                                        C
                                     @else
                                         X
                                     @endif
@@ -184,7 +190,9 @@
         <strong>Referencias:</strong> 
         <span style="color: #4f46e5; font-weight: bold;">[X] Azul:</span> Planificado (Pendiente) | 
         <span style="color: #10b981; font-weight: bold;">[✓] Verde:</span> Cumplido | 
-        <span style="color: #ef4444; font-weight: bold;">[X] Rojo:</span> Incumplimiento (Vencido)
+        <span style="color: #ef4444; font-weight: bold;">[X] Rojo:</span> Incumplimiento (Vencido) | 
+        <span style="color: #f59e0b; font-weight: bold;">[S] Naranja:</span> Suspendido | 
+        <span style="color: #9ca3af; font-weight: bold;">[C] Gris:</span> Cancelado
     </div>
 
     <div class="footer">

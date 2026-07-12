@@ -9,6 +9,10 @@ class AnnualPlan extends Model
 {
     use HasFactory;
 
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_SUSPENDED = 'suspended';
+    public const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = [
         'sede_id',
         'category',
@@ -16,6 +20,7 @@ class AnnualPlan extends Model
         'activity_name',
         'activity_code',
         'checklist_id',
+        'status',
         'period_start',
         'period_end',
         'scheduled_months',

@@ -1,4 +1,9 @@
-<x-pdf.layout :title="$completion->assignment->checklist->title ?? 'Reporte de Inspección'" :code="'INSP-V-' . str_pad($completion->id, 6, '0', STR_PAD_LEFT)" :status="'completed'">
+@php
+    $cp = $branding['primary'] ?? '#1e40af';
+    $cs = $branding['secondary'] ?? '#6b7280';
+    $ca = $branding['accent'] ?? '#16a34a';
+@endphp
+<x-pdf.layout :title="$completion->assignment->checklist->title ?? 'Reporte de Inspección'" :code="'INSP-V-' . str_pad($completion->id, 6, '0', STR_PAD_LEFT)" :status="'completed'" :branding="$branding">
 
     {{-- 1. Cabecera --}}
     <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
@@ -30,7 +35,7 @@
                         Ubicación
                     </div>
                     <div style="line-height: 1.4;">
-                        <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a;">
+                        <div style="font-size: 11pt; font-weight: bold; color: {{ $cp }};">
                             {{ $completion->visit->empresa->nombre ?? 'N/A' }}
                         </div>
                         <div style="font-weight: 500; color: #4b5563;">
@@ -80,8 +85,8 @@
         .th-base {
             padding: 12px 15px;
             font-size: 9pt;
-            color: #475569;
-            border-bottom: 2px solid #e2e8f0;
+            color: white;
+            border-bottom: 2px solid {{ $cp }};
         }
         .tr-even {
             background-color: #f9fafb;
@@ -117,7 +122,7 @@
 
         <table class="checklist-table">
             <thead>
-                <tr style="background-color: #f8fafc;">
+                <tr style="background-color: {{ $cp }};">
                     <th class="th-base {{ $hasObservations ? 'col-point-obs' : 'col-point-no-obs' }}">Punto de Control</th>
                     <th class="th-base {{ $hasObservations ? 'col-compliance-obs' : 'col-compliance-no-obs' }}">Cumplimiento</th>
                     @if($hasObservations)

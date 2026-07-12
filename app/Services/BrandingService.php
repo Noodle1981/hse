@@ -19,6 +19,9 @@ class BrandingService
             'secondary' => '#6b7280',
             'accent' => '#16a34a',
             'name' => 'XAMASAFE',
+            'email' => 'contacto@xamasafe.com',
+            'phone' => '+54 11 1234-5678',
+            'address' => 'Buenos Aires, Argentina',
         ];
     }
 
@@ -42,6 +45,12 @@ class BrandingService
             return self::defaults();
         }
 
+        $addressParts = array_filter([
+            $consultora->fiscal_address,
+            $consultora->locality,
+            $consultora->province,
+        ]);
+
         return [
             'logo' => $consultora->logo_path
                             ? public_path('storage/'.$consultora->logo_path)
@@ -50,6 +59,9 @@ class BrandingService
             'secondary' => $consultora->color_secondary ?? '#6b7280',
             'accent' => $consultora->color_accent ?? '#16a34a',
             'name' => $consultora->nombre ?? 'XAMASAFE',
+            'email' => $consultora->email ?? 'contacto@xamasafe.com',
+            'phone' => $consultora->phone ?? '+54 11 1234-5678',
+            'address' => ! empty($addressParts) ? implode(', ', $addressParts) : 'Buenos Aires, Argentina',
         ];
     }
 }

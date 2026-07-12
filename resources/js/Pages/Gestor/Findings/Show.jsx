@@ -63,12 +63,14 @@ export default function Show({ finding }) {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <button 
-                                onClick={() => setShowUpdateModal(true)}
-                                className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic hover:bg-white/10 transition-all shadow-xl active:scale-95"
-                            >
-                                Gestionar Estado
-                            </button>
+                            {(!isTecnico || finding.estado !== 'cerrado') && (
+                                <button 
+                                    onClick={() => setShowUpdateModal(true)}
+                                    className="px-10 py-5 bg-white/5 border border-white/10 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic hover:bg-white/10 transition-all shadow-xl active:scale-95"
+                                >
+                                    Gestionar Estado
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -189,7 +191,7 @@ export default function Show({ finding }) {
                                     <option value="pendiente">PENDIENTE</option>
                                     <option value="en_proceso">EN PROCESO / CORRECCIÓN</option>
                                     <option value="resuelto">RESUELTO / VERIFICADO</option>
-                                    <option value="cerrado">CERRADO (HISTORIAL)</option>
+                                    {!isTecnico && <option value="cerrado">CERRADO (HISTORIAL)</option>}
                                 </select>
                             </div>
 

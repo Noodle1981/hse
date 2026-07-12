@@ -609,4 +609,89 @@ class InspectionController extends Controller
             'inspection' => $inspection,
         ]);
     }
+
+    /**
+     * Re-vincula la inspección a un activo diferente (o la desvincula).
+     */
+    public function relinkAsset(Request $request, DynamicInspection $inspection)
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        if ($user->isTechnician()) {
+            abort(403, 'Los técnicos no tienen permiso para re-vincular activos.');
+        }
+
+        $request->validate([
+            'asset_id' => 'nullable|exists:assets,id',
+        ]);
+
+        $oldAsset = $inspection->asset;
+        $newAssetId = $request->asset_id;
+
+        DB::transaction(function () use ($inspection, $oldAsset, $newAssetId) {
+            // 1. Actualizar el asset_id de la inspección
+            $inspection->update(['asset_id' => $newAssetId]);
+
+            // 2. Si tenía un activo anterior, restaurar sus métricas previas
+            if ($oldAsset) {
+                $logs = \App\Models\AssetMetadataLog::where('asset_id', $oldAsset->id)
+                    ->where('dynamic_inspection_id', $inspection->id)
+                    ->get();
+
+                $oldMetadata = $oldAsset->metadata ?? [];
+                foreach ($logs as $log) {
+                    if ($log->old_value === null) {
+                        unset($oldMetadata[$log->field_key]);
+                    } else {
+                        $decoded = json_decode($log->old_value, true);
+                        $oldMetadata[$log->field_key] = (json_last_error() === JSON_ERROR_NONE) ? $decoded : $log->old_value;
+                    }
+                    $log->delete();
+                }
+                $oldAsset->metadata = $oldMetadata;
+                $oldAsset->save();
+            }
+
+            // 3. Si se vinculó a un nuevo activo, disparar el motor de sincronización de metadatos
+            if ($newAssetId) {
+                $newAsset = Asset::findOrFail($newAssetId);
+                $newMetadata = $newAsset->metadata ?? [];
+
+                $inspection->load('answers.question');
+
+                foreach ($inspection->answers as $answer) {
+                    $question = $answer->question;
+                    if ($question && ! empty($question->vincular_a_metadata)) {
+                        $metricKey = $question->vincular_a_metadata;
+                        $val = $answer->value;
+
+                        $oldVal = isset($newMetadata[$metricKey]) ? $newMetadata[$metricKey] : null;
+                        $oldValStr = $oldVal !== null ? (is_array($oldVal) ? json_encode($oldVal) : (string) $oldVal) : null;
+                        $newValStr = $val !== null ? (is_array($val) ? json_encode($val) : (string) $val) : null;
+
+                        if ($oldValStr !== $newValStr) {
+                            \App\Models\AssetMetadataLog::create([
+                                'asset_id' => $newAsset->id,
+                                'dynamic_inspection_id' => $inspection->id,
+                                'field_key' => $metricKey,
+                                'old_value' => $oldValStr,
+                                'new_value' => $newValStr,
+                                'changed_by' => Auth::id(),
+                            ]);
+                        }
+
+                        $newMetadata[$metricKey] = $val;
+                    }
+                }
+
+                $newAsset->metadata = $newMetadata;
+                $newAsset->save();
+            }
+
+            // 4. Re-evaluar alertas del sistema para que ambos activos actualicen sus estados SRE
+            \Illuminate\Support\Facades\Artisan::call('assets:check-alerts');
+        });
+
+        return back()->with('message', 'Activo re-vinculado con éxito y alertas actualizadas.');
+    }
 }

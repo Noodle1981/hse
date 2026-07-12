@@ -119,9 +119,15 @@ class AnnualContractReportController extends Controller
                 if ($count > 0) {
                     $monthData[$name] = ['status' => 'completed', 'count' => $count];
                 } else {
-                    $currentDate = now()->format('Y-m');
-                    $status = $monthStr < $currentDate ? 'overdue' : 'pending';
-                    $monthData[$name] = ['status' => $status, 'count' => 0];
+                    if ($plan->status === 'suspended') {
+                        $monthData[$name] = ['status' => 'suspended', 'count' => 0];
+                    } elseif ($plan->status === 'cancelled') {
+                        $monthData[$name] = ['status' => 'cancelled', 'count' => 0];
+                    } else {
+                        $currentDate = now()->format('Y-m');
+                        $status = $monthStr < $currentDate ? 'overdue' : 'pending';
+                        $monthData[$name] = ['status' => $status, 'count' => 0];
+                    }
                 }
             }
 

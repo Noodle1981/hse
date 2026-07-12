@@ -46,6 +46,7 @@ El sistema cuenta con las siguientes entidades principales:
 | `activity_name` | `varchar` | No ❌ | *ninguno* |  |
 | `activity_code` | `varchar` | Sí ✅ | *ninguno* |  |
 | `checklist_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
+| `status` | `varchar` | No ❌ | `'active'` |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `frequency` | `varchar` | No ❌ | `'none'` |  |

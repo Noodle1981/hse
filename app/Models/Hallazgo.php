@@ -88,7 +88,7 @@ class Hallazgo extends Model
      */
     public function origen(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo()->withTrashed();
     }
 
     /**

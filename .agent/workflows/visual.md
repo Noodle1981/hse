@@ -131,3 +131,17 @@ Para evitar la incertidumbre durante procesos pesados (PDF, cálculos):
    - *Informes / Reportes:* Gama **Rojo / Esmeralda / Amarillo** según criticidad de incidente/hallazgo.
 5. **Scrollbars de Marca**: Las tablas horizontales desbordables (`overflow-x-auto`) deben tener la clase `.custom-scrollbar` definida en `app.css` aplicando el color translúcido del pilar correspondiente para guiar sutil pero claramente al usuario sobre el deslizamiento horizontal disponible.
 
+---
+
+## 9. Estética y Maquetación de PDFs (Estándar Premium)
+Todos los documentos PDF generables/descargables de la plataforma deben seguir esta guía visual de alta fidelidad:
+- **Identidad de Marca:** Todo PDF debe mostrar de forma clara y destacada en la cabecera el logo de la consultora y su nombre comercial.
+- **Colores Corporativos Dinámicos:** Utilizar de manera estricta los colores configurados por la consultora en `/admin` (primario, secundario y de acento) para aplicar estilos en bordes, fondos de tablas, títulos de secciones y badges.
+- **Pie de Página Unificado (Footer):** En la parte inferior de todas las páginas del PDF se debe renderizar:
+  - *Extremo izquierdo:* Logo de la consultora o logo corporativo de XamaSafe en su defecto.
+  - *Centro:* La marca **XamaSafe** y la URL visible **www.xamasafe.com**.
+  - *Extremo derecho:* Numeración de página dinámica usando el formato "Página {PAGE_NUM} de {PAGE_COUNT}".
+- **Distribución de Evidencias:** Grillas organizadas de fotos en 2 columnas, con bordes redondeados (`border-radius: 4px`), bordes tenues de contraste y espaciados regulares para evitar saltos de página huérfanos.
+- **Excepciones de Fase:** Por el momento, esta normalización estética se aplicará a las **Constancias de Visita** y **Detalles de Inspección**. Los Informes de Hallazgos quedan excluidos de esta fase de diseño.
+
+

@@ -36,7 +36,7 @@ El sistema opera bajo un esquema estricto de multi-tenancy y control de accesos 
   * Diseñar y estructurar plantillas de checklists dinámicos (`DynamicChecklist`, `ChecklistSection`, `DynamicQuestion`).
   * Asignar checklists a sedes y técnicos específicos para su ejecución en fechas límites (`ChecklistAssignment`).
   * Configurar los planes de contratación anual (`AnnualPlan`) para definir qué tareas deben cumplirse cada mes.
-  * Auditar desvíos complejos, incidentes y planes de acción correctiva en campo.
+  * Auditar desvíos complejos, incidentes y planes de acción correctiva en campo, siendo el único autorizado para transicionar hallazgos a los estados de cierre definitivo (`cerrado`) o verificación final (`verificado`).
   * Consolidar visitas, capacitaciones e inspecciones en **Reportes Maestros** (`MasterReport`) y generar los informes consolidados en PDF.
   * Auditar, observar, devolver y aprobar los Informes Maestros redactados por los técnicos a su cargo, redactando observaciones de corrección (`observacion_revision`).
 * **Páginas React / Inertia asociadas:** 
@@ -47,7 +47,7 @@ El sistema opera bajo un esquema estricto de multi-tenancy y control de accesos 
 * **Responsabilidades:**
   * Iniciar y finalizar visitas en terreno (`VisitCertificate`), registrando su ingreso y egreso con verificación GPS obligatoria (Proof of Presence).
   * Completar los checklists e inspecciones asignadas u auto-asignadas (`VisitChecklistCompletion`), registrando las firmas e imágenes correspondientes.
-  * Registrar hallazgos críticos de Higiene y Seguridad (desvíos) adjuntando fotos de evidencia en tiempo real.
+  * Registrar hallazgos críticos de Higiene y Seguridad (desvíos) adjuntando fotos de evidencia en tiempo real, con la capacidad de cambiar su estado hasta `resuelto` (pero restringido de cerrarlos o verificarlos).
   * Registrar incidentes de seguridad que requieran atención inmediata.
   * Impartir capacitaciones en planta, agregando participantes y tomando la firma electrónica en pantalla mediante el panel táctil (`signature_pad` integrado en React).
 * **Páginas React / Inertia asociadas:**

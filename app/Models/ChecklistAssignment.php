@@ -32,7 +32,7 @@ class ChecklistAssignment extends Model
 
     public function asset(): BelongsTo
     {
-        return $this->belongsTo(Asset::class);
+        return $this->belongsTo(Asset::class)->withTrashed();
     }
 
     public function user(): BelongsTo

@@ -1,43 +1,27 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Reporte Maestro de Visita #{{ $visit->id }}</title>
+@php
+    $cp = $branding['primary'] ?? '#1e40af';
+    $cs = $branding['secondary'] ?? '#6b7280';
+    $ca = $branding['accent'] ?? '#16a34a';
+@endphp
+<x-pdf.layout :title="'Constancia Técnica de Visita'" :code="'REP-' . str_pad($visit->id, 6, '0', STR_PAD_LEFT)" :status="null" :branding="$branding">
     <style>
-        @page { margin: 1.5cm; }
-        body {
-            font-family: 'Helvetica', 'Arial', sans-serif;
-            font-size: 10px;
-            color: #334155;
-            line-height: 1.5;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Paleta de Colores */
-        .text-orange { color: #F69239; }
+        /* Estilos específicos de este reporte */
+        .text-accent { color: {{ $ca }}; }
         .text-dark { color: #1e293b; }
-        .bg-dark { background-color: #1e293b; color: #ffffff; }
+        .bg-dark { background-color: {{ $cp }}; color: #ffffff; }
         
-        /* Cabecera */
-        .header-table { width: 100%; border-bottom: 2px solid #F69239; padding-bottom: 10px; margin-bottom: 20px; }
-        .logo { max-height: 50px; }
-        .report-title-box { text-align: right; }
-        .report-num { font-size: 16px; font-weight: bold; color: #1e293b; margin: 0; }
-        .report-subtitle { color: #F69239; font-size: 11px; text-transform: uppercase; font-weight: bold; margin: 0; }
-
         /* Estructura de Secciones */
         .section { margin-bottom: 15px; width: 100%; }
         .section-header { 
             background-color: #f8fafc; 
-            border-left: 4px solid #1e293b; 
+            border-left: 4px solid {{ $cp }}; 
             padding: 8px 12px; 
             margin-bottom: 10px;
         }
         .section-header h2 { 
             margin: 0; 
             font-size: 12px; 
-            color: #1e293b; 
+            color: {{ $cp }}; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
         }
@@ -52,16 +36,16 @@
         .observation-box {
             padding: 12px;
             background-color: #fdfcfb;
-            border: 1px solid #fed7aa;
+            border: 1px solid {{ $ca }};
             border-radius: 4px;
-            color: #4338ca; /* Azul oscuro para notas */
+            color: #1e293b;
             font-size: 10px;
         }
 
         /* Tablas de Detalles (Checklists, Capacitaciones) */
         .detail-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
         .detail-table th { 
-            background-color: #1e293b; 
+            background-color: {{ $cp }}; 
             color: white; 
             padding: 7px 10px; 
             font-size: 8px; 
@@ -102,38 +86,14 @@
         .signature-table { width: 100%; margin-top: 50px; page-break-inside: avoid; }
         .signature-box { width: 50%; text-align: center; padding: 0 40px; }
         .signature-img { max-height: 70px; margin-bottom: 5px; }
-        .signature-line { border-top: 1px solid #1e293b; padding-top: 8px; }
+        .signature-line { border-top: 1px solid {{ $cp }}; padding-top: 8px; }
         .signature-name { font-weight: bold; font-size: 10px; color: #1e293b; display: block; }
         .signature-role { font-size: 8px; color: #64748b; text-transform: uppercase; }
-
-        .footer {
-            position: fixed; bottom: -10px; width: 100%; text-align: center; 
-            font-size: 8px; color: #94a3b8; border-top: 1px solid #f1f5f9; padding-top: 10px;
-        }
 
         /* Failure states */
         .bg-failure { background-color: #fef2f2 !important; }
         .text-failure { color: #b91c1c !important; font-weight: bold !important; }
     </style>
-</head>
-<body>
-
-    <table class="header-table">
-        <tr>
-            <td>
-                @php $logoPath = public_path('images/logo_ep_viejo.jpg'); @endphp
-                @if(file_exists($logoPath))
-                    <img src="{{ $logoPath }}" class="logo">
-                @else
-                    <span style="font-size: 18px; font-weight: bold; color: #F69239;">EP SALUD Y SEGURIDAD</span>
-                @endif
-            </td>
-            <td class="report-title-box">
-                <p class="report-subtitle">Constancia Técnica de Visita</p>
-                <h1 class="report-num">REPORTE #{{ str_pad($visit->id, 6, '0', STR_PAD_LEFT) }}</h1>
-            </td>
-        </tr>
-    </table>
 
     {{-- 1. INFORMACIÓN GENERAL --}}
     <div class="section">
@@ -150,7 +110,7 @@
                 </td>
                 <td style="width: 33%">
                     <span class="label">Fecha del Servicio</span>
-                    <span class="value text-orange">{{ $visit->visit_date ? $visit->visit_date->format('d/m/Y') : '-' }}</span>
+                    <span class="value text-accent">{{ $visit->visit_date ? $visit->visit_date->format('d/m/Y') : '-' }}</span>
                 </td>
             </tr>
             <tr>
@@ -239,7 +199,7 @@
             <div style="border: 1px solid #e2e8f0; margin-bottom: 15px;">
                 <table class="data-table" style="background: #f8fafc;">
                     <tr>
-                        <td style="width: 50%; border:none;"><span class="label">TEMA</span><span class="value" style="color: #F69239;">{{ $training->title }}</span></td>
+                        <td style="width: 50%; border:none;"><span class="label">TEMA</span><span class="value text-accent">{{ $training->title }}</span></td>
                         <td style="width: 20%; border:none; text-align: right;"><span class="label">DURACIÓN</span><span class="value">{{ $training->duration_minutes }} min</span></td>
                         <td style="width: 30%; border:none; text-align: right;"><span class="label">OBSERVACIONES</span><span class="value">{{ $training->notes ?: '-' }}</span></td>
                     </tr>
@@ -294,7 +254,7 @@
                                             {{ $hallazgo->criticidad }}
                                         </span>
                                     </td>
-                                    <td style="border:none; padding: 0;"><span class="label">Plazo</span><span class="value text-orange">{{ $hallazgo->plazo_correccion ? $hallazgo->plazo_correccion->format('d/m/Y') : 'Inmediato' }}</span></td>
+                                    <td style="border:none; padding: 0;"><span class="label">Plazo</span><span class="value text-accent">{{ $hallazgo->plazo_correccion ? $hallazgo->plazo_correccion->format('d/m/Y') : 'Inmediato' }}</span></td>
                                 </tr>
                             </table>
                         </td>
@@ -412,15 +372,10 @@
                 @endif
                 <div class="signature-line">
                     <span class="signature-name">{{ $visit->user->nombres }} {{ $visit->user->apellidos }}</span>
-                    <span class="signature-role">Asesor Profesional EP HyS</span>
+                    <span class="signature-role">Asesor Profesional {{ $branding['name'] }}</span>
                 </div>
             </td>
         </tr>
     </table>
 
-    <div class="footer">
-        Generado automáticamente por Sistema EP Salud y Seguridad | {{ date('d/m/Y H:i') }} | Visita ID: {{ $visit->id }}
-    </div>
-
-</body>
-</html>
+</x-pdf.layout>

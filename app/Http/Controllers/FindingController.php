@@ -201,6 +201,21 @@ class FindingController extends Controller
             'comentario' => 'required|string|min:5',
         ]);
 
+        /** @var User $user */
+        $user = Auth::user();
+
+        // Si el hallazgo ya está cerrado, el técnico no puede hacer más seguimientos
+        if ($finding->estado === Hallazgo::ESTADO_CERRADO && $user->isTechnician()) {
+            abort(403, 'No se puede modificar un hallazgo que ya está cerrado.');
+        }
+
+        // Restricción de transiciones para técnicos
+        if ($user->isTechnician()) {
+            if (in_array($request->estado_nuevo, [Hallazgo::ESTADO_CERRADO, Hallazgo::ESTADO_VERIFICADO])) {
+                abort(403, 'Los técnicos no están autorizados a verificar o cerrar hallazgos.');
+            }
+        }
+
         $finding->agregarSeguimiento(
             $request->estado_nuevo,
             $request->comentario,

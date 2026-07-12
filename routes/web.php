@@ -167,6 +167,7 @@ Route::middleware(['auth'])->group(function () {
         Route::prefix('inspections')->name('inspections.')->group(function () {
             Route::get('/', [InspectionController::class, 'historyGestor'])->name('index');
             Route::get('/{inspection}', [InspectionController::class, 'show'])->name('show');
+            Route::post('/{inspection}/relink-asset', [InspectionController::class, 'relinkAsset'])->name('relink-asset');
             Route::get('/{id}/pdf', [InspectionPDFController::class, 'download'])->name('pdf.download');
             Route::get('/{id}/pdf/preview', [InspectionPDFController::class, 'preview'])->name('pdf.preview');
         });

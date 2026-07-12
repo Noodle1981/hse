@@ -116,7 +116,7 @@ ep-back/
 | `trainings` | Sesiones e instancias de capacitación | `id`, `empresa_id`, `sede_id`, `dynamic_checklist_id`, `title`, `description`, `type` (presencial/virtual), `date`, `duration`, `status` |
 | `training_attendances` | Firmas y asistencia individual de alumnos normalizada | `id`, `training_id`, `visit_training_id`, `user_id`, `employee_name`, `dni`, `signature` |
 | `visit_trainings` | Bitácora y capacitación en vivo en la visita | `id`, `visit_certificate_id`, `training_id`, `title`, `description`, `notes`, `duration_minutes`, `status` |
-| `annual_plans` | Planificación anual del contrato de HyS por sede | `id`, `sede_id`, `category`, `activity_name`, `checklist_id`, `duration_minutes`, `modality`, `multi_trainer`, `scheduled_months` (JSON) |
+| `annual_plans` | Planificación anual del contrato de HyS por sede | `id`, `sede_id`, `category`, `activity_name`, `checklist_id`, `status`, `duration_minutes`, `modality`, `multi_trainer`, `scheduled_months` (JSON) |
 
 ---
 
@@ -172,6 +172,7 @@ ep-back/
 - ✅ **Aislamiento de Súper Administración:** Las rutas de súper administración se protegen con middleware `role:super_admin,vendedor` o `role:super_admin` según la jerarquía, e invocan `$this->ensureSuperAdminOrVendedor()` o `$this->ensureSuperAdmin()` en `AdministrationController` para convalidar el rol en backend.
 - ✅ **Validación de Jerarquía Multi-tenant en Consultoras:** Para evitar accesos cruzados ilegítimos o manipulados en endpoints parametrizados de operadores, se valida explícitamente en backend (`abort_unless($user->consultora_id === $consultant->id, 403)`) la pertenencia estricta del usuario objetivo a la consultora máster inyectada.
 - ✅ **Lógica de Deshabilitación Unificada (Preservación de Trazabilidad):** Las bajas de personal global y de operadores de consultoras sustituyen el borrado físico (`delete()`) por un cambio lógico de estado (`'inactivo'`). Esto mantiene la integridad de auditorías de inspección, capacitaciones e incidentes históricos relacionados al usuario en la base de datos.
+- ✅ **Re-vinculación de Activos y Restauración de Metadata Histórica:** Se proporciona la capacidad de re-vincular o desvincular activos en inspecciones completadas. El backend (`InspectionController@relinkAsset`) utiliza la tabla `asset_metadata_logs` para revertir de manera automática y precisa los valores previos de los metadatos en el activo de origen, y sincroniza las respuestas en el nuevo activo de destino. Adicionalmente, se fuerza el recálculo y actualización de alertas del motor SRE para mantener los estados operativos sincronizados en caliente.
 - ✅ Retornar respuestas nativas de Inertia: `return Inertia::render('Componente', [...]);`.
  
 ### Frontend (React 19 & Inertia)

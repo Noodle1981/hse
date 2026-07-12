@@ -211,14 +211,18 @@ class CheckAssetAlerts extends Command
                 } else {
                     if (empty($rules)) {
                         $title = "Alerta: {$asset->name} ({$asset->identifier}) - {$fieldName}";
-                        Hallazgo::where('origen_type', Asset::class)
+                        $findingsToResolve = Hallazgo::where('origen_type', Asset::class)
                             ->where('origen_id', $asset->id)
                             ->where('titulo', $title)
                             ->whereIn('estado', [Hallazgo::ESTADO_PENDIENTE, Hallazgo::ESTADO_EN_PROCESO])
-                            ->update([
-                                'estado' => Hallazgo::ESTADO_RESUELTO,
-                                'fecha_resolucion' => now(),
-                            ]);
+                            ->get();
+
+                        foreach ($findingsToResolve as $finding) {
+                            $finding->agregarSeguimiento(
+                                Hallazgo::ESTADO_RESUELTO,
+                                "Resolución automática: La métrica del activo retornó a niveles normales."
+                            );
+                        }
                     }
                 }
             }
@@ -318,14 +322,18 @@ class CheckAssetAlerts extends Command
     {
         $checklistResolucionId = $rule['checklist_resolucion_id'];
 
-        Hallazgo::where('origen_type', Asset::class)
+        $findingsToResolve = Hallazgo::where('origen_type', Asset::class)
             ->where('origen_id', $asset->id)
             ->where('titulo', $title)
             ->whereIn('estado', [Hallazgo::ESTADO_PENDIENTE, Hallazgo::ESTADO_EN_PROCESO])
-            ->update([
-                'estado' => Hallazgo::ESTADO_RESUELTO,
-                'fecha_resolucion' => now(),
-            ]);
+            ->get();
+
+        foreach ($findingsToResolve as $finding) {
+            $finding->agregarSeguimiento(
+                Hallazgo::ESTADO_RESUELTO,
+                "Resolución automática SRE: Se completó el checklist de mantenimiento / reparación."
+            );
+        }
 
         ChecklistAssignment::where('asset_id', $asset->id)
             ->where('dynamic_checklist_id', $checklistResolucionId)

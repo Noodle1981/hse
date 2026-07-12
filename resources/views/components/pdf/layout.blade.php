@@ -138,16 +138,21 @@
 
     <!-- Footer Global -->
     <footer>
-        <table class="no-border">
+        <table class="no-border" style="width: 100%; border: none; border-collapse: collapse;">
             <tr>
-                <td style="width: 33%; text-align: left;">
-                    {{ strtoupper($branding['name'] ?? 'XAMASAFE') }} — Sistema HSE
+                <td style="width: 35%; text-align: left; vertical-align: middle; border: none; padding: 0;">
+                    @php $logoPath = $branding['logo'] ?? public_path('images/logo.png'); @endphp
+                    @if(file_exists($logoPath))
+                        <img src="{{ $logoPath }}" style="max-height: 18px; max-width: 100px; vertical-align: middle; margin-right: 5px;">
+                    @endif
+                    <span style="font-weight: bold; font-size: 8pt; vertical-align: middle; color: #475569;">{{ strtoupper($branding['name'] ?? 'XAMASAFE') }}</span>
                 </td>
-                <td style="width: 33%; text-align: center;">
-                    Página <span class="page-number"></span>
+                <td style="width: 30%; text-align: center; vertical-align: middle; border: none; padding: 0; line-height: 1.1;">
+                    <span style="font-weight: bold; color: {{ $cp }}; font-size: 8.5pt;">XamaSafe</span><br>
+                    <span style="font-size: 7.5pt; color: #94a3b8; font-weight: 500;">www.xamasafe.com</span>
                 </td>
-                <td style="width: 33%; text-align: right;">
-                    {{ $footerText ?? 'Confidencial' }}
+                <td style="width: 35%; text-align: right; vertical-align: middle; border: none; padding: 0;">
+                    &nbsp;
                 </td>
             </tr>
         </table>
@@ -161,7 +166,7 @@
     <!-- Script for Page Numbers (DomPDF) -->
     <script type="text/php">
         if (isset($pdf)) {
-            $x = 280;
+            $x = 490;
             $y = 820;
             $text = "Página {PAGE_NUM} de {PAGE_COUNT}";
             $font = null;

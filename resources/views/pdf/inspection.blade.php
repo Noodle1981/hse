@@ -1,4 +1,9 @@
-<x-pdf.layout :title="$inspection->checklist->title ?? 'Reporte de Inspección'" :code="'INSP-' . str_pad($inspection->id, 6, '0', STR_PAD_LEFT)" :status="$inspection->status">
+@php
+    $cp = $branding['primary'] ?? '#1e40af';
+    $cs = $branding['secondary'] ?? '#6b7280';
+    $ca = $branding['accent'] ?? '#16a34a';
+@endphp
+<x-pdf.layout :title="$inspection->checklist->title ?? 'Reporte de Inspección'" :code="'INSP-' . str_pad($inspection->id, 6, '0', STR_PAD_LEFT)" :status="$inspection->status" :branding="$branding">
 
     <style>
         .text-placeholder { color: #d1d5db; font-weight: 500; }
@@ -37,7 +42,7 @@
                         Ubicación
                     </div>
                     <div style="line-height: 1.4;">
-                        <div style="font-size: 11pt; font-weight: bold; color: #1e3a8a;">
+                        <div style="font-size: 11pt; font-weight: bold; color: {{ $cp }};">
                             {{ $inspection->sede->empresa->nombre ?? 'N/A' }}
                         </div>
                         <div style="font-weight: 500; color: #4b5563;">
@@ -80,7 +85,7 @@
         @foreach($groupedAnswers as $sectionId => $sectionAnswers)
             <div style="margin-bottom: 25px; page-break-inside: avoid;">
                 {{-- Título de Sección --}}
-                <h3 style="font-size: 12pt; font-weight: bold; color: #111827; border-left: 4px solid #1e3a8a; padding-left: 10px; margin-bottom: 15px;">
+                <h3 style="font-size: 12pt; font-weight: bold; color: #111827; border-left: 4px solid {{ $cp }}; padding-left: 10px; margin-bottom: 15px;">
                     {{ $sectionId && isset($sections[$sectionId]) ? $sections[$sectionId]->title : 'Preguntas Generales' }}
                 </h3>
 
@@ -109,7 +114,7 @@
                                     @php $values = json_decode($answer->value, true) ?? []; @endphp
                                     <div style="text-align: right;">
                                         @forelse($values as $val)
-                                            <span style="display: inline-block; background-color: #eff6ff; color: #1d4ed8; border: 1px solid #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 8pt; margin-left: 4px; font-weight: bold;">
+                                            <span style="display: inline-block; background-color: #eff6ff; color: {{ $cp }}; border: 1px solid #dbeafe; padding: 2px 6px; border-radius: 4px; font-size: 8pt; margin-left: 4px; font-weight: bold;">
                                                 ✓ {{ $val }}
                                             </span>
                                         @empty
@@ -135,11 +140,11 @@
 
     {{-- 3. Observaciones Generales --}}
     @if($inspection->notes)
-        <div style="background-color: #eff6ff; border: 1px solid #dbeafe; border-radius: 8px; padding: 15px; margin-top: 20px; page-break-inside: avoid;">
-            <div style="font-size: 9pt; font-weight: bold; color: #1e40af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+        <div style="background-color: #f9fafb; border-left: 4px solid {{ $ca }}; border-top: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; border-radius: 4px; padding: 15px; margin-top: 20px; page-break-inside: avoid;">
+            <div style="font-size: 9pt; font-weight: bold; color: {{ $cp }}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
                 Observaciones y Hallazgos
             </div>
-            <p style="font-size: 9pt; color: #1e3a8a; line-height: 1.5; margin: 0;">
+            <p style="font-size: 9pt; color: #374151; line-height: 1.5; margin: 0;">
                 {{ $inspection->notes }}
             </p>
         </div>
@@ -193,7 +198,7 @@
 
     {{-- 5. Footer de Generación (adicional al global) --}}
     <div style="text-align: center; color: #9ca3af; font-size: 8pt; margin-top: 30px; border-top: 1px solid #f3f4f6; padding-top: 10px;">
-        GENERADO AUTOMÁTICAMENTE POR EP CHECKLISTS • {{ now()->format('d/m/Y H:i:s') }}
+        GENERADO AUTOMÁTICAMENTE POR {{ strtoupper($branding['name'] ?? 'XAMASAFE') }} • {{ now()->format('d/m/Y H:i:s') }}
     </div>
 
 </x-pdf.layout>
