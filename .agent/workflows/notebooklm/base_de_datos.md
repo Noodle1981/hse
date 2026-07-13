@@ -73,6 +73,8 @@ El sistema cuenta con las siguientes entidades principales:
 | `category_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
 | `name` | `varchar` | No ❌ | *ninguno* |  |
 | `description` | `text` | Sí ✅ | *ninguno* |  |
+| `group_label` | `varchar` | Sí ✅ | `'Grupo'` |  |
+| `subgroup_label` | `varchar` | Sí ✅ | `'Subgrupo'` |  |
 | `metadata_schema` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `photo_schema` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `notification_emails` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
@@ -119,6 +121,8 @@ El sistema cuenta con las siguientes entidades principales:
 | `name` | `varchar` | No ❌ | *ninguno* |  |
 | `identifier` | `varchar` | No ❌ | *ninguno* (index) |  |
 | `status` | `varchar` | No ❌ | `'operativo'` |  |
+| `grupo` | `varchar` | Sí ✅ | *ninguno* |  |
+| `subgrupo` | `varchar` | Sí ✅ | *ninguno* |  |
 | `metadata` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `photos` | `TEXT` (json) | Sí ✅ | *ninguno* |  |
 | `created_at` | `datetime` | Sí ✅ | *ninguno* |  |

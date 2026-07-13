@@ -133,6 +133,13 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Alta Dinámica Multi-Activo con Validación Anti-Duplicados (`Create.jsx`):**
   - Carga ágil en lote de múltiples activos en un solo paso con auto-incremento inteligente de identificadores (ej. `MF001` -> `MF002` -> `MF003`).
   - Validación de duplicados en tiempo real (frontend con bordes de alerta e impedimento de envío) y en backend (`distinct` y `unique:assets,identifier`).
+* **Agrupación Jerárquica L1/L2 (Grupo y Subgrupo) por Sede y Empresa:**
+  - Los activos se clasifican nativamente en una estructura jerárquica de dos niveles: Grupo (Nivel 1, ej: Planta Baja, Flota A) y Subgrupo (Nivel 2, ej: Sector General, Camionetas 4x4).
+  - Las etiquetas de la jerarquía son configurables dinámicamente en el tipo de activo (`asset_types.group_label` y `asset_types.subgroup_label`) permitiendo adaptar la nomenclatura (ej: Piso/Oficina o Flota/Sub-flota).
+  - La visualización en el listado principal (`Index.jsx`) y en la barra lateral de creación (`Create.jsx`) adopta un renderizado estructurado en árbol de doble bucle con contenedores oscuros e indentación de filas.
+  - Al ingresar el grupo y subgrupo en el formulario de alta o edición, el sistema consulta en tiempo real las sugerencias existentes en la base de datos de esa Sede y muestra un distintivo verde (`✓ Grupo existente en BD`) o naranja (`✨ Nuevo Grupo (se creará)`) para evitar duplicaciones.
+  - Para corregir y alinear diferencias de mayúsculas y acentos (ej: *PLANTA BAJA* vs *planta baja*), el input auto-ajusta y ajusta la tipografía de forma exacta on-blur comparándola case-insensitively contra los registros de la base de datos.
+  - Se permite la edición en caliente de nombre, identificador/QR, grupo y subgrupo desde la barra lateral de creación en `Create.jsx` con validación de unicidad en Laravel y captura de errores asíncronos.
 * **Schema-Driven Metadata y Roles de Pre-llenado (`AssetType` / Tipos de Checklist Dinámicos):**
   - Los Gestores definen en `asset_types.metadata_schema` campos dinámicos JSON (`type`, `label`, `show_in_create`, `role`, `alert_days`, `alert_threshold`).
   - **Roles de Atributo:** Cada campo de metadata se asocia a un rol para determinar su comportamiento de pre-llenado en el Wizard:

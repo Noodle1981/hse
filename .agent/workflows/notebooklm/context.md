@@ -101,8 +101,8 @@ ep-back/
 
 | Tabla | Propósito | Campos Clave |
 |-------|-----------|--------------|
-| `asset_types` | Tipos de Checklist Dinámicos: unificadores de atributos de ficha técnica vinculados a un checklist operativo. Ámbito de empresa (no de sede). | `id`, `empresa_id`, `name`, `category_id`, `metadata_schema` (JSON), `photo_schema` (JSON) |
-| `assets` | Ficha del activo físico con identificador/QR único y metadata dinámica | `id`, `empresa_id`, `sede_id`, `asset_type_id`, `name`, `identifier`, `status`, `metadata` |
+| `asset_types` | Tipos de Checklist Dinámicos: unificadores de atributos de ficha técnica vinculados a un checklist operativo. Ámbito de empresa (no de sede). | `id`, `empresa_id`, `name`, `category_id`, `metadata_schema` (JSON), `photo_schema` (JSON), `group_label`, `subgroup_label` |
+| `assets` | Ficha del activo físico con identificador/QR único y metadata dinámica. Agrupable jerárquicamente en dos niveles (Grupo/Subgrupo) y configurable en caliente por sede. | `id`, `empresa_id`, `sede_id`, `asset_type_id`, `name`, `identifier`, `status`, `grupo`, `subgrupo`, `metadata` |
 | `audit_logs` | Registro de auditoría inmutable de cambios de accesos | `id`, `user_id`, `action`, `target_type`, `target_id`, `payload` |
 | `consultoras` | Empresas consultoras de HyS que agrupan usuarios y clientes | `id`, `nombre`, `cuit`, `max_tecnicos`, `max_gestores`, `max_empresas`, `estado_suscripcion` |
 | `consultora_suscripcion_logs` | Historial de transiciones de estado de suscripción de consultoras | `id`, `consultora_id`, `estado_anterior`, `estado_nuevo`, `user_id` |
@@ -124,6 +124,11 @@ ep-back/
 
 ### Backend (Laravel 12)
 - ✅ **Módulo Genérico de Activos, Metadata Dinámica y Expediente Fotográfico:** Para soportar múltiples rubros (Transporte, Seguridad, Alimentación), el sistema modela el equipamiento de forma abstracta (`assets` y `asset_types`) y guarda los atributos específicos en un campo JSON `metadata` y su expediente de fotos en `photos`. Permite configurar esquemas de fotos por categoría (`photo_schema`), alta dinámica multi-activo con prevención de identificadores duplicados (`show_in_create`, `distinct`), galería de evidencias de siniestros (`incidentes.asset_id`) y exportación a PDF A4.
+- ✅ **Agrupación Jerárquica L1/L2 y Normalización de Escritura de Activos:**
+  - Los activos admiten estructuración anidada mediante los campos `grupo` (Nivel 1, ej: *Planta*) y `subgrupo` (Nivel 2, ej: *Sector*), con etiquetas editables a nivel de tipo de activo.
+  - El listado principal y la barra lateral de creación agrupan los activos jerárquicamente en árbol mediante doble bucle y contenedores de relieve HUD.
+  - Para asegurar la consistencia y unicidad, el input ofrece sugerencias en caliente y auto-ajusta (on-blur snapping) las diferencias de mayúsculas comparándolas de forma insensible a mayúsculas con los grupos existentes en la base de datos de esa Sede, mostrando distintivos dinámicos de nuevo/existente.
+  - Admite edición en caliente de nombre, identificador, grupo y subgrupo desde la barra lateral con validación asíncrona de unicidad del ID.
 - ✅ **Tipos de Checklist Dinámicos (`AssetType`) — Arquitectura, Roles y Política:**
   - El `AssetType` actúa como **unificador de atributos de ficha técnica**, no como un tipo físico de activo. Se asocia a un checklist operativo existente para importar sus preguntas como atributos estructurados del activo.
   - **Roles de Atributo y Pre-llenado Inteligente:** Los campos en `metadata_schema` pueden tener un `role` específico para guiar la inicialización de respuestas en el Wizard de Inspección:
