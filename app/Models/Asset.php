@@ -22,6 +22,8 @@ class Asset extends Model
         'name',
         'identifier',
         'status',
+        'grupo',
+        'subgrupo',
         'metadata',
         'photos',
     ];

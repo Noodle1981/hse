@@ -1,71 +1,82 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Plan Anual de Higiene y Seguridad</title>
+@php
+    $cp = $branding['primary'] ?? '#1e40af';
+    $cs = $branding['secondary'] ?? '#6b7280';
+    $ca = $branding['accent'] ?? '#16a34a';
+@endphp
+
+<x-pdf.layout 
+    :title="'PROGRAMA ANUAL DE ACTIVIDADES - ' . $year" 
+    :subtitle="'Sede: ' . $sede->nombre_sede" 
+    :code="'PA-HYS-' . $year" 
+    :branding="$branding"
+>
     <style>
-        @page {
-            margin: 0.5cm;
-        }
-        body {
-            font-family: 'Helvetica', sans-serif;
-            font-size: 8px;
-            color: #333;
-        }
-        .header {
-            width: 100%;
-            margin-bottom: 15px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #1e40af;
-        }
-        .header table { width: 100%; }
-        .logo { width: 25%; }
-        .logo img { max-height: 40px; }
-        .title { font-size: 14px; font-weight: bold; text-align: right; color: #111; text-transform: uppercase; }
-        
         .info-table {
             width: 100%;
-            margin-bottom: 10px;
-            background-color: #f9fafb;
-            border: 1px solid #e5e7eb;
+            margin-bottom: 15px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-top: 3px solid {{ $cp }};
         }
-        .info-table td { padding: 4px; border: 1px solid #e5e7eb; }
-        .label { font-weight: bold; color: #6b7280; font-size: 7px; text-transform: uppercase; }
-        .value { font-weight: bold; font-size: 9px; }
+        .info-table td { 
+            padding: 6px 8px; 
+            border: 1px solid #e2e8f0; 
+        }
+        .info-label { 
+            font-size: 7pt; 
+            font-weight: bold; 
+            color: #64748b; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .info-value { 
+            font-size: 9pt; 
+            font-weight: bold; 
+            color: #1e293b;
+        }
 
         .main-table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 5px;
         }
         .main-table th {
-            background-color: #1e40af;
+            background-color: {{ $cp }};
             color: white;
-            padding: 5px 2px;
-            font-size: 8px;
-            border: 1px solid #1e3a8a;
+            padding: 6px 3px;
+            font-size: 7.5pt;
+            font-weight: bold;
+            border: 1px solid {{ $cp }};
             text-transform: uppercase;
+            text-align: center;
         }
         .main-table td {
-            border: 1px solid #e5e7eb;
-            padding: 4px;
+            border: 1px solid #e2e8f0;
+            padding: 5px 4px;
             vertical-align: middle;
+            font-size: 7.5pt;
         }
         .category-row {
-            background-color: #f3f4f6;
+            background-color: #f1f5f9;
             font-weight: bold;
-            color: #1e40af;
+            color: {{ $cp }};
             text-transform: uppercase;
-            font-size: 7px;
+            font-size: 8pt;
+            letter-spacing: 0.5px;
+            padding: 6px 8px !important;
+            border-left: 4px solid {{ $cp }} !important;
         }
         .cell-status {
-            width: 15px;
-            height: 15px;
+            width: 18px;
+            height: 18px;
             margin: 0 auto;
-            border-radius: 3px;
+            border-radius: 4px;
             display: block;
             text-align: center;
-            line-height: 15px;
+            line-height: 18px;
             font-weight: bold;
+            font-size: 8pt;
             color: white;
             position: relative;
         }
@@ -74,67 +85,79 @@
         .bg-overdue { background-color: #ef4444; }
         .bg-suspended { background-color: #f59e0b; }
         .bg-cancelled { background-color: #9ca3af; }
-        .bg-none { background-color: #f3f4f6; border: 1px solid #e5e7eb; }
+        .bg-none { background-color: #f8fafc; border: 1px solid #e2e8f0; }
         
         .count-badge {
-            font-size: 6px;
+            font-size: 6pt;
             position: absolute;
-            top: -3px;
-            right: -3px;
+            top: -4px;
+            right: -4px;
             background: white;
             color: #10b981;
-            padding: 0 2px;
-            border-radius: 5px;
+            padding: 0 3px;
+            border-radius: 6px;
             border: 1px solid #10b981;
+            font-weight: bold;
+            line-height: 1;
         }
 
-        .footer {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 7px;
-            color: #9ca3af;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 5px;
+        .references-container {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+        .references-title {
+            font-size: 8pt;
+            font-weight: bold;
+            color: #475569;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .reference-item {
+            display: inline-block;
+            margin-right: 15px;
+            font-size: 7.5pt;
+        }
+        .ref-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            margin-right: 4px;
+            vertical-align: middle;
         }
     </style>
-</head>
-<body>
-    <div class="header">
-        <table>
-            <tr>
-                <td class="logo">
-                    <img src="{{ public_path('images/logo.png') }}" alt="Logo">
-                </td>
-                <td class="title">PROGRAMA ANUAL DE ACTIVIDADES - {{ $year }}</td>
-            </tr>
-        </table>
-    </div>
 
+    {{-- Info Table --}}
     <table class="info-table">
         <tr>
             <td width="25%">
-                <div class="label">Empresa</div>
-                <div class="value">{{ $sede->empresa->nombre }}</div>
+                <div class="info-label">Empresa Mandante</div>
+                <div class="info-value">{{ $sede->empresa->nombre }}</div>
             </td>
             <td width="25%">
-                <div class="label">Sede / Establecimiento</div>
-                <div class="value">{{ $sede->nombre_sede }}</div>
+                <div class="info-label">Activo / Sede Operativa</div>
+                <div class="info-value">{{ $sede->nombre_sede }}</div>
             </td>
             <td width="25%">
-                <div class="label">Año Fiscal</div>
-                <div class="value">{{ $year }}</div>
+                <div class="info-label">Año Fiscal</div>
+                <div class="info-value">{{ $year }}</div>
             </td>
             <td width="25%">
-                <div class="label">Fecha Emisión</div>
-                <div class="value">{{ now()->format('d/m/Y H:i') }}</div>
+                <div class="info-label">Fecha Emisión</div>
+                <div class="info-value">{{ now()->format('d/m/Y H:i') }}</div>
             </td>
         </tr>
     </table>
 
+    {{-- Main Table --}}
     <table class="main-table">
         <thead>
             <tr>
-                <th width="20%">Actividad / Programa</th>
+                <th width="20%" style="text-align: left; padding-left: 8px;">Actividad / Programa</th>
                 <th width="8%">Código</th>
                 @foreach($months as $name => $num)
                     <th width="6%">{{ substr(strtoupper($name), 0, 3) }}</th>
@@ -151,8 +174,10 @@
                     @php $currentCategory = $item['plan']->category; @endphp
                 @endif
                 <tr>
-                    <td><strong>{{ $item['plan']->activity_name }}</strong></td>
-                    <td align="center">
+                    <td style="font-weight: 600; color: #334155; padding-left: 8px;">
+                        {{ $item['plan']->activity_name }}
+                    </td>
+                    <td align="center" style="font-family: monospace; font-size: 7pt; color: #475569;">
                         {{ $item['plan']->checklist?->registry_code ?: ($item['plan']->activity_code ?: '-') }}
                     </td>
                     @foreach($months as $name => $num)
@@ -173,7 +198,7 @@
                                     @elseif($status === 'cancelled')
                                         C
                                     @else
-                                        X
+                                        -
                                     @endif
                                 </div>
                             @else
@@ -186,17 +211,30 @@
         </tbody>
     </table>
 
-    <div style="margin-top: 20px; font-size: 7px; color: #6b7280;">
-        <strong>Referencias:</strong> 
-        <span style="color: #4f46e5; font-weight: bold;">[X] Azul:</span> Planificado (Pendiente) | 
-        <span style="color: #10b981; font-weight: bold;">[✓] Verde:</span> Cumplido | 
-        <span style="color: #ef4444; font-weight: bold;">[X] Rojo:</span> Incumplimiento (Vencido) | 
-        <span style="color: #f59e0b; font-weight: bold;">[S] Naranja:</span> Suspendido | 
-        <span style="color: #9ca3af; font-weight: bold;">[C] Gris:</span> Cancelado
+    {{-- References --}}
+    <div class="references-container">
+        <div class="references-title">Referencias de Cumplimiento</div>
+        <div>
+            <div class="reference-item">
+                <span class="ref-dot bg-pending"></span>
+                <span style="color: #4f46e5; font-weight: bold;">Planificado (Pendiente)</span>
+            </div>
+            <div class="reference-item">
+                <span class="ref-dot bg-completed"></span>
+                <span style="color: #10b981; font-weight: bold;">Cumplido</span>
+            </div>
+            <div class="reference-item">
+                <span class="ref-dot bg-overdue"></span>
+                <span style="color: #ef4444; font-weight: bold;">Incumplimiento (Vencido)</span>
+            </div>
+            <div class="reference-item">
+                <span class="ref-dot bg-suspended"></span>
+                <span style="color: #f59e0b; font-weight: bold;">Suspendido</span>
+            </div>
+            <div class="reference-item">
+                <span class="ref-dot bg-cancelled"></span>
+                <span style="color: #9ca3af; font-weight: bold;">Cancelado</span>
+            </div>
+        </div>
     </div>
-
-    <div class="footer">
-        SOFTWARE DE GESTIÓN XAMASAFE • PROGRAMA ANUAL DE HIGIENE Y SEGURIDAD • GENERADO AUTOMÁTICAMENTE
-    </div>
-</body>
-</html>
+</x-pdf.layout>

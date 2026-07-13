@@ -51,7 +51,7 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
     });
 
     const selectedEditChecklist = checklistOptions.find(c => c.id == editForm.data.checklist_id);
-    const editHasAssetLink = selectedEditChecklist && selectedEditChecklist.has_asset_link > 0;
+    const editHasRealAssets = selectedEditChecklist && selectedEditChecklist.has_real_assets === true;
 
     const openEditModal = (plan) => {
         setPlanToEdit(plan);
@@ -377,12 +377,12 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                             <option key={c.id} value={c.id} className="bg-[#16162a] text-white">{c.title}</option>
                                         ))}
                                     </select>
-                                    {editForm.data.category === 'Inspección' && editHasAssetLink && (
+                                    {editForm.data.category === 'Inspección' && editHasRealAssets && (
                                         <span className="text-[9px] font-black text-emerald-400 uppercase tracking-widest italic flex items-center gap-1 mt-1 animate-pulse">
                                             🛡️ Checklist con activos incluidos
                                         </span>
                                     )}
-                                    {editForm.data.category === 'Inspección' && selectedEditChecklist && !editHasAssetLink && editForm.data.checklist_id && (
+                                    {editForm.data.category === 'Inspección' && selectedEditChecklist && !editHasRealAssets && editForm.data.checklist_id && (
                                         <span className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic flex items-center gap-1 mt-1">
                                             📋 Checklist sin activos vinculados
                                         </span>
@@ -430,17 +430,17 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                             <select
                                                 value={editForm.data.duration_minutes}
                                                 onChange={e => editForm.setData('duration_minutes', parseInt(e.target.value))}
-                                                className="w-full bg-[#11111d] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic"
+                                                className="w-full bg-[#16162a] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic [color-scheme:dark]"
                                             >
-                                                <option value={5}>5 MINUTOS</option>
-                                                <option value={10}>10 MINUTOS</option>
-                                                <option value={15}>15 MINUTOS</option>
-                                                <option value={30}>30 MINUTOS</option>
-                                                <option value={45}>45 MINUTOS</option>
-                                                <option value={60}>1 HORA</option>
-                                                <option value={90}>1:30 HORAS</option>
-                                                <option value={120}>2 HORAS</option>
-                                                <option value={180}>3 HORAS</option>
+                                                <option value={5} className="bg-[#16162a] text-white">5 MINUTOS</option>
+                                                <option value={10} className="bg-[#16162a] text-white">10 MINUTOS</option>
+                                                <option value={15} className="bg-[#16162a] text-white">15 MINUTOS</option>
+                                                <option value={30} className="bg-[#16162a] text-white">30 MINUTOS</option>
+                                                <option value={45} className="bg-[#16162a] text-white">45 MINUTOS</option>
+                                                <option value={60} className="bg-[#16162a] text-white">1 HORA</option>
+                                                <option value={90} className="bg-[#16162a] text-white">1:30 HORAS</option>
+                                                <option value={120} className="bg-[#16162a] text-white">2 HORAS</option>
+                                                <option value={180} className="bg-[#16162a] text-white">3 HORAS</option>
                                             </select>
                                         </div>
                                         {/* Modalidad */}
@@ -449,11 +449,11 @@ export default function AnnualPlanMatrix({ plans, dynamicMonths, complianceData,
                                             <select
                                                 value={editForm.data.modality}
                                                 onChange={e => editForm.setData('modality', e.target.value)}
-                                                className="w-full bg-[#11111d] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic"
+                                                className="w-full bg-[#16162a] border-white/10 rounded-2xl px-5 py-4 text-xs font-black text-white italic [color-scheme:dark]"
                                             >
-                                                <option value="presencial">PRESENCIAL</option>
-                                                <option value="virtual">VIRTUAL</option>
-                                                <option value="hibrido">HÍBRIDO</option>
+                                                <option value="presencial" className="bg-[#16162a] text-white">PRESENCIAL</option>
+                                                <option value="virtual" className="bg-[#16162a] text-white">VIRTUAL</option>
+                                                <option value="hibrido" className="bg-[#16162a] text-white">HÍBRIDO</option>
                                             </select>
                                         </div>
                                         {/* Multi Instructor Switch */}

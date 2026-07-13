@@ -166,8 +166,10 @@
     <!-- Script for Page Numbers (DomPDF) -->
     <script type="text/php">
         if (isset($pdf)) {
-            $x = 490;
-            $y = 820;
+            $w = $pdf->get_width();
+            $h = $pdf->get_height();
+            $x = $w - 110;
+            $y = $h - 25;
             $text = "Página {PAGE_NUM} de {PAGE_COUNT}";
             $font = null;
             $size = 8;

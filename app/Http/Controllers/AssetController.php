@@ -58,6 +58,18 @@ class AssetController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->grupo) {
+            $query->where('grupo', $request->grupo);
+        }
+
+        if ($request->subgrupo) {
+            $query->where('subgrupo', $request->subgrupo);
+        }
+
+        if ($request->wantsJson() || $request->query('json')) {
+            return response()->json($query->latest('created_at')->get());
+        }
+
         // KPIs
         $statsBase = Asset::query()->whereIn('empresa_id', $assignedEmpresaIds);
         if ($request->sede_id) {
@@ -93,7 +105,7 @@ class AssetController extends Controller
         $sedes = Sede::whereIn('empresa_id', $assignedEmpresaIds)->get(['id', 'nombre_sede', 'empresa_id']);
         $assetTypes = AssetType::whereIn('empresa_id', $assignedEmpresaIds)
             ->orWhereNull('empresa_id')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'category_id']);
 
         return Inertia::render('Gestor/Assets/Index', [
             'assets' => $assets,
@@ -129,6 +141,11 @@ class AssetController extends Controller
             'empresas' => $empresas,
             'sedes' => $sedes,
             'assetTypes' => $assetTypes,
+            'prefilled' => [
+                'empresa_id' => request()->query('empresa_id', ''),
+                'sede_id' => request()->query('sede_id', ''),
+                'asset_type_id' => request()->query('asset_type_id', ''),
+            ]
         ]);
     }
 
@@ -147,10 +164,12 @@ class AssetController extends Controller
                 'items.*.name' => 'required|string|max:255',
                 'items.*.identifier' => 'required|string|max:255|distinct|unique:assets,identifier',
                 'items.*.status' => 'required|in:operativo,alerta,fuera_de_servicio',
+                'items.*.grupo' => 'nullable|string|max:255',
+                'items.*.subgrupo' => 'nullable|string|max:255',
                 'items.*.metadata' => 'nullable|array',
             ], [
-                'items.*.identifier.distinct' => 'El identificador :value está repetido dentro del mismo formulario.',
-                'items.*.identifier.unique' => 'El identificador :value ya está registrado en el sistema.',
+                'items.*.identifier.distinct' => 'El identificador está repetido dentro del mismo formulario.',
+                'items.*.identifier.unique' => 'El identificador ya está registrado en el sistema.',
             ]);
 
             $createdCount = 0;
@@ -164,6 +183,8 @@ class AssetController extends Controller
                     'name' => $item['name'],
                     'identifier' => $item['identifier'],
                     'status' => $item['status'] ?? 'operativo',
+                    'grupo' => $item['grupo'] ?? null,
+                    'subgrupo' => $item['subgrupo'] ?? null,
                     'metadata' => $item['metadata'] ?? [],
                 ]);
 
@@ -188,6 +209,8 @@ class AssetController extends Controller
             'name' => 'required|string|max:255',
             'identifier' => 'required|string|max:255|unique:assets,identifier',
             'status' => 'required|in:operativo,alerta,fuera_de_servicio',
+            'grupo' => 'nullable|string|max:255',
+            'subgrupo' => 'nullable|string|max:255',
             'metadata' => 'nullable|array',
         ], [
             'identifier.unique' => 'El identificador ya está registrado en el sistema.',
@@ -200,6 +223,8 @@ class AssetController extends Controller
             'name' => $request->name,
             'identifier' => $request->identifier,
             'status' => $request->status,
+            'grupo' => $request->grupo,
+            'subgrupo' => $request->subgrupo,
             'metadata' => $request->metadata ?? [],
         ]);
 
@@ -347,9 +372,13 @@ class AssetController extends Controller
             'sede_id' => 'required|exists:sedes,id',
             'asset_type_id' => 'required|exists:asset_types,id',
             'name' => 'required|string|max:255',
-            'identifier' => 'required|string|max:255',
+            'identifier' => 'required|string|max:255|unique:assets,identifier,' . $asset->id,
             'status' => 'required|in:operativo,alerta,fuera_de_servicio',
+            'grupo' => 'nullable|string|max:255',
+            'subgrupo' => 'nullable|string|max:255',
             'metadata' => 'nullable|array',
+        ], [
+            'identifier.unique' => 'El identificador ya está registrado en el sistema.',
         ]);
 
         $asset->update([
@@ -359,8 +388,18 @@ class AssetController extends Controller
             'name' => $request->name,
             'identifier' => $request->identifier,
             'status' => $request->status,
+            'grupo' => $request->grupo,
+            'subgrupo' => $request->subgrupo,
             'metadata' => $request->metadata ?? [],
         ]);
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Activo '{$asset->name}' actualizado correctamente.",
+                'asset' => $asset
+            ]);
+        }
 
         return redirect()->route('gestor.assets.show', $asset->id)
             ->with('message', "Activo '{$asset->name}' actualizado correctamente.");

@@ -69,6 +69,8 @@ class AssetTypeController extends Controller
             'empresa_id' => 'nullable|exists:empresas,id',
             'category_id' => 'nullable|exists:categories,id',
             'description' => 'nullable|string',
+            'group_label' => 'nullable|string|max:255',
+            'subgroup_label' => 'nullable|string|max:255',
             'metadata_schema' => 'nullable|array',
             'metadata_schema.*.name' => 'required|string|max:255',
             'metadata_schema.*.label' => 'required|string|max:255',
@@ -90,6 +92,8 @@ class AssetTypeController extends Controller
             'empresa_id' => $request->empresa_id,
             'category_id' => $request->category_id,
             'description' => $request->description,
+            'group_label' => $request->group_label,
+            'subgroup_label' => $request->subgroup_label,
             'metadata_schema' => $request->metadata_schema ?? [],
             'photo_schema' => $request->photo_schema ?? [],
         ];

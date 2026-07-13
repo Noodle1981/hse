@@ -318,7 +318,7 @@ export default function Show({ asset, evidences = [], metadataLogs = [] }) {
                     {/* DETALLES GENERALES */}
                     <div className="bg-[#16162a] p-6 rounded-[2rem] border border-white/5 shadow-xl space-y-4">
                         <h2 className="text-xs font-black text-white/40 uppercase tracking-widest border-b border-white/5 pb-2">Información de Ubicación y Clasificación</h2>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+                        <div className="grid grid-cols-2 sm:grid-cols-6 gap-4 text-xs">
                             <div>
                                 <span className="text-white/40 block text-[10px] uppercase font-bold">Empresa</span>
                                 <span className="font-bold text-white text-sm">{asset.sede?.empresa?.nombre || 'N/A'}</span>
@@ -326,6 +326,14 @@ export default function Show({ asset, evidences = [], metadataLogs = [] }) {
                             <div>
                                 <span className="text-white/40 block text-[10px] uppercase font-bold">Sede / Planta</span>
                                 <span className="font-bold text-white text-sm">{asset.sede?.nombre_sede || 'N/A'}</span>
+                            </div>
+                            <div>
+                                <span className="text-white/40 block text-[10px] uppercase font-bold">{asset.asset_type?.group_label || 'Grupo'}</span>
+                                <span className="font-bold text-orange-400 text-sm">{asset.grupo || 'Sin Clasificar'}</span>
+                            </div>
+                            <div>
+                                <span className="text-white/40 block text-[10px] uppercase font-bold">{asset.asset_type?.subgroup_label || 'Subgrupo'}</span>
+                                <span className="font-bold text-white text-sm">{asset.subgrupo || 'Sin Clasificar'}</span>
                             </div>
                             <div>
                                 <span className="text-white/40 block text-[10px] uppercase font-bold">Tipo de Activo</span>

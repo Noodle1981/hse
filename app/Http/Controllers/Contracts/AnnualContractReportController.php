@@ -12,6 +12,7 @@ use App\Models\VisitTraining;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Services\BrandingService;
 
 class AnnualContractReportController extends Controller
 {
@@ -137,7 +138,9 @@ class AnnualContractReportController extends Controller
             ];
         }
 
-        $pdf = Pdf::loadView('pdf.annual-plan', compact('sede', 'year', 'reportData', 'months'))
+        $branding = BrandingService::forUser(auth()->user());
+
+        $pdf = Pdf::loadView('pdf.annual-plan', compact('sede', 'year', 'reportData', 'months', 'branding'))
             ->setPaper('a4', 'landscape');
 
         return $pdf->stream("plan_anual_{$sede->nombre_sede}_{$year}.pdf");

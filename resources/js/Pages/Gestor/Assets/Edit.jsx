@@ -1,6 +1,7 @@
 import { Head, useForm, Link } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import axios from 'axios';
 
 export default function Edit({ asset, empresas = [], sedes = [], assetTypes = [] }) {
     const { data, setData, put, processing, errors } = useForm({
@@ -10,8 +11,44 @@ export default function Edit({ asset, empresas = [], sedes = [], assetTypes = []
         name: asset.name || '',
         identifier: asset.identifier || '',
         status: asset.status || 'operativo',
+        grupo: asset.grupo || '',
+        subgrupo: asset.subgrupo || '',
         metadata: asset.metadata || {},
     });
+
+    const [existingAssets, setExistingAssets] = useState([]);
+
+    useEffect(() => {
+        if (data.empresa_id && data.sede_id && data.asset_type_id) {
+            axios.get(route('gestor.assets.index'), {
+                params: {
+                    empresa_id: data.empresa_id,
+                    sede_id: data.sede_id,
+                    asset_type_id: data.asset_type_id,
+                    json: true
+                }
+            })
+            .then(res => {
+                setExistingAssets(res.data || []);
+            });
+        }
+    }, [data.empresa_id, data.sede_id, data.asset_type_id]);
+
+    const existingGroups = useMemo(() => {
+        const set = new Set();
+        existingAssets.forEach(a => {
+            if (a.grupo) set.add(a.grupo);
+        });
+        return Array.from(set).sort();
+    }, [existingAssets]);
+
+    const existingSubgroups = useMemo(() => {
+        const set = new Set();
+        existingAssets.forEach(a => {
+            if (a.subgrupo) set.add(a.subgrupo);
+        });
+        return Array.from(set).sort();
+    }, [existingAssets]);
 
     const selectedType = useMemo(() => {
         return assetTypes.find(t => t.id.toString() === data.asset_type_id.toString());
@@ -25,7 +62,29 @@ export default function Edit({ asset, empresas = [], sedes = [], assetTypes = []
 
     const editFields = useMemo(() => {
         if (!selectedType || !selectedType.metadata_schema) return [];
-        return selectedType.metadata_schema.filter(field => !!field.show_in_create || (data.metadata && data.metadata[field.name] !== undefined && data.metadata[field.name] !== ''));
+        return selectedType.metadata_schema.filter(field => {
+            const hasShow = !!field.show_in_create || (data.metadata && data.metadata[field.name] !== undefined && data.metadata[field.name] !== '');
+            if (!hasShow) return false;
+
+            const nameLower = (field.name || '').toLowerCase();
+            const labelLower = (field.label || '').toLowerCase();
+            if (
+                nameLower === 'nro_interno' || 
+                nameLower === 'nro_interno_extintor' ||
+                nameLower === 'identificacion' ||
+                nameLower === 'identificador' ||
+                nameLower === 'codigo' ||
+                nameLower === 'nro_extintor' ||
+                labelLower.includes('identificación') ||
+                labelLower.includes('n° interno') ||
+                labelLower.includes('numero interno') ||
+                labelLower === 'código' ||
+                labelLower === 'codigo'
+            ) {
+                return false;
+            }
+            return true;
+        });
     }, [selectedType, data.metadata]);
 
     const handleMetadataChange = (key, value) => {
@@ -153,6 +212,51 @@ export default function Edit({ asset, empresas = [], sedes = [], assetTypes = []
                                     required
                                 />
                                 {errors.identifier && <p className="text-xs text-red-400 mt-1">{errors.identifier}</p>}
+                            </div>
+                        </div>
+
+                        {/* GRUPO Y SUBGRUPO DE AGRUPACIÓN (FLOTA/PISO) */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                            {/* GRUPO */}
+                            <div>
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 italic">
+                                    {selectedType?.group_label || 'Grupo'}
+                                </label>
+                                <input
+                                    type="text"
+                                    list="existing-groups"
+                                    value={data.grupo || ''}
+                                    onChange={e => setData('grupo', e.target.value)}
+                                    placeholder={`Ej: ${selectedType?.group_label || 'Piso 1, Flota A'}`}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-orange-500"
+                                />
+                                <datalist id="existing-groups">
+                                    {existingGroups.map(g => (
+                                        <option key={g} value={g} />
+                                    ))}
+                                </datalist>
+                                {errors.grupo && <p className="text-xs text-red-400 mt-1">{errors.grupo}</p>}
+                            </div>
+
+                            {/* SUBGRUPO */}
+                            <div>
+                                <label className="block text-[10px] font-black text-white/40 uppercase tracking-widest mb-2 italic">
+                                    {selectedType?.subgroup_label || 'Subgrupo'}
+                                </label>
+                                <input
+                                    type="text"
+                                    list="existing-subgroups"
+                                    value={data.subgrupo || ''}
+                                    onChange={e => setData('subgrupo', e.target.value)}
+                                    placeholder={`Ej: ${selectedType?.subgroup_label || 'Sector Norte, Oficina'}`}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-orange-500"
+                                />
+                                <datalist id="existing-subgroups">
+                                    {existingSubgroups.map(sg => (
+                                        <option key={sg} value={sg} />
+                                    ))}
+                                </datalist>
+                                {errors.subgrupo && <p className="text-xs text-red-400 mt-1">{errors.subgrupo}</p>}
                             </div>
                         </div>
 

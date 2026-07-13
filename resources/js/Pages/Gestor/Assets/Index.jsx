@@ -1,6 +1,6 @@
 import { router, Head, Link, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '../../../Layouts/AuthenticatedLayout';
-import { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 const ICONS = {
     'shield-check': '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />',
@@ -209,6 +209,11 @@ const getAssetHallazgosWithVirtual = (asset) => {
 
 export default function Index({ assets, kpis, filters, empresas = [], sedes = [], assetTypes = [] }) {
     const { flash } = usePage().props;
+
+    const findAssetTypeForGroup = (group) => {
+        if (!group || !group.category) return null;
+        return assetTypes.find(t => t.category_id === group.category.id);
+    };
 
     const [search, setSearch] = useState(filters.search || '');
     const [empresaId, setEmpresaId] = useState(filters.empresa_id || '');
@@ -735,46 +740,100 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                                                             </tr>
                                                         </thead>
                                                         <tbody className="divide-y divide-white/5 text-xs">
-                                                            {group.assets.map(asset => (
-                                                                <tr key={asset.id} className="hover:bg-white/[0.01] transition-colors">
-                                                                    <td className="p-3 pl-6">
-                                                                        <div className="font-bold text-white uppercase italic">{asset.name}</div>
-                                                                        <div className="text-[10px] text-orange-400 font-mono tracking-wider">QR/ID: {asset.identifier}</div>
-                                                                    </td>
-                                                                    <td className="p-3">
-                                                                        <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-indigo-200 uppercase tracking-wide">
-                                                                            {asset.asset_type?.name || 'Genérico'}
-                                                                        </span>
-                                                                    </td>
-                                                                    <td className="p-3">
-                                                                        <div className="text-white font-bold">{asset.sede?.nombre_sede}</div>
-                                                                        <div className="text-[10px] text-white/40">{asset.sede?.empresa?.nombre}</div>
-                                                                    </td>
-                                                                    <td className="p-3 relative hover:z-30">
-                                                                        {getStatusBadge(asset)}
-                                                                    </td>
-                                                                    <td className="p-3 pr-6 text-right space-x-2">
-                                                                        <Link
-                                                                            href={route('gestor.assets.show', asset.id)}
-                                                                            className="px-3 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500/20 transition-all inline-block"
-                                                                        >
-                                                                            Ficha
-                                                                        </Link>
-                                                                        <Link
-                                                                            href={route('gestor.assets.edit', asset.id)}
-                                                                            className="px-3 py-1.5 bg-white/5 text-white/70 border border-white/10 rounded-xl text-[10px] font-black uppercase hover:bg-white/10 transition-all inline-block"
-                                                                        >
-                                                                            Editar
-                                                                        </Link>
-                                                                        <button
-                                                                            onClick={() => handleDelete(asset)}
-                                                                            className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all cursor-pointer inline-block"
-                                                                        >
-                                                                            Dar de Baja
-                                                                        </button>
-                                                                    </td>
-                                                                </tr>
-                                                            ))}
+                                                            {(() => {
+                                                                const groupsL1 = {};
+                                                                group.assets.forEach(asset => {
+                                                                    const gName = asset.grupo || 'Sin Clasificar';
+                                                                    if (!groupsL1[gName]) {
+                                                                        groupsL1[gName] = {};
+                                                                    }
+                                                                    const sgName = asset.subgrupo || 'Sin Subgrupo';
+                                                                    if (!groupsL1[gName][sgName]) {
+                                                                        groupsL1[gName][sgName] = [];
+                                                                    }
+                                                                    groupsL1[gName][sgName].push(asset);
+                                                                });
+
+                                                                const groupLabel = group.assets[0]?.asset_type?.group_label || 'Grupo';
+                                                                const subgroupLabel = group.assets[0]?.asset_type?.subgroup_label || 'Subgrupo';
+
+                                                                return Object.entries(groupsL1).map(([gName, subgroups]) => (
+                                                                    <React.Fragment key={gName}>
+                                                                        {/* Header de Grupo (Nivel 1) */}
+                                                                        <tr className="bg-white/[0.03] border-y border-white/10 select-none">
+                                                                            <td colSpan="5" className="p-3 pl-6 text-[10px] font-black text-orange-400 uppercase tracking-widest italic bg-black/35">
+                                                                                📁 {groupLabel}: {gName} ({Object.values(subgroups).reduce((acc, curr) => acc + curr.length, 0)})
+                                                                            </td>
+                                                                        </tr>
+                                                                        {Object.entries(subgroups).map(([sgName, subAssets]) => (
+                                                                            <React.Fragment key={sgName}>
+                                                                                {/* Subheader de Subgrupo (Nivel 2) */}
+                                                                                <tr className="bg-white/[0.01] border-b border-white/5 select-none">
+                                                                                    <td colSpan="5" className="p-2 pl-10 text-[9px] font-bold text-indigo-300/80 uppercase tracking-wider italic bg-black/15">
+                                                                                        📍 {subgroupLabel}: {sgName} ({subAssets.length})
+                                                                                    </td>
+                                                                                </tr>
+                                                                                {subAssets.map(asset => (
+                                                                                    <tr key={asset.id} className="hover:bg-white/[0.01] transition-colors">
+                                                                                        <td className="p-3 pl-12">
+                                                                                            <div className="font-semibold text-white italic">{asset.name}</div>
+                                                                                            <div className="text-[10px] text-orange-400 font-mono tracking-wider">QR/ID: {asset.identifier}</div>
+                                                                                        </td>
+                                                                                        <td className="p-3">
+                                                                                            <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded-lg text-[9px] font-black text-indigo-200 uppercase tracking-wide">
+                                                                                                {asset.asset_type?.name || 'Genérico'}
+                                                                                            </span>
+                                                                                        </td>
+                                                                                        <td className="p-3">
+                                                                                            <div className="text-white font-bold">{asset.sede?.nombre_sede}</div>
+                                                                                            <div className="text-[10px] text-white/40">{asset.sede?.empresa?.nombre}</div>
+                                                                                        </td>
+                                                                                        <td className="p-3 relative hover:z-30">
+                                                                                            {getStatusBadge(asset)}
+                                                                                        </td>
+                                                                                        <td className="p-3 pr-6 text-right space-x-2">
+                                                                                            <Link
+                                                                                                href={route('gestor.assets.show', asset.id)}
+                                                                                                className="px-3 py-1.5 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-500/20 transition-all inline-block"
+                                                                                            >
+                                                                                                Ficha
+                                                                                            </Link>
+                                                                                            <Link
+                                                                                                href={route('gestor.assets.edit', asset.id)}
+                                                                                                className="px-3 py-1.5 bg-white/5 text-white/70 border border-white/10 rounded-xl text-[10px] font-black uppercase hover:bg-white/10 transition-all inline-block"
+                                                                                            >
+                                                                                                Editar
+                                                                                            </Link>
+                                                                                            <button
+                                                                                                onClick={() => handleDelete(asset)}
+                                                                                                className="px-3 py-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl text-[10px] font-black uppercase hover:bg-red-500/20 transition-all cursor-pointer inline-block"
+                                                                                            >
+                                                                                                Dar de Baja
+                                                                                            </button>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </React.Fragment>
+                                                                        ))}
+                                                                    </React.Fragment>
+                                                                ));
+                                                            })()}
+                                                            {/* Fila '+' para agregar activo directamente con los filtros/contexto del grupo */}
+                                                            <tr className="hover:bg-white/[0.04] transition-colors border-t border-white/5">
+                                                                <td colSpan="5" className="p-3 pl-6">
+                                                                    <Link
+                                                                        href={route('gestor.assets.create', {
+                                                                            empresa_id: filters.empresa_id || group.assets[0]?.empresa_id || '',
+                                                                            sede_id: filters.sede_id || group.assets[0]?.sede_id || '',
+                                                                            asset_type_id: findAssetTypeForGroup(group)?.id || group.assets[0]?.asset_type_id || '',
+                                                                        })}
+                                                                        className="inline-flex items-center gap-1.5 text-xs text-orange-400 font-black uppercase tracking-wider hover:text-orange-300 transition-colors"
+                                                                    >
+                                                                        <span className="w-5 h-5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-bold">+</span>
+                                                                        Registrar nuevo activo para este checklist
+                                                                    </Link>
+                                                                </td>
+                                                            </tr>
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -808,8 +867,13 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                                             assets.data.map(asset => (
                                                 <tr key={asset.id} className="hover:bg-white/[0.02] transition-colors">
                                                     <td className="p-4 pl-6">
-                                                        <div className="font-bold text-white uppercase italic">{asset.name}</div>
+                                                        <div className="font-semibold text-white italic">{asset.name}</div>
                                                         <div className="text-[10px] text-orange-400 font-mono tracking-wider">QR/ID: {asset.identifier}</div>
+                                                        {asset.grupo && (
+                                                            <div className="text-[9px] text-white/50 mt-1 uppercase tracking-wider font-bold italic">
+                                                                📁 {asset.asset_type?.group_label || 'Grupo'}: {asset.grupo} {asset.subgrupo && `> ${asset.subgrupo}`}
+                                                            </div>
+                                                        )}
                                                     </td>
                                                     <td className="p-4">
                                                         <div className="flex flex-col gap-2">
@@ -871,6 +935,22 @@ export default function Index({ assets, kpis, filters, empresas = [], sedes = []
                                                 </tr>
                                             ))
                                         )}
+                                        {/* Fila '+' para agregar activo en el listado plano */}
+                                        <tr className="hover:bg-white/[0.04] transition-colors border-t border-white/5">
+                                            <td colSpan="5" className="p-4 pl-6">
+                                                <Link
+                                                    href={route('gestor.assets.create', {
+                                                        empresa_id: filters.empresa_id || '',
+                                                        sede_id: filters.sede_id || '',
+                                                        asset_type_id: filters.asset_type_id || '',
+                                                    })}
+                                                    className="inline-flex items-center gap-1.5 text-xs text-orange-400 font-black uppercase tracking-wider hover:text-orange-300 transition-colors"
+                                                >
+                                                    <span className="w-5 h-5 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 font-bold">+</span>
+                                                    Registrar nuevo activo
+                                                </Link>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

@@ -94,11 +94,25 @@ class ContractController extends Controller
                 'duration' => $contractDuration,
                 'category' => $request->category,
             ],
-            'checklistOptions' => DynamicChecklist::select('id', 'title', 'registry_code')
-                ->withCount(['questions as has_asset_link' => function ($q) {
-                    $q->whereNotNull('vincular_a_metadata')->where('vincular_a_metadata', '!=', '');
-                }])
-                ->get(),
+            'checklistOptions' => (function () {
+                // Obtenemos los category_ids que tienen al menos un AssetType con activos reales
+                $categoriesWithRealAssets = \App\Models\AssetType::withCount('assets')
+                    ->get()
+                    ->filter(fn ($at) => $at->assets_count > 0)
+                    ->pluck('category_id')
+                    ->unique()
+                    ->values()
+                    ->toArray();
+
+                return DynamicChecklist::select('id', 'title', 'registry_code', 'category_id')
+                    ->get()
+                    ->map(fn ($c) => [
+                        'id'             => $c->id,
+                        'title'          => $c->title,
+                        'registry_code'  => $c->registry_code,
+                        'has_real_assets' => in_array($c->category_id, $categoriesWithRealAssets),
+                    ]);
+            })(),
         ]);
     }
 

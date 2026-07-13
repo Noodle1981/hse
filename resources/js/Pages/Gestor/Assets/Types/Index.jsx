@@ -78,6 +78,8 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
         empresa_id: '',
         category_id: '',
         description: '',
+        group_label: 'Grupo',
+        subgroup_label: 'Subgrupo',
         metadata_schema: [],
         photo_schema: [],
     });
@@ -93,6 +95,8 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
             empresa_id: '',
             category_id: '',
             description: '',
+            group_label: 'Grupo',
+            subgroup_label: 'Subgrupo',
             metadata_schema: [],
             photo_schema: [
                 { key: 'foto_principal', label: 'Foto Principal / Vista General', required: true },
@@ -112,6 +116,8 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
             empresa_id: type.empresa_id || '',
             category_id: type.category_id || '',
             description: type.description || '',
+            group_label: type.group_label || 'Grupo',
+            subgroup_label: type.subgroup_label || 'Subgrupo',
             metadata_schema: type.metadata_schema || [],
             photo_schema: type.photo_schema || [
                 { key: 'foto_principal', label: 'Foto Principal / Vista General', required: true },
@@ -549,6 +555,48 @@ export default function Index({ assetTypes = [], categories = [], empresas = [],
                                                 ⚠️ {importError}
                                             </p>
                                         )}
+                                    </div>
+
+                                    {/* CONFIGURACIÓN DE AGRUPACIÓN (FLOTA/PISO) */}
+                                    <div className="bg-orange-500/5 border border-orange-500/20 rounded-2xl p-5 space-y-4">
+                                        <div className="flex items-start gap-3">
+                                            <div className="h-10 w-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400 shadow-inner flex-shrink-0">
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                                </svg>
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="text-xs font-black text-orange-400 uppercase tracking-wider">Etiquetas de Agrupación Jerárquica</h4>
+                                                <p className="text-[10px] text-white/50 mt-0.5">
+                                                    Personalizá cómo los gestores y técnicos clasificarán y verán los activos de este tipo (ej: Flota/Sub-flota o Piso/Sector).
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1 italic">Nivel 1: Grupo Principal (ej: Flota, Piso, Nave) *</label>
+                                                <input
+                                                    type="text"
+                                                    value={form.data.group_label}
+                                                    onChange={e => form.setData('group_label', e.target.value)}
+                                                    placeholder="Ej: Piso, Flota, Nave"
+                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-[9px] font-black text-white/40 uppercase tracking-widest mb-1 italic">Nivel 2: Subgrupo / Sector (ej: Sub-flota, Sector)</label>
+                                                <input
+                                                    type="text"
+                                                    value={form.data.subgroup_label}
+                                                    onChange={e => form.setData('subgroup_label', e.target.value)}
+                                                    placeholder="Ej: Sector, Sub-flota, Oficina"
+                                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-orange-500"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* ─────────────────────────────────────────── */}

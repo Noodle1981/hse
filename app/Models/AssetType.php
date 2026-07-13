@@ -14,6 +14,8 @@ class AssetType extends Model
         'category_id',
         'name',
         'description',
+        'group_label',
+        'subgroup_label',
         'metadata_schema',
         'photo_schema',
         'notification_emails',

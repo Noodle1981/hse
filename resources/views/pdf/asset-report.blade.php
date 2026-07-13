@@ -193,6 +193,22 @@
                     <span class="value">{{ $asset->created_at ? $asset->created_at->format('d/m/Y') : 'N/D' }}</span>
                 </td>
             </tr>
+            @if($asset->grupo)
+            <tr>
+                <td style="width: 25%;">
+                    <span class="label">{{ $asset->assetType?->group_label ?? 'Grupo' }}</span>
+                    <span class="value">{{ $asset->grupo }}</span>
+                </td>
+                <td style="width: 25%;">
+                    @if($asset->subgrupo)
+                        <span class="label">{{ $asset->assetType?->subgroup_label ?? 'Subgrupo' }}</span>
+                        <span class="value">{{ $asset->subgrupo }}</span>
+                    @endif
+                </td>
+                <td style="width: 25%;"></td>
+                <td style="width: 25%;"></td>
+            </tr>
+            @endif
         </table>
     </div>
 
