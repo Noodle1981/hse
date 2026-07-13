@@ -34,17 +34,14 @@ class ContractController extends Controller
             ->orderBy('nombre')
             ->get();
 
-        $companyId = $request->query('company_id', $companies->first()?->id);
-        $sedes = $availableSedes->where('empresa_id', $companyId)->values();
+        $companyId = $request->query('company_id');
+        $sedes = $companyId ? $availableSedes->where('empresa_id', $companyId)->values() : collect();
 
         $sedeId = $request->query('sede_id');
-        if (! $sedeId && $sedes->isNotEmpty()) {
-            $sedeId = $sedes->first()->id;
-        }
 
-        $activeSede = Sede::with(['empresa', 'users' => function ($q) {
+        $activeSede = $sedeId ? Sede::with(['empresa', 'users' => function ($q) {
             $q->where('rol', 'tecnico');
-        }])->find($sedeId);
+        }])->find($sedeId) : null;
 
         // 2. Parámetros de Planificación (Por defecto inicia en el mes presente Y-m)
         $contractStart = $request->query('contract_start', now()->format('Y-m'));

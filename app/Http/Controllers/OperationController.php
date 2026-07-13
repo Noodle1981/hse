@@ -295,16 +295,14 @@ class OperationController extends Controller
             // El campo `periodo` es lo que el técnico seleccionó al crear el informe,
             // independientemente del mes en que fue creado físicamente (created_at).
             $matchingReport = MasterReport::where('sede_id', $plan->sede_id)
-                ->where('user_id', $user->id)
                 ->where('periodo', $queryMonth)
                 ->orderByDesc('created_at')
                 ->first();
 
             // Fallback: si no hay match por periodo exacto, buscar cualquier informe
-            // de esta sede+usuario en el año actual (cubre casos de periodo mal formateado)
+            // de esta sede en el año actual (cubre casos de periodo mal formateado)
             if (! $matchingReport) {
                 $matchingReport = MasterReport::where('sede_id', $plan->sede_id)
-                    ->where('user_id', $user->id)
                     ->whereYear('created_at', $now->year)
                     ->whereMonth('created_at', $selectedMonth)
                     ->orderByDesc('created_at')
@@ -663,7 +661,7 @@ class OperationController extends Controller
                         'training_id' => $training->id,
                         'is_adhoc' => false,
                         'title' => $training->title,
-                        'description' => $training->description ?? 'Capacitación programada de plan anual',
+                        'description' => $training->description ?? null,
                         'duration_minutes' => $training->duration ?? $plan->duration_minutes ?? 15,
                         'attendees' => [],
                     ]);
@@ -991,7 +989,7 @@ class OperationController extends Controller
                 'training_id' => $training->id,
                 'is_adhoc' => false,
                 'title' => $training->title,
-                'description' => $training->description ?? 'Capacitación programada de plan anual',
+                'description' => $training->description ?? null,
                 'duration_minutes' => $training->duration ?? $plan->duration_minutes ?? 15,
                 'attendees' => [],
             ]);

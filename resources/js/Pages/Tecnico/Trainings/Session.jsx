@@ -332,7 +332,7 @@ export default function Session({ session }) {
                                         onChange={e => detailsForm.setData('description', e.target.value)}
                                         rows="10"
                                         className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-blue-500/50 transition-all uppercase placeholder-white/5 italic"
-                                        placeholder="Escriba los temas explicados en la capacitación..."
+                                        placeholder="Ingrese detalles del temario, charla o capacitación a ejecutar..."
                                     />
                                 </div>
                                 <div className="relative group">

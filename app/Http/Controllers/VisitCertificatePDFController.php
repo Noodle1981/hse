@@ -31,6 +31,7 @@ class VisitCertificatePDFController extends Controller
             'sede',
             'user',
             'checklistCompletions.assignment.checklist',
+            'checklistCompletions.assignment.inspection.asset.assetType',
             'trainings.training',
             'hallazgos.fotos',
             'incidentes.fotos',
@@ -86,6 +87,7 @@ class VisitCertificatePDFController extends Controller
         $completion = VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections',
+            'assignment.inspection.asset.assetType',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($completion->visit->user);
@@ -103,6 +105,7 @@ class VisitCertificatePDFController extends Controller
         $completion = VisitChecklistCompletion::with([
             'visit.empresa', 'visit.sede', 'visit.user',
             'assignment.checklist.sections',
+            'assignment.inspection.asset.assetType',
         ])->findOrFail($id);
 
         $branding = BrandingService::forUser($completion->visit->user);

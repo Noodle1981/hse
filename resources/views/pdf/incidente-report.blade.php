@@ -1,7 +1,7 @@
-<x-pdf.layout :title="'Reporte de Incidente / Accidente'" :code="'INC-'.$incident->id" :status="$incident->gravedad">
+<x-pdf.layout :title="'Reporte de Incidente / Accidente'" :code="'INC-'.$incident->id" :status="$incident->gravedad" :branding="$branding">
     
     {{-- Datos de Contexto --}}
-    <x-pdf.card title="Contexto del Evento">
+    <x-pdf.card title="Contexto del Evento" :branding="$branding">
         <table class="no-border">
             <tr>
                 <td style="width: 50%;">
@@ -19,6 +19,6 @@
     <div class="mb-2"></div>
 
     {{-- Componente Modular de Detalle --}}
-    <x-pdf.incidente-detail :incident="$incident" />
+    <x-pdf.incidente-detail :incident="$incident" :branding="$branding" />
 
 </x-pdf.layout>

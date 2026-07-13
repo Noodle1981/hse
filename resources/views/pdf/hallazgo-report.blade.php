@@ -1,4 +1,4 @@
-<x-pdf.layout :title="'Reporte de Hallazgo/Incidente'" :code="'FIND-'.$finding->id" :status="$finding->estado">
+<x-pdf.layout :title="'Reporte de Hallazgo/Incidente'" :code="'FIND-'.$finding->id" :status="$finding->estado" :branding="$branding">
     
     <style>
         .context-table { width: 100%; border-collapse: collapse; }
@@ -18,7 +18,7 @@
         .value-md { 
             font-size: 10.5pt; 
             color: #1e293b; 
-            font-weight: 500;
+            font-weight: 600;
         }
 
         /* Indicador de ID */
@@ -33,10 +33,10 @@
         .separator { height: 15px; }
 
         /* Colores de estado dinamicos para evitar errores de IDE */
-        .status-pendiente { color: #dc2626; }
-        .status-en_proceso { color: #ca8a04; }
-        .status-resuelto { color: #0891b2; }
-        .status-cerrado { color: #16a34a; }
+        .status-pendiente { color: #dc2626; font-weight: bold; }
+        .status-en_proceso { color: #ca8a04; font-weight: bold; }
+        .status-resuelto { color: #16a34a; font-weight: bold; }
+        .status-cerrado { color: #16a34a; font-weight: bold; }
         .status-default { color: #64748b; }
     </style>
 
@@ -50,7 +50,7 @@
         };
     @endphp
 
-    <x-pdf.card title="Información General del Reporte">
+    <x-pdf.card title="Información General del Reporte" :branding="$branding">
         <table class="context-table">
             <tr>
                 {{-- Columna 1: Ubicación --}}
@@ -104,12 +104,12 @@
         asegúrate de que use width: 100% y padding consistente.
     --}}
     <div style="width: 100%;">
-        <x-pdf.finding-detail :finding="$finding" />
+        <x-pdf.finding-detail :finding="$finding" :branding="$branding" />
     </div>
 
     @if(isset($seguimientos) && $seguimientos->count() > 0)
         <div class="separator" style="height: 20px;"></div>
-        <x-pdf.card title="Historial de Seguimientos e Intervenciones">
+        <x-pdf.card title="Historial de Seguimientos e Intervenciones" :branding="$branding">
             <table style="width: 100%; border-collapse: collapse; font-size: 10pt; text-align: left;">
                 <thead>
                     <tr style="background-color: #f1f5f9; border-bottom: 2px solid #cbd5e1;">

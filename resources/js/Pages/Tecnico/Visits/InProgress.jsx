@@ -368,8 +368,7 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                                                         }`}>
                                                                             {task.type === 'inspection' ? 'INSPECCIÓN COMPLETADA' : 'CAPACITACIÓN COMPLETADA'}
                                                                         </span>
-                                                                        
-                                                                        {task.type === 'inspection' && task.failures && (
+                                                                                                                     {task.type === 'inspection' && task.failures && (
                                                                             <>
                                                                                 <span className="h-1 w-1 rounded-full bg-white/20"></span>
                                                                                 <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest italic ${
@@ -382,6 +381,19 @@ export default function InProgress({ visit, user, suggestedPlanTasks = [], pendi
                                                                             </>
                                                                         )}
 
+                                                                        {task.type === 'inspection' && task.detail?.assignment?.inspection?.asset && (
+                                                                            <>
+                                                                                <span className="h-1 w-1 rounded-full bg-white/20"></span>
+                                                                                <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest italic ${
+                                                                                    task.detail.assignment.inspection.asset.status === 'operativo' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' :
+                                                                                    task.detail.assignment.inspection.asset.status === 'alerta' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.1)]' :
+                                                                                    'bg-red-500/10 border border-red-500/20 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.1)]'
+                                                                                }`}>
+                                                                                    {task.detail.assignment.inspection.asset.status === 'operativo' ? 'OPERATIVO' :
+                                                                                     task.detail.assignment.inspection.asset.status === 'alerta' ? 'EN ALERTA' : 'FUERA DE SERVICIO'}
+                                                                                </span>
+                                                                            </>
+                                                                        )}
                                                                         {task.type === 'inspection' && task.detail?.assignment?.inspection?.asset && (
                                                                             <>
                                                                                 <span className="h-1 w-1 rounded-full bg-white/20"></span>

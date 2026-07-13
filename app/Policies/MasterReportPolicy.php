@@ -23,9 +23,9 @@ class MasterReportPolicy
             return $user->consultora_id === ($report->sede?->empresa?->consultora_id ?? null);
         }
 
-        // El Técnico solo ve sus propios informes
+        // El Técnico ve sus propios informes o informes de sus sedes asignadas
         if ($user->isTechnician()) {
-            return $user->id === $report->user_id;
+            return $user->id === $report->user_id || $user->sedes()->where('sedes.id', $report->sede_id)->exists();
         }
 
         return false;

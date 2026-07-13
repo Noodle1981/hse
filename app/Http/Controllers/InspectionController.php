@@ -525,7 +525,7 @@ class InspectionController extends Controller
                 ->first();
 
             // Obtener las inspecciones individuales de este grupo
-            $inspectionsQuery = DynamicInspection::with('checklist')
+            $inspectionsQuery = DynamicInspection::with(['checklist', 'asset'])
                 ->where('user_id', Auth::id())
                 ->where('sede_id', $group->sede_id)
                 ->whereDate('completed_at', $group->completed_date)
@@ -551,6 +551,12 @@ class InspectionController extends Controller
                     'supervisor_name' => $ins->supervisor_name ?: 'Sin Firmar',
                     'result' => $ins->result,
                     'has_failed' => $ins->result === 'Fail',
+                    'asset' => $ins->asset ? [
+                        'id' => $ins->asset->id,
+                        'name' => $ins->asset->name,
+                        'identifier' => $ins->asset->identifier,
+                        'status' => $ins->asset->status,
+                    ] : null,
                 ];
             });
 

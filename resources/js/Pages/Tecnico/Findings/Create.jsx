@@ -46,6 +46,14 @@ export default function Create({ sedes, visit_id, initial_sede_id }) {
         setPreviews(updatedPreviews);
     };
 
+    const getCancelUrl = () => {
+        if (visit_id) {
+            return route('tecnico.visits.in-progress', visit_id);
+        }
+        const isTecnico = auth?.user?.is_technician;
+        return route(isTecnico ? 'tecnico.hallazgos.index' : 'gestor.hallazgos.index');
+    };
+
     const submit = (e) => {
         e.preventDefault();
         const isTecnico = auth?.user?.is_technician;
@@ -149,16 +157,22 @@ export default function Create({ sedes, visit_id, initial_sede_id }) {
                                      </div>
                                  </div>
 
-                                <div className="pt-6 flex justify-end">
-                                    <button 
-                                        type="button" 
-                                        onClick={() => setCurrentStep(2)}
-                                        disabled={!data.titulo || !data.sede_id}
-                                        className="px-16 py-5 bg-red-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-red-600/20 hover:brightness-110 active:scale-95 disabled:opacity-20"
-                                    >
-                                        Siguiente Paso
-                                    </button>
-                                </div>
+                                 <div className="pt-6 flex justify-between items-center">
+                                     <Link 
+                                         href={getCancelUrl()} 
+                                         className="px-10 py-5 text-[10px] font-black uppercase text-white/20 hover:text-white transition-all italic"
+                                     >
+                                         ← Cancelar
+                                     </Link>
+                                     <button 
+                                         type="button" 
+                                         onClick={() => setCurrentStep(2)}
+                                         disabled={!data.titulo || !data.sede_id}
+                                         className="px-16 py-5 bg-red-600 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] italic transition-all shadow-xl shadow-red-600/20 hover:brightness-110 active:scale-95 disabled:opacity-20"
+                                     >
+                                         Siguiente Paso
+                                     </button>
+                                 </div>
                             </div>
                         )}
 
@@ -185,16 +199,67 @@ export default function Create({ sedes, visit_id, initial_sede_id }) {
                                             <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">
                                                 Nivel de Criticidad
                                             </label>
-                                            <select id="field_3" name="field_3" 
-                                                value={data.criticidad}
-                                                onChange={e => setData('criticidad', e.target.value)}
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-sm font-black text-white focus:ring-2 focus:ring-red-500 transition-all [color-scheme:dark] italic uppercase"
-                                            >
-                                                <option value="bajo" className="text-emerald-500">🟢 BAJO (Mejora)</option>
-                                                <option value="medio" className="text-yellow-500">🟡 MEDIO (Desviación)</option>
-                                                <option value="alto" className="text-orange-500">🟠 ALTO (Riesgo)</option>
-                                                <option value="critico" className="text-red-500">🔴 CRÍTICO (Peligro Inminente)</option>
-                                            </select>
+                                            <div className="grid grid-cols-2 gap-4 mt-1">
+                                                {[
+                                                    { 
+                                                        value: 'bajo', 
+                                                        label: 'Bajo', 
+                                                        subtitle: 'Mejora', 
+                                                        icon: '🟢',
+                                                        activeClass: 'bg-emerald-500/10 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]',
+                                                        glowClass: 'from-emerald-500/0 via-emerald-500/[0.05] to-emerald-500/0'
+                                                    },
+                                                    { 
+                                                        value: 'medio', 
+                                                        label: 'Medio', 
+                                                        subtitle: 'Desviación', 
+                                                        icon: '🟡',
+                                                        activeClass: 'bg-amber-500/10 border-amber-500 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]',
+                                                        glowClass: 'from-amber-500/0 via-amber-500/[0.05] to-amber-500/0'
+                                                    },
+                                                    { 
+                                                        value: 'alto', 
+                                                        label: 'Alto', 
+                                                        subtitle: 'Riesgo', 
+                                                        icon: '🟠',
+                                                        activeClass: 'bg-orange-500/10 border-orange-500 text-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.15)]',
+                                                        glowClass: 'from-orange-500/0 via-orange-500/[0.05] to-orange-500/0'
+                                                    },
+                                                    { 
+                                                        value: 'critico', 
+                                                        label: 'Crítico', 
+                                                        subtitle: 'Peligro', 
+                                                        icon: '🔴',
+                                                        activeClass: 'bg-red-500/10 border-red-500 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.15)]',
+                                                        glowClass: 'from-red-500/0 via-red-500/[0.05] to-red-500/0'
+                                                    }
+                                                ].map(opt => {
+                                                    const isSelected = data.criticidad === opt.value;
+                                                    return (
+                                                        <button
+                                                            key={opt.value}
+                                                            type="button"
+                                                            onClick={() => setData('criticidad', opt.value)}
+                                                            className={`p-4 rounded-2xl border text-left transition-all duration-300 relative overflow-hidden group ${
+                                                                isSelected 
+                                                                    ? `${opt.activeClass} scale-[1.02]` 
+                                                                    : 'bg-black/40 border-white/5 text-white/50 hover:border-white/10 hover:text-white'
+                                                            }`}
+                                                        >
+                                                            {isSelected && (
+                                                                <div className={`absolute inset-0 bg-gradient-to-r ${opt.glowClass} animate-pulse`} />
+                                                            )}
+                                                            <div className="flex items-center gap-3 relative z-10">
+                                                                <span className="text-xl">{opt.icon}</span>
+                                                                <div>
+                                                                    <div className="text-xs font-black uppercase tracking-wider italic">{opt.label}</div>
+                                                                    <div className="text-[9px] font-black uppercase tracking-widest opacity-60 mt-0.5 italic">{opt.subtitle}</div>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
                                         </div>
                                         <div className="space-y-3 group">
                                             <label className="text-[10px] font-black text-red-400/60 uppercase tracking-[0.25em] italic block pl-1">

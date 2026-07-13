@@ -191,10 +191,82 @@
     </div>
     @endif
 
-    {{-- 3. CAPACITACIONES --}}
+    @php
+        $inspectedAssets = collect();
+        foreach($visit->checklistCompletions as $completion) {
+            $asset = $completion->assignment?->inspection?->asset;
+            if ($asset) {
+                // Evitar duplicados por id de activo
+                if (!$inspectedAssets->contains('asset.id', $asset->id)) {
+                    $inspectedAssets->push([
+                        'asset' => $asset,
+                        'completion' => $completion,
+                        'failures' => $completion->failure_analysis['failed'] ?? 0
+                    ]);
+                }
+            }
+        }
+    @endphp
+
+    {{-- 3. CONTROL Y ESTADO DE ACTIVOS --}}
+    @if($inspectedAssets->count() > 0)
+    <div class="section">
+        <div class="section-header"><h2>3. Control y Estado de Activos Evaluados</h2></div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th style="width: 35%">Activo / Equipo</th>
+                    <th style="width: 25%">Identificador / QR</th>
+                    <th style="width: 20%; text-align: center;">Resultado Inspección</th>
+                    <th style="width: 20%; text-align: center;">Estado Actual</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($inspectedAssets as $item)
+                    @php
+                        $asset = $item['asset'];
+                        $failures = $item['failures'];
+                        $status = $asset->status;
+                    @endphp
+                    <tr class="{{ $loop->even ? 'row-alt' : '' }}">
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9.5px;">
+                            <div style="font-weight: bold; color: #1e293b;">
+                                {{ $asset->name }}
+                            </div>
+                            <div style="font-size: 8px; color: #64748b; margin-top: 1px;">
+                                Tipo: {{ $asset->assetType?->name ?? 'Genérico' }}
+                            </div>
+                        </td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9.5px; font-family: monospace;">
+                            {{ $asset->identifier }}
+                        </td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9.5px; text-align: center; vertical-align: middle;">
+                            @if($failures > 0)
+                                <span class="pill pill-danger" style="display: inline-block; min-width: 60px;">{{ $failures }} {{ $failures == 1 ? 'Falla' : 'Fallas' }}</span>
+                            @else
+                                <span class="pill pill-success" style="display: inline-block; min-width: 60px;">Sin Fallas</span>
+                            @endif
+                        </td>
+                        <td style="padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9.5px; text-align: center; vertical-align: middle;">
+                            @if($status === 'operativo')
+                                <span class="pill pill-success" style="display: inline-block; min-width: 60px;">OPERATIVO</span>
+                            @elseif($status === 'alerta')
+                                <span class="pill pill-warning" style="display: inline-block; min-width: 60px;">EN ALERTA</span>
+                            @else
+                                <span class="pill pill-danger" style="display: inline-block; min-width: 60px;">FUERA DE SERVICIO</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
+
+    {{-- 4. CAPACITACIONES --}}
     @if($visit->trainings->count() > 0)
     <div class="section">
-        <div class="section-header"><h2>3. Capacitaciones Realizadas</h2></div>
+        <div class="section-header"><h2>4. Capacitaciones Realizadas</h2></div>
         @foreach($visit->trainings as $training)
             <div style="border: 1px solid #e2e8f0; margin-bottom: 15px;">
                 <table class="data-table" style="background: #f8fafc;">
@@ -234,10 +306,10 @@
     </div>
     @endif
 
-    {{-- 4. HALLAZGOS (EL PLATO FUERTE) --}}
+    {{-- 5. HALLAZGOS (EL PLATO FUERTE) --}}
     @if($visit->hallazgos->count() > 0)
     <div class="section">
-        <div class="section-header"><h2>4. Reporte Detallado de Hallazgos</h2></div>
+        <div class="section-header"><h2>5. Reporte Detallado de Hallazgos</h2></div>
         @foreach($visit->hallazgos as $hallazgo)
             <div class="card-finding">
                 <table style="width: 100%;">
@@ -285,10 +357,10 @@
     </div>
     @endif
 
-    {{-- 5. INCIDENTES --}}
+    {{-- 6. INCIDENTES --}}
     @if($visit->incidentes->count() > 0)
     <div class="section">
-        <div class="section-header"><h2>5. Registro de Incidentes</h2></div>
+        <div class="section-header"><h2>6. Registro de Incidentes</h2></div>
         @foreach($visit->incidentes as $incidente)
             <div class="card-finding" style="border-color: #fee2e2; background-color: #fffafb;">
                 <div style="font-size: 11px; font-weight: bold; color: #b91c1c; margin-bottom: 10px;">

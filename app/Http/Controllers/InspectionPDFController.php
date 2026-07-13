@@ -19,6 +19,7 @@ class InspectionPDFController extends Controller
             'user',
             'sede.empresa',
             'answers.question',
+            'asset.assetType',
         ])->findOrFail($id);
 
         Gate::authorize('view', $inspection);
@@ -45,6 +46,7 @@ class InspectionPDFController extends Controller
             'user',
             'sede.empresa',
             'answers.question',
+            'asset.assetType',
         ])->findOrFail($id);
 
         Gate::authorize('view', $inspection);

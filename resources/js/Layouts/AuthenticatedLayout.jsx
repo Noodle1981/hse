@@ -117,10 +117,10 @@ export default function AuthenticatedLayout({ children, title, header }) {
                         {/* ── ADMIN / GESTOR ── */}
                         {user?.is_admin && !user?.is_super_admin && (
                             <>
-                                <NavItem href={safeRoute('gestor.assets.index')} active={isActive('gestor.assets.*', 'gestor.asset-types.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconAssets />} label="Activos y Equipamiento" />
                                 <NavItem href={safeRoute('gestor.operations.visits.index')} active={isActive('gestor.operations.visits.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconLocation />} label="Control de Visitas" />
                                 <NavItem href={safeRoute('gestor.inspections.index')} active={isActive('gestor.inspections.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconClock />} label="Historial de Inspecciones" />
                                 <NavItem href={safeRoute('gestor.checklists.index')} active={isActive('gestor.checklists.*', 'gestor.categories.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconDoc />} label="Plantillas de Checklist" />
+                                <NavItem href={safeRoute('gestor.assets.index')} active={isActive('gestor.assets.*', 'gestor.asset-types.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconAssets />} label="Activos y Equipamiento" />
                                 <NavItem href={safeRoute('gestor.trainings.index')} active={isActive('gestor.trainings.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconTraining />} label="Capacitaciones" />
                                 <NavItem href={safeRoute('gestor.hallazgos.index')} active={isActive('gestor.hallazgos.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconWarning />} label="Hallazgos" />
                                 <NavItem href={safeRoute('gestor.incidentes.index')} active={isActive('gestor.incidentes.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconAlert />} label="Incidentes" />

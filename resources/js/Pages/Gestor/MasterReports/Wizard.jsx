@@ -2,6 +2,51 @@ import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 
+const groupCompletions = (completions) => {
+    if (!completions || completions.length === 0) return [];
+    
+    const groups = {};
+    completions.forEach(cc => {
+        const title = cc.assignment?.checklist?.title || 'Inspección';
+        const key = cc.assignment?.dynamic_checklist_id || title;
+        
+        if (!groups[key]) {
+            groups[key] = {
+                title,
+                count: 0,
+                passed: 0,
+                failed: 0,
+                assets: [],
+            };
+        }
+        
+        groups[key].count += 1;
+        
+        const isFailed = cc.failure_analysis?.is_failed;
+        if (isFailed) {
+            groups[key].failed += 1;
+        } else {
+            groups[key].passed += 1;
+        }
+        
+        const asset = cc.assignment?.asset || cc.assignment?.inspection?.asset;
+        if (asset) {
+            // Evitar duplicados de activos en el mismo grupo de checklists en la misma visita
+            const exists = groups[key].assets.some(a => a.id === asset.id);
+            if (!exists) {
+                groups[key].assets.push({
+                    id: asset.id,
+                    identifier: asset.identifier,
+                    name: asset.name,
+                    status: asset.status,
+                });
+            }
+        }
+    });
+    
+    return Object.values(groups);
+};
+
 export default function Wizard({ auth, report, periodData }) {
     const { data, setData, put, processing, errors, transform } = useForm({
         resumen_ejecutivo: report.resumen_ejecutivo || '',
@@ -197,18 +242,83 @@ export default function Wizard({ auth, report, periodData }) {
                                     </div>
                                     <div className="flex-grow">
                                         <p className="text-sm italic text-indigo-100/50 leading-relaxed mb-6 border-l-2 border-white/5 pl-6">{visit.general_observations || 'Sin observaciones generales registradas.'}</p>
-                                        <div className="flex flex-wrap gap-3">
-                                            {visit.checklist_completions?.map((cc, i) => (
-                                                <span key={i} className="px-4 py-1.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase italic rounded-xl">
-                                                    INSPECCIÓN: {cc.assignment?.checklist?.title}
-                                                </span>
-                                            ))}
-                                            {visit.trainings?.map((t, i) => (
-                                                <span key={i} className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase italic rounded-xl">
-                                                    ACCIÓN FORMATIVA: {t.title}
-                                                </span>
-                                            ))}
-                                        </div>
+                                        {/* Tabla de Inspecciones Agrupadas */}
+                                        {(() => {
+                                            const grouped = groupCompletions(visit.checklist_completions);
+                                            if (grouped.length === 0) return null;
+                                            return (
+                                                <div className="overflow-x-auto mb-6 rounded-2xl border border-white/5 bg-black/20">
+                                                    <table className="w-full text-left border-collapse">
+                                                        <thead>
+                                                            <tr className="border-b border-white/5 bg-white/5 text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic">
+                                                                <th className="px-6 py-4">Protocolo de Control / Inspección</th>
+                                                                <th className="px-4 py-4 text-center">Cant.</th>
+                                                                <th className="px-4 py-4 text-center">Conformes</th>
+                                                                <th className="px-4 py-4 text-center">Con Desvíos</th>
+                                                                <th className="px-6 py-4">Equipos / Activos Evaluados</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-white/5 text-[11px] font-semibold text-white/80">
+                                                            {grouped.map((group, gIdx) => (
+                                                                <tr key={gIdx} className="hover:bg-white/[0.02] transition-colors">
+                                                                    <td className="px-6 py-4 font-black uppercase text-indigo-100 tracking-wide">
+                                                                        {group.title}
+                                                                    </td>
+                                                                    <td className="px-4 py-4 text-center font-black">
+                                                                        {group.count}
+                                                                    </td>
+                                                                    <td className="px-4 py-4 text-center text-emerald-400 font-bold">
+                                                                        {group.passed}
+                                                                    </td>
+                                                                    <td className="px-4 py-4 text-center text-red-400 font-bold">
+                                                                        {group.failed}
+                                                                    </td>
+                                                                    <td className="px-6 py-4">
+                                                                        {group.assets.length > 0 ? (
+                                                                            <div className="flex flex-wrap gap-1.5">
+                                                                                {group.assets.map((asset, aIdx) => {
+                                                                                    const statusColors = {
+                                                                                        operativo: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400',
+                                                                                        alerta: 'bg-amber-500/10 border-amber-500/20 text-amber-400',
+                                                                                        fuera_de_servicio: 'bg-red-500/10 border-red-500/20 text-red-400',
+                                                                                    };
+                                                                                    const colorClass = statusColors[asset.status] || 'bg-white/5 border-white/10 text-white/60';
+                                                                                    return (
+                                                                                        <span 
+                                                                                            key={aIdx} 
+                                                                                            title={`${asset.name} (${asset.status ? asset.status.replace(/_/g, ' ').toUpperCase() : 'N/A'})`}
+                                                                                            className={`inline-flex items-center px-2 py-0.5 border rounded-lg text-[9px] font-black uppercase tracking-wider ${colorClass}`}
+                                                                                        >
+                                                                                            {asset.identifier}
+                                                                                        </span>
+                                                                                    );
+                                                                                })}
+                                                                            </div>
+                                                                        ) : (
+                                                                            <span className="text-white/25 text-[9px] font-bold uppercase tracking-widest">Sin Activos</span>
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            );
+                                        })()}
+
+                                        {/* Acciones Formativas */}
+                                        {visit.trainings && visit.trainings.length > 0 && (
+                                            <div className="mt-6">
+                                                <span className="text-[9px] font-black text-indigo-100/35 uppercase tracking-[0.2em] block mb-2 px-1">Acciones Formativas Dictadas</span>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {visit.trainings.map((t, i) => (
+                                                        <span key={i} className="px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] font-black uppercase italic rounded-xl">
+                                                            {t.title}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

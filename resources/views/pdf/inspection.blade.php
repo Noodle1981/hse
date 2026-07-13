@@ -10,12 +10,16 @@
         .text-value { color: #111827; font-weight: 500; }
     </style>
 
-    {{-- 1. Cabecera (Grid de 3 columnas simulado con Tabla) --}}
+    {{-- 1. Cabecera (Grid de 3 o 4 columnas simulado con Tabla) --}}
     <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+        @php
+            $asset = $inspection->asset;
+            $w = $asset ? '25%' : '33%';
+        @endphp
         <table class="no-border">
             <tr>
                 {{-- Col 1: Info General --}}
-                <td style="width: 33%; vertical-align: top;">
+                <td style="width: {{ $w }}; vertical-align: top;">
                     <div style="font-size: 8pt; font-weight: bold; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
                         Información General
                     </div>
@@ -37,7 +41,7 @@
                 </td>
 
                 {{-- Col 2: Ubicación --}}
-                <td style="width: 33%; vertical-align: top; border-left: 1px solid #f3f4f6; padding-left: 15px;">
+                <td style="width: {{ $w }}; vertical-align: top; border-left: 1px solid #f3f4f6; padding-left: 15px;">
                     <div style="font-size: 8pt; font-weight: bold; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
                         Ubicación
                     </div>
@@ -54,8 +58,37 @@
                     </div>
                 </td>
 
-                {{-- Col 3: Responsable --}}
-                <td style="width: 33%; vertical-align: top; border-left: 1px solid #f3f4f6; padding-left: 15px;">
+                {{-- Col 3: Activo (si existe) --}}
+                @if($asset)
+                <td style="width: 25%; vertical-align: top; border-left: 1px solid #f3f4f6; padding-left: 15px;">
+                    <div style="font-size: 8pt; font-weight: bold; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
+                        Activo Evaluado
+                    </div>
+                    <div style="line-height: 1.4;">
+                        <div style="font-size: 10pt; font-weight: bold; color: #1e293b;">
+                            {{ $asset->name }}
+                        </div>
+                        <div style="font-size: 8pt; color: #4b5563; margin-top: 2px;">
+                            <span style="font-weight: bold; color: #9ca3af; text-transform: uppercase;">ID:</span> {{ $asset->identifier }}
+                        </div>
+                        <div style="font-size: 8pt; color: #4b5563;">
+                            <span style="font-weight: bold; color: #9ca3af; text-transform: uppercase;">Tipo:</span> {{ $asset->assetType?->name ?? 'Genérico' }}
+                        </div>
+                        <div style="margin-top: 4px;">
+                            @if($asset->status === 'operativo')
+                                <span style="color: #15803d; font-weight: bold; text-transform: uppercase; font-size: 7.5pt; background-color: #f0fdf4; padding: 2px 6px; border-radius: 4px; border: 1px solid #dcfce7;">OPERATIVO</span>
+                            @elseif($asset->status === 'alerta')
+                                <span style="color: #92400e; font-weight: bold; text-transform: uppercase; font-size: 7.5pt; background-color: #fef3c7; padding: 2px 6px; border-radius: 4px; border: 1px solid #fde68a;">EN ALERTA</span>
+                            @else
+                                <span style="color: #b91c1c; font-weight: bold; text-transform: uppercase; font-size: 7.5pt; background-color: #fef2f2; padding: 2px 6px; border-radius: 4px; border: 1px solid #fee2e2;">FUERA DE SERVICIO</span>
+                            @endif
+                        </div>
+                    </div>
+                </td>
+                @endif
+
+                {{-- Col 4: Responsable --}}
+                <td style="width: {{ $w }}; vertical-align: top; border-left: 1px solid #f3f4f6; padding-left: 15px;">
                     <div style="font-size: 8pt; font-weight: bold; color: #9ca3af; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;">
                         Responsable
                     </div>

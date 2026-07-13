@@ -292,6 +292,21 @@ export default function History({ inspections, filters, empresas = [] }) {
                                                                                 <div className="text-[10px] font-black text-white/60">
                                                                                     Quién Firmó: <span className="text-orange-300 italic">{child.supervisor_name}</span>
                                                                                 </div>
+                                                                                {child.asset && (
+                                                                                    <div className="flex flex-wrap items-center gap-2 pt-1.5">
+                                                                                        <span className="px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest italic bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.1)] flex items-center gap-1">
+                                                                                            <span>📦</span> {child.asset.identifier} ({child.asset.name})
+                                                                                        </span>
+                                                                                        <span className={`px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest italic ${
+                                                                                            child.asset.status === 'operativo' ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]' :
+                                                                                            child.asset.status === 'alerta' ? 'bg-amber-500/10 border border-amber-500/20 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]' :
+                                                                                            'bg-rose-500/10 border border-rose-500/20 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.15)]'
+                                                                                        }`}>
+                                                                                            {child.asset.status === 'operativo' ? 'OPERATIVO' :
+                                                                                             child.asset.status === 'alerta' ? 'EN ALERTA' : 'FUERA DE SERVICIO'}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                )}
                                                                             </div>
                                                                             <div className="flex items-center gap-3">
                                                                                 {child.has_failed ? (

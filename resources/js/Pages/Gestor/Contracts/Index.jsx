@@ -72,17 +72,18 @@ export default function Index({
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1 mb-1 block">Empresa Mandante</label>
                                     <select id="field_4" name="field_4" 
-                                        value={filters.company_id}
+                                        value={filters.company_id || ''}
                                         onChange={e => updateFilter({ company_id: e.target.value, sede_id: '' })}
                                         className="w-full bg-[#16162a] border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all [color-scheme:dark]"
                                     >
+                                        <option value="" className="bg-[#16162a] text-white">Seleccione Empresa</option>
                                         {companies.map(c => <option key={c.id} value={c.id} className="bg-[#16162a] text-white">{c.nombre}</option>)}
                                     </select>
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-[10px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic ml-1 mb-1 block">Activo / Sede Operativa</label>
                                     <select id="field_3" name="field_3" 
-                                        value={filters.sede_id}
+                                        value={filters.sede_id || ''}
                                         onChange={e => updateFilter({ sede_id: e.target.value })}
                                         className="w-full bg-[#16162a] border border-white/10 rounded-2xl px-5 py-3 text-sm font-bold text-white focus:ring-ep-primary transition-all [color-scheme:dark]"
                                     >
@@ -93,7 +94,7 @@ export default function Index({
                             </div>
 
                             {/* Configuración Plan: Solo para Gestores */}
-                            {!isTech && (
+                            {!isTech && filters.sede_id && (
                                 <div className="flex items-center gap-4 bg-indigo-600/10 p-3 rounded-2xl border border-indigo-500/20">
                                     <div>
                                         <label className="text-[9px] font-black text-indigo-100/40 uppercase tracking-widest italic block mb-1">Inicio</label>
@@ -123,7 +124,7 @@ export default function Index({
 
                             {/* Acciones */}
                             <div className="flex gap-3">
-                                {!isTech && (
+                                {!isTech && filters.sede_id && (
                                     <button 
                                         onClick={() => setEditMode(!editMode)}
                                         className={`px-10 rounded-2xl font-black text-[11px] uppercase tracking-widest italic transition-all flex items-center justify-center gap-3 h-14 ${editMode ? 'bg-indigo-600 shadow-[0_0_30px_rgba(79,70,229,0.5)]' : 'bg-ep-primary shadow-2xl shadow-ep-primary/20 hover:scale-105'}`}
@@ -132,14 +133,16 @@ export default function Index({
                                         {editMode ? 'GUARDAR PLAN' : 'PLANIFICAR'}
                                     </button>
                                 )}
-                                <a 
-                                    href={route('annual-contract.pdf', { sede_id: filters.sede_id, year: filters.contract_start.substring(0,4) })}
-                                    target="_blank"
-                                    className="px-10 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest italic hover:bg-black hover:text-white transition-all shadow-2xl flex items-center justify-center gap-3 h-14" rel="noreferrer"
-                                >
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                    PDF
-                                </a>
+                                {filters.sede_id && (
+                                    <a 
+                                        href={route('annual-contract.pdf', { sede_id: filters.sede_id, year: filters.contract_start.substring(0,4) })}
+                                        target="_blank"
+                                        className="px-10 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-widest italic hover:bg-black hover:text-white transition-all shadow-2xl flex items-center justify-center gap-3 h-14" rel="noreferrer"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                        PDF
+                                    </a>
+                                )}
                             </div>
                         </div>
 
@@ -214,7 +217,7 @@ export default function Index({
                     </div>
 
                     {/* FORMULARIO DE PLANIFICACIÓN */}
-                    {editMode && (
+                    {editMode && filters.sede_id && (
                         <PlanningForm 
                             sedeId={filters.sede_id} 
                             contractStart={filters.contract_start}
@@ -237,13 +240,23 @@ export default function Index({
                             </div>
                         </div>
 
-                        <AnnualPlanMatrix 
-                            plans={plans} 
-                            dynamicMonths={dynamicMonths} 
-                            complianceData={complianceData} 
-                            editMode={editMode}
-                            checklistOptions={checklistOptions}
-                        />
+                        {filters.sede_id ? (
+                            <AnnualPlanMatrix 
+                                plans={plans} 
+                                dynamicMonths={dynamicMonths} 
+                                complianceData={complianceData} 
+                                editMode={editMode}
+                                checklistOptions={checklistOptions}
+                            />
+                        ) : (
+                            <div className="py-16 text-center">
+                                <svg className="w-16 h-16 text-indigo-100/10 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider italic">No se ha seleccionado una sede</h3>
+                                <p className="text-xs text-indigo-100/40 mt-1 max-w-md mx-auto">Seleccione una empresa mandante y su sede correspondiente para visualizar la planificación operativa.</p>
+                            </div>
+                        )}
                     </div>
 
                 </div>

@@ -1,4 +1,4 @@
-@props(['finding'])
+@props(['finding', 'branding' => null])
 
 <style>
     .finding-wrapper { width: 100%; font-family: sans-serif; }
@@ -46,7 +46,7 @@
     }
 </style>
 
-<x-pdf.card :title="'Reporte de ' . ucfirst($finding->tipo ?? 'Hallazgo')">
+<x-pdf.card :title="'Reporte de ' . ucfirst($finding->tipo ?? 'Hallazgo')" :branding="$branding">
     <div class="finding-wrapper">
         
         {{-- Descripción: Le damos todo el ancho porque suele ser texto largo --}}

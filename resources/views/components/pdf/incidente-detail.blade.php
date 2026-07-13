@@ -1,6 +1,10 @@
-@props(['incident'])
+@props(['incident', 'branding' => null])
 
-<x-pdf.card :title="'Detalles del ' . ucfirst($incident->tipo ?? 'Incidente')">
+@php
+    $cp = $branding['primary'] ?? '#1e40af';
+@endphp
+
+<x-pdf.card :title="'Detalles del ' . ucfirst($incident->tipo ?? 'Incidente')" :branding="$branding">
     <table class="no-border" style="margin-bottom: 10px;">
         <tr>
             <td style="width: 70%;">
@@ -47,7 +51,7 @@
 
     <div style="margin-top: 15px;">
         <strong>Medidas Tomadas / Plan de Acción:</strong>
-        <div style="background-color: #f8fafc; padding: 10px; border-left: 4px solid #3b82f6; margin-top: 5px; font-size: 9pt;">
+        <div style="background-color: #f8fafc; padding: 10px; border-left: 4px solid {{ $cp }}; margin-top: 5px; font-size: 9pt;">
             {{ $incident->medidas_tomadas ?? 'No se registraron medidas iniciales' }}
         </div>
     </div>

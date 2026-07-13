@@ -65,6 +65,7 @@ class MasterReportController extends Controller
             'tecnicos' => $tecnicos,
             'initial_sede_id' => $request->sede_id,
             'initial_periodo' => $request->periodo,
+            'initial_user_id' => $request->user_id ?? ($user->isTechnician() ? (string)$user->id : ''),
         ]);
     }
 
@@ -204,6 +205,8 @@ class MasterReportController extends Controller
         $visits = $report->sede->visitCertificates()
             ->with([
                 'checklistCompletions.assignment.checklist',
+                'checklistCompletions.assignment.asset.assetType',
+                'checklistCompletions.assignment.inspection.asset.assetType',
                 'trainings.attendances',
                 'hallazgos.fotos',
                 'incidentes.fotos',

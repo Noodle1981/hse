@@ -6,9 +6,9 @@ description: Documento de Requisitos de Producto (PRD) para XamaSafe
 
 ## 1. Control del Documento
 * **Nombre del Producto:** XamaSafe
-* **Versión del PRD:** v2.4 (Stack React + Inertia.js)
+* **Versión del PRD:** v2.5 (Stack React + Inertia.js)
 * **Estado:** Activo / En Desarrollo
-* **Última Actualización:** 10 Julio 2026
+* **Última Actualización:** 13 Julio 2026
 * **Tecnología Core:** Laravel 12 + Inertia.js (React 19) + Tailwind CSS v4 + SQLite/MySQL + Ziggy JS
 
 ---
@@ -271,6 +271,14 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Ámbito:** El `AssetType` pertenece a la `empresa_id`, siendo una plantilla compartida por todas las sedes de esa empresa. Los activos individuales (`Asset`) son los que se asocian a una `sede_id` específica. El checklist original puede seguir usándose normalmente en inspecciones de cualquier sede sin conflictos.
 * **Selector de Tipo con Esquema Dark:** El `<select>` de tipo de dato utiliza `[color-scheme:dark]` y fondos sólidos en las opciones (`bg-[#16162a]`) para respetar la estética premium oscura en todos los navegadores.
 
+### 4.12. Mejoras de Ecosistema Técnico (Activos, Capacitaciones, Branding y Reportes Maestro)
+* **Resumen de Activos Integrado**: Todos los checklists y constancias que auditan activos incorporan el identificador QR de control del equipo y su estado de salud en tiempo real (**Operativo**, **Alerta** o **Fuera de Servicio**) de forma consistente. La cabecera informativa de los PDFs standalone de checklist e inspección conmuta de manera automática de 3 a 4 columnas responsivamente si hay un activo asignado.
+* **Charla de Capacitación Limpia**: El cuadro de desarrollo de temario de una nueva capacitación inicia vacío (removiendo textos default del plan de la base de datos) y en su lugar provee un placeholder translúcido interactivo para guiar al técnico.
+* **Coloración y Tematización Dinámica de PDFs (Branding)**: Los reportes PDF (capacitaciones, hallazgos, incidentes y checklists) propagan el objeto de marca (`$branding`) inyectando el color de acento primario de la consultora en las tarjetas genéricas y separadores, logrando consistencia e identidad visual corporativa.
+* **Auto-Asociación y Bloqueo de Técnico**: La creación del Informe Maestro detecta de forma transparente si el creador es un técnico logueado, pre-asociando su ID y renderizando su nombre de forma inmutable/bloqueada para simplificar la UX.
+* **Agrupación Cuantitativa en Informe Maestro**: La bitácora del Wizard de edición y el reporte PDF del Informe Maestro agrupan las inspecciones del mismo tipo realizadas el mismo día, mostrando un consolidado de cantidad ejecutada, resultados conformes/desviaciones y listado horizontal de los activos evaluados con sus respectivos semáforos de salud.
+* **Desvinculación del Creador en Tareas de Plan Anual**: El cumplimiento de la tarea de informe en el Plan Anual se calcula por sede y mes de forma independiente de quién lo redactó. Si un técnico del equipo aprueba el informe, la tarea figura completada en verde para todos los técnicos asignados a la sede. Además, la política permite la visualización cruzada de los reportes finales PDF de su sede para prevenir errores 403 Forbidden.
+
 ---
 
 ## 5. Requisitos de Experiencia de Usuario y Diseño (Aesthetics)
@@ -312,6 +320,6 @@ Para evitar que las tablas anchas comprometan la navegación en notebooks conven
 ---
 
 *Documento creado: 20 Mayo 2026*  
-*Última actualización: 7 Julio 2026 — v2.3: Módulo Tipos de Checklist Dinámicos, política de versionado de checklists, UI configurador schema-driven*  
+*Última actualización: 13 Julio 2026 — v2.5: Resumen de activos, tematización dinámica de PDFs, y optimizaciones de Informe Maestro por Sede y Técnico.*  
 *Propiedad del Proyecto XamaSafe*  
 *Bajo especificaciones del Stack Inertia-React en la rama `feature-inertia-react`*  

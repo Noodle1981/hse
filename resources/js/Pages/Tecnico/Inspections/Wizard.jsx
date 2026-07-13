@@ -18,7 +18,6 @@ function toArray(val) {
 export default function Wizard({ checklist, assignment = {}, inspection = {}, visitId = null, initialAnswers = {}, assets = [], isEmulation = false, inspectedAssetIds = [] }) {
     const { auth, flash } = usePage().props;
     const user = auth.user;
-    console.log("DEBUG - User in Wizard props:", user);
     const [currentStep, setCurrentStep] = useState(0);
     const [showFailureModal, setShowFailureModal] = useState(false);
     const [pendingNextStep, setPendingNextStep] = useState(null);
@@ -46,6 +45,70 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
         visit_id: visitId,
         asset_id: inspection.asset_id || '',
     });
+
+    // Auto-prellenar respuestas de metadata al cargar (para borradores activos)
+    useEffect(() => {
+        if (selectedAssetId && assets && assets.length > 0) {
+            const selectedAsset = assets.find(a => a.id === selectedAssetId);
+            if (selectedAsset) {
+                const metadata = selectedAsset.metadata || {};
+                const schemaFields = selectedAsset.asset_type?.metadata_schema || [];
+                const schemaMap = {};
+                schemaFields.forEach(f => {
+                    schemaMap[f.name] = f;
+                });
+                
+                let hasChanges = false;
+                const newAnswers = { ...form.data.answers };
+                
+                sections.forEach(sec => {
+                    (sec.questions || []).forEach(q => {
+                        if (q.vincular_a_metadata) {
+                            if (newAnswers[q.id] === undefined || newAnswers[q.id] === null || newAnswers[q.id] === '') {
+                                const fieldSchema = schemaMap[q.vincular_a_metadata];
+                                let role = fieldSchema?.role;
+                                if (!role && fieldSchema) {
+                                    const label = fieldSchema.label || '';
+                                    const isExpirationDate = /venc|vto|vigenc|proxim|caduc/i.test(label);
+                                    const isIdentifier = fieldSchema.show_in_create || /identif|nro|n°|interno|codigo|patente|matricula/i.test(label);
+                                    const isStatic = /tipo|modelo|marca|fabricante|capacidad/i.test(label);
+                                    
+                                    if (isIdentifier) {
+                                        role = 'identificador';
+                                    } else if (fieldSchema.type === 'date' && isExpirationDate) {
+                                        role = 'dato_con_regla';
+                                    } else if (isStatic) {
+                                        role = 'dato_estatico';
+                                    } else {
+                                        role = 'verificacion';
+                                    }
+                                }
+                                
+                                if (role && ['identificador', 'dato_estatico', 'dato_con_regla'].includes(role)) {
+                                    let metadataValue = metadata[q.vincular_a_metadata];
+                                    if (metadataValue === undefined || metadataValue === null || metadataValue === '') {
+                                        if (selectedAsset[q.vincular_a_metadata] !== undefined && selectedAsset[q.vincular_a_metadata] !== null) {
+                                            metadataValue = selectedAsset[q.vincular_a_metadata];
+                                        } else if (q.vincular_a_metadata === 'identifier' || /identif|nro|n°|interno|codigo|patente|matricula/i.test(q.vincular_a_metadata)) {
+                                            metadataValue = selectedAsset.identifier;
+                                        }
+                                    }
+                                    if (metadataValue !== undefined && metadataValue !== null && metadataValue !== '') {
+                                        newAnswers[q.id] = metadataValue;
+                                        hasChanges = true;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                });
+                
+                if (hasChanges) {
+                    form.setData(d => ({ ...d, answers: newAnswers }));
+                }
+            }
+        }
+    }, [selectedAssetId, assets]);
 
     const filteredAssets = (assets || []).filter(a =>
         a.name.toLowerCase().includes(assetSearch.toLowerCase()) ||
@@ -138,7 +201,20 @@ export default function Wizard({ checklist, assignment = {}, inspection = {}, vi
                         
                         // Pre-fill only if role is identifier, static data, or SRE rule data
                         if (role && ['identificador', 'dato_estatico', 'dato_con_regla'].includes(role)) {
-                            const metadataValue = metadata[q.vincular_a_metadata];
+                            let metadataValue = metadata[q.vincular_a_metadata];
+                            
+                            // Fallback to first-class columns of the Asset (e.g., 'identifier', 'name', etc.)
+                            if (metadataValue === undefined || metadataValue === null || metadataValue === '') {
+                                if (selectedAsset && selectedAsset[q.vincular_a_metadata] !== undefined && selectedAsset[q.vincular_a_metadata] !== null) {
+                                    metadataValue = selectedAsset[q.vincular_a_metadata];
+                                } else if (selectedAsset && (
+                                    q.vincular_a_metadata === 'identifier' || 
+                                    /identif|nro|n°|interno|codigo|patente|matricula/i.test(q.vincular_a_metadata)
+                                )) {
+                                    metadataValue = selectedAsset.identifier;
+                                }
+                            }
+                            
                             newAnswers[q.id] = (metadataValue !== undefined && metadataValue !== null) ? metadataValue : '';
                         } else {
                             // Verification fields should start empty

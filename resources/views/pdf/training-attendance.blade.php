@@ -1,7 +1,7 @@
-<x-pdf.layout :title="'Registro de Capacitación'" :code="'CAP-'.$training->id" :status="$training->status">
+<x-pdf.layout :title="'Registro de Capacitación'" :code="'CAP-'.$training->id" :status="$training->status" :branding="$branding">
     
     {{-- Datos Generales --}}
-    <x-pdf.card title="Información General">
+    <x-pdf.card title="Información General" :branding="$branding">
         <table class="no-border">
             <tr>
                 <td style="width: 50%;">
@@ -18,7 +18,7 @@
     <div class="mb-2"></div>
 
     {{-- Componente Modular --}}
-    <x-pdf.training-record :training="$training" />
+    <x-pdf.training-record :training="$training" :branding="$branding" />
 
     {{-- Firmas de Cierre al Final --}}
     @if(isset($training->visit) && $training->visit)

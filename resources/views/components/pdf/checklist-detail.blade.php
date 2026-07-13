@@ -1,4 +1,8 @@
-@props(['checklist', 'completion'])
+@props(['checklist', 'completion', 'branding' => null])
+
+@php
+    $cp = $branding['primary'] ?? '#1e40af';
+@endphp
 
 <style>
     .pdf-content { font-family: sans-serif; padding-top: 10px; }
@@ -18,8 +22,8 @@
     .signature-title { 
         font-size: 11px; 
         font-weight: bold; 
-        color: #1e40af; 
-        border-bottom: 1px solid #bfdbfe; 
+        color: {{ $cp }}; 
+        border-bottom: 1px solid {{ $cp }}; 
         padding-bottom: 5px; 
         margin-bottom: 15px; 
         text-transform: uppercase;
@@ -35,7 +39,7 @@
     .badge-check { background-color: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 4px; font-size: 10px; font-weight: bold; }
 </style>
 
-<x-pdf.card :title="$checklist->title ?? 'Reporte de Inspección'">
+<x-pdf.card :title="$checklist->title ?? 'Reporte de Inspección'" :branding="$branding">
     <div class="pdf-content">
         
         {{-- Encabezado --}}

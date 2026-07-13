@@ -1,4 +1,4 @@
-@props(['training'])
+@props(['training', 'branding' => null])
 
 @php
     $attendeesList = [];
@@ -7,6 +7,8 @@
     } elseif (isset($training->attendees)) {
         $attendeesList = is_string($training->attendees) ? json_decode($training->attendees, true) : $training->attendees;
     }
+
+    $cp = $branding['primary'] ?? '#1e40af';
 @endphp
 
 <style>
@@ -30,7 +32,7 @@
         font-weight: bold; 
         color: #475569; 
         text-transform: uppercase;
-        border-left: 3px solid #3b82f6;
+        border-left: 3px solid {{ $cp }};
     }
 
     .attendees-table { width: 100%; border-collapse: collapse; }

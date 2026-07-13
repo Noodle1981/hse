@@ -25,6 +25,59 @@ export default function Show({ inspection }) {
         }
     };
 
+    const isAnswerFailure = (qId) => {
+        const ans = answers.find(a => a.dynamic_question_id === qId);
+        if (!ans) return false;
+        const question = ans.question;
+        if (!question) return false;
+
+        const value = ans.value;
+        let processedValue;
+        try {
+            processedValue = JSON.parse(value);
+        } catch (e) {
+            processedValue = value;
+        }
+
+        // 1. Chequear disparadores de falla (failure_values)
+        if (question.failure_values && Array.isArray(question.failure_values) && question.failure_values.length > 0) {
+            const logic = question.failure_logic || 'fail_if_selected';
+
+            if (logic === 'fail_if_missing') {
+                if (Array.isArray(processedValue)) {
+                    for (const required of question.failure_values) {
+                        if (!processedValue.includes(required)) return true;
+                    }
+                } else {
+                    if (!question.failure_values.includes(processedValue)) return true;
+                }
+            } else {
+                if (Array.isArray(processedValue)) {
+                    for (const val of processedValue) {
+                        if (question.failure_values.includes(val)) return true;
+                    }
+                } else {
+                    if (question.failure_values.includes(processedValue)) return true;
+                }
+            }
+        }
+
+        // 2. Chequear rangos numéricos si existen
+        if (question.type === 'number') {
+            const numValue = parseFloat(processedValue);
+            if (!isNaN(numValue)) {
+                if (question.min_value !== null && question.min_value !== undefined && numValue < parseFloat(question.min_value)) {
+                    return true;
+                }
+                if (question.max_value !== null && question.max_value !== undefined && numValue > parseFloat(question.max_value)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    };
+
     return (
         <AuthenticatedLayout title="Bóveda de Inspección - Detalle">
             <Head title={`Detalle Inspección: ${checklist?.title}`} />
@@ -66,25 +119,35 @@ export default function Show({ inspection }) {
                                         </h3>
                                     </div>
                                     <div className="p-10 space-y-8">
-                                        {section.questions?.map((q, qi) => (
-                                            <div key={q.id} className="group border-b border-white/5 pb-8 last:border-0 last:pb-0">
-                                                <div className="flex justify-between items-start gap-10">
-                                                    <div className="space-y-4 flex-1">
-                                                        <div className="flex items-start gap-3">
-                                                            <span className="text-[10px] font-black text-white/20 italic mt-1">{si+1}.{qi+1}</span>
-                                                            <label className="text-sm font-black text-white italic uppercase tracking-tight">{q.label}</label>
+                                        {section.questions?.map((q, qi) => {
+                                            const isFail = isAnswerFailure(q.id);
+                                            return (
+                                                <div key={q.id} className={`group border-b border-white/5 pb-8 last:border-0 last:pb-0 transition-all duration-300 ${isFail ? 'bg-red-500/[0.01] -mx-4 px-4 py-4 rounded-2xl border border-dashed border-red-500/10 hover:bg-red-500/[0.02]' : ''}`}>
+                                                    <div className="flex justify-between items-start gap-10">
+                                                        <div className="space-y-4 flex-1">
+                                                            <div className="flex items-start gap-3">
+                                                                <span className="text-[10px] font-black text-white/20 italic mt-1">{si+1}.{qi+1}</span>
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <label className="text-sm font-black text-white italic uppercase tracking-tight">{q.label}</label>
+                                                                    {isFail && (
+                                                                        <span className="px-2.5 py-0.5 rounded-lg bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 uppercase tracking-widest italic animate-pulse">
+                                                                            ⚠️ FALLA
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className={`pl-6 text-xl font-black italic uppercase ${isFail ? 'text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'text-emerald-400'}`}>
+                                                                {getAnswerValue(q.id)}
+                                                            </div>
                                                         </div>
-                                                        <div className="pl-6 text-xl font-black text-emerald-400 italic uppercase">
-                                                            {getAnswerValue(q.id)}
+                                                        {/* Badge de tipo */}
+                                                        <div className="text-[8px] font-black text-white/10 uppercase tracking-widest border border-white/5 px-2 py-1 rounded-lg italic">
+                                                            {q.type.toUpperCase()}
                                                         </div>
-                                                    </div>
-                                                    {/* Badge de tipo */}
-                                                    <div className="text-[8px] font-black text-white/10 uppercase tracking-widest border border-white/5 px-2 py-1 rounded-lg italic">
-                                                        {q.type}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             ))}
@@ -99,25 +162,35 @@ export default function Show({ inspection }) {
                                         </h3>
                                     </div>
                                     <div className="p-10 space-y-8">
-                                        {checklist.questions.filter(q => !q.section_id).map((q, qi) => (
-                                            <div key={q.id} className="group border-b border-white/5 pb-8 last:border-0 last:pb-0">
-                                                <div className="flex justify-between items-start gap-10">
-                                                    <div className="space-y-4 flex-1">
-                                                        <div className="flex items-start gap-3">
-                                                            <span className="text-[10px] font-black text-white/20 italic mt-1">G.{qi+1}</span>
-                                                            <label className="text-sm font-black text-white italic uppercase tracking-tight">{q.label}</label>
+                                        {checklist.questions.filter(q => !q.section_id).map((q, qi) => {
+                                            const isFail = isAnswerFailure(q.id);
+                                            return (
+                                                <div key={q.id} className={`group border-b border-white/5 pb-8 last:border-0 last:pb-0 transition-all duration-300 ${isFail ? 'bg-red-500/[0.01] -mx-4 px-4 py-4 rounded-2xl border border-dashed border-red-500/10 hover:bg-red-500/[0.02]' : ''}`}>
+                                                    <div className="flex justify-between items-start gap-10">
+                                                        <div className="space-y-4 flex-1">
+                                                            <div className="flex items-start gap-3">
+                                                                <span className="text-[10px] font-black text-white/20 italic mt-1">G.{qi+1}</span>
+                                                                <div className="flex flex-wrap items-center gap-2">
+                                                                    <label className="text-sm font-black text-white italic uppercase tracking-tight">{q.label}</label>
+                                                                    {isFail && (
+                                                                        <span className="px-2.5 py-0.5 rounded-lg bg-red-500/10 border border-red-500/20 text-[8px] font-black text-red-500 uppercase tracking-widest italic animate-pulse">
+                                                                            ⚠️ FALLA
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className={`pl-6 text-xl font-black italic uppercase ${isFail ? 'text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 'text-emerald-400'}`}>
+                                                                {getAnswerValue(q.id)}
+                                                            </div>
                                                         </div>
-                                                        <div className="pl-6 text-xl font-black text-emerald-400 italic uppercase">
-                                                            {getAnswerValue(q.id)}
+                                                        {/* Badge de tipo */}
+                                                        <div className="text-[8px] font-black text-white/10 uppercase tracking-widest border border-white/5 px-2 py-1 rounded-lg italic">
+                                                            {q.type.toUpperCase()}
                                                         </div>
-                                                    </div>
-                                                    {/* Badge de tipo */}
-                                                    <div className="text-[8px] font-black text-white/10 uppercase tracking-widest border border-white/5 px-2 py-1 rounded-lg italic">
-                                                        {q.type}
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}

@@ -2,10 +2,10 @@ import React from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, useForm, Link } from '@inertiajs/react';
 
-export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial_periodo }) {
+export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial_periodo, initial_user_id }) {
     const { data, setData, post, processing, errors } = useForm({
         sede_id: initial_sede_id || '',
-        user_id: auth.user.is_technician ? auth.user.id : '',
+        user_id: initial_user_id || (auth.user.is_technician ? auth.user.id : ''),
         titulo: 'Informe Maestro de Servicio - ' + new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }).toUpperCase(),
         periodo: initial_periodo || new Date().toISOString().substring(0, 7), // YYYY-MM
         frecuencia: 'mensual',
@@ -62,16 +62,22 @@ export default function Create({ auth, sedes, tecnicos, initial_sede_id, initial
                                 {/* Técnico */}
                                 <div className="space-y-3">
                                     <label className="block text-[10px] font-black text-indigo-100/30 uppercase tracking-widest italic px-2">Especialista Asignado</label>
-                                    <select id="field_4" name="field_4" 
-                                        value={data.user_id}
-                                        onChange={e => setData('user_id', e.target.value)}
-                                        className="w-full bg-black/40 border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all"
-                                    >
-                                        <option value="">Seleccione un técnico</option>
-                                        {tecnicos.map(t => (
-                                            <option key={t.id} value={t.id}>{t.nombres} {t.apellidos}</option>
-                                        ))}
-                                    </select>
+                                    {auth.user.is_technician ? (
+                                        <div className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white/50 cursor-not-allowed select-none">
+                                            {auth.user.nombres} {auth.user.apellidos}
+                                        </div>
+                                    ) : (
+                                        <select id="field_4" name="field_4" 
+                                            value={data.user_id}
+                                            onChange={e => setData('user_id', e.target.value)}
+                                            className="w-full bg-black/40 border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-ep-primary transition-all"
+                                        >
+                                            <option value="">Seleccione un técnico</option>
+                                            {tecnicos.map(t => (
+                                                <option key={t.id} value={t.id}>{t.nombres} {t.apellidos}</option>
+                                            ))}
+                                        </select>
+                                    )}
                                     {errors.user_id && <span className="text-red-500 text-[10px] font-black uppercase italic tracking-widest px-2">{errors.user_id}</span>}
                                 </div>
 

@@ -273,10 +273,41 @@
                             <td>
                                 <div style="margin-bottom: 5px;">{{ $visit->general_observations ?: 'Sin observaciones' }}</div>
                                 @if($visit->checklistCompletions->count() > 0)
-                                    <div style="font-size: 7px; color: <?php echo $primaryColor; ?>; font-weight: bold; margin-top: 5px; text-transform: uppercase;">Procedimientos:</div>
-                                    <div style="font-size: 7px; color: #7e8299;">
-                                        @foreach($visit->checklistCompletions as $index => $comp)
-                                            • {{ $comp->assignment->checklist->title ?? 'Inspección técnica' }}{{ $index < $visit->checklistCompletions->count() - 1 ? '' : '' }}<br>
+                                    <div style="font-size: 7.5px; color: <?php echo $primaryColor; ?>; font-weight: bold; margin-top: 5px; text-transform: uppercase;">Procedimientos:</div>
+                                    <div style="font-size: 7px; color: #7e8299; line-height: 1.3;">
+                                        @php
+                                            $groupedCompletions = $visit->checklistCompletions->groupBy(function($comp) {
+                                                return $comp->assignment?->checklist?->title ?? 'Inspección técnica';
+                                            });
+                                        @endphp
+                                        @foreach($groupedCompletions as $title => $completions)
+                                            @php
+                                                $total = $completions->count();
+                                                $passed = $completions->filter(function($c) {
+                                                    $fa = $c->failure_analysis;
+                                                    return !($fa['is_failed'] ?? false);
+                                                })->count();
+                                                $failed = $total - $passed;
+                                                
+                                                $assetsText = $completions->map(function($c) {
+                                                    $asset = $c->assignment?->asset ?? $c->assignment?->inspection?->asset ?? null;
+                                                    if ($asset) {
+                                                        $statusLabels = [
+                                                            'operativo' => 'Operativo',
+                                                            'alerta' => 'Alerta',
+                                                            'fuera_de_servicio' => 'Fuera de Servicio',
+                                                        ];
+                                                        $statusText = $statusLabels[$asset->status] ?? ucfirst($asset->status);
+                                                        return $asset->identifier . ' (' . $statusText . ')';
+                                                    }
+                                                    return null;
+                                                })->filter()->unique()->implode(', ');
+                                            @endphp
+                                            • <strong>{{ $title }}</strong> (Cant: {{ $total }} | Conformes: {{ $passed }} | Con Desvíos: {{ $failed }})
+                                            @if($assetsText)
+                                                <br><span style="color: #7e8299; font-size: 6.5px; padding-left: 8px; font-style: italic;">Equipos: {{ $assetsText }}</span>
+                                            @endif
+                                            <br>
                                         @endforeach
                                     </div>
                                 @endif
