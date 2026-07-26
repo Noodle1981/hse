@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AnnualPlan;
+use App\Models\AssetType;
 use App\Models\DynamicChecklist;
 use App\Models\DynamicInspection;
 use App\Models\Empresa;
@@ -93,7 +94,7 @@ class ContractController extends Controller
             ],
             'checklistOptions' => (function () {
                 // Obtenemos los category_ids que tienen al menos un AssetType con activos reales
-                $categoriesWithRealAssets = \App\Models\AssetType::withCount('assets')
+                $categoriesWithRealAssets = AssetType::withCount('assets')
                     ->get()
                     ->filter(fn ($at) => $at->assets_count > 0)
                     ->pluck('category_id')
@@ -104,9 +105,9 @@ class ContractController extends Controller
                 return DynamicChecklist::select('id', 'title', 'registry_code', 'category_id')
                     ->get()
                     ->map(fn ($c) => [
-                        'id'             => $c->id,
-                        'title'          => $c->title,
-                        'registry_code'  => $c->registry_code,
+                        'id' => $c->id,
+                        'title' => $c->title,
+                        'registry_code' => $c->registry_code,
                         'has_real_assets' => in_array($c->category_id, $categoriesWithRealAssets),
                     ]);
             })(),

@@ -15,6 +15,12 @@ export default function Index({ users, filters }) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
 
+    // Reset de contraseña
+    const [showResetModal, setShowResetModal] = useState(false);
+    const [userToReset, setUserToReset] = useState(null);
+    const [resetPassword, setResetPassword] = useState(null);
+    const [copied, setCopied] = useState(false);
+
     // Visor de Firma Aprobada
     const [showSignaturePreview, setShowSignaturePreview] = useState(false);
     const [previewUser, setPreviewUser] = useState(null);
@@ -240,12 +246,14 @@ export default function Index({ users, filters }) {
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all lowercase"/>
                                             {form.errors.email && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.email}</span>}
                                         </div>
+                                        {!editingId && (
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Contraseña</label>
-                                            <input id="password" name="password" type="password" value={form.data.password} onChange={e => form.setData('password', e.target.value)} required={!editingId} 
+                                            <input id="password" name="password" type="password" value={form.data.password} onChange={e => form.setData('password', e.target.value)} required
                                                 className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all"/>
                                             {form.errors.password && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.password}</span>}
                                         </div>
+                                        )}
                                         <div className="space-y-2">
                                             <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Rol Sistema</label>
                                             <select id="rol" name="rol" value={form.data.rol} onChange={e => form.setData('rol', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
@@ -280,13 +288,32 @@ export default function Index({ users, filters }) {
                                         </div>
                                     </div>
 
-                                    <div className="flex justify-end gap-4 pt-4">
-                                        <button type="button" onClick={() => setShowForm(false)} className="px-8 py-4 bg-white/5 text-white/40 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
-                                            Abortar Operación
-                                        </button>
-                                        <button type="submit" disabled={form.processing} className="px-10 py-4 bg-[#F69239] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg shadow-[#F69239]/20 hover:brightness-110">
-                                            {form.processing ? 'Procesando...' : (editingId ? 'Confirmar Actualización' : 'Inyectar Usuario')}
-                                        </button>
+                                    <div className="flex justify-between items-center gap-4 pt-4">
+                                        {editingId ? (
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    const u = form.data;
+                                                    setUserToReset({ id: editingId, nombres: u.nombres, apellidos: u.apellidos });
+                                                    setShowForm(false);
+                                                    setShowResetModal(true);
+                                                    setResetPassword(null);
+                                                    setCopied(false);
+                                                }}
+                                                className="px-5 py-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[9px] font-black uppercase italic tracking-widest rounded-2xl border border-amber-500/20 hover:border-amber-500/40 transition-all inline-flex items-center gap-2"
+                                            >
+                                                🔑 Resetear Clave
+                                            </button>
+                                        ) : <div />}
+
+                                        <div className="flex gap-4">
+                                            <button type="button" onClick={() => setShowForm(false)} className="px-8 py-4 bg-white/5 text-white/40 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
+                                                Abortar Operación
+                                            </button>
+                                            <button type="submit" disabled={form.processing} className="px-10 py-4 bg-[#F69239] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg shadow-[#F69239]/20 hover:brightness-110">
+                                                {form.processing ? 'Procesando...' : (editingId ? 'Confirmar Actualización' : 'Inyectar Usuario')}
+                                            </button>
+                                        </div>
                                     </div>
                                 </form>
                             </div>
@@ -403,6 +430,67 @@ export default function Index({ users, filters }) {
                     </div>
                 </div>
             </div>
+
+            {/* Reset Password Modal */}
+            {showResetModal && userToReset && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+                    <div className="w-full max-w-md bg-[#16162a] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative">
+                        <button onClick={() => { setShowResetModal(false); setResetPassword(null); }} className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">✕</button>
+
+                        {!resetPassword ? (
+                            <>
+                                <div className="mb-6">
+                                    <h3 className="text-xs font-black text-amber-400 uppercase tracking-[0.4em] italic mb-1">Resetear Contraseña</h3>
+                                    <h4 className="text-lg font-black text-white uppercase italic tracking-tighter leading-none">
+                                        {userToReset.apellidos}, {userToReset.nombres}
+                                    </h4>
+                                </div>
+                                <p className="text-xs text-indigo-100/60 font-semibold leading-relaxed mb-8">
+                                    Se generará una contraseña temporal de 16 caracteres. El usuario deberá cambiarla en su próximo ingreso.
+                                </p>
+                                <div className="flex justify-end gap-3">
+                                    <button onClick={() => { setShowResetModal(false); setResetPassword(null); }} className="px-6 py-3 bg-white/5 text-white/40 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            router.post(route('gestor.users.reset-password', userToReset.id), {}, {
+                                                onSuccess: (page) => {
+                                                    const pwd = page.props.flash?.generated_password;
+                                                    if (pwd) setResetPassword(pwd);
+                                                }
+                                            });
+                                        }}
+                                        className="px-6 py-3 bg-amber-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all hover:brightness-110"
+                                    >
+                                        Confirmar Reset
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="mb-6">
+                                    <h3 className="text-xs font-black text-emerald-400 uppercase tracking-[0.4em] italic mb-1">✓ Contraseña Generada</h3>
+                                    <h4 className="text-base font-black text-white uppercase italic tracking-tighter">{userToReset.apellidos}, {userToReset.nombres}</h4>
+                                </div>
+                                <p className="text-[10px] text-white/40 uppercase tracking-widest font-black italic mb-3">Contraseña Temporal (copia antes de cerrar)</p>
+                                <div className="flex items-center gap-3 bg-black/40 border border-emerald-500/30 rounded-2xl px-5 py-4 mb-6">
+                                    <code className="flex-1 text-emerald-300 font-black text-sm tracking-wider">{resetPassword}</code>
+                                    <button
+                                        onClick={() => { navigator.clipboard.writeText(resetPassword); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+                                        className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-xl text-[9px] font-black uppercase transition-all"
+                                    >
+                                        {copied ? '✓ Copiado' : 'Copiar'}
+                                    </button>
+                                </div>
+                                <button onClick={() => { setShowResetModal(false); setResetPassword(null); }} className="w-full px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
+                                    Cerrar
+                                </button>
+                            </>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Deletion Modal */}
             {showDeleteModal && (

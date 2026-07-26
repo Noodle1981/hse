@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\InspectionCompleted;
 use App\Http\Requests\StoreChecklistCompletionRequest;
 use App\Models\Asset;
+use App\Models\AssetMetadataLog;
 use App\Models\AssetType;
 use App\Models\ChecklistAssignment;
 use App\Models\DynamicAnswer;
@@ -20,6 +21,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -640,7 +642,7 @@ class InspectionController extends Controller
 
             // 2. Si tenía un activo anterior, restaurar sus métricas previas
             if ($oldAsset) {
-                $logs = \App\Models\AssetMetadataLog::where('asset_id', $oldAsset->id)
+                $logs = AssetMetadataLog::where('asset_id', $oldAsset->id)
                     ->where('dynamic_inspection_id', $inspection->id)
                     ->get();
 
@@ -676,7 +678,7 @@ class InspectionController extends Controller
                         $newValStr = $val !== null ? (is_array($val) ? json_encode($val) : (string) $val) : null;
 
                         if ($oldValStr !== $newValStr) {
-                            \App\Models\AssetMetadataLog::create([
+                            AssetMetadataLog::create([
                                 'asset_id' => $newAsset->id,
                                 'dynamic_inspection_id' => $inspection->id,
                                 'field_key' => $metricKey,
@@ -695,7 +697,7 @@ class InspectionController extends Controller
             }
 
             // 4. Re-evaluar alertas del sistema para que ambos activos actualicen sus estados SRE
-            \Illuminate\Support\Facades\Artisan::call('assets:check-alerts');
+            Artisan::call('assets:check-alerts');
         });
 
         return back()->with('message', 'Activo re-vinculado con éxito y alertas actualizadas.');

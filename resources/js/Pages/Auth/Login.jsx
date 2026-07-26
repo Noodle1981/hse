@@ -4,6 +4,7 @@ import { useForm, usePage, Head } from '@inertiajs/react';
 export default function Login() {
     const { branding } = usePage().props;
     const [showPassword, setShowPassword] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
         email: '',
@@ -11,9 +12,23 @@ export default function Login() {
         remember: false,
     });
 
+    const resetForm = useForm({
+        email: '',
+    });
+
     const submit = (e) => {
         e.preventDefault();
         post(route('login'));
+    };
+
+    const handleResetSubmit = (e) => {
+        e.preventDefault();
+        resetForm.post(route('password.reset-request.store'), {
+            onSuccess: () => {
+                setShowResetModal(false);
+                resetForm.reset();
+            }
+        });
     };
 
     return (
@@ -118,18 +133,25 @@ export default function Login() {
                                 {errors.password && <p className="mt-1.5 text-xs text-red-400">{errors.password}</p>}
                             </div>
 
-                            {/* Remember me */}
-                            <div className="flex items-center">
-                                <input
-                                    id="remember"
-                                    type="checkbox"
-                                    checked={data.remember}
-                                    onChange={e => setData('remember', e.target.checked)}
-                                    className="w-4 h-4 text-[#F69239] bg-white/5 border-white/20 rounded focus:ring-[#F69239]/50 accent-[#F69239]"
-                                />
-                                <label htmlFor="remember" className="ml-2 text-sm text-gray-400 cursor-pointer">
-                                    Recordarme
+                            {/* Remember me & Forgot password */}
+                            <div className="flex items-center justify-between">
+                                <label className="flex items-center cursor-pointer">
+                                    <input
+                                        id="remember"
+                                        type="checkbox"
+                                        checked={data.remember}
+                                        onChange={e => setData('remember', e.target.checked)}
+                                        className="w-4 h-4 text-[#F69239] bg-white/5 border-white/20 rounded focus:ring-[#F69239]/50 accent-[#F69239]"
+                                    />
+                                    <span className="ml-2 text-xs text-gray-400">Recordarme</span>
                                 </label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowResetModal(true)}
+                                    className="text-xs text-[#F69239] hover:underline font-medium transition-colors"
+                                >
+                                    ¿Olvidaste tu contraseña?
+                                </button>
                             </div>
 
                             {/* Botón submit */}
@@ -159,6 +181,64 @@ export default function Login() {
                     </p>
                 </div>
             </div>
+
+            {/* MODAL SOLICITUD DE RESETEO DE CONTRASEÑA */}
+            {showResetModal && (
+                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-[#16162a] border border-white/10 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-5">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+                                Solicitar Reseteo de Contraseña
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => setShowResetModal(false)}
+                                className="text-gray-400 hover:text-white text-lg font-bold"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <p className="text-xs text-gray-300 leading-relaxed">
+                            Ingresá tu correo electrónico. Tu gestor o administrador recibirá una solicitud en la plataforma para blanquear tu clave.
+                        </p>
+
+                        <form onSubmit={handleResetSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                    Email de Usuario *
+                                </label>
+                                <input
+                                    type="email"
+                                    value={resetForm.data.email}
+                                    onChange={e => resetForm.setData('email', e.target.value)}
+                                    placeholder="usuario@ejemplo.com"
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-[#F69239] focus:ring-0 font-mono"
+                                    required
+                                />
+                                {resetForm.errors.email && <p className="text-xs text-red-400 mt-1">{resetForm.errors.email}</p>}
+                            </div>
+
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowResetModal(false)}
+                                    className="px-4 py-2.5 bg-white/5 border border-white/10 hover:bg-white/10 text-white/70 text-xs font-bold rounded-xl transition-all"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    disabled={resetForm.processing}
+                                    className="px-5 py-2.5 bg-[#F69239] hover:bg-orange-500 text-white text-xs font-bold rounded-xl transition-all shadow-lg shadow-[#F69239]/20"
+                                >
+                                    {resetForm.processing ? 'Enviando...' : 'Enviar Solicitud'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

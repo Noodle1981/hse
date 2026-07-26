@@ -145,7 +145,7 @@ class AssetController extends Controller
                 'empresa_id' => request()->query('empresa_id', ''),
                 'sede_id' => request()->query('sede_id', ''),
                 'asset_type_id' => request()->query('asset_type_id', ''),
-            ]
+            ],
         ]);
     }
 
@@ -372,7 +372,7 @@ class AssetController extends Controller
             'sede_id' => 'required|exists:sedes,id',
             'asset_type_id' => 'required|exists:asset_types,id',
             'name' => 'required|string|max:255',
-            'identifier' => 'required|string|max:255|unique:assets,identifier,' . $asset->id,
+            'identifier' => 'required|string|max:255|unique:assets,identifier,'.$asset->id,
             'status' => 'required|in:operativo,alerta,fuera_de_servicio',
             'grupo' => 'nullable|string|max:255',
             'subgrupo' => 'nullable|string|max:255',
@@ -397,7 +397,7 @@ class AssetController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => "Activo '{$asset->name}' actualizado correctamente.",
-                'asset' => $asset
+                'asset' => $asset,
             ]);
         }
 

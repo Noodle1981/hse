@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm, router } from '@inertiajs/react';
+import { Head, Link, useForm, usePage, router } from '@inertiajs/react';
 
 export default function Users({ auth, consultant, users }) {
+    const { flash } = usePage().props;
     const [showModal, setShowModal] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
     const [showDeactivateModal, setShowDeactivateModal] = useState(false);
     const [deactivatingUser, setDeactivatingUser] = useState(null);
+    const [copiedPassword, setCopiedPassword] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm({
         id: '',
         nombres: '',
         apellidos: '',
         email: '',
-        password: '',
         rol: 'gestor',
         estado: 'activo',
     });
@@ -26,7 +27,6 @@ export default function Users({ auth, consultant, users }) {
             nombres: '',
             apellidos: '',
             email: '',
-            password: '',
             rol: 'gestor',
             estado: 'activo',
         });
@@ -40,7 +40,6 @@ export default function Users({ auth, consultant, users }) {
             nombres: user.nombres,
             apellidos: user.apellidos,
             email: user.email,
-            password: '',
             rol: user.rol,
             estado: user.estado,
         });
@@ -57,6 +56,12 @@ export default function Users({ auth, consultant, users }) {
         });
     };
 
+    const resetUserPassword = (user) => {
+        if (confirm(`¿Desea resetear la contraseña del usuario ${user.nombres} ${user.apellidos}? Se generará una clave temporal de un solo uso.`)) {
+            router.post(route('admin.consultants.users.reset-password', [consultant.id, user.id]));
+        }
+    };
+
     const openDeactivateModal = (user) => {
         setDeactivatingUser(user);
         setShowDeactivateModal(true);
@@ -71,6 +76,12 @@ export default function Users({ auth, consultant, users }) {
                 }
             });
         }
+    };
+
+    const handleCopyPassword = (password) => {
+        navigator.clipboard.writeText(password);
+        setCopiedPassword(true);
+        setTimeout(() => setCopiedPassword(false), 2500);
     };
 
     return (
@@ -185,7 +196,15 @@ export default function Users({ auth, consultant, users }) {
                                                         >
                                                             Configurar
                                                         </button>
-                                                        {u.id !== auth.user.id && u.rol !== 'tecnico' && u.estado === 'activo' && (
+                                                        {u.is_primary && (
+                                                            <button
+                                                                onClick={() => resetUserPassword(u)}
+                                                                className="px-4 py-2 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-white text-[9px] font-black uppercase tracking-widest italic rounded-lg border border-amber-500/20 hover:border-amber-500 transition-all"
+                                                            >
+                                                                Resetear Clave
+                                                            </button>
+                                                        )}
+                                                        {u.id !== auth.user.id && u.estado === 'activo' && (
                                                             <button
                                                                 onClick={() => openDeactivateModal(u)}
                                                                 className="px-4 py-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white text-[9px] font-black uppercase tracking-widest italic rounded-lg border border-red-500/20 hover:border-red-500 transition-all"
@@ -260,21 +279,6 @@ export default function Users({ auth, consultant, users }) {
                                 {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
                             </div>
 
-                            <div>
-                                <label htmlFor="password" className="block text-[9px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic mb-1.5">
-                                    Contraseña {editingUser ? '(Opcional)' : '*'}
-                                </label>
-                                <input 
-                                    type="password" 
-                                    id="password"
-                                    value={data.password} 
-                                    onChange={e => setData('password', e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:border-ep-primary focus:ring-0 transition-all font-bold"
-                                    required={!editingUser}
-                                />
-                                {errors.password && <p className="text-xs text-red-400 mt-1">{errors.password}</p>}
-                            </div>
-
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label htmlFor="rol" className="block text-[9px] font-black text-indigo-100/40 uppercase tracking-[0.2em] italic mb-1.5">Rol de Operador</label>
@@ -304,23 +308,39 @@ export default function Users({ auth, consultant, users }) {
                                 </div>
                             </div>
 
-                            <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
-                                <button 
-                                    type="button" 
-                                    onClick={() => setShowModal(false)}
-                                    className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all"
-                                >
-                                    Cancelar
-                                </button>
-                                <button 
-                                    type="submit" 
-                                    disabled={processing}
-                                    className="group relative px-6 py-3 bg-ep-primary text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg overflow-hidden inline-flex items-center gap-1.5"
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
-                                    {processing ? 'Guardando...' : 'Guardar'}
-                                </button>
+                            <div className="flex justify-between items-center gap-3 pt-6 border-t border-white/5">
+                                {/* Reset password button - only when editing an existing user */}
+                                {editingUser ? (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowModal(false);
+                                            resetUserPassword(editingUser);
+                                        }}
+                                        className="px-4 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[9px] font-black uppercase italic tracking-widest rounded-xl border border-amber-500/20 hover:border-amber-500/40 transition-all inline-flex items-center gap-1.5"
+                                    >
+                                        🔑 Resetear Clave
+                                    </button>
+                                ) : <div />}
+
+                                <div className="flex gap-3">
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setShowModal(false)}
+                                        className="px-6 py-3 bg-white/5 border border-white/10 hover:bg-white/10 text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl transition-all"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button 
+                                        type="submit" 
+                                        disabled={processing}
+                                        className="group relative px-6 py-3 bg-ep-primary text-white text-[10px] font-black uppercase italic tracking-widest rounded-xl hover:brightness-110 active:scale-95 transition-all shadow-lg overflow-hidden inline-flex items-center gap-1.5"
+                                    >
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" /></svg>
+                                        {processing ? 'Guardando...' : 'Guardar'}
+                                    </button>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -330,7 +350,6 @@ export default function Users({ auth, consultant, users }) {
             {showDeactivateModal && deactivatingUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
                     <div className="w-full max-w-md bg-[#16162a] border border-white/10 rounded-[2.5rem] p-8 sm:p-10 shadow-2xl relative animate-scale-up">
-                        {/* Close button */}
                         <button 
                             onClick={() => setShowDeactivateModal(false)}
                             className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors text-lg"
@@ -371,6 +390,52 @@ export default function Users({ auth, consultant, users }) {
                                     Deshabilitar
                                 </button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL CONTRASEÑA GENERADA DE UN SOLO USO */}
+            {flash?.generated_password && (
+                <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+                    <div className="bg-[#16162a] border border-amber-500/30 rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-6">
+                        <div className="flex items-center gap-3 text-amber-400 border-b border-white/10 pb-4">
+                            <span className="text-2xl">🔑</span>
+                            <div>
+                                <h3 className="text-sm font-bold uppercase tracking-wider text-white">Contraseña Temporal Generada</h3>
+                                <p className="text-[10px] text-amber-400/80">Esta clave solo se mostrará una vez</p>
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-gray-300 leading-relaxed">
+                            Copiá la clave temporal e informala al usuario. El sistema le solicitará cambiarla obligatoriamente al iniciar sesión.
+                        </p>
+
+                        <div className="bg-black/60 border border-white/15 rounded-xl p-4 flex items-center justify-between gap-3">
+                            <code className="text-lg font-mono font-bold text-amber-300 tracking-wider select-all break-all">
+                                {flash.generated_password}
+                            </code>
+                            <button
+                                type="button"
+                                onClick={() => handleCopyPassword(flash.generated_password)}
+                                className="px-3 py-2 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold rounded-lg transition-colors shrink-0 flex items-center gap-1.5"
+                            >
+                                {copiedPassword ? '✓ Copiada' : 'Copiar'}
+                            </button>
+                        </div>
+
+                        <div className="text-[10px] text-amber-400/70 bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+                            ⚠️ Por seguridad, no guardes esta contraseña en texto plano ni la compartas por medios no seguros.
+                        </div>
+
+                        <div className="flex justify-end pt-2">
+                            <button
+                                type="button"
+                                onClick={() => router.reload()}
+                                className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl transition-all shadow-lg shadow-amber-500/20"
+                            >
+                                Entendido y Cerrar
+                            </button>
                         </div>
                     </div>
                 </div>

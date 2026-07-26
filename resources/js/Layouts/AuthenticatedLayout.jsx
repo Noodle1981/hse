@@ -4,7 +4,7 @@ import { route } from 'ziggy-js';
 
 export default function AuthenticatedLayout({ children, title, header }) {
     const { props, url } = usePage();
-    const { auth = {}, branding = {}, flash = {} } = props;
+    const { auth = {}, branding = {}, flash = {}, pendingResetRequests = 0 } = props;
     const user = auth?.user || {};
     const isAdminView = url.startsWith('/admin');
 
@@ -136,6 +136,18 @@ export default function AuthenticatedLayout({ children, title, header }) {
                                     <NavItem href={safeRoute('admin.staff.index')} active={isActive('admin.staff.*')} open={sidebarOpen || mobileMenuOpen} icon={<IconStaff />} label="Personal / Staff" />
                                 )}
                             </>
+                        )}
+
+                        {/* Solicitudes de Reseteo (Super Admin, Vendedor, Gestor Principal) */}
+                        {(user?.is_super_admin || user?.is_vendedor || user?.is_primary_gestor || pendingResetRequests > 0) && (
+                            <NavItem 
+                                href={safeRoute('admin.password-reset-requests.index')} 
+                                active={isActive('admin.password-reset-requests.*')} 
+                                open={sidebarOpen || mobileMenuOpen} 
+                                icon={<IconKey />} 
+                                label="Solicitudes de Clave" 
+                                badge={pendingResetRequests} 
+                            />
                         )}
 
                         {/* Informe Maestro */}
@@ -287,20 +299,27 @@ export default function AuthenticatedLayout({ children, title, header }) {
 }
 
 /* ── NavItem Component ── */
-function NavItem({ href, active, open, icon, label }) {
+function NavItem({ href, active, open, icon, label, badge = null }) {
     if (!href || href === '#') return null; // No renderizar si la ruta no existe
     return (
         <li>
             <Link
                 href={href}
-                className={`flex items-center px-3 py-2 rounded-lg transition-colors ${
+                className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
                     active
                         ? 'bg-gradient-to-r from-[#F69239]/30 to-[#F69239]/10 border-l-[3px] border-[#F69239] text-white'
                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                 }`}
             >
-                <span className="flex-shrink-0 w-5 h-5 mr-3">{icon}</span>
-                {open && <span className="text-sm font-medium truncate">{label}</span>}
+                <div className="flex items-center min-w-0">
+                    <span className="flex-shrink-0 w-5 h-5 mr-3">{icon}</span>
+                    {open && <span className="text-sm font-medium truncate">{label}</span>}
+                </div>
+                {badge !== null && badge > 0 && (
+                    <span className="bg-red-500 text-white font-black text-[9px] px-2 py-0.5 rounded-full animate-pulse flex-shrink-0">
+                        {badge}
+                    </span>
+                )}
             </Link>
         </li>
     );
@@ -321,4 +340,5 @@ const IconUser     = () => <svg fill="none" stroke="currentColor" viewBox="0 0 2
 const IconCompanies = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>;
 const IconStaff     = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>;
 const IconAssets    = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>;
+const IconKey       = () => <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>;
 

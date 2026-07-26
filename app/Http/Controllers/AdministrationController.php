@@ -21,6 +21,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
@@ -166,6 +167,30 @@ class AdministrationController extends Controller
         $user->sedes()->detach($request->sede_id);
 
         return back()->with('message', 'Asignación eliminada correctamente.');
+    }
+
+    /**
+     * Reset password for a user in the gestor's own consultora.
+     * Available to: gestor principal (Administrador role).
+     */
+    public function gestorUsersResetPassword(User $user)
+    {
+        /** @var User $currentUser */
+        $currentUser = Auth::user();
+
+        // El usuario a resetear debe pertenecer a la misma consultora
+        abort_unless($user->consultora_id === $currentUser->consultora_id, 403, 'Acceso no autorizado.');
+
+        $plainPassword = Str::random(16);
+        $user->update([
+            'password' => Hash::make($plainPassword),
+            'must_change_password' => true,
+        ]);
+
+        session()->flash('generated_password', $plainPassword);
+        session()->flash('generated_password_user', $user->full_name ?? $user->nombres.' '.$user->apellidos);
+
+        return back()->with('message', "Contraseña de {$user->nombres} {$user->apellidos} reseteada exitosamente.");
     }
 
     /**
@@ -821,6 +846,7 @@ class AdministrationController extends Controller
             'description', 'fiscal_address', 'province', 'locality',
             'estado_suscripcion', 'color_primary', 'color_secondary', 'color_accent',
         ]);
+        $data['created_by_user_id'] = Auth::id();
 
         if ($request->hasFile('logo')) {
             $path = $request->file('logo')->store('logos/consultoras', 'public');
@@ -927,6 +953,8 @@ class AdministrationController extends Controller
             ];
         }
 
+        $primaryGestor = $consultant->primaryGestor;
+
         return Inertia::render('Admin/Consultants/Edit', [
             'consultant' => [
                 'id' => $consultant->id,
@@ -947,6 +975,18 @@ class AdministrationController extends Controller
                 'color_accent' => $consultant->color_accent ?? '#16a34a',
                 'logo_path' => $consultant->logo_path ? asset('storage/'.$consultant->logo_path) : null,
             ],
+            'primary_gestor' => $primaryGestor ? [
+                'id' => $primaryGestor->id,
+                'nombres' => $primaryGestor->nombres,
+                'apellidos' => $primaryGestor->apellidos,
+                'email' => $primaryGestor->email,
+                'telefono' => $primaryGestor->telefono,
+                'n_doc' => $primaryGestor->n_doc,
+                'matricula' => $primaryGestor->matricula,
+                'estado' => $primaryGestor->estado,
+                'must_change_password' => (bool) $primaryGestor->must_change_password,
+            ] : null,
+            'has_primary_gestor' => $primaryGestor !== null,
             'suscripcion_logs' => $formattedLogs,
             'audit_logs' => $formattedAuditLogs,
         ]);
@@ -1015,7 +1055,7 @@ class AdministrationController extends Controller
      */
     public function consultantUsersIndex(Consultora $consultant)
     {
-        $this->ensureSuperAdmin();
+        $this->ensureSuperAdminOrVendedor();
         $users = $consultant->users()->get();
 
         return Inertia::render('Admin/Consultants/Users', [
@@ -1029,7 +1069,7 @@ class AdministrationController extends Controller
      */
     public function consultantUsersSave(Request $request, Consultora $consultant)
     {
-        $this->ensureSuperAdmin();
+        $this->ensureSuperAdminOrVendedor();
         $userId = $request->input('id');
 
         if ($userId) {
@@ -1044,12 +1084,6 @@ class AdministrationController extends Controller
             'rol' => 'required|string|in:gestor,tecnico',
             'estado' => 'required|string|in:activo,inactivo',
         ];
-
-        if (! $userId) {
-            $rules['password'] = 'required|string|min:8';
-        } else {
-            $rules['password'] = 'nullable|string|min:8';
-        }
 
         $request->validate($rules);
 
@@ -1083,20 +1117,42 @@ class AdministrationController extends Controller
         $data = $request->only(['nombres', 'apellidos', 'email', 'rol', 'estado']);
         $data['consultora_id'] = $consultant->id;
 
-        if ($request->input('password')) {
-            $data['password'] = Hash::make($request->input('password'));
-        }
+        if (! $userId) {
+            $plainPassword = Str::random(16);
+            $data['password'] = Hash::make($plainPassword);
+            $data['must_change_password'] = true;
 
-        if ($userId) {
+            User::create($data);
+            session()->flash('generated_password', $plainPassword);
+
+            $message = 'Usuario creado exitosamente. Se ha generado su contraseña temporal.';
+        } else {
             $user = User::findOrFail($userId);
             $user->update($data);
+
             $message = 'Usuario actualizado exitosamente.';
-        } else {
-            User::create($data);
-            $message = 'Usuario creado exitosamente.';
         }
 
         return redirect()->route('admin.consultants.users.index', $consultant->id)->with('message', $message);
+    }
+
+    /**
+     * Reset password for a consultora user.
+     */
+    public function consultantUsersResetPassword(Consultora $consultant, User $user)
+    {
+        $this->ensureSuperAdminOrVendedor();
+        abort_unless($user->consultora_id === $consultant->id, 403, 'Acceso no autorizado a este usuario.');
+
+        $plainPassword = Str::random(16);
+        $user->update([
+            'password' => Hash::make($plainPassword),
+            'must_change_password' => true,
+        ]);
+
+        session()->flash('generated_password', $plainPassword);
+
+        return back()->with('message', "Contraseña de {$user->full_name} reseteada exitosamente.");
     }
 
     /**
@@ -1104,15 +1160,11 @@ class AdministrationController extends Controller
      */
     public function consultantUsersDestroy(Consultora $consultant, User $user)
     {
-        $this->ensureSuperAdmin();
+        $this->ensureSuperAdminOrVendedor();
         abort_unless($user->consultora_id === $consultant->id, 403, 'Acceso no autorizado a este usuario.');
 
         if ($user->id === Auth::id()) {
             return back()->with('error', 'No puedes deshabilitar tu propio usuario.');
-        }
-
-        if ($user->rol === User::ROLE_TECNICO) {
-            return back()->with('error', 'No puedes deshabilitar a un usuario con rol Técnico desde la súper administración.');
         }
 
         $user->update(['estado' => 'inactivo']);
@@ -1197,5 +1249,83 @@ class AdministrationController extends Controller
         $user->update(['estado' => 'inactivo']);
 
         return redirect()->route('admin.staff.index')->with('message', 'Miembro del staff global deshabilitado exitosamente.');
+    }
+
+    /**
+     * Crear o actualizar el gestor principal de una consultora.
+     */
+    public function consultantSavePrimaryGestor(Request $request, Consultora $consultant)
+    {
+        $this->ensureSuperAdminOrVendedor();
+
+        $existingPrimary = $consultant->primaryGestor;
+        $userId = $existingPrimary?->id;
+
+        if ($request->has('email')) {
+            $request->merge(['email' => strtolower(trim($request->email))]);
+        }
+
+        $rules = [
+            'nombres' => 'required|string|max:255',
+            'apellidos' => 'required|string|max:255',
+            'email' => ['required', 'email', Rule::unique('users')->ignore($userId)],
+            'telefono' => 'nullable|string|max:50',
+            'n_doc' => 'nullable|string|max:50',
+            'matricula' => 'nullable|string|max:50',
+        ];
+
+        $request->validate($rules);
+
+        $data = [
+            'nombres' => $request->nombres,
+            'apellidos' => $request->apellidos,
+            'email' => $request->email,
+            'telefono' => $request->telefono,
+            'n_doc' => $request->n_doc,
+            'matricula' => $request->matricula,
+            'consultora_id' => $consultant->id,
+            'rol' => User::ROLE_GESTOR,
+            'is_primary' => true,
+            'estado' => 'activo',
+        ];
+
+        if (! $userId) {
+            $plainPassword = Str::random(16);
+            $data['password'] = Hash::make($plainPassword);
+            $data['must_change_password'] = true;
+
+            User::create($data);
+
+            session()->flash('generated_password', $plainPassword);
+
+            return back()->with('message', 'Gestor Principal creado exitosamente. Comuníquele su clave inicial de acceso.');
+        } else {
+            $existingPrimary->update($data);
+
+            return back()->with('message', 'Datos del Gestor Principal actualizados exitosamente.');
+        }
+    }
+
+    /**
+     * Resetear contraseña del gestor principal de una consultora.
+     */
+    public function consultantResetPrimaryPassword(Consultora $consultant)
+    {
+        $this->ensureSuperAdminOrVendedor();
+
+        $primaryGestor = $consultant->primaryGestor;
+        if (! $primaryGestor) {
+            return back()->with('error', 'La consultora no tiene un Gestor Principal asignado.');
+        }
+
+        $plainPassword = Str::random(16);
+        $primaryGestor->update([
+            'password' => Hash::make($plainPassword),
+            'must_change_password' => true,
+        ]);
+
+        session()->flash('generated_password', $plainPassword);
+
+        return back()->with('message', 'Contraseña del Gestor Principal reseteada exitosamente. Comuníquele la nueva clave temporal.');
     }
 }

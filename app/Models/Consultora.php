@@ -32,11 +32,30 @@ class Consultora extends Model
         'color_primary',
         'color_secondary',
         'color_accent',
+        'created_by_user_id',
     ];
 
     protected $casts = [
         'config' => 'array',
     ];
+
+    /**
+     * Usuario que creó la consultora (vendedor / super admin)
+     */
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by_user_id');
+    }
+
+    /**
+     * Gestor principal de la consultora
+     */
+    public function primaryGestor()
+    {
+        return $this->hasOne(User::class, 'consultora_id')
+            ->where('is_primary', true)
+            ->whereIn('rol', [User::ROLE_GESTOR, 'administrador']);
+    }
 
     /**
      * Empresas gestionadas por esta consultora

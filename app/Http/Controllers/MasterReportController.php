@@ -65,7 +65,7 @@ class MasterReportController extends Controller
             'tecnicos' => $tecnicos,
             'initial_sede_id' => $request->sede_id,
             'initial_periodo' => $request->periodo,
-            'initial_user_id' => $request->user_id ?? ($user->isTechnician() ? (string)$user->id : ''),
+            'initial_user_id' => $request->user_id ?? ($user->isTechnician() ? (string) $user->id : ''),
         ]);
     }
 

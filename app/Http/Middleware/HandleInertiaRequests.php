@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\PasswordResetRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -35,8 +36,22 @@ class HandleInertiaRequests extends Middleware
         $sede = $user?->sedes()->first();
         $empresa = $sede?->empresa;
 
+        $pendingResetRequests = 0;
+        if ($user) {
+            $pendingResetRequests = PasswordResetRequest::query()
+                ->where('status', 'pending')
+                ->where(function ($q) use ($user) {
+                    $q->whereJsonContains('notified_user_ids', $user->id);
+                    if ($user->isSuperAdmin()) {
+                        $q->orWhereNull('notified_user_ids');
+                    }
+                })
+                ->count();
+        }
+
         return [
             ...parent::share($request),
+            'pendingResetRequests' => $pendingResetRequests,
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->id,
@@ -44,6 +59,8 @@ class HandleInertiaRequests extends Middleware
                     'apellidos' => $user->apellidos,
                     'email' => $user->email,
                     'rol' => $user->rol,
+                    'is_primary' => (bool) $user->is_primary,
+                    'is_primary_gestor' => $user->isPrimaryGestor(),
                     'active_role' => session('active_role', $user->rol),
                     'is_admin' => $user->isAdmin(),
                     'is_technician' => $user->isTechnician(),

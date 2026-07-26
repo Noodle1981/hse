@@ -220,7 +220,7 @@ class CheckAssetAlerts extends Command
                         foreach ($findingsToResolve as $finding) {
                             $finding->agregarSeguimiento(
                                 Hallazgo::ESTADO_RESUELTO,
-                                "Resolución automática: La métrica del activo retornó a niveles normales."
+                                'Resolución automática: La métrica del activo retornó a niveles normales.'
                             );
                         }
                     }
@@ -331,7 +331,7 @@ class CheckAssetAlerts extends Command
         foreach ($findingsToResolve as $finding) {
             $finding->agregarSeguimiento(
                 Hallazgo::ESTADO_RESUELTO,
-                "Resolución automática SRE: Se completó el checklist de mantenimiento / reparación."
+                'Resolución automática SRE: Se completó el checklist de mantenimiento / reparación.'
             );
         }
 

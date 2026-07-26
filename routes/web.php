@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdministrationController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetTypeController;
+use App\Http\Controllers\Auth\ForcePasswordChangeController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ChecklistController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\InspectionController;
 use App\Http\Controllers\InspectionPDFController;
 use App\Http\Controllers\MasterReportController;
 use App\Http\Controllers\OperationController;
+use App\Http\Controllers\PasswordResetRequestController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SignatureApprovalController;
 use App\Http\Controllers\SwitchRoleController;
@@ -102,6 +104,7 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/save', [AdministrationController::class, 'saveUser'])->name('users.save');
             Route::delete('/{user}', [AdministrationController::class, 'deleteUser'])->name('users.delete');
             Route::post('/{id}/restore', [AdministrationController::class, 'restoreUser'])->name('users.restore');
+            Route::post('/{user}/reset-password', [AdministrationController::class, 'gestorUsersResetPassword'])->name('users.reset-password');
             Route::get('/pending-signatures', [SignatureApprovalController::class, 'pending'])->name('signatures.pending');
             Route::post('/{user}/approve-signature', [SignatureApprovalController::class, 'approve'])->name('signatures.approve');
             Route::post('/{user}/reject-signature', [SignatureApprovalController::class, 'reject'])->name('signatures.reject');
@@ -392,15 +395,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/store', [AdministrationController::class, 'consultantsStore'])->name('store');
             Route::get('/{consultant}/edit', [AdministrationController::class, 'consultantsEdit'])->name('edit');
             Route::post('/{consultant}/update', [AdministrationController::class, 'consultantsUpdate'])->name('update');
+            Route::post('/{consultant}/primary-gestor', [AdministrationController::class, 'consultantSavePrimaryGestor'])->name('primary-gestor.save');
+            Route::post('/{consultant}/primary-gestor/reset-password', [AdministrationController::class, 'consultantResetPrimaryPassword'])->name('primary-gestor.reset-password');
+            Route::get('/{consultant}/users', [AdministrationController::class, 'consultantUsersIndex'])->name('users.index');
+            Route::post('/{consultant}/users/save', [AdministrationController::class, 'consultantUsersSave'])->name('users.save');
+            Route::post('/{consultant}/users/{user}/reset-password', [AdministrationController::class, 'consultantUsersResetPassword'])->name('users.reset-password');
+            Route::delete('/{consultant}/users/{user}', [AdministrationController::class, 'consultantUsersDestroy'])->name('users.destroy');
 
-            // Acciones destructivas y gestión de staff interno restringidas a super_admin
+            // Acciones destructivas restringidas a super_admin
             Route::middleware(['role:super_admin'])->group(function () {
                 Route::delete('/{consultant}', [AdministrationController::class, 'consultantsDestroy'])->name('destroy');
-
-                // Staff/Users Management per Consultora
-                Route::get('/{consultant}/users', [AdministrationController::class, 'consultantUsersIndex'])->name('users.index');
-                Route::post('/{consultant}/users/save', [AdministrationController::class, 'consultantUsersSave'])->name('users.save');
-                Route::delete('/{consultant}/users/{user}', [AdministrationController::class, 'consultantUsersDestroy'])->name('users.destroy');
             });
         });
 
@@ -412,10 +416,21 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
-    // Logout
     // Role Switch
     Route::get('/switch-role/{role}', [SwitchRoleController::class, 'switch'])->name('switch-role');
+
+    // Cambiar contraseña obligatoria
+    Route::get('/change-password', [ForcePasswordChangeController::class, 'show'])->name('password.change');
+    Route::post('/change-password', [ForcePasswordChangeController::class, 'update'])->name('password.change.update');
+
+    // Solicitudes de reseteo de contraseña (In-App)
+    Route::get('/admin/password-reset-requests', [PasswordResetRequestController::class, 'index'])->name('admin.password-reset-requests.index');
+    Route::post('/admin/password-reset-requests/{resetRequest}/resolve', [PasswordResetRequestController::class, 'resolve'])->name('admin.password-reset-requests.resolve');
+    Route::delete('/admin/password-reset-requests/{resetRequest}', [PasswordResetRequestController::class, 'destroy'])->name('admin.password-reset-requests.destroy');
 
     // Logout
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 });
+
+// Ruta pública para solicitar reseteo de contraseña (sin estar autenticado)
+Route::post('/password-reset-request', [PasswordResetRequestController::class, 'store'])->name('password.reset-request.store');

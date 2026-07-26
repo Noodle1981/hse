@@ -9,10 +9,10 @@ use App\Models\MasterReport;
 use App\Models\Sede;
 use App\Models\Training;
 use App\Models\VisitTraining;
+use App\Services\BrandingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use App\Services\BrandingService;
 
 class AnnualContractReportController extends Controller
 {

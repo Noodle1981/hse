@@ -41,6 +41,7 @@ class User extends Authenticatable
         'firma_status',
         'titulo',
         'must_change_password',
+        'is_primary',
     ];
 
     /**
@@ -72,6 +73,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'must_change_password' => 'boolean',
+            'is_primary' => 'boolean',
         ];
     }
 
@@ -199,6 +201,11 @@ class User extends Authenticatable
     public function isGestor(): bool
     {
         return $this->hasRole(self::ROLE_GESTOR);
+    }
+
+    public function isPrimaryGestor(): bool
+    {
+        return $this->isGestor() && (bool) $this->is_primary;
     }
 
     public function isSocio(): bool
