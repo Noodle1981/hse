@@ -30,7 +30,10 @@ El sistema opera bajo un esquema estricto de multi-tenancy y control de accesos 
 ```
 
 ### 1.1. Gestor (Administrador / Consultor Técnico de Higiene y Seguridad)
-* **Objetivo:** Diseñar el plan estratégico de seguridad y auditorías, y consolidar la información en informes consolidados profesionales para el cliente final.
+* **Objetivo:** Diseñar el plan estratégico de seguridad y auditorías, administrar el personal técnico/gestor de su consultora, y consolidar la información en informes consolidados profesionales para el cliente final.
+* **Jerarquía de Gestores (`is_primary`):**
+  - **Gestor Principal (`is_primary = true`):** Es el administrador titular de la consultora. Posee facultades exclusivas para gestionar al personal de su firma y resetear contraseñas de sus gestores secundarios y técnicos desde la consola `gestor/users`.
+  - **Gestores Secundarios (`is_primary = false`):** Operan la administración cotidiana pero no tienen privilegios para resetear claves ni alterar la nómina de usuarios de la consultora.
 * **Responsabilidades:**
   * Crear y dar de alta Empresas (`Empresa`) y Sedes físicas (`Sede`).
   * Diseñar y estructurar plantillas de checklists dinámicos (`DynamicChecklist`, `ChecklistSection`, `DynamicQuestion`).
@@ -40,7 +43,7 @@ El sistema opera bajo un esquema estricto de multi-tenancy y control de accesos 
   * Consolidar visitas, capacitaciones e inspecciones en **Reportes Maestros** (`MasterReport`) y generar los informes consolidados en PDF.
   * Auditar, observar, devolver y aprobar los Informes Maestros redactados por los técnicos a su cargo, redactando observaciones de corrección (`observacion_revision`).
 * **Páginas React / Inertia asociadas:** 
-  * Directorio `resources/js/Pages/Gestor/*` (Dashboard, MasterReports, Inspections, Visits, Companies, Checklist administration, Annual Plan).
+  * Directorio `resources/js/Pages/Gestor/*` (Dashboard, MasterReports, Inspections, Visits, Companies, Users, Checklist administration, Annual Plan).
 
 ### 1.2. Técnico (Inspector de Campo / Operador de Terreno)
 * **Objetivo:** Ejecutar las inspecciones físicas, constatar condiciones de seguridad, dictar capacitaciones y certificar su presencia y visitas en las instalaciones del cliente.
@@ -391,5 +394,17 @@ Utiliza estas estructuras de prompts cuando trabajes en NotebookLM o con asisten
 > **Regla de Política (Documentos Controlados):**
 > Los checklists son documentos controlados (ISO 9001/45001). Si se corrige un checklist, se crea una nueva versión y el gestor re-importa deliberadamente.
 > **Regla de Ámbito:**
+> Si `category_id` no está seteado en la plantilla, el checklist es global y se puede asociar a cualquier `AssetType`. Si tiene `category_id`, solo está disponible para ese tipo.
+
+### 4.4. Prompt para Gestión de Usuarios, Jerarquía y Reseteo de Claves In-App
+> **Contexto:** Trabajo en los módulos de administración de personal (`Admin/Consultants/Users.jsx` y `Gestor/Users.jsx`) en Laravel 12 + Inertia.js.
+> **Reglas de Jerarquía y Reseteo:**
+> - El campo `is_primary = true` determina al Gestor Principal de la consultora.
+> - Solo el Gestor Principal dentro de su consultora puede ver y accionar el reseteo de clave (`🔑 Resetear Clave`) para sus operadores en `gestor/users`.
+> - Súper Admins y Vendedores pueden resetear claves de Gestores Principales desde la administración central de consultoras.
+> - El reseteo de contraseña no requiere servidor SMTP (reseteo in-app vía `password_reset_requests`).
+> - Se genera automáticamente una contraseña temporal de 16 caracteres (`Str::random(16)`) y se marca `must_change_password = true`.
+> - El middleware `ForcePasswordChange` obliga al usuario a cambiar su clave en `/change-password` al ingresar.
+> **Tarea:** `[Describir tarea o consulta específica]`
 > `AssetType.empresa_id` (nivel empresa, compartido entre sedes). `Asset.sede_id` (nivel sede). No hay conflicto entre sedes que usen el mismo tipo.
 > **Tarea:** `[Describir mejora o corrección en el configurador]`.

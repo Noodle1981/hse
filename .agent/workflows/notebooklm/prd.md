@@ -77,13 +77,30 @@ XamaSafe destaca por una interfaz inmersiva y de alto impacto visual. Emplea una
 * **Modalidad Roster Minero 24/7:** Configuración especial para sedes en zonas de operación minera continua. Al activarse, se omiten las alertas ordinarias de días y horarios no laborales, validando de forma automática cualquier ingreso del técnico (incluyendo domingos y feriados).
 * **Control Inteligente de Jornada:** En sedes estándar, el sistema audita en tiempo real que los ingresos ocurran en los días (`dias_operativos`) y horarios (`hora_apertura` / `hora_cierre`) parametrizados, disparando advertencias visuales de sobrejornada en el dashboard táctico ante excesos.
 
-### 4.3. Motor de Autenticación y Autorización Robustecida (Fix Definitivo de Roles)
+### 4.3. Motor de Autenticación, Autorización y Gestión de Identidades
+
 * **Parsing Universal de Roles (Modelo `User`):** La verificación de accesos soporta múltiples formatos de definición para una flexibilidad y confiabilidad absoluta en producción:
   - Strings simples (ej. `'Técnico'`, `'gestor'`).
   - Cadenas delimitadas por comas (ej. `'Técnico,tecnico,gestor'`).
   - Cadenas separadas por barras o pipes (ej. `'Técnico|tecnico|gestor'`).
   - Arrays y estructuras anidadas (ej. `['gestor', 'tecnico,Socio']`).
 * **Simplificación y Delegación de Middleware (`CheckRole`):** Reducción de la lógica de acoplamiento en el middleware de ruta. Toda solicitud de roles de las rutas de Laravel se delega directamente a `User::hasRole()`, garantizando consistencia arquitectónica bidireccional (Rutas de Middleware vs Políticas de Controladores).
+
+#### 4.3.1. Jerarquía de Usuarios y Control Operativo (`is_primary`)
+* **Gestor Principal (`is_primary = true`):** Es el gestor creado inicialmente al registrar la consultora (o promovido como tal). Posee privilegios exclusivos dentro de su consultora para:
+  - Administrar a los operadores de su firma (Gestores secundarios y Técnicos).
+  - Ejecutar el reseteo de contraseñas de su personal directamente desde la consola `gestor/users`.
+  - Los Gestores Secundarios y Técnicos no tienen acceso a la funcionalidad de reseteo de claves de otros usuarios.
+* **Trazabilidad de Creación de Consultora (`created_by_user_id`):** Registra el ID del usuario (`vendedor` o `super_admin`) que dio de alta la consultora, permitiendo a los vendedores gestionar y dar soporte comercial a las consultoras creadas por ellos.
+
+#### 4.3.2. Reseteo de Contraseñas In-App (Arquitectura Sin Servidor SMTP)
+* **Solicitudes de Reseteo In-App (`password_reset_requests`):** Ante la ausencia de un servidor de correo SMTP en entornos de despliegue aislados, el enlace "¿Olvidaste tu contraseña?" en el portal de `Login` permite al usuario enviar una solicitud de reseteo in-app.
+* **Notificaciones e Integración Táctica:** La solicitud queda registrada en la base de datos y genera una notificación con badges flotantes en la consola del Súper Admin, Vendedor o Gestor Principal correspondiente.
+* **Generación Automática de Contraseña Temporal (16 caracteres):** Al procesar un reseteo de clave (sea mediante resolución de solicitud o desde el modal de configuración de operadores), el sistema elimina la carga manual de contraseñas y genera automáticamente un password temporal seguro de 16 caracteres (`Str::random(16)`). La contraseña se despliega en pantalla dentro de un modal interactivo con botón "Copiar".
+
+#### 4.3.3. Control de Cambio Obligatorio de Clave (`ForcePasswordChange`)
+* **Flag `must_change_password`:** Todo usuario recién creado o cuya contraseña haya sido reseteada por un administrador se marca activamente con `must_change_password = true`.
+* **Middleware `ForcePasswordChange`:** Al iniciar sesión o navegar, el middleware intercepta al usuario y restringe su acceso únicamente a la pantalla obligatoria de cambio de clave (`/change-password`). El usuario no puede acceder al dashboard ni ejecutar tareas en campo hasta definir su nueva contraseña personal definitiva.
 
 ### 4.4. Módulo de Hallazgos e Incidentes
 * **Reporte Rápido y Sede Contextual:** Durante una visita activa, el técnico puede levantar un "Hallazgo" o "Incidente" al vuelo. Si se reporta dentro del contexto de una visita activa (`visit_id` presente):

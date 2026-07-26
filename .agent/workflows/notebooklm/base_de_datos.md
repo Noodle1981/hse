@@ -332,6 +332,10 @@ El sistema cuenta con las siguientes entidades principales:
 | `color_primary` | `varchar` | No ❌ | `'#1e40af'` |  |
 | `color_secondary` | `varchar` | No ❌ | `'#6b7280'` |  |
 | `color_accent` | `varchar` | No ❌ | `'#16a34a'` |  |
+| `created_by_user_id` | `INTEGER` | Sí ✅ | *ninguno* | Usuario (`vendedor` o `super_admin`) que creó la consultora |
+
+### 🔗 Relaciones (Foreign Keys)
+- `created_by_user_id` → vincula con `users`(`id`)
 
 ### 🗂️ Índices
 - `consultoras_cuit_unique` (Único)
@@ -992,13 +996,32 @@ solicitado → en_redaccion → finalizado → aprobado
 | `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `deleted_at` | `datetime` | Sí ✅ | *ninguno* |  |
 | `consultora_id` | `INTEGER` | Sí ✅ | *ninguno* |  |
-| `must_change_password` | `tinyint(1)` | No ❌ | `'0'` |  |
+| `must_change_password` | `tinyint(1)` | No ❌ | `'0'` | Flag de seguridad que fuerza al usuario a cambiar contraseña en su próximo login |
+| `is_primary` | `tinyint(1)` | No ❌ | `'0'` | Indica si es el gestor principal de la consultora con potestad para administrar su personal y resetear claves |
 
 ### 🔗 Relaciones (Foreign Keys)
 - `consultora_id` → vincula con `consultoras`(`id`)
 
 ### 🗂️ Índices
 - `users_email_unique` (Único)
+
+---
+
+## Tabla: `password_reset_requests`
+
+| Campo | Tipo | Admite Nulo | Valor por Defecto | PK |
+|---|---|---|---|---|
+| `id` | `INTEGER` | No ❌ | *ninguno* | 🔑 PK |
+| `user_id` | `INTEGER` | No ❌ | *ninguno* | Usuario que solicita el reseteo de contraseña |
+| `status` | `varchar` (enum) | No ❌ | `'pending'` | Estado de la solicitud (`'pending'`, `'resolved'`, `'rejected'`, `'cancelled'`) |
+| `notified_user_ids` | `TEXT` (json) | Sí ✅ | *ninguno* | Array JSON con IDs de usuarios notificados para resolver (ej. Gestor Principal, Vendedor, Super Admin) |
+| `resolved_by_user_id` | `INTEGER` | Sí ✅ | *ninguno* | Usuario administrador que resolvió la solicitud |
+| `created_at` | `datetime` | Sí ✅ | *ninguno* |  |
+| `updated_at` | `datetime` | Sí ✅ | *ninguno* |  |
+
+### 🔗 Relaciones (Foreign Keys)
+- `user_id` → vincula con `users`(`id`) (cascadeOnDelete)
+- `resolved_by_user_id` → vincula con `users`(`id`) (nullOnDelete)
 
 ---
 
