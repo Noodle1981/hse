@@ -1,13 +1,30 @@
 ---
-description: 
+description: Tutoriales o manual de ayuda
 ---
 
-en http://ep-back.test/admin/consultants/1/edit, no tengo como crear un usuario de gestor principal y unico, como es el caso de gestor@ep.com, ni tampoco modificarlo si se ha creado. necesito que en esa vista se pueda crear, y debe permitirse cambiar la contraseña
+En esta etapa necesito armar tutoriales o manual de ayuda o uso. con la finalidad de poder proveer informacion, en la carpeta doc, hay otra carpeta que se llama tutoriales y ahi vas a generar los archivos que se titulan de la siguiente manera
 
-es decir que tomo un correo que el quiera dar, se habilita, ese correo que el da sirve como usuario, se le asigna un clave generica de un solo uso, cuando el se logee la primera vez, digamos una vez entrado, el sistema debe detectar que es un usuario nuevo con un codigo de una unica vez y que debe cambiarse.
-
-
-Si elegimos un codigo de inicial para todos los usuarios nuevos, una vez dado de alta, se puede cambiar, o lo mejor que el sistema genere codigos solo y unicos y luego pasarlo, pregunto para no complicar la lógica en si.
+vendedores : creación de consultoras, gestor principal, explicacion de contraseña unica, reseteo, y todas las funcionalidades que le compete al rol vendedores, reseteos de claves permitidas
 
 
-y si es un formato tokens via email? dime que es lo que sugieres, que sea seguro, rapido y facil de implementar.
+Gestores principales y secundarios creacion de usuarios, roles de usuarios (tecnicos y gestores secundarios), reseteo de contraseña permitidas, gestion y aprobación de firmas, asignación de tecnicos en sedes, configuración de perfil propios
+
+
+técnicos configuración de perfil propios, firmas, 
+
+
+luego procedimientos
+
+procedimientos de gestores
+
+procedimientos de técnicos
+
+
+
+como me gustaria que se pueda hacer con el contexto del la visual.md con el logo de xamasafe, ect. vamos a crear pdf de esos archivos, para que yo pueda descargarlos y enviarlos al equipo , esos archivos deberian poder descargarse desde un enlace llamado tutoriales en super admin y vendedores. para tenerlo a manos en descargas.
+
+
+
+necesito que por cada tutotrial sea un sprint, para poder trabajar en profundidad, me comprendes?
+
+

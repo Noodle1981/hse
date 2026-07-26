@@ -12,6 +12,7 @@ use App\Http\Controllers\ContractController;
 use App\Http\Controllers\Contracts\AnnualContractReportController;
 use App\Http\Controllers\FindingController;
 use App\Http\Controllers\Hallazgos\HallazgoPDFController;
+use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\IncidenteController;
 use App\Http\Controllers\Incidentes\IncidentePDFController;
 use App\Http\Controllers\InspectionController;
@@ -71,6 +72,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
     Route::post('/perfil/signature', [ProfileController::class, 'updateSignature'])->name('profile.signature');
     Route::post('/perfil/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
+
+    // Centro de Ayuda & Manuales / Tutoriales (PDFs)
+    Route::get('/tutoriales', [HelpCenterController::class, 'index'])->name('tutorials.index');
+    Route::get('/tutoriales/{key}/pdf', [HelpCenterController::class, 'downloadPdf'])->name('tutorials.pdf');
 
     /*
     |--------------------------------------------------------------------------
