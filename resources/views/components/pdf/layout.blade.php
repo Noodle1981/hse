@@ -16,7 +16,7 @@
             Colors are injected dynamically from Consultora branding.
         */
         @page {
-            margin: 100px 25px 60px 25px; /* Top margin space for Header */
+            margin: 115px 25px 60px 25px; /* Margen superior suficiente para el header fijo */
         }
         
         body {
@@ -35,12 +35,12 @@
         /* Header & Footer */
         header {
             position: fixed;
-            top: -80px;
+            top: -95px;
             left: 0px;
             right: 0px;
-            height: 80px;
+            height: 75px;
             border-bottom: 3px solid {{ $cp }};
-            padding-bottom: 10px;
+            padding-bottom: 8px;
         }
 
         footer {

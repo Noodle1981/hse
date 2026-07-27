@@ -132,6 +132,20 @@
             color: #0f172a;
             font-weight: bold;
         }
+
+        /* Reglas de salto de página para evitar que el texto o las listas se encimen en los márgenes */
+        .markdown-body h1,
+        .markdown-body h2,
+        .markdown-body h3 {
+            page-break-after: avoid;
+        }
+
+        .markdown-body li,
+        .markdown-body blockquote,
+        .markdown-body pre,
+        .markdown-body tr {
+            page-break-inside: avoid;
+        }
     </style>
 
     <div class="markdown-body">
