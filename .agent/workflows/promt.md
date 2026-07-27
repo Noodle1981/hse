@@ -2,29 +2,13 @@
 description: Tutoriales o manual de ayuda
 ---
 
-En esta etapa necesito armar tutoriales o manual de ayuda o uso. con la finalidad de poder proveer informacion, en la carpeta doc, hay otra carpeta que se llama tutoriales y ahi vas a generar los archivos que se titulan de la siguiente manera
+en http://ep-back.test/tutoriales?tutorial=vendedores_manual, 
+primera tarea
 
-vendedores : creación de consultoras, gestor principal, explicacion de contraseña unica, reseteo, y todas las funcionalidades que le compete al rol vendedores, reseteos de claves permitidas
+noto que los manuales hace mucha menciones con los nombres de campos de la bd, por ejemplo (password_reset_requests,  (recibe 403 Forbidden). (is_primary) (is_primary = true) created_by_user_id, es decir hay que traducirlo en algo más coloquial, mas entendible, para que se pueda vender y comprender más facil, mucho tecnicismo de nombres de campos no es necesarios, pero si me gustan las explicaciones y objetivos. adaptarlo para que sea leible
 
+2 tarea, necesito mejorar la vista, digamos no necesito que salga el detalle de la escritura, conque estén en los pdf es suficientes
 
-Gestores principales y secundarios creacion de usuarios, roles de usuarios (tecnicos y gestores secundarios), reseteo de contraseña permitidas, gestion y aprobación de firmas, asignación de tecnicos en sedes, configuración de perfil propios
+3 noto que carga muy lento esta vista, tratar de optimizarla, o al menos revisar porque.
 
-
-técnicos configuración de perfil propios, firmas, 
-
-
-luego procedimientos
-
-procedimientos de gestores
-
-procedimientos de técnicos
-
-
-
-como me gustaria que se pueda hacer con el contexto del la visual.md con el logo de xamasafe, ect. vamos a crear pdf de esos archivos, para que yo pueda descargarlos y enviarlos al equipo , esos archivos deberian poder descargarse desde un enlace llamado tutoriales en super admin y vendedores. para tenerlo a manos en descargas.
-
-
-
-necesito que por cada tutotrial sea un sprint, para poder trabajar en profundidad, me comprendes?
-
-
+hazlo por sprint las tareas por favor.
