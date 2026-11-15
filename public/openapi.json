@@ -1,0 +1,117 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HSE SaaS — API & Contratos Internos",
+    "version": "2.3.0",
+    "description": "Especificación OpenAPI para endpoints Sanctum (/api/*) y endpoints JSON internos consumidos por React/Inertia (/gestor/api/*)."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Servidor activo de la aplicación"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "sanctumToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Sanctum"
+      },
+      "sessionCookie": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "laravel_session"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nombres": { "type": "string" },
+          "apellidos": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "rol": { "type": "string", "enum": ["super_admin", "gestor", "tecnico", "cliente"] },
+          "consultora_id": { "type": "integer", "nullable": true }
+        }
+      },
+      "Sede": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "nombre_sede": { "type": "string" },
+          "empresa_id": { "type": "integer" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/user": {
+      "get": {
+        "summary": "Obtener usuario autenticado (Sanctum)",
+        "tags": ["Sanctum API"],
+        "security": [{ "sanctumToken": [] }],
+        "responses": {
+          "200": {
+            "description": "Usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/User" }
+              }
+            }
+          },
+          "401": { "description": "No autenticado" }
+        }
+      }
+    },
+    "/gestor/api/companies/{empresa}/sites": {
+      "get": {
+        "summary": "Listar sedes de una empresa (validado por consultora_id)",
+        "tags": ["Gestor JSON API"],
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [
+          {
+            "name": "empresa",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de sedes pertenecientes a la empresa",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Sede" }
+                }
+              }
+            }
+          },
+          "403": { "description": "Acceso denegado (aislamiento multi-tenant)" }
+        }
+      }
+    },
+    "/gestor/api/technicians/{user}/assignments": {
+      "get": {
+        "summary": "Listar sedes asignadas a un técnico (validado por consultora_id)",
+        "tags": ["Gestor JSON API"],
+        "security": [{ "sessionCookie": [] }],
+        "parameters": [
+          {
+            "name": "user",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Sedes asignadas al técnico con relación empresa" },
+          "403": { "description": "Acceso denegado (aislamiento multi-tenant)" }
+        }
+      }
+    }
+  }
+}

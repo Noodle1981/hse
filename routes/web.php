@@ -427,6 +427,9 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 
+    // Documentación OpenAPI / Scalar protegida (super_admin)
+    Route::get('/docs', fn () => view('scalar'))->middleware('role:super_admin')->name('api.docs');
+
     // Role Switch
     Route::get('/switch-role/{role}', [SwitchRoleController::class, 'switch'])->name('switch-role');
 
