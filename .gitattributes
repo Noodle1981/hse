@@ -9,3 +9,9 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Excluir plantillas de impresión PDF y reportes generados de las estadísticas de GitHub Linguist
+resources/views/pdf/** linguist-generated=true
+resources/views/components/pdf/** linguist-generated=true
+qa/informes/generados/** linguist-generated=true
+public/openapi.json linguist-generated=true
