@@ -84,7 +84,7 @@ Archivos: 21 · sobre umbral: **10** · críticos: **5**
 |---:|---|---|---|
 | 567 | 🔴 Crítico | `app/Services/InspectionService.php` | — |
 | 512 | 🔴 Crítico | `app/Services/AnnualContractService.php` | — |
-| 467 | 🔴 Crítico | `app/Services/OperationService.php` | — |
+| 471 | 🔴 Crítico | `app/Services/OperationService.php` | — |
 | 448 | 🔴 Crítico | `app/Services/MasterReportService.php` | — |
 | 401 | 🔴 Crítico | `app/Services/TechnicianAssignmentService.php` | — |
 | 318 | 🟡 Sobre umbral | `app/Services/ConsultantService.php` | — |

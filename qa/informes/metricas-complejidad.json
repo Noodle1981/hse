@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-15T18:41:37.823Z",
+  "generado": "2026-11-15T18:53:18.879Z",
   "proyecto": "HSE SaaS (XamaSafe / EP-Back)",
   "categorias": [
     {
@@ -1034,7 +1034,7 @@
         {
           "ruta": "app/Services/OperationService.php",
           "nombre": "OperationService.php",
-          "lineas": 467,
+          "lineas": 471,
           "estado": "critico",
           "accesoDatos": []
         },
