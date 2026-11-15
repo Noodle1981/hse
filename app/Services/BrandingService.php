@@ -18,10 +18,10 @@ class BrandingService
             'primary' => '#1e40af',
             'secondary' => '#6b7280',
             'accent' => '#16a34a',
-            'name' => 'XAMASAFE',
-            'email' => 'contacto@xamasafe.com',
-            'phone' => '+54 11 1234-5678',
-            'address' => 'Buenos Aires, Argentina',
+            'name' => config('app.branding.name', 'XAMASAFE'),
+            'email' => config('app.branding.email', 'contacto@xamasafe.com'),
+            'phone' => config('app.branding.phone', '+54 11 1234-5678'),
+            'address' => config('app.branding.address', 'Buenos Aires, Argentina'),
         ];
     }
 

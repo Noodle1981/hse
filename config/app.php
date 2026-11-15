@@ -15,6 +15,14 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
 
+    'branding' => [
+        'name' => env('BRAND_NAME', env('APP_NAME', 'XAMASAFE')),
+        'email' => env('BRAND_EMAIL', 'contacto@xamasafe.com'),
+        'phone' => env('BRAND_PHONE', '+54 11 1234-5678'),
+        'address' => env('BRAND_ADDRESS', 'Buenos Aires, Argentina'),
+        'whatsapp' => env('BRAND_WHATSAPP', '5491112345678'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Application Environment

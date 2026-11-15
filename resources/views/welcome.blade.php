@@ -290,13 +290,13 @@
                             <p class="text-ep-dark/85 text-sm sm:text-base md:text-lg font-black uppercase tracking-widest italic mb-8 md:mb-12 max-w-2xl mx-auto">ÚNETE A LA TRANSFORMACIÓN DIGITAL DE LA SEGURIDAD INDUSTRIAL. CONTROL TOTAL, CUMPLIMIENTO GARANTIZADO.</p>
                             <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                                 <a href="{{ route('login') }}" class="inline-flex bg-ep-dark text-white px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-2xl">
-                                    Activar Acceso a XamaSafe
+                                    Activar Acceso a {{ config('app.branding.name', 'XamaSafe') }}
                                 </a>
-                                <a href="https://wa.me/5492644553442?text=Hola!%20Me%20interesa%20obtener%20más%20información%20sobre%20Industrias%20Xamanen" target="_blank" class="inline-flex bg-ep-dark text-white px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-2xl items-center gap-2">
+                                <a href="https://wa.me/{{ config('app.branding.whatsapp', '5492644553442') }}?text=Hola!%20Me%20interesa%20obtener%20m%C3%A1s%20informaci%C3%B3n%20sobre%20{{ urlencode(config('app.branding.name', 'XamaSafe')) }}" target="_blank" class="inline-flex bg-ep-dark text-white px-6 py-4 sm:px-12 sm:py-6 rounded-[1.5rem] sm:rounded-[2.5rem] text-xs font-black uppercase tracking-[0.3em] italic hover:scale-110 active:scale-95 transition-all shadow-2xl items-center gap-2">
                                     <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.73-1.451L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.528 2.015 14.07 1 11.5 1c-5.438 0-9.863 4.373-9.867 9.801-.001 1.73.473 3.41 1.37 4.887L1.88 20.66l4.767-1.506z" />
                                     </svg>
-                                    WhatsApp: +54 9 2644 55-3442
+                                    WhatsApp: {{ config('app.branding.phone', '+54 9 2644 55-3442') }}
                                 </a>
                             </div>
                         </div>
@@ -332,8 +332,8 @@
                     <h5 class="text-[10px] font-black text-white/40 uppercase tracking-[0.4em] italic mb-6 md:mb-10">Conectividad</h5>
                     <ul class="space-y-4 text-[10px] font-black uppercase tracking-widest italic text-white/60">
                         <li>
-                            <a href="https://wa.me/5492644553442?text=Hola!%20Necesito%20soporte%20o%20información%20sobre%20la%20plataforma." target="_blank" class="hover:text-ep-primary transition-colors">
-                                WhatsApp: +54 9 2644 55-3442
+                            <a href="https://wa.me/{{ config('app.branding.whatsapp', '5492644553442') }}?text=Hola!%20Necesito%20soporte%20o%20informaci%C3%B3n%20sobre%20la%20plataforma." target="_blank" class="hover:text-ep-primary transition-colors">
+                                WhatsApp: {{ config('app.branding.phone', '+54 9 2644 55-3442') }}
                             </a>
                         </li>
                         <li>
