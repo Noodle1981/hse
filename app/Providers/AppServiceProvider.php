@@ -12,6 +12,7 @@ use App\Models\MasterReport;
 use App\Observers\AssetObserver;
 use App\Policies\InspectionPolicy;
 use App\Policies\MasterReportPolicy;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
@@ -31,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Model::preventLazyLoading(! app()->isProduction());
+
         Gate::policy(DynamicInspection::class, InspectionPolicy::class);
         Gate::policy(MasterReport::class, MasterReportPolicy::class);
 
