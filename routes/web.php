@@ -13,6 +13,8 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\Contracts\AnnualContractReportController;
 use App\Http\Controllers\FindingController;
+use App\Http\Controllers\Gestor\AssignmentManagerController;
+use App\Http\Controllers\Gestor\BrandingController;
 use App\Http\Controllers\Hallazgos\HallazgoPDFController;
 use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\IncidenteController;
@@ -23,6 +25,7 @@ use App\Http\Controllers\MasterReportController;
 use App\Http\Controllers\OperationController;
 use App\Http\Controllers\PasswordResetRequestController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicSignatureController;
 use App\Http\Controllers\SignatureApprovalController;
 use App\Http\Controllers\SwitchRoleController;
 use App\Http\Controllers\TrainingController;
@@ -43,10 +46,8 @@ Route::get('/', function () {
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1')->name('login.attempt');
-Route::get('/constancia/firmar/{token}', function () {
-    // TODO: Migrar PublicSignature a React
-    abort(404, 'Vista de firma pública pendiente de migración a React.');
-})->name('constancia.firmar');
+Route::get('/constancia/firmar/{token}', [PublicSignatureController::class, 'show'])->name('constancia.firmar');
+Route::post('/constancia/firmar/{token}', [PublicSignatureController::class, 'store'])->name('constancia.firmar.store');
 
 /*
 |--------------------------------------------------------------------------
@@ -151,7 +152,9 @@ Route::middleware(['auth'])->group(function () {
         });
 
         Route::prefix('assignments')->name('assignments.')->group(function () {
-            // TODO: Migrar AssignmentManager a React
+            Route::get('/', [AssignmentManagerController::class, 'index'])->name('index');
+            Route::post('/', [AssignmentManagerController::class, 'store'])->name('store');
+            Route::delete('/{assignment}', [AssignmentManagerController::class, 'destroy'])->name('destroy');
         });
 
         // Hallazgos (React)
@@ -239,8 +242,9 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/{id}/pdf/preview', [TrainingPDFController::class, 'preview'])->name('pdf.preview');
         });
 
-        // Personalización de Empresa (TODO: Migrar a React)
-        // Route::get('/administration/branding/{id}', ...)->name('administration.branding');
+        // Personalización de Consultora (Branding)
+        Route::get('/administration/branding', [BrandingController::class, 'edit'])->name('administration.branding');
+        Route::post('/administration/branding', [BrandingController::class, 'update'])->name('administration.branding.update');
 
     });
 

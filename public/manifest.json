@@ -1,0 +1,17 @@
+{
+  "name": "XamaSafe — Gestión HSE",
+  "short_name": "XamaSafe",
+  "description": "Plataforma inteligente para la gestión de higiene y seguridad industrial, inspecciones de campo y constancias digitales.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#11111d",
+  "theme_color": "#ea580c",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/ico.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ]
+}

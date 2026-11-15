@@ -2,26 +2,26 @@ import { router, Head, Link, useForm, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useState, useEffect } from 'react';
 import PendingSignaturesList from './Partials/PendingSignaturesList';
+import UserFormModal from './Partials/UserFormModal';
+import { ResetPasswordModal, DeleteUserModal, SignaturePreviewModal } from './Partials/UserActionModals';
 
 export default function Index({ users, filters }) {
-    const { auth, flash } = usePage().props;
-    
+    const { auth } = usePage().props;
+
     const [search, setSearch] = useState(filters.search || '');
     const [roleFilter, setRoleFilter] = useState(filters.roleFilter || 'all');
     const [showDeleted, setShowDeleted] = useState(filters.showDeleted === 'true' || filters.showDeleted === true);
-    
+
     const [showForm, setShowForm] = useState(false);
     const [editingId, setEditingId] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
 
-    // Reset de contraseña
     const [showResetModal, setShowResetModal] = useState(false);
     const [userToReset, setUserToReset] = useState(null);
     const [resetPassword, setResetPassword] = useState(null);
     const [copied, setCopied] = useState(false);
 
-    // Visor de Firma Aprobada
     const [showSignaturePreview, setShowSignaturePreview] = useState(false);
     const [previewUser, setPreviewUser] = useState(null);
 
@@ -30,7 +30,6 @@ export default function Index({ users, filters }) {
         setShowSignaturePreview(true);
     };
 
-    // Formulario unificado para Crear/Editar
     const form = useForm({
         id: null,
         nombres: '',
@@ -45,7 +44,6 @@ export default function Index({ users, filters }) {
         foto: '',
     });
 
-    // Sincronizar búsqueda y filtros con el servidor
     const updateFilters = () => {
         router.get(route('gestor.users.index'), {
             search,
@@ -57,7 +55,6 @@ export default function Index({ users, filters }) {
         });
     };
 
-    // Debounce para búsqueda
     useEffect(() => {
         const timeout = setTimeout(() => {
             if (search !== (filters.search || '')) updateFilters();
@@ -65,7 +62,6 @@ export default function Index({ users, filters }) {
         return () => clearTimeout(timeout);
     }, [search]);
 
-    // Filtros inmediatos
     useEffect(() => {
         if (roleFilter !== (filters.roleFilter || 'all') || showDeleted !== (filters.showDeleted === 'true')) {
             updateFilters();
@@ -124,12 +120,12 @@ export default function Index({ users, filters }) {
     };
 
     return (
-        <AuthenticatedLayout 
+        <AuthenticatedLayout
             title="Matriz Identidades"
             header={
                 <div className="flex items-center gap-4">
-                    <Link 
-                        href={route('gestor.administration.hub')} 
+                    <Link
+                        href={route('gestor.administration.hub')}
                         className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:bg-[#F69239]/10 hover:border-[#F69239]/30 text-white/60 hover:text-white transition-all group/back shadow-lg"
                         title="Volver al Panel de Administración"
                     >
@@ -152,19 +148,18 @@ export default function Index({ users, filters }) {
 
             <div className="px-4 sm:px-6 lg:px-8 py-8 text-white selection:bg-[#F69239]/30">
                 <div className="max-w-[95rem] mx-auto space-y-12 animate-fade-in">
-                    
-                    {/* AUDITORÍA DE FIRMAS PENDIENTES */}
                     <PendingSignaturesList />
 
-                    {/* HUB DE FILTRADO Y ACCIÓN MAESTRA */}
                     <div className="bg-[#16162a]/40 backdrop-blur-md rounded-[2rem] border border-white/5 p-8 shadow-2xl relative overflow-hidden animate-fade-in-down">
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#F69239]/30 to-transparent"></div>
-                        
+
                         <div className="flex flex-col lg:flex-row gap-6 justify-between items-center relative z-10">
                             <div className="w-full lg:w-1/3 relative group">
                                 <span className="absolute -top-2.5 left-4 bg-[#11111d] px-2 text-[8px] font-black text-[#F69239] uppercase tracking-[0.3em] italic z-10">Terminal de Búsqueda</span>
-                                <input id="search" name="search" 
-                                    type="text" 
+                                <input
+                                    id="search"
+                                    name="search"
+                                    type="text"
                                     value={search}
                                     onChange={e => setSearch(e.target.value)}
                                     placeholder="NOMBRE, EMAIL O MATRÍCULA..."
@@ -181,8 +176,10 @@ export default function Index({ users, filters }) {
                                     </label>
                                 </div>
 
-                                <select id="roleFilter" name="roleFilter" 
-                                    value={roleFilter} 
+                                <select
+                                    id="roleFilter"
+                                    name="roleFilter"
+                                    value={roleFilter}
                                     onChange={e => setRoleFilter(e.target.value)}
                                     className="bg-black/40 border border-white/10 rounded-2xl px-6 py-3 text-[10px] font-black text-white focus:ring-2 focus:ring-indigo-500/50 transition-all [color-scheme:dark] italic uppercase appearance-none cursor-pointer"
                                 >
@@ -191,11 +188,13 @@ export default function Index({ users, filters }) {
                                     <option value="tecnico">TÉCNICOS</option>
                                 </select>
 
-                                <button onClick={openCreateModal} 
-                                        className="flex h-12 px-8 bg-[#F69239] text-white hover:brightness-110 active:scale-95 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic transition-all items-center gap-3 shadow-[0_0_20px_rgba(246,146,57,0.3)] group/btn relative overflow-hidden">
+                                <button
+                                    onClick={openCreateModal}
+                                    className="flex h-12 px-8 bg-[#F69239] text-white hover:brightness-110 active:scale-95 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] italic transition-all items-center gap-3 shadow-[0_0_20px_rgba(246,146,57,0.3)] group/btn relative overflow-hidden"
+                                >
                                     <div className="absolute inset-0 bg-white/10 translate-y-12 group-hover/btn:translate-y-0 transition-transform"></div>
                                     <svg className="w-4 h-4 group-hover/btn:rotate-90 transition-transform duration-500 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">
-                                        <path d="M12 4v16m8-8H4"/>
+                                        <path d="M12 4v16m8-8H4" />
                                     </svg>
                                     <span className="relative z-10">Nuevo Usuario</span>
                                 </button>
@@ -203,127 +202,9 @@ export default function Index({ users, filters }) {
                         </div>
                     </div>
 
-                    {/* Form Modal */}
-                    {showForm && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in overflow-y-auto">
-                            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowForm(false)}></div>
-                            <div className="bg-[#16162a] border border-white/10 rounded-[3rem] p-8 max-w-4xl w-full relative z-10 shadow-2xl overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-[#F69239]/5 to-transparent"></div>
-                                <h3 className="text-xl font-black text-white italic mb-8 uppercase tracking-widest relative z-10 flex items-center gap-3">
-                                    <span className="w-2 h-8 bg-[#F69239] rounded-full"></span>
-                                    {editingId ? 'Actualizar Perfil' : 'Registro de Identidad'}
-                                </h3>
-                                
-                                <form onSubmit={submit} className="relative z-10 space-y-8">
-                                    {form.data.foto && (
-                                        <div className="flex items-center gap-3 bg-white/5 border border-white/5 p-3 rounded-2xl max-w-sm animate-fade-in">
-                                            <div className="w-12 h-12 rounded-xl border border-[#F69239]/30 overflow-hidden shrink-0">
-                                                <img src={`/storage/${form.data.foto}`} alt="Foto de Perfil" className="w-full h-full object-cover" />
-                                            </div>
-                                            <div>
-                                                <span className="text-[8px] font-black text-[#F69239] uppercase tracking-widest block italic mb-0.5">Identidad Digital</span>
-                                                <span className="text-xs font-bold text-white uppercase italic">{form.data.nombres} {form.data.apellidos}</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                    
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nombres</label>
-                                            <input id="nombres" name="nombres" type="text" value={form.data.nombres} onChange={e => form.setData('nombres', e.target.value)} required 
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all"/>
-                                            {form.errors.nombres && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.nombres}</span>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Apellidos</label>
-                                            <input id="apellidos" name="apellidos" type="text" value={form.data.apellidos} onChange={e => form.setData('apellidos', e.target.value)} required 
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all"/>
-                                            {form.errors.apellidos && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.apellidos}</span>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Email Corporativo</label>
-                                            <input id="email" name="email" type="email" value={form.data.email} onChange={e => form.setData('email', e.target.value.toLowerCase())} required 
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all lowercase"/>
-                                            {form.errors.email && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.email}</span>}
-                                        </div>
-                                        {!editingId && (
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Contraseña</label>
-                                            <input id="password" name="password" type="password" value={form.data.password} onChange={e => form.setData('password', e.target.value)} required
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all"/>
-                                            {form.errors.password && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.password}</span>}
-                                        </div>
-                                        )}
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Rol Sistema</label>
-                                            <select id="rol" name="rol" value={form.data.rol} onChange={e => form.setData('rol', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
-                                                <option value="tecnico">TÉCNICO OPERATIVO</option>
-                                                <option value="gestor">GESTOR ADMINISTRATIVO</option>
-                                            </select>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Matrícula ID</label>
-                                            <input id="matricula" name="matricula" type="text" value={form.data.matricula} onChange={e => form.setData('matricula', e.target.value.toUpperCase())} required 
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
-                                            {form.errors.matricula && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.matricula}</span>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Teléfono Enlace</label>
-                                            <input id="telefono" name="telefono" type="text" value={form.data.telefono} onChange={e => form.setData('telefono', e.target.value)} required 
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
-                                            {form.errors.telefono && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.telefono}</span>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Nº Documento (Opcional)</label>
-                                            <input id="n_doc" name="n_doc" type="text" value={form.data.n_doc} onChange={e => form.setData('n_doc', e.target.value.toUpperCase())} 
-                                                className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all uppercase"/>
-                                            {form.errors.n_doc && <span className="text-red-500 text-[10px] font-black italic ml-4">{form.errors.n_doc}</span>}
-                                        </div>
-                                        <div className="space-y-2">
-                                            <label className="text-[9px] font-black text-white/40 uppercase tracking-[0.3em] ml-4">Estado</label>
-                                            <select id="estado" name="estado" value={form.data.estado} onChange={e => form.setData('estado', e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-sm font-bold text-white focus:ring-2 focus:ring-[#F69239] transition-all [color-scheme:dark] italic uppercase">
-                                                <option value="activo">ACTIVO</option>
-                                                <option value="inactivo">INACTIVO</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex justify-between items-center gap-4 pt-4">
-                                        {editingId ? (
-                                            <button
-                                                type="button"
-                                                onClick={() => {
-                                                    const u = form.data;
-                                                    setUserToReset({ id: editingId, nombres: u.nombres, apellidos: u.apellidos });
-                                                    setShowForm(false);
-                                                    setShowResetModal(true);
-                                                    setResetPassword(null);
-                                                    setCopied(false);
-                                                }}
-                                                className="px-5 py-4 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[9px] font-black uppercase italic tracking-widest rounded-2xl border border-amber-500/20 hover:border-amber-500/40 transition-all inline-flex items-center gap-2"
-                                            >
-                                                🔑 Resetear Clave
-                                            </button>
-                                        ) : <div />}
-
-                                        <div className="flex gap-4">
-                                            <button type="button" onClick={() => setShowForm(false)} className="px-8 py-4 bg-white/5 text-white/40 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
-                                                Abortar Operación
-                                            </button>
-                                            <button type="submit" disabled={form.processing} className="px-10 py-4 bg-[#F69239] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg shadow-[#F69239]/20 hover:brightness-110">
-                                                {form.processing ? 'Procesando...' : (editingId ? 'Confirmar Actualización' : 'Inyectar Usuario')}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* User Table */}
                     <div className="bg-[#16162a]/60 backdrop-blur-md rounded-[3rem] border border-white/5 shadow-2xl relative overflow-hidden animate-fade-in-up">
                         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent"></div>
-                        
+
                         <div className="overflow-x-auto">
                             <table className="w-full border-collapse min-w-[1000px]">
                                 <thead>
@@ -382,11 +263,11 @@ export default function Index({ users, filters }) {
                                                                 </button>
                                                             )}
                                                             <button onClick={() => openEditModal(user)} className="h-10 w-10 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeWidth="2"/></svg>
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeWidth="2" /></svg>
                                                             </button>
                                                             {user.id !== auth.user.id && (
                                                                 <button onClick={() => confirmDelete(user)} className="h-10 w-10 bg-red-600/10 border border-red-500/20 text-red-500 hover:bg-red-600 hover:text-white rounded-xl flex items-center justify-center transition-all shadow-lg">
-                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2"/></svg>
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeWidth="2" /></svg>
                                                                 </button>
                                                             )}
                                                         </>
@@ -398,7 +279,7 @@ export default function Index({ users, filters }) {
                                     {users.data.length === 0 && (
                                         <tr>
                                             <td colSpan="6" className="px-8 py-32 text-center text-white/5 uppercase font-black text-sm tracking-[0.4em] italic leading-relaxed">
-                                                Matriz de identidades vacía <br /> 
+                                                Matriz de identidades vacía <br />
                                                 <span className="text-[9px] tracking-widest text-white/3 italic">Inyecte un nuevo usuario para iniciar el registro</span>
                                             </td>
                                         </tr>
@@ -407,20 +288,19 @@ export default function Index({ users, filters }) {
                             </table>
                         </div>
 
-                        {/* Pagination */}
                         <div className="px-10 py-6 border-t border-white/5 bg-black/20 flex items-center justify-between">
                             <div className="text-[10px] font-bold text-white/20 uppercase italic">
                                 Mostrando {users.from} a {users.to} de {users.total} identidades
                             </div>
                             <div className="flex gap-2">
                                 {users.links.map((link, i) => (
-                                    <Link 
+                                    <Link
                                         key={i}
                                         href={link.url || '#'}
                                         dangerouslySetInnerHTML={{ __html: link.label }}
                                         className={`px-4 py-2 rounded-xl text-[10px] font-black transition-all border ${
-                                            link.active 
-                                                ? 'bg-[#F69239]/10 border-[#F69239]/30 text-[#F69239]' 
+                                            link.active
+                                                ? 'bg-[#F69239]/10 border-[#F69239]/30 text-[#F69239]'
                                                 : 'bg-white/5 border-white/5 text-white/20 hover:text-white'
                                         } ${!link.url && 'opacity-30 cursor-not-allowed'}`}
                                     />
@@ -431,135 +311,44 @@ export default function Index({ users, filters }) {
                 </div>
             </div>
 
-            {/* Reset Password Modal */}
-            {showResetModal && userToReset && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-                    <div className="w-full max-w-md bg-[#16162a] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative">
-                        <button onClick={() => { setShowResetModal(false); setResetPassword(null); }} className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors">✕</button>
+            <UserFormModal
+                isOpen={showForm}
+                onClose={() => setShowForm(false)}
+                editingId={editingId}
+                form={form}
+                onSubmit={submit}
+                onOpenResetPassword={() => {
+                    const u = form.data;
+                    setUserToReset({ id: editingId, nombres: u.nombres, apellidos: u.apellidos });
+                    setShowForm(false);
+                    setShowResetModal(true);
+                    setResetPassword(null);
+                    setCopied(false);
+                }}
+            />
 
-                        {!resetPassword ? (
-                            <>
-                                <div className="mb-6">
-                                    <h3 className="text-xs font-black text-amber-400 uppercase tracking-[0.4em] italic mb-1">Resetear Contraseña</h3>
-                                    <h4 className="text-lg font-black text-white uppercase italic tracking-tighter leading-none">
-                                        {userToReset.apellidos}, {userToReset.nombres}
-                                    </h4>
-                                </div>
-                                <p className="text-xs text-indigo-100/60 font-semibold leading-relaxed mb-8">
-                                    Se generará una contraseña temporal de 16 caracteres. El usuario deberá cambiarla en su próximo ingreso.
-                                </p>
-                                <div className="flex justify-end gap-3">
-                                    <button onClick={() => { setShowResetModal(false); setResetPassword(null); }} className="px-6 py-3 bg-white/5 text-white/40 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            router.post(route('gestor.users.reset-password', userToReset.id), {}, {
-                                                onSuccess: (page) => {
-                                                    const pwd = page.props.flash?.generated_password;
-                                                    if (pwd) setResetPassword(pwd);
-                                                }
-                                            });
-                                        }}
-                                        className="px-6 py-3 bg-amber-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all hover:brightness-110"
-                                    >
-                                        Confirmar Reset
-                                    </button>
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <div className="mb-6">
-                                    <h3 className="text-xs font-black text-emerald-400 uppercase tracking-[0.4em] italic mb-1">✓ Contraseña Generada</h3>
-                                    <h4 className="text-base font-black text-white uppercase italic tracking-tighter">{userToReset.apellidos}, {userToReset.nombres}</h4>
-                                </div>
-                                <p className="text-[10px] text-white/40 uppercase tracking-widest font-black italic mb-3">Contraseña Temporal (copia antes de cerrar)</p>
-                                <div className="flex items-center gap-3 bg-black/40 border border-emerald-500/30 rounded-2xl px-5 py-4 mb-6">
-                                    <code className="flex-1 text-emerald-300 font-black text-sm tracking-wider">{resetPassword}</code>
-                                    <button
-                                        onClick={() => { navigator.clipboard.writeText(resetPassword); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                                        className="px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-400 hover:text-white rounded-xl text-[9px] font-black uppercase transition-all"
-                                    >
-                                        {copied ? '✓ Copiado' : 'Copiar'}
-                                    </button>
-                                </div>
-                                <button onClick={() => { setShowResetModal(false); setResetPassword(null); }} className="w-full px-6 py-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
-                                    Cerrar
-                                </button>
-                            </>
-                        )}
-                    </div>
-                </div>
-            )}
+            <ResetPasswordModal
+                isOpen={showResetModal}
+                userToReset={userToReset}
+                resetPassword={resetPassword}
+                setResetPassword={setResetPassword}
+                copied={copied}
+                setCopied={setCopied}
+                onClose={() => { setShowResetModal(false); setResetPassword(null); }}
+            />
 
-            {/* Deletion Modal */}
-            {showDeleteModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowDeleteModal(false)}></div>
-                    <div className="bg-[#16162a] border border-white/10 rounded-[3rem] p-10 max-w-lg w-full relative z-10 shadow-2xl text-center overflow-hidden">
-                        <div className="absolute inset-x-0 top-0 h-1 bg-red-500/50"></div>
-                        <div className="w-20 h-20 bg-red-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 text-red-500 border border-red-500/20">
-                            <svg className="w-10 h-10 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        </div>
-                        <h3 className="text-xl font-black text-white uppercase italic tracking-widest mb-4">Revocar Acceso</h3>
-                        <p className="text-sm text-white/40 mb-10 font-bold leading-relaxed italic uppercase">
-                            ESTÁ A PUNTO DE DAR DE BAJA A <span className="text-red-400">{userToDelete?.nombres} {userToDelete?.apellidos}</span>.<br/><br/>
-                            EL REGISTRO NO SE ELIMINARÁ PERMANENTEMENTE PARA PRESERVAR EL HISTORIAL FORENSE.
-                        </p>
-                        <div className="flex justify-center gap-4">
-                            <button onClick={() => setShowDeleteModal(false)} className="px-8 py-4 bg-white/5 text-white/40 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all">
-                                Cancelar
-                             </button>
-                            <button onClick={handleDelete} className="px-10 py-4 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all shadow-lg animate-pulse">
-                                Confirmar Baja
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <DeleteUserModal
+                isOpen={showDeleteModal}
+                userToDelete={userToDelete}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleDelete}
+            />
 
-            {/* Signature Preview Modal */}
-            {showSignaturePreview && previewUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
-                    <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowSignaturePreview(false)}></div>
-                    <div className="bg-[#16162a] border border-white/10 rounded-[3rem] p-10 max-w-lg w-full relative z-10 shadow-2xl text-center overflow-hidden">
-                        <div className="absolute inset-x-0 top-0 h-1 bg-amber-500/50"></div>
-                        <h3 className="text-xl font-black text-white uppercase italic tracking-widest mb-2">Visor de Firma</h3>
-                        <p className="text-[10px] text-white/40 uppercase tracking-widest mb-6 font-black italic">
-                            Identidad: {previewUser.nombres} {previewUser.apellidos}
-                        </p>
-                        
-                        <div className="bg-white/5 border border-white/10 rounded-3xl p-6 mb-8 flex flex-col items-center justify-center relative">
-                            {/* Grid pattern background */}
-                            <div className="absolute inset-0 opacity-5 pointer-events-none bg-[linear-gradient(to_right,#808080_1px,transparent_1px),linear-gradient(to_bottom,#808080_1px,transparent_1px)] bg-[size:14px_24px]"></div>
-                            
-                            <div className="w-full h-32 bg-black/40 border border-white/5 rounded-2xl flex items-center justify-center p-4 relative z-10">
-                                <img 
-                                    src={`/storage/${previewUser.firma}`} 
-                                    alt="Firma Aprobada" 
-                                    className="max-h-full brightness-0 invert opacity-90" 
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col gap-4 items-center mb-8">
-                            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest italic border text-emerald-400 border-emerald-500/30 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                Firma Oficial Aprobada
-                            </span>
-                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest italic">
-                                Matrícula: {previewUser.matricula || 'N/A'}
-                            </span>
-                        </div>
-
-                        <div className="flex justify-center">
-                            <button onClick={() => setShowSignaturePreview(false)} className="px-10 py-4 bg-white/5 text-white/60 hover:text-white rounded-2xl text-[10px] font-black uppercase tracking-widest italic transition-all border border-white/5 hover:border-white/10">
-                                Cerrar Visor
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <SignaturePreviewModal
+                isOpen={showSignaturePreview}
+                previewUser={previewUser}
+                onClose={() => setShowSignaturePreview(false)}
+            />
 
             <style>{`
                 .animate-fade-in { animation: fade-in 0.4s ease-out forwards; }
@@ -574,10 +363,10 @@ export default function Index({ users, filters }) {
 }
 
 function RoleBadge({ role }) {
-    const theme = role === 'gestor' 
+    const theme = role === 'gestor'
         ? 'text-purple-400 border-purple-500/30 bg-purple-500/10 shadow-[0_0_10px_rgba(168,85,247,0.2)]'
         : 'text-indigo-400 border-indigo-500/30 bg-indigo-500/10 shadow-[0_0_10px_rgba(99,102,241,0.2)]';
-    
+
     return (
         <span className={`inline-flex px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest italic border ${theme}`}>
             {role.toUpperCase()}

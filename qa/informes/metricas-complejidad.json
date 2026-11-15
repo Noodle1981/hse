@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-15T18:24:54.778Z",
+  "generado": "2026-11-15T18:41:37.823Z",
   "proyecto": "HSE SaaS (XamaSafe / EP-Back)",
   "categorias": [
     {
@@ -10,104 +10,6 @@
       "umbralCritico": 800,
       "accion": "Extraer subcomponentes (Partials/Modals) a Components/ o lógica de estado a custom hooks",
       "archivos": [
-        {
-          "ruta": "resources/js/Pages/Tecnico/MyAssignments.jsx",
-          "nombre": "MyAssignments.jsx",
-          "lineas": 1317,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Assets/Index.jsx",
-          "nombre": "Index.jsx",
-          "lineas": 1048,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Tecnico/Inspections/Wizard.jsx",
-          "nombre": "Wizard.jsx",
-          "lineas": 1014,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Assets/Types/Index.jsx",
-          "nombre": "Index.jsx",
-          "lineas": 1001,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Assets/Create.jsx",
-          "nombre": "Create.jsx",
-          "lineas": 837,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Admin/Consultants/Edit.jsx",
-          "nombre": "Edit.jsx",
-          "lineas": 793,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/MasterReports/Wizard.jsx",
-          "nombre": "Wizard.jsx",
-          "lineas": 675,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Companies/Locations.jsx",
-          "nombre": "Locations.jsx",
-          "lineas": 667,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Contracts/Partials/AnnualPlanMatrix.jsx",
-          "nombre": "AnnualPlanMatrix.jsx",
-          "lineas": 652,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Tecnico/Visits/InProgress.jsx",
-          "nombre": "InProgress.jsx",
-          "lineas": 645,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Assets/Show.jsx",
-          "nombre": "Show.jsx",
-          "lineas": 625,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Users.jsx",
-          "nombre": "Users.jsx",
-          "lineas": 596,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Tecnico/Trainings/Session.jsx",
-          "nombre": "Session.jsx",
-          "lineas": 574,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "resources/js/Pages/Gestor/Checklists/Builder.jsx",
-          "nombre": "Builder.jsx",
-          "lineas": 569,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
         {
           "ruta": "resources/js/Pages/Gestor/Findings/Index.jsx",
           "nombre": "Index.jsx",
@@ -158,6 +60,13 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/Wizard.jsx",
+          "nombre": "Wizard.jsx",
+          "lineas": 423,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Gestor/Inspections/Index.jsx",
           "nombre": "Index.jsx",
           "lineas": 401,
@@ -175,6 +84,34 @@
           "ruta": "resources/js/Pages/Gestor/Trainings/Index.jsx",
           "nombre": "Index.jsx",
           "lineas": 390,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Trainings/Session.jsx",
+          "nombre": "Session.jsx",
+          "lineas": 388,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Users.jsx",
+          "nombre": "Users.jsx",
+          "lineas": 385,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Visits/InProgress.jsx",
+          "nombre": "InProgress.jsx",
+          "lineas": 379,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Checklists/Builder.jsx",
+          "nombre": "Builder.jsx",
+          "lineas": 376,
           "estado": "moderado",
           "accesoDatos": []
         },
@@ -242,6 +179,41 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Gestor/Assets/Create.jsx",
+          "nombre": "Create.jsx",
+          "lineas": 307,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Partials/QuickExecutionModal.jsx",
+          "nombre": "QuickExecutionModal.jsx",
+          "lineas": 302,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Types/Partials/MetadataFieldEditor.jsx",
+          "nombre": "MetadataFieldEditor.jsx",
+          "lineas": 298,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Contracts/Partials/AnnualPlanMatrix.jsx",
+          "nombre": "AnnualPlanMatrix.jsx",
+          "lineas": 297,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/MyAssignments.jsx",
+          "nombre": "MyAssignments.jsx",
+          "lineas": 289,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Tecnico/Inspections/Show.jsx",
           "nombre": "Show.jsx",
           "lineas": 274,
@@ -270,8 +242,22 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Admin/Consultants/Edit.jsx",
+          "nombre": "Edit.jsx",
+          "lineas": 265,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Gestor/Categories/Index.jsx",
           "nombre": "Index.jsx",
+          "lineas": 255,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Companies/Partials/LocationFormModal.jsx",
+          "nombre": "LocationFormModal.jsx",
           "lineas": 255,
           "estado": "optimo",
           "accesoDatos": []
@@ -284,8 +270,29 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Gestor/Assets/Partials/AssetShowTabs.jsx",
+          "nombre": "AssetShowTabs.jsx",
+          "lineas": 254,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 253,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Auth/Login.jsx",
           "nombre": "Login.jsx",
+          "lineas": 245,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/Partials/QuestionRenderer.jsx",
+          "nombre": "QuestionRenderer.jsx",
           "lineas": 245,
           "estado": "optimo",
           "accesoDatos": []
@@ -319,6 +326,55 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Gestor/Assets/Partials/AssetStatusHelpers.jsx",
+          "nombre": "AssetStatusHelpers.jsx",
+          "lineas": 233,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Types/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 233,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Types/Partials/AssetTypeModal.jsx",
+          "nombre": "AssetTypeModal.jsx",
+          "lineas": 231,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Partials/AssignmentTaskTable.jsx",
+          "nombre": "AssignmentTaskTable.jsx",
+          "lineas": 229,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Partials/AssetGroupedList.jsx",
+          "nombre": "AssetGroupedList.jsx",
+          "lineas": 225,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Companies/Locations.jsx",
+          "nombre": "Locations.jsx",
+          "lineas": 225,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/MasterReports/Wizard.jsx",
+          "nombre": "Wizard.jsx",
+          "lineas": 225,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Gestor/Contracts/Partials/PlanningForm.jsx",
           "nombre": "PlanningForm.jsx",
           "lineas": 224,
@@ -329,6 +385,20 @@
           "ruta": "resources/js/Pages/Gestor/Visits/Index.jsx",
           "nombre": "Index.jsx",
           "lineas": 219,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Contracts/Partials/PlanActivityModals.jsx",
+          "nombre": "PlanActivityModals.jsx",
+          "lineas": 215,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Show.jsx",
+          "nombre": "Show.jsx",
+          "lineas": 208,
           "estado": "optimo",
           "accesoDatos": []
         },
@@ -347,9 +417,30 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Gestor/Assets/Partials/AssetItemFormCard.jsx",
+          "nombre": "AssetItemFormCard.jsx",
+          "lineas": 186,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Partials/UserFormModal.jsx",
+          "nombre": "UserFormModal.jsx",
+          "lineas": 182,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Auth/ChangePassword.jsx",
           "nombre": "ChangePassword.jsx",
           "lineas": 181,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assignments/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 180,
           "estado": "optimo",
           "accesoDatos": []
         },
@@ -375,9 +466,86 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Gestor/Contracts/Partials/PlanExecutionHistoryModal.jsx",
+          "nombre": "PlanExecutionHistoryModal.jsx",
+          "lineas": 172,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Partials/ExistingAssetsSidebar.jsx",
+          "nombre": "ExistingAssetsSidebar.jsx",
+          "lineas": 169,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Consultants/Partials/ConsultantHistorySidebar.jsx",
+          "nombre": "ConsultantHistorySidebar.jsx",
+          "lineas": 165,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Checklists/Partials/QuestionItem.jsx",
+          "nombre": "QuestionItem.jsx",
+          "lineas": 162,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Consultants/Partials/PrimaryGestorCard.jsx",
+          "nombre": "PrimaryGestorCard.jsx",
+          "lineas": 156,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Gestor/MasterReports/Create.jsx",
           "nombre": "Create.jsx",
           "lineas": 154,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Visits/Partials/CompletedProtocolsCard.jsx",
+          "nombre": "CompletedProtocolsCard.jsx",
+          "lineas": 153,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/MasterReports/Partials/SignatureAndReviewSection.jsx",
+          "nombre": "SignatureAndReviewSection.jsx",
+          "lineas": 150,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Partials/UserActionModals.jsx",
+          "nombre": "UserActionModals.jsx",
+          "lineas": 149,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/MasterReports/Partials/VisitsLogSection.jsx",
+          "nombre": "VisitsLogSection.jsx",
+          "lineas": 137,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Public/SignCertificate.jsx",
+          "nombre": "SignCertificate.jsx",
+          "lineas": 136,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Partials/AssetFlatTable.jsx",
+          "nombre": "AssetFlatTable.jsx",
+          "lineas": 135,
           "estado": "optimo",
           "accesoDatos": []
         },
@@ -389,9 +557,65 @@
           "accesoDatos": []
         },
         {
+          "ruta": "resources/js/Pages/Gestor/Branding/Edit.jsx",
+          "nombre": "Edit.jsx",
+          "lineas": 132,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/Partials/WizardModals.jsx",
+          "nombre": "WizardModals.jsx",
+          "lineas": 120,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "resources/js/Pages/Gestor/Visits/Start.jsx",
           "nombre": "Start.jsx",
           "lineas": 118,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/Partials/WizardIntroStep.jsx",
+          "nombre": "WizardIntroStep.jsx",
+          "lineas": 118,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Visits/Partials/FinalizeVisitModal.jsx",
+          "nombre": "FinalizeVisitModal.jsx",
+          "lineas": 109,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Types/Partials/AssetTypeCard.jsx",
+          "nombre": "AssetTypeCard.jsx",
+          "lineas": 106,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/Partials/SignatureStep.jsx",
+          "nombre": "SignatureStep.jsx",
+          "lineas": 101,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Trainings/Partials/AttendeeSignaturePanel.jsx",
+          "nombre": "AttendeeSignaturePanel.jsx",
+          "lineas": 99,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Trainings/Partials/FinalizeTrainingModal.jsx",
+          "nombre": "FinalizeTrainingModal.jsx",
+          "lineas": 99,
           "estado": "optimo",
           "accesoDatos": []
         },
@@ -401,12 +625,40 @@
           "lineas": 89,
           "estado": "optimo",
           "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Checklists/Partials/ChecklistCategoryModals.jsx",
+          "nombre": "ChecklistCategoryModals.jsx",
+          "lineas": 68,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Partials/ChecklistInfoModal.jsx",
+          "nombre": "ChecklistInfoModal.jsx",
+          "lineas": 66,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Consultants/Partials/GeneratedPasswordModal.jsx",
+          "nombre": "GeneratedPasswordModal.jsx",
+          "lineas": 56,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Companies/Partials/LocationUsersModal.jsx",
+          "nombre": "LocationUsersModal.jsx",
+          "lineas": 56,
+          "estado": "optimo",
+          "accesoDatos": []
         }
       ],
       "resumen": {
-        "total": 56,
-        "sobreUmbral": 14,
-        "criticos": 5,
+        "total": 92,
+        "sobreUmbral": 0,
+        "criticos": 0,
         "accesoDatos": 0
       }
     },
@@ -696,6 +948,13 @@
           ]
         },
         {
+          "ruta": "app/Http/Controllers/Gestor/AssignmentManagerController.php",
+          "nombre": "AssignmentManagerController.php",
+          "lineas": 54,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "app/Http/Controllers/Auth/ForcePasswordChangeController.php",
           "nombre": "ForcePasswordChangeController.php",
           "lineas": 52,
@@ -715,9 +974,23 @@
           ]
         },
         {
+          "ruta": "app/Http/Controllers/PublicSignatureController.php",
+          "nombre": "PublicSignatureController.php",
+          "lineas": 48,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "app/Http/Controllers/SwitchRoleController.php",
           "nombre": "SwitchRoleController.php",
           "lineas": 46,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/Gestor/BrandingController.php",
+          "nombre": "BrandingController.php",
+          "lineas": 44,
           "estado": "optimo",
           "accesoDatos": []
         },
@@ -730,7 +1003,7 @@
         }
       ],
       "resumen": {
-        "total": 29,
+        "total": 32,
         "sobreUmbral": 0,
         "criticos": 0,
         "accesoDatos": 11
@@ -850,6 +1123,13 @@
           "accesoDatos": []
         },
         {
+          "ruta": "app/Services/GestorToolsService.php",
+          "nombre": "GestorToolsService.php",
+          "lineas": 144,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "app/Jobs/ImportEmployeesJob.php",
           "nombre": "ImportEmployeesJob.php",
           "lineas": 135,
@@ -886,7 +1166,7 @@
         }
       ],
       "resumen": {
-        "total": 20,
+        "total": 21,
         "sobreUmbral": 10,
         "criticos": 5,
         "accesoDatos": 0
