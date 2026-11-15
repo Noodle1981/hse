@@ -5,13 +5,14 @@ namespace Tests\Feature;
 use App\Models\Consultora;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SubscriptionStatusTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function a_user_with_active_subscription_can_access_routes()
     {
         $consultora = Consultora::create([
@@ -36,7 +37,7 @@ class SubscriptionStatusTest extends TestCase
         $response->assertStatus(302); // redirects to gestor.dashboard
     }
 
-    /** @test */
+    #[Test]
     public function a_user_with_morosa_subscription_is_blocked()
     {
         $consultora = Consultora::create([
@@ -61,7 +62,7 @@ class SubscriptionStatusTest extends TestCase
         $response->assertSee('El servicio de su consultora ha sido suspendido temporalmente por falta de pago.');
     }
 
-    /** @test */
+    #[Test]
     public function a_user_with_baja_subscription_is_blocked()
     {
         $consultora = Consultora::create([
@@ -86,7 +87,7 @@ class SubscriptionStatusTest extends TestCase
         $response->assertSee('El servicio de su consultora ha sido dado de baja.');
     }
 
-    /** @test */
+    #[Test]
     public function a_super_admin_is_never_blocked_by_subscription_checks()
     {
         $superAdmin = User::create([

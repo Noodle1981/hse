@@ -7,13 +7,14 @@ use App\Models\DynamicInspection;
 use App\Models\DynamicQuestion;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DynamicChecklistTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_can_create_a_checklist(): void
     {
         $checklist = DynamicChecklist::factory()->create([
@@ -27,7 +28,7 @@ class DynamicChecklistTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_questions(): void
     {
         $checklist = DynamicChecklist::factory()->create();
@@ -39,7 +40,7 @@ class DynamicChecklistTest extends TestCase
         $this->assertCount(5, $checklist->questions);
     }
 
-    /** @test */
+    #[Test]
     public function it_has_many_inspections(): void
     {
         $checklist = DynamicChecklist::factory()->create();
@@ -53,7 +54,7 @@ class DynamicChecklistTest extends TestCase
         $this->assertCount(3, $checklist->inspections);
     }
 
-    /** @test */
+    #[Test]
     public function scope_active_returns_only_active_checklists(): void
     {
         DynamicChecklist::factory()->active()->count(3)->create();
@@ -64,7 +65,7 @@ class DynamicChecklistTest extends TestCase
         $this->assertCount(3, $activeChecklists);
     }
 
-    /** @test */
+    #[Test]
     public function scope_category_filters_by_category(): void
     {
         DynamicChecklist::factory()->category('hys')->count(2)->create();
@@ -77,7 +78,7 @@ class DynamicChecklistTest extends TestCase
         $this->assertCount(3, $calidadChecklists);
     }
 
-    /** @test */
+    #[Test]
     public function questions_are_ordered_by_order_field(): void
     {
         $checklist = DynamicChecklist::factory()->create();
@@ -105,7 +106,7 @@ class DynamicChecklistTest extends TestCase
         $this->assertEquals('Pregunta 3', $questions[2]->label);
     }
 
-    /** @test */
+    #[Test]
     public function question_options_are_cast_to_array(): void
     {
         $checklist = DynamicChecklist::factory()->create();
@@ -120,7 +121,7 @@ class DynamicChecklistTest extends TestCase
         $this->assertContains('Sí', $question->options);
     }
 
-    /** @test */
+    #[Test]
     public function inspection_can_be_marked_as_completed(): void
     {
         $user = User::factory()->create();
@@ -140,7 +141,7 @@ class DynamicChecklistTest extends TestCase
         $this->assertNotNull($inspection->completed_at);
     }
 
-    /** @test */
+    #[Test]
     public function it_deletes_questions_when_checklist_is_deleted(): void
     {
         $checklist = DynamicChecklist::factory()->create();

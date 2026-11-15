@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\VisitCertificate;
-use App\Models\VisitChecklistCompletion;
 use App\Services\BrandingService;
+use App\Services\PdfReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class VisitCertificatePDFController extends Controller
 {
+    public function __construct(protected PdfReportService $pdfReportService) {}
+
     public function loading($id)
     {
-        $visit = VisitCertificate::with('sede')->findOrFail($id);
+        $visit = $this->pdfReportService->loadVisitSummary($id);
         $prefix = request()->is('gestor/*') ? 'gestor' : 'tecnico';
 
         return view('pdf.loading', [
@@ -24,26 +25,12 @@ class VisitCertificatePDFController extends Controller
         ]);
     }
 
-    private function loadVisit($id): VisitCertificate
-    {
-        return VisitCertificate::with([
-            'empresa',
-            'sede',
-            'user',
-            'checklistCompletions.assignment.checklist',
-            'checklistCompletions.assignment.inspection.asset.assetType',
-            'trainings.training',
-            'hallazgos.fotos',
-            'incidentes.fotos',
-        ])->findOrFail($id);
-    }
-
     public function preview($id)
     {
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $visit = $this->loadVisit($id);
+        $visit = $this->pdfReportService->loadVisitFull($id);
         $branding = BrandingService::forUser($visit->user);
 
         $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit', 'branding'));
@@ -56,7 +43,7 @@ class VisitCertificatePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $visit = $this->loadVisit($id);
+        $visit = $this->pdfReportService->loadVisitFull($id);
         $branding = BrandingService::forUser($visit->user);
 
         $pdf = Pdf::loadView('pdf.visit-certificate-report', compact('visit', 'branding'));
@@ -66,7 +53,7 @@ class VisitCertificatePDFController extends Controller
 
     public function checklistLoading($id)
     {
-        $completion = VisitChecklistCompletion::with(['visit.sede', 'assignment.checklist'])->findOrFail($id);
+        $completion = $this->pdfReportService->loadCompletionSummary($id);
         $prefix = request()->is('gestor/*') ? 'gestor' : 'tecnico';
 
         return view('pdf.loading', [
@@ -84,12 +71,7 @@ class VisitCertificatePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $completion = VisitChecklistCompletion::with([
-            'visit.empresa', 'visit.sede', 'visit.user',
-            'assignment.checklist.sections',
-            'assignment.inspection.asset.assetType',
-        ])->findOrFail($id);
-
+        $completion = $this->pdfReportService->loadCompletionFull($id);
         $branding = BrandingService::forUser($completion->visit->user);
 
         $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion', 'branding'));
@@ -102,12 +84,7 @@ class VisitCertificatePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $completion = VisitChecklistCompletion::with([
-            'visit.empresa', 'visit.sede', 'visit.user',
-            'assignment.checklist.sections',
-            'assignment.inspection.asset.assetType',
-        ])->findOrFail($id);
-
+        $completion = $this->pdfReportService->loadCompletionFull($id);
         $branding = BrandingService::forUser($completion->visit->user);
 
         $pdf = Pdf::loadView('pdf.checklist-standalone', compact('completion', 'branding'));

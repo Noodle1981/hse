@@ -41,49 +41,28 @@ class ConsultantService
         return Consultora::create($data);
     }
 
-    /**
-     * Build edit view payload for a consultora including subscription and audit log timelines.
-     */
     public function getEditData(Consultora $consultant): array
     {
-        $formattedLogs = $this->formatSubscriptionLogs($consultant);
-        $formattedAuditLogs = $this->formatAuditLogs($consultant);
         $primaryGestor = $consultant->primaryGestor;
 
         return [
             'consultant' => [
-                'id' => $consultant->id,
-                'nombre' => $consultant->nombre,
-                'cuit' => $consultant->cuit,
-                'max_tecnicos' => $consultant->max_tecnicos,
+                ...$consultant->only(['id', 'nombre', 'cuit', 'max_tecnicos', 'description', 'fiscal_address', 'province', 'locality', 'email', 'phone']),
                 'max_gestores' => $consultant->max_gestores ?? 2,
                 'max_empresas' => $consultant->max_empresas ?? 5,
-                'description' => $consultant->description,
-                'fiscal_address' => $consultant->fiscal_address,
-                'province' => $consultant->province,
-                'locality' => $consultant->locality,
                 'estado_suscripcion' => $consultant->estado_suscripcion ?? 'activa',
-                'email' => $consultant->email,
-                'phone' => $consultant->phone,
                 'color_primary' => $consultant->color_primary ?? '#1e40af',
                 'color_secondary' => $consultant->color_secondary ?? '#6b7280',
                 'color_accent' => $consultant->color_accent ?? '#16a34a',
                 'logo_path' => $consultant->logo_path ? asset('storage/'.$consultant->logo_path) : null,
             ],
             'primary_gestor' => $primaryGestor ? [
-                'id' => $primaryGestor->id,
-                'nombres' => $primaryGestor->nombres,
-                'apellidos' => $primaryGestor->apellidos,
-                'email' => $primaryGestor->email,
-                'telefono' => $primaryGestor->telefono,
-                'n_doc' => $primaryGestor->n_doc,
-                'matricula' => $primaryGestor->matricula,
-                'estado' => $primaryGestor->estado,
+                ...$primaryGestor->only(['id', 'nombres', 'apellidos', 'email', 'telefono', 'n_doc', 'matricula', 'estado']),
                 'must_change_password' => (bool) $primaryGestor->must_change_password,
             ] : null,
             'has_primary_gestor' => $primaryGestor !== null,
-            'suscripcion_logs' => $formattedLogs,
-            'audit_logs' => $formattedAuditLogs,
+            'suscripcion_logs' => $this->formatSubscriptionLogs($consultant),
+            'audit_logs' => $this->formatAuditLogs($consultant),
         ];
     }
 
@@ -152,23 +131,15 @@ class ConsultantService
     {
         $existingPrimary = $consultant->primaryGestor;
         $data = [
-            'nombres' => $validated['nombres'],
-            'apellidos' => $validated['apellidos'],
-            'email' => $validated['email'],
-            'telefono' => $validated['telefono'] ?? null,
-            'n_doc' => $validated['n_doc'] ?? null,
-            'matricula' => $validated['matricula'] ?? null,
-            'consultora_id' => $consultant->id,
-            'rol' => User::ROLE_GESTOR,
-            'is_primary' => true,
-            'estado' => 'activo',
+            'nombres' => $validated['nombres'], 'apellidos' => $validated['apellidos'], 'email' => $validated['email'],
+            'telefono' => $validated['telefono'] ?? null, 'n_doc' => $validated['n_doc'] ?? null, 'matricula' => $validated['matricula'] ?? null,
+            'consultora_id' => $consultant->id, 'rol' => User::ROLE_GESTOR, 'is_primary' => true, 'estado' => 'activo',
         ];
 
         if (! $existingPrimary) {
             $plainPassword = Str::random(16);
             $data['password'] = Hash::make($plainPassword);
             $data['must_change_password'] = true;
-
             User::create($data);
             session()->flash('generated_password', $plainPassword);
 
@@ -196,38 +167,22 @@ class ConsultantService
 
     private function checkRoleQuota(Consultora $consultant, string $rol, ?int $excludeUserId): ?string
     {
-        if ($rol === 'tecnico') {
-            $count = User::where('consultora_id', $consultant->id)
-                ->whereIn('rol', ['tecnico', 'technician'])
-                ->where('estado', 'activo')
-                ->when($excludeUserId, fn ($q) => $q->where('id', '!=', $excludeUserId))
-                ->count();
-
-            if ($count >= $consultant->max_tecnicos) {
-                return 'Se ha alcanzado el límite de técnicos activos ('.$consultant->max_tecnicos.') para esta consultora.';
-            }
-        } elseif ($rol === 'gestor') {
-            $count = User::where('consultora_id', $consultant->id)
-                ->whereIn('rol', ['gestor', 'administrador'])
-                ->where('estado', 'activo')
-                ->when($excludeUserId, fn ($q) => $q->where('id', '!=', $excludeUserId))
-                ->count();
-
-            if ($count >= $consultant->max_gestores) {
-                return 'Se ha alcanzado el límite de gestores activos ('.$consultant->max_gestores.') para esta consultora.';
-            }
+        if (! in_array($rol, ['tecnico', 'gestor'], true)) {
+            return null;
         }
+        $roles = $rol === 'tecnico' ? ['tecnico', 'technician'] : ['gestor', 'administrador'];
+        $limit = $rol === 'tecnico' ? $consultant->max_tecnicos : $consultant->max_gestores;
+        $label = $rol === 'tecnico' ? 'técnicos' : 'gestores';
 
-        return null;
+        $count = User::where('consultora_id', $consultant->id)->whereIn('rol', $roles)->where('estado', 'activo')
+            ->when($excludeUserId, fn ($q) => $q->where('id', '!=', $excludeUserId))->count();
+
+        return $count >= $limit ? "Se ha alcanzado el límite de {$label} activos ({$limit}) para esta consultora." : null;
     }
 
     private function formatSubscriptionLogs(Consultora $consultant): array
     {
-        $logs = $consultant->suscripcionLogs()
-            ->with('user:id,nombres,apellidos,email')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
+        $logs = $consultant->suscripcionLogs()->with('user:id,nombres,apellidos,email')->orderBy('created_at', 'desc')->get();
         $formattedLogs = [];
         $count = count($logs);
 
@@ -235,22 +190,14 @@ class ConsultantService
             $current = $logs[$i];
             $startDate = $current->created_at;
             $endDate = ($i > 0) ? $logs[$i - 1]->created_at : now();
-
             $formattedLogs[] = [
                 'id' => $current->id,
                 'estado_anterior' => $current->estado_anterior,
                 'estado_nuevo' => $current->estado_nuevo,
                 'created_at' => $current->created_at?->toISOString(),
                 'created_at_formatted' => $current->created_at ? $current->created_at->format('d/m/Y H:i') : 'N/A',
-                'user' => $current->user ? [
-                    'name' => $current->user->nombres.' '.$current->user->apellidos,
-                    'email' => $current->user->email,
-                ] : null,
-                'duration' => $startDate->diffForHumans($endDate, [
-                    'parts' => 2,
-                    'join' => true,
-                    'syntax' => CarbonInterface::DIFF_ABSOLUTE,
-                ]),
+                'user' => $current->user ? ['name' => $current->user->nombres.' '.$current->user->apellidos, 'email' => $current->user->email] : null,
+                'duration' => $startDate->diffForHumans($endDate, ['parts' => 2, 'join' => true, 'syntax' => CarbonInterface::DIFF_ABSOLUTE]),
                 'is_current' => ($i === 0),
             ];
         }
@@ -264,11 +211,7 @@ class ConsultantService
                 'created_at' => $createdAt->toISOString(),
                 'created_at_formatted' => $createdAt->format('d/m/Y H:i'),
                 'user' => null,
-                'duration' => $createdAt->diffForHumans(now(), [
-                    'parts' => 2,
-                    'join' => true,
-                    'syntax' => CarbonInterface::DIFF_ABSOLUTE,
-                ]),
+                'duration' => $createdAt->diffForHumans(now(), ['parts' => 2, 'join' => true, 'syntax' => CarbonInterface::DIFF_ABSOLUTE]),
                 'is_current' => true,
             ];
         }
@@ -278,11 +221,8 @@ class ConsultantService
 
     private function formatAuditLogs(Consultora $consultant): array
     {
-        $auditLogs = AuditLog::where('target_type', Consultora::class)
-            ->where('target_id', $consultant->id)
-            ->with('user:id,nombres,apellidos,email,rol')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $auditLogs = AuditLog::where('target_type', Consultora::class)->where('target_id', $consultant->id)
+            ->with('user:id,nombres,apellidos,email,rol')->orderBy('created_at', 'desc')->get();
 
         $formatted = [];
         $auditCount = count($auditLogs);
@@ -291,23 +231,14 @@ class ConsultantService
             $current = $auditLogs[$i];
             $startDate = $current->created_at;
             $endDate = ($i > 0) ? $auditLogs[$i - 1]->created_at : now();
-
             $formatted[] = [
                 'id' => $current->id,
                 'action' => $current->action,
                 'payload' => $current->payload,
                 'created_at' => $current->created_at?->toISOString(),
                 'created_at_formatted' => $current->created_at ? $current->created_at->format('d/m/Y H:i') : 'N/A',
-                'user' => $current->user ? [
-                    'name' => $current->user->nombres.' '.$current->user->apellidos,
-                    'email' => $current->user->email,
-                    'rol' => $current->user->rol,
-                ] : null,
-                'duration' => $startDate ? $startDate->diffForHumans($endDate, [
-                    'parts' => 2,
-                    'join' => true,
-                    'syntax' => CarbonInterface::DIFF_ABSOLUTE,
-                ]) : 'N/A',
+                'user' => $current->user ? ['name' => $current->user->nombres.' '.$current->user->apellidos, 'email' => $current->user->email, 'rol' => $current->user->rol] : null,
+                'duration' => $startDate ? $startDate->diffForHumans($endDate, ['parts' => 2, 'join' => true, 'syntax' => CarbonInterface::DIFF_ABSOLUTE]) : 'N/A',
                 'is_current' => ($i === 0),
             ];
         }

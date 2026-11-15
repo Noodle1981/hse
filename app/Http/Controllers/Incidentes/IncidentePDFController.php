@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\Incidentes;
 
 use App\Http\Controllers\Controller;
-use App\Models\Incidente;
 use App\Services\BrandingService;
+use App\Services\PdfReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class IncidentePDFController extends Controller
 {
+    public function __construct(protected PdfReportService $pdfReportService) {}
+
     public function download(int $id)
     {
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $incidente = Incidente::with([
-            'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit',
-        ])->findOrFail($id);
-
+        $incidente = $this->pdfReportService->loadIncidenteForPdf($id);
         $branding = BrandingService::forUser($incidente->user);
 
         $pdf = Pdf::loadView('pdf.incidente-report', [
@@ -35,10 +34,7 @@ class IncidentePDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $incidente = Incidente::with([
-            'sede.empresa', 'user', 'fotos', 'hallazgo', 'visit',
-        ])->findOrFail($id);
-
+        $incidente = $this->pdfReportService->loadIncidenteForPdf($id);
         $branding = BrandingService::forUser($incidente->user);
 
         $pdf = Pdf::loadView('pdf.incidente-report', [

@@ -3,28 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Subcategory;
+use App\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
+    public function __construct(protected CategoryService $categoryService) {}
+
     /**
      * Display a listing of categories.
      */
     public function index(Request $request)
     {
-        $categories = Category::query()
-            ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->when($request->boolean('showInactive') == false, fn ($q) => $q->where('is_active', true))
-            ->withCount('subcategories')
-            ->orderBy('order')
-            ->paginate(15)
-            ->withQueryString();
-
         return Inertia::render('Gestor/Categories/Index', [
-            'categories' => $categories,
+            'categories' => $this->categoryService->getPaginatedCategories($request),
             'filters' => $request->only(['search', 'showInactive']),
         ]);
     }
@@ -72,15 +66,7 @@ class CategoryController extends Controller
         ]);
 
         $data = $request->only(['code', 'name', 'description', 'color', 'icon', 'is_active', 'order']);
-
-        if ($id) {
-            $category = Category::findOrFail($id);
-            $category->update($data);
-            $message = 'Categoría actualizada correctamente.';
-        } else {
-            Category::create($data);
-            $message = 'Categoría creada correctamente.';
-        }
+        $message = $this->categoryService->saveCategory($data, $id);
 
         if ($request->has('redirect_back')) {
             return back()->with('message', $message);
@@ -120,17 +106,7 @@ class CategoryController extends Controller
         ]);
 
         $data = $request->only(['code', 'name', 'description', 'is_active']);
-        $data['category_id'] = $category->id;
-
-        if ($id) {
-            $subcategory = Subcategory::findOrFail($id);
-            $subcategory->update($data);
-            $message = 'Subcategoría actualizada.';
-        } else {
-            $data['order'] = $category->subcategories()->count();
-            Subcategory::create($data);
-            $message = 'Subcategoría creada.';
-        }
+        $message = $this->categoryService->saveSubcategory($category, $data, $id);
 
         return back()->with('message', $message);
     }
@@ -140,15 +116,8 @@ class CategoryController extends Controller
      */
     public function toggleStatus(Request $request, $type, $id)
     {
-        if ($type === 'category') {
-            $model = Category::findOrFail($id);
-        } else {
-            $model = Subcategory::findOrFail($id);
-        }
+        $message = $this->categoryService->toggleModelStatus($type, $id);
 
-        $model->update(['is_active' => ! $model->is_active]);
-        $status = $model->is_active ? 'activada' : 'desactivada';
-
-        return back()->with('message', ucfirst($type)." $status exitosamente.");
+        return back()->with('message', $message);
     }
 }

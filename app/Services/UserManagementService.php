@@ -147,11 +147,6 @@ class UserManagementService
         $target->delete();
     }
 
-    /**
-     * Restore a soft-deleted user if consultora quotas allow it.
-     *
-     * @return array{error?: string, message?: string}
-     */
     public function restoreUser(User $currentUser, int|string $id): array
     {
         $user = User::withTrashed()->findOrFail($id);
@@ -159,21 +154,15 @@ class UserManagementService
 
         if ($user->consultora_id) {
             $consultora = Consultora::findOrFail($user->consultora_id);
-            if ($user->rol === 'tecnico' || $user->rol === 'technician') {
-                $activeCount = User::where('consultora_id', $user->consultora_id)
-                    ->whereIn('rol', ['tecnico', 'technician'])
-                    ->where('estado', 'activo')
-                    ->count();
-                if ($activeCount >= $consultora->max_tecnicos) {
-                    return ['error' => 'No se puede restaurar el usuario: Límite de técnicos excedido.'];
-                }
-            } elseif ($user->rol === 'gestor' || $user->rol === 'administrador') {
-                $activeCount = User::where('consultora_id', $user->consultora_id)
-                    ->whereIn('rol', ['gestor', 'administrador'])
-                    ->where('estado', 'activo')
-                    ->count();
-                if ($activeCount >= $consultora->max_gestores) {
-                    return ['error' => 'No se puede restaurar el usuario: Límite de gestores excedido.'];
+            $isTech = in_array($user->rol, ['tecnico', 'technician']);
+            $isGestor = in_array($user->rol, ['gestor', 'administrador']);
+            if ($isTech || $isGestor) {
+                $roles = $isTech ? ['tecnico', 'technician'] : ['gestor', 'administrador'];
+                $limit = $isTech ? $consultora->max_tecnicos : $consultora->max_gestores;
+                $label = $isTech ? 'técnicos' : 'gestores';
+                $activeCount = User::where('consultora_id', $user->consultora_id)->whereIn('rol', $roles)->where('estado', 'activo')->count();
+                if ($activeCount >= $limit) {
+                    return ['error' => "No se puede restaurar el usuario: Límite de {$label} excedido."];
                 }
             }
         }
@@ -184,40 +173,22 @@ class UserManagementService
         return ['message' => 'Usuario restaurado exitosamente.'];
     }
 
-    /**
-     * Reset a user's password within the same consultora.
-     */
     public function resetGestorUserPassword(User $currentUser, User $user): string
     {
         abort_unless($user->consultora_id === $currentUser->consultora_id, 403, 'Acceso no autorizado.');
-
         $plainPassword = Str::random(16);
-        $user->update([
-            'password' => Hash::make($plainPassword),
-            'must_change_password' => true,
-        ]);
-
+        $user->update(['password' => Hash::make($plainPassword), 'must_change_password' => true]);
         session()->flash('generated_password', $plainPassword);
         session()->flash('generated_password_user', $user->full_name ?? $user->nombres.' '.$user->apellidos);
 
         return "Contraseña de {$user->nombres} {$user->apellidos} reseteada exitosamente.";
     }
 
-    /**
-     * Paginated global staff listing (super_admin & vendedor).
-     */
     public function getGlobalStaffData(Request $request): array
     {
-        $query = User::query()
-            ->whereNull('consultora_id')
-            ->whereIn('rol', [User::ROLE_SUPER_ADMIN, User::ROLE_VENDEDOR]);
-
+        $query = User::query()->whereNull('consultora_id')->whereIn('rol', [User::ROLE_SUPER_ADMIN, User::ROLE_VENDEDOR]);
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('nombres', 'like', "%{$request->search}%")
-                    ->orWhere('apellidos', 'like', "%{$request->search}%")
-                    ->orWhere('email', 'like', "%{$request->search}%");
-            });
+            $query->where(fn ($q) => $q->where('nombres', 'like', "%{$request->search}%")->orWhere('apellidos', 'like', "%{$request->search}%")->orWhere('email', 'like', "%{$request->search}%"));
         }
 
         return [

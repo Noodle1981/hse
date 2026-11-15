@@ -2,26 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\DynamicInspection;
 use App\Services\BrandingService;
+use App\Services\PdfReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Gate;
 
 class InspectionPDFController extends Controller
 {
+    public function __construct(protected PdfReportService $pdfReportService) {}
+
     public function download(int $id)
     {
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $inspection = DynamicInspection::with([
-            'checklist.sections',
-            'user',
-            'sede.empresa',
-            'answers.question',
-            'asset.assetType',
-        ])->findOrFail($id);
-
+        $inspection = $this->pdfReportService->loadInspectionForPdf($id);
         Gate::authorize('view', $inspection);
 
         $branding = BrandingService::forUser($inspection->user);
@@ -41,14 +36,7 @@ class InspectionPDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $inspection = DynamicInspection::with([
-            'checklist.sections',
-            'user',
-            'sede.empresa',
-            'answers.question',
-            'asset.assetType',
-        ])->findOrFail($id);
-
+        $inspection = $this->pdfReportService->loadInspectionForPdf($id);
         Gate::authorize('view', $inspection);
 
         $branding = BrandingService::forUser($inspection->user);

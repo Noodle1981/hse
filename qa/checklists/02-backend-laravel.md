@@ -7,7 +7,7 @@
 - [x] **Route Model Binding consistente**: Los nombres de parámetros en `routes/web.php` coinciden con las variables tipadas en los métodos de los controladores (ej. `{masterReport}`, `{inspection}`, `{visit}`, `{asset}`).
 - [x] **Uso de Form Requests dedicados**: Extraer validaciones inline (`$request->validate([...])`) de los controladores hacia clases dedicadas en `app/Http/Requests/`.
 - [x] **Eventos, Listeners y Jobs desacoplados**: Procesamiento pesado (importación de empleados en `ImportEmployeesJob`) y efectos secundarios (sincronización de metadata en `SyncAssetMetadata` tras `InspectionCompleted`) gestionados mediante eventos y colas.
-- [ ] **Unificación de motor PDF y Excel**: Consolidar el uso de librerías de exportación evitando mantener paquetes redundantes para la misma tarea (`dompdf` vs `spatie/laravel-pdf`, y múltiples librerías de XLSX). *(Se ejecuta en Checklist 07 / `AUD-005` para no mezclar dependencias aquí).*
+- [x] **Unificación de motor PDF y Excel**: Consolidado el uso de `barryvdh/laravel-dompdf` y `shuchkin/simplexlsx`, eliminando paquetes redundantes (`spatie/laravel-pdf`, `maatwebsite/excel`, `phpoffice/phpspreadsheet`, `shuchkin/simplexlsxgen`) en `AUD-005`.
 
 ## Hallazgos de la medición (Archivos sobre umbral > 200 lín y acceso a datos)
 

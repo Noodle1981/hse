@@ -40,54 +40,28 @@ class AssetService
             ->whereIn('empresa_id', $assignedEmpresaIds);
 
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', "%{$request->search}%")
-                    ->orWhere('identifier', 'like', "%{$request->search}%");
-            });
+            $query->where(fn ($q) => $q->where('name', 'like', "%{$request->search}%")->orWhere('identifier', 'like', "%{$request->search}%"));
         }
-
-        if ($request->empresa_id) {
-            $query->where('empresa_id', $request->empresa_id);
+        foreach (['empresa_id', 'sede_id', 'asset_type_id', 'grupo', 'subgrupo'] as $field) {
+            if ($request->$field) {
+                $query->where($field, $request->$field);
+            }
         }
-
-        if ($request->sede_id) {
-            $query->where('sede_id', $request->sede_id);
-        }
-
-        if ($request->asset_type_id) {
-            $query->where('asset_type_id', $request->asset_type_id);
-        }
-
         if ($request->status && $request->status !== 'all') {
             $query->where('status', $request->status);
-        }
-
-        if ($request->grupo) {
-            $query->where('grupo', $request->grupo);
-        }
-
-        if ($request->subgrupo) {
-            $query->where('subgrupo', $request->subgrupo);
         }
 
         return $query;
     }
 
-    /**
-     * Build Inertia props for the Asset index page.
-     */
     public function getIndexData(User $user, Request $request): array
     {
         $assignedEmpresaIds = $this->getUserEmpresaIds($user);
         $query = $this->buildFilteredQuery($user, $request);
 
-        $statsBase = Asset::query()->whereIn('empresa_id', $assignedEmpresaIds);
-        if ($request->sede_id) {
-            $statsBase->where('sede_id', $request->sede_id);
-        }
-        if ($request->empresa_id) {
-            $statsBase->where('empresa_id', $request->empresa_id);
-        }
+        $statsBase = Asset::query()->whereIn('empresa_id', $assignedEmpresaIds)
+            ->when($request->sede_id, fn ($q) => $q->where('sede_id', $request->sede_id))
+            ->when($request->empresa_id, fn ($q) => $q->where('empresa_id', $request->empresa_id));
 
         $kpis = [
             'total' => (clone $statsBase)->count(),
@@ -96,16 +70,9 @@ class AssetService
             'fuera_de_servicio' => (clone $statsBase)->where('status', 'fuera_de_servicio')->count(),
         ];
 
-        $viewMode = $request->input('view_mode', 'grouped');
-        if ($viewMode === 'grouped') {
+        if ($request->input('view_mode', 'grouped') === 'grouped') {
             $assetsData = $query->latest('created_at')->get();
-            $assets = [
-                'data' => $assetsData,
-                'total' => $assetsData->count(),
-                'from' => 1,
-                'to' => $assetsData->count(),
-                'links' => [],
-            ];
+            $assets = ['data' => $assetsData, 'total' => $assetsData->count(), 'from' => 1, 'to' => $assetsData->count(), 'links' => []];
         } else {
             $assets = $query->latest('created_at')->paginate(15)->withQueryString();
         }
@@ -116,15 +83,10 @@ class AssetService
             'filters' => $request->only(['search', 'empresa_id', 'sede_id', 'asset_type_id', 'status', 'view_mode']),
             'empresas' => Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']),
             'sedes' => Sede::whereIn('empresa_id', $assignedEmpresaIds)->get(['id', 'nombre_sede', 'empresa_id']),
-            'assetTypes' => AssetType::whereIn('empresa_id', $assignedEmpresaIds)
-                ->orWhereNull('empresa_id')
-                ->get(['id', 'name', 'category_id']),
+            'assetTypes' => AssetType::whereIn('empresa_id', $assignedEmpresaIds)->orWhereNull('empresa_id')->get(['id', 'name', 'category_id']),
         ];
     }
 
-    /**
-     * Get empresas, sedes, and assetTypes for create/edit forms.
-     */
     public function getFormOptions(User $user): array
     {
         $assignedEmpresaIds = $this->getUserEmpresaIds($user);
@@ -132,9 +94,7 @@ class AssetService
         return [
             'empresas' => Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']),
             'sedes' => Sede::whereIn('empresa_id', $assignedEmpresaIds)->get(['id', 'nombre_sede', 'empresa_id']),
-            'assetTypes' => AssetType::whereIn('empresa_id', $assignedEmpresaIds)
-                ->orWhereNull('empresa_id')
-                ->get(),
+            'assetTypes' => AssetType::whereIn('empresa_id', $assignedEmpresaIds)->orWhereNull('empresa_id')->get(),
         ];
     }
 

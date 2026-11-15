@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-15T18:53:18.879Z",
+  "generado": "2026-11-15T19:12:20.028Z",
   "proyecto": "HSE SaaS (XamaSafe / EP-Back)",
   "categorias": [
     {
@@ -671,30 +671,6 @@
       "accion": "Mover consultas Eloquent y lógica de negocio pesada a Services/ o Actions/, validaciones a FormRequests",
       "archivos": [
         {
-          "ruta": "app/Http/Controllers/AssetTypeController.php",
-          "nombre": "AssetTypeController.php",
-          "lineas": 198,
-          "estado": "moderado",
-          "accesoDatos": [
-            {
-              "patron": "::query\\(",
-              "linea": 25
-            },
-            {
-              "patron": "::where\\(",
-              "linea": 41
-            },
-            {
-              "patron": "::create\\(",
-              "linea": 106
-            },
-            {
-              "patron": "::findOrFail\\(",
-              "linea": 102
-            }
-          ]
-        },
-        {
           "ruta": "app/Http/Controllers/Admin/ConsultantController.php",
           "nombre": "ConsultantController.php",
           "lineas": 197,
@@ -730,54 +706,6 @@
           "accesoDatos": []
         },
         {
-          "ruta": "app/Http/Controllers/PasswordResetRequestController.php",
-          "nombre": "PasswordResetRequestController.php",
-          "lineas": 185,
-          "estado": "moderado",
-          "accesoDatos": [
-            {
-              "patron": "::where\\(",
-              "linea": 28
-            },
-            {
-              "patron": "::with\\(",
-              "linea": 85
-            },
-            {
-              "patron": "::create\\(",
-              "linea": 68
-            }
-          ]
-        },
-        {
-          "ruta": "app/Http/Controllers/IncidenteController.php",
-          "nombre": "IncidenteController.php",
-          "lineas": 184,
-          "estado": "moderado",
-          "accesoDatos": [
-            {
-              "patron": "DB::",
-              "linea": 132
-            },
-            {
-              "patron": "::query\\(",
-              "linea": 31
-            },
-            {
-              "patron": "::with\\(",
-              "linea": 92
-            },
-            {
-              "patron": "::create\\(",
-              "linea": 134
-            },
-            {
-              "patron": "::find\\(",
-              "linea": 99
-            }
-          ]
-        },
-        {
           "ruta": "app/Http/Controllers/CompanyController.php",
           "nombre": "CompanyController.php",
           "lineas": 165,
@@ -794,66 +722,16 @@
         {
           "ruta": "app/Http/Controllers/CategoryController.php",
           "nombre": "CategoryController.php",
-          "lineas": 155,
+          "lineas": 124,
           "estado": "moderado",
-          "accesoDatos": [
-            {
-              "patron": "::query\\(",
-              "linea": 18
-            },
-            {
-              "patron": "::create\\(",
-              "linea": 81
-            },
-            {
-              "patron": "::findOrFail\\(",
-              "linea": 77
-            }
-          ]
-        },
-        {
-          "ruta": "app/Http/Controllers/Contracts/AnnualContractReportController.php",
-          "nombre": "AnnualContractReportController.php",
-          "lineas": 149,
-          "estado": "moderado",
-          "accesoDatos": [
-            {
-              "patron": "::where\\(",
-              "linea": 29
-            },
-            {
-              "patron": "::with\\(",
-              "linea": 24
-            },
-            {
-              "patron": "::create\\(",
-              "linea": 26
-            }
-          ]
+          "accesoDatos": []
         },
         {
           "ruta": "app/Http/Controllers/SignatureApprovalController.php",
           "nombre": "SignatureApprovalController.php",
-          "lineas": 121,
-          "estado": "moderado",
-          "accesoDatos": [
-            {
-              "patron": "::where\\(",
-              "linea": 22
-            }
-          ]
-        },
-        {
-          "ruta": "app/Http/Controllers/VisitCertificatePDFController.php",
-          "nombre": "VisitCertificatePDFController.php",
-          "lineas": 118,
+          "lineas": 116,
           "estado": "optimo",
-          "accesoDatos": [
-            {
-              "patron": "::with\\(",
-              "linea": 14
-            }
-          ]
+          "accesoDatos": []
         },
         {
           "ruta": "app/Http/Controllers/FindingController.php",
@@ -870,16 +748,11 @@
           "accesoDatos": []
         },
         {
-          "ruta": "app/Http/Controllers/TrainingPDFController.php",
-          "nombre": "TrainingPDFController.php",
+          "ruta": "app/Http/Controllers/PasswordResetRequestController.php",
+          "nombre": "PasswordResetRequestController.php",
           "lineas": 108,
           "estado": "optimo",
-          "accesoDatos": [
-            {
-              "patron": "::with\\(",
-              "linea": 18
-            }
-          ]
+          "accesoDatos": []
         },
         {
           "ruta": "app/Http/Controllers/MasterReportController.php",
@@ -892,6 +765,27 @@
           "ruta": "app/Http/Controllers/ProfileController.php",
           "nombre": "ProfileController.php",
           "lineas": 105,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/AssetTypeController.php",
+          "nombre": "AssetTypeController.php",
+          "lineas": 95,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/VisitCertificatePDFController.php",
+          "nombre": "VisitCertificatePDFController.php",
+          "lineas": 95,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/IncidenteController.php",
+          "nombre": "IncidenteController.php",
+          "lineas": 92,
           "estado": "optimo",
           "accesoDatos": []
         },
@@ -910,18 +804,6 @@
           "accesoDatos": []
         },
         {
-          "ruta": "app/Http/Controllers/InspectionPDFController.php",
-          "nombre": "InspectionPDFController.php",
-          "lineas": 66,
-          "estado": "optimo",
-          "accesoDatos": [
-            {
-              "patron": "::with\\(",
-              "linea": 17
-            }
-          ]
-        },
-        {
           "ruta": "app/Http/Controllers/Admin/GlobalStaffController.php",
           "nombre": "GlobalStaffController.php",
           "lineas": 65,
@@ -936,20 +818,15 @@
           "accesoDatos": []
         },
         {
-          "ruta": "app/Http/Controllers/Hallazgos/HallazgoPDFController.php",
-          "nombre": "HallazgoPDFController.php",
-          "lineas": 56,
-          "estado": "optimo",
-          "accesoDatos": [
-            {
-              "patron": "::with\\(",
-              "linea": 17
-            }
-          ]
-        },
-        {
           "ruta": "app/Http/Controllers/Gestor/AssignmentManagerController.php",
           "nombre": "AssignmentManagerController.php",
+          "lineas": 54,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/InspectionPDFController.php",
+          "nombre": "InspectionPDFController.php",
           "lineas": 54,
           "estado": "optimo",
           "accesoDatos": []
@@ -962,16 +839,18 @@
           "accesoDatos": []
         },
         {
-          "ruta": "app/Http/Controllers/Incidentes/IncidentePDFController.php",
-          "nombre": "IncidentePDFController.php",
+          "ruta": "app/Http/Controllers/Hallazgos/HallazgoPDFController.php",
+          "nombre": "HallazgoPDFController.php",
           "lineas": 52,
           "estado": "optimo",
-          "accesoDatos": [
-            {
-              "patron": "::with\\(",
-              "linea": 17
-            }
-          ]
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/Incidentes/IncidentePDFController.php",
+          "nombre": "IncidentePDFController.php",
+          "lineas": 48,
+          "estado": "optimo",
+          "accesoDatos": []
         },
         {
           "ruta": "app/Http/Controllers/PublicSignatureController.php",
@@ -995,6 +874,20 @@
           "accesoDatos": []
         },
         {
+          "ruta": "app/Http/Controllers/TrainingPDFController.php",
+          "nombre": "TrainingPDFController.php",
+          "lineas": 40,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/Contracts/AnnualContractReportController.php",
+          "nombre": "AnnualContractReportController.php",
+          "lineas": 28,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "app/Http/Controllers/Controller.php",
           "nombre": "Controller.php",
           "lineas": 9,
@@ -1006,7 +899,7 @@
         "total": 32,
         "sobreUmbral": 0,
         "criticos": 0,
-        "accesoDatos": 11
+        "accesoDatos": 0
       }
     },
     {
@@ -1018,73 +911,87 @@
       "accion": "Dividir servicios grandes por caso de uso o responsabilidad única",
       "archivos": [
         {
-          "ruta": "app/Services/InspectionService.php",
-          "nombre": "InspectionService.php",
-          "lineas": 567,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "app/Services/AnnualContractService.php",
-          "nombre": "AnnualContractService.php",
-          "lineas": 512,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "app/Services/OperationService.php",
-          "nombre": "OperationService.php",
-          "lineas": 471,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "app/Services/MasterReportService.php",
-          "nombre": "MasterReportService.php",
-          "lineas": 448,
-          "estado": "critico",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "app/Services/TechnicianAssignmentService.php",
-          "nombre": "TechnicianAssignmentService.php",
-          "lineas": 401,
-          "estado": "critico",
+          "ruta": "app/Services/DashboardMetricsService.php",
+          "nombre": "DashboardMetricsService.php",
+          "lineas": 250,
+          "estado": "moderado",
           "accesoDatos": []
         },
         {
           "ruta": "app/Services/ConsultantService.php",
           "nombre": "ConsultantService.php",
-          "lineas": 318,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "app/Services/DashboardMetricsService.php",
-          "nombre": "DashboardMetricsService.php",
-          "lineas": 310,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "app/Services/AssetService.php",
-          "nombre": "AssetService.php",
-          "lineas": 284,
-          "estado": "sobre-umbral",
-          "accesoDatos": []
-        },
-        {
-          "ruta": "app/Services/UserManagementService.php",
-          "nombre": "UserManagementService.php",
-          "lineas": 265,
-          "estado": "sobre-umbral",
+          "lineas": 249,
+          "estado": "moderado",
           "accesoDatos": []
         },
         {
           "ruta": "app/Services/TrainingService.php",
           "nombre": "TrainingService.php",
-          "lineas": 252,
-          "estado": "sobre-umbral",
+          "lineas": 249,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/AssetService.php",
+          "nombre": "AssetService.php",
+          "lineas": 244,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/MasterReportComplianceService.php",
+          "nombre": "MasterReportComplianceService.php",
+          "lineas": 239,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/AnnualComplianceCalculatorService.php",
+          "nombre": "AnnualComplianceCalculatorService.php",
+          "lineas": 236,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/UserManagementService.php",
+          "nombre": "UserManagementService.php",
+          "lineas": 236,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/QuickTaskExecutionService.php",
+          "nombre": "QuickTaskExecutionService.php",
+          "lineas": 226,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/TechnicianTaskUnifierService.php",
+          "nombre": "TechnicianTaskUnifierService.php",
+          "lineas": 221,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/AnnualContractService.php",
+          "nombre": "AnnualContractService.php",
+          "lineas": 219,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/InspectionService.php",
+          "nombre": "InspectionService.php",
+          "lineas": 219,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/OperationService.php",
+          "nombre": "OperationService.php",
+          "lineas": 214,
+          "estado": "moderado",
           "accesoDatos": []
         },
         {
@@ -1102,6 +1009,13 @@
           "accesoDatos": []
         },
         {
+          "ruta": "app/Services/InspectionHistoryService.php",
+          "nombre": "InspectionHistoryService.php",
+          "lineas": 195,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
           "ruta": "app/Services/FindingService.php",
           "nombre": "FindingService.php",
           "lineas": 182,
@@ -1112,6 +1026,20 @@
           "ruta": "app/Services/TimeTrackingService.php",
           "nombre": "TimeTrackingService.php",
           "lineas": 177,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/MasterReportService.php",
+          "nombre": "MasterReportService.php",
+          "lineas": 173,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/TechnicianAssignmentService.php",
+          "nombre": "TechnicianAssignmentService.php",
+          "lineas": 159,
           "estado": "moderado",
           "accesoDatos": []
         },
@@ -1137,6 +1065,20 @@
           "accesoDatos": []
         },
         {
+          "ruta": "app/Services/AnnualContractReportService.php",
+          "nombre": "AnnualContractReportService.php",
+          "lineas": 124,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/AssetTypeService.php",
+          "nombre": "AssetTypeService.php",
+          "lineas": 124,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "app/Services/ProfileService.php",
           "nombre": "ProfileService.php",
           "lineas": 124,
@@ -1151,9 +1093,44 @@
           "accesoDatos": []
         },
         {
+          "ruta": "app/Services/PdfReportService.php",
+          "nombre": "PdfReportService.php",
+          "lineas": 120,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/IncidenteService.php",
+          "nombre": "IncidenteService.php",
+          "lineas": 119,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/InspectionAssetSyncService.php",
+          "nombre": "InspectionAssetSyncService.php",
+          "lineas": 114,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/PasswordResetRequestService.php",
+          "nombre": "PasswordResetRequestService.php",
+          "lineas": 102,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
           "ruta": "app/Services/BrandingService.php",
           "nombre": "BrandingService.php",
           "lineas": 68,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/CategoryService.php",
+          "nombre": "CategoryService.php",
+          "lineas": 66,
           "estado": "optimo",
           "accesoDatos": []
         },
@@ -1166,13 +1143,40 @@
         }
       ],
       "resumen": {
-        "total": 21,
-        "sobreUmbral": 10,
-        "criticos": 5,
+        "total": 33,
+        "sobreUmbral": 0,
+        "criticos": 0,
         "accesoDatos": 0
       }
     }
   ],
-  "versiones": null,
-  "documentacion": null
+  "versiones": {
+    "commitsTotales": 269,
+    "commitsAnalizados": 50,
+    "porcentajeConvencional": 96,
+    "noConvencionalesEjemplo": [
+      "mejoras varias",
+      "design: update landing page copies and align contact button styling"
+    ],
+    "tags": 1,
+    "ultimoTag": "v2.3.0",
+    "ramaActual": "pre-produccion",
+    "commitActual": "4e199c8"
+  },
+  "documentacion": {
+    "rutasDocs": [
+      "README.md",
+      "doc",
+      ".agent/workflows/notebooklm"
+    ],
+    "rutasCodigo": [
+      "app",
+      "resources/js",
+      "routes"
+    ],
+    "ultimaActualizacionDocs": "2026-11-15",
+    "ultimoCambioCodigo": "2026-11-15",
+    "commitsDeCodigoSinActualizarDocs": 0,
+    "desactualizada": false
+  }
 }

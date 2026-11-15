@@ -231,18 +231,15 @@ class TrainingService
 
     private function storeBase64Signature(string $sigData): ?string
     {
-        if (preg_match('/^data:image\/(\w+);base64,/', $sigData, $type)) {
+        $type = 'png';
+        if (preg_match('/^data:image\/(\w+);base64,/', $sigData, $m)) {
             $sigData = substr($sigData, strpos($sigData, ',') + 1);
-            $type = strtolower($type[1]);
-        } else {
-            $type = 'png';
+            $type = strtolower($m[1]);
         }
-
         $decoded = base64_decode($sigData);
         if ($decoded === false) {
             return null;
         }
-
         $filename = 'signatures/instructor_'.uniqid().'.'.$type;
         Storage::disk('public')->put($filename, $decoded);
 

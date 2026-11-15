@@ -1,6 +1,6 @@
 # Ranking de complejidad — HSE SaaS (XamaSafe / EP-Back)
 
-> Generado: 2026-11-15
+> Generado: 2026-11-15 · commit `4e199c8` · rama `pre-produccion`
 
 ## Vistas y Layouts Frontend (React + Inertia) (umbral 500 lín · crítico 800 lín)
 
@@ -41,68 +41,89 @@ Archivos: 92 · sobre umbral: **0** · críticos: **0**
 
 ## Controladores Backend (Laravel) (umbral 200 lín · crítico 300 lín)
 
-Archivos: 32 · sobre umbral: **0** · críticos: **0** · con acceso directo a datos: **11**
+Archivos: 32 · sobre umbral: **0** · críticos: **0**
 
 | Líneas | Estado | Archivo | Acceso a datos |
 |---:|---|---|---|
-| 198 | 🔵 Moderado | `app/Http/Controllers/AssetTypeController.php` | `::query\(` (L25), `::where\(` (L41), `::create\(` (L106), `::findOrFail\(` (L102) |
 | 197 | 🔵 Moderado | `app/Http/Controllers/Admin/ConsultantController.php` | — |
 | 191 | 🔵 Moderado | `app/Http/Controllers/AdministrationController.php` | — |
 | 190 | 🔵 Moderado | `app/Http/Controllers/TrainingController.php` | — |
 | 186 | 🔵 Moderado | `app/Http/Controllers/AssetController.php` | — |
 | 185 | 🔵 Moderado | `app/Http/Controllers/HelpCenterController.php` | — |
-| 185 | 🔵 Moderado | `app/Http/Controllers/PasswordResetRequestController.php` | `::where\(` (L28), `::with\(` (L85), `::create\(` (L68) |
-| 184 | 🔵 Moderado | `app/Http/Controllers/IncidenteController.php` | `DB::` (L132), `::query\(` (L31), `::with\(` (L92), `::create\(` (L134), `::find\(` (L99) |
 | 165 | 🔵 Moderado | `app/Http/Controllers/CompanyController.php` | — |
 | 164 | 🔵 Moderado | `app/Http/Controllers/OperationController.php` | — |
-| 155 | 🔵 Moderado | `app/Http/Controllers/CategoryController.php` | `::query\(` (L18), `::create\(` (L81), `::findOrFail\(` (L77) |
-| 149 | 🔵 Moderado | `app/Http/Controllers/Contracts/AnnualContractReportController.php` | `::where\(` (L29), `::with\(` (L24), `::create\(` (L26) |
-| 121 | 🔵 Moderado | `app/Http/Controllers/SignatureApprovalController.php` | `::where\(` (L22) |
-| 118 | 🟢 Óptimo | `app/Http/Controllers/VisitCertificatePDFController.php` | `::with\(` (L14) |
+| 124 | 🔵 Moderado | `app/Http/Controllers/CategoryController.php` | — |
+| 116 | 🟢 Óptimo | `app/Http/Controllers/SignatureApprovalController.php` | — |
 | 110 | 🟢 Óptimo | `app/Http/Controllers/FindingController.php` | — |
 | 108 | 🟢 Óptimo | `app/Http/Controllers/InspectionController.php` | — |
-| 108 | 🟢 Óptimo | `app/Http/Controllers/TrainingPDFController.php` | `::with\(` (L18) |
+| 108 | 🟢 Óptimo | `app/Http/Controllers/PasswordResetRequestController.php` | — |
 | 107 | 🟢 Óptimo | `app/Http/Controllers/MasterReportController.php` | — |
 | 105 | 🟢 Óptimo | `app/Http/Controllers/ProfileController.php` | — |
+| 95 | 🟢 Óptimo | `app/Http/Controllers/AssetTypeController.php` | — |
+| 95 | 🟢 Óptimo | `app/Http/Controllers/VisitCertificatePDFController.php` | — |
+| 92 | 🟢 Óptimo | `app/Http/Controllers/IncidenteController.php` | — |
 | 82 | 🟢 Óptimo | `app/Http/Controllers/ContractController.php` | — |
 | 74 | 🟢 Óptimo | `app/Http/Controllers/ChecklistController.php` | — |
-| 66 | 🟢 Óptimo | `app/Http/Controllers/InspectionPDFController.php` | `::with\(` (L17) |
 | 65 | 🟢 Óptimo | `app/Http/Controllers/Admin/GlobalStaffController.php` | — |
 | 56 | 🟢 Óptimo | `app/Http/Controllers/Auth/LoginController.php` | — |
-| 56 | 🟢 Óptimo | `app/Http/Controllers/Hallazgos/HallazgoPDFController.php` | `::with\(` (L17) |
 | 54 | 🟢 Óptimo | `app/Http/Controllers/Gestor/AssignmentManagerController.php` | — |
+| 54 | 🟢 Óptimo | `app/Http/Controllers/InspectionPDFController.php` | — |
 | 52 | 🟢 Óptimo | `app/Http/Controllers/Auth/ForcePasswordChangeController.php` | — |
-| 52 | 🟢 Óptimo | `app/Http/Controllers/Incidentes/IncidentePDFController.php` | `::with\(` (L17) |
+| 52 | 🟢 Óptimo | `app/Http/Controllers/Hallazgos/HallazgoPDFController.php` | — |
+| 48 | 🟢 Óptimo | `app/Http/Controllers/Incidentes/IncidentePDFController.php` | — |
 | 48 | 🟢 Óptimo | `app/Http/Controllers/PublicSignatureController.php` | — |
 | 46 | 🟢 Óptimo | `app/Http/Controllers/SwitchRoleController.php` | — |
+| 44 | 🟢 Óptimo | `app/Http/Controllers/Gestor/BrandingController.php` | — |
+| 40 | 🟢 Óptimo | `app/Http/Controllers/TrainingPDFController.php` | — |
 
 ## Servicios, Jobs y Listeners (Dominio) (umbral 250 lín · crítico 400 lín)
 
-Archivos: 21 · sobre umbral: **10** · críticos: **5**
+Archivos: 33 · sobre umbral: **0** · críticos: **0**
 
 | Líneas | Estado | Archivo | Acceso a datos |
 |---:|---|---|---|
-| 567 | 🔴 Crítico | `app/Services/InspectionService.php` | — |
-| 512 | 🔴 Crítico | `app/Services/AnnualContractService.php` | — |
-| 471 | 🔴 Crítico | `app/Services/OperationService.php` | — |
-| 448 | 🔴 Crítico | `app/Services/MasterReportService.php` | — |
-| 401 | 🔴 Crítico | `app/Services/TechnicianAssignmentService.php` | — |
-| 318 | 🟡 Sobre umbral | `app/Services/ConsultantService.php` | — |
-| 310 | 🟡 Sobre umbral | `app/Services/DashboardMetricsService.php` | — |
-| 284 | 🟡 Sobre umbral | `app/Services/AssetService.php` | — |
-| 265 | 🟡 Sobre umbral | `app/Services/UserManagementService.php` | — |
-| 252 | 🟡 Sobre umbral | `app/Services/TrainingService.php` | — |
+| 250 | 🔵 Moderado | `app/Services/DashboardMetricsService.php` | — |
+| 249 | 🔵 Moderado | `app/Services/ConsultantService.php` | — |
+| 249 | 🔵 Moderado | `app/Services/TrainingService.php` | — |
+| 244 | 🔵 Moderado | `app/Services/AssetService.php` | — |
+| 239 | 🔵 Moderado | `app/Services/MasterReportComplianceService.php` | — |
+| 236 | 🔵 Moderado | `app/Services/AnnualComplianceCalculatorService.php` | — |
+| 236 | 🔵 Moderado | `app/Services/UserManagementService.php` | — |
+| 226 | 🔵 Moderado | `app/Services/QuickTaskExecutionService.php` | — |
+| 221 | 🔵 Moderado | `app/Services/TechnicianTaskUnifierService.php` | — |
+| 219 | 🔵 Moderado | `app/Services/AnnualContractService.php` | — |
+| 219 | 🔵 Moderado | `app/Services/InspectionService.php` | — |
+| 214 | 🔵 Moderado | `app/Services/OperationService.php` | — |
 | 197 | 🔵 Moderado | `app/Services/ChecklistBuilderService.php` | — |
 | 195 | 🔵 Moderado | `app/Services/CompanyService.php` | — |
+| 195 | 🔵 Moderado | `app/Services/InspectionHistoryService.php` | — |
 | 182 | 🔵 Moderado | `app/Services/FindingService.php` | — |
 | 177 | 🔵 Moderado | `app/Services/TimeTrackingService.php` | — |
+| 173 | 🔵 Moderado | `app/Services/MasterReportService.php` | — |
+| 159 | 🔵 Moderado | `app/Services/TechnicianAssignmentService.php` | — |
 | 151 | 🔵 Moderado | `app/Services/VisitService.php` | — |
 | 144 | 🟢 Óptimo | `app/Services/GestorToolsService.php` | — |
 | 135 | 🟢 Óptimo | `app/Jobs/ImportEmployeesJob.php` | — |
+| 124 | 🟢 Óptimo | `app/Services/AnnualContractReportService.php` | — |
+| 124 | 🟢 Óptimo | `app/Services/AssetTypeService.php` | — |
 | 124 | 🟢 Óptimo | `app/Services/ProfileService.php` | — |
 | 124 | 🟢 Óptimo | `app/Listeners/SyncAssetMetadata.php` | — |
-| 68 | 🟢 Óptimo | `app/Services/BrandingService.php` | — |
-| 21 | 🟢 Óptimo | `app/Listeners/LogClientAccess.php` | — |
+| 120 | 🟢 Óptimo | `app/Services/PdfReportService.php` | — |
+| 119 | 🟢 Óptimo | `app/Services/IncidenteService.php` | — |
+| 114 | 🟢 Óptimo | `app/Services/InspectionAssetSyncService.php` | — |
+| 102 | 🟢 Óptimo | `app/Services/PasswordResetRequestService.php` | — |
 
-**Acción sugerida:** Dividir servicios grandes por caso de uso o responsabilidad única
+## Control de versiones
 
+- Commits totales: 269
+- Convención de commits (últimos 50): **96%**
+- Tags: 1 (último: `v2.3.0`)
+- Ejemplos sin convención:
+  - "mejoras varias"
+  - "design: update landing page copies and align contact button styling"
+
+## Documentación
+
+- Última actualización de docs (README.md, doc, .agent/workflows/notebooklm): 2026-11-15
+- Último cambio de código: 2026-11-15
+- Commits de código desde la última actualización de docs: **0**

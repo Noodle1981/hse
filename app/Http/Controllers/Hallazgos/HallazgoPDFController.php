@@ -3,21 +3,20 @@
 namespace App\Http\Controllers\Hallazgos;
 
 use App\Http\Controllers\Controller;
-use App\Models\Hallazgo;
 use App\Services\BrandingService;
+use App\Services\PdfReportService;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class HallazgoPDFController extends Controller
 {
+    public function __construct(protected PdfReportService $pdfReportService) {}
+
     public function download(int $id)
     {
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $hallazgo = Hallazgo::with([
-            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen',
-        ])->findOrFail($id);
-
+        $hallazgo = $this->pdfReportService->loadHallazgoForPdf($id);
         $branding = BrandingService::forUser($hallazgo->user);
 
         $pdf = Pdf::loadView('pdf.hallazgo-report', [
@@ -37,10 +36,7 @@ class HallazgoPDFController extends Controller
         ini_set('memory_limit', '512M');
         set_time_limit(300);
 
-        $hallazgo = Hallazgo::with([
-            'sede.empresa', 'user', 'seguimientos.user', 'fotos', 'origen',
-        ])->findOrFail($id);
-
+        $hallazgo = $this->pdfReportService->loadHallazgoForPdf($id);
         $branding = BrandingService::forUser($hallazgo->user);
 
         $pdf = Pdf::loadView('pdf.hallazgo-report', [

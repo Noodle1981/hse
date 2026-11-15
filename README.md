@@ -82,7 +82,7 @@ php artisan serve
 ## Pruebas y Calidad
 
 ```bash
-# Ejecutar suite de pruebas PHPUnit (SQLite en memoria)
+# Ejecutar suite de pruebas PHPUnit (SQLite en memoria — 56 tests / 163 aserciones)
 php artisan test
 
 # Compilación de producción frontend

@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\PdfReportService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SignatureApprovalController extends Controller
 {
+    public function __construct(protected PdfReportService $pdfReportService) {}
+
     /**
      * List all users with pending signature reviews (Only for Gestores/Admins).
      */
@@ -19,15 +22,7 @@ class SignatureApprovalController extends Controller
         /** @var User $currentUser */
         $currentUser = Auth::user();
 
-        $query = User::where('firma_status', 'pending');
-
-        if (! $currentUser->isSuperAdmin()) {
-            $query->where('consultora_id', $currentUser->consultora_id);
-        }
-
-        $pendingUsers = $query->orderBy('apellidos')->get();
-
-        return response()->json($pendingUsers);
+        return response()->json($this->pdfReportService->getPendingSignatureUsers($currentUser));
     }
 
     /**

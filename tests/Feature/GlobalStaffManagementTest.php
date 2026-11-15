@@ -6,13 +6,14 @@ use App\Models\AuditLog;
 use App\Models\Consultora;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class GlobalStaffManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function super_admin_can_manage_global_staff()
     {
         $superAdmin = User::create([
@@ -74,7 +75,7 @@ class GlobalStaffManagementTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function vendedor_cannot_access_global_staff_crud()
     {
         $vendedor = User::create([
@@ -105,7 +106,7 @@ class GlobalStaffManagementTest extends TestCase
         $response->assertStatus(403);
     }
 
-    /** @test */
+    #[Test]
     public function vendedor_cannot_delete_consultoras()
     {
         $consultora = Consultora::create([
@@ -134,7 +135,7 @@ class GlobalStaffManagementTest extends TestCase
         $this->assertDatabaseHas('consultoras', ['id' => $consultora->id]);
     }
 
-    /** @test */
+    #[Test]
     public function audit_logs_record_creations_and_updates_for_consultant()
     {
         $superAdmin = User::create([
@@ -192,7 +193,7 @@ class GlobalStaffManagementTest extends TestCase
         $this->assertEquals('morosa', $updateLog->payload['estado_suscripcion']['new']);
     }
 
-    /** @test */
+    #[Test]
     public function audit_logs_are_immutable()
     {
         $log = AuditLog::create([
@@ -210,7 +211,7 @@ class GlobalStaffManagementTest extends TestCase
         $log->delete();
     }
 
-    /** @test */
+    #[Test]
     public function vendedor_and_super_admin_redirect_to_admin_dashboard()
     {
         // 1. Vendedor

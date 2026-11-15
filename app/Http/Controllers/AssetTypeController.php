@@ -3,59 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Models\AssetType;
-use App\Models\Category;
 use App\Models\DynamicChecklist;
-use App\Models\Empresa;
 use App\Models\User;
+use App\Services\AssetTypeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AssetTypeController extends Controller
 {
+    public function __construct(protected AssetTypeService $assetTypeService) {}
+
     /**
      * Listado de Tipos de Activos con su esquema de metadata.
      */
-    public function index(Request $request)
+    public function index()
     {
         /** @var User $user */
         $user = Auth::user();
 
-        $empresaQuery = Empresa::query();
-        if (! $user->isSuperAdmin()) {
-            $empresaQuery->where('consultora_id', $user->consultora_id);
-        }
-        $assignedEmpresaIds = $empresaQuery->pluck('id')->toArray();
-
-        $assetTypes = AssetType::query()
-            ->with(['category', 'empresa'])
-            ->where(function ($q) use ($assignedEmpresaIds) {
-                $q->whereIn('empresa_id', $assignedEmpresaIds)
-                    ->orWhereNull('empresa_id');
-            })
-            ->latest()
-            ->get();
-
-        // Categorías con sus subcategorías anidadas
-        $categories = Category::where('is_active', true)
-            ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('order')])
-            ->orderBy('order')
-            ->get(['id', 'name', 'color', 'icon']);
-
-        $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']);
-
-        // Todos los checklists activos con sus IDs de categoría y subcategoría para filtrar en frontend
-        $checklists = DynamicChecklist::where('is_active', true)
-            ->orderBy('title')
-            ->get(['id', 'title', 'registry_code', 'category_id', 'subcategory_id']);
-
-        return Inertia::render('Gestor/Assets/Types/Index', [
-            'assetTypes' => $assetTypes,
-            'categories' => $categories,
-            'empresas' => $empresas,
-            'checklists' => $checklists,
-        ]);
+        return Inertia::render('Gestor/Assets/Types/Index', $this->assetTypeService->getIndexData($user));
     }
 
     /**
@@ -98,89 +65,19 @@ class AssetTypeController extends Controller
             'photo_schema' => $request->photo_schema ?? [],
         ];
 
-        if ($request->id) {
-            $assetType = AssetType::findOrFail($request->id);
-            $assetType->update($data);
-            $msg = "Tipo de activo '{$assetType->name}' actualizado correctamente.";
-        } else {
-            $assetType = AssetType::create($data);
-            $msg = "Tipo de activo '{$assetType->name}' creado correctamente.";
-        }
+        $msg = $this->assetTypeService->saveAssetType($data, $request->id);
 
         return redirect()->route('gestor.asset-types.index')->with('message', $msg);
     }
 
     /**
      * Importar campos de metadata desde las preguntas de un checklist.
-     * Si las preguntas no tienen vincular_a_metadata, genera automáticamente una clave limpia.
      */
     public function importFromChecklist(DynamicChecklist $checklist)
     {
-        $questions = $checklist->questions()->get(['id', 'label', 'type', 'vincular_a_metadata']);
-
-        $fields = $questions->map(function ($q) {
-            // Mapear tipo de pregunta → tipo de metadata
-            $metaType = match ($q->type) {
-                'number' => 'number',
-                'date', 'datetime' => 'date',
-                default => 'text',
-            };
-
-            // Usar vincular_a_metadata o auto-generar uno a partir del label
-            $keyName = ! empty($q->vincular_a_metadata)
-                ? $q->vincular_a_metadata
-                : $this->generateKeyFromLabel($q->label);
-
-            // Guardar automáticamente el vínculo en la pregunta si no lo tenía
-            if (empty($q->vincular_a_metadata)) {
-                $q->update(['vincular_a_metadata' => $keyName]);
-            }
-
-            // Detectar si es fecha de vencimiento/vigencia para sugerir alerta o dejarla como fecha informativa
-            $isExpirationDate = preg_match('/venc|vto|vigenc|proxim|caduc/i', $q->label);
-            $isIdentifier = preg_match('/identif|nro|n°|interno|codigo|patente|matricula/i', $q->label);
-            $isStatic = preg_match('/tipo|modelo|marca|fabricante|capacidad/i', $q->label);
-
-            $role = 'verificacion'; // default
-            $showInCreate = false;
-
-            if ($isIdentifier) {
-                $role = 'identificador';
-                $showInCreate = true;
-            } elseif ($metaType === 'date' && $isExpirationDate) {
-                $role = 'dato_con_regla';
-            } elseif ($isStatic) {
-                $role = 'dato_estatico';
-            }
-
-            return [
-                'name' => $keyName,
-                'label' => $q->label,
-                'type' => $metaType,
-                'show_in_create' => $showInCreate,
-                'role' => $role,
-                'alert_days' => ($metaType === 'date' && $isExpirationDate) ? 30 : null,
-                'alert_threshold' => null,
-                '_imported' => true,
-            ];
-        })
-            ->filter(fn ($f) => ! empty($f['name']))
-            ->unique('name')
-            ->values();
-
-        return response()->json(['fields' => $fields]);
-    }
-
-    /**
-     * Generar clave limpia snake_case a partir de una etiqueta de pregunta.
-     */
-    private function generateKeyFromLabel(string $label): string
-    {
-        $clean = preg_replace('/[^\p{L}\p{N}\s]/u', '', $label);
-        $slug = Str::slug($clean, '_');
-        $slug = substr($slug, 0, 35);
-
-        return rtrim($slug, '_') ?: 'atributo_'.uniqid();
+        return response()->json([
+            'fields' => $this->assetTypeService->importFieldsFromChecklist($checklist),
+        ]);
     }
 
     /**

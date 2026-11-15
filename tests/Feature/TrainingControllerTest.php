@@ -11,6 +11,7 @@ use App\Models\VisitCertificate;
 use App\Models\VisitTraining;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class TrainingControllerTest extends TestCase
@@ -72,21 +73,21 @@ class TrainingControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function an_admin_can_load_trainings_index_page()
     {
         $response = $this->actingAs($this->admin)->get(route('gestor.trainings.index'));
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function a_technician_can_load_live_training_session_page()
     {
         $response = $this->actingAs($this->tecnico)->get(route('tecnico.trainings.session', $this->visitTraining->id));
         $response->assertStatus(200);
     }
 
-    /** @test */
+    #[Test]
     public function a_technician_can_add_an_attendee_to_training()
     {
         $payload = [
@@ -109,7 +110,7 @@ class TrainingControllerTest extends TestCase
         $this->assertEquals('95827361', $this->visitTraining->attendees[0]['dni']);
     }
 
-    /** @test */
+    #[Test]
     public function a_technician_can_finalize_training_with_external_instructor()
     {
         // Registrar al menos un asistente en la base de datos para la sesión

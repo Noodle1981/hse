@@ -7,13 +7,14 @@ use App\Models\ConsultoraSuscripcionLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ConsultantSubscriptionTraceabilityTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function creating_a_consultant_creates_an_initial_subscription_log()
     {
         $consultora = Consultora::create([
@@ -32,7 +33,7 @@ class ConsultantSubscriptionTraceabilityTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function changing_subscription_status_creates_new_log_with_user_association()
     {
         $consultora = Consultora::create([
@@ -80,7 +81,7 @@ class ConsultantSubscriptionTraceabilityTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function consultants_edit_returns_formatted_suscripcion_logs_with_duration()
     {
         Carbon::setLocale('en');

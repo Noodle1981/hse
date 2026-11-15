@@ -6,13 +6,14 @@ use App\Models\Consultora;
 use App\Models\Empresa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ConsultantLimitationsTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function cannot_exceed_max_tecnicos_when_saving_active_user()
     {
         $consultora = Consultora::create([
@@ -64,7 +65,7 @@ class ConsultantLimitationsTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'tecnico2@test.com']);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_exceed_max_gestores_when_saving_active_user()
     {
         $consultora = Consultora::create([
@@ -104,7 +105,7 @@ class ConsultantLimitationsTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'gestor2@test.com']);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_exceed_max_empresas_when_creating_company()
     {
         $consultora = Consultora::create([
@@ -146,7 +147,7 @@ class ConsultantLimitationsTest extends TestCase
         $this->assertDatabaseMissing('empresas', ['nombre' => 'Empresa Dos']);
     }
 
-    /** @test */
+    #[Test]
     public function super_admin_cannot_exceed_user_limits_for_consultant()
     {
         $consultora = Consultora::create([
@@ -194,7 +195,7 @@ class ConsultantLimitationsTest extends TestCase
         $this->assertDatabaseMissing('users', ['email' => 'tecnico2@test.com']);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_restore_user_if_it_exceeds_limits()
     {
         $consultora = Consultora::create([
@@ -246,7 +247,7 @@ class ConsultantLimitationsTest extends TestCase
         $this->assertTrue(User::onlyTrashed()->where('id', $deletedUser->id)->exists());
     }
 
-    /** @test */
+    #[Test]
     public function cannot_restore_company_if_it_exceeds_limits()
     {
         $consultora = Consultora::create([

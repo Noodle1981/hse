@@ -90,20 +90,12 @@ class DashboardMetricsService
             'consultoraName' => $consultoraName,
             'consultants' => $consultants,
             'kpis' => [
-                'empresas_count' => $empresasCount,
-                'gestores_count' => $gestoresCount,
-                'tecnicos_count' => $tecnicosCount,
-                'checklists_templates_count' => DynamicChecklist::count(),
-                'inspections_count' => $inspectionsCount,
-                'trainings_count' => $trainingsCount,
-                'master_reports_count' => $masterReportsCount,
+                'empresas_count' => $empresasCount, 'gestores_count' => $gestoresCount, 'tecnicos_count' => $tecnicosCount,
+                'checklists_templates_count' => DynamicChecklist::count(), 'inspections_count' => $inspectionsCount,
+                'trainings_count' => $trainingsCount, 'master_reports_count' => $masterReportsCount,
             ],
             'companies' => $companies,
-            'filters' => [
-                'from' => $from,
-                'to' => $to,
-                'consultora_id' => $consultoraId,
-            ],
+            'filters' => ['from' => $from, 'to' => $to, 'consultora_id' => $consultoraId],
         ];
     }
 
@@ -219,69 +211,21 @@ class DashboardMetricsService
     private function getTacticalTerminalEvents(?int $consultoraId)
     {
         $limit = 15;
+        $scope = fn ($q) => $q->where('consultora_id', $consultoraId);
 
-        $inspections = DynamicInspection::with(['checklist', 'user', 'sede.empresa'])
-            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-            ->completed()
-            ->latest('completed_at')
-            ->limit($limit)
-            ->get()
-            ->map(fn ($i) => [
-                'time' => $i->completed_at,
-                'label' => 'INSPECCIÓN',
-                'color' => 'emerald',
-                'description' => "{$i->user?->full_name} finalizó '{$i->checklist?->title}' en ".($i->sede?->empresa?->nombre ?? 'Sede desconocida'),
-                'diffText' => $i->completed_at?->diffForHumans(),
-            ]);
+        $inspections = DynamicInspection::with(['checklist', 'user', 'sede.empresa'])->whereHas('sede.empresa', $scope)->completed()->latest('completed_at')->limit($limit)->get()
+            ->map(fn ($i) => ['time' => $i->completed_at, 'label' => 'INSPECCIÓN', 'color' => 'emerald', 'description' => "{$i->user?->full_name} finalizó '{$i->checklist?->title}' en ".($i->sede?->empresa?->nombre ?? 'Sede desconocida'), 'diffText' => $i->completed_at?->diffForHumans()]);
 
-        $findings = Hallazgo::with(['sede.empresa'])
-            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-            ->latest('fecha_deteccion')
-            ->limit($limit)
-            ->get()
-            ->map(fn ($h) => [
-                'time' => $h->created_at,
-                'label' => 'HALLAZGO',
-                'color' => 'yellow',
-                'description' => "Nuevo hallazgo '{$h->titulo}' detectado en ".($h->sede?->empresa?->nombre ?? 'Sede desconocida')." (Nivel: {$h->criticidad})",
-                'diffText' => $h->created_at?->diffForHumans(),
-            ]);
+        $findings = Hallazgo::with(['sede.empresa'])->whereHas('sede.empresa', $scope)->latest('fecha_deteccion')->limit($limit)->get()
+            ->map(fn ($h) => ['time' => $h->created_at, 'label' => 'HALLAZGO', 'color' => 'yellow', 'description' => "Nuevo hallazgo '{$h->titulo}' detectado en ".($h->sede?->empresa?->nombre ?? 'Sede desconocida')." (Nivel: {$h->criticidad})", 'diffText' => $h->created_at?->diffForHumans()]);
 
-        $incidents = Incidente::with(['sede.empresa'])
-            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-            ->latest('fecha_ocurrencia')
-            ->limit($limit)
-            ->get()
-            ->map(fn ($inc) => [
-                'time' => $inc->created_at,
-                'label' => 'SINIESTRO',
-                'color' => 'red',
-                'description' => 'Siniestro reportado en '.($inc->sede?->empresa?->nombre ?? 'Sede desconocida').": {$inc->tipo}",
-                'diffText' => $inc->created_at?->diffForHumans(),
-            ]);
+        $incidents = Incidente::with(['sede.empresa'])->whereHas('sede.empresa', $scope)->latest('fecha_ocurrencia')->limit($limit)->get()
+            ->map(fn ($inc) => ['time' => $inc->created_at, 'label' => 'SINIESTRO', 'color' => 'red', 'description' => 'Siniestro reportado en '.($inc->sede?->empresa?->nombre ?? 'Sede desconocida').": {$inc->tipo}", 'diffText' => $inc->created_at?->diffForHumans()]);
 
-        $reports = MasterReport::with(['sede.empresa'])
-            ->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-            ->whereIn('estado', ['finalizado', 'aprobado'])
-            ->latest('updated_at')
-            ->limit($limit)
-            ->get()
-            ->map(fn ($r) => [
-                'time' => $r->updated_at,
-                'label' => 'REPORTE',
-                'color' => 'blue',
-                'description' => 'Informe Maestro consolidado para '.($r->sede?->empresa?->nombre ?? 'Sede desconocida')." ({$r->periodo})",
-                'diffText' => $r->updated_at?->diffForHumans(),
-            ]);
+        $reports = MasterReport::with(['sede.empresa'])->whereHas('sede.empresa', $scope)->whereIn('estado', ['finalizado', 'aprobado'])->latest('updated_at')->limit($limit)->get()
+            ->map(fn ($r) => ['time' => $r->updated_at, 'label' => 'REPORTE', 'color' => 'blue', 'description' => 'Informe Maestro consolidado para '.($r->sede?->empresa?->nombre ?? 'Sede desconocida')." ({$r->periodo})", 'diffText' => $r->updated_at?->diffForHumans()]);
 
-        return collect([])
-            ->concat($inspections)
-            ->concat($findings)
-            ->concat($incidents)
-            ->concat($reports)
-            ->sortByDesc('time')
-            ->take(20)
-            ->values();
+        return collect([])->concat($inspections)->concat($findings)->concat($incidents)->concat($reports)->sortByDesc('time')->take(20)->values();
     }
 
     private function calculateConsultoraEfficiency(?int $consultoraId, ?Carbon $from = null): array
@@ -289,16 +233,12 @@ class DashboardMetricsService
         $date = $from ?? now();
         $year = $date->year;
         $month = $date->month;
+        $scope = fn ($q) => $q->where('consultora_id', $consultoraId);
 
-        $totalPlanned = AnnualPlan::whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-            ->where('scheduled_months', 'like', "%{$year}-".str_pad((string) $month, 2, '0', STR_PAD_LEFT).'%')
-            ->count();
-
-        $totalDone = DynamicInspection::whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $consultoraId))
-            ->whereYear('completed_at', $year)
-            ->whereMonth('completed_at', $month)
-            ->completed()
-            ->count();
+        $totalPlanned = AnnualPlan::whereHas('sede.empresa', $scope)
+            ->where('scheduled_months', 'like', "%{$year}-".str_pad((string) $month, 2, '0', STR_PAD_LEFT).'%')->count();
+        $totalDone = DynamicInspection::whereHas('sede.empresa', $scope)
+            ->whereYear('completed_at', $year)->whereMonth('completed_at', $month)->completed()->count();
 
         return [
             'percentage' => $totalPlanned > 0 ? round(($totalDone / $totalPlanned) * 100) : 0,
