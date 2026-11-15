@@ -37,9 +37,18 @@ class OperationController extends Controller
      */
     public function index(Request $request)
     {
+        /** @var User $user */
+        $user = Auth::user();
+
         $query = VisitCertificate::query()
             ->with(['sede.empresa', 'user'])
             ->latest('visit_date');
+
+        if (! $user->isSuperAdmin()) {
+            $query->whereHas('sede.empresa', function ($q) use ($user) {
+                $q->where('consultora_id', $user->consultora_id);
+            });
+        }
 
         // Filtros básicos
         if ($request->search) {

@@ -40,7 +40,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.attempt');
+Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:10,1')->name('login.attempt');
 Route::get('/constancia/firmar/{token}', function () {
     // TODO: Migrar PublicSignature a React
     abort(404, 'Vista de firma pública pendiente de migración a React.');
@@ -438,4 +438,4 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // Ruta pública para solicitar reseteo de contraseña (sin estar autenticado)
-Route::post('/password-reset-request', [PasswordResetRequestController::class, 'store'])->name('password.reset-request.store');
+Route::post('/password-reset-request', [PasswordResetRequestController::class, 'store'])->middleware('throttle:5,1')->name('password.reset-request.store');

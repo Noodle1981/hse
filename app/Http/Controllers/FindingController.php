@@ -23,8 +23,16 @@ class FindingController extends Controller
         $user = Auth::user();
 
         // 1. DATA PARA FILTROS
-        $sedes = Sede::orderBy('nombre_sede')->get();
-        $tecnicos = User::whereIn('rol', ['tecnico', 'Técnico'])->orderBy('nombres')->get();
+        $sedesQuery = Sede::orderBy('nombre_sede');
+        $tecnicosQuery = User::whereIn('rol', ['tecnico', 'Técnico'])->orderBy('nombres');
+
+        if (! $user->isSuperAdmin()) {
+            $sedesQuery->whereHas('empresa', fn ($q) => $q->where('consultora_id', $user->consultora_id));
+            $tecnicosQuery->where('consultora_id', $user->consultora_id);
+        }
+
+        $sedes = $sedesQuery->get();
+        $tecnicos = $tecnicosQuery->get();
 
         // 2. QUERY BASE
         $query = Hallazgo::query()
@@ -33,6 +41,10 @@ class FindingController extends Controller
             ->latest();
 
         // 3. SEGURIDAD DE ACCESO
+        if (! $user->isSuperAdmin()) {
+            $query->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $user->consultora_id));
+        }
+
         if ($user->isTechnician()) {
             $query->where(function ($q) use ($user) {
                 $q->where('user_id', $user->id)
@@ -75,12 +87,17 @@ class FindingController extends Controller
         }
 
         // 5. INTELIGENCIA DE RIESGO (KPIs)
+        $kpiBase = Hallazgo::query();
+        if (! $user->isSuperAdmin()) {
+            $kpiBase->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $user->consultora_id));
+        }
+
         $kpis = [
             'total' => (clone $query)->count(),
-            'pendientes' => Hallazgo::pendientes()->count(),
-            'criticos' => Hallazgo::criticos()->abiertos()->count(),
-            'vencidos' => Hallazgo::vencidos()->count(),
-            'resueltos_mes' => Hallazgo::whereIn('estado', ['resuelto', 'cerrado'])
+            'pendientes' => (clone $kpiBase)->pendientes()->count(),
+            'criticos' => (clone $kpiBase)->criticos()->abiertos()->count(),
+            'vencidos' => (clone $kpiBase)->vencidos()->count(),
+            'resueltos_mes' => (clone $kpiBase)->whereIn('estado', ['resuelto', 'cerrado'])
                 ->where('updated_at', '>=', now()->startOfMonth())
                 ->count(),
         ];
@@ -104,7 +121,10 @@ class FindingController extends Controller
 
         $sedes = $user->isTechnician()
             ? $user->sedes()->with('empresa')->get()
-            : Sede::with('empresa')->orderBy('nombre_sede')->get();
+            : Sede::with('empresa')
+                ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereHas('empresa', fn ($eq) => $eq->where('consultora_id', $user->consultora_id)))
+                ->orderBy('nombre_sede')
+                ->get();
 
         $initialSedeId = null;
         if ($request->visit_id) {
@@ -186,6 +206,12 @@ class FindingController extends Controller
     {
         $finding->load(['sede.empresa', 'user', 'fotos', 'seguimientos.user', 'visit']);
 
+        /** @var User $user */
+        $user = Auth::user();
+        if (! $user->isSuperAdmin() && $finding->sede?->empresa?->consultora_id !== $user->consultora_id) {
+            abort(403, 'No tienes permiso para acceder a este hallazgo.');
+        }
+
         return Inertia::render('Gestor/Findings/Show', [
             'finding' => $finding,
         ]);
@@ -203,6 +229,10 @@ class FindingController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
+        $finding->loadMissing('sede.empresa');
+        if (! $user->isSuperAdmin() && $finding->sede?->empresa?->consultora_id !== $user->consultora_id) {
+            abort(403, 'No tienes permiso para modificar este hallazgo.');
+        }
 
         // Si el hallazgo ya está cerrado, el técnico no puede hacer más seguimientos
         if ($finding->estado === Hallazgo::ESTADO_CERRADO && $user->isTechnician()) {

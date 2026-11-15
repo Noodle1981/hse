@@ -27,7 +27,10 @@ class ContractController extends Controller
 
         // 1. Contexto de filtrado
         $availableSedes = $user->isAdmin()
-            ? Sede::select('id', 'nombre_sede', 'empresa_id')->orderBy('nombre_sede')->get()
+            ? Sede::select('id', 'nombre_sede', 'empresa_id')
+                ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereHas('empresa', fn ($eq) => $eq->where('consultora_id', $user->consultora_id)))
+                ->orderBy('nombre_sede')
+                ->get()
             : $user->sedes()->select('sedes.id', 'sedes.nombre_sede', 'sedes.empresa_id')->orderBy('nombre_sede')->get();
 
         $companies = Empresa::select('id', 'nombre')

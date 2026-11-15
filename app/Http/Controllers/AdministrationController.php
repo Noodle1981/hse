@@ -106,7 +106,11 @@ class AdministrationController extends Controller
             ->withQueryString();
 
         // Data for assignment modal
-        $companies = Empresa::orderBy('nombre')->get();
+        $companiesQuery = Empresa::orderBy('nombre');
+        if (! $currentUser->isSuperAdmin()) {
+            $companiesQuery->where('consultora_id', $currentUser->consultora_id);
+        }
+        $companies = $companiesQuery->get();
 
         return Inertia::render('Gestor/Technicians', [
             'technicians' => $technicians,
@@ -120,6 +124,12 @@ class AdministrationController extends Controller
      */
     public function getCompanySites(Empresa $empresa)
     {
+        /** @var User $currentUser */
+        $currentUser = Auth::user();
+        if (! $currentUser->isSuperAdmin() && $empresa->consultora_id !== $currentUser->consultora_id) {
+            abort(403, 'No tienes permiso para acceder a esta empresa.');
+        }
+
         return response()->json($empresa->sedes()->orderBy('nombre_sede')->get());
     }
 

@@ -23,7 +23,9 @@ class IncidenteController extends Controller
         $user = Auth::user();
 
         // 1. DATA PARA FILTROS
-        $sedes = Sede::orderBy('nombre_sede')->get();
+        $sedes = Sede::orderBy('nombre_sede')
+            ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereHas('empresa', fn ($eq) => $eq->where('consultora_id', $user->consultora_id)))
+            ->get();
 
         // 2. QUERY BASE
         $query = Incidente::query()
@@ -32,7 +34,7 @@ class IncidenteController extends Controller
 
         // Tenancy check (if not super admin, only own consultora)
         if (! $user->isSuperAdmin()) {
-            $query->whereHas('sede', function ($q) use ($user) {
+            $query->whereHas('sede.empresa', function ($q) use ($user) {
                 $q->where('consultora_id', $user->consultora_id);
             });
         }
@@ -87,7 +89,10 @@ class IncidenteController extends Controller
 
         $sedes = $user->isTechnician()
             ? $user->sedes()->with('empresa')->get()
-            : Sede::with('empresa')->orderBy('nombre_sede')->get();
+            : Sede::with('empresa')
+                ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereHas('empresa', fn ($eq) => $eq->where('consultora_id', $user->consultora_id)))
+                ->orderBy('nombre_sede')
+                ->get();
 
         $initialSedeId = null;
         if ($request->visit_id) {
@@ -109,7 +114,7 @@ class IncidenteController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'titulo' => 'required|string|max:255',
             'tipo' => 'required|in:accidente,incidente,cuasi_accidente',
             'gravedad' => 'required|in:leve,moderado,grave,fatal',
@@ -121,11 +126,13 @@ class IncidenteController extends Controller
             'dias_perdidos' => 'nullable|integer|min:0',
             'fotos.*' => 'nullable|image|max:5120',
             'visit_certificate_id' => 'nullable|exists:visit_certificates,id',
+            'asset_id' => 'nullable|exists:assets,id',
         ]);
 
-        return DB::transaction(function () use ($request) {
+        return DB::transaction(function () use ($request, $validated) {
+            unset($validated['fotos']);
             $incidente = Incidente::create([
-                ...$request->except('fotos'),
+                ...$validated,
                 'user_id' => Auth::id(),
                 'estado' => 'reportado',
             ]);
@@ -162,6 +169,12 @@ class IncidenteController extends Controller
     public function show(Incidente $incident)
     {
         $incident->load(['sede.empresa', 'user', 'fotos', 'hallazgo', 'visit']);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if (! $user->isSuperAdmin() && $incident->sede?->empresa?->consultora_id !== $user->consultora_id) {
+            abort(403, 'No tienes permiso para acceder a este incidente.');
+        }
 
         return Inertia::render('Gestor/Incidents/Show', [
             'incident' => $incident,
