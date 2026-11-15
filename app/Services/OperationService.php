@@ -115,6 +115,10 @@ class OperationService
      */
     public function prepareShowVisit(User $user, VisitCertificate $visit): array
     {
+        if (! $user->isSuperAdmin() && $visit->consultora_id !== $user->consultora_id) {
+            abort(403);
+        }
+
         if ($visit->user_id !== $user->id && ! $user->isAdmin()) {
             abort(403);
         }

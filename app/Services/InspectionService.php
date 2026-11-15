@@ -140,7 +140,7 @@ class InspectionService
             $updateData = ['notes' => $request->input('notes')];
             if ($request->filled('asset_id')) {
                 $assetId = $request->input('asset_id');
-                $this->assertAssetNotBlocked((int) $assetId, (int) $inspection->dynamic_checklist_id);
+                $this->assertAssetNotBlocked((string) $assetId, (int) $inspection->dynamic_checklist_id);
                 $updateData['asset_id'] = $assetId;
             }
 
@@ -429,7 +429,7 @@ class InspectionService
             ->toArray();
     }
 
-    private function assertAssetNotBlocked(int $assetId, int $checklistId): void
+    private function assertAssetNotBlocked(int|string $assetId, int $checklistId): void
     {
         $asset = Asset::with('assetType')->find($assetId);
         if (! $asset || $asset->status !== 'fuera_de_servicio') {

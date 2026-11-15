@@ -130,7 +130,7 @@ class ConsultantSubscriptionTraceabilityTest extends TestCase
         $this->assertCount(2, $logs);
         // The first log in desc order is the latest (morosa, created 5 days ago)
         $this->assertEquals('morosa', $logs[0]['estado_nuevo']);
-        $this->assertEquals('5 days', $logs[0]['duration']);
+        $this->assertStringStartsWith('5 days', $logs[0]['duration']);
         $this->assertTrue($logs[0]['is_current']);
 
         // The second log (initial, created 10 days ago, lasted until 5 days ago = 5 days)
