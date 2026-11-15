@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\ConsultantController;
+use App\Http\Controllers\Admin\GlobalStaffController;
 use App\Http\Controllers\AdministrationController;
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AssetTypeController;
@@ -395,29 +397,29 @@ Route::middleware(['auth'])->group(function () {
 
         // Consultoras Management (Lectura, creación y edición compartida)
         Route::prefix('consultants')->name('consultants.')->group(function () {
-            Route::get('/', [AdministrationController::class, 'consultantsIndex'])->name('index');
-            Route::get('/create', [AdministrationController::class, 'consultantsCreate'])->name('create');
-            Route::post('/store', [AdministrationController::class, 'consultantsStore'])->name('store');
-            Route::get('/{consultant}/edit', [AdministrationController::class, 'consultantsEdit'])->name('edit');
-            Route::post('/{consultant}/update', [AdministrationController::class, 'consultantsUpdate'])->name('update');
-            Route::post('/{consultant}/primary-gestor', [AdministrationController::class, 'consultantSavePrimaryGestor'])->name('primary-gestor.save');
-            Route::post('/{consultant}/primary-gestor/reset-password', [AdministrationController::class, 'consultantResetPrimaryPassword'])->name('primary-gestor.reset-password');
-            Route::get('/{consultant}/users', [AdministrationController::class, 'consultantUsersIndex'])->name('users.index');
-            Route::post('/{consultant}/users/save', [AdministrationController::class, 'consultantUsersSave'])->name('users.save');
-            Route::post('/{consultant}/users/{user}/reset-password', [AdministrationController::class, 'consultantUsersResetPassword'])->name('users.reset-password');
-            Route::delete('/{consultant}/users/{user}', [AdministrationController::class, 'consultantUsersDestroy'])->name('users.destroy');
+            Route::get('/', [ConsultantController::class, 'index'])->name('index');
+            Route::get('/create', [ConsultantController::class, 'create'])->name('create');
+            Route::post('/store', [ConsultantController::class, 'store'])->name('store');
+            Route::get('/{consultant}/edit', [ConsultantController::class, 'edit'])->name('edit');
+            Route::post('/{consultant}/update', [ConsultantController::class, 'update'])->name('update');
+            Route::post('/{consultant}/primary-gestor', [ConsultantController::class, 'savePrimaryGestor'])->name('primary-gestor.save');
+            Route::post('/{consultant}/primary-gestor/reset-password', [ConsultantController::class, 'resetPrimaryPassword'])->name('primary-gestor.reset-password');
+            Route::get('/{consultant}/users', [ConsultantController::class, 'usersIndex'])->name('users.index');
+            Route::post('/{consultant}/users/save', [ConsultantController::class, 'usersSave'])->name('users.save');
+            Route::post('/{consultant}/users/{user}/reset-password', [ConsultantController::class, 'usersResetPassword'])->name('users.reset-password');
+            Route::delete('/{consultant}/users/{user}', [ConsultantController::class, 'usersDestroy'])->name('users.destroy');
 
             // Acciones destructivas restringidas a super_admin
             Route::middleware(['role:super_admin'])->group(function () {
-                Route::delete('/{consultant}', [AdministrationController::class, 'consultantsDestroy'])->name('destroy');
+                Route::delete('/{consultant}', [ConsultantController::class, 'destroy'])->name('destroy');
             });
         });
 
         // CRUD de Personal Global (Restringido a super_admin)
         Route::middleware(['role:super_admin'])->group(function () {
-            Route::get('/staff', [AdministrationController::class, 'globalStaffIndex'])->name('staff.index');
-            Route::post('/staff/save', [AdministrationController::class, 'globalStaffSave'])->name('staff.save');
-            Route::delete('/staff/{user}', [AdministrationController::class, 'globalStaffDestroy'])->name('staff.destroy');
+            Route::get('/staff', [GlobalStaffController::class, 'index'])->name('staff.index');
+            Route::post('/staff/save', [GlobalStaffController::class, 'save'])->name('staff.save');
+            Route::delete('/staff/{user}', [GlobalStaffController::class, 'destroy'])->name('staff.destroy');
         });
     });
 

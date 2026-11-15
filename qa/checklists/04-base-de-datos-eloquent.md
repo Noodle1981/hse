@@ -1,0 +1,10 @@
+# 04 — Base de Datos y Persistencia (Eloquent ORM · SQLite / MySQL)
+
+- [ ] **Migraciones versionadas al día (obligatorio)**: Todas las migraciones en `database/migrations/` ejecutadas sin pendientes (`php artisan migrate:status` 100% `Ran`); sin modificaciones manuales fuera de migraciones.
+- [ ] **Prevención de problemas N+1 (`with()` / `withCount()`)**: Uso sistemático de Eager Loading en listados de visitas, inspecciones, activos, asignaciones y planes anuales; habilitar `Model::preventLazyLoading(! app()->isProduction())` en desarrollo.
+- [ ] **Proyecciones acotadas en selectores y filtros**: Seleccionar solo columnas necesarias (`select('id', 'nombre', ...)`) al cargar listas desplegables de empresas, sedes y técnicos para modales.
+- [ ] **Transacciones atómicas (`DB::transaction`)**: Toda operación que modifica múltiples tablas dependientes (completar checklist + actualizar asignación + sincronizar metadata de activo; crear hallazgo + fotos; crear incidente + fotos) se ejecuta dentro de `DB::transaction`.
+- [ ] **Preservación histórica con `SoftDeletes` y `withTrashed()`**: Las bajas de activos (`Asset`), usuarios y empresas usan baja lógica o estado `inactivo`, y las relaciones históricas en `DynamicInspection` e `Incidente` cargan `->withTrashed()` para no dejar reportes legales huérfanos.
+- [ ] **Almacenamiento liviano de firmas (Storage vs Base64)**: Las firmas permanentes de usuarios e instructores especialistas se almacenan como archivos `.png` en `storage/app/public/signatures/` guardando solo la ruta relativa en la base de datos para evitar bloat en columnas `TEXT`.
+- [ ] **Trazabilidad e inmutabilidad de logs (`audit_logs` y `asset_metadata_logs`)**: Registro automático de cambios en atributos vinculados de activos (`SyncAssetMetadata`) y cambios de suscripción/límites de consultoras (`ConsultoraSuscripcionLog` y `AuditLog`).
+- [ ] **Índices en claves foráneas y filtros frecuentes**: Índices definidos en `consultora_id`, `empresa_id`, `sede_id`, `user_id`, `asset_id`, `status` y `due_date`.

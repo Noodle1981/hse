@@ -1,0 +1,14 @@
+{
+  "name": "qa-sistema",
+  "version": "1.0.0",
+  "description": "Sistema de Aseguramiento de Calidad y Auditoría Pre-Deploy",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "qa:nueva-pasada": "node scripts/nueva-pasada.js --reset-total",
+    "qa:reset": "node scripts/nueva-pasada.js --reset-total",
+    "qa:tarjetas": "node scripts/generar-tarjetas-checklists.js",
+    "qa:analizar": "node scripts/analizar-complejidad.js",
+    "qa:verificar": "node scripts/setup-helper.js verificar"
+  }
+}

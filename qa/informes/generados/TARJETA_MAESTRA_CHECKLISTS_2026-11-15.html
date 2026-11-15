@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjeta Maestra QA — HSE SaaS (XamaSafe / EP-Back)</title>
+<style>
+:root{--o:#FF8200;--od:#D46900;--d:#1D252D;--g:#4A5568;--l:#F8FAFC;--b:#E2E8F0;--s:#10B981;--r:#EF4444;--bl:#2563EB}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:#F1F5F9;color:var(--d);line-height:1.5;padding-bottom:60px}
+.top-action-bar{position:sticky;top:0;z-index:1000;background:rgba(29,37,45,.96);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid var(--o)}
+.bar-brand{font-size:14px;font-weight:700;display:flex;gap:10px;align-items:center}.bar-badge{background:var(--o);padding:3px 8px;border-radius:4px;font-size:11px;font-weight:800;text-transform:uppercase}
+.btn{padding:8px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;margin-left:8px}.btn-primary{background:var(--o);color:#fff}.btn-secondary{background:rgba(255,255,255,.15);color:#fff}
+.sheet{max-width:1060px;margin:30px auto;background:#fff;border-radius:12px;padding:40px;border:1px solid var(--b);box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.official-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--d);padding-bottom:20px;margin-bottom:24px}
+.inst{font-size:13px;font-weight:800;text-transform:uppercase;color:var(--g)}.main-title{font-size:24px;font-weight:900;margin-top:4px}.subtitle{font-size:13px;color:var(--o);font-weight:700}.logo{height:75px}
+.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--l);padding:16px;border-radius:8px;border:1px solid var(--b);margin-bottom:24px}
+.meta-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--g)}.meta-val{font-size:13px;font-weight:700}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+.kpi-card{border:1px solid var(--b);border-radius:8px;padding:14px;text-align:center;border-top:4px solid var(--g)}.k-o{border-top-color:var(--o)}.k-g{border-top-color:var(--s)}.k-r{border-top-color:var(--r)}.k-b{border-top-color:var(--bl)}
+.kpi-number{font-size:26px;font-weight:900}.kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--g)}
+.progress-section{background:var(--l);border:1px solid var(--b);border-radius:8px;padding:16px 20px;margin-bottom:28px}.progress-info{display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:8px}
+.progress-bg{height:12px;background:#E2E8F0;border-radius:6px;overflow:hidden}.progress-fill{height:100%;background:linear-gradient(90deg,var(--o),var(--s));transition:width .3s}
+.complexity-alert-section{background:#FFFDF5;border:2px solid #FCD34D;border-radius:10px;padding:24px;margin-bottom:34px}
+.alert-header{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #FDE68A;padding-bottom:14px;margin-bottom:18px}.alert-title-wrap{display:flex;gap:10px;align-items:center}.alert-title-wrap h3{font-size:17px;font-weight:800;color:#92400E}
+.alert-badge{background:#FEF3C7;color:#B45309;font-size:11px;font-weight:800;padding:3px 8px;border-radius:4px}
+.alert-cards-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}.mini-alert-card{background:#fff;border:1px solid #FDE68A;border-radius:8px;padding:14px;border-left:5px solid #F59E0B}
+.mini-alert-card.alert-danger{border-left-color:var(--r);background:#FEF2F2;border-color:#FECACA}.mini-alert-card h4{font-size:14px;font-weight:800;margin-bottom:6px}.mini-alert-card p{font-size:12px;color:#475569}
+.extra-metrics{font-size:12px;background:#fff;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:16px}
+.det-summary{font-size:13px;font-weight:800;cursor:pointer;padding:4px 0}
+.loc-table{width:100%;border-collapse:collapse;font-size:12px;background:#fff;margin-top:10px;border:1px solid var(--b)}.loc-table th{background:var(--l);padding:8px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#475569}.loc-table td{padding:8px 12px;border-top:1px solid #F1F5F9}
+.table-subtext{font-size:10px;color:#94A3B8}.table-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:800;white-space:nowrap}
+.badge-danger{background:#FEE2E2;color:#991B1B}.badge-warning{background:#FEF3C7;color:#92400E}.badge-info{background:#E0E7FF;color:#3730A3}.badge-success{background:#D1FAE5;color:#065F46}
+.filter-bar{display:flex;gap:10px;margin-bottom:24px;padding-bottom:12px;border-bottom:1px solid var(--b)}.filter-btn{padding:6px 12px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:1px solid var(--b);background:#fff;color:var(--g)}.filter-btn.active{background:var(--d);color:#fff}
+.card-area{border:1px solid var(--b);border-radius:10px;margin-bottom:24px;overflow:hidden;page-break-inside:avoid}
+.card-header{background:var(--l);padding:14px 20px;border-bottom:1px solid var(--b);display:flex;justify-content:space-between;align-items:center}.card-title-group{display:flex;gap:12px;align-items:center}
+.card-badge-num{background:var(--d);color:#fff;font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px}.card-title{font-size:16px;font-weight:800}
+.card-progress-wrap{display:flex;gap:10px;align-items:center}.card-counter{font-size:12px;font-weight:800;color:var(--g)}.mini-progress-bar{width:70px;height:6px;background:#E2E8F0;border-radius:3px;overflow:hidden}.mini-progress-fill{height:100%;background:var(--o)}
+.card-warning-banner{padding:10px 20px;background:#FEF2F2;border-bottom:1px solid #FECACA;font-size:12px;color:#991B1B}.card-na{padding:12px 20px;font-size:13px;color:var(--g);font-style:italic}
+.item-section{padding:10px 20px 4px;font-size:11px;font-weight:800;text-transform:uppercase;color:var(--o)}
+.checklist-item{display:flex;gap:14px;padding:11px 20px;border-bottom:1px solid #F1F5F9;cursor:pointer}.checklist-item:hover{background:var(--l)}
+.chk-item{margin-top:3px;width:17px;height:17px;accent-color:var(--o)}.item-content{flex:1;font-size:13px;color:#334155}.item-bold{font-weight:800;color:var(--d);margin-right:6px}.item-bold::after{content:" —";color:var(--o)}
+.item-checked .item-content{color:#64748B}.item-checked .item-bold{color:var(--s)}
+code{background:#F1F5F9;padding:1px 5px;border-radius:4px;font-size:12px}
+.signature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:40px;padding-top:30px;border-top:1px solid var(--b);page-break-inside:avoid}.sig-box{text-align:center}.sig-line{border-top:1px solid #94A3B8;width:80%;margin:0 auto 8px}.sig-title{font-size:12px;font-weight:800}.sig-sub{font-size:11px;color:var(--g)}
+@media print{body{background:#fff;padding:0}.top-action-bar,.filter-bar{display:none!important}.sheet{box-shadow:none;border:none;padding:0;margin:0;max-width:100%}details{display:block}details>summary{list-style:none}}
+</style></head><body>
+<div class="top-action-bar">
+  <div class="bar-brand"><span>PROYECTO PROPIO</span><span class="bar-badge">QA Pre-Deploy</span><span style="font-size:12px;color:#94A3B8">| HSE SaaS (XamaSafe / EP-Back)</span></div>
+  <div><button class="btn btn-secondary" onclick="copySummaryText()">📋 Copiar Resumen</button><button class="btn btn-primary" onclick="window.print()">🖨️ Imprimir / Guardar en PDF</button></div>
+</div>
+<div class="sheet">
+  <div class="official-header"><div><div class="inst">Proyecto Propio — SaaS B2B2B Higiene y Seguridad Industrial</div><div class="main-title">Tarjeta Maestra de Control QA Pre-Deploy</div><div class="subtitle">Matriz de verificación y criterios técnicos para despliegue</div></div>
+    <img src="data:image/png;base64,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" class="logo" alt="Logo institucional"></div>
+  <div class="meta-grid">
+    <div><div class="meta-label">Sistema</div><div class="meta-val">HSE SaaS (XamaSafe / EP-Back)</div></div>
+    <div><div class="meta-label">Fecha de emisión</div><div class="meta-val">2026-11-15</div></div>
+    <div><div class="meta-label">Destinatarios</div><div class="meta-val">Equipo de Desarrollo</div></div>
+    <div><div class="meta-label">Commit</div><div class="meta-val">3abc3f2</div></div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi-card k-o"><div class="kpi-number">98</div><div class="kpi-label">Puntos de control</div></div>
+    <div class="kpi-card k-g"><div class="kpi-number" id="kpiChecked">0</div><div class="kpi-label">Cumplidos</div></div>
+    <div class="kpi-card"><div class="kpi-number" id="kpiPending">98</div><div class="kpi-label">Pendientes</div></div>
+    <div class="kpi-card k-r"><div class="kpi-number">25</div><div class="kpi-label">Archivos sobre umbral · 21 acc. datos</div></div>
+    <div class="kpi-card k-b"><div class="kpi-number" id="kpiPercent">0.0%</div><div class="kpi-label">Conformidad</div></div>
+  </div>
+  <div class="progress-section"><div class="progress-info"><span>Estado global de conformidad</span><span id="progressLabel">0.0% completado</span></div>
+    <div class="progress-bg"><div class="progress-fill" id="mainProgressBar" style="width:0.0%"></div></div></div>
+  
+    <div class="complexity-alert-section">
+      <div class="alert-header"><div class="alert-title-wrap"><span style="font-size:20px">🔬</span><h3>Diagnóstico de código: tamaños, acceso a datos, versiones y documentación</h3></div>
+      <span class="alert-badge">Medición 2026-11-15</span></div>
+      <div class="alert-cards-grid">
+      <div class="mini-alert-card alert-danger">
+        <h4>Vistas y Layouts Frontend (React + Inertia): 14 sobre umbral (500 lín)</h4>
+        <p>56 archivos analizados · 5 críticos.<br><strong>Acción:</strong> Extraer subcomponentes (Partials/Modals) a Components/ o lógica de estado a custom hooks</p>
+      </div>
+      <div class="mini-alert-card alert-danger">
+        <h4>Controladores Backend (Laravel): 11 sobre umbral (200 lín)</h4>
+        <p>27 archivos analizados · 8 críticos · <strong>21 con acceso directo a datos</strong>.<br><strong>Acción:</strong> Mover consultas Eloquent y lógica de negocio pesada a Services/ o Actions/, validaciones a FormRequests</p>
+      </div>
+      <div class="mini-alert-card ">
+        <h4>Servicios, Jobs y Listeners (Dominio): 0 sobre umbral (250 lín)</h4>
+        <p>6 archivos analizados · 0 críticos.<br>Dentro de los límites.</p>
+      </div></div>
+      <div class="extra-metrics">🗂️ <strong>Versiones:</strong> 92% commits convencionales · 0 tags · commit <code>3abc3f2</code><br>📚 <strong>Documentación:</strong> última actualización 2026-07-26 · 1 commits de código desde entonces</div>
+      
+      <details open style="margin-bottom:14px;">
+        <summary class="det-summary">▶ Vistas y Layouts Frontend (React + Inertia) — umbral 500 lín / crítico 800 lín</summary>
+        <table class="loc-table"><thead><tr><th>Archivo</th><th style="text-align:right">Líneas</th><th>Estado</th><th>Acceso a datos</th></tr></thead><tbody>
+        <tr><td><strong>MyAssignments.jsx</strong><br><span class="table-subtext">resources/js/Pages/Tecnico/MyAssignments.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">1317</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Assets/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">1048</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td>—</td></tr><tr><td><strong>Wizard.jsx</strong><br><span class="table-subtext">resources/js/Pages/Tecnico/Inspections/Wizard.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">1014</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Assets/Types/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">1001</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td>—</td></tr><tr><td><strong>Create.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Assets/Create.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">837</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td>—</td></tr><tr><td><strong>Edit.jsx</strong><br><span class="table-subtext">resources/js/Pages/Admin/Consultants/Edit.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">793</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>Wizard.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/MasterReports/Wizard.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">675</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>Locations.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Companies/Locations.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">667</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>AnnualPlanMatrix.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Contracts/Partials/AnnualPlanMatrix.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">652</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>InProgress.jsx</strong><br><span class="table-subtext">resources/js/Pages/Tecnico/Visits/InProgress.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">645</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>Show.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Assets/Show.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">625</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>Users.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Users.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">596</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>Session.jsx</strong><br><span class="table-subtext">resources/js/Pages/Tecnico/Trainings/Session.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">574</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>Builder.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Checklists/Builder.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">569</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Findings/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">488</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Dashboard.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Dashboard.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">477</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/HelpCenter/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">477</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Show.jsx</strong><br><span class="table-subtext">resources/js/Pages/Profile/Show.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">474</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Users.jsx</strong><br><span class="table-subtext">resources/js/Pages/Admin/Consultants/Users.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">446</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Incidents/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">434</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/Admin/Staff/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">430</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Inspections/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">401</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>ActionSelector.jsx</strong><br><span class="table-subtext">resources/js/Pages/Tecnico/Visits/ActionSelector.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">392</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>Index.jsx</strong><br><span class="table-subtext">resources/js/Pages/Gestor/Trainings/Index.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">390</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>History.jsx</strong><br><span class="table-subtext">resources/js/Pages/Tecnico/Inspections/History.jsx</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">375</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr>
+        </tbody></table>
+      </details>
+      <details  style="margin-bottom:14px;">
+        <summary class="det-summary">▶ Controladores Backend (Laravel) — umbral 200 lín / crítico 300 lín</summary>
+        <table class="loc-table"><thead><tr><th>Archivo</th><th style="text-align:right">Líneas</th><th>Estado</th><th>Acceso a datos</th></tr></thead><tbody>
+        <tr><td><strong>AdministrationController.php</strong><br><span class="table-subtext">app/Http/Controllers/AdministrationController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">1332</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L51</span> <span class="table-badge badge-danger">L261</span> <span class="table-badge badge-danger">L434</span> <span class="table-badge badge-danger">L306</span> <span class="table-badge badge-danger">L254</span> <span class="table-badge badge-danger">L257</span></td></tr><tr><td><strong>OperationController.php</strong><br><span class="table-subtext">app/Http/Controllers/OperationController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">1097</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L40</span> <span class="table-badge badge-danger">L297</span> <span class="table-badge badge-danger">L85</span> <span class="table-badge badge-danger">L525</span> <span class="table-badge badge-danger">L505</span> <span class="table-badge badge-danger">L510</span></td></tr><tr><td><strong>InspectionController.php</strong><br><span class="table-subtext">app/Http/Controllers/InspectionController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">706</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L197</span> <span class="table-badge badge-danger">L71</span> <span class="table-badge badge-danger">L47</span> <span class="table-badge badge-danger">L56</span> <span class="table-badge badge-danger">L54</span> <span class="table-badge badge-danger">L190</span></td></tr><tr><td><strong>ContractController.php</strong><br><span class="table-subtext">app/Http/Controllers/ContractController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">551</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L153</span> <span class="table-badge badge-danger">L71</span> <span class="table-badge badge-danger">L43</span> <span class="table-badge badge-danger">L154</span> <span class="table-badge badge-danger">L176</span></td></tr><tr><td><strong>MasterReportController.php</strong><br><span class="table-subtext">app/Http/Controllers/MasterReportController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">462</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L61</span> <span class="table-badge badge-danger">L25</span> <span class="table-badge badge-danger">L77</span></td></tr><tr><td><strong>AssetController.php</strong><br><span class="table-subtext">app/Http/Controllers/AssetController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">420</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L26</span> <span class="table-badge badge-danger">L254</span> <span class="table-badge badge-danger">L179</span></td></tr><tr><td><strong>TrainingController.php</strong><br><span class="table-subtext">app/Http/Controllers/TrainingController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">320</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L31</span> <span class="table-badge badge-danger">L26</span> <span class="table-badge badge-danger">L66</span> <span class="table-badge badge-danger">L93</span> <span class="table-badge badge-danger">L113</span></td></tr><tr><td><strong>CompanyController.php</strong><br><span class="table-subtext">app/Http/Controllers/CompanyController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">305</td>
+          <td><span class="table-badge badge-danger">🔴 Crítico</span></td>
+          <td><span class="table-badge badge-danger">L24</span> <span class="table-badge badge-danger">L108</span> <span class="table-badge badge-danger">L130</span> <span class="table-badge badge-danger">L87</span> <span class="table-badge badge-danger">L107</span></td></tr><tr><td><strong>ChecklistController.php</strong><br><span class="table-subtext">app/Http/Controllers/ChecklistController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">296</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td><span class="table-badge badge-danger">L20</span> <span class="table-badge badge-danger">L214</span> <span class="table-badge badge-danger">L122</span> <span class="table-badge badge-danger">L236</span> <span class="table-badge badge-danger">L134</span> <span class="table-badge badge-danger">L230</span></td></tr><tr><td><strong>FindingController.php</strong><br><span class="table-subtext">app/Http/Controllers/FindingController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">265</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td><span class="table-badge badge-danger">L138</span> <span class="table-badge badge-danger">L30</span> <span class="table-badge badge-danger">L107</span> <span class="table-badge badge-danger">L139</span> <span class="table-badge badge-danger">L111</span></td></tr><tr><td><strong>ProfileController.php</strong><br><span class="table-subtext">app/Http/Controllers/ProfileController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">250</td>
+          <td><span class="table-badge badge-warning">🟡 Sobre umbral</span></td>
+          <td>—</td></tr><tr><td><strong>AssetTypeController.php</strong><br><span class="table-subtext">app/Http/Controllers/AssetTypeController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">198</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td><span class="table-badge badge-danger">L25</span> <span class="table-badge badge-danger">L41</span> <span class="table-badge badge-danger">L106</span> <span class="table-badge badge-danger">L102</span></td></tr><tr><td><strong>HelpCenterController.php</strong><br><span class="table-subtext">app/Http/Controllers/HelpCenterController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">185</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>PasswordResetRequestController.php</strong><br><span class="table-subtext">app/Http/Controllers/PasswordResetRequestController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">185</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td><span class="table-badge badge-danger">L28</span> <span class="table-badge badge-danger">L85</span> <span class="table-badge badge-danger">L68</span></td></tr><tr><td><strong>IncidenteController.php</strong><br><span class="table-subtext">app/Http/Controllers/IncidenteController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">171</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td><span class="table-badge badge-danger">L126</span> <span class="table-badge badge-danger">L29</span> <span class="table-badge badge-danger">L90</span> <span class="table-badge badge-danger">L127</span> <span class="table-badge badge-danger">L94</span></td></tr><tr><td><strong>CategoryController.php</strong><br><span class="table-subtext">app/Http/Controllers/CategoryController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">155</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td><span class="table-badge badge-danger">L18</span> <span class="table-badge badge-danger">L81</span> <span class="table-badge badge-danger">L77</span></td></tr><tr><td><strong>AnnualContractReportController.php</strong><br><span class="table-subtext">app/Http/Controllers/Contracts/AnnualContractReportController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">149</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td><span class="table-badge badge-danger">L29</span> <span class="table-badge badge-danger">L24</span> <span class="table-badge badge-danger">L26</span></td></tr><tr><td><strong>SignatureApprovalController.php</strong><br><span class="table-subtext">app/Http/Controllers/SignatureApprovalController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">121</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td><span class="table-badge badge-danger">L22</span></td></tr><tr><td><strong>VisitCertificatePDFController.php</strong><br><span class="table-subtext">app/Http/Controllers/VisitCertificatePDFController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">118</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td><span class="table-badge badge-danger">L14</span></td></tr><tr><td><strong>TrainingPDFController.php</strong><br><span class="table-subtext">app/Http/Controllers/TrainingPDFController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">108</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td><span class="table-badge badge-danger">L18</span></td></tr><tr><td><strong>InspectionPDFController.php</strong><br><span class="table-subtext">app/Http/Controllers/InspectionPDFController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">66</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td><span class="table-badge badge-danger">L17</span></td></tr><tr><td><strong>LoginController.php</strong><br><span class="table-subtext">app/Http/Controllers/Auth/LoginController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">56</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td>—</td></tr><tr><td><strong>HallazgoPDFController.php</strong><br><span class="table-subtext">app/Http/Controllers/Hallazgos/HallazgoPDFController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">56</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td><span class="table-badge badge-danger">L17</span></td></tr><tr><td><strong>ForcePasswordChangeController.php</strong><br><span class="table-subtext">app/Http/Controllers/Auth/ForcePasswordChangeController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">52</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td>—</td></tr><tr><td><strong>IncidentePDFController.php</strong><br><span class="table-subtext">app/Http/Controllers/Incidentes/IncidentePDFController.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">52</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td><span class="table-badge badge-danger">L17</span></td></tr>
+        </tbody></table>
+      </details>
+      <details  style="margin-bottom:14px;">
+        <summary class="det-summary">▶ Servicios, Jobs y Listeners (Dominio) — umbral 250 lín / crítico 400 lín</summary>
+        <table class="loc-table"><thead><tr><th>Archivo</th><th style="text-align:right">Líneas</th><th>Estado</th><th>Acceso a datos</th></tr></thead><tbody>
+        <tr><td><strong>TimeTrackingService.php</strong><br><span class="table-subtext">app/Services/TimeTrackingService.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">177</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>VisitService.php</strong><br><span class="table-subtext">app/Services/VisitService.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">151</td>
+          <td><span class="table-badge badge-info">🔵 Moderado</span></td>
+          <td>—</td></tr><tr><td><strong>ImportEmployeesJob.php</strong><br><span class="table-subtext">app/Jobs/ImportEmployeesJob.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">135</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td>—</td></tr><tr><td><strong>SyncAssetMetadata.php</strong><br><span class="table-subtext">app/Listeners/SyncAssetMetadata.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">124</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td>—</td></tr><tr><td><strong>BrandingService.php</strong><br><span class="table-subtext">app/Services/BrandingService.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">68</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td>—</td></tr><tr><td><strong>LogClientAccess.php</strong><br><span class="table-subtext">app/Listeners/LogClientAccess.php</span></td>
+          <td style="text-align:right;font-weight:800;font-family:monospace">21</td>
+          <td><span class="table-badge badge-success">🟢 Óptimo</span></td>
+          <td>—</td></tr>
+        </tbody></table>
+      </details>
+    </div>
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="applyFilter(event,'all')">Todos</button>
+    <button class="filter-btn" onclick="applyFilter(event,'pending')">Pendientes</button>
+    <button class="filter-btn" onclick="applyFilter(event,'checked')">Cumplidos</button>
+  </div>
+  
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">01</span><h2 class="card-title">01 — Seguridad y Control de Accesos (Laravel 12 + Multi-Tenant)</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_0">0 / 10</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_0" style="width:0%"></div></div></div>
+    </div>
+    
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_0_0">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_0"  onchange="toggleItem('chk_0_0', 0)">
+        <div class="item-content"><span class="item-bold">Aislamiento Multi-Tenant estricto por Consultora (BOLA / IDOR)</span><span>Toda consulta en <code>AdministrationController</code>, <code>OperationController</code>, <code>CompanyController</code>, <code>AssetController</code>, <code>FindingController</code> e <code>IncidenteController</code> filtra explícitamente por <code>consultora_id</code> del usuario autenticado (o <code>sedes</code> asignadas al técnico), impidiendo listar empresas o visitas de otras consultoras (ej. corregir <code>AdministrationController.php:109</code> y <code>OperationController.php:40</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_1">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_1"  onchange="toggleItem('chk_0_1', 0)">
+        <div class="item-content"><span class="item-bold">Control vertical por rol (RBAC)</span><span>Toda ruta en <code>routes/web.php</code> exige middleware <code>auth</code> y <code>role:...</code> validado mediante <code>User::hasRole()</code>; separación estricta entre <code>super_admin</code> y <code>vendedor</code> (<code>ensureSuperAdmin()</code> vs <code>ensureSuperAdminOrVendedor()</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_2">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_2"  onchange="toggleItem('chk_0_2', 0)">
+        <div class="item-content"><span class="item-bold">Autorización mediante Policies de Laravel</span><span>Uso sistemático de <code>$this-&gt;authorize()</code> con <code>MasterReportPolicy</code> e <code>InspectionPolicy</code> antes de ver, editar o aprobar recursos sensibles.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_3">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_3"  onchange="toggleItem('chk_0_3', 0)">
+        <div class="item-content"><span class="item-bold">Protección contra Mass-Assignment</span><span>Modelos Eloquent con <code>$fillable</code> explícito (sin <code>$guarded = []</code>) y creación/actualización usando exclusivamente <code>$request-&gt;validated()</code> o <code>safeData()</code> desde <code>FormRequest</code> (<code>StoreMasterReportRequest</code>, <code>UpdateMasterReportRequest</code>, <code>StoreChecklistCompletionRequest</code>, <code>StoreEmployeeRequest</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_4">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_4"  onchange="toggleItem('chk_0_4', 0)">
+        <div class="item-content"><span class="item-bold">Blindaje de marcas de tiempo e integridad SRE</span><span>En <code>InspectionController@complete</code> y <code>VisitService</code>, las fechas y horas de inicio/cierre (<code>start_time</code>, <code>end_time</code>, <code>completed_at</code>) se fuerzan en servidor con <code>now()</code>, ignorando y auditando con <code>Log::warning()</code> cualquier timestamp manipulado desde el cliente.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_5">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_5"  onchange="toggleItem('chk_0_5', 0)">
+        <div class="item-content"><span class="item-bold">Gestión de contraseñas y sesiones</span><span>Generación de claves temporales aleatorias de 16 caracteres (<code>Str::random(16)</code>), middleware <code>ForcePasswordChange</code> activo (<code>must_change_password = true</code>), regeneración de sesión en <code>LoginController@login</code> y rate-limiting (<code>throttle</code>) en <code>/login</code> y <code>/password-reset-request</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_6">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_6"  onchange="toggleItem('chk_0_6', 0)">
+        <div class="item-content"><span class="item-bold">Carga segura de archivos y firmas digitales</span><span>Validación de MIME types (<code>jpg,jpeg,png,webp</code>) y tamaño máximo en subida de fotos de activos, hallazgos, incidentes y firmas; decodificación segura de Base64 a PNG físico en <code>storage/app/public/signatures/</code> con nombres generados por el servidor (<code>uniqid()</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_7">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_7"  onchange="toggleItem('chk_0_7', 0)">
+        <div class="item-content"><span class="item-bold">Prevención de SQL Injection y XSS</span><span>Consultas Eloquent/Query Builder parametrizadas (incluyendo <code>whereJsonContains</code> y <code>json_each</code>), y vistas Blade de PDFs escapando variables con <code>{{ }}</code> (reservando <code>{!! !!}</code> solo para SVGs/QR generados en servidor).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_8">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_8"  onchange="toggleItem('chk_0_8', 0)">
+        <div class="item-content"><span class="item-bold">Configuración segura de producción</span><span><code>APP_DEBUG=false</code> en producción, <code>SESSION_HTTP_ONLY=true</code>, cabeceras de seguridad HTTP (<code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options</code>) y secretos leídos únicamente desde <code>.env</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_0_9">
+        <input type="checkbox" class="chk-item" data-cat="0" id="chk_0_9"  onchange="toggleItem('chk_0_9', 0)">
+        <div class="item-content"><span class="item-bold">Auditoría inmutable (<code>AuditLog</code>)</span><span>Cambios en límites de licencias y estados de suscripción de consultoras registrados vía evento <code>ClientAccessModified</code> → <code>LogClientAccess</code> en <code>audit_logs</code> con bloqueo de <code>updating</code> y <code>deleting</code>.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">02</span><h2 class="card-title">02 — Backend y Arquitectura (PHP 8.5 / Laravel 12)</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_1">0 / 19</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_1" style="width:0%"></div></div></div>
+    </div>
+    <div class="card-warning-banner">⚠️ <strong>11 archivo(s) de "Controladores Backend (Laravel)" superan 200 líneas:</strong> <code>AdministrationController.php (1332)</code>, <code>OperationController.php (1097)</code>, <code>InspectionController.php (706)</code>, <code>ContractController.php (551)</code>, <code>MasterReportController.php (462)</code>, <code>AssetController.php (420)</code>, <code>TrainingController.php (320)</code>, <code>CompanyController.php (305)</code>…<br><strong>21 con acceso directo a datos:</strong> <code>AdministrationController.php</code>, <code>OperationController.php</code>, <code>InspectionController.php</code>, <code>ContractController.php</code>, <code>MasterReportController.php</code>, <code>AssetController.php</code>, <code>TrainingController.php</code>, <code>CompanyController.php</code>, <code>ChecklistController.php</code>, <code>FindingController.php</code>, <code>AssetTypeController.php</code>, <code>PasswordResetRequestController.php</code>, <code>IncidenteController.php</code>, <code>CategoryController.php</code>, <code>AnnualContractReportController.php</code>, <code>SignatureApprovalController.php</code>, <code>VisitCertificatePDFController.php</code>, <code>TrainingPDFController.php</code>, <code>InspectionPDFController.php</code>, <code>HallazgoPDFController.php</code>, <code>IncidentePDFController.php</code></div>
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_1_0">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_0"  onchange="toggleItem('chk_1_0', 1)">
+        <div class="item-content"><span class="item-bold">Capas y separación de responsabilidades (obligatorio)</span><span>Arquitectura en capas claramente delimitada (<code>routes/web.php</code> → <code>Controllers</code> → <code>FormRequests</code> / <code>Policies</code> → <code>Services</code> / <code>Events</code> → <code>Models</code> Eloquent).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_1">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_1"  onchange="toggleItem('chk_1_1', 1)">
+        <div class="item-content"><span class="item-bold">Controladores delgados — Thin Controllers &lt; 200 lín (obligatorio)</span><span>Los controladores actúan como adaptadores HTTP/Inertia finos sin acumular lógica de negocio pesada ni cálculos complejos.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_2">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_2"  onchange="toggleItem('chk_1_2', 1)">
+        <div class="item-content"><span class="item-bold">Cero acceso directo a datos en controladores (obligatorio)</span><span>Delegar consultas complejas, transacciones <code>DB::transaction</code> y mutaciones multi-modelo desde los controladores hacia clases en <code>app/Services/</code> (<code>VisitService</code>, <code>TimeTrackingService</code>, <code>BrandingService</code>, etc.).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_3">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_3"  onchange="toggleItem('chk_1_3', 1)">
+        <div class="item-content"><span class="item-bold">Compatibilidad total con PHP 8.5</span><span>Uso de constantes y tipado compatibles con PHP 8.5 (como <code>\Pdo\Mysql::ATTR_SSL_CA</code> en <code>config/database.php</code>) sin avisos <code>Deprecated</code> en tiempo de ejecución.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_4">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_4"  onchange="toggleItem('chk_1_4', 1)">
+        <div class="item-content"><span class="item-bold">Route Model Binding consistente</span><span>Los nombres de parámetros en <code>routes/web.php</code> coinciden con las variables tipadas en los métodos de los controladores (ej. <code>{masterReport}</code>, <code>{inspection}</code>, <code>{visit}</code>, <code>{asset}</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_5">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_5"  onchange="toggleItem('chk_1_5', 1)">
+        <div class="item-content"><span class="item-bold">Uso de Form Requests dedicados</span><span>Extraer validaciones inline (<code>$request-&gt;validate([...])</code>) de los controladores hacia clases dedicadas en <code>app/Http/Requests/</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_6">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_6"  onchange="toggleItem('chk_1_6', 1)">
+        <div class="item-content"><span class="item-bold">Eventos, Listeners y Jobs desacoplados</span><span>Procesamiento pesado (importación de empleados en <code>ImportEmployeesJob</code>) y efectos secundarios (sincronización de metadata en <code>SyncAssetMetadata</code> tras <code>InspectionCompleted</code>) gestionados mediante eventos y colas.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_7">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_7"  onchange="toggleItem('chk_1_7', 1)">
+        <div class="item-content"><span class="item-bold">Unificación de motor PDF y Excel</span><span>Consolidar el uso de librerías de exportación evitando mantener paquetes redundantes para la misma tarea (<code>dompdf</code> vs <code>spatie/laravel-pdf</code>, y múltiples librerías de XLSX).</span></div>
+      </label><div class="item-section">Hallazgos de la medición (Archivos sobre umbral &gt; 200 lín y acceso a datos)</div>
+      <label class="checklist-item " id="label_chk_1_8">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_8"  onchange="toggleItem('chk_1_8', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/AdministrationController.php</code> (1332 lín · 🔴 Crítico)</span><span>Extraer la gestión de Consultoras (<code>consultants*</code>) a <code>Admin/ConsultantController.php</code>, el Staff Global (<code>globalStaff*</code>) a <code>Admin/GlobalStaffController.php</code>, la gestión de Usuarios/Técnicos del Gestor a <code>Gestor/UserManagementController.php</code> y las métricas de dashboards a un <code>DashboardMetricsService.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_9">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_9"  onchange="toggleItem('chk_1_9', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/OperationController.php</code> (1097 lín · 🔴 Crítico)</span><span>Extraer el armado del tablero de asignaciones del técnico (<code>myAssignments</code>) a un <code>TechnicianAssignmentService.php</code> y separar el ciclo de vida de visitas en un <code>VisitOperationController.php</code> apoyado en <code>VisitService</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_10">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_10"  onchange="toggleItem('chk_1_10', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/InspectionController.php</code> (706 lín · 🔴 Crítico)</span><span>Mover la lógica del Wizard, validación de Interlock SRE, cálculo de fallas y re-vinculación de activos (<code>relinkAsset</code>) a un <code>InspectionService.php</code>, eliminando llamadas a <code>DB::</code> (L197) y <code>Artisan::call</code> en el controlador.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_11">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_11"  onchange="toggleItem('chk_1_11', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/ContractController.php</code> (551 lín · 🔴 Crítico)</span><span>Extraer la matriz y sincronización del Plan Anual (PPD) y sus transacciones (<code>DB::</code> L153) hacia un <code>AnnualContractService.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_12">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_12"  onchange="toggleItem('chk_1_12', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/MasterReportController.php</code> (462 lín · 🔴 Crítico)</span><span>Mover la consolidación de datos del período (visitas, checklists, capacitaciones, hallazgos y matriz) y la máquina de estados (<code>solicitado</code> → <code>en_redaccion</code> → <code>finalizado</code> → <code>aprobado</code>) a un <code>MasterReportService.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_13">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_13"  onchange="toggleItem('chk_1_13', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/AssetController.php</code> (420 lín · 🔴 Crítico)</span><span>Extraer el cálculo de alertas de vencimiento, agrupación L1/L2 (<code>grupo</code>/<code>subgrupo</code>) y manejo de fotos del activo a un <code>AssetService.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_14">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_14"  onchange="toggleItem('chk_1_14', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/TrainingController.php</code> (320 lín · 🔴 Crítico)</span><span>Delegar el guardado de firmas PNG en disco (<code>signatures/instructor_*.png</code>), sesiones in-situ y asistencia nominal a un <code>TrainingService.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_15">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_15"  onchange="toggleItem('chk_1_15', 1)">
+        <div class="item-content"><span class="item-bold">Dividir <code>app/Http/Controllers/CompanyController.php</code> (305 lín · 🔴 Crítico)</span><span>Separar las acciones de Sedes (<code>locations</code>, <code>saveLocation</code>, <code>deleteLocation</code>, <code>toggleUserAssignment</code>) en un <code>SedeController.php</code> o <code>CompanyService.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_16">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_16"  onchange="toggleItem('chk_1_16', 1)">
+        <div class="item-content"><span class="item-bold">Refactorizar <code>app/Http/Controllers/ChecklistController.php</code> (296 lín · 🟡 Sobre umbral)</span><span>Extraer la creación/edición profunda de secciones y preguntas y la duplicación de plantillas (<code>duplicate</code>) a un <code>ChecklistBuilderService.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_17">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_17"  onchange="toggleItem('chk_1_17', 1)">
+        <div class="item-content"><span class="item-bold">Refactorizar <code>app/Http/Controllers/FindingController.php</code> (265 lín · 🟡 Sobre umbral)</span><span>Mover la creación de hallazgos con fotos y seguimientos (<code>DB::</code> L138) a un <code>FindingService.php</code> y un <code>StoreFindingRequest.php</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_1_18">
+        <input type="checkbox" class="chk-item" data-cat="1" id="chk_1_18"  onchange="toggleItem('chk_1_18', 1)">
+        <div class="item-content"><span class="item-bold">Refactorizar <code>app/Http/Controllers/ProfileController.php</code> (250 lín · 🟡 Sobre umbral)</span><span>Extraer el procesamiento de fotos de perfil y firmas en estado <code>pending</code> (<code>firma_temp</code>) a un servicio de perfil de usuario.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">03</span><h2 class="card-title">03 — Frontend y Experiencia de Usuario (React 19 + Inertia.js 3 + Tailwind v4)</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_2">0 / 23</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_2" style="width:0%"></div></div></div>
+    </div>
+    <div class="card-warning-banner">⚠️ <strong>14 archivo(s) de "Vistas y Layouts Frontend (React + Inertia)" superan 500 líneas:</strong> <code>MyAssignments.jsx (1317)</code>, <code>Index.jsx (1048)</code>, <code>Wizard.jsx (1014)</code>, <code>Index.jsx (1001)</code>, <code>Create.jsx (837)</code>, <code>Edit.jsx (793)</code>, <code>Wizard.jsx (675)</code>, <code>Locations.jsx (667)</code>…</div>
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_2_0">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_0"  onchange="toggleItem('chk_2_0', 2)">
+        <div class="item-content"><span class="item-bold">Límite de tamaño de vistas &lt; 500 lín (obligatorio)</span><span>Ningún componente de página en <code>resources/js/Pages/</code> o layout en <code>resources/js/Layouts/</code> debe superar las 500 líneas de código (crítico &gt; 800 líneas).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_1">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_1"  onchange="toggleItem('chk_2_1', 2)">
+        <div class="item-content"><span class="item-bold">Modularidad y subcomponentes (<code>Partials</code> / <code>Components</code>)</span><span>Pantallas complejas descomponen sus modales, tablas, tarjetas móviles y pasos de wizard en subcomponentes enfocados y reutilizables.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_2">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_2"  onchange="toggleItem('chk_2_2', 2)">
+        <div class="item-content"><span class="item-bold">Completar las 3 pantallas pendientes de migración a React</span><span></span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_3">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_3"  onchange="toggleItem('chk_2_3', 2)">
+        <div class="item-content"><span class="item-bold">Uso seguro de <code>usePage().props</code> y <code>auth</code></span><span>Destructurar <code>const { auth } = usePage().props</code> con optional chaining (<code>auth?.user</code>) para prevenir errores de ejecución en vistas compartidas o públicas.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_4">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_4"  onchange="toggleItem('chk_2_4', 2)">
+        <div class="item-content"><span class="item-bold">Manejo de formularios con <code>useForm</code> de Inertia</span><span>Uso de <code>processing</code> para deshabilitar botones de envío y evitar registros duplicados; uso de <code>form.transform(...)</code> inmutable antes de enviar flags de acción (<code>approve</code>, <code>observe</code>, <code>finalize</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_5">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_5"  onchange="toggleItem('chk_2_5', 2)">
+        <div class="item-content"><span class="item-bold">Coherencia cromática por pilar (Regla Visual HUD)</span><span>Naranja (<code>ep-primary</code> / <code>orange-500</code>) para Checklists y Contrato Anual; Azul/Índigo (<code>indigo-500</code>) para Capacitaciones y Hallazgos; Rojo (<code>red-500</code>) para Incidentes; Esmeralda (<code>emerald-500</code>) para estados aprobados/operativos.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_6">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_6"  onchange="toggleItem('chk_2_6', 2)">
+        <div class="item-content"><span class="item-bold">Responsividad Mobile-First y transición Tabla → Card (<code>lg:block hidden</code> / <code>lg:hidden block</code>)</span><span>En resoluciones menores a <code>1024px</code>, las tablas anchas se transforman en tarjetas táctiles verticales, y las grillas matriciales aplican <code>.custom-scrollbar</code> y columnas fijas adaptables.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_7">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_7"  onchange="toggleItem('chk_2_7', 2)">
+        <div class="item-content"><span class="item-bold">Soporte de campo para Técnicos (PWA + Respaldo Local)</span><span>Configuración de <code>manifest.json</code> instalable y respaldo en <code>localStorage</code> / <code>IndexedDB</code> de las respuestas en curso en <code>Wizard.jsx</code> ante cortes momentáneos de señal en planta.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_8">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_8"  onchange="toggleItem('chk_2_8', 2)">
+        <div class="item-content"><span class="item-bold">Compilación limpia con Vite 6 y ESLint 9</span><span><code>npm run build</code> y <code>npm run lint</code> ejecutan sin errores ni referencias a componentes inexistentes.</span></div>
+      </label><div class="item-section">Hallazgos de la medición (Vistas sobre umbral &gt; 500 lín)</div>
+      <label class="checklist-item " id="label_chk_2_9">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_9"  onchange="toggleItem('chk_2_9', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Tecnico/MyAssignments.jsx</code> (1317 lín · 🔴 Crítico)</span><span>Extraer las pestañas de Inspecciones, Capacitaciones, Informes y Plan Anual, los filtros superiores y las tarjetas de misión en subcomponentes dentro de <code>Pages/Tecnico/Partials/</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_10">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_10"  onchange="toggleItem('chk_2_10', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Assets/Index.jsx</code> (1048 lín · 🔴 Crítico)</span><span>Extraer el árbol jerárquico L1/L2 (<code>grupo</code>/<code>subgrupo</code>), los tooltips de alertas SRE y el panel lateral de edición rápida en componentes dedicados (<code>Assets/Partials/</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_11">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_11"  onchange="toggleItem('chk_2_11', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Tecnico/Inspections/Wizard.jsx</code> (1014 lín · 🔴 Crítico)</span><span>Extraer el Paso 0 (selección de activo y modal ámbar de re-inspección), el renderizador de preguntas por tipo, el detector de falla crítica y el paso de firmas en subcomponentes (<code>Inspections/Partials/</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_12">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_12"  onchange="toggleItem('chk_2_12', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Assets/Types/Index.jsx</code> (1001 lín · 🔴 Crítico)</span><span>Extraer el constructor de esquema de metadata (<code>MetadataSchemaBuilder</code>), el configurador de reglas SRE y el configurador de esquema de fotos (<code>PhotoSchemaBuilder</code>) en partials separados.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_13">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_13"  onchange="toggleItem('chk_2_13', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Assets/Create.jsx</code> (837 lín · 🔴 Crítico)</span><span>Extraer el formulario dinámico de alta multi-activo y la barra lateral de previsualización de grupos/subgrupos en subcomponentes.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_14">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_14"  onchange="toggleItem('chk_2_14', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Admin/Consultants/Edit.jsx</code> (793 lín · 🟡 Sobre umbral)</span><span>Extraer el formulario de límites/suscripción, la configuración del Gestor Principal y la línea de tiempo de Auditoría (<code>AuditTimeline</code>) en <code>Consultants/Partials/</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_15">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_15"  onchange="toggleItem('chk_2_15', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/MasterReports/Wizard.jsx</code> (675 lín · 🟡 Sobre umbral)</span><span>Separar las secciones del informe (visitas, checklists, capacitaciones, hallazgos, matriz y evaluación del gestor) y la botonera flotante en partials.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_16">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_16"  onchange="toggleItem('chk_2_16', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Companies/Locations.jsx</code> (667 lín · 🟡 Sobre umbral)</span><span>Extraer el formulario de sedes (días operativos, horarios, Roster 24/7 y coordenadas GPS) y el modal de asignación de usuarios en subcomponentes.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_17">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_17"  onchange="toggleItem('chk_2_17', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Contracts/Partials/AnnualPlanMatrix.jsx</code> (652 lín · 🟡 Sobre umbral)</span><span>Extraer las filas de categoría, celdas mensuales interactivas y modales de programación de fechas en componentes más pequeños.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_18">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_18"  onchange="toggleItem('chk_2_18', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Tecnico/Visits/InProgress.jsx</code> (645 lín · 🟡 Sobre umbral)</span><span>Extraer el resumen de actividades ejecutadas en la visita y el modal de cierre/firma (<code>VisitCheckoutModal</code>) en partials.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_19">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_19"  onchange="toggleItem('chk_2_19', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Assets/Show.jsx</code> (625 lín · 🟡 Sobre umbral)</span><span>Extraer la galería de fotos, el historial de inspecciones del activo y la bitácora <code>asset_metadata_logs</code> en subcomponentes.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_20">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_20"  onchange="toggleItem('chk_2_20', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Users.jsx</code> (596 lín · 🟡 Sobre umbral)</span><span>Extraer el modal de creación/edición de usuario y el modal de clave temporal generada en partials junto a <code>PendingSignaturesList.jsx</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_21">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_21"  onchange="toggleItem('chk_2_21', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Tecnico/Trainings/Session.jsx</code> (574 lín · 🟡 Sobre umbral)</span><span>Extraer la carga nominal de asistentes con firma y el bloque de firma del instructor especialista en subcomponentes.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_2_22">
+        <input type="checkbox" class="chk-item" data-cat="2" id="chk_2_22"  onchange="toggleItem('chk_2_22', 2)">
+        <div class="item-content"><span class="item-bold">Dividir <code>resources/js/Pages/Gestor/Checklists/Builder.jsx</code> (569 lín · 🟡 Sobre umbral)</span><span>Extraer el editor de secciones y el configurador de lógica de falla de preguntas (<code>failure_values</code> / <code>vincular_a_metadata</code>) en partials.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">04</span><h2 class="card-title">04 — Base de Datos y Persistencia (Eloquent ORM · SQLite / MySQL)</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_3">0 / 8</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_3" style="width:0%"></div></div></div>
+    </div>
+    
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_3_0">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_0"  onchange="toggleItem('chk_3_0', 3)">
+        <div class="item-content"><span class="item-bold">Migraciones versionadas al día (obligatorio)</span><span>Todas las migraciones en <code>database/migrations/</code> ejecutadas sin pendientes (<code>php artisan migrate:status</code> 100% <code>Ran</code>); sin modificaciones manuales fuera de migraciones.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_3_1">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_1"  onchange="toggleItem('chk_3_1', 3)">
+        <div class="item-content"><span class="item-bold">Prevención de problemas N+1 (<code>with()</code> / <code>withCount()</code>)</span><span>Uso sistemático de Eager Loading en listados de visitas, inspecciones, activos, asignaciones y planes anuales; habilitar <code>Model::preventLazyLoading(! app()-&gt;isProduction())</code> en desarrollo.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_3_2">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_2"  onchange="toggleItem('chk_3_2', 3)">
+        <div class="item-content"><span class="item-bold">Proyecciones acotadas en selectores y filtros</span><span>Seleccionar solo columnas necesarias (<code>select('id', 'nombre', ...)</code>) al cargar listas desplegables de empresas, sedes y técnicos para modales.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_3_3">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_3"  onchange="toggleItem('chk_3_3', 3)">
+        <div class="item-content"><span class="item-bold">Transacciones atómicas (<code>DB::transaction</code>)</span><span>Toda operación que modifica múltiples tablas dependientes (completar checklist + actualizar asignación + sincronizar metadata de activo; crear hallazgo + fotos; crear incidente + fotos) se ejecuta dentro de <code>DB::transaction</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_3_4">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_4"  onchange="toggleItem('chk_3_4', 3)">
+        <div class="item-content"><span class="item-bold">Preservación histórica con <code>SoftDeletes</code> y <code>withTrashed()</code></span><span>Las bajas de activos (<code>Asset</code>), usuarios y empresas usan baja lógica o estado <code>inactivo</code>, y las relaciones históricas en <code>DynamicInspection</code> e <code>Incidente</code> cargan <code>-&gt;withTrashed()</code> para no dejar reportes legales huérfanos.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_3_5">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_5"  onchange="toggleItem('chk_3_5', 3)">
+        <div class="item-content"><span class="item-bold">Almacenamiento liviano de firmas (Storage vs Base64)</span><span>Las firmas permanentes de usuarios e instructores especialistas se almacenan como archivos <code>.png</code> en <code>storage/app/public/signatures/</code> guardando solo la ruta relativa en la base de datos para evitar bloat en columnas <code>TEXT</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_3_6">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_6"  onchange="toggleItem('chk_3_6', 3)">
+        <div class="item-content"><span class="item-bold">Trazabilidad e inmutabilidad de logs (<code>audit_logs</code> y <code>asset_metadata_logs</code>)</span><span>Registro automático de cambios en atributos vinculados de activos (<code>SyncAssetMetadata</code>) y cambios de suscripción/límites de consultoras (<code>ConsultoraSuscripcionLog</code> y <code>AuditLog</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_3_7">
+        <input type="checkbox" class="chk-item" data-cat="3" id="chk_3_7"  onchange="toggleItem('chk_3_7', 3)">
+        <div class="item-content"><span class="item-bold">Índices en claves foráneas y filtros frecuentes</span><span>Índices definidos en <code>consultora_id</code>, <code>empresa_id</code>, <code>sede_id</code>, <code>user_id</code>, <code>asset_id</code>, <code>status</code> y <code>due_date</code>.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">05</span><h2 class="card-title">05 — Contratos Inertia.js, Endpoints Internos y API Sanctum</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_4">0 / 6</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_4" style="width:0%"></div></div></div>
+    </div>
+    
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_4_0">
+        <input type="checkbox" class="chk-item" data-cat="4" id="chk_4_0"  onchange="toggleItem('chk_4_0', 4)">
+        <div class="item-content"><span class="item-bold">Sincronización de rutas Ziggy ↔ <code>routes/web.php</code></span><span>Toda llamada <code>route('...')</code> en los componentes React de <code>resources/js/</code> corresponde a una ruta existente y activa en <code>routes/web.php</code>, con parámetros coincidentes.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_4_1">
+        <input type="checkbox" class="chk-item" data-cat="4" id="chk_4_1"  onchange="toggleItem('chk_4_1', 4)">
+        <div class="item-content"><span class="item-bold">Consolidación de rutas compartidas Gestor / Técnico</span><span>Evitar duplicación innecesaria de definiciones entre los prefijos <code>/gestor/...</code> y <code>/tecnico/...</code> cuando apuntan al mismo controlador y método.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_4_2">
+        <input type="checkbox" class="chk-item" data-cat="4" id="chk_4_2"  onchange="toggleItem('chk_4_2', 4)">
+        <div class="item-content"><span class="item-bold">Protección de endpoints JSON internos (<code>/gestor/api/*</code>)</span><span>Los endpoints JSON consumidos por modales React (<code>/gestor/api/companies/{empresa}/sites</code> y <code>/gestor/api/technicians/{user}/assignments</code>) validan pertenencia del recurso a la <code>consultora_id</code> del usuario autenticado.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_4_3">
+        <input type="checkbox" class="chk-item" data-cat="4" id="chk_4_3"  onchange="toggleItem('chk_4_3', 4)">
+        <div class="item-content"><span class="item-bold">Validación estricta de payloads (Anti Mass-Assignment)</span><span>Peticiones <code>POST</code>/<code>PUT</code> validadas con reglas explícitas antes de persistir, rechazando campos no autorizados con HTTP <code>422</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_4_4">
+        <input type="checkbox" class="chk-item" data-cat="4" id="chk_4_4"  onchange="toggleItem('chk_4_4', 4)">
+        <div class="item-content"><span class="item-bold">Especificación OpenAPI y visor Scalar</span><span>Inicializar contrato <code>public/openapi.json</code> documentando los endpoints JSON/API (<code>/api/*</code> y <code>/gestor/api/*</code>) y montar el visor interactivo <strong>Scalar</strong> en una ruta protegida (<code>/docs</code> o <code>/scalar</code>) para el equipo y futuras integraciones móviles.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_4_5">
+        <input type="checkbox" class="chk-item" data-cat="4" id="chk_4_5"  onchange="toggleItem('chk_4_5', 4)">
+        <div class="item-content"><span class="item-bold">Protección de documentación en producción</span><span>El visor de contratos OpenAPI/Scalar debe requerir autenticación de usuario global (<code>super_admin</code>) en entornos productivos.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">06</span><h2 class="card-title">06 — Testing y Verificación Automatizada (PHPUnit 11 + Laravel 12)</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_5">0 / 6</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_5" style="width:0%"></div></div></div>
+    </div>
+    
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_5_0">
+        <input type="checkbox" class="chk-item" data-cat="5" id="chk_5_0"  onchange="toggleItem('chk_5_0', 5)">
+        <div class="item-content"><span class="item-bold">Suite de pruebas unitarias de dominio (<code>tests/Unit</code>)</span><span>Pruebas automatizadas para <code>TimeTrackingService</code> (cálculo de distancia GPS Haversine, tolerancia en metros, horarios operativos y Roster 24/7), <code>VisitService</code> y <code>ValidCuil</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_5_1">
+        <input type="checkbox" class="chk-item" data-cat="5" id="chk_5_1"  onchange="toggleItem('chk_5_1', 5)">
+        <div class="item-content"><span class="item-bold">Pruebas de integración e Inertia (<code>tests/Feature</code>)</span><span>Pruebas HTTP verificando renderizado de componentes Inertia (<code>assertInertia</code>), máquina de estados de <code>MasterReport</code> (<code>solicitado</code> → <code>en_redaccion</code> → <code>finalizado</code> → <code>aprobado</code>) y sincronización <code>SyncAssetMetadata</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_5_2">
+        <input type="checkbox" class="chk-item" data-cat="5" id="chk_5_2"  onchange="toggleItem('chk_5_2', 5)">
+        <div class="item-content"><span class="item-bold">Pruebas de aislamiento Multi-Tenant y Roles (RBAC)</span><span>Casos de prueba que confirman denegación <code>403</code> cuando un <code>vendedor</code> intenta eliminar una consultora o gestionar staff global, o cuando un <code>Gestor</code> intenta acceder a empresas/sedes de otra consultora.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_5_3">
+        <input type="checkbox" class="chk-item" data-cat="5" id="chk_5_3"  onchange="toggleItem('chk_5_3', 5)">
+        <div class="item-content"><span class="item-bold">Purga de tests Legacy rotos (<code>tests/Legacy</code>)</span><span>Actualizar o remover pruebas antiguas de componentes Livewire eliminados para que <code>php artisan test</code> pase al 100% en verde.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_5_4">
+        <input type="checkbox" class="chk-item" data-cat="5" id="chk_5_4"  onchange="toggleItem('chk_5_4', 5)">
+        <div class="item-content"><span class="item-bold">Uso de base de datos efímera en memoria</span><span><code>phpunit.xml</code> configurado con <code>DB_CONNECTION=sqlite</code> y <code>DB_DATABASE=:memory:</code> usando el trait <code>RefreshDatabase</code> para no tocar <code>database/database.sqlite</code> local durante los tests.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_5_5">
+        <input type="checkbox" class="chk-item" data-cat="5" id="chk_5_5"  onchange="toggleItem('chk_5_5', 5)">
+        <div class="item-content"><span class="item-bold">Faking de servicios y almacenamiento</span><span>Uso de <code>Storage::fake('public')</code>, <code>Mail::fake()</code> y <code>Event::fake()</code> en pruebas de carga de fotos, firmas y envío de constancias por correo.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">07</span><h2 class="card-title">07 — Legacy, Limpieza y Mantenibilidad</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_6">0 / 7</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_6" style="width:0%"></div></div></div>
+    </div>
+    
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_6_0">
+        <input type="checkbox" class="chk-item" data-cat="6" id="chk_6_0"  onchange="toggleItem('chk_6_0', 6)">
+        <div class="item-content"><span class="item-bold">Eliminar carpeta <code>resources/views/resources - legacy/</code></span><span>Tras migrar las 3 pantallas faltantes (<code>public-signature</code>, <code>assignment-manager</code> y <code>company-branding</code>) a React, borrar las 42 vistas Blade/Livewire antiguas almacenadas en <code>resources/views/resources - legacy/</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_6_1">
+        <input type="checkbox" class="chk-item" data-cat="6" id="chk_6_1"  onchange="toggleItem('chk_6_1', 6)">
+        <div class="item-content"><span class="item-bold">Remover <code>livewire/livewire</code> de <code>composer.json</code></span><span>Desinstalar el paquete <code>livewire/livewire</code> (<code>^3.7</code>) que ya no forma parte del stack oficial React + Inertia y que aún inyecta middlewares en cada petición web.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_6_2">
+        <input type="checkbox" class="chk-item" data-cat="6" id="chk_6_2"  onchange="toggleItem('chk_6_2', 6)">
+        <div class="item-content"><span class="item-bold">Eliminar copias de bases de datos y archivos basura versionados</span><span>Borrar <code>database/database copy.sqlite</code> y el archivo vacío/basura <code>--help</code> de la raíz del proyecto, agregando <code>*.sqlite</code> al <code>.gitignore</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_6_3">
+        <input type="checkbox" class="chk-item" data-cat="6" id="chk_6_3"  onchange="toggleItem('chk_6_3', 6)">
+        <div class="item-content"><span class="item-bold">Parametrización de Marca Blanca (<code>BrandingService</code> y vistas)</span><span>Reemplazar nombres, correos y teléfonos hardcodeados (<code>XAMASAFE</code>, <code>contacto@xamasafe.com</code>, <code>EP-Back</code>, WhatsApp fijo en <code>welcome.blade.php</code>) por variables configurables en <code>config/app.php</code> y <code>.env</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_6_4">
+        <input type="checkbox" class="chk-item" data-cat="6" id="chk_6_4"  onchange="toggleItem('chk_6_4', 6)">
+        <div class="item-content"><span class="item-bold">Unificar dependencias duplicadas en <code>composer.json</code></span><span>Mantener una sola librería de generación de PDF (<code>barryvdh/laravel-dompdf</code> o <code>spatie/laravel-pdf</code>) y una sola librería de hojas de cálculo Excel (<code>maatwebsite/excel</code> vs <code>shuchkin/simplexlsx*</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_6_5">
+        <input type="checkbox" class="chk-item" data-cat="6" id="chk_6_5"  onchange="toggleItem('chk_6_5', 6)">
+        <div class="item-content"><span class="item-bold">Código libre de <code>// TODO</code> y rutas huérfanas</span><span>Resolver los bloques comentados y <code>TODO</code> en <code>routes/web.php</code> (líneas 45, 152 y 240) y limpiar vistas Blade en <code>resources/views/master-reports/</code> si ya fueron reemplazadas por <code>Pages/Gestor/MasterReports/</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_6_6">
+        <input type="checkbox" class="chk-item" data-cat="6" id="chk_6_6"  onchange="toggleItem('chk_6_6', 6)">
+        <div class="item-content"><span class="item-bold">Sin artefactos temporales en el repositorio</span><span>Mantener <code>public/hot</code>, <code>storage/logs/*.log</code> y <code>bootstrap/cache/*.tmp</code> excluidos del control de versiones.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">08</span><h2 class="card-title">08 — Deploy y Entorno (Laravel 12 + Vite 6 + PHP 8.4/8.5)</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_7">0 / 8</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_7" style="width:0%"></div></div></div>
+    </div>
+    
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_7_0">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_0"  onchange="toggleItem('chk_7_0', 7)">
+        <div class="item-content"><span class="item-bold">Compilación reproducible de Frontend y Backend</span><span><code>composer install --no-dev --optimize-autoloader</code> y <code>npm ci &amp;&amp; npm run build</code> ejecutan sin errores ni advertencias críticas.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_7_1">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_1"  onchange="toggleItem('chk_7_1', 7)">
+        <div class="item-content"><span class="item-bold">Variables de entorno obligatorias definidas</span><span><code>.env</code> productivo configurado con <code>APP_ENV=production</code>, <code>APP_DEBUG=false</code>, <code>APP_KEY</code>, credenciales de base de datos, correo SMTP y variables de marca.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_7_2">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_2"  onchange="toggleItem('chk_7_2', 7)">
+        <div class="item-content"><span class="item-bold">Enlace simbólico de almacenamiento (<code>storage:link</code>)</span><span><code>php artisan storage:link</code> ejecutado y verificado para servir logos de consultoras (<code>storage/logos/</code>), firmas (<code>storage/signatures/</code>) y evidencias fotográficas (<code>storage/hallazgos/</code>, <code>storage/incidentes/</code>).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_7_3">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_3"  onchange="toggleItem('chk_7_3', 7)">
+        <div class="item-content"><span class="item-bold">Límites de subida de imágenes móviles en <code>php.ini</code> / Nginx</span><span>Configuración verificada con <code>upload_max_filesize &gt;= 20M</code> y <code>post_max_size &gt;= 20M</code> para soportar fotos de cámaras de celulares en campo.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_7_4">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_4"  onchange="toggleItem('chk_7_4', 7)">
+        <div class="item-content"><span class="item-bold">Caché de optimización de Laravel en producción</span><span>Ejecución de <code>php artisan config:cache</code>, <code>php artisan route:cache</code> y <code>php artisan view:cache</code> en el script de despliegue.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_7_5">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_5"  onchange="toggleItem('chk_7_5', 7)">
+        <div class="item-content"><span class="item-bold">Ejecución programada de alertas SRE (<code>schedule:run</code>)</span><span>Cron del servidor configurado para ejecutar <code>php artisan schedule:run</code> (incluyendo el comando <code>CheckAssetAlerts</code> para vencimientos de activos).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_7_6">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_6"  onchange="toggleItem('chk_7_6', 7)">
+        <div class="item-content"><span class="item-bold">Worker de colas activo (<code>queue:work</code>)</span><span>Proceso supervisor configurado para procesar jobs en segundo plano como <code>ImportEmployeesJob</code> y envíos de correo.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_7_7">
+        <input type="checkbox" class="chk-item" data-cat="7" id="chk_7_7"  onchange="toggleItem('chk_7_7', 7)">
+        <div class="item-content"><span class="item-bold">Respaldo periódico de Base de Datos y <code>storage/app/public</code></span><span>Política de backup automatizado para la base de datos y la carpeta de firmas/fotos de auditoría legal.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">09</span><h2 class="card-title">09 — Control de Versiones (Git &amp; GitHub)</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_8">0 / 6</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_8" style="width:0%"></div></div></div>
+    </div>
+    <div class="card-warning-banner">⚠️ <strong>Sin tags de versión</strong> en el repositorio.</div>
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_8_0">
+        <input type="checkbox" class="chk-item" data-cat="8" id="chk_8_0"  onchange="toggleItem('chk_8_0', 8)">
+        <div class="item-content"><span class="item-bold">Repositorio remoto propio desacoplado</span><span><code>origin</code> apuntando exclusivamente a <code>https://github.com/Noodle1981/hse.git</code> sin referencias al repositorio anterior.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_8_1">
+        <input type="checkbox" class="chk-item" data-cat="8" id="chk_8_1"  onchange="toggleItem('chk_8_1', 8)">
+        <div class="item-content"><span class="item-bold">Convención de commits (&gt; 90%)</span><span>Mensajes de commit con prefijo convencional (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>, <code>chore:</code>, <code>refactor:</code>, <code>test:</code>). *(Medición actual: <strong>92%</strong> en los últimos 50 commits; evitar commits genéricos como <code>"Update"</code> o <code>"mejoras varias"</code>).*</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_8_2">
+        <input type="checkbox" class="chk-item" data-cat="8" id="chk_8_2"  onchange="toggleItem('chk_8_2', 8)">
+        <div class="item-content"><span class="item-bold">Etiquetado de versiones (Tags SemVer)</span><span>Crear tags de versión (<code>v2.3.0</code>, etc.) en cada hito estable o pase a producción. *(Medición actual: <strong>0 tags</strong> en 258 commits).*</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_8_3">
+        <input type="checkbox" class="chk-item" data-cat="8" id="chk_8_3"  onchange="toggleItem('chk_8_3', 8)">
+        <div class="item-content"><span class="item-bold">Configuración de exclusiones (<code>.gitignore</code>)</span><span>Excluir <code>database/*.sqlite</code>, <code>public/hot</code>, <code>public/build</code>, <code>node_modules/</code>, <code>vendor/</code> y archivos temporales.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_8_4">
+        <input type="checkbox" class="chk-item" data-cat="8" id="chk_8_4"  onchange="toggleItem('chk_8_4', 8)">
+        <div class="item-content"><span class="item-bold">Privacidad de herramientas de auditoría (<code>.git/info/exclude</code>)</span><span>Reglas locales configuradas mediante <code>setup-helper.js ignorar</code> para mantener <code>qa/plantillas/</code>, <code>qa/scripts/</code>, <code>qa/skills/</code>, <code>qa/alcance.md</code> y <code>qa/protocolo-pre-deploy.md</code> excluidos.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_8_5">
+        <input type="checkbox" class="chk-item" data-cat="8" id="chk_8_5"  onchange="toggleItem('chk_8_5', 8)">
+        <div class="item-content"><span class="item-bold">Repositorio libre de binarios y volcados de base de datos</span><span>Eliminar <code>database/database copy.sqlite</code> del seguimiento de Git.</span></div>
+      </label></div>
+  </div>
+  <div class="card-area">
+    <div class="card-header">
+      <div class="card-title-group"><span class="card-badge-num">10</span><h2 class="card-title">10 — Documentación Técnica y de Negocio</h2></div>
+      <div class="card-progress-wrap"><span class="card-counter" id="counter_9">0 / 5</span>
+        <div class="mini-progress-bar"><div class="mini-progress-fill" id="progress_9" style="width:0%"></div></div></div>
+    </div>
+    <div class="card-warning-banner">⚠️ <strong>1 commits de código</strong> desde la última actualización de documentación (2026-07-26).</div>
+    
+    <div class="checklist-items">
+      <label class="checklist-item " id="label_chk_9_0">
+        <input type="checkbox" class="chk-item" data-cat="9" id="chk_9_0"  onchange="toggleItem('chk_9_0', 9)">
+        <div class="item-content"><span class="item-bold">Actualizar <code>README.md</code> principal a la versión V2.3 (React 19 + Inertia 3)</span><span>Reemplazar la descripción obsoleta de <code>V1.2.0.0</code> (stack TALL / Livewire de Diciembre 2024) en <code>README.md</code> para reflejar la arquitectura real actual (Laravel 12 + Inertia.js 3 + React 19 + Tailwind CSS 4 + Multi-Tenancy + Motor de Activos SRE).</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_9_1">
+        <input type="checkbox" class="chk-item" data-cat="9" id="chk_9_1"  onchange="toggleItem('chk_9_1', 9)">
+        <div class="item-content"><span class="item-bold">Frescura de la documentación de arquitectura</span><span>Mantener sincronizados <code>.agent/workflows/notebooklm/arquitectura.md</code>, <code>context.md</code>, <code>base_de_datos.md</code> y <code>prd.md</code> con los últimos cambios del código fuente. *(Medición actual: 1 commit desde la última actualización).*</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_9_2">
+        <input type="checkbox" class="chk-item" data-cat="9" id="chk_9_2"  onchange="toggleItem('chk_9_2', 9)">
+        <div class="item-content"><span class="item-bold">Variables de entorno (<code>.env.example</code>) completas</span><span>Documentar en <code>.env.example</code> todas las variables requeridas por el proyecto (incluyendo <code>MYSQL_ATTR_SSL_CA</code> y variables de branding) sin exponer credenciales reales.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_9_3">
+        <input type="checkbox" class="chk-item" data-cat="9" id="chk_9_3"  onchange="toggleItem('chk_9_3', 9)">
+        <div class="item-content"><span class="item-bold">Guía de instalación y puesta en marcha verificada</span><span>Instrucciones paso a paso probadas en PHP 8.4/8.5 con <code>composer install</code>, <code>npm install</code>, <code>php artisan migrate --seed</code> y <code>npm run dev</code>.</span></div>
+      </label>
+      <label class="checklist-item " id="label_chk_9_4">
+        <input type="checkbox" class="chk-item" data-cat="9" id="chk_9_4"  onchange="toggleItem('chk_9_4', 9)">
+        <div class="item-content"><span class="item-bold">Manuales y Centro de Ayuda In-App (<code>HelpCenterController</code>)</span><span>Verificar que los tutoriales descargables en PDF (<code>/tutoriales/{key}/pdf</code>) estén actualizados con las pantallas actuales del sistema.</span></div>
+      </label></div>
+  </div>
+  <div class="signature-grid">
+    <div class="sig-box"><div class="sig-line"></div><div class="sig-title">Auditor QA / Control de Calidad</div><div class="sig-sub">Ingeniería de Software &amp; QA</div></div>
+    <div class="sig-box"><div class="sig-line"></div><div class="sig-title">Líder Técnico</div><div class="sig-sub">Equipo de Desarrollo HSE SaaS (XamaSafe / EP-Back)</div></div>
+    <div class="sig-box"><div class="sig-line"></div><div class="sig-title">Jefatura de Sistemas</div><div class="sig-sub">Aprobación final de despliegue</div></div>
+  </div>
+</div>
+<script>
+const total=98;let checked=0;
+function toggleItem(id,cat){
+  const chk=document.getElementById(id);document.getElementById('label_'+id).classList.toggle('item-checked',chk.checked);
+  checked+=chk.checked?1:-1;
+  const boxes=document.querySelectorAll('.chk-item[data-cat="'+cat+'"]');let c=0;boxes.forEach(b=>{if(b.checked)c++});
+  document.getElementById('counter_'+cat).innerText=c+' / '+boxes.length;
+  document.getElementById('progress_'+cat).style.width=(boxes.length?Math.round(c/boxes.length*100):0)+'%';
+  const p=(total?checked/total*100:0).toFixed(1);
+  document.getElementById('kpiChecked').innerText=checked;document.getElementById('kpiPending').innerText=total-checked;
+  document.getElementById('kpiPercent').innerText=p+'%';document.getElementById('progressLabel').innerText=p+'% completado';
+  document.getElementById('mainProgressBar').style.width=p+'%';
+}
+function applyFilter(ev,mode){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));ev.target.classList.add('active');
+  document.querySelectorAll('.checklist-item').forEach(it=>{const c=it.querySelector('.chk-item').checked;
+    it.style.display=mode==='all'||(mode==='checked'&&c)||(mode==='pending'&&!c)?'flex':'none';});
+}
+function copySummaryText(){
+  const t="📋 [QA HSE SaaS (XamaSafe / EP-Back)] Tarjeta Maestra\n• Puntos de control: "+total+"\n• Cumplidos: "+checked+"\n• Pendientes: "+(total-checked)+
+    "\n• Archivos sobre umbral: 25\n• Accesos directos a datos en controladores: 21\n• Conformidad: "+document.getElementById('kpiPercent').innerText+"\nGenerado: 2026-11-15";
+  navigator.clipboard.writeText(t).then(()=>alert('✅ Resumen copiado al portapapeles.'));
+}
+</script></body></html>

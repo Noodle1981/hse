@@ -1,0 +1,898 @@
+{
+  "generado": "2026-11-15T18:24:54.778Z",
+  "proyecto": "HSE SaaS (XamaSafe / EP-Back)",
+  "categorias": [
+    {
+      "id": "vistas",
+      "nombre": "Vistas y Layouts Frontend (React + Inertia)",
+      "checklist": "03-frontend-react-inertia.md",
+      "umbralAdvertencia": 500,
+      "umbralCritico": 800,
+      "accion": "Extraer subcomponentes (Partials/Modals) a Components/ o lógica de estado a custom hooks",
+      "archivos": [
+        {
+          "ruta": "resources/js/Pages/Tecnico/MyAssignments.jsx",
+          "nombre": "MyAssignments.jsx",
+          "lineas": 1317,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 1048,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/Wizard.jsx",
+          "nombre": "Wizard.jsx",
+          "lineas": 1014,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Types/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 1001,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Create.jsx",
+          "nombre": "Create.jsx",
+          "lineas": 837,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Consultants/Edit.jsx",
+          "nombre": "Edit.jsx",
+          "lineas": 793,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/MasterReports/Wizard.jsx",
+          "nombre": "Wizard.jsx",
+          "lineas": 675,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Companies/Locations.jsx",
+          "nombre": "Locations.jsx",
+          "lineas": 667,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Contracts/Partials/AnnualPlanMatrix.jsx",
+          "nombre": "AnnualPlanMatrix.jsx",
+          "lineas": 652,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Visits/InProgress.jsx",
+          "nombre": "InProgress.jsx",
+          "lineas": 645,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Show.jsx",
+          "nombre": "Show.jsx",
+          "lineas": 625,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Users.jsx",
+          "nombre": "Users.jsx",
+          "lineas": 596,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Trainings/Session.jsx",
+          "nombre": "Session.jsx",
+          "lineas": 574,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Checklists/Builder.jsx",
+          "nombre": "Builder.jsx",
+          "lineas": 569,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Findings/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 488,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Dashboard.jsx",
+          "nombre": "Dashboard.jsx",
+          "lineas": 477,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/HelpCenter/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 477,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Profile/Show.jsx",
+          "nombre": "Show.jsx",
+          "lineas": 474,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Consultants/Users.jsx",
+          "nombre": "Users.jsx",
+          "lineas": 446,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Incidents/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 434,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Staff/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 430,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Inspections/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 401,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Visits/ActionSelector.jsx",
+          "nombre": "ActionSelector.jsx",
+          "lineas": 392,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Trainings/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 390,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/History.jsx",
+          "nombre": "History.jsx",
+          "lineas": 375,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Visits/History.jsx",
+          "nombre": "History.jsx",
+          "lineas": 375,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Technicians.jsx",
+          "nombre": "Technicians.jsx",
+          "lineas": 359,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Findings/Create.jsx",
+          "nombre": "Create.jsx",
+          "lineas": 356,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Layouts/AuthenticatedLayout.jsx",
+          "nombre": "AuthenticatedLayout.jsx",
+          "lineas": 355,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Dashboard.jsx",
+          "nombre": "Dashboard.jsx",
+          "lineas": 343,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Assets/Edit.jsx",
+          "nombre": "Edit.jsx",
+          "lineas": 337,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Checklists/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 323,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Incidents/Create.jsx",
+          "nombre": "Create.jsx",
+          "lineas": 318,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Tecnico/Inspections/Show.jsx",
+          "nombre": "Show.jsx",
+          "lineas": 274,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Contracts/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 272,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Inspections/Show.jsx",
+          "nombre": "Show.jsx",
+          "lineas": 270,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/Consultants/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 269,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Categories/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 255,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Trainings/Builder.jsx",
+          "nombre": "Builder.jsx",
+          "lineas": 255,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Auth/Login.jsx",
+          "nombre": "Login.jsx",
+          "lineas": 245,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Findings/Show.jsx",
+          "nombre": "Show.jsx",
+          "lineas": 240,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Admin/PasswordResetRequests/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 239,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/MasterReports/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 239,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Companies/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 235,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Contracts/Partials/PlanningForm.jsx",
+          "nombre": "PlanningForm.jsx",
+          "lineas": 224,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Visits/Index.jsx",
+          "nombre": "Index.jsx",
+          "lineas": 219,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Incidents/Show.jsx",
+          "nombre": "Show.jsx",
+          "lineas": 199,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Categories/Subcategories.jsx",
+          "nombre": "Subcategories.jsx",
+          "lineas": 190,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Auth/ChangePassword.jsx",
+          "nombre": "ChangePassword.jsx",
+          "lineas": 181,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Categories/Builder.jsx",
+          "nombre": "Builder.jsx",
+          "lineas": 176,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/AdminHub.jsx",
+          "nombre": "AdminHub.jsx",
+          "lineas": 174,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Partials/PendingSignaturesList.jsx",
+          "nombre": "PendingSignaturesList.jsx",
+          "lineas": 173,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/MasterReports/Create.jsx",
+          "nombre": "Create.jsx",
+          "lineas": 154,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Companies/Builder.jsx",
+          "nombre": "Builder.jsx",
+          "lineas": 133,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Visits/Start.jsx",
+          "nombre": "Start.jsx",
+          "lineas": 118,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "resources/js/Pages/Gestor/Trainings/Attendance.jsx",
+          "nombre": "Attendance.jsx",
+          "lineas": 89,
+          "estado": "optimo",
+          "accesoDatos": []
+        }
+      ],
+      "resumen": {
+        "total": 56,
+        "sobreUmbral": 14,
+        "criticos": 5,
+        "accesoDatos": 0
+      }
+    },
+    {
+      "id": "controladores",
+      "nombre": "Controladores Backend (Laravel)",
+      "checklist": "02-backend-laravel.md",
+      "umbralAdvertencia": 200,
+      "umbralCritico": 300,
+      "accion": "Mover consultas Eloquent y lógica de negocio pesada a Services/ o Actions/, validaciones a FormRequests",
+      "archivos": [
+        {
+          "ruta": "app/Http/Controllers/AssetTypeController.php",
+          "nombre": "AssetTypeController.php",
+          "lineas": 198,
+          "estado": "moderado",
+          "accesoDatos": [
+            {
+              "patron": "::query\\(",
+              "linea": 25
+            },
+            {
+              "patron": "::where\\(",
+              "linea": 41
+            },
+            {
+              "patron": "::create\\(",
+              "linea": 106
+            },
+            {
+              "patron": "::findOrFail\\(",
+              "linea": 102
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/Admin/ConsultantController.php",
+          "nombre": "ConsultantController.php",
+          "lineas": 197,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/AdministrationController.php",
+          "nombre": "AdministrationController.php",
+          "lineas": 191,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/TrainingController.php",
+          "nombre": "TrainingController.php",
+          "lineas": 190,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/AssetController.php",
+          "nombre": "AssetController.php",
+          "lineas": 186,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/HelpCenterController.php",
+          "nombre": "HelpCenterController.php",
+          "lineas": 185,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/PasswordResetRequestController.php",
+          "nombre": "PasswordResetRequestController.php",
+          "lineas": 185,
+          "estado": "moderado",
+          "accesoDatos": [
+            {
+              "patron": "::where\\(",
+              "linea": 28
+            },
+            {
+              "patron": "::with\\(",
+              "linea": 85
+            },
+            {
+              "patron": "::create\\(",
+              "linea": 68
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/IncidenteController.php",
+          "nombre": "IncidenteController.php",
+          "lineas": 184,
+          "estado": "moderado",
+          "accesoDatos": [
+            {
+              "patron": "DB::",
+              "linea": 132
+            },
+            {
+              "patron": "::query\\(",
+              "linea": 31
+            },
+            {
+              "patron": "::with\\(",
+              "linea": 92
+            },
+            {
+              "patron": "::create\\(",
+              "linea": 134
+            },
+            {
+              "patron": "::find\\(",
+              "linea": 99
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/CompanyController.php",
+          "nombre": "CompanyController.php",
+          "lineas": 165,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/OperationController.php",
+          "nombre": "OperationController.php",
+          "lineas": 164,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/CategoryController.php",
+          "nombre": "CategoryController.php",
+          "lineas": 155,
+          "estado": "moderado",
+          "accesoDatos": [
+            {
+              "patron": "::query\\(",
+              "linea": 18
+            },
+            {
+              "patron": "::create\\(",
+              "linea": 81
+            },
+            {
+              "patron": "::findOrFail\\(",
+              "linea": 77
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/Contracts/AnnualContractReportController.php",
+          "nombre": "AnnualContractReportController.php",
+          "lineas": 149,
+          "estado": "moderado",
+          "accesoDatos": [
+            {
+              "patron": "::where\\(",
+              "linea": 29
+            },
+            {
+              "patron": "::with\\(",
+              "linea": 24
+            },
+            {
+              "patron": "::create\\(",
+              "linea": 26
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/SignatureApprovalController.php",
+          "nombre": "SignatureApprovalController.php",
+          "lineas": 121,
+          "estado": "moderado",
+          "accesoDatos": [
+            {
+              "patron": "::where\\(",
+              "linea": 22
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/VisitCertificatePDFController.php",
+          "nombre": "VisitCertificatePDFController.php",
+          "lineas": 118,
+          "estado": "optimo",
+          "accesoDatos": [
+            {
+              "patron": "::with\\(",
+              "linea": 14
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/FindingController.php",
+          "nombre": "FindingController.php",
+          "lineas": 110,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/InspectionController.php",
+          "nombre": "InspectionController.php",
+          "lineas": 108,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/TrainingPDFController.php",
+          "nombre": "TrainingPDFController.php",
+          "lineas": 108,
+          "estado": "optimo",
+          "accesoDatos": [
+            {
+              "patron": "::with\\(",
+              "linea": 18
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/MasterReportController.php",
+          "nombre": "MasterReportController.php",
+          "lineas": 107,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/ProfileController.php",
+          "nombre": "ProfileController.php",
+          "lineas": 105,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/ContractController.php",
+          "nombre": "ContractController.php",
+          "lineas": 82,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/ChecklistController.php",
+          "nombre": "ChecklistController.php",
+          "lineas": 74,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/InspectionPDFController.php",
+          "nombre": "InspectionPDFController.php",
+          "lineas": 66,
+          "estado": "optimo",
+          "accesoDatos": [
+            {
+              "patron": "::with\\(",
+              "linea": 17
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/Admin/GlobalStaffController.php",
+          "nombre": "GlobalStaffController.php",
+          "lineas": 65,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/Auth/LoginController.php",
+          "nombre": "LoginController.php",
+          "lineas": 56,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/Hallazgos/HallazgoPDFController.php",
+          "nombre": "HallazgoPDFController.php",
+          "lineas": 56,
+          "estado": "optimo",
+          "accesoDatos": [
+            {
+              "patron": "::with\\(",
+              "linea": 17
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/Auth/ForcePasswordChangeController.php",
+          "nombre": "ForcePasswordChangeController.php",
+          "lineas": 52,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/Incidentes/IncidentePDFController.php",
+          "nombre": "IncidentePDFController.php",
+          "lineas": 52,
+          "estado": "optimo",
+          "accesoDatos": [
+            {
+              "patron": "::with\\(",
+              "linea": 17
+            }
+          ]
+        },
+        {
+          "ruta": "app/Http/Controllers/SwitchRoleController.php",
+          "nombre": "SwitchRoleController.php",
+          "lineas": 46,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Http/Controllers/Controller.php",
+          "nombre": "Controller.php",
+          "lineas": 9,
+          "estado": "optimo",
+          "accesoDatos": []
+        }
+      ],
+      "resumen": {
+        "total": 29,
+        "sobreUmbral": 0,
+        "criticos": 0,
+        "accesoDatos": 11
+      }
+    },
+    {
+      "id": "servicios",
+      "nombre": "Servicios, Jobs y Listeners (Dominio)",
+      "checklist": "02-backend-laravel.md",
+      "umbralAdvertencia": 250,
+      "umbralCritico": 400,
+      "accion": "Dividir servicios grandes por caso de uso o responsabilidad única",
+      "archivos": [
+        {
+          "ruta": "app/Services/InspectionService.php",
+          "nombre": "InspectionService.php",
+          "lineas": 567,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/AnnualContractService.php",
+          "nombre": "AnnualContractService.php",
+          "lineas": 512,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/OperationService.php",
+          "nombre": "OperationService.php",
+          "lineas": 467,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/MasterReportService.php",
+          "nombre": "MasterReportService.php",
+          "lineas": 448,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/TechnicianAssignmentService.php",
+          "nombre": "TechnicianAssignmentService.php",
+          "lineas": 401,
+          "estado": "critico",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/ConsultantService.php",
+          "nombre": "ConsultantService.php",
+          "lineas": 318,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/DashboardMetricsService.php",
+          "nombre": "DashboardMetricsService.php",
+          "lineas": 310,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/AssetService.php",
+          "nombre": "AssetService.php",
+          "lineas": 284,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/UserManagementService.php",
+          "nombre": "UserManagementService.php",
+          "lineas": 265,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/TrainingService.php",
+          "nombre": "TrainingService.php",
+          "lineas": 252,
+          "estado": "sobre-umbral",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/ChecklistBuilderService.php",
+          "nombre": "ChecklistBuilderService.php",
+          "lineas": 197,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/CompanyService.php",
+          "nombre": "CompanyService.php",
+          "lineas": 195,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/FindingService.php",
+          "nombre": "FindingService.php",
+          "lineas": 182,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/TimeTrackingService.php",
+          "nombre": "TimeTrackingService.php",
+          "lineas": 177,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/VisitService.php",
+          "nombre": "VisitService.php",
+          "lineas": 151,
+          "estado": "moderado",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Jobs/ImportEmployeesJob.php",
+          "nombre": "ImportEmployeesJob.php",
+          "lineas": 135,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/ProfileService.php",
+          "nombre": "ProfileService.php",
+          "lineas": 124,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Listeners/SyncAssetMetadata.php",
+          "nombre": "SyncAssetMetadata.php",
+          "lineas": 124,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Services/BrandingService.php",
+          "nombre": "BrandingService.php",
+          "lineas": 68,
+          "estado": "optimo",
+          "accesoDatos": []
+        },
+        {
+          "ruta": "app/Listeners/LogClientAccess.php",
+          "nombre": "LogClientAccess.php",
+          "lineas": 21,
+          "estado": "optimo",
+          "accesoDatos": []
+        }
+      ],
+      "resumen": {
+        "total": 20,
+        "sobreUmbral": 10,
+        "criticos": 5,
+        "accesoDatos": 0
+      }
+    }
+  ],
+  "versiones": null,
+  "documentacion": null
+}

@@ -3,205 +3,62 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hallazgo;
-use App\Models\HallazgoFoto;
-use App\Models\Sede;
 use App\Models\User;
-use App\Models\VisitCertificate;
+use App\Services\FindingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class FindingController extends Controller
 {
-    /**
-     * Display a listing of findings.
-     */
+    public function __construct(protected FindingService $findingService) {}
+
     public function index(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
 
-        // 1. DATA PARA FILTROS
-        $sedesQuery = Sede::orderBy('nombre_sede');
-        $tecnicosQuery = User::whereIn('rol', ['tecnico', 'Técnico'])->orderBy('nombres');
-
-        if (! $user->isSuperAdmin()) {
-            $sedesQuery->whereHas('empresa', fn ($q) => $q->where('consultora_id', $user->consultora_id));
-            $tecnicosQuery->where('consultora_id', $user->consultora_id);
-        }
-
-        $sedes = $sedesQuery->get();
-        $tecnicos = $tecnicosQuery->get();
-
-        // 2. QUERY BASE
-        $query = Hallazgo::query()
-            ->with(['sede.empresa', 'user'])
-            ->withCount(['fotos', 'seguimientos'])
-            ->latest();
-
-        // 3. SEGURIDAD DE ACCESO
-        if (! $user->isSuperAdmin()) {
-            $query->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $user->consultora_id));
-        }
-
-        if ($user->isTechnician()) {
-            $query->where(function ($q) use ($user) {
-                $q->where('user_id', $user->id)
-                    ->orWhereIn('sede_id', $user->sedes->pluck('id'));
-            });
-        }
-
-        // 4. FILTROS TÁCTICOS
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('titulo', 'like', "%{$request->search}%")
-                    ->orWhere('descripcion', 'like', "%{$request->search}%")
-                    ->orWhere('ubicacion_especifica', 'like', "%{$request->search}%");
-            });
-        }
-
-        if ($request->status && $request->status !== 'all') {
-            $query->where('estado', $request->status);
-        }
-
-        if ($request->criticidad && $request->criticidad !== 'all') {
-            $query->where('criticidad', $request->criticidad);
-        }
-
-        if ($request->sede_id && $request->sede_id !== 'all') {
-            $query->where('sede_id', $request->sede_id);
-        }
-
-        if ($request->user_id && $request->user_id !== 'all') {
-            $query->where('user_id', $request->user_id);
-        }
-
-        if ($request->vencidos === 'si') {
-            $query->vencidos();
-        } elseif ($request->vencidos === 'no') {
-            $query->where(function ($q) {
-                $q->where('plazo_correccion', '>=', now())
-                    ->orWhereIn('estado', ['resuelto', 'cerrado']);
-            });
-        }
-
-        // 5. INTELIGENCIA DE RIESGO (KPIs)
-        $kpiBase = Hallazgo::query();
-        if (! $user->isSuperAdmin()) {
-            $kpiBase->whereHas('sede.empresa', fn ($q) => $q->where('consultora_id', $user->consultora_id));
-        }
-
-        $kpis = [
-            'total' => (clone $query)->count(),
-            'pendientes' => (clone $kpiBase)->pendientes()->count(),
-            'criticos' => (clone $kpiBase)->criticos()->abiertos()->count(),
-            'vencidos' => (clone $kpiBase)->vencidos()->count(),
-            'resueltos_mes' => (clone $kpiBase)->whereIn('estado', ['resuelto', 'cerrado'])
-                ->where('updated_at', '>=', now()->startOfMonth())
-                ->count(),
-        ];
-
-        return Inertia::render('Gestor/Findings/Index', [
-            'findings' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search', 'status', 'criticidad', 'sede_id', 'user_id', 'vencidos']),
-            'kpis' => $kpis,
-            'sedes' => $sedes,
-            'tecnicos' => $tecnicos,
-        ]);
+        return Inertia::render('Gestor/Findings/Index', $this->findingService->getIndexData($user, $request));
     }
 
-    /**
-     * Show the form for creating a new finding.
-     */
     public function create(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
+        $visitId = $request->visit_id ? (int) $request->visit_id : null;
 
-        $sedes = $user->isTechnician()
-            ? $user->sedes()->with('empresa')->get()
-            : Sede::with('empresa')
-                ->when(! $user->isSuperAdmin(), fn ($q) => $q->whereHas('empresa', fn ($eq) => $eq->where('consultora_id', $user->consultora_id)))
-                ->orderBy('nombre_sede')
-                ->get();
-
-        $initialSedeId = null;
-        if ($request->visit_id) {
-            $visit = VisitCertificate::find($request->visit_id);
-            if ($visit) {
-                $initialSedeId = $visit->sede_id;
-            }
-        }
-
-        return Inertia::render('Tecnico/Findings/Create', [
-            'sedes' => $sedes,
-            'visit_id' => $request->visit_id, // Contexto opcional de visita
-            'initial_sede_id' => $initialSedeId,
-        ]);
+        return Inertia::render('Tecnico/Findings/Create', $this->findingService->getCreateData($user, $visitId));
     }
 
-    /**
-     * Store a newly created finding.
-     */
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
+            'sede_id' => 'required|exists:sedes,id',
             'titulo' => 'required|string|max:255',
             'descripcion' => 'required|string',
-            'sede_id' => 'required|exists:sedes,id',
             'criticidad' => 'required|in:bajo,medio,alto,critico',
-            'plazo_correccion' => 'required|date|after_or_equal:today',
-            'fotos.*' => 'nullable|image|max:5120', // 5MB max por foto
+            'plazo_correccion' => 'nullable|date|after_or_equal:today',
+            'ubicacion_especifica' => 'nullable|string|max:255',
+            'accion_inmediata' => 'nullable|string',
+            'visit_id' => 'nullable|exists:visit_certificates,id',
+            'fotos.*' => 'nullable|image|max:5120',
         ]);
 
-        return DB::transaction(function () use ($request) {
-            $hallazgo = Hallazgo::create([
-                ...$request->except('fotos'),
-                'user_id' => Auth::id(),
-                'estado' => 'pendiente',
-                'fecha_deteccion' => now(),
-            ]);
+        /** @var User $user */
+        $user = Auth::user();
+        $hallazgo = $this->findingService->createFinding($user, $validated, $request->file('fotos', []));
 
-            // Manejo de Fotos
-            if ($request->hasFile('fotos')) {
-                foreach ($request->file('fotos') as $index => $file) {
-                    $path = $file->store('hallazgos/'.$hallazgo->id, 'public');
-                    HallazgoFoto::create([
-                        'hallazgo_id' => $hallazgo->id,
-                        'tipo' => HallazgoFoto::TIPO_ANTES,
-                        'ruta_archivo' => $path,
-                        'descripcion' => 'Foto de evidencia inicial #'.($index + 1),
-                    ]);
-                }
-            }
+        if ($user->isTechnician() && $hallazgo->visit_certificate_id) {
+            return redirect()->route('tecnico.visits.in-progress', $hallazgo->visit_certificate_id)
+                ->with('message', 'Hallazgo registrado con éxito.');
+        }
 
-            // Registro automático de seguimiento inicial
-            $hallazgo->seguimientos()->create([
-                'user_id' => Auth::id(),
-                'estado_anterior' => 'nuevo',
-                'estado_nuevo' => 'pendiente',
-                'comentario' => 'Hallazgo registrado en el sistema.',
-                'fecha_seguimiento' => now(),
-            ]);
+        $routePrefix = $user->isTechnician() ? 'tecnico.hallazgos' : 'gestor.hallazgos';
 
-            /** @var User $user */
-            $user = Auth::user();
-            $routePrefix = $user->isTechnician() ? 'tecnico.hallazgos' : 'gestor.hallazgos';
-
-            if ($user->isTechnician() && $hallazgo->visit_certificate_id) {
-                return redirect()->route('tecnico.visits.in-progress', $hallazgo->visit_certificate_id)
-                    ->with('message', 'Hallazgo registrado con éxito.');
-            }
-
-            return redirect()->route($routePrefix.'.show', $hallazgo->id)
-                ->with('message', 'Hallazgo registrado y certificado táctocamente.');
-        });
+        return redirect()->route($routePrefix.'.show', $hallazgo->id)
+            ->with('message', 'Hallazgo registrado y certificado tácticamente.');
     }
 
-    /**
-     * Display the specified finding.
-     */
     public function show(Hallazgo $finding)
     {
         $finding->load(['sede.empresa', 'user', 'fotos', 'seguimientos.user', 'visit']);
@@ -212,14 +69,9 @@ class FindingController extends Controller
             abort(403, 'No tienes permiso para acceder a este hallazgo.');
         }
 
-        return Inertia::render('Gestor/Findings/Show', [
-            'finding' => $finding,
-        ]);
+        return Inertia::render('Gestor/Findings/Show', ['finding' => $finding]);
     }
 
-    /**
-     * Add a follow-up action or change status.
-     */
     public function addUpdate(Request $request, Hallazgo $finding)
     {
         $request->validate([
@@ -234,61 +86,24 @@ class FindingController extends Controller
             abort(403, 'No tienes permiso para modificar este hallazgo.');
         }
 
-        // Si el hallazgo ya está cerrado, el técnico no puede hacer más seguimientos
         if ($finding->estado === Hallazgo::ESTADO_CERRADO && $user->isTechnician()) {
             abort(403, 'No se puede modificar un hallazgo que ya está cerrado.');
         }
 
-        // Restricción de transiciones para técnicos
-        if ($user->isTechnician()) {
-            if (in_array($request->estado_nuevo, [Hallazgo::ESTADO_CERRADO, Hallazgo::ESTADO_VERIFICADO])) {
-                abort(403, 'Los técnicos no están autorizados a verificar o cerrar hallazgos.');
-            }
+        if ($user->isTechnician() && in_array($request->estado_nuevo, [Hallazgo::ESTADO_CERRADO, Hallazgo::ESTADO_VERIFICADO])) {
+            abort(403, 'Los técnicos no están autorizados a verificar o cerrar hallazgos.');
         }
 
-        $finding->agregarSeguimiento(
-            $request->estado_nuevo,
-            $request->comentario,
-            Auth::id()
-        );
+        $finding->agregarSeguimiento($request->estado_nuevo, $request->comentario, Auth::id());
 
         return back()->with('message', 'Estado del hallazgo actualizado.');
     }
 
-    /**
-     * Mis Hallazgos (Vista para el Técnico).
-     */
     public function myFindings(Request $request)
     {
         /** @var User $user */
         $user = Auth::user();
-        $query = Hallazgo::query()
-            ->with(['sede.empresa', 'user'])
-            ->where('user_id', $user->id)
-            ->latest();
 
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('titulo', 'like', "%{$request->search}%")
-                    ->orWhereHas('sede', fn ($sq) => $sq->where('nombre_sede', 'like', "%{$request->search}%"));
-            });
-        }
-
-        return Inertia::render('Gestor/Findings/Index', [
-            'findings' => $query->paginate(15)->withQueryString(),
-            'filters' => $request->only(['search']),
-            'kpis' => [
-                'total' => (clone $query)->count(),
-                'pendientes' => (clone $query)->where('estado', 'pendiente')->count(),
-                'criticos' => (clone $query)->where('criticidad', 'critico')->count(),
-                'vencidos' => (clone $query)->vencidos()->count(),
-                'resueltos_mes' => (clone $query)->whereIn('estado', ['resuelto', 'cerrado'])
-                    ->where('updated_at', '>=', now()->startOfMonth())
-                    ->count(),
-            ],
-            'sedes' => $user->sedes()->with('empresa')->get(),
-            'tecnicos' => [$user], // Para el técnico solo él mismo o su equipo
-            'isTecnico' => true,
-        ]);
+        return Inertia::render('Gestor/Findings/Index', $this->findingService->getMyFindingsData($user, $request));
     }
 }

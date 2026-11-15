@@ -3,150 +3,46 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
-use App\Models\AssetMetadataLog;
-use App\Models\AssetType;
-use App\Models\Empresa;
-use App\Models\Sede;
-use App\Models\User;
+use App\Services\AssetService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class AssetController extends Controller
 {
+    public function __construct(private readonly AssetService $assetService) {}
+
     /**
      * Listado de activos con KPIs y filtros.
      */
     public function index(Request $request)
     {
-        /** @var User $user */
         $user = Auth::user();
 
-        $empresaQuery = Empresa::query();
-        if (! $user->isSuperAdmin()) {
-            $empresaQuery->where('consultora_id', $user->consultora_id);
-        }
-        $assignedEmpresaIds = $empresaQuery->pluck('id')->toArray();
-
-        $query = Asset::query()
-            ->with(['sede.empresa', 'assetType.category.checklists', 'hallazgos' => function ($q) {
-                $q->whereIn('estado', ['pendiente', 'en_proceso']);
-            }])
-            ->whereIn('empresa_id', $assignedEmpresaIds);
-
-        if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', "%{$request->search}%")
-                    ->orWhere('identifier', 'like', "%{$request->search}%");
-            });
-        }
-
-        if ($request->empresa_id) {
-            $query->where('empresa_id', $request->empresa_id);
-        }
-
-        if ($request->sede_id) {
-            $query->where('sede_id', $request->sede_id);
-        }
-
-        if ($request->asset_type_id) {
-            $query->where('asset_type_id', $request->asset_type_id);
-        }
-
-        if ($request->status && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->grupo) {
-            $query->where('grupo', $request->grupo);
-        }
-
-        if ($request->subgrupo) {
-            $query->where('subgrupo', $request->subgrupo);
-        }
-
         if ($request->wantsJson() || $request->query('json')) {
-            return response()->json($query->latest('created_at')->get());
+            return response()->json(
+                $this->assetService->buildFilteredQuery($user, $request)->latest('created_at')->get()
+            );
         }
 
-        // KPIs
-        $statsBase = Asset::query()->whereIn('empresa_id', $assignedEmpresaIds);
-        if ($request->sede_id) {
-            $statsBase->where('sede_id', $request->sede_id);
-        }
-        if ($request->empresa_id) {
-            $statsBase->where('empresa_id', $request->empresa_id);
-        }
-
-        $kpis = [
-            'total' => (clone $statsBase)->count(),
-            'operativos' => (clone $statsBase)->where('status', 'operativo')->count(),
-            'alerta' => (clone $statsBase)->where('status', 'alerta')->count(),
-            'fuera_de_servicio' => (clone $statsBase)->where('status', 'fuera_de_servicio')->count(),
-        ];
-
-        $viewMode = $request->input('view_mode', 'grouped');
-
-        if ($viewMode === 'grouped') {
-            $assetsData = $query->latest('created_at')->get();
-            $assets = [
-                'data' => $assetsData,
-                'total' => $assetsData->count(),
-                'from' => 1,
-                'to' => $assetsData->count(),
-                'links' => [],
-            ];
-        } else {
-            $assets = $query->latest('created_at')->paginate(15)->withQueryString();
-        }
-
-        $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']);
-        $sedes = Sede::whereIn('empresa_id', $assignedEmpresaIds)->get(['id', 'nombre_sede', 'empresa_id']);
-        $assetTypes = AssetType::whereIn('empresa_id', $assignedEmpresaIds)
-            ->orWhereNull('empresa_id')
-            ->get(['id', 'name', 'category_id']);
-
-        return Inertia::render('Gestor/Assets/Index', [
-            'assets' => $assets,
-            'kpis' => $kpis,
-            'filters' => $request->only(['search', 'empresa_id', 'sede_id', 'asset_type_id', 'status', 'view_mode']),
-            'empresas' => $empresas,
-            'sedes' => $sedes,
-            'assetTypes' => $assetTypes,
-        ]);
+        return Inertia::render('Gestor/Assets/Index', $this->assetService->getIndexData($user, $request));
     }
 
     /**
      * Formulario de creación de activo.
      */
-    public function create()
+    public function create(Request $request)
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        $empresaQuery = Empresa::query();
-        if (! $user->isSuperAdmin()) {
-            $empresaQuery->where('consultora_id', $user->consultora_id);
-        }
-        $assignedEmpresaIds = $empresaQuery->pluck('id')->toArray();
-
-        $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']);
-        $sedes = Sede::whereIn('empresa_id', $assignedEmpresaIds)->get(['id', 'nombre_sede', 'empresa_id']);
-        $assetTypes = AssetType::whereIn('empresa_id', $assignedEmpresaIds)
-            ->orWhereNull('empresa_id')
-            ->get();
-
-        return Inertia::render('Gestor/Assets/Create', [
-            'empresas' => $empresas,
-            'sedes' => $sedes,
-            'assetTypes' => $assetTypes,
-            'prefilled' => [
-                'empresa_id' => request()->query('empresa_id', ''),
-                'sede_id' => request()->query('sede_id', ''),
-                'asset_type_id' => request()->query('asset_type_id', ''),
-            ],
-        ]);
+        return Inertia::render('Gestor/Assets/Create', array_merge(
+            $this->assetService->getFormOptions(Auth::user()),
+            [
+                'prefilled' => [
+                    'empresa_id' => $request->query('empresa_id', ''),
+                    'sede_id' => $request->query('sede_id', ''),
+                    'asset_type_id' => $request->query('asset_type_id', ''),
+                ],
+            ]
+        ));
     }
 
     /**
@@ -154,9 +50,8 @@ class AssetController extends Controller
      */
     public function store(Request $request)
     {
-        // Soporta guardado masivo en lote (varios activos en la misma petición)
         if ($request->has('items') && is_array($request->items)) {
-            $request->validate([
+            $validated = $request->validate([
                 'empresa_id' => 'required|exists:empresas,id',
                 'sede_id' => 'required|exists:sedes,id',
                 'asset_type_id' => 'required|exists:asset_types,id',
@@ -172,37 +67,12 @@ class AssetController extends Controller
                 'items.*.identifier.unique' => 'El identificador ya está registrado en el sistema.',
             ]);
 
-            $createdCount = 0;
-            $firstAsset = null;
-
-            foreach ($request->items as $item) {
-                $asset = Asset::create([
-                    'empresa_id' => $request->empresa_id,
-                    'sede_id' => $request->sede_id,
-                    'asset_type_id' => $request->asset_type_id,
-                    'name' => $item['name'],
-                    'identifier' => $item['identifier'],
-                    'status' => $item['status'] ?? 'operativo',
-                    'grupo' => $item['grupo'] ?? null,
-                    'subgrupo' => $item['subgrupo'] ?? null,
-                    'metadata' => $item['metadata'] ?? [],
-                ]);
-
-                if (! $firstAsset) {
-                    $firstAsset = $asset;
-                }
-                $createdCount++;
-            }
-
-            $msg = $createdCount === 1
-                ? "Activo '{$firstAsset->name}' registrado correctamente."
-                : "Se registraron {$createdCount} activos correctamente.";
+            $msg = $this->assetService->storeBatch($validated);
 
             return redirect()->route('gestor.assets.index')->with('message', $msg);
         }
 
-        // Guardado tradicional de un solo activo
-        $request->validate([
+        $validated = $request->validate([
             'empresa_id' => 'required|exists:empresas,id',
             'sede_id' => 'required|exists:sedes,id',
             'asset_type_id' => 'required|exists:asset_types,id',
@@ -216,17 +86,7 @@ class AssetController extends Controller
             'identifier.unique' => 'El identificador ya está registrado en el sistema.',
         ]);
 
-        $asset = Asset::create([
-            'empresa_id' => $request->empresa_id,
-            'sede_id' => $request->sede_id,
-            'asset_type_id' => $request->asset_type_id,
-            'name' => $request->name,
-            'identifier' => $request->identifier,
-            'status' => $request->status,
-            'grupo' => $request->grupo,
-            'subgrupo' => $request->subgrupo,
-            'metadata' => $request->metadata ?? [],
-        ]);
+        $asset = $this->assetService->storeSingle($validated);
 
         return redirect()->route('gestor.assets.show', $asset->id)
             ->with('message', "Activo '{$asset->name}' registrado correctamente.");
@@ -237,64 +97,7 @@ class AssetController extends Controller
      */
     public function show(Asset $asset)
     {
-        $asset->load([
-            'sede.empresa',
-            'assetType',
-            'dynamicInspections' => function ($q) {
-                $q->with(['checklist', 'user', 'answers.question'])->latest('completed_at')->take(15);
-            },
-            'incidentes' => function ($q) {
-                $q->with(['user', 'fotos'])->latest('fecha_ocurrencia')->take(10);
-            },
-            'hallazgos' => function ($q) {
-                $q->whereIn('estado', ['pendiente', 'en_proceso']);
-            },
-        ]);
-
-        $metadataLogs = AssetMetadataLog::where('asset_id', $asset->id)
-            ->with(['inspection.checklist', 'changedByUser'])
-            ->latest('created_at')
-            ->get();
-
-        // Compilar timeline visual de hallazgos e incidentes
-        $evidences = [];
-
-        // 1. Evidencias de inspecciones
-        foreach ($asset->dynamicInspections as $insp) {
-            if ($insp->result === 'Fail' || ! empty($insp->observaciones)) {
-                $evidences[] = [
-                    'id' => 'insp_'.$insp->id,
-                    'type' => 'inspection',
-                    'title' => 'Inspección: '.($insp->checklist?->title ?? 'Checklist'),
-                    'status' => $insp->result,
-                    'date' => $insp->completed_at ? $insp->completed_at->format('d/m/Y H:i') : 'N/D',
-                    'user' => $insp->user?->name ?? 'Técnico',
-                    'description' => $insp->observaciones ?? 'Inspección realizada.',
-                    'photos' => [],
-                ];
-            }
-        }
-
-        // 2. Evidencias de incidentes/siniestros
-        foreach ($asset->incidentes as $inc) {
-            $incPhotos = $inc->fotos ? $inc->fotos->pluck('foto_url')->toArray() : [];
-            $evidences[] = [
-                'id' => 'inc_'.$inc->id,
-                'type' => 'incident',
-                'title' => 'Incidente: '.($inc->titulo ?? 'Siniestro registrado'),
-                'status' => strtoupper($inc->gravedad ?? 'Incidente'),
-                'date' => $inc->fecha_ocurrencia ? $inc->fecha_ocurrencia->format('d/m/Y H:i') : 'N/D',
-                'user' => $inc->user?->name ?? 'Usuario',
-                'description' => $inc->descripcion ?? 'Reporte de incidente.',
-                'photos' => $incPhotos,
-            ];
-        }
-
-        return Inertia::render('Gestor/Assets/Show', [
-            'asset' => $asset,
-            'evidences' => $evidences,
-            'metadataLogs' => $metadataLogs,
-        ]);
+        return Inertia::render('Gestor/Assets/Show', $this->assetService->getShowData($asset));
     }
 
     /**
@@ -304,18 +107,10 @@ class AssetController extends Controller
     {
         $request->validate([
             'photo_key' => 'required|string|max:255',
-            'photo' => 'required|image|max:15360', // Máx 15MB
+            'photo' => 'required|image|max:15360',
         ]);
 
-        $file = $request->file('photo');
-        $key = $request->input('photo_key');
-        $path = $file->store("assets/{$asset->id}", 'public');
-
-        $photos = $asset->photos ?? [];
-        $photos[$key] = Storage::url($path);
-
-        $asset->photos = $photos;
-        $asset->save();
+        $this->assetService->uploadPhoto($asset, $request->input('photo_key'), $request->file('photo'));
 
         return redirect()->back()->with('message', 'Foto guardada correctamente en la ficha del activo.');
     }
@@ -327,9 +122,7 @@ class AssetController extends Controller
     {
         $asset->load(['sede.empresa', 'assetType', 'dynamicInspections.checklist', 'incidentes.fotos']);
 
-        return view('pdf.asset-report', [
-            'asset' => $asset,
-        ]);
+        return view('pdf.asset-report', ['asset' => $asset]);
     }
 
     /**
@@ -337,29 +130,12 @@ class AssetController extends Controller
      */
     public function edit(Asset $asset)
     {
-        /** @var User $user */
-        $user = Auth::user();
-
-        $empresaQuery = Empresa::query();
-        if (! $user->isSuperAdmin()) {
-            $empresaQuery->where('consultora_id', $user->consultora_id);
-        }
-        $assignedEmpresaIds = $empresaQuery->pluck('id')->toArray();
-
-        $empresas = Empresa::whereIn('id', $assignedEmpresaIds)->get(['id', 'nombre']);
-        $sedes = Sede::whereIn('empresa_id', $assignedEmpresaIds)->get(['id', 'nombre_sede', 'empresa_id']);
-        $assetTypes = AssetType::whereIn('empresa_id', $assignedEmpresaIds)
-            ->orWhereNull('empresa_id')
-            ->get();
-
         $asset->load(['assetType', 'sede.empresa']);
 
-        return Inertia::render('Gestor/Assets/Edit', [
-            'asset' => $asset,
-            'empresas' => $empresas,
-            'sedes' => $sedes,
-            'assetTypes' => $assetTypes,
-        ]);
+        return Inertia::render('Gestor/Assets/Edit', array_merge(
+            ['asset' => $asset],
+            $this->assetService->getFormOptions(Auth::user())
+        ));
     }
 
     /**
@@ -367,7 +143,7 @@ class AssetController extends Controller
      */
     public function update(Request $request, Asset $asset)
     {
-        $request->validate([
+        $validated = $request->validate([
             'empresa_id' => 'required|exists:empresas,id',
             'sede_id' => 'required|exists:sedes,id',
             'asset_type_id' => 'required|exists:asset_types,id',
@@ -381,17 +157,7 @@ class AssetController extends Controller
             'identifier.unique' => 'El identificador ya está registrado en el sistema.',
         ]);
 
-        $asset->update([
-            'empresa_id' => $request->empresa_id,
-            'sede_id' => $request->sede_id,
-            'asset_type_id' => $request->asset_type_id,
-            'name' => $request->name,
-            'identifier' => $request->identifier,
-            'status' => $request->status,
-            'grupo' => $request->grupo,
-            'subgrupo' => $request->subgrupo,
-            'metadata' => $request->metadata ?? [],
-        ]);
+        $this->assetService->updateAsset($asset, $validated);
 
         if ($request->wantsJson()) {
             return response()->json([
